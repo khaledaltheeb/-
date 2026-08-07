@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect } from 'react';
 
 export default function ErrorPage({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
@@ -13,7 +14,7 @@ export default function ErrorPage({ error, reset }: { error: Error & { digest?: 
       <span className="system-code">تعذر إكمال الطلب</span>
       <h1>حدث خطأ غير متوقع</h1>
       <p>لم يتم فقدان بياناتك بسبب هذه الشاشة. يمكنك إعادة المحاولة أو العودة إلى الصفحة الرئيسية.</p>
-      <div className="rawafid-directory-actions"><button className="primary-action" type="button" onClick={() => reset()}>إعادة المحاولة</button><a className="button" href="/">العودة للرئيسية</a></div>
+      <div className="rawafid-directory-actions"><button className="primary-action" type="button" onClick={() => reset()}>إعادة المحاولة</button><Link className="button" href="/">العودة للرئيسية</Link></div>
     </section>
   </main>;
 }
