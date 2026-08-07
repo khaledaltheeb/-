@@ -14,7 +14,7 @@ const groups = [
     title: 'المشاركة المهنية',
     links: [
       { href: '/community', label: 'المتدربون والمتطوعون' },
-      { href: '/login', label: 'إنشاء حساب' },
+      { href: '/community/join', label: 'طلب الانضمام' },
       { href: '/specialist', label: 'بوابة المختص' },
       { href: '/center', label: 'بوابة المركز' },
     ],
@@ -26,6 +26,7 @@ const groups = [
       { href: '/editorial-policy', label: 'السياسة التحريرية' },
       { href: '/disclaimer', label: 'إخلاء المسؤولية' },
       { href: '/privacy', label: 'الخصوصية' },
+      { href: '/terms', label: 'شروط الاستخدام' },
     ],
   },
 ];
