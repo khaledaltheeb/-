@@ -1,17 +1,18 @@
 # MIG-000006 — الوظائف التنفيذية
 
 - Lane: C0 — الموسوعة والمصطلحات العامة
-- Status: DRAFT BUILT — FINAL WORKFLOW / POST-PUBLISH QA PENDING
+- Status: **COMPLETE — PUBLISHED / POST-PUBLISH QA PASS**
 - Canonical key: `executive-functions`
 - New canonical: `/content/executive-functions`
 - Content type: `glossary_term`
 - Supabase content id: `93766f01-ab63-43f4-8107-21a0aa1507d1`
-- Database status: `draft`
+- Final version: **v8**
+- Database status: **published**
 - Sector/category: `knowledge` / `cognitive-processes`
 
 ## Canonical decision
 
-هذه الصفحة للمفهوم المعرفي العام «الوظائف التنفيذية». تبقى مستقلة عنها:
+هذه الصفحة هي Canonical للمفهوم المعرفي العام «الوظائف التنفيذية». تبقى مستقلة عنها:
 - `/content/working-memory` كصفحة Canonical للذاكرة العاملة.
 - أدلة الطفل وروتين دعم الوظائف التنفيذية.
 - ADHD والتوحد والحالات الأخرى.
@@ -50,7 +51,7 @@
 - References: **8**, all HTTPS
 - Tags: **8**
 - Categories: **1**
-- Duplicate candidates: **0**
+- Duplicate canonical: **0**
 - TODO/FIXME/agent/private-plan text: **0**
 - banned term «معاقين»: **0**
 
@@ -73,13 +74,30 @@
 - الدعم الخارجي قد يقلل الحمل ويزيد الاستقلال؛ ليس بالضرورة «اعتمادًا».
 - الانتقال من تدريب معرفي إلى تحسن واسع في الحياة لا يُفترض تلقائيًا.
 
+## Workflow / Audit
+
+Passed:
+`Draft → Scientific Review → Editorial Review → SEO → Accessibility → Approved → Scheduled → Published`
+
+No human reviewer identity was fabricated. Audit records identify system-assisted migration QA with source verification.
+
+- Versions: **8**
+- Audit events: **8**
+- Published at: `2026-08-07T21:35:55Z`
+
+## Post-publish QA
+
+Search query `الوظائف التنفيذية` returns `/content/executive-functions` first. `/content/attention` and `/content/working-memory` remain distinct semantic relations at much lower scores.
+
+- Duplicate canonical: **0**
+- Specialized redirect collisions from child/autism/ADHD pages: **0**
+- Search: **PASS**
+- Taxonomy/tags: **PASS**
+
 ## Redirect decision
 
-لا يُحوّل دليل الطفل أو صفحات ADHD/autism أو أدوات التقييم إلى Canonical العام. لا يتم تخمين `concept-*` URLs القديمة.
+No child routine, autism/ADHD page, or assessment tool was redirected to the general canonical. No generated `concept-*` URL was guessed.
 
-## Remaining before COMPLETE
+## Final result
 
-1. Full workflow → Scheduled → Published.
-2. Post-publish search/duplicate/taxonomy QA.
-3. Verify zero incorrect redirects from child/ADHD/autism/tool entities.
-4. Close Claim Issue #11 and update central ledger.
+**MIG-000006 is closed and canonicalized.**
