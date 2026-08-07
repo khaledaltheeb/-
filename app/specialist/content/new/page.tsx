@@ -22,8 +22,8 @@ export default async function NewSpecialistContent({searchParams}:{searchParams:
   ]);
   const params=await searchParams;
   return <main className="dashboard-shell"><section className="dashboard-card cms-editor">
-    <div className="admin-heading"><div><span className="eyebrow">مسودة مهنية جديدة</span><h1>إضافة محتوى</h1><p>المختص يستطيع إنشاء مقال أو دليل أو مورد. الحفظ لا يعني النشر؛ بعد الإكمال تُرسل المسودة للمراجعة العلمية.</p></div><Link className="button" href="/specialist/content">العودة لمحتواي</Link></div>
+    <div className="admin-heading"><div><span className="eyebrow">مسودة مهنية جديدة</span><h1>إضافة محتوى</h1><p>المختص يستطيع إنشاء مقال أو دليل أو مورد. الحفظ لا يعني النشر؛ بعد الإكمال تُرسل المسودة للمراجعة العلمية.</p></div><div className="dashboard-actions"><Link className="button" href="/specialist/media">مكتبتي الإعلامية</Link><Link className="button" href="/specialist/content">العودة لمحتواي</Link></div></div>
     {params.error&&<p className="system-message error">تعذر إنشاء المسودة. تحقق من الحقول والـSlug وبنية المحتوى.</p>}
-    <ContentForm action={createSpecialistDraft} sectors={sectors??[]} categories={categories??[]} submitLabel="إنشاء المسودة" allowedTypes={['article','guide','resource']} />
+    <ContentForm action={createSpecialistDraft} sectors={sectors??[]} categories={categories??[]} submitLabel="إنشاء المسودة" allowedTypes={['article','guide','resource']} mediaLibraryHref="/specialist/media" />
   </section></main>;
 }
