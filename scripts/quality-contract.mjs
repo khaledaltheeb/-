@@ -46,6 +46,7 @@ for(const file of [
  'supabase/migrations/20260807183000_content_release_gate.sql',
  'supabase/migrations/20260807184000_media_library.sql',
  'supabase/migrations/20260807184500_structured_content_featured_media.sql',
+ 'supabase/migrations/20260807185000_taxonomy_hierarchy_integrity.sql',
 ]){
  if(!fs.existsSync(path.join(root,file)))fail(`missing migration ${file}`);
 }
@@ -58,14 +59,17 @@ requireText('supabase/migrations/20260807182500_content_draft_delete.sql',['only
 requireText('supabase/migrations/20260807183000_content_release_gate.sql',['meta description must be 150-160 characters','scientific reviewer is required for YMYL content','featured image alt text is required','content_release_gate']);
 requireText('supabase/migrations/20260807184000_media_library.sql',['rawafid-media','media_assets','register_media_asset','delete_media_asset','6291456']);
 requireText('supabase/migrations/20260807184500_structured_content_featured_media.sql',['create_content_draft_v4','update_content_draft_v4','validate_featured_media','featured_image_url','featured_image_alt']);
+requireText('supabase/migrations/20260807185000_taxonomy_hierarchy_integrity.sql',['category hierarchy cycle detected','parent category must belong to the same sector','delete_category_safe','delete_sector_safe','revoke delete on public.categories','revoke delete on public.sectors']);
 
 // Empty-theme contract: the UI must not smuggle demo taxonomy/content into a clean database.
 const home=read('app/page.tsx');
 if(home.includes('fallbackPillars')) fail('homepage must not contain fallback/demo sectors');
 for(const needle of ['sectors.length > 0','rawafid-empty','getPublicSectors','ذوو الاحتياجات الخاصة']) if(!home.includes(needle)) fail(`homepage empty-theme behavior missing ${needle}`);
 requireText('components/site-header.tsx',['ذوو الاحتياجات الخاصة والدمج','/sections']);
-requireText('app/sectors/page.tsx',['getPublicSectors' in globalThis ? '' : 'قطاعات روافد']);
+requireText('app/sectors/page.tsx',['قطاعات روافد','visibility','public']);
 requireText('app/sections/page.tsx',['ذوي الاحتياجات الخاصة والدمج','PlatformIcon name="knowledge"']);
+requireText('app/admin/taxonomy/actions.ts',['delete_category_safe','delete_sector_safe','parent-sector-mismatch']);
+requireText('app/admin/taxonomy/page.tsx',['deleteCategory','deleteSector','حذف نهائي إذا كان فارغًا']);
 requireText('app/theme-preview/page.tsx',['index: false','follow: false','Design System V3']);
 requireText('app/not-found.tsx',['الصفحة غير موجودة','SiteHeader','SiteFooter']);
 requireText('app/loading.tsx',['system-loading-shell','aria-busy']);
@@ -99,7 +103,7 @@ requireText('app/pwa-icon-192/route.ts',['createPwaIcon(192)']);
 requireText('app/pwa-icon-512/route.ts',['createPwaIcon(512)']);
 if(read('app/opengraph-image.tsx').includes("runtime = 'edge'")||read('app/twitter-image.tsx').includes("runtime = 'edge'")) fail('deprecated Edge runtime must not be used for social image routes');
 requireText('app/layout.tsx',["'./theme-empty.css'","'./dashboard-v3.css'","'./theme-preview.css'","'./public-modules-v3.css'","'./system-states.css'","'./content-v3.css'","'./structured-content.css'","'./block-editor-v3.css'","'./profile-v3.css'","'./admin-shell-v3.css'","/pwa-icon-180"]);
-requireText('app/api/health/route.ts',['supabase','status']);
+requireText('app/api/health/route.ts',['supabase: \'ok\'','database: \'ok\'','status: \'ok\'']);
 requireText('.env.example',['NEXT_PUBLIC_SITE_URL=https://healthrenewal.org','NEXT_PUBLIC_ALLOW_INDEXING=false']);
 requireText('lib/seo.ts',["'https://healthrenewal.org'"]);
 
