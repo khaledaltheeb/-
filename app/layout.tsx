@@ -26,6 +26,7 @@ import './block-editor-v3.css';
 import './profile-v3.css';
 import './admin-shell-v3.css';
 import './mega-nav-v3.css';
+import './media-v3.css';
 
 const arabicFont = Noto_Sans_Arabic({
   subsets: ['arabic'],
