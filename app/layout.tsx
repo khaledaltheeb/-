@@ -22,6 +22,7 @@ import './public-modules-v3.css';
 import './system-states.css';
 import './content-v3.css';
 import './structured-content.css';
+import './block-editor-v3.css';
 
 const arabicFont = Noto_Sans_Arabic({
   subsets: ['arabic'],
