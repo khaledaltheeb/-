@@ -26,7 +26,9 @@ requireText('public/sw.js',["'/messages'","'/appointments'","'/notifications'","
 
 const manifest=JSON.parse(read('public/manifest.webmanifest'));
 for(const key of ['name','short_name','start_url','scope','display','theme_color','background_color','icons']){if(!manifest[key])fail(`manifest missing ${key}`);}
-if(!Array.isArray(manifest.icons)||manifest.icons.length===0)fail('manifest requires at least one icon');
+if(!Array.isArray(manifest.icons)||manifest.icons.length<2)fail('manifest requires PNG PWA icons');
+if(!manifest.icons.some((icon)=>icon?.type==='image/png'&&icon?.sizes==='192x192'))fail('manifest missing 192x192 PNG icon');
+if(!manifest.icons.some((icon)=>icon?.type==='image/png'&&icon?.sizes==='512x512'&&String(icon?.purpose||'').includes('maskable')))fail('manifest missing 512x512 maskable PNG icon');
 if(!manifest.share_target?.action)fail('manifest share_target missing');
 
 for(const file of [
@@ -67,7 +69,16 @@ requireText('app/specialist/content/actions.ts',['SPECIALIST_CONTENT_TYPES','cre
 requireText('app/specialist/page.tsx',['/specialist/content','/messages','/appointments','/notifications']);
 requireText('app/center/page.tsx',['/messages','/appointments','/notifications']);
 requireText('app/account/page.tsx',['/messages','/appointments','/notifications']);
-requireText('app/layout.tsx',["'./theme-empty.css'","'./dashboard-v3.css'","'./theme-preview.css'","'./public-modules-v3.css'","'./system-states.css'","'./content-v3.css'","'./structured-content.css'","'./block-editor-v3.css'"]);
+requireText('app/admin/layout.tsx',['admin-sidebar','/admin/integrity','/admin/audit','/admin/redirects']);
+requireText('app/specialists/[slug]/page.tsx',['verified-label','license-card','can_contact_provider']);
+requireText('app/centers/[slug]/page.tsx',['license-card','can_contact_provider','get_public_center']);
+requireText('app/community/[slug]/page.tsx',['community-badge','لا تمنح صاحبها صفة مختص مرخص']);
+requireText('lib/pwa-icon.ts',['ImageResponse','Cache-Control']);
+requireText('app/pwa-icon-180/route.ts',['createPwaIcon(180)']);
+requireText('app/pwa-icon-192/route.ts',['createPwaIcon(192)']);
+requireText('app/pwa-icon-512/route.ts',['createPwaIcon(512)']);
+if(read('app/opengraph-image.tsx').includes("runtime = 'edge'")||read('app/twitter-image.tsx').includes("runtime = 'edge'")) fail('deprecated Edge runtime must not be used for social image routes');
+requireText('app/layout.tsx',["'./theme-empty.css'","'./dashboard-v3.css'","'./theme-preview.css'","'./public-modules-v3.css'","'./system-states.css'","'./content-v3.css'","'./structured-content.css'","'./block-editor-v3.css'","'./profile-v3.css'","'./admin-shell-v3.css'","/pwa-icon-180"]);
 requireText('.env.example',['NEXT_PUBLIC_SITE_URL=https://healthrenewal.org','NEXT_PUBLIC_ALLOW_INDEXING=false']);
 requireText('lib/seo.ts',["'https://healthrenewal.org'"]);
 
