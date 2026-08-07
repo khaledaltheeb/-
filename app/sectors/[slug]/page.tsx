@@ -14,30 +14,31 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const supabase = await createClient();
   const { data: sector } = await supabase
     .from('sectors')
-    .select('name_ar,description')
+    .select('name_ar,description,seo_title,seo_description')
     .eq('slug', slug)
     .eq('is_active', true)
     .maybeSingle();
 
   if (!sector) return {};
-  const description = sector.description || `استكشف قطاع ${sector.name_ar} ضمن منصة روافد.`;
+  const title = sector.seo_title || sector.name_ar;
+  const description = sector.seo_description || sector.description || `استكشف قطاع ${sector.name_ar} ضمن منصة روافد.`;
   const canonical = `/sectors/${slug}`;
 
   return {
-    title: sector.name_ar,
+    title,
     description,
     alternates: { canonical },
     openGraph: {
       type: 'website',
       url: `${SITE}${canonical}`,
       siteName: 'منصة روافد',
-      title: `${sector.name_ar} | منصة روافد`,
+      title: `${title} | منصة روافد`,
       description,
       locale: 'ar_AR',
     },
     twitter: {
       card: 'summary',
-      title: `${sector.name_ar} | منصة روافد`,
+      title: `${title} | منصة روافد`,
       description,
     },
   };
@@ -49,7 +50,7 @@ export default async function SectorPage({ params }: { params: Params }) {
 
   const { data: sector } = await supabase
     .from('sectors')
-    .select('id,slug,name_ar,description,accent')
+    .select('id,slug,name_ar,description,accent,seo_title,seo_description')
     .eq('slug', slug)
     .eq('is_active', true)
     .maybeSingle();
@@ -67,11 +68,11 @@ export default async function SectorPage({ params }: { params: Params }) {
   const categoryRows = categories ?? [];
   const roots = categoryRows.filter((category) => !category.parent_id);
   const accentStyle = { '--accent': sector.accent || '#0f8f88' } as CSSProperties;
-  const description = sector.description || 'قطاع معرفي وخدمي ضمن منصة روافد.';
+  const description = sector.seo_description || sector.description || 'قطاع معرفي وخدمي ضمن منصة روافد.';
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
-    name: sector.name_ar,
+    name: sector.seo_title || sector.name_ar,
     description,
     url: `${SITE}/sectors/${sector.slug}`,
     inLanguage: 'ar',
@@ -96,7 +97,7 @@ export default async function SectorPage({ params }: { params: Params }) {
       <section className="sector-hero">
         <span className="eyebrow">قطاع ديناميكي</span>
         <h1>{sector.name_ar}</h1>
-        <p>{description}</p>
+        <p>{sector.description || description}</p>
       </section>
 
       <section className="section">
