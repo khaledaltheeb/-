@@ -11,6 +11,7 @@ const groups: AdminNavGroup[] = [
     items: [
       ['/admin', 'نظرة عامة'],
       ['/admin/content', 'المحتوى وCMS'],
+      ['/admin/media', 'مكتبة الوسائط'],
       ['/admin/taxonomy', 'القطاعات والأقسام'],
       ['/admin/redirects', 'الروابط والتحويلات'],
     ],
