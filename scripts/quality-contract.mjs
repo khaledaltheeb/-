@@ -48,7 +48,10 @@ const home=read('app/page.tsx');
 if(home.includes('fallbackPillars')) fail('homepage must not contain fallback/demo sectors');
 for(const needle of ['sectors.length > 0','rawafid-empty','getPublicSectors']) if(!home.includes(needle)) fail(`homepage empty-theme behavior missing ${needle}`);
 requireText('app/theme-preview/page.tsx',['index: false','follow: false','Design System V3']);
-requireText('app/layout.tsx',["'./theme-empty.css'","'./dashboard-v3.css'","'./theme-preview.css'"]);
+requireText('app/not-found.tsx',['الصفحة غير موجودة','SiteHeader','SiteFooter']);
+requireText('app/loading.tsx',['system-loading-shell','aria-busy']);
+requireText('app/error.tsx',["'use client'",'إعادة المحاولة']);
+requireText('app/layout.tsx',["'./theme-empty.css'","'./dashboard-v3.css'","'./theme-preview.css'","'./public-modules-v3.css'","'./system-states.css'"]);
 requireText('.env.example',['NEXT_PUBLIC_SITE_URL=https://healthrenewal.org','NEXT_PUBLIC_ALLOW_INDEXING=false']);
 requireText('lib/seo.ts',["'https://healthrenewal.org'"]);
 
