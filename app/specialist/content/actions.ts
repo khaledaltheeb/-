@@ -19,6 +19,7 @@ function refresh(slug?:string){
   revalidatePath('/specialist');
   revalidatePath('/specialist/content');
   revalidatePath('/admin/content');
+  revalidatePath('/admin/seo');
   if(slug) revalidatePath(`/content/${slug}`);
 }
 
@@ -26,7 +27,7 @@ export async function createSpecialistDraft(formData:FormData){
   const {supabase}=await requireSpecialist();
   const data=buildContentPayload(formData,SPECIALIST_CONTENT_TYPES);
   if(!data) redirect('/specialist/content/new?error=invalid-input');
-  const {data:id,error}=await supabase.rpc('create_content_draft_v3',data);
+  const {data:id,error}=await supabase.rpc('create_content_draft_v4',data);
   if(error||!id) redirect('/specialist/content/new?error=create-failed');
   refresh(data.p_slug);
   redirect(`/specialist/content/${id}?ok=created`);
@@ -37,7 +38,7 @@ export async function updateSpecialistDraft(formData:FormData){
   const id=field(formData,'id',60);
   const data=buildContentPayload(formData,SPECIALIST_CONTENT_TYPES);
   if(!validUuid(id)||!data) redirect('/specialist/content?error=invalid-input');
-  const {error}=await supabase.rpc('update_content_draft_v3',{p_id:id,...data});
+  const {error}=await supabase.rpc('update_content_draft_v4',{p_id:id,...data});
   if(error) redirect(`/specialist/content/${id}?error=update-failed`);
   refresh(data.p_slug);
   redirect(`/specialist/content/${id}?ok=saved`);
