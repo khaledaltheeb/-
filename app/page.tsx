@@ -32,7 +32,7 @@ export default async function HomePage() {
           <span><strong>روافد</strong><small>Rawafid</small></span>
         </Link>
         <nav aria-label="التنقل الرئيسي">
-          <a href="#discover">اكتشف</a><a href="#sectors">القطاعات</a><a href="#specialists">المختصون والمراكز</a><a href="#tools">الأدوات</a><a href="#knowledge">المعرفة</a>
+          <a href="#discover">اكتشف</a><a href="#sectors">القطاعات</a><a href="#specialists">المختصون والمراكز</a><Link href="/search">البحث</Link>
         </nav>
         <Link className="button ghost" href="/login">تسجيل الدخول</Link>
       </header>
@@ -42,9 +42,9 @@ export default async function HomePage() {
           <span className="eyebrow">Rawafid Institutional Platform — V3</span>
           <h1>كيف يمكن لروافد مساعدتك اليوم؟</h1>
           <p>نظام مؤسسي جديد يُبنى من الصفر. هذه النسخة لا تحتوي أي محتوى مرحّل من الموقع القديم حتى تكتمل البنية والاختبارات.</p>
-          <form className="search" role="search">
-            <input aria-label="البحث" placeholder="ابحث عن حالة، مصطلح، مختص، مركز، أداة أو سؤال..." disabled />
-            <button type="button" disabled>بحث</button>
+          <form className="search" action="/search" method="get" role="search">
+            <input name="q" aria-label="البحث" minLength={2} maxLength={160} autoComplete="off" placeholder="ابحث عن حالة، مصطلح، مختص، مركز، أداة أو سؤال..." />
+            <button type="submit">بحث</button>
           </form>
           <div className="intent-grid">
             {['أفهم حالة','أساعد شخصًا','أجد مختصًا','أجد مركزًا','أتعامل مع إدمان','أساعد طفلي','أستخدم أداة','أتعلم كمتخصص'].map((item) => <span key={item}>{item}</span>)}
