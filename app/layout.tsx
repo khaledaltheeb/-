@@ -14,6 +14,7 @@ import './trust.css';
 import './theme-v3.css';
 import './public-enhancements.css';
 import './communication.css';
+import './mobile-nav-v3.css';
 import MobileNav from './mobile-nav';
 import PwaRegister from './pwa-register';
 
