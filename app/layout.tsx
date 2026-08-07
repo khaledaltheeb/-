@@ -8,6 +8,7 @@ import './cms.css';
 import './search.css';
 import './directory.css';
 import './portal.css';
+import './theme-v3.css';
 import MobileNav from './mobile-nav';
 import PwaRegister from './pwa-register';
 
