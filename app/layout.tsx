@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import Script from 'next/script';
 import { Noto_Sans_Arabic } from 'next/font/google';
 import { BRAND_NAME, DEFAULT_DESCRIPTION, SITE_URL, organizationJsonLd } from '@/lib/seo';
 import './globals.css';
@@ -79,11 +80,45 @@ if ('serviceWorker' in navigator) {
 }
 `;
 
+function validatedAnalyticsId(value: string | undefined, pattern: RegExp) {
+  const normalized = value?.trim() ?? '';
+  return pattern.test(normalized) ? normalized : '';
+}
+
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const organizationSchema = organizationJsonLd();
+  const analyticsEnabled = process.env.NEXT_PUBLIC_ENABLE_ANALYTICS === 'true';
+  const directGaEnabled = process.env.NEXT_PUBLIC_ENABLE_DIRECT_GA === 'true';
+  const gtmId = validatedAnalyticsId(process.env.NEXT_PUBLIC_GTM_ID, /^GTM-[A-Z0-9]+$/i);
+  const gaId = validatedAnalyticsId(process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID, /^G-[A-Z0-9]+$/i);
+
   return (
     <html lang="ar" dir="rtl" className={arabicFont.variable}>
       <body>
+        {analyticsEnabled && gtmId ? (
+          <>
+            <Script id="rawafid-gtm" strategy="afterInteractive">
+              {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${gtmId}');`}
+            </Script>
+            <noscript>
+              <iframe
+                src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`}
+                height="0"
+                width="0"
+                style={{ display: 'none', visibility: 'hidden' }}
+                title="Google Tag Manager"
+              />
+            </noscript>
+          </>
+        ) : null}
+        {analyticsEnabled && directGaEnabled && gaId ? (
+          <>
+            <Script src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`} strategy="afterInteractive" />
+            <Script id="rawafid-ga4" strategy="afterInteractive">
+              {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${gaId}');`}
+            </Script>
+          </>
+        ) : null}
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema).replace(/</g, '\\u003c') }} />
         {children}
         <script dangerouslySetInnerHTML={{ __html: serviceWorkerBootstrap }} />
