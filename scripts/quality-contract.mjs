@@ -17,7 +17,7 @@ for(const file of scanDirs.flatMap(walk).filter(file=>/\.(ts|tsx|js|mjs)$/.test(
  }
 }
 
-for(const file of ['app/messages/page.tsx','app/messages/[id]/page.tsx','app/messages/new/page.tsx','app/appointments/page.tsx','app/appointments/new/page.tsx','app/notifications/page.tsx']){
+for(const file of ['app/messages/page.tsx','app/messages/[id]/page.tsx','app/messages/new/page.tsx','app/appointments/page.tsx','app/appointments/new/page.tsx','app/notifications/page.tsx','app/specialist/content/page.tsx','app/specialist/content/new/page.tsx','app/specialist/content/[id]/page.tsx']){
  requireText(file,['robots:{index:false','noarchive:true']);
 }
 
@@ -36,6 +36,7 @@ for(const file of [
  'supabase/migrations/20260807176000_messaging_recent_window_fix.sql',
  'supabase/migrations/20260807177000_audit_redirect_least_privilege.sql',
  'supabase/migrations/20260807182000_structured_content_editor.sql',
+ 'supabase/migrations/20260807182500_content_draft_delete.sql',
 ]){
  if(!fs.existsSync(path.join(root,file)))fail(`missing migration ${file}`);
 }
@@ -44,6 +45,7 @@ requireText('supabase/migrations/20260807173000_messaging_core_hardening.sql',['
 requireText('supabase/migrations/20260807174000_appointments_core_hardening.sql',['request_appointment','provider_update_appointment','requester_cancel_appointment']);
 requireText('supabase/migrations/20260807175000_admin_audit_redirect_hardening.sql',['redirect loop detected','admin_audit_log','admin_upsert_redirect']);
 requireText('supabase/migrations/20260807182000_structured_content_editor.sql',['create_content_draft_v3','update_content_draft_v3','validate_content_body_v3']);
+requireText('supabase/migrations/20260807182500_content_draft_delete.sql',['only drafts can be permanently deleted','delete_content_draft']);
 
 // Empty-theme contract: the UI must not smuggle demo taxonomy/content into a clean database.
 const home=read('app/page.tsx');
@@ -56,8 +58,11 @@ requireText('app/error.tsx',["'use client'",'إعادة المحاولة']);
 requireText('components/content-renderer.tsx',["type === 'heading'","type === 'list'","type === 'table'","type === 'callout'","type === 'resource'"]);
 requireText('app/content/[slug]/page.tsx',['body_json','ContentRenderer']);
 requireText('app/admin/content/block-editor.tsx',['body_json','body_text','إضافة وحدة','table','callout']);
-requireText('app/admin/content/content-form.tsx',['BlockEditor','bodyJson={record?.body_json}']);
-requireText('app/admin/content/actions.ts',['sanitizeBody','create_content_draft_v3','update_content_draft_v3']);
+requireText('app/admin/content/content-form.tsx',['BlockEditor','bodyJson={record?.body_json}','allowedTypes']);
+requireText('lib/content-editor-payload.ts',['sanitizeBody','SITE_URL','SPECIALIST_CONTENT_TYPES','buildContentPayload']);
+requireText('app/admin/content/actions.ts',['buildContentPayload','create_content_draft_v3','update_content_draft_v3','delete_content_draft']);
+requireText('app/specialist/content/actions.ts',['SPECIALIST_CONTENT_TYPES','create_content_draft_v3','update_content_draft_v3','delete_content_draft','scientific_review']);
+requireText('app/specialist/page.tsx',['/specialist/content','/messages','/appointments','/notifications']);
 requireText('app/layout.tsx',["'./theme-empty.css'","'./dashboard-v3.css'","'./theme-preview.css'","'./public-modules-v3.css'","'./system-states.css'","'./content-v3.css'","'./structured-content.css'","'./block-editor-v3.css'"]);
 requireText('.env.example',['NEXT_PUBLIC_SITE_URL=https://healthrenewal.org','NEXT_PUBLIC_ALLOW_INDEXING=false']);
 requireText('lib/seo.ts',["'https://healthrenewal.org'"]);
