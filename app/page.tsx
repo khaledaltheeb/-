@@ -8,22 +8,23 @@ import { buildSeoMetadata } from '@/lib/seo';
 export const dynamic = 'force-dynamic';
 
 export const metadata = buildSeoMetadata({
-  title: 'الصحة النفسية والتعافي والتمكين',
-  description: 'منصة روافد للصحة النفسية والتعافي والدمج والتمكين: معرفة موثوقة، أدلة عملية، دليل مختصين ومراكز، وخدمات مترابطة للأفراد والأسر ومقدمي الخدمة في الوطن العربي.',
+  title: 'الصحة النفسية وذوو الاحتياجات الخاصة والتعافي',
+  description: 'منصة روافد للصحة النفسية وذوي الاحتياجات الخاصة والدمج والتعافي والتمكين: معرفة موثوقة، أدلة عملية، مختصون ومراكز وخدمات مترابطة للأفراد والأسر ومقدمي الخدمة.',
   path: '/',
   index: true,
-  keywords: ['الصحة النفسية', 'التعافي', 'الدمج', 'التمكين', 'مختص نفسي', 'مراكز نفسية', 'منصة روافد'],
+  keywords: ['الصحة النفسية', 'ذوو الاحتياجات الخاصة', 'الدمج', 'التمكين', 'الإدمان والتعافي', 'مختص نفسي', 'مراكز نفسية', 'منصة روافد'],
 });
 
 const quickSearches = [
   ['الصحة النفسية', 'الصحة النفسية'],
   ['الإدمان والتعافي', 'الإدمان والتعافي'],
-  ['دعم الأسرة', 'دعم الأسرة'],
   ['ذوو الاحتياجات الخاصة', 'ذوو الاحتياجات الخاصة'],
+  ['دعم الأسرة', 'دعم الأسرة'],
 ];
 
 const platformModules = [
   { href: '/search', icon: 'knowledge' as const, title: 'المعرفة والموسوعة', text: 'محرك معرفة منظم للمقالات والأدلة والحالات والأبحاث.', accent: '#08716d' },
+  { href: '/search?q=%D8%B0%D9%88%D9%88+%D8%A7%D9%84%D8%A7%D8%AD%D8%AA%D9%8A%D8%A7%D8%AC%D8%A7%D8%AA+%D8%A7%D9%84%D8%AE%D8%A7%D8%B5%D8%A9+%D8%A7%D9%84%D8%AF%D9%85%D8%AC', icon: 'community' as const, title: 'ذوو الاحتياجات الخاصة والدمج', text: 'بنية واسعة للأقسام التعليمية والتأهيلية والأسرية والمهنية والتمكين والخدمات المتخصصة.', accent: '#2b7a68' },
   { href: '/specialists', icon: 'specialist' as const, title: 'دليل المختصين', text: 'ملفات مهنية موثقة مع تخصصات ومؤهلات وخيارات تواصل.', accent: '#2f68a8' },
   { href: '/centers', icon: 'center' as const, title: 'دليل المراكز', text: 'مراكز وفروع وخدمات ومواقع ضمن دورة تحقق إدارية.', accent: '#6753b5' },
   { href: '/search', icon: 'tools' as const, title: 'الأدوات والمسارات', text: 'بنية جاهزة للأدوات والاختبارات والمسارات التعليمية.', accent: '#a94334' },
@@ -41,7 +42,7 @@ export default async function HomePage() {
           <div className="rawafid-hero-copy">
             <span className="rawafid-kicker">منصة عربية مؤسسية متكاملة</span>
             <h1 id="home-title">معرفة أوضح، وصول أسرع، و<em>خدمات مترابطة</em></h1>
-            <p>روافد تجمع المعرفة المتخصصة، الأدلة العملية، المختصين والمراكز في تجربة عربية واحدة مصممة للفرد والأسرة ومقدم الخدمة.</p>
+            <p>روافد تجمع الصحة النفسية، الإدمان والتعافي، ذوي الاحتياجات الخاصة والدمج والتمكين، مع الأدلة العملية والمختصين والمراكز في تجربة عربية واحدة مصممة للفرد والأسرة ومقدم الخدمة.</p>
 
             <form className="search rawafid-search" action="/search" method="get" role="search">
               <label className="sr-only" htmlFor="home-search">البحث في منصة روافد</label>
@@ -60,7 +61,7 @@ export default async function HomePage() {
                 <span className="rawafid-visual-badge"><i className="rawafid-visual-status" aria-hidden="true" />منصة واحدة · خدمات مترابطة</span>
               </div>
               <h2>بنية مصممة لتبقى واضحة مهما توسعت المنصة.</h2>
-              <p>القطاعات والمحتوى والدلائل والحسابات تُدار من قاعدة بيانات واحدة، بينما يبقى التصميم موحدًا ومتجاوبًا على جميع الأجهزة.</p>
+              <p>القطاعات والمحتوى والدلائل والحسابات تُدار من قاعدة بيانات واحدة، مع دعم قطاعات كبيرة كثيرة الأقسام مثل ذوي الاحتياجات الخاصة والدمج، بينما يبقى التصميم موحدًا ومتجاوبًا على جميع الأجهزة.</p>
             </div>
             <div className="rawafid-visual-grid">
               <div className="rawafid-visual-card"><PlatformIcon name="knowledge" /><div><strong>معرفة منظمة</strong><span>قطاعات وأقسام ومحتوى ديناميكي</span></div></div>
@@ -97,7 +98,7 @@ export default async function HomePage() {
 
         <section className="rawafid-section" id="sectors" aria-labelledby="sectors-title">
           <div className="rawafid-section-head">
-            <div className="rawafid-section-title"><span>القطاعات</span><h2 id="sectors-title">هيكل ديناميكي ينمو دون تعديل الثيم</h2><p>أي قطاع يتم إنشاؤه وتفعيله من لوحة الإدارة يظهر تلقائيًا هنا وفي القائمة الرئيسية والبحث.</p></div>
+            <div className="rawafid-section-title"><span>القطاعات</span><h2 id="sectors-title">هيكل ديناميكي ينمو دون تعديل الثيم</h2><p>أي قطاع يتم إنشاؤه وتفعيله من لوحة الإدارة يظهر تلقائيًا هنا وفي القائمة الرئيسية والبحث، ويمكن أن يحتوي عددًا كبيرًا من الأقسام والأقسام الفرعية.</p></div>
           </div>
 
           {sectors.length > 0 ? (
