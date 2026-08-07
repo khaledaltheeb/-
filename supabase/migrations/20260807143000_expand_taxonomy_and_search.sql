@@ -36,15 +36,39 @@ alter table public.content
   );
 
 alter table public.content
-  add column if not exists search_aliases text[] not null default '{}'::text[];
+  add column if not exists search_aliases text[] not null default '{}'::text[],
+  add column if not exists search_vector tsvector;
 
-alter table public.content
-  add column if not exists search_vector tsvector generated always as (
-    to_tsvector(
-      'simple',
-      coalesce(title, '') || ' ' || coalesce(excerpt, '') || ' ' || coalesce(body_text, '') || ' ' || array_to_string(search_aliases, ' ')
-    )
-  ) stored;
+create or replace function public.refresh_content_search_vector()
+returns trigger
+language plpgsql
+set search_path = ''
+as $$
+begin
+  new.search_vector := pg_catalog.to_tsvector(
+    'pg_catalog.simple'::regconfig,
+    coalesce(new.title, '') || ' ' ||
+    coalesce(new.excerpt, '') || ' ' ||
+    coalesce(new.body_text, '') || ' ' ||
+    coalesce(pg_catalog.array_to_string(new.search_aliases, ' '), '')
+  );
+  return new;
+end;
+$$;
+
+drop trigger if exists content_search_vector_updated on public.content;
+create trigger content_search_vector_updated
+before insert or update of title, excerpt, body_text, search_aliases on public.content
+for each row execute function public.refresh_content_search_vector();
+
+update public.content
+set search_vector = pg_catalog.to_tsvector(
+  'pg_catalog.simple'::regconfig,
+  coalesce(title, '') || ' ' ||
+  coalesce(excerpt, '') || ' ' ||
+  coalesce(body_text, '') || ' ' ||
+  coalesce(pg_catalog.array_to_string(search_aliases, ' '), '')
+);
 
 create table if not exists public.tags (
   id uuid primary key default gen_random_uuid(),
@@ -82,6 +106,7 @@ create index if not exists tags_name_trgm_idx on public.tags using gin (name_ar 
 create index if not exists content_categories_category_idx on public.content_categories(category_id, content_id);
 create index if not exists content_tags_tag_idx on public.content_tags(tag_id, content_id);
 
+drop trigger if exists tags_updated on public.tags;
 create trigger tags_updated before update on public.tags for each row execute function public.set_updated_at();
 
 alter table public.tags enable row level security;
