@@ -37,6 +37,7 @@ for(const file of [
  'supabase/migrations/20260807177000_audit_redirect_least_privilege.sql',
  'supabase/migrations/20260807182000_structured_content_editor.sql',
  'supabase/migrations/20260807182500_content_draft_delete.sql',
+ 'supabase/migrations/20260807183000_content_release_gate.sql',
 ]){
  if(!fs.existsSync(path.join(root,file)))fail(`missing migration ${file}`);
 }
@@ -46,6 +47,7 @@ requireText('supabase/migrations/20260807174000_appointments_core_hardening.sql'
 requireText('supabase/migrations/20260807175000_admin_audit_redirect_hardening.sql',['redirect loop detected','admin_audit_log','admin_upsert_redirect']);
 requireText('supabase/migrations/20260807182000_structured_content_editor.sql',['create_content_draft_v3','update_content_draft_v3','validate_content_body_v3']);
 requireText('supabase/migrations/20260807182500_content_draft_delete.sql',['only drafts can be permanently deleted','delete_content_draft']);
+requireText('supabase/migrations/20260807183000_content_release_gate.sql',['meta description must be 150-160 characters','scientific reviewer is required for YMYL content','featured image alt text is required','content_release_gate']);
 
 // Empty-theme contract: the UI must not smuggle demo taxonomy/content into a clean database.
 const home=read('app/page.tsx');
@@ -63,6 +65,8 @@ requireText('lib/content-editor-payload.ts',['sanitizeBody','SITE_URL','SPECIALI
 requireText('app/admin/content/actions.ts',['buildContentPayload','create_content_draft_v3','update_content_draft_v3','delete_content_draft']);
 requireText('app/specialist/content/actions.ts',['SPECIALIST_CONTENT_TYPES','create_content_draft_v3','update_content_draft_v3','delete_content_draft','scientific_review']);
 requireText('app/specialist/page.tsx',['/specialist/content','/messages','/appointments','/notifications']);
+requireText('app/center/page.tsx',['/messages','/appointments','/notifications']);
+requireText('app/account/page.tsx',['/messages','/appointments','/notifications']);
 requireText('app/layout.tsx',["'./theme-empty.css'","'./dashboard-v3.css'","'./theme-preview.css'","'./public-modules-v3.css'","'./system-states.css'","'./content-v3.css'","'./structured-content.css'","'./block-editor-v3.css'"]);
 requireText('.env.example',['NEXT_PUBLIC_SITE_URL=https://healthrenewal.org','NEXT_PUBLIC_ALLOW_INDEXING=false']);
 requireText('lib/seo.ts',["'https://healthrenewal.org'"]);
