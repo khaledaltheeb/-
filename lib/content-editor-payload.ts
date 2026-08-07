@@ -35,6 +35,14 @@ function canonical(formData: FormData) {
   } catch { return null; }
   return null;
 }
+function httpsUrl(formData: FormData, key: string, max = 2000) {
+  const raw = field(formData, key, max);
+  if (!raw) return null;
+  try {
+    const parsed = new URL(raw);
+    return parsed.protocol === 'https:' ? parsed.toString() : null;
+  } catch { return null; }
+}
 function object(value: unknown): JsonRecord | null {
   return value !== null && typeof value === 'object' && !Array.isArray(value) ? value as JsonRecord : null;
 }
@@ -79,6 +87,13 @@ export function buildContentPayload(formData: FormData, allowedTypes: Set<string
   const seoTitle=field(formData,'seo_title',47);
   const seoDescription=field(formData,'seo_description',160);
   if (seoDescription && seoDescription.length < 150) return null;
+
+  const featuredImageUrl=httpsUrl(formData,'featured_image_url',2000);
+  const featuredImageAlt=field(formData,'featured_image_alt',500);
+  const rawFeaturedUrl=field(formData,'featured_image_url',2000);
+  if (rawFeaturedUrl && !featuredImageUrl) return null;
+  if (featuredImageUrl && featuredImageAlt.length < 3) return null;
+
   return {
     p_content_type:contentType,
     p_slug:slug,
@@ -95,5 +110,7 @@ export function buildContentPayload(formData: FormData, allowedTypes: Set<string
     p_canonical_url:canonical(formData),
     p_robots_index:formData.get('robots_index')==='on',
     p_robots_follow:formData.get('robots_follow')==='on',
+    p_featured_image_url:featuredImageUrl,
+    p_featured_image_alt:featuredImageUrl ? featuredImageAlt : null,
   };
 }
