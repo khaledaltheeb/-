@@ -2,7 +2,10 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 
-const groups = [
+type AdminNavItem = readonly [href: string, label: string];
+type AdminNavGroup = { label: string; items: AdminNavItem[] };
+
+const groups: AdminNavGroup[] = [
   {
     label: 'المحتوى والمعرفة',
     items: [
@@ -30,7 +33,7 @@ const groups = [
       ['/admin/integrity', 'سلامة المنصة'],
     ],
   },
-] as const;
+];
 
 export default async function AdminLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const supabase = await createClient();
@@ -39,6 +42,8 @@ export default async function AdminLayout({ children }: Readonly<{ children: Rea
   if (!userId) redirect('/login?next=/admin');
   const { data: profile } = await supabase.from('profiles').select('display_name,role,is_active').eq('id', userId).single();
   if (!profile?.is_active || !['owner','admin'].includes(profile.role)) redirect('/account');
+
+  const mobileItems: AdminNavItem[] = groups.flatMap((group) => group.items);
 
   return <div className="admin-app-shell">
     <aside className="admin-sidebar" aria-label="التنقل الإداري">
@@ -54,7 +59,7 @@ export default async function AdminLayout({ children }: Readonly<{ children: Rea
 
     <div className="admin-mobile-bar">
       <Link className="admin-mobile-brand" href="/admin"><span>ر</span><strong>إدارة روافد</strong></Link>
-      <details className="admin-mobile-menu"><summary>القائمة</summary><div>{groups.flatMap((group) => group.items).map(([href,label]) => <Link href={href} key={href}>{label}</Link>)}<Link href="/">عرض الموقع</Link><Link href="/account">حسابي</Link></div></details>
+      <details className="admin-mobile-menu"><summary>القائمة</summary><div>{mobileItems.map(([href,label]) => <Link href={href} key={href}>{label}</Link>)}<Link href="/">عرض الموقع</Link><Link href="/account">حسابي</Link></div></details>
     </div>
 
     <div className="admin-workspace">{children}</div>
