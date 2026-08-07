@@ -27,6 +27,8 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Architecture privacy PWA and theme contract
         run: npm run architecture-check
+      - name: Final content-readiness hardening contract
+        run: node scripts/final-hardening-check.mjs
       - name: Type check
         run: npm run typecheck
       - name: Lint
