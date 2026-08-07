@@ -3,6 +3,7 @@ import './globals.css';
 import './sector-pages.css';
 import './admin-ui.css';
 import './cms.css';
+import './search.css';
 import MobileNav from './mobile-nav';
 import PwaRegister from './pwa-register';
 
