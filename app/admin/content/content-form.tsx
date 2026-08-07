@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import BlockEditor from './block-editor';
 
 type Sector = { id: string; name_ar: string };
@@ -20,6 +21,8 @@ type ContentRecord = {
   canonical_url?: string | null;
   robots_index?: boolean;
   robots_follow?: boolean;
+  featured_image_url?: string | null;
+  featured_image_alt?: string | null;
 };
 
 const TYPES = [
@@ -51,6 +54,14 @@ export default function ContentForm({ action, sectors, categories, record, submi
         <label>الجمهور<input name="audience" defaultValue={(record?.audience ?? []).join(', ')} placeholder="الفرد، الأسرة، المختص" /></label>
         <label className="cms-wide">الملخص<textarea name="excerpt" rows={3} maxLength={1200} defaultValue={record?.excerpt ?? ''} /></label>
       </div>
+
+      <details className="cms-details" open>
+        <summary>الصورة البارزة والإتاحة</summary>
+        <div className="cms-grid cms-details-grid">
+          <label className="cms-wide">رابط الصورة البارزة<input name="featured_image_url" type="url" dir="ltr" maxLength={2000} defaultValue={record?.featured_image_url ?? ''} placeholder="https://..." /><small>استخدم صورة من <Link href="/admin/media">مكتبة الوسائط</Link> أو رابط HTTPS موثوقًا. يمكن تركه فارغًا.</small></label>
+          <label className="cms-wide">Alt Text للصورة<input name="featured_image_alt" maxLength={500} minLength={3} defaultValue={record?.featured_image_alt ?? ''} placeholder="صف الصورة بدقة لقارئات الشاشة ومحركات البحث" /><small>إلزامي فقط عند وجود صورة بارزة، ويُحفظ مع نفس نسخة المحتوى.</small></label>
+        </div>
+      </details>
 
       <BlockEditor bodyJson={record?.body_json} bodyText={record?.body_text} />
 
