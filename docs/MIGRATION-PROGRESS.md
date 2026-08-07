@@ -134,13 +134,43 @@ Source repository: `khaledaltheeb/healthrenewal.org`
 - Full record: `migration-records/C0/MIG-000003-perception.md`
 - Claim: GitHub Issue #3 — CLOSED / COMPLETED
 
+### MIG-000004 — الذاكرة
+- Lane: C0
+- Canonical: `/content/memory`
+- Type: `glossary_term`
+- Status: **PUBLISHED / QA PASS**
+- Useful Arabic words: **1808**
+- FAQ: **11**
+- References: **8**
+- Versions: **8**
+- Duplicate canonicals after publish: **0**
+- Search validation: **PASS — first result for الذاكرة; working memory remains distinct**
+- Incorrect redirect collision with working-memory/tool: **0**
+- Full record: `migration-records/C0/MIG-000004-memory.md`
+- Claim: GitHub Issue #4 — CLOSED / COMPLETED
+
+### MIG-000005 — اللغة
+- Lane: C0
+- Canonical: `/content/language`
+- Type: `glossary_term`
+- Status: **PUBLISHED / QA PASS**
+- Useful Arabic words: **1891**
+- FAQ: **11**
+- References: **8**
+- Versions: **8**
+- Duplicate canonicals after publish: **0**
+- Search validation: **PASS — first result for اللغة**
+- Specialized redirect collisions from ADHD/selective mutism/AAC/autism: **0**
+- Full record: `migration-records/C0/MIG-000005-language.md`
+- Claim: GitHub Issue #9 — CLOSED / COMPLETED
+
 ## Totals
 
-- Completed canonical pages: **3**
-- Published canonical pages: **3**
-- C0 completed: **3**
+- Completed canonical pages: **5**
+- Published canonical pages: **5**
+- C0 completed: **5**
 - A1–A5 completed recorded in central ledger: **0**
 
 ## Next action
 
-C0 may start **MIG-000004** only after checking all open agent Claims and selecting a general encyclopedia topic that is not owned by A1–A5.
+C0 may start **MIG-000006** only after checking all open agent Claims and selecting a general encyclopedia topic that is not owned by A1–A5.
