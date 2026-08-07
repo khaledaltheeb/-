@@ -57,3 +57,13 @@ export async function transitionStatus(formData: FormData) {
   refresh(slug || undefined);
   redirect(`/admin/content/${id}?ok=transitioned`);
 }
+
+export async function deleteDraft(formData: FormData) {
+  const supabase = await requireAdmin();
+  const id = field(formData, 'id', 60);
+  if (!validUuid(id)) redirect('/admin/content?error=invalid-input');
+  const { error } = await supabase.rpc('delete_content_draft', { p_id: id });
+  if (error) redirect(`/admin/content/${id}?error=delete-failed`);
+  refresh();
+  redirect('/admin/content?ok=deleted');
+}
