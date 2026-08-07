@@ -39,14 +39,18 @@ export const metadata: Metadata = {
   applicationName: BRAND_NAME,
   manifest: '/manifest.webmanifest',
   icons: {
-    icon: '/icons/rawafid-app.svg',
-    apple: '/icons/rawafid-app.svg',
+    icon: [
+      { url: '/pwa-icon-192', type: 'image/png', sizes: '192x192' },
+      { url: '/icons/rawafid-app.svg', type: 'image/svg+xml', sizes: 'any' },
+    ],
+    apple: [{ url: '/pwa-icon-180', type: 'image/png', sizes: '180x180' }],
   },
   appleWebApp: {
     capable: true,
     title: 'روافد',
     statusBarStyle: 'default',
   },
+  formatDetection: { telephone: false, email: false, address: false },
   robots: { index: false, follow: false, noarchive: true },
   referrer: 'strict-origin-when-cross-origin',
 };
