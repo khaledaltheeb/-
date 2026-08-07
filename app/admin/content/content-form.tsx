@@ -1,3 +1,5 @@
+import BlockEditor from './block-editor';
+
 type Sector = { id: string; name_ar: string };
 type Category = { id: string; sector_id: string | null; name_ar: string };
 
@@ -7,6 +9,7 @@ type ContentRecord = {
   slug?: string;
   title?: string;
   excerpt?: string | null;
+  body_json?: unknown;
   body_text?: string | null;
   sector_id?: string | null;
   category_id?: string | null;
@@ -44,11 +47,12 @@ export default function ContentForm({ action, sectors, categories, record, submi
         <label>القسم الأساسي<select name="category_id" defaultValue={record?.category_id ?? ''}><option value="">بدون قسم</option>{categories.map((category) => <option value={category.id} key={category.id}>{category.name_ar}</option>)}</select></label>
         <label>الجمهور<input name="audience" defaultValue={(record?.audience ?? []).join(', ')} placeholder="الفرد، الأسرة، المختص" /></label>
         <label className="cms-wide">الملخص<textarea name="excerpt" rows={3} maxLength={1200} defaultValue={record?.excerpt ?? ''} /></label>
-        <label className="cms-wide">النص التحريري<textarea name="body_text" rows={18} maxLength={250000} defaultValue={record?.body_text ?? ''} placeholder="محتوى الصفحة. هذه المرحلة لا تستورد أي نص من المستودع القديم." /></label>
       </div>
 
+      <BlockEditor bodyJson={record?.body_json} bodyText={record?.body_text} />
+
       <details className="cms-details" open>
-        <summary>SEO والبحث</summary>
+        <summary>SEO والبحث الأساسي</summary>
         <div className="cms-grid cms-details-grid">
           <label>SEO Title الأساسي<input name="seo_title" maxLength={47} defaultValue={record?.seo_title ?? ''} /><small>حتى 47 حرفًا؛ يضاف «منصة روافد» آليًا ليبقى Title Tag النهائي ضمن 60 حرفًا.</small></label>
           <label>Canonical URL<input name="canonical_url" dir="ltr" maxLength={500} defaultValue={record?.canonical_url ?? ''} placeholder="/content/example" /></label>
@@ -59,7 +63,7 @@ export default function ContentForm({ action, sectors, categories, record, submi
         </div>
       </details>
 
-      <div className="cms-actions"><button className="primary-action" type="submit">{submitLabel}</button><span>الحفظ هنا لا ينشر الصفحة؛ تبقى ضمن مسار المراجعة المؤسسي.</span></div>
+      <div className="cms-actions"><button className="primary-action" type="submit">{submitLabel}</button><span>الحفظ هنا ينشئ نسخة جديدة ولا ينشر الصفحة؛ النشر يمر عبر Workflow المؤسسي.</span></div>
     </form>
   );
 }
