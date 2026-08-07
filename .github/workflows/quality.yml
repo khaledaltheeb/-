@@ -54,7 +54,10 @@ jobs:
           const fs=require('fs');
           const report=JSON.parse(fs.readFileSync('/tmp/rawafid-lighthouse.json','utf8'));
           const scores=Object.fromEntries(Object.entries(report.categories).map(([key,value])=>[key,value.score]));
+          const metricIds=['server-response-time','first-contentful-paint','largest-contentful-paint','total-blocking-time','cumulative-layout-shift','speed-index'];
+          const metrics=Object.fromEntries(metricIds.map((id)=>[id,report.audits[id]?.displayValue??report.audits[id]?.numericValue??null]));
           console.log('Lighthouse lab scores:',scores);
+          console.log('Lighthouse lab metrics:',metrics);
           if((scores.accessibility??0)<0.90) throw new Error(`Accessibility Lighthouse score below 0.90: ${scores.accessibility}`);
           if((scores['best-practices']??0)<0.90) throw new Error(`Best Practices Lighthouse score below 0.90: ${scores['best-practices']}`);
           if((scores.performance??0)<0.70) throw new Error(`Performance Lighthouse lab score below 0.70: ${scores.performance}`);
