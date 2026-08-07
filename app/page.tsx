@@ -1,14 +1,29 @@
+import type { CSSProperties } from 'react';
 import Link from 'next/link';
+import { createClient } from '@/lib/supabase/server';
 
-const pillars = [
-  { title: 'المعرفة', body: 'موسوعة وأدلة ومقارنات مبنية على بنية محتوى قابلة للتوسع.', accent: 'teal' },
-  { title: 'الصحة النفسية', body: 'مسارات واضحة للفرد والأسرة والمعلم والمختص.', accent: 'lilac' },
-  { title: 'الإدمان والتعافي', body: 'معلومات ومسارات مساعدة ودعم وفق احتياج المستخدم.', accent: 'coral' },
-  { title: 'الدمج والتمكين', body: 'محتوى وخدمات للأشخاص ذوي الاحتياجات الخاصة ومقدمي الدعم.', accent: 'green' },
-  { title: 'المختصون والمراكز', body: 'دليل موثق قابل للبحث والحجز والتواصل.', accent: 'blue' },
+export const dynamic = 'force-dynamic';
+
+const fallbackPillars = [
+  { slug: 'knowledge', name_ar: 'المعرفة', description: 'موسوعة وأدلة ومقارنات مبنية على بنية محتوى قابلة للتوسع.', accent: '#0f8f88' },
+  { slug: 'mental-health', name_ar: 'الصحة النفسية', description: 'مسارات واضحة للفرد والأسرة والمعلم والمختص.', accent: '#8d7bd8' },
+  { slug: 'addiction-recovery', name_ar: 'الإدمان والتعافي', description: 'معلومات ومسارات مساعدة ودعم وفق احتياج المستخدم.', accent: '#ff7d63' },
+  { slug: 'inclusion-empowerment', name_ar: 'الدمج والتمكين', description: 'محتوى وخدمات للأشخاص ذوي الاحتياجات الخاصة ومقدمي الدعم.', accent: '#65ad69' },
+  { slug: 'specialists-centers', name_ar: 'المختصون والمراكز', description: 'دليل موثق قابل للبحث والحجز والتواصل.', accent: '#4d8fd8' },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const supabase = await createClient();
+  const { data: sectors } = await supabase
+    .from('sectors')
+    .select('slug,name_ar,description,accent,sort_order')
+    .eq('is_active', true)
+    .order('sort_order')
+    .order('name_ar')
+    .limit(12);
+
+  const pillars = sectors?.length ? sectors : fallbackPillars;
+
   return (
     <main className="site-shell">
       <header className="topbar">
@@ -44,8 +59,20 @@ export default function HomePage() {
       </section>
 
       <section className="section" id="sectors">
-        <div className="section-heading"><span>Core + Modules</span><h2>القطاعات الأساسية</h2><p>ألوان زاهية محسوبة ضمن هوية مؤسسية ثابتة.</p></div>
-        <div className="pillar-grid">{pillars.map((pillar) => <article className={`pillar ${pillar.accent}`} key={pillar.title}><div className="icon-dot"/><h3>{pillar.title}</h3><p>{pillar.body}</p><span>جاهز للبناء</span></article>)}</div>
+        <div className="section-heading"><span>Dynamic Taxonomy</span><h2>القطاعات الأساسية</h2><p>القطاعات النشطة تُقرأ مباشرة من Supabase وتُرتب من لوحة الإدارة.</p></div>
+        <div className="pillar-grid">
+          {pillars.map((pillar) => {
+            const style = { '--accent': pillar.accent || '#0f8f88' } as CSSProperties;
+            return (
+              <Link className="pillar dynamic-pillar" style={style} href={`/sectors/${pillar.slug}`} key={pillar.slug}>
+                <div className="icon-dot" />
+                <h3>{pillar.name_ar}</h3>
+                <p>{pillar.description || 'قطاع معرفي وخدمي ضمن منصة روافد.'}</p>
+                <span>استكشف القطاع</span>
+              </Link>
+            );
+          })}
+        </div>
       </section>
 
       <section className="section split" id="specialists">
