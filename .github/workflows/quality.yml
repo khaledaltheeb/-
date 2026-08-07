@@ -4,7 +4,12 @@ on:
   pull_request:
     branches: [main]
   push:
-    branches: [main, foundation-v3, final-hardening]
+    branches:
+      - main
+      - foundation-v3
+      - final-hardening
+      - legacy-migration-audit
+      - 'migration-agent-*'
 
 concurrency:
   group: rawafid-quality-${{ github.ref }}
