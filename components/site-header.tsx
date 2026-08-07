@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { getPublicSectors } from '@/lib/public-taxonomy';
 
@@ -46,25 +45,25 @@ export default async function SiteHeader() {
     <>
       <header className="site-header">
         <div className="site-header-inner">
-          <Link className="brand" href="/" aria-label="منصة روافد - الرئيسية">
+          <a className="brand" href="/" aria-label="منصة روافد - الرئيسية">
             <span className="brand-mark" aria-hidden="true">ر</span>
             <span className="brand-copy"><strong>روافد</strong><small>Rawafid Platform</small></span>
-          </Link>
+          </a>
 
           <nav className="desktop-nav" aria-label="التنقل الرئيسي">
-            <Link href="/">الرئيسية</Link>
+            <a href="/">الرئيسية</a>
             <details className="nav-dropdown">
               <summary>القطاعات</summary>
               <div className="nav-dropdown-panel">
                 <div className="nav-dropdown-heading"><strong>قطاعات روافد</strong><span>تنظيم معرفي وخدمي ديناميكي</span></div>
                 <div className="nav-dropdown-grid">
-                  {sectors.map((sector) => <Link key={sector.slug} href={`/sectors/${sector.slug}`}>{sector.name_ar}</Link>)}
+                  {sectors.map((sector) => <a key={sector.slug} href={`/sectors/${sector.slug}`}>{sector.name_ar}</a>)}
                   {sectors.length === 0 && <span className="nav-empty">تظهر القطاعات بعد تفعيلها من الإدارة.</span>}
                 </div>
               </div>
             </details>
-            {primaryLinks.map((link) => <Link key={link.href} href={link.href}>{link.label}</Link>)}
-            {signedIn && <Link href="/messages">الرسائل</Link>}
+            {primaryLinks.map((link) => <a key={link.href} href={link.href}>{link.label}</a>)}
+            {signedIn && <a href="/messages">الرسائل</a>}
           </nav>
 
           <form className="header-search" action="/search" method="get" role="search">
@@ -73,23 +72,23 @@ export default async function SiteHeader() {
             <button type="submit">بحث</button>
           </form>
 
-          <div className="header-actions">{signedIn ? <Link className="button header-login" href="/account">حسابي</Link> : <Link className="button header-login" href="/login">تسجيل الدخول</Link>}</div>
+          <div className="header-actions">{signedIn ? <a className="button header-login" href="/account">حسابي</a> : <a className="button header-login" href="/login">تسجيل الدخول</a>}</div>
 
           <details className="mobile-menu">
             <summary aria-label="فتح القائمة">القائمة</summary>
             <div className="mobile-menu-panel">
               <form className="mobile-search" action="/search" method="get"><input name="q" type="search" placeholder="ابحث في روافد" maxLength={120} /><button type="submit">بحث</button></form>
-              <Link href="/">الرئيسية</Link>
+              <a href="/">الرئيسية</a>
               <span className="mobile-menu-label">القطاعات</span>
-              {sectors.map((sector) => <Link key={sector.slug} href={`/sectors/${sector.slug}`}>{sector.name_ar}</Link>)}
-              {primaryLinks.map((link) => <Link key={link.href} href={link.href}>{link.label}</Link>)}
-              {signedIn ? <><Link href="/messages">الرسائل</Link><Link href="/appointments">المواعيد</Link><Link href="/notifications">الإشعارات</Link><Link href="/account">حسابي</Link></> : <Link href="/login">تسجيل الدخول</Link>}
+              {sectors.map((sector) => <a key={sector.slug} href={`/sectors/${sector.slug}`}>{sector.name_ar}</a>)}
+              {primaryLinks.map((link) => <a key={link.href} href={link.href}>{link.label}</a>)}
+              {signedIn ? <><a href="/messages">الرسائل</a><a href="/appointments">المواعيد</a><a href="/notifications">الإشعارات</a><a href="/account">حسابي</a></> : <a href="/login">تسجيل الدخول</a>}
             </div>
           </details>
         </div>
       </header>
       <nav className="mobile-bottom-nav" aria-label="التنقل السريع للهاتف">
-        {mobileItems.map((item) => <Link href={item.href} key={`${item.href}-${item.label}`}><NavIcon name={item.icon}/><span>{item.label}</span></Link>)}
+        {mobileItems.map((item) => <a href={item.href} key={`${item.href}-${item.label}`}><NavIcon name={item.icon}/><span>{item.label}</span></a>)}
       </nav>
     </>
   );
