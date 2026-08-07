@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { createCategory, createSector, updateCategory, updateSector } from './actions';
+import { createCategory, createSector, deleteCategory, deleteSector, updateCategory, updateSector } from './actions';
 
 export const dynamic = 'force-dynamic';
 
@@ -48,13 +48,13 @@ export default async function TaxonomyPage({ searchParams }: { searchParams: Sea
           <div>
             <span className="eyebrow">Taxonomy Engine</span>
             <h1>إدارة القطاعات والأقسام</h1>
-            <p>إنشاء وتعديل وترتيب وتعطيل البنية التحريرية وإدارة SEO والجمهور والظهور دون تعديل الكود.</p>
+            <p>إنشاء وتعديل وترتيب وتعطيل وحذف البنية التحريرية بأمان، مع دعم تسلسل هرمي عميق للقطاعات الكبيرة مثل ذوي الاحتياجات الخاصة والدمج.</p>
           </div>
           <Link className="button" href="/admin">العودة للوحة الإدارة</Link>
         </div>
 
-        {params.ok && <p className="system-message success">تم حفظ التعديل بنجاح.</p>}
-        {params.error && <p className="system-message error">تعذر حفظ التعديل. تحقق من القيم وعدم تكرار الـ slug.</p>}
+        {params.ok && <p className="system-message success">تم تنفيذ العملية بنجاح.</p>}
+        {params.error && <p className="system-message error">تعذر تنفيذ العملية. الحذف النهائي مسموح فقط للعناصر الفارغة؛ ويمكن دائمًا تعطيل العنصر المستخدم بدل حذفه.</p>}
 
         <section className="taxonomy-section" aria-labelledby="new-sector-title">
           <div className="section-mini-heading"><h2 id="new-sector-title">إضافة قطاع</h2><span>{sectorRows.length} قطاع حالي</span></div>
@@ -71,7 +71,7 @@ export default async function TaxonomyPage({ searchParams }: { searchParams: Sea
         </section>
 
         <section className="taxonomy-section" aria-labelledby="sectors-title">
-          <div className="section-mini-heading"><h2 id="sectors-title">القطاعات الحالية</h2><span>تعديل مباشر</span></div>
+          <div className="section-mini-heading"><h2 id="sectors-title">القطاعات الحالية</h2><span>تعديل وتعطيل وحذف آمن</span></div>
           <div className="taxonomy-list">
             {sectorRows.map((sector) => (
               <form action={updateSector} className="taxonomy-row" key={sector.id}>
@@ -83,7 +83,7 @@ export default async function TaxonomyPage({ searchParams }: { searchParams: Sea
                 <label className="wide-field">الوصف<textarea name="description" rows={2} defaultValue={sector.description ?? ''} /></label>
                 <AdvancedFields item={sector} />
                 <label className="check-field"><input name="is_active" type="checkbox" defaultChecked={sector.is_active} /> نشط</label>
-                <button className="secondary-action" type="submit">حفظ</button>
+                <div className="taxonomy-row-actions"><button className="secondary-action" type="submit">حفظ</button><button className="danger-action" type="submit" formAction={deleteSector}>حذف نهائي إذا كان فارغًا</button></div>
               </form>
             ))}
             {!sectorRows.length && <p className="empty-state">لا توجد قطاعات بعد.</p>}
@@ -106,7 +106,7 @@ export default async function TaxonomyPage({ searchParams }: { searchParams: Sea
         </section>
 
         <section className="taxonomy-section" aria-labelledby="categories-title">
-          <div className="section-mini-heading"><h2 id="categories-title">الأقسام الحالية</h2><span>Hierarchical</span></div>
+          <div className="section-mini-heading"><h2 id="categories-title">الأقسام الحالية</h2><span>Hierarchical · محمية من الدورات</span></div>
           <div className="taxonomy-list">
             {categoryRows.map((category) => (
               <form action={updateCategory} className="taxonomy-row category-row" key={category.id}>
@@ -120,7 +120,7 @@ export default async function TaxonomyPage({ searchParams }: { searchParams: Sea
                 <AdvancedFields item={category} />
                 <div className="taxonomy-meta">الأب الحالي: {category.parent_id ? categoryName.get(category.parent_id) ?? 'غير معروف' : '—'}</div>
                 <label className="check-field"><input name="is_active" type="checkbox" defaultChecked={category.is_active} /> نشط</label>
-                <button className="secondary-action" type="submit">حفظ</button>
+                <div className="taxonomy-row-actions"><button className="secondary-action" type="submit">حفظ</button><button className="danger-action" type="submit" formAction={deleteCategory}>حذف نهائي إذا كان فارغًا</button></div>
               </form>
             ))}
             {!categoryRows.length && <p className="empty-state">لا توجد أقسام بعد.</p>}
