@@ -43,4 +43,13 @@ requireText('supabase/migrations/20260807173000_messaging_core_hardening.sql',['
 requireText('supabase/migrations/20260807174000_appointments_core_hardening.sql',['request_appointment','provider_update_appointment','requester_cancel_appointment']);
 requireText('supabase/migrations/20260807175000_admin_audit_redirect_hardening.sql',['redirect loop detected','admin_audit_log','admin_upsert_redirect']);
 
-if(!process.exitCode)console.log('Rawafid architecture/privacy/PWA quality contract passed.');
+// Empty-theme contract: the UI must not smuggle demo taxonomy/content into a clean database.
+const home=read('app/page.tsx');
+if(home.includes('fallbackPillars')) fail('homepage must not contain fallback/demo sectors');
+for(const needle of ['sectors.length > 0','rawafid-empty','getPublicSectors']) if(!home.includes(needle)) fail(`homepage empty-theme behavior missing ${needle}`);
+requireText('app/theme-preview/page.tsx',['index: false','follow: false','Design System V3']);
+requireText('app/layout.tsx',["'./theme-empty.css'","'./dashboard-v3.css'","'./theme-preview.css'"]);
+requireText('.env.example',['NEXT_PUBLIC_SITE_URL=https://healthrenewal.org','NEXT_PUBLIC_ALLOW_INDEXING=false']);
+requireText('lib/seo.ts',["'https://healthrenewal.org'"]);
+
+if(!process.exitCode)console.log('Rawafid architecture/privacy/PWA/theme quality contract passed.');
