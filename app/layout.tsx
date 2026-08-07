@@ -53,14 +53,12 @@ export const viewport: Viewport = {
 const serviceWorkerBootstrap = `
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    var register = function () {
+    window.setTimeout(function () {
       navigator.serviceWorker.register('/sw.js').then(function (registration) {
         registration.update().catch(function () {});
         if (registration.waiting) registration.waiting.postMessage('SKIP_WAITING');
       }).catch(function () {});
-    };
-    if ('requestIdleCallback' in window) window.requestIdleCallback(register, { timeout: 2500 });
-    else window.setTimeout(register, 1200);
+    }, 8000);
   }, { once: true });
 }
 `;
