@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 const pillars = [
   { title: 'المعرفة', body: 'موسوعة وأدلة ومقارنات مبنية على بنية محتوى قابلة للتوسع.', accent: 'teal' },
   { title: 'الصحة النفسية', body: 'مسارات واضحة للفرد والأسرة والمعلم والمختص.', accent: 'lilac' },
@@ -10,14 +12,14 @@ export default function HomePage() {
   return (
     <main className="site-shell">
       <header className="topbar">
-        <a className="brand" href="/" aria-label="منصة روافد الرئيسية">
+        <Link className="brand" href="/" aria-label="منصة روافد الرئيسية">
           <span className="brand-mark">ر</span>
           <span><strong>روافد</strong><small>Rawafid</small></span>
-        </a>
+        </Link>
         <nav aria-label="التنقل الرئيسي">
           <a href="#discover">اكتشف</a><a href="#sectors">القطاعات</a><a href="#specialists">المختصون والمراكز</a><a href="#tools">الأدوات</a><a href="#knowledge">المعرفة</a>
         </nav>
-        <a className="button ghost" href="/login">تسجيل الدخول</a>
+        <Link className="button ghost" href="/login">تسجيل الدخول</Link>
       </header>
 
       <section className="hero" id="discover">
