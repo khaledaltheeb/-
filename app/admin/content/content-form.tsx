@@ -32,13 +32,14 @@ const TYPES = [
   ['directory_page', 'صفحة دليل'], ['news', 'خبر'], ['sector_page', 'صفحة قطاع'], ['landing_page', 'صفحة هبوط'],
 ];
 
-export default function ContentForm({ action, sectors, categories, record, submitLabel, allowedTypes }: {
+export default function ContentForm({ action, sectors, categories, record, submitLabel, allowedTypes, mediaLibraryHref='/admin/media' }: {
   action: (formData: FormData) => void | Promise<void>;
   sectors: Sector[];
   categories: Category[];
   record?: ContentRecord;
   submitLabel: string;
   allowedTypes?: string[];
+  mediaLibraryHref?: string;
 }) {
   const typeOptions = allowedTypes?.length ? TYPES.filter(([value]) => allowedTypes.includes(value)) : TYPES;
   const defaultType = record?.content_type && typeOptions.some(([value]) => value === record.content_type) ? record.content_type : typeOptions[0]?.[0] ?? 'article';
@@ -58,7 +59,7 @@ export default function ContentForm({ action, sectors, categories, record, submi
       <details className="cms-details" open>
         <summary>الصورة البارزة والإتاحة</summary>
         <div className="cms-grid cms-details-grid">
-          <label className="cms-wide">رابط الصورة البارزة<input name="featured_image_url" type="url" dir="ltr" maxLength={2000} defaultValue={record?.featured_image_url ?? ''} placeholder="https://..." /><small>استخدم صورة من <Link href="/admin/media">مكتبة الوسائط</Link> أو رابط HTTPS موثوقًا. يمكن تركه فارغًا.</small></label>
+          <label className="cms-wide">رابط الصورة البارزة<input name="featured_image_url" type="url" dir="ltr" maxLength={2000} defaultValue={record?.featured_image_url ?? ''} placeholder="https://..." /><small>استخدم صورة من <Link href={mediaLibraryHref}>مكتبة الوسائط</Link> أو رابط HTTPS موثوقًا. يمكن تركه فارغًا.</small></label>
           <label className="cms-wide">Alt Text للصورة<input name="featured_image_alt" maxLength={500} minLength={3} defaultValue={record?.featured_image_alt ?? ''} placeholder="صف الصورة بدقة لقارئات الشاشة ومحركات البحث" /><small>إلزامي فقط عند وجود صورة بارزة، ويُحفظ مع نفس نسخة المحتوى.</small></label>
         </div>
       </details>
