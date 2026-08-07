@@ -49,8 +49,8 @@ export default async function AdminPage() {
         <div className="admin-module-grid">
           <Link href="/admin/taxonomy"><strong>القطاعات والأقسام</strong><span>إنشاء، تعديل، ترتيب وتعطيل Taxonomy دون تعديل الكود.</span></Link>
           <Link href="/admin/content"><strong>إدارة المحتوى</strong><span>CMS بإصدارات، SEO، وسير مراجعة مؤسسي قبل النشر.</span></Link>
-          <Link href="/specialists"><strong>دليل المختصين</strong><span>معاينة الملفات الموثقة كما تظهر للعامة؛ لوحة التوثيق الإدارية هي الخطوة التالية.</span></Link>
-          <Link href="/centers"><strong>دليل المراكز</strong><span>معاينة المراكز الموثقة والفرق المرتبطة بها.</span></Link>
+          <Link href="/admin/specialists"><strong>توثيق المختصين</strong><span>مراجعة الملف المهني، الاعتماد، الرفض، التعليق والتفعيل مع Audit Log.</span></Link>
+          <Link href="/centers"><strong>دليل المراكز</strong><span>معاينة المراكز الموثقة والفرق المرتبطة بها؛ لوحة إدارة المراكز قيد الاستكمال.</span></Link>
           <div><strong>SEO والـRedirects</strong><span>Metadata وStructured Data موجودان؛ لوحة Redirects والإطلاق ما زالت قيد البناء.</span></div>
           <div><strong>Audit Log</strong><span>تتبّع العمليات الحساسة والتغييرات، مع واجهة إدارية قيد الاستكمال.</span></div>
         </div>
