@@ -35,6 +35,7 @@ for(const file of [
  'supabase/migrations/20260807175000_admin_audit_redirect_hardening.sql',
  'supabase/migrations/20260807176000_messaging_recent_window_fix.sql',
  'supabase/migrations/20260807177000_audit_redirect_least_privilege.sql',
+ 'supabase/migrations/20260807182000_structured_content_editor.sql',
 ]){
  if(!fs.existsSync(path.join(root,file)))fail(`missing migration ${file}`);
 }
@@ -42,6 +43,7 @@ for(const file of [
 requireText('supabase/migrations/20260807173000_messaging_core_hardening.sql',['start_conversation','send_message','set_user_block','report_conversation','revoke all on public.conversations']);
 requireText('supabase/migrations/20260807174000_appointments_core_hardening.sql',['request_appointment','provider_update_appointment','requester_cancel_appointment']);
 requireText('supabase/migrations/20260807175000_admin_audit_redirect_hardening.sql',['redirect loop detected','admin_audit_log','admin_upsert_redirect']);
+requireText('supabase/migrations/20260807182000_structured_content_editor.sql',['create_content_draft_v3','update_content_draft_v3','validate_content_body_v3']);
 
 // Empty-theme contract: the UI must not smuggle demo taxonomy/content into a clean database.
 const home=read('app/page.tsx');
@@ -53,7 +55,10 @@ requireText('app/loading.tsx',['system-loading-shell','aria-busy']);
 requireText('app/error.tsx',["'use client'",'إعادة المحاولة']);
 requireText('components/content-renderer.tsx',["type === 'heading'","type === 'list'","type === 'table'","type === 'callout'","type === 'resource'"]);
 requireText('app/content/[slug]/page.tsx',['body_json','ContentRenderer']);
-requireText('app/layout.tsx',["'./theme-empty.css'","'./dashboard-v3.css'","'./theme-preview.css'","'./public-modules-v3.css'","'./system-states.css'","'./content-v3.css'","'./structured-content.css'"]);
+requireText('app/admin/content/block-editor.tsx',['body_json','body_text','إضافة وحدة','table','callout']);
+requireText('app/admin/content/content-form.tsx',['BlockEditor','bodyJson={record?.body_json}']);
+requireText('app/admin/content/actions.ts',['sanitizeBody','create_content_draft_v3','update_content_draft_v3']);
+requireText('app/layout.tsx',["'./theme-empty.css'","'./dashboard-v3.css'","'./theme-preview.css'","'./public-modules-v3.css'","'./system-states.css'","'./content-v3.css'","'./structured-content.css'","'./block-editor-v3.css'"]);
 requireText('.env.example',['NEXT_PUBLIC_SITE_URL=https://healthrenewal.org','NEXT_PUBLIC_ALLOW_INDEXING=false']);
 requireText('lib/seo.ts',["'https://healthrenewal.org'"]);
 
