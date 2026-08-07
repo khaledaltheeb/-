@@ -139,6 +139,7 @@ export default async function SpecialistDashboard({ searchParams }: { searchPara
           <div className="section-mini-heading"><h2>مساحة العمل</h2><span>الوحدات التالية مرتبطة بنفس حساب المختص</span></div>
           <div className="admin-module-grid">
             <Link href="/specialist/content"><strong>مقالاتي ومحتواي</strong><span>إنشاء المسودات وتعديلها ومتابعة مسار المراجعة.</span></Link>
+            <Link href="/specialist/media"><strong>مكتبتي الإعلامية</strong><span>رفع الصور وإدارة Alt Text واستخدامها في المقالات والأدلة.</span></Link>
             <Link href="/messages"><strong>المحادثات</strong><span>استقبال الرسائل والرد عليها داخل روافد.</span></Link>
             <Link href="/appointments"><strong>المواعيد</strong><span>طلبات المواعيد والتأكيد والإلغاء والحالات.</span></Link>
             <Link href="/notifications"><strong>الإشعارات</strong><span>التحديثات والتنبيهات المرتبطة بالحساب.</span></Link>
