@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
+import ContentRenderer from '@/components/content-renderer';
 import { createClient } from '@/lib/supabase/server';
 import { buildSeoMetadata, breadcrumbJsonLd, SITE_URL } from '@/lib/seo';
 
@@ -16,7 +17,7 @@ async function getPublished(slug: string) {
   const supabase = await createClient();
   const { data } = await supabase
     .from('content')
-    .select('id,slug,title,excerpt,body_text,content_type,audience,seo_title,seo_description,canonical_url,robots_index,robots_follow,published_at,updated_at,featured_image_url,featured_image_alt,primary_keyword,secondary_keywords,semantic_terms,search_intent,author_display_name,reviewer_display_name,reviewer_credentials,last_reviewed_at,references_json,medical_disclaimer,sector_id,category_id,sectors(slug,name_ar),categories(slug,name_ar)')
+    .select('id,slug,title,excerpt,body_json,body_text,content_type,audience,seo_title,seo_description,canonical_url,robots_index,robots_follow,published_at,updated_at,featured_image_url,featured_image_alt,primary_keyword,secondary_keywords,semantic_terms,search_intent,author_display_name,reviewer_display_name,reviewer_credentials,last_reviewed_at,references_json,medical_disclaimer,sector_id,category_id,sectors(slug,name_ar),categories(slug,name_ar)')
     .eq('slug', slug).eq('status', 'published').lte('published_at', new Date().toISOString()).maybeSingle();
   return data;
 }
@@ -59,7 +60,6 @@ export default async function PublishedContentPage({ params }: { params: Params 
   const related = (Array.isArray(relatedData) ? relatedData : []) as RelatedItem[];
   const sector = Array.isArray(record.sectors) ? record.sectors[0] : record.sectors;
   const category = Array.isArray(record.categories) ? record.categories[0] : record.categories;
-  const paragraphs = String(record.body_text ?? '').split(/\n{2,}/).map((p) => p.trim()).filter(Boolean);
   const audiences = Array.isArray(record.audience) ? record.audience.map((item: unknown) => String(item)) : [];
   const references = safeReferences(record.references_json);
   const canonical = record.canonical_url || `/content/${record.slug}`;
@@ -99,8 +99,7 @@ export default async function PublishedContentPage({ params }: { params: Params 
 
           <div className="article-body">
             {record.featured_image_url && <figure className="article-featured-image"><Image src={record.featured_image_url} alt={record.featured_image_alt || record.title} width={1200} height={675} sizes="(max-width: 900px) 100vw, 900px" priority unoptimized /><figcaption className="sr-only">{record.featured_image_alt || record.title}</figcaption></figure>}
-            {paragraphs.map((paragraph, index) => <p key={`${record.id}-${index}`}>{paragraph}</p>)}
-            {!paragraphs.length && <p>لا يتوفر نص منشور لهذه الصفحة.</p>}
+            <ContentRenderer bodyJson={record.body_json} bodyText={record.body_text} recordId={record.id} />
           </div>
 
           {record.medical_disclaimer && <aside className="medical-disclaimer" aria-label="إخلاء المسؤولية الطبية"><strong>تنبيه طبي</strong><p>{record.medical_disclaimer}</p><Link href="/disclaimer">إخلاء المسؤولية الكامل</Link></aside>}
