@@ -1,25 +1,29 @@
 # MIG-000004 — الذاكرة
 
 - Lane: C0 — الموسوعة والمصطلحات العامة
-- Status: DRAFT BUILT — FINAL WORKFLOW / POST-PUBLISH QA PENDING
+- Status: **COMPLETE — PUBLISHED / POST-PUBLISH QA PASS**
 - Canonical key: `memory`
 - New canonical: `/content/memory`
 - Content type: `glossary_term`
 - Supabase content id: `56ca6aae-21e6-409f-ae82-92b0fe55718b`
-- Database status: `draft`
+- Final version: **v8**
+- Database status: **published**
 - Sector/category: `knowledge` / `cognitive-processes`
 
 ## Canonical decision
 
-هذه الصفحة للمفهوم العام «الذاكرة». تبقى `/content/working-memory` Canonical مستقلة للذاكرة العاملة. كما تبقى أدوات associative binding، change detection، working-memory updating وغيرها أدوات مستقلة، وتبقى اضطرابات الذاكرة/فقد الذاكرة كيانات سريرية مستقلة.
+هذه الصفحة هي Canonical للمفهوم العام «الذاكرة». تبقى `/content/working-memory` Canonical مستقلة للذاكرة العاملة. أدوات associative binding وchange detection وworking-memory updating وغيرها تبقى أدوات، واضطرابات الذاكرة/فقد الذاكرة تبقى كيانات سريرية مستقلة.
 
 ## Legacy material inspected
 
-- `scripts/scale_site_v8.py` — الذاكرة كموضوع مولد متعدد Facets.
-- `terms/index.html` — المعجم العام القديم.
-- `cognitive-lab/index.html` و`upgrade_cognitive_batch1_v22.py` و`upgrade_cognitive_batch2_v22.py` — أدوات معرفية منفصلة.
-- `publish_associative_binding_v207.py`, `publish_visual_change_detection_v210.py`, `publish_working_memory_updating_v205.py` — مهام مستقلة لا تُدمج في الصفحة العامة.
+- `scripts/scale_site_v8.py`
+- `terms/index.html`
+- `cognitive-lab/index.html`
+- `upgrade_cognitive_batch1_v22.py`, `upgrade_cognitive_batch2_v22.py`
+- `publish_associative_binding_v207.py`, `publish_visual_change_detection_v210.py`, `publish_working_memory_updating_v205.py`
 - طبقات الإثراء والموسوعة التاريخية.
+
+تم استبعاد كود التوليد والقوالب العامة والملاحظات الداخلية والتحذيرات المتكررة، وعدم دمج الأدوات أو الذاكرة العاملة داخل الصفحة العامة.
 
 ## Authoritative sources
 
@@ -43,8 +47,8 @@
 - Lists: **1**
 - References: **8**, all HTTPS
 - Tags: **6**
-- Categories: **1**
-- Duplicate candidates: **0**
+- Primary category relations: **1**
+- Duplicate canonical: **0**
 - TODO/FIXME/agent/private-plan text: **0**
 - banned term «معاقين»: **0**
 
@@ -58,12 +62,30 @@
 - Visible FAQ → FAQPage schema
 - `glossary_term` → DefinedTerm schema
 
+## Workflow / Audit
+
+Passed:
+`Draft → Scientific Review → Editorial Review → SEO → Accessibility → Approved → Scheduled → Published`
+
+No human reviewer was fabricated; audit identifies system-assisted migration QA with source verification.
+
+- Versions: **8**
+- Audit events: **8**
+- Published at: `2026-08-07T21:18:52Z`
+
+## Post-publish QA
+
+Search query `الذاكرة` returns `/content/memory` first with score 13. `/content/working-memory` appears second as a distinct highly related canonical, which is correct.
+
+- Duplicate canonical: **0**
+- Redirect collision with working-memory/tool: **0**
+- Search: **PASS**
+- Taxonomy/tags: **PASS**
+
 ## Redirect decision
 
-المولدات القديمة تثبت تعدد صفحات/Facets مرتبطة بالذاكرة لكنها لا تثبت وحدها URL منشورًا بعينه. لا يتم تخمين `concept-*` redirects. الأدوات والذاكرة العاملة ليست نسخًا مكررة.
+No `concept-*` redirect was guessed from old generator arithmetic. Distinct tools and `/content/working-memory` were not redirected to this page.
 
-## Remaining
+## Final result
 
-- Full workflow → Scheduled → Published.
-- Search/canonical/taxonomy post-publish QA.
-- Close Claim Issue #4 and update central ledger.
+**MIG-000004 is closed and canonicalized.**
