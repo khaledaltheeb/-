@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { setSpecialistStatus } from './actions';
+import { createSpecialist, setSpecialistStatus } from './actions';
 
 export const dynamic = 'force-dynamic';
 type SearchParams = Promise<{ status?: string; ok?: string; error?: string }>;
@@ -59,12 +59,40 @@ export default async function AdminSpecialistsPage({ searchParams }: { searchPar
     <main className="dashboard-shell specialist-admin-shell">
       <section className="dashboard-card specialist-admin-card">
         <div className="admin-heading">
-          <div><span className="eyebrow">Verification Control</span><h1>إدارة المختصين</h1><p>مراجعة البيانات المهنية وتغيير حالة التوثيق والتفعيل. كل تغيير يُسجل في Audit Log.</p></div>
+          <div><span className="eyebrow">Verification Control</span><h1>إدارة المختصين</h1><p>إضافة المختصين، مراجعة البيانات المهنية وتغيير حالة التوثيق والتفعيل. كل تغيير يُسجل في Audit Log.</p></div>
           <div className="dashboard-actions"><Link className="button" href="/admin">لوحة الإدارة</Link><Link className="button" href="/specialists">الدليل العام</Link></div>
         </div>
 
-        {params.ok && <p className="system-message success">تم تحديث حالة المختص وتسجيل العملية.</p>}
-        {(params.error || error) && <p className="system-message error">تعذر تحميل أو تحديث قائمة المختصين.</p>}
+        {params.ok === 'created' && <p className="system-message success">تمت إضافة المختص بحالة «قيد المراجعة».</p>}
+        {params.ok === 'updated' && <p className="system-message success">تم تحديث حالة المختص وتسجيل العملية.</p>}
+        {(params.error || error) && <p className="system-message error">تعذر تنفيذ العملية. تحقق من البيانات وعدم تكرار الرابط أو الحساب المرتبط.</p>}
+
+        <section className="portal-section admin-create-section">
+          <div className="section-mini-heading"><div><span className="eyebrow">Admin Create</span><h2>إضافة مختص من لوحة المدير</h2></div><span>يُنشأ الملف بحالة «قيد المراجعة» ولا يظهر للعامة حتى اعتماد التوثيق صراحةً.</span></div>
+          <form className="admin-form" action={createSpecialist}>
+            <div className="admin-form-grid">
+              <label>الاسم الكامل<input name="full_name" required minLength={3} maxLength={200} /></label>
+              <label>Slug بالإنجليزية<input name="slug" required maxLength={140} pattern="[a-z0-9]+(?:-[a-z0-9]+)*" dir="ltr" /></label>
+              <label>المسمى المهني<input name="professional_title" maxLength={220} /></label>
+              <label>حساب مرتبط - اختياري<input name="user_id" maxLength={60} dir="ltr" placeholder="UUID" /></label>
+              <label>رقم الترخيص<input name="license_number" maxLength={180} /></label>
+              <label>سنوات الخبرة<input name="years_experience" type="number" min={0} max={80} /></label>
+              <label>الدولة<input name="country" maxLength={120} /></label>
+              <label>المنطقة<input name="region" maxLength={120} /></label>
+              <label>المدينة<input name="city" maxLength={120} /></label>
+              <label>البريد<input name="email" type="email" maxLength={254} /></label>
+              <label>الهاتف<input name="phone" maxLength={60} /></label>
+              <label>الموقع الإلكتروني<input name="website_url" type="url" maxLength={500} dir="ltr" /></label>
+              <label className="wide-field">التخصصات<input name="specialties" maxLength={1800} placeholder="افصل بفاصلة" /></label>
+              <label className="wide-field">المؤهلات<input name="qualifications" maxLength={1800} placeholder="افصل بفاصلة" /></label>
+              <label className="wide-field">اللغات<input name="languages" maxLength={1800} placeholder="العربية، الإنجليزية" /></label>
+              <label className="wide-field">نبذة<textarea name="bio" maxLength={5000} rows={5} /></label>
+              <label className="check-field"><input type="checkbox" name="offers_in_person" defaultChecked /> يقدم خدمة حضورية</label>
+              <label className="check-field"><input type="checkbox" name="offers_remote" /> يقدم خدمة عن بُعد</label>
+            </div>
+            <button className="primary-action" type="submit">إضافة المختص للمراجعة</button>
+          </form>
+        </section>
 
         <nav className="verification-filters" aria-label="حالة التوثيق">
           <Link className={!requestedStatus ? 'active' : ''} href="/admin/specialists">الكل <span>{allRows.length}</span></Link>
@@ -75,7 +103,7 @@ export default async function AdminSpecialistsPage({ searchParams }: { searchPar
           {rows.map((specialist) => (
             <article className="verification-card" key={specialist.id}>
               <div className="verification-main">
-                <div className="verification-title"><div><span className={`status-badge status-${specialist.verification}`}>{STATUS_LABELS[specialist.verification] ?? specialist.verification}</span><h2>{specialist.full_name}</h2><p>{specialist.professional_title || 'لا يوجد مسمى مهني'}</p></div><Link href={`/specialists/${specialist.slug}`}>معاينة الملف العام</Link></div>
+                <div className="verification-title"><div><span className={`status-badge status-${specialist.verification}`}>{STATUS_LABELS[specialist.verification] ?? specialist.verification}</span><h2>{specialist.full_name}</h2><p>{specialist.professional_title || 'لا يوجد مسمى مهني'}</p></div>{specialist.verification === 'verified' && <Link href={`/specialists/${specialist.slug}`}>معاينة الملف العام</Link>}</div>
                 <div className="review-facts">
                   <span><strong>الموقع:</strong> {[specialist.city,specialist.region,specialist.country].filter(Boolean).join('، ') || '—'}</span>
                   <span><strong>الخبرة:</strong> {specialist.years_experience ?? '—'}</span>
@@ -84,7 +112,7 @@ export default async function AdminSpecialistsPage({ searchParams }: { searchPar
                 </div>
                 <div className="directory-tags">{(specialist.specialties ?? []).map((item) => <span key={item}>{item}</span>)}</div>
                 {specialist.bio && <p className="review-bio">{specialist.bio}</p>}
-                <details className="review-details"><summary>البيانات الكاملة للمراجعة</summary><div className="review-details-grid"><div><strong>البريد</strong><span>{specialist.email || '—'}</span></div><div><strong>الهاتف</strong><span>{specialist.phone || '—'}</span></div><div><strong>الموقع الإلكتروني</strong><span dir="ltr">{specialist.website_url || '—'}</span></div><div><strong>اللغات</strong><span>{(specialist.languages ?? []).join('، ') || '—'}</span></div><div className="review-wide"><strong>المؤهلات</strong><ul>{qualifications(specialist.qualifications).map((item) => <li key={item}>{item}</li>)}</ul></div></div></details>
+                <details className="review-details"><summary>البيانات الكاملة للمراجعة</summary><div className="review-details-grid"><div><strong>البريد</strong><span>{specialist.email || '—'}</span></div><div><strong>الهاتف</strong><span>{specialist.phone || '—'}</span></div><div><strong>الموقع الإلكتروني</strong><span dir="ltr">{specialist.website_url || '—'}</span></div><div><strong>اللغات</strong><span>{(specialist.languages ?? []).join('، ') || '—'}</span></div><div><strong>الحساب المرتبط</strong><span dir="ltr">{specialist.user_id || 'غير مرتبط'}</span></div><div className="review-wide"><strong>المؤهلات</strong><ul>{qualifications(specialist.qualifications).map((item) => <li key={item}>{item}</li>)}</ul></div></div></details>
               </div>
               <form action={setSpecialistStatus} className="verification-controls">
                 <input type="hidden" name="id" value={specialist.id} />
