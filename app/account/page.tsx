@@ -28,7 +28,7 @@ export default async function AccountPage({ searchParams }: { searchParams: Sear
           <div>
             <span className="eyebrow">حسابي</span>
             <h1>{profile.display_name || 'حساب روافد'}</h1>
-            <p>إعدادات الحساب الأساسية. لا يمكن تغيير الدور أو التفعيل من هذه الشاشة.</p>
+            <p>مركز الحساب والخدمات المرتبطة به. لا يمكن تغيير الدور أو التفعيل من هذه الشاشة.</p>
           </div>
           <form action="/auth/signout" method="post"><button className="button" type="submit">تسجيل الخروج</button></form>
         </div>
@@ -58,7 +58,10 @@ export default async function AccountPage({ searchParams }: { searchParams: Sear
           <div className="account-links">
             {(profile.role === 'owner' || profile.role === 'admin') && <Link href="/admin"><strong>لوحة الإدارة</strong><span>المحتوى، القطاعات، المختصون، المراكز والصلاحيات.</span></Link>}
             {profile.role === 'specialist' && <Link href="/specialist"><strong>بوابة المختص</strong><span>الملف المهني، التوثيق، المحتوى، الرسائل والمواعيد.</span></Link>}
-            {profile.role === 'center_manager' && <Link href="/center"><strong>بوابة المركز</strong><span>بيانات المركز والفريق والخدمات والظهور العام.</span></Link>}
+            {profile.role === 'center_manager' && <Link href="/center"><strong>بوابة المركز</strong><span>بيانات المركز والفروع والخدمات والتواصل والظهور العام.</span></Link>}
+            <Link href="/messages"><strong>الرسائل</strong><span>المحادثات الخاصة داخل منصة روافد.</span></Link>
+            <Link href="/appointments"><strong>المواعيد</strong><span>طلبات المواعيد وحالاتها المرتبطة بحسابك.</span></Link>
+            <Link href="/notifications"><strong>الإشعارات</strong><span>تنبيهات الحساب والمراجعات والتواصل.</span></Link>
             <Link href="/search"><strong>البحث</strong><span>البحث في المحتوى والقطاعات والمختصين والمراكز.</span></Link>
           </div>
         </section>
