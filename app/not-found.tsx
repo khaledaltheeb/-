@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import PlatformIcon from '@/components/platform-icon';
@@ -12,7 +13,7 @@ export default function NotFound() {
           <span className="system-code">404</span>
           <h1>الصفحة غير موجودة</h1>
           <p>قد يكون الرابط قد تغيّر أو لم يعد متاحًا. استخدم البحث أو ارجع إلى الصفحة الرئيسية.</p>
-          <div className="rawafid-directory-actions"><a className="primary-link" href="/">العودة للرئيسية</a><a className="button" href="/search">البحث في روافد</a></div>
+          <div className="rawafid-directory-actions"><Link className="primary-link" href="/">العودة للرئيسية</Link><Link className="button" href="/search">البحث في روافد</Link></div>
         </div>
       </section>
     </main>
