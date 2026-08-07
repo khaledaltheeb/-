@@ -15,7 +15,6 @@ import './theme-v3.css';
 import './public-enhancements.css';
 import './communication.css';
 import './mobile-nav-v3.css';
-import MobileNav from './mobile-nav';
 import PwaRegister from './pwa-register';
 
 const arabicFont = Noto_Sans_Arabic({
@@ -59,7 +58,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema).replace(/</g, '\\u003c') }} />
         {children}
-        <MobileNav />
         <PwaRegister />
       </body>
     </html>
