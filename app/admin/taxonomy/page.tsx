@@ -7,6 +7,21 @@ export const dynamic = 'force-dynamic';
 
 type SearchParams = Promise<{ ok?: string; error?: string }>;
 
+function AdvancedFields({ item }: { item?: { seo_title?: string | null; seo_description?: string | null; visibility?: string | null; audience?: string[] | null; icon_key?: string | null } }) {
+  return (
+    <details className="advanced-fields wide-field">
+      <summary>SEO والظهور والجمهور</summary>
+      <div className="advanced-fields-grid">
+        <label>SEO Title<input name="seo_title" maxLength={180} defaultValue={item?.seo_title ?? ''} /></label>
+        <label>Icon key<input name="icon_key" maxLength={80} dir="ltr" defaultValue={item?.icon_key ?? ''} placeholder="brain" /></label>
+        <label>الظهور<select name="visibility" defaultValue={item?.visibility ?? 'public'}><option value="public">عام</option><option value="authenticated">للمسجلين</option><option value="hidden">مخفي</option></select></label>
+        <label>الجمهور<input name="audience" defaultValue={(item?.audience ?? []).join(', ')} placeholder="الفرد، الأسرة، المختص" /></label>
+        <label className="wide-field">SEO Description<textarea name="seo_description" rows={2} maxLength={500} defaultValue={item?.seo_description ?? ''} /></label>
+      </div>
+    </details>
+  );
+}
+
 export default async function TaxonomyPage({ searchParams }: { searchParams: SearchParams }) {
   const supabase = await createClient();
   const { data: claimsData } = await supabase.auth.getClaims();
@@ -17,8 +32,8 @@ export default async function TaxonomyPage({ searchParams }: { searchParams: Sea
   if (!profile?.is_active || !['owner', 'admin'].includes(profile.role)) redirect('/account');
 
   const [{ data: sectors }, { data: categories }] = await Promise.all([
-    supabase.from('sectors').select('id,slug,name_ar,description,accent,sort_order,is_active').order('sort_order').order('name_ar'),
-    supabase.from('categories').select('id,sector_id,parent_id,slug,name_ar,description,sort_order,is_active').order('sort_order').order('name_ar'),
+    supabase.from('sectors').select('id,slug,name_ar,description,accent,sort_order,is_active,seo_title,seo_description,visibility,audience,icon_key').order('sort_order').order('name_ar'),
+    supabase.from('categories').select('id,sector_id,parent_id,slug,name_ar,description,sort_order,is_active,seo_title,seo_description,visibility,audience,icon_key').order('sort_order').order('name_ar'),
   ]);
 
   const params = await searchParams;
@@ -33,7 +48,7 @@ export default async function TaxonomyPage({ searchParams }: { searchParams: Sea
           <div>
             <span className="eyebrow">Taxonomy Engine</span>
             <h1>إدارة القطاعات والأقسام</h1>
-            <p>إنشاء وتعديل وترتيب وتعطيل البنية التحريرية دون تعديل الكود.</p>
+            <p>إنشاء وتعديل وترتيب وتعطيل البنية التحريرية وإدارة SEO والجمهور والظهور دون تعديل الكود.</p>
           </div>
           <Link className="button" href="/admin">العودة للوحة الإدارة</Link>
         </div>
@@ -49,6 +64,7 @@ export default async function TaxonomyPage({ searchParams }: { searchParams: Sea
             <label>لون Accent<input name="accent" type="color" defaultValue="#0f8f88" /></label>
             <label>الترتيب<input name="sort_order" type="number" defaultValue="0" min="-9999" max="9999" /></label>
             <label className="wide-field">الوصف<textarea name="description" rows={3} maxLength={1200} /></label>
+            <AdvancedFields />
             <label className="check-field"><input name="is_active" type="checkbox" defaultChecked /> نشط</label>
             <button className="primary-action" type="submit">إضافة القطاع</button>
           </form>
@@ -65,6 +81,7 @@ export default async function TaxonomyPage({ searchParams }: { searchParams: Sea
                 <label>اللون<input name="accent" type="color" defaultValue={sector.accent && /^#[0-9a-f]{6}$/i.test(sector.accent) ? sector.accent : '#0f8f88'} /></label>
                 <label>الترتيب<input name="sort_order" type="number" defaultValue={sector.sort_order} min="-9999" max="9999" /></label>
                 <label className="wide-field">الوصف<textarea name="description" rows={2} defaultValue={sector.description ?? ''} /></label>
+                <AdvancedFields item={sector} />
                 <label className="check-field"><input name="is_active" type="checkbox" defaultChecked={sector.is_active} /> نشط</label>
                 <button className="secondary-action" type="submit">حفظ</button>
               </form>
@@ -82,6 +99,7 @@ export default async function TaxonomyPage({ searchParams }: { searchParams: Sea
             <label>Slug<input name="slug" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" placeholder="anxiety" dir="ltr" /></label>
             <label>الترتيب<input name="sort_order" type="number" defaultValue="0" min="-9999" max="9999" /></label>
             <label className="wide-field">الوصف<textarea name="description" rows={3} maxLength={1200} /></label>
+            <AdvancedFields />
             <label className="check-field"><input name="is_active" type="checkbox" defaultChecked /> نشط</label>
             <button className="primary-action" type="submit">إضافة القسم</button>
           </form>
@@ -99,6 +117,7 @@ export default async function TaxonomyPage({ searchParams }: { searchParams: Sea
                 <label>Slug<input name="slug" defaultValue={category.slug} dir="ltr" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" /></label>
                 <label>الترتيب<input name="sort_order" type="number" defaultValue={category.sort_order} min="-9999" max="9999" /></label>
                 <label className="wide-field">الوصف<textarea name="description" rows={2} defaultValue={category.description ?? ''} /></label>
+                <AdvancedFields item={category} />
                 <div className="taxonomy-meta">الأب الحالي: {category.parent_id ? categoryName.get(category.parent_id) ?? 'غير معروف' : '—'}</div>
                 <label className="check-field"><input name="is_active" type="checkbox" defaultChecked={category.is_active} /> نشط</label>
                 <button className="secondary-action" type="submit">حفظ</button>
