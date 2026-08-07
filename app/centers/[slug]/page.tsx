@@ -16,6 +16,7 @@ type Center = {
   public_email: string | null; public_phone: string | null; public_latitude: number | null; public_longitude: number | null;
   working_hours: unknown; parent_center_id: string | null; verified_at: string | null;
 };
+type CenterLicense = { license_number: string | null; regulatory_authority: string | null; license_expiry_date: string | null };
 type Specialist = { id: string; slug: string; full_name: string; professional_title: string | null; specialties: string[] };
 
 async function getCenter(slug: string): Promise<Center | null> {
@@ -24,11 +25,7 @@ async function getCenter(slug: string): Promise<Center | null> {
   if (error || !Array.isArray(data) || !data[0]) return null;
   return data[0] as Center;
 }
-
-function safeWebsite(value: string | null) {
-  if (!value) return null;
-  try { const url = new URL(value); return ['http:', 'https:'].includes(url.protocol) ? url.toString() : null; } catch { return null; }
-}
+function safeWebsite(value: string | null) { if (!value) return null; try { const url = new URL(value); return ['http:', 'https:'].includes(url.protocol) ? url.toString() : null; } catch { return null; } }
 function safeEmail(value: string | null) { return value && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? value : null; }
 function safePhone(value: string | null) { if (!value) return null; const cleaned = value.replace(/[^+0-9]/g, ''); return cleaned.length >= 7 && cleaned.length <= 18 ? cleaned : null; }
 function hoursRows(value: unknown): string[] { if (!value || typeof value !== 'object' || Array.isArray(value)) return []; return Object.entries(value as Record<string, unknown>).slice(0, 14).map(([day, hours]) => `${day}: ${typeof hours === 'string' ? hours : JSON.stringify(hours)}`.slice(0, 180)); }
@@ -41,9 +38,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   return buildSeoMetadata({
     title: center.name,
     description: center.description || `${center.name} — مركز موثق في دليل منصة روافد مع بيانات الموقع والخدمات وطرق التواصل التي يسمح المركز بعرضها للعامة.`,
-    path: `/centers/${center.slug}`,
-    index: true,
-    image: center.cover_url || center.logo_url,
+    path: `/centers/${center.slug}`, index: true, image: center.cover_url || center.logo_url,
     keywords: [center.name, ...(center.services ?? []).slice(0, 8), center.city, center.country].filter(Boolean) as string[],
   });
 }
@@ -53,8 +48,11 @@ export default async function CenterProfile({ params }: { params: Params }) {
   const center = await getCenter(slug);
   if (!center) notFound();
   const supabase = await createClient();
-
-  const { data: memberships } = await supabase.from('center_specialists').select('specialist_id,is_primary').eq('center_id', center.id);
+  const [{ data: memberships }, { data: licenseRows }] = await Promise.all([
+    supabase.from('center_specialists').select('specialist_id,is_primary').eq('center_id', center.id),
+    supabase.rpc('get_public_center_license', { p_center_id: center.id }),
+  ]);
+  const license = Array.isArray(licenseRows) && licenseRows[0] ? licenseRows[0] as CenterLicense : null;
   const specialistIds = (memberships ?? []).map((item) => item.specialist_id);
   let specialists: Specialist[] = [];
   if (specialistIds.length) {
@@ -76,9 +74,10 @@ export default async function CenterProfile({ params }: { params: Params }) {
     address: location ? { '@type': 'PostalAddress', streetAddress: center.address || undefined, addressLocality: center.city || undefined, addressRegion: center.region || undefined, addressCountry: center.country || undefined } : undefined,
     telephone: phone || undefined, email: email || undefined, sameAs: website ? [website] : undefined,
     geo: center.public_latitude !== null && center.public_longitude !== null ? { '@type':'GeoCoordinates', latitude:center.public_latitude, longitude:center.public_longitude } : undefined,
-    hasMap: mapUrl || undefined,
-    knowsLanguage: center.languages?.length ? center.languages : undefined,
+    hasMap: mapUrl || undefined, knowsLanguage: center.languages?.length ? center.languages : undefined,
     medicalSpecialty: center.services?.length ? center.services : undefined,
+    identifier: license?.license_number || undefined,
+    additionalProperty: license?.regulatory_authority ? [{ '@type':'PropertyValue', name:'Regulatory authority', value:license.regulatory_authority }] : undefined,
   };
 
   return (
@@ -92,6 +91,7 @@ export default async function CenterProfile({ params }: { params: Params }) {
           <article className="profile-main">
             {center.description && <section><h2>عن المركز</h2><p className="profile-bio">{center.description}</p></section>}
             <section><h2>الخدمات ونمط التقديم</h2><div className="community-facts"><div><strong>نمط الخدمة</strong><span>{[center.offers_in_person ? 'حضوري' : '',center.offers_remote ? 'عن بُعد' : ''].filter(Boolean).join('، ') || 'غير محدد'}</span></div><div><strong>اللغات</strong><span>{(center.languages ?? []).join('، ') || 'غير محددة'}</span></div></div></section>
+            {license && (license.license_number || license.regulatory_authority || license.license_expiry_date) && <section><h2>الترخيص والجهة التنظيمية</h2><div className="license-card"><strong>بيانات الترخيص الموثقة</strong>{license.license_number && <span>رقم الترخيص/التسجيل: <bdi dir="ltr">{license.license_number}</bdi></span>}{license.regulatory_authority && <span>الجهة التنظيمية: {license.regulatory_authority}</span>}{license.license_expiry_date && <span>تاريخ الانتهاء: {new Intl.DateTimeFormat('ar',{dateStyle:'medium'}).format(new Date(`${license.license_expiry_date}T00:00:00Z`))}</span>}<small>يُنصح بالتحقق من حالة الترخيص لدى الجهة التنظيمية المختصة عند اتخاذ قرار خدمة.</small></div></section>}
             {specialists.length > 0 && <section><h2>الفريق المهني</h2><div className="linked-specialists">{specialists.map((specialist) => <Link href={`/specialists/${specialist.slug}`} key={specialist.id}><strong>{specialist.full_name}</strong><span>{specialist.professional_title || (specialist.specialties ?? []).slice(0, 2).join('، ')}</span></Link>)}</div></section>}
             {hours.length > 0 && <section><h2>ساعات العمل</h2><div className="hours-list">{hours.map((row) => <span key={row}>{row}</span>)}</div></section>}
           </article>
