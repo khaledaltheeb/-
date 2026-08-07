@@ -1,5 +1,3 @@
-import Link from 'next/link';
-
 const groups = [
   {
     title: 'روافد',
@@ -36,7 +34,7 @@ export default function SiteFooter() {
     <footer className="site-footer">
       <div className="site-footer-inner">
         <div className="footer-brand-block">
-          <Link className="brand footer-brand" href="/"><span className="brand-mark" aria-hidden="true">ر</span><span className="brand-copy"><strong>منصة روافد</strong><small>Rawafid Platform</small></span></Link>
+          <a className="brand footer-brand" href="/"><span className="brand-mark" aria-hidden="true">ر</span><span className="brand-copy"><strong>منصة روافد</strong><small>Rawafid Platform</small></span></a>
           <p>منصة عربية مؤسسية للمعرفة والخدمات في الصحة النفسية والتعافي والدمج والتمكين، مبنية على الثقة، الوصول الآمن، والمراجعة المنهجية.</p>
           <span className="footer-trust-note">المحتوى التثقيفي لا يحل محل التقييم أو التشخيص أو العلاج المهني الفردي.</span>
         </div>
@@ -44,7 +42,7 @@ export default function SiteFooter() {
           {groups.map((group) => (
             <section key={group.title} aria-labelledby={`footer-${group.title}`}>
               <h2 id={`footer-${group.title}`}>{group.title}</h2>
-              <div>{group.links.map((link) => <Link key={link.href} href={link.href}>{link.label}</Link>)}</div>
+              <div>{group.links.map((link) => <a key={link.href} href={link.href}>{link.label}</a>)}</div>
             </section>
           ))}
         </div>
