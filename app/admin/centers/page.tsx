@@ -1,0 +1,27 @@
+import Link from 'next/link';
+import { redirect } from 'next/navigation';
+import { createClient } from '@/lib/supabase/server';
+import { setCenterStatus } from './actions';
+
+export const dynamic='force-dynamic';
+type SearchParams=Promise<{status?:string;ok?:string;error?:string}>;
+type CenterRow={id:string;manager_user_id:string|null;slug:string;name:string;description:string|null;email:string|null;phone:string|null;website_url:string|null;country:string|null;region:string|null;city:string|null;address:string|null;latitude:number|null;longitude:number|null;working_hours:unknown;verification:string;verified_at:string|null;is_active:boolean;parent_center_id:string|null;center_type:string;services:string[];languages:string[];offers_remote:boolean;offers_in_person:boolean;updated_at:string};
+const STATUS:Record<string,string>={unverified:'غير موثق',pending:'قيد المراجعة',verified:'موثق',rejected:'يحتاج تصحيحًا',suspended:'موقوف'};
+const TYPE_LABELS:Record<string,string>={center:'مركز',clinic:'عيادة',hospital:'مستشفى',rehabilitation_center:'مركز تأهيل',association:'جمعية',school:'مدرسة/مؤسسة تعليمية',other:'أخرى'};
+
+export default async function AdminCentersPage({searchParams}:{searchParams:SearchParams}){
+ const supabase=await createClient();const {data:claims}=await supabase.auth.getClaims();const uid=claims?.claims?.sub;if(!uid)redirect('/login');
+ const {data:profile}=await supabase.from('profiles').select('role,is_active').eq('id',uid).single();if(!profile?.is_active||!['owner','admin'].includes(profile.role))redirect('/account');
+ const params=await searchParams,requested=String(params.status??'');const {data,error}=await supabase.rpc('admin_center_queue',{p_limit:500});const all:CenterRow[]=Array.isArray(data)?data as CenterRow[]:[];const rows=STATUS[requested]?all.filter(c=>c.verification===requested):all;
+ const counts=new Map<string,number>();for(const c of all)counts.set(c.verification,(counts.get(c.verification)??0)+1);
+ return <main className="dashboard-shell specialist-admin-shell"><section className="dashboard-card specialist-admin-card">
+  <div className="admin-heading"><div><span className="eyebrow">Center Verification</span><h1>إدارة المراكز</h1><p>مراجعة المركز والفروع والخدمات والعنوان وقرار التوثيق والتفعيل. كل تغيير يُسجل في Audit Log.</p></div><div className="dashboard-actions"><Link className="button" href="/admin">لوحة الإدارة</Link><Link className="button" href="/centers">الدليل العام</Link></div></div>
+  {params.ok&&<p className="system-message success">تم تحديث حالة المركز وتسجيل العملية.</p>}{(params.error||error)&&<p className="system-message error">تعذر تحميل أو تحديث المراكز.</p>}
+  <nav className="verification-filters" aria-label="حالة توثيق المركز"><Link className={!requested?'active':''} href="/admin/centers">الكل <span>{all.length}</span></Link>{Object.entries(STATUS).map(([k,l])=><Link className={requested===k?'active':''} href={`/admin/centers?status=${k}`} key={k}>{l}<span>{counts.get(k)??0}</span></Link>)}</nav>
+  <div className="verification-list">{rows.map(center=><article className="verification-card" key={center.id}><div className="verification-main"><div className="verification-title"><div><span className={`status-badge status-${center.verification}`}>{STATUS[center.verification]??center.verification}</span><h2>{center.name}</h2><p>{TYPE_LABELS[center.center_type]??center.center_type}{center.parent_center_id?' — فرع':''}</p></div><Link href={`/centers/${center.slug}`}>معاينة الملف العام</Link></div>
+   <div className="review-facts"><span><strong>الموقع:</strong> {[center.address,center.city,center.region,center.country].filter(Boolean).join('، ')||'—'}</span><span><strong>الخدمات:</strong> {(center.services??[]).length}</span><span><strong>عن بُعد:</strong> {center.offers_remote?'نعم':'لا'}</span><span><strong>آخر تعديل:</strong> {new Intl.DateTimeFormat('ar',{dateStyle:'medium',timeStyle:'short'}).format(new Date(center.updated_at))}</span></div>
+   <div className="directory-tags">{(center.services??[]).slice(0,12).map(s=><span key={s}>{s}</span>)}</div>{center.description&&<p className="review-bio">{center.description}</p>}
+   <details className="review-details"><summary>بيانات المراجعة الكاملة</summary><div className="review-details-grid"><div><strong>البريد</strong><span>{center.email||'—'}</span></div><div><strong>الهاتف</strong><span>{center.phone||'—'}</span></div><div><strong>الموقع الإلكتروني</strong><span dir="ltr">{center.website_url||'—'}</span></div><div><strong>اللغات</strong><span>{(center.languages??[]).join('، ')||'—'}</span></div><div><strong>Manager ID</strong><span dir="ltr">{center.manager_user_id||'—'}</span></div><div><strong>الإحداثيات</strong><span dir="ltr">{center.latitude??'—'}, {center.longitude??'—'}</span></div></div></details>
+  </div><form action={setCenterStatus} className="verification-controls"><input type="hidden" name="id" value={center.id}/><input type="hidden" name="slug" value={center.slug}/><label>الحالة<select name="status" defaultValue={center.verification}>{Object.entries(STATUS).map(([k,l])=><option value={k} key={k}>{l}</option>)}</select></label><label className="check-field"><input name="is_active" type="checkbox" defaultChecked={center.is_active}/> المركز نشط</label><button className="primary-action" type="submit">حفظ القرار</button></form></article>)}{!rows.length&&<div className="search-state"><h2>لا توجد مراكز في هذه الحالة</h2><p>ستظهر طلبات التوثيق هنا تلقائيًا.</p></div>}</div>
+ </section></main>
+}
