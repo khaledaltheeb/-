@@ -47,6 +47,7 @@ for(const file of [
  'supabase/migrations/20260807184000_media_library.sql',
  'supabase/migrations/20260807184500_structured_content_featured_media.sql',
  'supabase/migrations/20260807185000_taxonomy_hierarchy_integrity.sql',
+ 'supabase/migrations/20260807185500_initial_owner_bootstrap.sql',
 ]){
  if(!fs.existsSync(path.join(root,file)))fail(`missing migration ${file}`);
 }
@@ -60,8 +61,8 @@ requireText('supabase/migrations/20260807183000_content_release_gate.sql',['meta
 requireText('supabase/migrations/20260807184000_media_library.sql',['rawafid-media','media_assets','register_media_asset','delete_media_asset','6291456']);
 requireText('supabase/migrations/20260807184500_structured_content_featured_media.sql',['create_content_draft_v4','update_content_draft_v4','validate_featured_media','featured_image_url','featured_image_alt']);
 requireText('supabase/migrations/20260807185000_taxonomy_hierarchy_integrity.sql',['category hierarchy cycle detected','parent category must belong to the same sector','delete_category_safe','delete_sector_safe','revoke delete on public.categories','revoke delete on public.sectors']);
+requireText('supabase/migrations/20260807185500_initial_owner_bootstrap.sql',['bootstrap_initial_owner','active owner already exists','grant execute on function private.bootstrap_initial_owner(text) to service_role']);
 
-// Empty-theme contract: the UI must not smuggle demo taxonomy/content into a clean database.
 const home=read('app/page.tsx');
 if(home.includes('fallbackPillars')) fail('homepage must not contain fallback/demo sectors');
 for(const needle of ['sectors.length > 0','rawafid-empty','getPublicSectors','ذوو الاحتياجات الخاصة']) if(!home.includes(needle)) fail(`homepage empty-theme behavior missing ${needle}`);
