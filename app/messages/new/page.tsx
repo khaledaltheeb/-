@@ -15,6 +15,8 @@ export default async function NewConversationPage({searchParams}:{searchParams:S
  const params=await searchParams;const specialistId=String(params.specialist??'');const centerId=String(params.center??'');
  if((specialistId?1:0)+(centerId?1:0)!==1||(!UUID_RE.test(specialistId)&&!UUID_RE.test(centerId)))redirect('/messages?error=invalid-target');
  const supabase=await createClient();const {data:claims}=await supabase.auth.getClaims();if(!claims?.claims?.sub)redirect(`/login?next=${encodeURIComponent(`/messages/new?${specialistId?`specialist=${specialistId}`:`center=${centerId}`}`)}`);
+ const {data:canContact}=await supabase.rpc('can_contact_provider',{p_specialist_id:specialistId||null,p_center_id:centerId||null});
+ if(canContact!==true)redirect('/messages?error=target-unavailable');
  let target:{name:string;subtitle:string;href:string}|null=null;
  if(specialistId){const {data}=await supabase.from('specialists').select('id,slug,full_name,professional_title').eq('id',specialistId).eq('verification','verified').eq('is_active',true).maybeSingle();if(data)target={name:data.full_name,subtitle:data.professional_title||'مختص موثق',href:`/specialists/${data.slug}`};}
  else {const {data}=await supabase.from('centers').select('id,slug,name,city,country').eq('id',centerId).eq('verification','verified').eq('is_active',true).maybeSingle();if(data)target={name:data.name,subtitle:[data.city,data.country].filter(Boolean).join('، ')||'مركز موثق',href:`/centers/${data.slug}`};}
