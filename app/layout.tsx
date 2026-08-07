@@ -5,6 +5,7 @@ import './admin-ui.css';
 import './cms.css';
 import './search.css';
 import './directory.css';
+import './portal.css';
 import MobileNav from './mobile-nav';
 import PwaRegister from './pwa-register';
 
