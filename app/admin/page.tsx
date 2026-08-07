@@ -15,7 +15,7 @@ export default async function AdminPage() {
   const [
     { count: contentCount }, { count: specialistsCount }, { count: centersCount }, { count: communityCount },
     { count: sectorsCount }, { count: categoriesCount }, { count: usersCount },
-    { data: reportRows }, { data: appointmentRows }, { data: redirectRows },
+    { data: reportRows }, { data: appointmentRows }, { data: redirectRows }, { data: integrityRows },
   ] = await Promise.all([
     supabase.from('content').select('id', { count: 'exact', head: true }),
     supabase.from('specialists').select('id', { count: 'exact', head: true }),
@@ -27,11 +27,13 @@ export default async function AdminPage() {
     supabase.rpc('admin_conversation_reports', { p_status: 'pending', p_limit: 100, p_offset: 0 }),
     supabase.rpc('admin_appointments', { p_status: 'requested', p_limit: 100, p_offset: 0 }),
     supabase.rpc('admin_list_redirects', { p_query: null, p_limit: 500, p_offset: 0 }),
+    supabase.rpc('admin_platform_integrity'),
   ]);
 
   const pendingReports = Array.isArray(reportRows) ? reportRows.length : 0;
   const pendingAppointments = Array.isArray(appointmentRows) ? appointmentRows.length : 0;
   const redirectCount = Array.isArray(redirectRows) ? redirectRows.length : 0;
+  const integrityIssues = Array.isArray(integrityRows) ? integrityRows.reduce((sum, row) => sum + (Number(row.issue_count) || 0), 0) : 0;
 
   return (
     <main className="dashboard-shell">
@@ -47,9 +49,11 @@ export default async function AdminPage() {
           <article><strong>{specialistsCount ?? 0}</strong><span>المختصون</span></article><article><strong>{centersCount ?? 0}</strong><span>المراكز</span></article>
           <article><strong>{communityCount ?? 0}</strong><span>المتدربون والمتطوعون</span></article><article><strong>{pendingReports}</strong><span>بلاغات تنتظر المراجعة</span></article>
           <article><strong>{pendingAppointments}</strong><span>طلبات مواعيد</span></article><article><strong>{redirectCount}</strong><span>Redirects</span></article>
+          <article><strong>{integrityIssues}</strong><span>ملاحظات Integrity</span></article>
         </div>
 
         <div className="admin-module-grid">
+          <Link href="/admin/integrity"><strong>سلامة وترابط المنصة</strong><span>فحص العلاقات والصلاحيات وجاهزية التواصل والتحويلات ونواقص المحتوى المنشور.</span></Link>
           <Link href="/admin/taxonomy"><strong>القطاعات والأقسام</strong><span>إنشاء وتعديل وترتيب وتعطيل Taxonomy دون تعديل الكود.</span></Link>
           <Link href="/admin/content"><strong>إدارة المحتوى وSEO</strong><span>CMS بإصدارات وسير مراجعة وحقول SEO قبل النشر.</span></Link>
           <Link href="/admin/users"><strong>الحسابات والصلاحيات</strong><span>الأدوار، التفعيل، وحماية التصعيد غير المصرح به.</span></Link>
