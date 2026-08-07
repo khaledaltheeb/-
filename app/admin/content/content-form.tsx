@@ -1,0 +1,98 @@
+type Sector = { id: string; name_ar: string };
+type Category = { id: string; sector_id: string | null; name_ar: string };
+
+type ContentRecord = {
+  id?: string;
+  content_type?: string;
+  slug?: string;
+  title?: string;
+  excerpt?: string | null;
+  body_text?: string | null;
+  sector_id?: string | null;
+  category_id?: string | null;
+  audience?: string[] | null;
+  search_aliases?: string[] | null;
+  seo_title?: string | null;
+  seo_description?: string | null;
+  canonical_url?: string | null;
+  robots_index?: boolean;
+  robots_follow?: boolean;
+};
+
+const TYPES = [
+  ['article', 'مقال'], ['guide', 'دليل'], ['condition', 'حالة'], ['research', 'بحث/دراسة'], ['comparison', 'مقارنة'],
+  ['tool', 'أداة'], ['assessment', 'تقييم'], ['intervention', 'تدخل'], ['protocol', 'بروتوكول'], ['course', 'دورة'],
+  ['learning_path', 'مسار تعلم'], ['resource', 'مورد'], ['calendar', 'تقويم'], ['glossary_term', 'مصطلح'], ['faq', 'أسئلة شائعة'],
+  ['directory_page', 'صفحة دليل'], ['news', 'خبر'], ['sector_page', 'صفحة قطاع'], ['landing_page', 'صفحة هبوط'],
+];
+
+export default function ContentForm({
+  action,
+  sectors,
+  categories,
+  record,
+  submitLabel,
+}: {
+  action: (formData: FormData) => void | Promise<void>;
+  sectors: Sector[];
+  categories: Category[];
+  record?: ContentRecord;
+  submitLabel: string;
+}) {
+  return (
+    <form action={action} className="cms-form">
+      {record?.id && <input type="hidden" name="id" value={record.id} />}
+      <div className="cms-grid">
+        <label>نوع الصفحة
+          <select name="content_type" required defaultValue={record?.content_type ?? 'article'}>
+            {TYPES.map(([value, label]) => <option value={value} key={value}>{label}</option>)}
+          </select>
+        </label>
+        <label>العنوان
+          <input name="title" required minLength={3} maxLength={300} defaultValue={record?.title ?? ''} />
+        </label>
+        <label>Slug
+          <input name="slug" required dir="ltr" maxLength={140} pattern="[a-z0-9]+(?:-[a-z0-9]+)*" defaultValue={record?.slug ?? ''} placeholder="clear-stable-slug" />
+        </label>
+        <label>القطاع
+          <select name="sector_id" defaultValue={record?.sector_id ?? ''}>
+            <option value="">بدون قطاع</option>
+            {sectors.map((sector) => <option value={sector.id} key={sector.id}>{sector.name_ar}</option>)}
+          </select>
+        </label>
+        <label>القسم الأساسي
+          <select name="category_id" defaultValue={record?.category_id ?? ''}>
+            <option value="">بدون قسم</option>
+            {categories.map((category) => <option value={category.id} key={category.id}>{category.name_ar}</option>)}
+          </select>
+        </label>
+        <label>الجمهور
+          <input name="audience" defaultValue={(record?.audience ?? []).join(', ')} placeholder="الفرد، الأسرة، المختص" />
+        </label>
+        <label className="cms-wide">الملخص
+          <textarea name="excerpt" rows={3} maxLength={1200} defaultValue={record?.excerpt ?? ''} />
+        </label>
+        <label className="cms-wide">النص التحريري
+          <textarea name="body_text" rows={18} maxLength={250000} defaultValue={record?.body_text ?? ''} placeholder="محتوى الصفحة. هذه المرحلة لا تستورد أي نص من المستودع القديم." />
+        </label>
+      </div>
+
+      <details className="cms-details" open>
+        <summary>SEO والبحث</summary>
+        <div className="cms-grid cms-details-grid">
+          <label>SEO Title<input name="seo_title" maxLength={180} defaultValue={record?.seo_title ?? ''} /></label>
+          <label>Canonical URL<input name="canonical_url" dir="ltr" maxLength={500} defaultValue={record?.canonical_url ?? ''} placeholder="/content/example" /></label>
+          <label className="cms-wide">SEO Description<textarea name="seo_description" rows={3} maxLength={500} defaultValue={record?.seo_description ?? ''} /></label>
+          <label className="cms-wide">مرادفات البحث<input name="search_aliases" defaultValue={(record?.search_aliases ?? []).join(', ')} placeholder="مرادف، اسم آخر، مصطلح إنجليزي" /></label>
+          <label className="check-field"><input type="checkbox" name="robots_index" defaultChecked={record?.robots_index ?? true} /> Index عند النشر</label>
+          <label className="check-field"><input type="checkbox" name="robots_follow" defaultChecked={record?.robots_follow ?? true} /> Follow عند النشر</label>
+        </div>
+      </details>
+
+      <div className="cms-actions">
+        <button className="primary-action" type="submit">{submitLabel}</button>
+        <span>الحفظ هنا لا ينشر الصفحة؛ تبقى ضمن مسار المراجعة المؤسسي.</span>
+      </div>
+    </form>
+  );
+}
