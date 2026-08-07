@@ -68,7 +68,10 @@ function refresh(slug?: string) {
   revalidatePath('/admin');
   revalidatePath('/admin/taxonomy');
   revalidatePath('/');
+  revalidatePath('/sectors');
+  revalidatePath('/sections');
   revalidatePath('/sitemap.xml');
+  revalidatePath('/sitemaps/taxonomy.xml');
   if (slug) {
     revalidatePath(`/sectors/${slug}`);
     revalidatePath(`/sections/${slug}`);
@@ -126,6 +129,16 @@ export async function updateSector(formData: FormData) {
   redirect('/admin/taxonomy?ok=sector-updated');
 }
 
+export async function deleteSector(formData: FormData) {
+  const supabase = await requireAdmin();
+  const id = text(formData, 'id', 50);
+  if (!UUID_RE.test(id)) redirect('/admin/taxonomy?error=invalid-sector');
+  const { error } = await supabase.rpc('delete_sector_safe', { p_id: id });
+  if (error) redirect('/admin/taxonomy?error=sector-not-empty');
+  refresh();
+  redirect('/admin/taxonomy?ok=sector-deleted');
+}
+
 export async function createCategory(formData: FormData) {
   const supabase = await requireAdmin();
   const sectorId = text(formData, 'sector_id', 50);
@@ -173,8 +186,8 @@ export async function updateCategory(formData: FormData) {
   }
 
   if (parentId) {
-    const { data: parent } = await supabase.from('categories').select('sector_id,parent_id').eq('id', parentId).single();
-    if (!parent || parent.sector_id !== sectorId || parent.parent_id === id) redirect('/admin/taxonomy?error=invalid-parent');
+    const { data: parent } = await supabase.from('categories').select('sector_id').eq('id', parentId).single();
+    if (!parent || parent.sector_id !== sectorId) redirect('/admin/taxonomy?error=invalid-parent');
   }
 
   const { error } = await supabase.from('categories').update({
@@ -191,4 +204,14 @@ export async function updateCategory(formData: FormData) {
   if (error) redirect('/admin/taxonomy?error=category-write');
   refresh(slug);
   redirect('/admin/taxonomy?ok=category-updated');
+}
+
+export async function deleteCategory(formData: FormData) {
+  const supabase = await requireAdmin();
+  const id = text(formData, 'id', 50);
+  if (!UUID_RE.test(id)) redirect('/admin/taxonomy?error=invalid-category');
+  const { error } = await supabase.rpc('delete_category_safe', { p_id: id });
+  if (error) redirect('/admin/taxonomy?error=category-not-empty');
+  refresh();
+  redirect('/admin/taxonomy?ok=category-deleted');
 }
