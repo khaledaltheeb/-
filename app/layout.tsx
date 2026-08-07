@@ -15,7 +15,6 @@ import './theme-v3.css';
 import './public-enhancements.css';
 import './communication.css';
 import './mobile-nav-v3.css';
-import PwaRegister from './pwa-register';
 
 const arabicFont = Noto_Sans_Arabic({
   subsets: ['arabic'],
@@ -51,6 +50,21 @@ export const viewport: Viewport = {
   colorScheme: 'light',
 };
 
+const serviceWorkerBootstrap = `
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    var register = function () {
+      navigator.serviceWorker.register('/sw.js').then(function (registration) {
+        registration.update().catch(function () {});
+        if (registration.waiting) registration.waiting.postMessage('SKIP_WAITING');
+      }).catch(function () {});
+    };
+    if ('requestIdleCallback' in window) window.requestIdleCallback(register, { timeout: 2500 });
+    else window.setTimeout(register, 1200);
+  }, { once: true });
+}
+`;
+
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const organizationSchema = organizationJsonLd();
   return (
@@ -58,7 +72,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema).replace(/</g, '\\u003c') }} />
         {children}
-        <PwaRegister />
+        <script dangerouslySetInnerHTML={{ __html: serviceWorkerBootstrap }} />
       </body>
     </html>
   );
