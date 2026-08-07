@@ -10,6 +10,20 @@ export const dynamic='force-dynamic';
 export const metadata:Metadata={title:'طلب موعد',robots:{index:false,follow:false,noarchive:true}};
 type SearchParams=Promise<{specialist?:string;center?:string;conversation?:string;error?:string}>;
 const UUID_RE=/^[0-9a-f]{8}-[0-9a-f-]{27,}$/i;
+const appointmentTimeScript=`
+(function(){
+  var form=document.getElementById('appointment-request-form');
+  var local=document.getElementById('appointment-start-local');
+  var utc=document.getElementById('appointment-start-utc');
+  if(!form||!local||!utc)return;
+  function sync(){
+    if(!local.value){utc.value='';return;}
+    var parsed=new Date(local.value);
+    utc.value=Number.isFinite(parsed.getTime())?parsed.toISOString():'';
+  }
+  local.addEventListener('change',sync);
+  form.addEventListener('submit',sync);
+})();`;
 
 export default async function NewAppointmentPage({searchParams}:{searchParams:SearchParams}){
  const params=await searchParams;const specialistId=String(params.specialist??'');const centerId=String(params.center??'');const conversationId=String(params.conversation??'');
@@ -24,6 +38,6 @@ export default async function NewAppointmentPage({searchParams}:{searchParams:Se
  return <><SiteHeader/><main className="communication-shell narrow"><section className="communication-heading"><div><span className="eyebrow">Appointments</span><h1>طلب موعد</h1><p>أرسل وقتًا مقترحًا ونمط الخدمة. يبقى الموعد «قيد الطلب» حتى يؤكده المختص أو المركز.</p></div></section>
  <div className="communication-card appointment-target"><div className="inbox-avatar large" aria-hidden="true">{target.name.slice(0,1)}</div><div><span className="verified-label">جهة موثقة</span><h2>{target.name}</h2><p>{target.subtitle}</p><Link href={target.href}>عرض الملف</Link></div></div>
  {params.error&&<div className="system-message error">تعذر إنشاء الطلب. تحقق من الوقت وحالة الجهة وعدم وجود طلب مماثل.</div>}
- <form action={requestAppointment} className="communication-form appointment-form">{specialistId&&<input type="hidden" name="specialist_id" value={specialistId}/>} {centerId&&<input type="hidden" name="center_id" value={centerId}/>} {conversationId&&<input type="hidden" name="conversation_id" value={conversationId}/>}<label>الوقت المقترح<input name="starts_at" type="datetime-local" required/></label><label>نمط الموعد<select name="mode" required defaultValue={target.remote?'remote':target.inPerson?'in_person':'other'}>{target.remote&&<option value="remote">عن بُعد</option>}{target.inPerson&&<option value="in_person">حضوري</option>}<option value="phone">هاتف</option><option value="other">يُحدد لاحقًا</option></select></label><label>ملاحظة للجهة<textarea name="note" rows={5} maxLength={2000} placeholder="سبب التواصل أو أي معلومة لازمة لترتيب الموعد، دون معلومات حساسة غير ضرورية."/></label><button className="primary-action" type="submit">إرسال طلب الموعد</button><small>الوقت المقترح لا يصبح موعدًا مؤكدًا إلا بعد قبول الجهة مقدمة الخدمة.</small></form>
+ <form id="appointment-request-form" action={requestAppointment} className="communication-form appointment-form">{specialistId&&<input type="hidden" name="specialist_id" value={specialistId}/>} {centerId&&<input type="hidden" name="center_id" value={centerId}/>} {conversationId&&<input type="hidden" name="conversation_id" value={conversationId}/>}<input id="appointment-start-utc" type="hidden" name="starts_at_utc"/><label>الوقت المقترح حسب توقيت جهازك<input id="appointment-start-local" type="datetime-local" required/></label><label>نمط الموعد<select name="mode" required defaultValue={target.remote?'remote':target.inPerson?'in_person':'other'}>{target.remote&&<option value="remote">عن بُعد</option>}{target.inPerson&&<option value="in_person">حضوري</option>}<option value="phone">هاتف</option><option value="other">يُحدد لاحقًا</option></select></label><label>ملاحظة للجهة<textarea name="note" rows={5} maxLength={2000} placeholder="سبب التواصل أو أي معلومة لازمة لترتيب الموعد، دون معلومات حساسة غير ضرورية."/></label><button className="primary-action" type="submit">إرسال طلب الموعد</button><small>يحوّل النظام الوقت المحلي المحدد إلى UTC قبل التخزين، ثم يعرضه لاحقًا حسب منطقة المستخدم. الوقت المقترح لا يصبح موعدًا مؤكدًا إلا بعد قبول الجهة.</small></form><script dangerouslySetInnerHTML={{__html:appointmentTimeScript}}/>
  </main><SiteFooter/></>;
 }
