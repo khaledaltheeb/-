@@ -12,7 +12,7 @@ permissions:
 jobs:
   quality:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -21,6 +21,8 @@ jobs:
           package-manager-cache: false
       - name: Install dependencies
         run: npm install --no-audit --no-fund
+      - name: Architecture privacy and PWA contract
+        run: npm run architecture-check
       - name: Type check
         run: npm run typecheck
       - name: Lint
@@ -30,3 +32,30 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
         run: npm run build
+      - name: Production HTTP smoke and Lighthouse lab audit
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
+          SMOKE_BASE_URL: http://127.0.0.1:3000
+        run: |
+          npm run start -- --hostname 127.0.0.1 --port 3000 > /tmp/rawafid-server.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID 2>/dev/null || true' EXIT
+          for i in $(seq 1 40); do
+            if curl -fsS http://127.0.0.1:3000/ >/dev/null; then break; fi
+            sleep 1
+          done
+          npm run smoke
+          npx --yes lighthouse@12.8.2 http://127.0.0.1:3000/ \
+            --quiet --chrome-flags="--headless --no-sandbox" \
+            --only-categories=performance,accessibility,best-practices \
+            --output=json --output-path=/tmp/rawafid-lighthouse.json
+          node - <<'NODE'
+          const fs=require('fs');
+          const report=JSON.parse(fs.readFileSync('/tmp/rawafid-lighthouse.json','utf8'));
+          const scores=Object.fromEntries(Object.entries(report.categories).map(([key,value])=>[key,value.score]));
+          console.log('Lighthouse lab scores:',scores);
+          if((scores.accessibility??0)<0.90) throw new Error(`Accessibility Lighthouse score below 0.90: ${scores.accessibility}`);
+          if((scores['best-practices']??0)<0.90) throw new Error(`Best Practices Lighthouse score below 0.90: ${scores['best-practices']}`);
+          if((scores.performance??0)<0.70) throw new Error(`Performance Lighthouse lab score below 0.70: ${scores.performance}`);
+          NODE
