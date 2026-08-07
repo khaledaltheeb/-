@@ -1,14 +1,14 @@
 # MIG-000002 — الانتباه
 
 - Lane: C0 — الموسوعة والمصطلحات العامة
-- Status: DRAFT BUILT — FINAL WORKFLOW / POST-PUBLISH QA PENDING
+- Status: **COMPLETE — PUBLISHED / POST-PUBLISH QA PASS**
 - Canonical key: `attention`
 - New slug: `attention`
 - New canonical: `/content/attention`
 - Content type: `glossary_term`
 - Supabase content id: `6668b64f-3d43-4737-90c9-8c90c43cb7b3`
-- Current version: v1
-- Current database status: `draft`
+- Final version: **v8**
+- Database status: **published**
 - Sector: `knowledge` — المعرفة والموسوعة
 - Primary category: `cognitive-processes` — المصطلحات والعمليات المعرفية
 - Audiences: الأفراد، الأسر، المعلمون، المختصون، المتدربون
@@ -16,106 +16,92 @@
 
 ## Canonical decision
 
-هذه الصفحة تمثل **المفهوم المعرفي العام للانتباه (Attention)**.
+هذه الصفحة هي Canonical للمفهوم المعرفي العام **الانتباه (Attention)**.
 
-لا تُدمج فيها كيانات أخرى مستقلة:
-
-- ADHD يبقى صفحة حالة/اضطراب مستقلة؛ التشتت ليس تشخيصًا مرادفًا للاضطراب.
-- `/quick-info/attention-distraction-factors/` مقالة فرعية عن عوامل التشتت، وليست الصفحة الموسوعية العامة.
-- أدوات `sustained-attention`, `selective-attention`, `divided-attention`, `attention-switch` وغيرها تبقى أدوات/مهام مستقلة.
-- «التركيز» مصطلح قريب في الاستخدام اليومي لكنه ليس مرادفًا علميًا كاملًا؛ يجب حسم Canonical مستقل له عند ترحيله لاحقًا.
+الكيانات التالية بقيت مستقلة عمدًا:
+- ADHD: حالة/اضطراب مستقل، والتشتت لا يساوي تشخيص ADHD.
+- `/quick-info/attention-distraction-factors/`: مقالة فرعية عن عوامل تشتت الانتباه.
+- أدوات `sustained-attention`, `selective-attention`, `divided-attention`, `attention-switch`: أدوات/مهام مستقلة.
+- «التركيز»: مصطلح قريب في الاستخدام اليومي لكنه ليس مرادفًا علميًا كاملًا، ويحتاج Canonical مستقل عند ترحيله.
 
 ## Legacy material inspected
 
-- `quick-info/attention-distraction-factors/index.html` — خمسة عوامل قد ترفع التشتت: النوم، الضغط/القلق/المزاج، المشتتات الرقمية والبيئية، غموض/طول المهمة، واختلافات تحتاج تقييمًا. تم الاحتفاظ بالفكرة المفيدة وإزالة التنبيهات المتكررة وصياغات القالب.
-- `scripts/complete_cognitive_remaining_v24.py` — يثبت وجود أدوات مستقلة للانتباه المستمر والانتقائي والمنقسم وتحويل الانتباه؛ لا تُدمج كصفحات مكررة.
-- `scripts/scale_site_v8.py` — يثبت أن النسخ القديمة ولّدت موضوع «الانتباه» عبر عشرات الـFacets، ما يستلزم دمج المعرفة في Canonical واحد بدل إعادة إنتاج الطبقات.
-- `scripts/rebuild_encyclopedia_v13.py` — بنية موسوعة مولّدة متعددة الزوايا وDefinedTerm patterns.
-- نتائج البحث عبر صفحات ADHD والمعلومات السريعة والمواد التعليمية للتحقق من حدود الموضوع.
+- `quick-info/attention-distraction-factors/index.html`
+- `scripts/complete_cognitive_remaining_v24.py`
+- `scripts/scale_site_v8.py`
+- `scripts/rebuild_encyclopedia_v13.py`
+- نتائج البحث عبر ADHD والمعلومات السريعة والمختبر المعرفي وطبقات الموسوعة.
 
-## Redirect evidence
+تم استبعاد القالب القديم، أكواد GTM/GA المكررة، التنبيهات العامة المتكررة، تعليمات التطوير، وأي صياغة تخلط التشتت بالتشخيص.
 
-لم يتم العثور على ملف/URL منشور مستقل ومؤكد يمكن إثبات أنه Canonical قديم للانتباه العام. أرقام `concept-*` القابلة للاشتقاق من مولد قديم لا تُعامل وحدها كدليل على URL منشور فعلي، لذلك **لا يتم إنشاء Redirect تخميني**.
+## Redirect decision
 
-كما لم يتم تحويل صفحة `quick-info/attention-distraction-factors/` أو أدوات الانتباه لأنها كيانات مختلفة.
+المولدات القديمة تثبت وجود طبقات/Facets متعددة للانتباه، لكنها لا تكفي وحدها لإثبات أن رقم `concept-*` معين كان URL منشورًا فعليًا. لم يُنشأ أي Redirect تخميني.
+
+لم تُحوّل المقالة الفرعية أو أدوات الانتباه إلى الصفحة العامة. Post-publish QA أثبت أن عدد التحويلات الخاطئة لهذه الكيانات إلى `/content/attention` = **0**.
 
 ## Authoritative sources used
 
-1. National Institute of Mental Health (NIMH) — RDoC Attention construct.
-2. American Psychological Association — APA Dictionary of Psychology: Attention (updated 2018).
+1. NIMH — RDoC Attention construct.
+2. APA Dictionary of Psychology — Attention (2018).
 3. Petersen & Posner — The Attention System of the Human Brain: 20 Years After (2012).
 4. Changes in the Networks of Attention across the Lifespan: A Graphical Meta-Analysis (2024).
 5. Sleep deprivation, vigilant attention, and brain function: a review (2019).
-6. National Institute of Mental Health — Dorsal attention network, RDoC element.
+6. NIMH — Dorsal attention network.
 7. APA Dictionary — Divided Attention (2018).
 8. APA Dictionary — Attentional Capture (2018).
 
 All stored reference URLs use HTTPS.
 
-## New page structure
-
-- H1: الانتباه
-- التعريف الرسمي ودلالة محدودية السعة
-- الفرق بين الانتباه والتركيز
-- لماذا نحتاج الانتباه
-- الانتباه الانتقائي
-- الانتباه المستمر/اليقظة
-- الانتباه المنقسم
-- التوجيه والتحول
-- جدول العمليات الانتباهية
-- شبكات التأهب والتوجيه والتحكم التنفيذي
-- علاقة الانتباه بالإدراك والذاكرة العاملة والوظائف التنفيذية
-- لماذا التشتت لا يعني ADHD
-- النوم والضغط والبيئة ووضوح المهمة
-- قياس الانتباه وحدود الاختبارات
-- هفوات الانتباه
-- إدارة الانتباه عمليًا
-- الانتباه في التعلم
-- الانتباه الرقمي وتعدد المهام
-- متى تكون الحاجة لتقييم أوسع
-- جدول الأخطاء الشائعة
-- 11 سؤالًا شائعًا مبنيًا على نوايا البحث
-- خلاصة
-
 ## Content QA
 
-- Arabic word count: **2017**
+- Arabic useful word count: **2017**
 - Structured blocks: **50**
 - H2: **15**
 - H3: **4**
-- FAQ blocks: **1**
-- FAQ questions: **11**
+- FAQ: **11**
 - Tables: **2**
 - Lists: **1**
 - References: **8**
-- All reference URLs HTTPS: **PASS**
 - Tags: **5**
 - Primary category relations: **1**
-- Duplicate candidates in new Supabase: **0**
-- Forbidden/internal text scan:
-  - TODO: PASS
-  - FIXME: PASS
-  - agent/worker instructions: PASS
-  - private plan language: PASS
-  - banned term «معاقين»: PASS
+- Duplicate canonical after publish: **0**
+- TODO/FIXME/internal agent/private-plan text: **0**
+- banned term «معاقين»: **0**
 
 ## SEO
 
-- Primary keyword/entity: `الانتباه`
+- Primary entity: `الانتباه`
 - SEO title: `الانتباه: التعريف والأنواع والعوامل المؤثرة`
-- SEO title length: **43 chars**
-- Meta description length: **155 chars**
+- SEO title length: **43**
+- Meta description length: **155**
 - Search aliases: **6**
 - Search intent: `informational`
 - Canonical: `/content/attention`
-- FAQ schema: generated only from visible FAQ block
-- Glossary schema: `DefinedTerm` generated by the hardened platform for `glossary_term`
+- Visible FAQ → FAQPage schema
+- `glossary_term` → DefinedTerm schema
 - Breadcrumbs: sector → category → content
 
-## Remaining before COMPLETE
+## Workflow / Audit
 
-1. Promote through the full workflow without claiming a human scientific reviewer who did not review it.
-2. Publish through Scheduled state.
-3. Verify search result, canonical, tags/category and duplicate count after publish.
-4. Confirm no incorrect redirects to distinct quick-info/tool entities.
-5. Close Claim Issue #2 and update central migration ledger.
+The page passed:
+`Draft → Scientific Review → Editorial Review → SEO → Accessibility → Approved → Scheduled → Published`
+
+No human reviewer identity was fabricated. Audit records describe the review as system-assisted migration QA with source verification.
+
+- Versions: **8**
+- Audit events: **8**
+- Published at: `2026-08-07T21:02:55Z`
+
+## Post-publish QA
+
+Search query `الانتباه` returns this page first with destination `/content/attention` and score 13. The already published `working-memory` appears as a weaker semantically related result, which is expected.
+
+- Duplicate canonical: **0**
+- Wrong redirects from distinct attention tools/article: **0**
+- Search: **PASS**
+- Taxonomy/tags: **PASS**
+
+## Final result
+
+**MIG-000002 is closed and canonicalized.**
