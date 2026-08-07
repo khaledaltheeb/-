@@ -1,4 +1,6 @@
 import type { Metadata, Viewport } from 'next';
+import { Noto_Sans_Arabic } from 'next/font/google';
+import { BRAND_NAME, DEFAULT_DESCRIPTION, SITE_URL, organizationJsonLd } from '@/lib/seo';
 import './globals.css';
 import './sector-pages.css';
 import './admin-ui.css';
@@ -9,11 +11,18 @@ import './portal.css';
 import MobileNav from './mobile-nav';
 import PwaRegister from './pwa-register';
 
+const arabicFont = Noto_Sans_Arabic({
+  subsets: ['arabic'],
+  display: 'swap',
+  variable: '--font-arabic',
+  preload: true,
+});
+
 export const metadata: Metadata = {
-  metadataBase: new URL('https://healthrenewal.org'),
-  title: { default: 'منصة روافد', template: '%s | منصة روافد' },
-  description: 'منصة عربية مؤسسية للصحة النفسية والتعافي والدمج والتمكين والمعرفة المتخصصة.',
-  applicationName: 'منصة روافد',
+  metadataBase: new URL(SITE_URL),
+  title: { default: BRAND_NAME, template: `%s | ${BRAND_NAME}` },
+  description: DEFAULT_DESCRIPTION,
+  applicationName: BRAND_NAME,
   manifest: '/manifest.webmanifest',
   icons: {
     icon: '/icons/rawafid-app.svg',
@@ -24,22 +33,24 @@ export const metadata: Metadata = {
     title: 'روافد',
     statusBarStyle: 'default',
   },
-  alternates: { canonical: '/' },
-  robots: { index: false, follow: false },
+  robots: { index: false, follow: false, noarchive: true },
+  referrer: 'strict-origin-when-cross-origin',
 };
 
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
-  themeColor: '#0f8f88',
+  themeColor: '#075e5d',
   colorScheme: 'light',
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const organizationSchema = organizationJsonLd();
   return (
-    <html lang="ar" dir="rtl">
+    <html lang="ar" dir="rtl" className={arabicFont.variable}>
       <body>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema).replace(/</g, '\\u003c') }} />
         {children}
         <MobileNav />
         <PwaRegister />
