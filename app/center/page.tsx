@@ -25,7 +25,7 @@ export default async function CenterManagerPage({searchParams}:{searchParams:Sea
   if(selected){const {data:licenseData}=await supabase.rpc('get_my_center_license',{p_center_id:selected.id});license=Array.isArray(licenseData)&&licenseData[0]?licenseData[0] as LicenseRow:null;}
 
   return <main className="dashboard-shell center-portal-shell"><section className="dashboard-card center-portal-card">
-    <div className="admin-heading"><div><span className="eyebrow">بوابة المركز</span><h1>{profile.display_name||'إدارة المركز'}</h1><p>إدارة بيانات المركز والفروع والخدمات والخصوصية والترخيص. التغييرات الجوهرية على مركز موثق تعيده تلقائيًا للمراجعة.</p></div><div className="dashboard-actions"><Link className="button" href="/account">حسابي</Link><Link className="button" href="/centers">الدليل العام</Link></div></div>
+    <div className="admin-heading"><div><span className="eyebrow">بوابة المركز</span><h1>{profile.display_name||'إدارة المركز'}</h1><p>إدارة بيانات المركز والفروع والخدمات والخصوصية والترخيص والتواصل والمواعيد. التغييرات الجوهرية على مركز موثق تعيده تلقائيًا للمراجعة.</p></div><div className="dashboard-actions"><Link className="button" href="/account">حسابي</Link><Link className="button" href="/messages">الرسائل</Link><Link className="button" href="/appointments">المواعيد</Link><Link className="button" href="/notifications">الإشعارات</Link><Link className="button" href="/centers">الدليل العام</Link></div></div>
     {params.ok&&<p className="system-message success">تم حفظ البيانات وتسجيل العملية.</p>}{(params.error||error)&&<p className="system-message error">تعذر حفظ أو تحميل بيانات المركز.</p>}
 
     <div className="center-portal-layout">
