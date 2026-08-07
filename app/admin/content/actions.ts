@@ -10,6 +10,7 @@ const CONTENT_TYPES = new Set([
   'article','guide','condition','research','comparison','tool','news','sector_page','landing_page',
   'assessment','intervention','protocol','course','learning_path','resource','calendar','glossary_term','faq','directory_page',
 ]);
+const WORKFLOW_TARGETS = new Set(['draft','scientific_review','editorial_review','seo_review','accessibility_review','approved','published','archived']);
 
 function value(formData: FormData, key: string, max: number) {
   return String(formData.get(key) ?? '').trim().slice(0, max);
@@ -103,4 +104,17 @@ export async function updateDraft(formData: FormData) {
   if (error) redirect(`/admin/content/${id}?error=update-failed`);
   refresh(data.p_slug);
   redirect(`/admin/content/${id}?ok=saved`);
+}
+
+export async function transitionStatus(formData: FormData) {
+  const supabase = await requireAdmin();
+  const id = value(formData, 'id', 60);
+  const target = value(formData, 'target', 40);
+  const slug = value(formData, 'slug', 140);
+  if (!UUID_RE.test(id) || !WORKFLOW_TARGETS.has(target)) redirect('/admin/content?error=invalid-transition');
+
+  const { error } = await supabase.rpc('transition_content_status', { p_id: id, p_target: target });
+  if (error) redirect(`/admin/content/${id}?error=transition-failed`);
+  refresh(slug || undefined);
+  redirect(`/admin/content/${id}?ok=transitioned`);
 }
