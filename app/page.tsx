@@ -1,5 +1,4 @@
 import type { CSSProperties } from 'react';
-import Link from 'next/link';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import { getPublicSectors } from '@/lib/public-taxonomy';
@@ -47,7 +46,7 @@ export default async function HomePage() {
               <button type="submit">بحث في روافد</button>
             </form>
             <div className="intent-grid" aria-label="مسارات بحث سريعة">
-              {intents.map(([label, query]) => <Link key={label} href={`/search?q=${encodeURIComponent(query)}`}>{label}</Link>)}
+              {intents.map(([label, query]) => <a key={label} href={`/search?q=${encodeURIComponent(query)}`}>{label}</a>)}
             </div>
           </div>
           <aside className="hero-panel hero-guidance" aria-label="ابدأ من المسار المناسب">
@@ -55,9 +54,9 @@ export default async function HomePage() {
             <h2>لا تحتاج لمعرفة اسم التشخيص لتصل إلى المسار المناسب.</h2>
             <p>ابدأ بالسؤال أو العرض أو نوع الدعم الذي تبحث عنه، ثم انتقل إلى المعرفة أو الدليل المهني أو الخدمات ذات الصلة.</p>
             <div className="hero-panel-links">
-              <Link href="/specialists">البحث عن مختص</Link>
-              <Link href="/centers">البحث عن مركز</Link>
-              <Link href="/community">المتدربون والمتطوعون</Link>
+              <a href="/specialists">البحث عن مختص</a>
+              <a href="/centers">البحث عن مركز</a>
+              <a href="/community">المتدربون والمتطوعون</a>
             </div>
           </aside>
         </section>
@@ -75,25 +74,25 @@ export default async function HomePage() {
             {pillars.map((pillar) => {
               const style = { '--accent': pillar.accent || '#08716d' } as CSSProperties;
               return (
-                <Link className="pillar dynamic-pillar" style={style} href={`/sectors/${pillar.slug}`} key={pillar.slug}>
+                <a className="pillar dynamic-pillar" style={style} href={`/sectors/${pillar.slug}`} key={pillar.slug}>
                   <div className="icon-dot" aria-hidden="true" />
                   <h3>{pillar.name_ar}</h3>
                   <p>{pillar.description || 'قطاع معرفي وخدمي ضمن منصة روافد.'}</p>
                   <span>استكشف القطاع ←</span>
-                </Link>
+                </a>
               );
             })}
           </div>
         </section>
 
         <section className="section split directory-callout" id="specialists">
-          <div><span className="eyebrow">دليل مهني موثق</span><h2>مختصون ومراكز ضمن دورة توثيق واضحة</h2><p>ملفات مهنية، تخصصات، مؤهلات، موقع جغرافي وإعدادات خصوصية، مع مراجعة واعتماد إداري قبل الظهور العام.</p><div className="section-actions"><Link className="primary-link" href="/specialists">دليل المختصين</Link><Link className="button" href="/centers">دليل المراكز</Link></div></div>
+          <div><span className="eyebrow">دليل مهني موثق</span><h2>مختصون ومراكز ضمن دورة توثيق واضحة</h2><p>ملفات مهنية، تخصصات، مؤهلات، موقع جغرافي وإعدادات خصوصية، مع مراجعة واعتماد إداري قبل الظهور العام.</p><div className="section-actions"><a className="primary-link" href="/specialists">دليل المختصين</a><a className="button" href="/centers">دليل المراكز</a></div></div>
           <div className="feature-list"><span>Verification</span><span>Privacy Controls</span><span>Messaging</span><span>Appointments</span><span>Maps</span><span>Audit Trail</span></div>
         </section>
 
         <section className="section community-callout">
           <div><span className="eyebrow">المشاركة والتطوير المهني</span><h2>مساحة للمتدربين والمتطوعين</h2><p>قسم مستقل يميز بوضوح بين المختص المرخص، المتدرب، والمتطوع، مع إشراف واعتماد وحالة ظهور واضحة لكل ملف.</p></div>
-          <Link className="primary-link" href="/community">استكشف القسم</Link>
+          <a className="primary-link" href="/community">استكشف القسم</a>
         </section>
       </main>
       <SiteFooter />
