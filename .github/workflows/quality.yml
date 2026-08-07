@@ -6,6 +6,10 @@ on:
   push:
     branches: [main, foundation-v3]
 
+concurrency:
+  group: rawafid-quality-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -21,7 +25,7 @@ jobs:
           package-manager-cache: false
       - name: Install dependencies
         run: npm install --no-audit --no-fund
-      - name: Architecture privacy and PWA contract
+      - name: Architecture privacy PWA and theme contract
         run: npm run architecture-check
       - name: Type check
         run: npm run typecheck
@@ -31,11 +35,15 @@ jobs:
         env:
           NEXT_PUBLIC_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
+          NEXT_PUBLIC_SITE_URL: https://healthrenewal.org
+          NEXT_PUBLIC_ALLOW_INDEXING: 'false'
         run: npm run build
       - name: Production HTTP smoke and Lighthouse lab audit
         env:
           NEXT_PUBLIC_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
+          NEXT_PUBLIC_SITE_URL: https://healthrenewal.org
+          NEXT_PUBLIC_ALLOW_INDEXING: 'false'
           SMOKE_BASE_URL: http://127.0.0.1:3000
         run: |
           npm run start -- --hostname 127.0.0.1 --port 3000 > /tmp/rawafid-server.log 2>&1 &
