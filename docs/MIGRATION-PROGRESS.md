@@ -6,15 +6,15 @@ Last updated: 2026-08-07
 
 **PAGE-BY-PAGE LEGACY MIGRATION — ACTIVE**
 
-No legacy page is considered migrated unless it has its own completed record in this ledger.
+No legacy page is considered migrated unless it has a completed record and passes coordinator QA.
 
 ## Mandatory operating rule
 
-Migration proceeds **one canonical page at a time per lane**. A lane does not start a second page until the current page has completed:
+Migration proceeds **one canonical page at a time per lane**:
 
 `Discovery → Variant history → Dedupe cluster → Exclusions → Source verification → Rewrite → SEO/E-E-A-T → CMS draft → Review → Redirect map → QA → Final status`
 
-If there is uncertainty that the next candidate is a duplicate/synonym/older version of the current topic, work stops and the relationship is resolved before another page is created.
+A lane does not open a second page while its current Claim remains open. Any possible duplicate/synonym/sector conflict stops that page until C0 resolves the canonical owner.
 
 ## Parallel lanes
 
@@ -25,67 +25,25 @@ If there is uncertainty that the next candidate is a duplicate/synonym/older ver
 - A4 — الطفل والأسرة والمدرسة
 - A5 — البحث والأدلة والأدوات والتعلم
 
-Each lane handles one page at a time. Claims are coordinated through GitHub Issues to prevent duplicate canonicals across lanes.
+## Platform readiness verified before migration
 
-## Platform readiness verified before legacy migration
+- Dynamic Supabase taxonomy and structured CMS; no legacy theme/CSS/layout imported.
+- Structured content supports headings, paragraphs, lists, tables, callouts, quotes, external sources, inline images with Alt, and visible FAQ blocks.
+- `glossary_term` emits DefinedTerm; visible FAQ emits FAQPage.
+- SEO/E-E-A-T release gates, version history, audit trail, tags, multi-category relations, scheduled publishing and version restore are implemented.
+- Large-scale sitemap architecture is sharded.
+- GTM/GA4 are centralized in the root layout rather than copied into pages.
+- Supabase security hardening remains in force.
 
-- New platform uses a dynamic Supabase taxonomy and structured CMS; no legacy theme/CSS/layout is imported.
-- Structured content supports headings, paragraphs, lists, tables, callouts, quotes, external sources, inline images with Alt, and FAQ blocks.
-- `glossary_term` pages emit DefinedTerm structured data in addition to the page schema.
-- SEO/E-E-A-T fields and release gates exist before approval/publishing.
-- Version history and audit trail exist.
-- Tags and multi-category relations are supported.
-- Scheduled publishing and version restore are implemented.
-- Sitemap architecture is hardened for large content volumes.
-- GTM/GA4 are centralized at the root layout and are not copied into each migrated page.
-- Supabase Security Advisor reported no active security lints after the latest database hardening.
-
-## Legacy repository audit facts verified
+## Legacy audit facts
 
 Source repository: `khaledaltheeb/healthrenewal.org`
 
-- Large generated/static repository with version-like and enrichment/generator directories.
-- GitHub code search reports hundreds/thousands of generated artifacts and pages; raw file count is **not** treated as unique-page count.
-- The old encyclopedia was generated in multiple layers/facets, so generated pages may represent variants of one canonical topic and must be clustered before migration.
-- Historical Git history and generated layers must be inspected per topic because multiple files/commits may represent the same page.
-- Internal planning files, workflow artifacts, agent instructions, TODO/QA notes, generator fragments, and development discussions are **not publishable content**.
-
-## Per-page record template
-
-### MIG-XXXXXX — [Canonical topic/title]
-- Status: NOT STARTED
-- Lane:
-- Candidate canonical slug:
-- Intended content type:
-- Sector:
-- Primary category:
-- Additional categories:
-- Audience(s):
-- Tags:
-- Current legacy URLs/files inspected:
-- Historical variants/commits inspected:
-- Duplicate/synonym cluster:
-- Internal/non-public text excluded:
-- Useful legacy material retained as facts/ideas:
-- Official/primary definition source:
-- Additional authoritative references:
-- Search intent:
-- Primary keyword/entity:
-- Secondary/semantic terms:
-- Target questions/FAQ:
-- H1:
-- Planned H2/H3 structure:
-- Useful word count:
-- Old URLs requiring redirect:
-- New CMS content id:
-- Versions:
-- Scientific/source review:
-- Editorial review:
-- SEO review:
-- Accessibility review:
-- Published/scheduled status:
-- Post-build QA:
-- Notes:
+- Generated/static repository with many enrichment/generator/version layers.
+- Raw file/page counts are not treated as unique canonicals.
+- Generator facets, historical variants and old routes are clustered topic-by-topic.
+- Internal planning, agent instructions, TODO/QA, generator code and development discussions are never publishable content.
+- Redirects are created only from verified old routes; `concept-*` routes are never guessed from generator arithmetic.
 
 ## Completed pages
 
@@ -94,83 +52,95 @@ Source repository: `khaledaltheeb/healthrenewal.org`
 - Canonical: `/content/working-memory`
 - Type: `glossary_term`
 - Status: **PUBLISHED / QA PASS**
-- Useful Arabic words: **2240**
-- FAQ: **11**
-- References: **8**
-- Versions: **9**
-- Duplicate canonicals after publish: **0**
-- Search validation: **PASS**
-- Incorrect redirect from related working-memory-updating tool: **0**
-- Full record: `migration-records/C0/MIG-000001-working-memory.md`
-- Claim: GitHub Issue #1 — CLOSED / COMPLETED
+- Words: **2240** | FAQ: **11** | References: **8** | Versions: **9**
+- Duplicate canonical: **0** | Search: **PASS** | wrong tool redirect: **0**
+- Record: `migration-records/C0/MIG-000001-working-memory.md`
+- Claim #1: CLOSED / COMPLETED
 
 ### MIG-000002 — الانتباه
 - Lane: C0
 - Canonical: `/content/attention`
 - Type: `glossary_term`
 - Status: **PUBLISHED / QA PASS**
-- Useful Arabic words: **2017**
-- FAQ: **11**
-- References: **8**
-- Versions: **8**
-- Duplicate canonicals after publish: **0**
-- Search validation: **PASS — first result for الانتباه**
-- Incorrect redirects from attention quick-info/tools: **0**
-- Full record: `migration-records/C0/MIG-000002-attention.md`
-- Claim: GitHub Issue #2 — CLOSED / COMPLETED
+- Words: **2017** | FAQ: **11** | References: **8** | Versions: **8**
+- Duplicate canonical: **0** | Search: **PASS** | wrong quick-info/tool redirects: **0**
+- Record: `migration-records/C0/MIG-000002-attention.md`
+- Claim #2: CLOSED / COMPLETED
 
 ### MIG-000003 — الإدراك
 - Lane: C0
 - Canonical: `/content/perception`
 - Type: `glossary_term`
 - Status: **PUBLISHED / QA PASS**
-- Useful Arabic words: **1905**
-- FAQ: **11**
-- References: **8**
-- Versions: **8**
-- Duplicate canonicals after publish: **0**
-- Search validation: **PASS — first result for الإدراك**
-- Guessed redirects: **0**
-- Full record: `migration-records/C0/MIG-000003-perception.md`
-- Claim: GitHub Issue #3 — CLOSED / COMPLETED
+- Words: **1905** | FAQ: **11** | References: **8** | Versions: **8**
+- Duplicate canonical: **0** | Search: **PASS** | guessed redirects: **0**
+- Record: `migration-records/C0/MIG-000003-perception.md`
+- Claim #3: CLOSED / COMPLETED
 
 ### MIG-000004 — الذاكرة
 - Lane: C0
 - Canonical: `/content/memory`
 - Type: `glossary_term`
 - Status: **PUBLISHED / QA PASS**
-- Useful Arabic words: **1808**
-- FAQ: **11**
-- References: **8**
-- Versions: **8**
-- Duplicate canonicals after publish: **0**
-- Search validation: **PASS — first result for الذاكرة; working memory remains distinct**
-- Incorrect redirect collision with working-memory/tool: **0**
-- Full record: `migration-records/C0/MIG-000004-memory.md`
-- Claim: GitHub Issue #4 — CLOSED / COMPLETED
+- Words: **1808** | FAQ: **11** | References: **8** | Versions: **8**
+- Duplicate canonical: **0** | Search: **PASS**
+- `/content/working-memory` remains a distinct related canonical.
+- Record: `migration-records/C0/MIG-000004-memory.md`
+- Claim #4: CLOSED / COMPLETED
 
 ### MIG-000005 — اللغة
 - Lane: C0
 - Canonical: `/content/language`
 - Type: `glossary_term`
 - Status: **PUBLISHED / QA PASS**
-- Useful Arabic words: **1891**
-- FAQ: **11**
-- References: **8**
-- Versions: **8**
-- Duplicate canonicals after publish: **0**
-- Search validation: **PASS — first result for اللغة**
-- Specialized redirect collisions from ADHD/selective mutism/AAC/autism: **0**
-- Full record: `migration-records/C0/MIG-000005-language.md`
-- Claim: GitHub Issue #9 — CLOSED / COMPLETED
+- Words: **1891** | FAQ: **11** | References: **8** | Versions: **8**
+- Duplicate canonical: **0** | Search: **PASS** | specialized redirect collisions: **0**
+- Record: `migration-records/C0/MIG-000005-language.md`
+- Claim #9: CLOSED / COMPLETED
+
+### MIG-000006 — الوظائف التنفيذية
+- Lane: C0
+- Canonical: `/content/executive-functions`
+- Type: `glossary_term`
+- Status: **PUBLISHED / QA PASS**
+- Words: **1687** | FAQ: **11** | References: **8** | Versions: **8**
+- Duplicate canonical: **0** | Search: **PASS** | child/autism/ADHD redirect collisions: **0**
+- Record: `migration-records/C0/MIG-000006-executive-functions.md`
+- Claim #11: CLOSED / COMPLETED
+
+### A4-000001 — الانضباط الإيجابي أم العقاب؟
+- Lane: A4
+- Canonical: `/content/discipline-vs-punishment`
+- Type: `article`
+- Status: **PUBLISHED / C0 QA PASS AFTER GOVERNANCE CORRECTION**
+- Words: **2673** | FAQ: **10** | References: **8**
+- SEO title: **42 chars** | Meta: **150 chars**
+- Redirect: `/quick-info/discipline-vs-punishment/` → canonical, **301 active**
+- Duplicate canonical: **0** | Search: **PASS**
+- Initial agent publish had only 1 version, 0 audit events, 0 tags, and 0 `content_categories` relations.
+- C0 reopened it transparently, preserved the accepted text/SEO/references/redirect, added **5 tags + 1 primary category relation**, and reran the full workflow.
+- Final database state: **9 versions, 8 audit events, 5 tags, 1 category relation**.
+- Claim #6: CLOSED / COMPLETED after C0 correction.
+- Agent record: `migration-records/A4/MIG-A4-000001-discipline-vs-punishment.md`
+
+## Active / pending lanes at this checkpoint
+
+- A1: `depression` — enriched 2800+ word draft; intentionally blocked at scientific review because no qualified human reviewer is registered. No reviewer identity may be fabricated.
+- A3: `autism` — active Claim; C0 must not touch autism while claimed.
+- A5: `accessible-fair-multimodal-assessment` — active Claim. A premature second A5 Claim (`evidence-literacy`) was closed by C0 because one lane may not have two open pages.
+- A2: no verified active Claim at the last coordinator check.
+- A4: first page completed; lane may claim its next page only after checking the global registry again.
 
 ## Totals
 
-- Completed canonical pages: **5**
-- Published canonical pages: **5**
-- C0 completed: **5**
-- A1–A5 completed recorded in central ledger: **0**
+- **Completed canonical pages after coordinator QA: 7**
+- **Published canonical pages after coordinator QA: 7**
+- C0 completed: **6**
+- Validated agent pages: **1 (A4)**
+- High-stakes pages blocked pending real qualified scientific review are not counted as complete.
 
 ## Next action
 
-C0 may start **MIG-000006** only after checking all open agent Claims and selecting a general encyclopedia topic that is not owned by A1–A5.
+1. Continue C0 with `MIG-000007` on a non-conflicting general encyclopedia concept.
+2. Monitor agent Claims before each new C0 topic.
+3. Independently audit every agent-completed page for content quality **and** versions/audit/tags/category relations before adding it to this ledger.
