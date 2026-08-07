@@ -1,6 +1,9 @@
-const CACHE_NAME = 'rawafid-shell-v1';
+const CACHE_NAME = 'rawafid-shell-v2';
 const PRECACHE = ['/', '/offline', '/manifest.webmanifest', '/icons/rawafid-app.svg'];
-const PRIVATE_PREFIXES = ['/account', '/admin', '/specialist', '/auth', '/login', '/api'];
+const PRIVATE_PREFIXES = [
+  '/account', '/admin', '/specialist', '/center', '/messages', '/appointments', '/notifications',
+  '/auth', '/login', '/forgot-password', '/reset-password', '/community/join', '/api'
+];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -31,17 +34,7 @@ self.addEventListener('fetch', (event) => {
   if (PRIVATE_PREFIXES.some((prefix) => url.pathname === prefix || url.pathname.startsWith(`${prefix}/`))) return;
 
   if (request.mode === 'navigate') {
-    event.respondWith(
-      fetch(request)
-        .then((response) => {
-          if (response.ok && response.type === 'basic') {
-            const copy = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
-          }
-          return response;
-        })
-        .catch(async () => (await caches.match(request)) || (await caches.match('/offline')))
-    );
+    event.respondWith(fetch(request).catch(async () => (await caches.match('/offline'))));
     return;
   }
 
