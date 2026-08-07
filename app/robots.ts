@@ -23,6 +23,7 @@ export default function robots(): MetadataRoute.Robots {
     },
     sitemap: [
       `${SITE_URL}/sitemap.xml`,
+      `${SITE_URL}/sitemaps/static.xml`,
       `${SITE_URL}/sitemaps/content.xml`,
       `${SITE_URL}/sitemaps/taxonomy.xml`,
       `${SITE_URL}/sitemaps/specialists.xml`,
