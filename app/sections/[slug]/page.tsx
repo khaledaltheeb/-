@@ -13,30 +13,31 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const supabase = await createClient();
   const { data: category } = await supabase
     .from('categories')
-    .select('name_ar,description')
+    .select('name_ar,description,seo_title,seo_description')
     .eq('slug', slug)
     .eq('is_active', true)
     .maybeSingle();
 
   if (!category) return {};
-  const description = category.description || `استكشف قسم ${category.name_ar} ضمن منصة روافد.`;
+  const title = category.seo_title || category.name_ar;
+  const description = category.seo_description || category.description || `استكشف قسم ${category.name_ar} ضمن منصة روافد.`;
   const canonical = `/sections/${slug}`;
 
   return {
-    title: category.name_ar,
+    title,
     description,
     alternates: { canonical },
     openGraph: {
       type: 'website',
       url: `${SITE}${canonical}`,
       siteName: 'منصة روافد',
-      title: `${category.name_ar} | منصة روافد`,
+      title: `${title} | منصة روافد`,
       description,
       locale: 'ar_AR',
     },
     twitter: {
       card: 'summary',
-      title: `${category.name_ar} | منصة روافد`,
+      title: `${title} | منصة روافد`,
       description,
     },
   };
@@ -48,7 +49,7 @@ export default async function SectionPage({ params }: { params: Params }) {
 
   const { data: category } = await supabase
     .from('categories')
-    .select('id,sector_id,parent_id,slug,name_ar,description')
+    .select('id,sector_id,parent_id,slug,name_ar,description,seo_title,seo_description')
     .eq('slug', slug)
     .eq('is_active', true)
     .maybeSingle();
@@ -65,7 +66,7 @@ export default async function SectionPage({ params }: { params: Params }) {
     supabase.from('categories').select('id,slug,name_ar,description').eq('parent_id', category.id).eq('is_active', true).order('sort_order').order('name_ar'),
   ]);
 
-  const description = category.description || 'قسم معرفي متخصص ضمن منصة روافد.';
+  const description = category.seo_description || category.description || 'قسم معرفي متخصص ضمن منصة روافد.';
   const breadcrumbItems = [
     { name: 'الرئيسية', item: SITE },
     ...(sector ? [{ name: sector.name_ar, item: `${SITE}/sectors/${sector.slug}` }] : []),
@@ -77,7 +78,7 @@ export default async function SectionPage({ params }: { params: Params }) {
     '@graph': [
       {
         '@type': 'CollectionPage',
-        name: category.name_ar,
+        name: category.seo_title || category.name_ar,
         description,
         url: `${SITE}/sections/${category.slug}`,
         inLanguage: 'ar',
@@ -115,7 +116,7 @@ export default async function SectionPage({ params }: { params: Params }) {
       <section className="sector-hero compact-hero">
         <span className="eyebrow">قسم ديناميكي</span>
         <h1>{category.name_ar}</h1>
-        <p>{description}</p>
+        <p>{category.description || description}</p>
       </section>
 
       <section className="section">
