@@ -67,13 +67,18 @@ export async function deleteMedia(formData: FormData) {
   const { supabase } = await requireAdmin();
   const id = String(formData.get('id') ?? '').trim();
   if (!/^[0-9a-f-]{36}$/i.test(id)) redirect('/admin/media?error=invalid-id');
-  const { data: asset } = await supabase.from('media_assets').select('object_path').eq('id',id).maybeSingle();
-  if (!asset?.object_path) redirect('/admin/media?error=not-found');
 
-  const { error: storageError } = await supabase.storage.from('rawafid-media').remove([asset.object_path]);
-  if (storageError) redirect('/admin/media?error=delete-storage-failed');
-  const { error: dbError } = await supabase.rpc('delete_media_asset',{ p_id:id });
-  if (dbError) redirect('/admin/media?error=delete-db-failed');
+  // Delete the database record first through the audited RPC. It returns the
+  // object path. If Storage cleanup then fails, the worst case is an orphaned
+  // object rather than a live database record pointing at a missing image.
+  const { data: objectPath, error: dbError } = await supabase.rpc('delete_media_asset',{ p_id:id });
+  if (dbError || !objectPath) redirect('/admin/media?error=delete-db-failed');
+
+  const { error: storageError } = await supabase.storage.from('rawafid-media').remove([objectPath]);
+  if (storageError) {
+    revalidatePath('/admin/media');
+    redirect('/admin/media?error=delete-storage-orphan');
+  }
 
   revalidatePath('/admin/media');
   redirect('/admin/media?ok=deleted');
