@@ -29,18 +29,21 @@ const TYPES = [
   ['directory_page', 'صفحة دليل'], ['news', 'خبر'], ['sector_page', 'صفحة قطاع'], ['landing_page', 'صفحة هبوط'],
 ];
 
-export default function ContentForm({ action, sectors, categories, record, submitLabel }: {
+export default function ContentForm({ action, sectors, categories, record, submitLabel, allowedTypes }: {
   action: (formData: FormData) => void | Promise<void>;
   sectors: Sector[];
   categories: Category[];
   record?: ContentRecord;
   submitLabel: string;
+  allowedTypes?: string[];
 }) {
+  const typeOptions = allowedTypes?.length ? TYPES.filter(([value]) => allowedTypes.includes(value)) : TYPES;
+  const defaultType = record?.content_type && typeOptions.some(([value]) => value === record.content_type) ? record.content_type : typeOptions[0]?.[0] ?? 'article';
   return (
     <form action={action} className="cms-form">
       {record?.id && <input type="hidden" name="id" value={record.id} />}
       <div className="cms-grid">
-        <label>نوع الصفحة<select name="content_type" required defaultValue={record?.content_type ?? 'article'}>{TYPES.map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select></label>
+        <label>نوع الصفحة<select name="content_type" required defaultValue={defaultType}>{typeOptions.map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select></label>
         <label>العنوان<input name="title" required minLength={3} maxLength={300} defaultValue={record?.title ?? ''} /></label>
         <label>Slug<input name="slug" required dir="ltr" maxLength={140} pattern="[a-z0-9]+(?:-[a-z0-9]+)*" defaultValue={record?.slug ?? ''} placeholder="clear-stable-slug" /></label>
         <label>القطاع<select name="sector_id" defaultValue={record?.sector_id ?? ''}><option value="">بدون قطاع</option>{sectors.map((sector) => <option value={sector.id} key={sector.id}>{sector.name_ar}</option>)}</select></label>
