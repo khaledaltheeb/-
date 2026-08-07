@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import SiteHeader from '@/components/site-header';
@@ -97,7 +98,7 @@ export default async function PublishedContentPage({ params }: { params: Params 
           </header>
 
           <div className="article-body">
-            {record.featured_image_url && <figure className="article-featured-image"><img src={record.featured_image_url} alt={record.featured_image_alt || record.title} loading="eager" /><figcaption className="sr-only">{record.featured_image_alt || record.title}</figcaption></figure>}
+            {record.featured_image_url && <figure className="article-featured-image"><Image src={record.featured_image_url} alt={record.featured_image_alt || record.title} width={1200} height={675} sizes="(max-width: 900px) 100vw, 900px" priority unoptimized /><figcaption className="sr-only">{record.featured_image_alt || record.title}</figcaption></figure>}
             {paragraphs.map((paragraph, index) => <p key={`${record.id}-${index}`}>{paragraph}</p>)}
             {!paragraphs.length && <p>لا يتوفر نص منشور لهذه الصفحة.</p>}
           </div>
