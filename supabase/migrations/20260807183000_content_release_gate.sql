@@ -24,8 +24,7 @@ begin
 
   if new.status in ('approved'::public.content_status,'published'::public.content_status) then
     if nullif(pg_catalog.btrim(coalesce(new.author_display_name,'')),'') is null then
-      select nullif(pg_catalog.btrim(coalesce(p.display_name,'')),'') into new.author_display_name
-      from public.profiles p where p.id=new.author_id;
+      new.author_display_name := (select nullif(pg_catalog.btrim(coalesce(p.display_name,'')),'') from public.profiles p where p.id=new.author_id);
     end if;
     if new.author_display_name is null then raise exception 'visible author is required before approval'; end if;
 
