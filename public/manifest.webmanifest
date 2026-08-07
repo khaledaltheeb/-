@@ -1,0 +1,46 @@
+{
+  "id": "/",
+  "name": "منصة روافد",
+  "short_name": "روافد",
+  "description": "منصة عربية مؤسسية للصحة النفسية والتعافي والدمج والتمكين والمعرفة المتخصصة.",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#fffefb",
+  "theme_color": "#0f8f88",
+  "categories": ["health", "education", "medical", "lifestyle"],
+  "icons": [
+    {
+      "src": "/icons/rawafid-app.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "الرئيسية",
+      "short_name": "الرئيسية",
+      "url": "/"
+    },
+    {
+      "name": "حسابي",
+      "short_name": "حسابي",
+      "url": "/account"
+    }
+  ],
+  "share_target": {
+    "action": "/share",
+    "method": "GET",
+    "enctype": "application/x-www-form-urlencoded",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  }
+}
