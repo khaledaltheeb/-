@@ -1,5 +1,5 @@
 const base=process.env.SMOKE_BASE_URL||'http://127.0.0.1:3000';
-const publicRoutes=['/','/search','/specialists','/centers','/community','/about','/offline','/share','/manifest.webmanifest','/sw.js','/robots.txt'];
+const publicRoutes=['/','/theme-preview','/search','/specialists','/centers','/community','/about','/offline','/share','/manifest.webmanifest','/sw.js','/robots.txt'];
 const protectedRoutes=['/messages','/appointments','/notifications','/account','/admin'];
 let failed=false;
 for(const route of publicRoutes){try{const response=await fetch(`${base}${route}`,{redirect:'manual'});if(response.status<200||response.status>=400){console.error(`PUBLIC ${route}: ${response.status}`);failed=true;}else console.log(`PUBLIC ${route}: ${response.status}`);}catch(error){console.error(`PUBLIC ${route}:`,error);failed=true;}}
