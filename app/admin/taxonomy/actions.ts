@@ -7,9 +7,18 @@ import { createClient } from '@/lib/supabase/server';
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const HEX_RE = /^#[0-9a-f]{6}$/i;
+const VISIBILITY = new Set(['public', 'authenticated', 'hidden']);
 
 function text(formData: FormData, key: string, max = 200) {
   return String(formData.get(key) ?? '').trim().slice(0, max);
+}
+
+function list(formData: FormData, key: string, maxItems = 20) {
+  return text(formData, key, 1000)
+    .split(/[،,\n]/)
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .slice(0, maxItems);
 }
 
 function orderValue(formData: FormData) {
@@ -19,6 +28,24 @@ function orderValue(formData: FormData) {
 
 function activeValue(formData: FormData) {
   return formData.get('is_active') === 'on' || formData.get('is_active') === 'true';
+}
+
+function visibilityValue(formData: FormData) {
+  const value = text(formData, 'visibility', 30);
+  return VISIBILITY.has(value) ? value : 'public';
+}
+
+function taxonomyMeta(formData: FormData) {
+  const seoTitle = text(formData, 'seo_title', 180) || null;
+  const seoDescription = text(formData, 'seo_description', 500) || null;
+  const iconKey = text(formData, 'icon_key', 80) || null;
+  return {
+    seo_title: seoTitle,
+    seo_description: seoDescription,
+    visibility: visibilityValue(formData),
+    audience: list(formData, 'audience'),
+    icon_key: iconKey,
+  };
 }
 
 async function requireAdmin() {
@@ -37,10 +64,15 @@ async function requireAdmin() {
   return supabase;
 }
 
-function refresh() {
+function refresh(slug?: string) {
   revalidatePath('/admin');
   revalidatePath('/admin/taxonomy');
   revalidatePath('/');
+  revalidatePath('/sitemap.xml');
+  if (slug) {
+    revalidatePath(`/sectors/${slug}`);
+    revalidatePath(`/sections/${slug}`);
+  }
 }
 
 export async function createSector(formData: FormData) {
@@ -60,10 +92,11 @@ export async function createSector(formData: FormData) {
     accent,
     sort_order: orderValue(formData),
     is_active: activeValue(formData),
+    ...taxonomyMeta(formData),
   });
 
   if (error) redirect('/admin/taxonomy?error=sector-write');
-  refresh();
+  refresh(slug);
   redirect('/admin/taxonomy?ok=sector-created');
 }
 
@@ -85,10 +118,11 @@ export async function updateSector(formData: FormData) {
     accent,
     sort_order: orderValue(formData),
     is_active: activeValue(formData),
+    ...taxonomyMeta(formData),
   }).eq('id', id);
 
   if (error) redirect('/admin/taxonomy?error=sector-write');
-  refresh();
+  refresh(slug);
   redirect('/admin/taxonomy?ok=sector-updated');
 }
 
@@ -117,10 +151,11 @@ export async function createCategory(formData: FormData) {
     description,
     sort_order: orderValue(formData),
     is_active: activeValue(formData),
+    ...taxonomyMeta(formData),
   });
 
   if (error) redirect('/admin/taxonomy?error=category-write');
-  refresh();
+  refresh(slug);
   redirect('/admin/taxonomy?ok=category-created');
 }
 
@@ -150,9 +185,10 @@ export async function updateCategory(formData: FormData) {
     description,
     sort_order: orderValue(formData),
     is_active: activeValue(formData),
+    ...taxonomyMeta(formData),
   }).eq('id', id);
 
   if (error) redirect('/admin/taxonomy?error=category-write');
-  refresh();
+  refresh(slug);
   redirect('/admin/taxonomy?ok=category-updated');
 }
