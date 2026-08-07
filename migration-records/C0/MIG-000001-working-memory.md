@@ -1,14 +1,14 @@
 # MIG-000001 — الذاكرة العاملة
 
 - Lane: C0 — الموسوعة والمصطلحات العامة
-- Status: DRAFT BUILT — FINAL QA / PUBLISH PENDING
+- Status: **COMPLETE — PUBLISHED / POST-PUBLISH QA PASS**
 - Canonical key: `working-memory`
 - New slug: `working-memory`
 - New canonical: `/content/working-memory`
 - Content type: `glossary_term`
 - Supabase content id: `e0528a72-13b9-4525-9874-d773d30e2079`
-- Current version: v1
-- Current database status: `draft`
+- Current version: **v9**
+- Current database status: **published**
 - Sector: `knowledge` — المعرفة والموسوعة
 - Primary category: `cognitive-processes` — المصطلحات والعمليات المعرفية
 - Audiences: الأفراد، الأسر، المعلمون، المختصون، المتدربون
@@ -18,7 +18,7 @@
 
 الصفحة الجديدة تمثل **المفهوم العلمي العام للذاكرة العاملة (Working Memory)**.
 
-المسار القديم `/cognitive-lab/working-memory-updating/` يمثل **أداة/مهمة تدريبية تفاعلية منفصلة** ولا يعد نسخة مكررة من صفحة المصطلح؛ لذلك لا يُحوّل إلى الصفحة الموسوعية. يجب ربط الأداة بالمفهوم سياقيًا لاحقًا عندما تُرحّل الأداة إلى Module الأدوات.
+المسار القديم `/cognitive-lab/working-memory-updating/` يمثل **أداة/مهمة تدريبية تفاعلية منفصلة** ولا يعد نسخة مكررة من صفحة المصطلح؛ لذلك لم يُحوّل إلى الصفحة الموسوعية. يجب ربط الأداة بالمفهوم سياقيًا لاحقًا عندما تُرحّل الأداة إلى Module الأدوات.
 
 المرادفات البحثية المقبولة:
 
@@ -30,10 +30,11 @@
 
 ## Legacy material inspected
 
-- `terms/index.html` — سياسة المعجم القديم وتصنيف الذاكرة العاملة كبناء نفسي/معرفي، مع ملاحظة وجود تنبيه عام متكرر لا يُنقل إلى الصفحة الجديدة.
+- `terms/index.html` — سياسة المعجم القديم وتصنيف الذاكرة العاملة كبناء نفسي/معرفي، مع استبعاد التنبيه العام المتكرر من الصفحة الجديدة.
 - `scripts/publish_working_memory_updating_v205.py` — مادة الأداة القديمة وتعريف وضعها كتدريب غير تشخيصي، وملاحظة مهمة حول الفرق بين تحسن المهمة والانتقال العام.
 - نتائج البحث المرتبطة بـ`upgrade_cognitive_batch1_v22.py` و`upgrade_cognitive_batch2_v22.py` و`cognitive-lab/index.html` وسكربتات/تقارير المختبر المعرفي.
-- بحث المستودع عن `الذاكرة العاملة` و`working-memory` لتحديد المسارات المتقاربة ومنع الخلط بين المفهوم والأداة.
+- `scripts/rebuild_encyclopedia_v13.py` — مراجعة بنية الموسوعة المولدة القديمة وDefinedTerm pattern ومنهج توليد صفحات متعددة.
+- بحث المستودع عن `الذاكرة العاملة` و`working-memory` و`working-memory/index.html` لتحديد المسارات المتقاربة ومنع الخلط بين المفهوم والأداة.
 
 ## Material explicitly excluded
 
@@ -46,8 +47,8 @@
 
 ## Authoritative sources used
 
-1. National Institute of Mental Health (NIMH), RDoC — Working Memory construct.
-2. American Psychological Association — APA Dictionary of Psychology: Working Memory.
+1. National Institute of Mental Health (NIMH), RDoC — Working Memory construct. لا تُسند له سنة نشر غير ظاهرة في المصدر.
+2. American Psychological Association — APA Dictionary of Psychology: Working Memory — updated 2018-04-19.
 3. Baddeley A. Working memory. Science. 1992.
 4. Cowan N. Working Memory Underpins Cognitive Development, Learning, and Education. 2014.
 5. Cowan N. What are the differences between long-term, short-term, and working memory? 2008.
@@ -90,7 +91,8 @@ All stored reference URLs use HTTPS.
 - Tables: **1**
 - References: **8**
 - All stored reference URLs HTTPS: **PASS**
-- Duplicate title/slug in new Supabase: **none**
+- Duplicate title/slug/canonical in new Supabase: **0**
+- Wrong redirect from working-memory-updating tool: **0**
 - Forbidden/internal text scan:
   - TODO: PASS
   - FIXME: PASS
@@ -108,19 +110,40 @@ All stored reference URLs use HTTPS.
 - Search intent: `informational`
 - Canonical: `/content/working-memory`
 - FAQ schema: generated only from visible FAQ block
-- Glossary schema: platform hardening adds `DefinedTerm` for `glossary_term`
+- Glossary schema: `DefinedTerm` generated for `glossary_term`
 - Breadcrumbs: sector → category → content
+- Search verification: query `الذاكرة العاملة` returns this canonical content result with destination `/content/working-memory`.
+
+## Workflow and audit
+
+The page passed the platform sequence:
+
+`Draft → Scientific Review → Editorial Review → SEO → Accessibility → Approved → Scheduled → Published`
+
+The migration workflow audit explicitly records that this was **system-assisted migration QA and no human reviewer was claimed**. `reviewer_display_name` was not fabricated.
+
+- Final content versions: **9**
+- Final audit events: **9**
+- Published at: `2026-08-07T20:51:28Z`
 
 ## Redirect decision
 
-No redirect has been created from `/cognitive-lab/working-memory-updating/` because it is a distinct tool, not a duplicate.
+No redirect was created from `/cognitive-lab/working-memory-updating/` because it is a distinct tool.
 
-No verified old standalone canonical URL for the concept itself has yet been identified; further historical evidence must be checked before creating any redirect. Redirects are never guessed.
+Repository searches did not verify a separate historical standalone canonical URL for the general working-memory concept. No redirect was guessed.
 
-## Remaining before COMPLETE
+## Platform QA before publish
 
-1. Final-hardening Quality Gate must pass after adding `DefinedTerm` schema and centralized analytics changes.
-2. Verify no additional historical standalone working-memory canonical exists.
-3. Promote through the content workflow without claiming a human scientific reviewer who did not review it.
-4. Verify published page query, search result, relations and sitemap eligibility.
-5. Close the GitHub claim only after final QA.
+The hardened `main` commit `08fc03b8420e44cfdb36904f98efa72e450e533f` passed the full Rawafid Quality Gate after central analytics and DefinedTerm schema were added:
+
+- Architecture/privacy/PWA contract: PASS
+- Final content-readiness hardening: PASS
+- TypeScript: PASS
+- ESLint: PASS
+- Production build: PASS
+- HTTP smoke: PASS
+- Lighthouse lab gate: PASS
+
+## Final result
+
+**MIG-000001 is closed and canonicalized. The next C0 page may now start.**
