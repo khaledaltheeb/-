@@ -2,7 +2,7 @@ import type { CSSProperties } from 'react';
 import Link from 'next/link';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
-import { createClient } from '@/lib/supabase/server';
+import { getPublicSectors } from '@/lib/public-taxonomy';
 import { buildSeoMetadata } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
@@ -29,17 +29,8 @@ const intents = [
 ];
 
 export default async function HomePage() {
-  const supabase = await createClient();
-  const { data: sectors } = await supabase
-    .from('sectors')
-    .select('slug,name_ar,description,accent,sort_order')
-    .eq('is_active', true)
-    .eq('visibility', 'public')
-    .order('sort_order')
-    .order('name_ar')
-    .limit(12);
-
-  const pillars = sectors?.length ? sectors : fallbackPillars;
+  const sectors = await getPublicSectors(12);
+  const pillars = sectors.length ? sectors : fallbackPillars;
 
   return (
     <>
