@@ -1,10 +1,25 @@
 import { createClient } from '@/lib/supabase/server';
 import { getPublicSectors } from '@/lib/public-taxonomy';
+import PlatformIcon from '@/components/platform-icon';
 
 const primaryLinks = [
   { href: '/specialists', label: 'المختصون' },
   { href: '/centers', label: 'المراكز' },
-  { href: '/community', label: 'المتدربون والمتطوعون' },
+  { href: '/community', label: 'المجتمع' },
+];
+
+const intentLinks = [
+  { href: '/search?q=أعراض+نفسية', label: 'أفهم عرضًا أو حالة', detail: 'ابدأ من السؤال أو العرض' },
+  { href: '/search?q=دعم+الأسرة', label: 'أساعد شخصًا قريبًا', detail: 'مسارات للأسرة ومقدمي الدعم' },
+  { href: '/search?q=الإدمان+والتعافي', label: 'أبحث عن مسار تعافٍ', detail: 'معرفة ودعم وخدمات مترابطة' },
+  { href: '/search?q=ذوو+الاحتياجات+الخاصة', label: 'أبحث عن دمج وتمكين', detail: 'أدلة وخدمات ومسارات دعم' },
+];
+
+const serviceLinks = [
+  { href: '/specialists', label: 'العثور على مختص', icon: 'specialist' as const },
+  { href: '/centers', label: 'العثور على مركز', icon: 'center' as const },
+  { href: '/community', label: 'متدربون ومتطوعون', icon: 'community' as const },
+  { href: '/search', label: 'البحث المتقدم', icon: 'search' as const },
 ];
 
 type IconName = 'home' | 'search' | 'discover' | 'messages' | 'account' | 'sections' | 'specialists' | 'more';
@@ -52,13 +67,27 @@ export default async function SiteHeader() {
 
           <nav className="desktop-nav" aria-label="التنقل الرئيسي">
             <a href="/">الرئيسية</a>
-            <details className="nav-dropdown">
-              <summary>القطاعات</summary>
-              <div className="nav-dropdown-panel">
-                <div className="nav-dropdown-heading"><strong>قطاعات روافد</strong><span>تنظيم معرفي وخدمي ديناميكي</span></div>
-                <div className="nav-dropdown-grid">
-                  {sectors.map((sector) => <a key={sector.slug} href={`/sectors/${sector.slug}`}>{sector.name_ar}</a>)}
-                  {sectors.length === 0 && <span className="nav-empty">تظهر القطاعات بعد تفعيلها من الإدارة.</span>}
+            <details className="nav-dropdown mega-nav">
+              <summary>استكشف روافد</summary>
+              <div className="nav-dropdown-panel mega-nav-panel">
+                <div className="nav-dropdown-heading"><div><strong>الوصول إلى روافد حسب احتياجك</strong><span>قطاعات ديناميكية، مسارات بحث، ودليل خدمات في مكان واحد</span></div><a href="/search">فتح البحث المتقدم ←</a></div>
+                <div className="mega-nav-layout">
+                  <section className="mega-nav-column mega-nav-sectors">
+                    <h2>القطاعات</h2>
+                    <div className="mega-sector-grid">
+                      {sectors.map((sector) => <a key={sector.slug} href={`/sectors/${sector.slug}`}><i style={{ background: sector.accent || '#08716d' }} aria-hidden="true" /><span>{sector.name_ar}</span></a>)}
+                      {sectors.length === 0 && <div className="mega-empty"><strong>الثيم جاهز للقطاعات</strong><span>تظهر هنا تلقائيًا بعد إضافتها من لوحة الإدارة.</span></div>}
+                    </div>
+                  </section>
+                  <section className="mega-nav-column">
+                    <h2>ابدأ من احتياجك</h2>
+                    <div className="mega-intent-list">{intentLinks.map((link) => <a href={link.href} key={link.href}><strong>{link.label}</strong><span>{link.detail}</span></a>)}</div>
+                  </section>
+                  <section className="mega-nav-column mega-services">
+                    <h2>الدليل والخدمات</h2>
+                    <div>{serviceLinks.map((link) => <a href={link.href} key={link.href}><PlatformIcon name={link.icon} size={19}/><span>{link.label}</span></a>)}</div>
+                    {signedIn && <div className="mega-member-links"><a href="/messages">الرسائل</a><a href="/appointments">المواعيد</a><a href="/notifications">الإشعارات</a></div>}
+                  </section>
                 </div>
               </div>
             </details>
@@ -79,8 +108,12 @@ export default async function SiteHeader() {
             <div className="mobile-menu-panel">
               <form className="mobile-search" action="/search" method="get"><input name="q" type="search" placeholder="ابحث في روافد" maxLength={120} /><button type="submit">بحث</button></form>
               <a href="/">الرئيسية</a>
+              <span className="mobile-menu-label">ابدأ من احتياجك</span>
+              {intentLinks.map((link) => <a key={link.href} href={link.href}>{link.label}</a>)}
               <span className="mobile-menu-label">القطاعات</span>
               {sectors.map((sector) => <a key={sector.slug} href={`/sectors/${sector.slug}`}>{sector.name_ar}</a>)}
+              {sectors.length === 0 && <span className="nav-empty">تظهر القطاعات بعد إضافتها من الإدارة.</span>}
+              <span className="mobile-menu-label">الدليل والخدمات</span>
               {primaryLinks.map((link) => <a key={link.href} href={link.href}>{link.label}</a>)}
               {signedIn ? <><a href="/messages">الرسائل</a><a href="/appointments">المواعيد</a><a href="/notifications">الإشعارات</a><a href="/account">حسابي</a></> : <a href="/login">تسجيل الدخول</a>}
             </div>
