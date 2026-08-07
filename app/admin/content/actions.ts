@@ -20,6 +20,7 @@ async function requireAdmin() {
 function refresh(slug?: string) {
   revalidatePath('/admin');
   revalidatePath('/admin/content');
+  revalidatePath('/admin/seo');
   revalidatePath('/sitemap.xml');
   revalidatePath('/sitemaps/content.xml');
   if (slug) revalidatePath(`/content/${slug}`);
@@ -29,7 +30,7 @@ export async function createDraft(formData: FormData) {
   const supabase = await requireAdmin();
   const data = buildContentPayload(formData);
   if (!data) redirect('/admin/content/new?error=invalid-input');
-  const { data: id, error } = await supabase.rpc('create_content_draft_v3', data);
+  const { data: id, error } = await supabase.rpc('create_content_draft_v4', data);
   if (error || !id) redirect('/admin/content/new?error=create-failed');
   refresh(data.p_slug);
   redirect(`/admin/content/${id}?ok=created`);
@@ -40,7 +41,7 @@ export async function updateDraft(formData: FormData) {
   const id = field(formData, 'id', 60);
   const data = buildContentPayload(formData);
   if (!validUuid(id) || !data) redirect('/admin/content?error=invalid-input');
-  const { error } = await supabase.rpc('update_content_draft_v3', { p_id: id, ...data });
+  const { error } = await supabase.rpc('update_content_draft_v4', { p_id: id, ...data });
   if (error) redirect(`/admin/content/${id}?error=update-failed`);
   refresh(data.p_slug);
   redirect(`/admin/content/${id}?ok=saved`);
