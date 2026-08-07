@@ -9,14 +9,11 @@ const primaryLinks = [
 
 export default async function SiteHeader() {
   const supabase = await createClient();
-  const { data: sectors } = await supabase
-    .from('sectors')
-    .select('slug,name_ar')
-    .eq('is_active', true)
-    .eq('visibility', 'public')
-    .order('sort_order')
-    .order('name_ar')
-    .limit(10);
+  const [{ data: sectors }, { data: claims }] = await Promise.all([
+    supabase.from('sectors').select('slug,name_ar').eq('is_active', true).eq('visibility', 'public').order('sort_order').order('name_ar').limit(10),
+    supabase.auth.getClaims(),
+  ]);
+  const signedIn = Boolean(claims?.claims?.sub);
 
   return (
     <header className="site-header">
@@ -39,6 +36,7 @@ export default async function SiteHeader() {
             </div>
           </details>
           {primaryLinks.map((link) => <Link key={link.href} href={link.href}>{link.label}</Link>)}
+          {signedIn && <Link href="/messages">الرسائل</Link>}
         </nav>
 
         <form className="header-search" action="/search" method="get" role="search">
@@ -47,7 +45,7 @@ export default async function SiteHeader() {
           <button type="submit">بحث</button>
         </form>
 
-        <div className="header-actions"><Link className="button header-login" href="/login">تسجيل الدخول</Link></div>
+        <div className="header-actions">{signedIn ? <Link className="button header-login" href="/account">حسابي</Link> : <Link className="button header-login" href="/login">تسجيل الدخول</Link>}</div>
 
         <details className="mobile-menu">
           <summary aria-label="فتح القائمة">القائمة</summary>
@@ -57,7 +55,7 @@ export default async function SiteHeader() {
             <span className="mobile-menu-label">القطاعات</span>
             {(sectors ?? []).map((sector) => <Link key={sector.slug} href={`/sectors/${sector.slug}`}>{sector.name_ar}</Link>)}
             {primaryLinks.map((link) => <Link key={link.href} href={link.href}>{link.label}</Link>)}
-            <Link href="/login">تسجيل الدخول</Link>
+            {signedIn ? <><Link href="/messages">الرسائل</Link><Link href="/appointments">المواعيد</Link><Link href="/notifications">الإشعارات</Link><Link href="/account">حسابي</Link></> : <Link href="/login">تسجيل الدخول</Link>}
           </div>
         </details>
       </div>
