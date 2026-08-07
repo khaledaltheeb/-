@@ -106,13 +106,29 @@ Source repository: `khaledaltheeb/healthrenewal.org`
 - Full record: `migration-records/C0/MIG-000001-working-memory.md`
 - Claim: GitHub Issue #1 — CLOSED / COMPLETED
 
+### MIG-000002 — الانتباه
+
+- Lane: C0
+- Canonical: `/content/attention`
+- Type: `glossary_term`
+- Status: **PUBLISHED / QA PASS**
+- Useful Arabic words: **2017**
+- FAQ: **11**
+- References: **8**
+- Versions: **8**
+- Duplicate canonicals after publish: **0**
+- Search validation: **PASS — first result for الانتباه**
+- Incorrect redirects from attention quick-info/tools: **0**
+- Full record: `migration-records/C0/MIG-000002-attention.md`
+- Claim: GitHub Issue #2 — CLOSED / COMPLETED
+
 ## Totals
 
-- Completed canonical pages: **1**
-- Published canonical pages: **1**
-- C0 completed: **1**
+- Completed canonical pages: **2**
+- Published canonical pages: **2**
+- C0 completed: **2**
 - A1–A5 completed recorded in central ledger: **0**
 
 ## Next action
 
-C0 may start **MIG-000002** only after checking all open agent Claims and selecting a general encyclopedia topic that is not owned by A1–A5.
+C0 may start **MIG-000003** only after checking all open agent Claims and selecting a general encyclopedia topic that is not owned by A1–A5.
