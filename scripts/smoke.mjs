@@ -4,4 +4,9 @@ const protectedRoutes=['/messages','/appointments','/notifications','/account','
 let failed=false;
 for(const route of publicRoutes){try{const response=await fetch(`${base}${route}`,{redirect:'manual'});if(response.status<200||response.status>=400){console.error(`PUBLIC ${route}: ${response.status}`);failed=true;}else console.log(`PUBLIC ${route}: ${response.status}`);}catch(error){console.error(`PUBLIC ${route}:`,error);failed=true;}}
 for(const route of protectedRoutes){try{const response=await fetch(`${base}${route}`,{redirect:'manual'});const location=response.headers.get('location')||'';if(![301,302,303,307,308].includes(response.status)||!location.includes('/login')){console.error(`PROTECTED ${route}: expected login redirect, got ${response.status} ${location}`);failed=true;}else console.log(`PROTECTED ${route}: ${response.status} -> login`);}catch(error){console.error(`PROTECTED ${route}:`,error);failed=true;}}
+try{
+  const response=await fetch(`${base}/__rawafid_missing_route_for_smoke__`,{redirect:'manual'});
+  const body=await response.text();
+  if(response.status!==404||!body.includes('الصفحة غير موجودة')){console.error(`NOT_FOUND: expected branded 404, got ${response.status}`);failed=true;}else console.log('NOT_FOUND: branded 404 verified');
+}catch(error){console.error('NOT_FOUND:',error);failed=true;}
 if(failed)process.exit(1);console.log('Rawafid production HTTP smoke checks passed.');
