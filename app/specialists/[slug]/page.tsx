@@ -45,7 +45,10 @@ export default async function SpecialistProfile({ params }: { params: Params }) 
   const specialist = await getSpecialist(slug);
   if (!specialist) notFound();
   const supabase = await createClient();
-  const { data: memberships } = await supabase.from('center_specialists').select('center_id,is_primary').eq('specialist_id', specialist.id);
+  const [{ data: memberships }, { data: canContact }] = await Promise.all([
+    supabase.from('center_specialists').select('center_id,is_primary').eq('specialist_id', specialist.id),
+    supabase.rpc('can_contact_provider', { p_specialist_id: specialist.id, p_center_id: null }),
+  ]);
   const centerIds = (memberships ?? []).map((item) => item.center_id);
   let centers: CenterRow[] = [];
   if (centerIds.length) { const { data } = await supabase.from('centers').select('id,slug,name,city,country').in('id', centerIds).eq('verification','verified').eq('is_active',true); centers = Array.isArray(data) ? data as CenterRow[] : []; }
@@ -82,7 +85,7 @@ export default async function SpecialistProfile({ params }: { params: Params }) 
             {specialist.languages?.length > 0 && <section><h2>اللغات</h2><div className="directory-tags">{specialist.languages.map((item) => <span key={item}>{item}</span>)}</div></section>}
             {centers.length > 0 && <section><h2>المراكز المرتبطة</h2><div className="linked-centers">{centers.map((center) => <Link href={`/centers/${center.slug}`} key={center.id}><strong>{center.name}</strong><span>{[center.city,center.country].filter(Boolean).join('، ')}</span></Link>)}</div></section>}
           </article>
-          <aside className="profile-sidebar"><div className="contact-card"><h2>التواصل</h2><p>ابدأ التواصل داخل روافد، أو استخدم وسيلة مباشرة فقط إذا سمح المختص بعرضها.</p><div className="contact-actions"><Link className="primary-link" href={`/messages/new?specialist=${specialist.id}`}>محادثة مع المختص</Link><Link className="button" href={`/appointments/new?specialist=${specialist.id}`}>طلب موعد</Link>{email && <a className="button" href={`mailto:${email}`}>البريد الإلكتروني</a>}{phone && <a className="button" href={`tel:${phone}`}>اتصال</a>}{website && <a className="button" href={website} target="_blank" rel="noopener noreferrer">الموقع الإلكتروني</a>}{mapUrl && <a className="button" href={mapUrl} target="_blank" rel="noopener noreferrer">عرض الموقع</a>}</div></div><div className="trust-card"><strong>حالة التوثيق</strong><span>موثق في منصة روافد</span>{specialist.verified_at && <small>آخر توثيق: {new Intl.DateTimeFormat('ar',{dateStyle:'medium'}).format(new Date(specialist.verified_at))}</small>}</div></aside>
+          <aside className="profile-sidebar"><div className="contact-card"><h2>التواصل</h2><p>ابدأ التواصل داخل روافد، أو استخدم وسيلة مباشرة فقط إذا سمح المختص بعرضها.</p><div className="contact-actions">{canContact===true&&<><Link className="primary-link" href={`/messages/new?specialist=${specialist.id}`}>محادثة مع المختص</Link><Link className="button" href={`/appointments/new?specialist=${specialist.id}`}>طلب موعد</Link></>}{canContact!==true&&<span className="contact-unavailable">التواصل والمواعيد داخل روافد غير مفعلة لهذا الملف بعد.</span>}{email && <a className="button" href={`mailto:${email}`}>البريد الإلكتروني</a>}{phone && <a className="button" href={`tel:${phone}`}>اتصال</a>}{website && <a className="button" href={website} target="_blank" rel="noopener noreferrer">الموقع الإلكتروني</a>}{mapUrl && <a className="button" href={mapUrl} target="_blank" rel="noopener noreferrer">عرض الموقع</a>}</div></div><div className="trust-card"><strong>حالة التوثيق</strong><span>موثق في منصة روافد</span>{specialist.verified_at && <small>آخر توثيق: {new Intl.DateTimeFormat('ar',{dateStyle:'medium'}).format(new Date(specialist.verified_at))}</small>}</div></aside>
         </div>
       </main>
       <SiteFooter />
