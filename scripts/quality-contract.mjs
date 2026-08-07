@@ -51,7 +51,9 @@ requireText('app/theme-preview/page.tsx',['index: false','follow: false','Design
 requireText('app/not-found.tsx',['الصفحة غير موجودة','SiteHeader','SiteFooter']);
 requireText('app/loading.tsx',['system-loading-shell','aria-busy']);
 requireText('app/error.tsx',["'use client'",'إعادة المحاولة']);
-requireText('app/layout.tsx',["'./theme-empty.css'","'./dashboard-v3.css'","'./theme-preview.css'","'./public-modules-v3.css'","'./system-states.css'"]);
+requireText('components/content-renderer.tsx',["type === 'heading'","type === 'list'","type === 'table'","type === 'callout'","type === 'resource'"]);
+requireText('app/content/[slug]/page.tsx',['body_json','ContentRenderer']);
+requireText('app/layout.tsx',["'./theme-empty.css'","'./dashboard-v3.css'","'./theme-preview.css'","'./public-modules-v3.css'","'./system-states.css'","'./content-v3.css'","'./structured-content.css'"]);
 requireText('.env.example',['NEXT_PUBLIC_SITE_URL=https://healthrenewal.org','NEXT_PUBLIC_ALLOW_INDEXING=false']);
 requireText('lib/seo.ts',["'https://healthrenewal.org'"]);
 
