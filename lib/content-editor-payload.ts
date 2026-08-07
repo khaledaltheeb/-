@@ -8,7 +8,7 @@ export const SPECIALIST_CONTENT_TYPES = new Set(['article','guide','resource']);
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-const BLOCK_TYPES = new Set(['paragraph','heading','list','quote','callout','table','resource','divider']);
+const BLOCK_TYPES = new Set(['paragraph','heading','list','quote','callout','table','resource','image','faq','divider']);
 const CALLOUT_TONES = new Set(['info','success','warning','danger']);
 type JsonRecord = Record<string, unknown>;
 type CleanBlock = Record<string, unknown>;
@@ -52,6 +52,15 @@ function text(value: unknown, max: number) {
 function strings(value: unknown, maxItems: number, maxLength: number) {
   return Array.isArray(value) ? value.slice(0, maxItems).map((item) => text(item, maxLength)).filter(Boolean) : [];
 }
+function safeHttps(value: unknown) {
+  const raw = text(value, 2000);
+  if (!raw) return '';
+  try { const parsed = new URL(raw); return parsed.protocol === 'https:' ? parsed.toString() : ''; } catch { return ''; }
+}
+function safeDimension(value: unknown, fallback: number) {
+  const number = Number(value);
+  return Number.isFinite(number) && number >= 100 && number <= 4000 ? Math.round(number) : fallback;
+}
 function sanitizeBody(formData: FormData) {
   const raw = String(formData.get('body_json') ?? '');
   if (!raw || raw.length > 1_000_000) return null;
@@ -71,11 +80,23 @@ function sanitizeBody(formData: FormData) {
     if (type === 'quote') { const body=text(block.text,5000); const cite=text(block.cite,500); blocks.push({type,text:body,cite}); if(body) searchable.push(body); if(cite) searchable.push(cite); continue; }
     if (type === 'callout') { const title=text(block.title,300); const body=text(block.text,7000); const toneRaw=text(block.tone,20); const tone=CALLOUT_TONES.has(toneRaw)?toneRaw:'info'; blocks.push({type,tone,title,text:body}); if(title) searchable.push(title); if(body) searchable.push(body); continue; }
     if (type === 'table') { const caption=text(block.caption,300); const headers=strings(block.headers,12,300); const rows=Array.isArray(block.rows)?block.rows.slice(0,100).map((row)=>strings(row,12,1000)).filter((row)=>row.length):[]; blocks.push({type,caption,headers,rows}); if(caption) searchable.push(caption); searchable.push(...headers,...rows.flat()); continue; }
-    if (type === 'resource') { const label=text(block.label,500); const description=text(block.description,2000); const urlRaw=text(block.url,2000); const url=/^https:\/\//i.test(urlRaw)?urlRaw:''; if(!label||!url) continue; blocks.push({type,label,url,description}); searchable.push(label); if(description) searchable.push(description); continue; }
+    if (type === 'resource') { const label=text(block.label,500); const description=text(block.description,2000); const url=safeHttps(block.url); if(!label||!url) continue; blocks.push({type,label,url,description}); searchable.push(label); if(description) searchable.push(description); continue; }
+    if (type === 'image') {
+      const src=safeHttps(block.src); const alt=text(block.alt,500); const caption=text(block.caption,1000);
+      if(!src || alt.length < 3) continue;
+      const width=safeDimension(block.width,1200); const height=safeDimension(block.height,675);
+      blocks.push({type,src,alt,caption,width,height}); searchable.push(alt); if(caption) searchable.push(caption); continue;
+    }
+    if (type === 'faq') {
+      const rawItems=Array.isArray(block.items)?block.items.slice(0,40):[];
+      const items=rawItems.flatMap((item)=>{const entry=object(item); if(!entry)return[]; const question=text(entry.question,500); const answer=text(entry.answer,6000); return question.length>=3&&answer.length>=3?[{question,answer}]:[];});
+      if(!items.length) continue;
+      blocks.push({type,items}); for(const item of items){searchable.push(item.question,item.answer);} continue;
+    }
     blocks.push({type:'divider'});
   }
   if (!blocks.length) blocks.push({type:'paragraph',text:''});
-  return { json:{version:2,format:'blocks',blocks}, text:searchable.join('\n\n').slice(0,250000)||null };
+  return { json:{version:3,format:'blocks',blocks}, text:searchable.join('\n\n').slice(0,250000)||null };
 }
 
 export function buildContentPayload(formData: FormData, allowedTypes: Set<string> = CONTENT_TYPES) {
