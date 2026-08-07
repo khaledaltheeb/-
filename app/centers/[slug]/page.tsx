@@ -48,9 +48,10 @@ export default async function CenterProfile({ params }: { params: Params }) {
   const center = await getCenter(slug);
   if (!center) notFound();
   const supabase = await createClient();
-  const [{ data: memberships }, { data: licenseRows }] = await Promise.all([
+  const [{ data: memberships }, { data: licenseRows }, { data: canContact }] = await Promise.all([
     supabase.from('center_specialists').select('specialist_id,is_primary').eq('center_id', center.id),
     supabase.rpc('get_public_center_license', { p_center_id: center.id }),
+    supabase.rpc('can_contact_provider', { p_specialist_id: null, p_center_id: center.id }),
   ]);
   const license = Array.isArray(licenseRows) && licenseRows[0] ? licenseRows[0] as CenterLicense : null;
   const specialistIds = (memberships ?? []).map((item) => item.specialist_id);
@@ -96,7 +97,7 @@ export default async function CenterProfile({ params }: { params: Params }) {
             {hours.length > 0 && <section><h2>ساعات العمل</h2><div className="hours-list">{hours.map((row) => <span key={row}>{row}</span>)}</div></section>}
           </article>
           <aside className="profile-sidebar">
-            <div className="contact-card"><h2>بيانات المركز</h2><div className="contact-actions"><Link className="primary-link" href={`/messages/new?center=${center.id}`}>محادثة مع المركز</Link><Link className="button" href={`/appointments/new?center=${center.id}`}>طلب موعد</Link>{phone && <a className="button" href={`tel:${phone}`}>اتصال</a>}{email && <a className="button" href={`mailto:${email}`}>البريد الإلكتروني</a>}{website && <a className="button" href={website} target="_blank" rel="noopener noreferrer">الموقع الإلكتروني</a>}{mapUrl && <a className="button" href={mapUrl} target="_blank" rel="noopener noreferrer">الخريطة</a>}</div></div>
+            <div className="contact-card"><h2>بيانات المركز</h2><div className="contact-actions">{canContact===true&&<><Link className="primary-link" href={`/messages/new?center=${center.id}`}>محادثة مع المركز</Link><Link className="button" href={`/appointments/new?center=${center.id}`}>طلب موعد</Link></>}{canContact!==true&&<span className="contact-unavailable">التواصل والمواعيد داخل روافد غير مفعلة لهذا المركز بعد.</span>}{phone && <a className="button" href={`tel:${phone}`}>اتصال</a>}{email && <a className="button" href={`mailto:${email}`}>البريد الإلكتروني</a>}{website && <a className="button" href={website} target="_blank" rel="noopener noreferrer">الموقع الإلكتروني</a>}{mapUrl && <a className="button" href={mapUrl} target="_blank" rel="noopener noreferrer">الخريطة</a>}</div></div>
             <div className="trust-card"><strong>حالة المركز</strong><span>موثق ونشط في منصة روافد{center.verified_at ? ` منذ ${new Intl.DateTimeFormat('ar',{dateStyle:'medium'}).format(new Date(center.verified_at))}` : ''}</span></div>
           </aside>
         </div>
