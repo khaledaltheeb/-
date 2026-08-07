@@ -12,7 +12,7 @@ const intentLinks = [
   { href: '/search?q=أعراض+نفسية', label: 'أفهم عرضًا أو حالة', detail: 'ابدأ من السؤال أو العرض' },
   { href: '/search?q=دعم+الأسرة', label: 'أساعد شخصًا قريبًا', detail: 'مسارات للأسرة ومقدمي الدعم' },
   { href: '/search?q=الإدمان+والتعافي', label: 'أبحث عن مسار تعافٍ', detail: 'معرفة ودعم وخدمات مترابطة' },
-  { href: '/search?q=ذوو+الاحتياجات+الخاصة', label: 'أبحث عن دمج وتمكين', detail: 'أدلة وخدمات ومسارات دعم' },
+  { href: '/search?q=ذوو+الاحتياجات+الخاصة+الدمج', label: 'ذوو الاحتياجات الخاصة والدمج', detail: 'أقسام واسعة للدعم والتعليم والتأهيل والتمكين والخدمات' },
 ];
 
 const serviceLinks = [
@@ -51,7 +51,7 @@ export default async function SiteHeader() {
   ] : [
     { href: '/', label: 'الرئيسية', icon: 'home' },
     { href: '/search', label: 'بحث', icon: 'search' },
-    { href: '/#sectors', label: 'الأقسام', icon: 'sections' },
+    { href: '/sections', label: 'الأقسام', icon: 'sections' },
     { href: '/specialists', label: 'مختصون', icon: 'specialists' },
     { href: '/about', label: 'المزيد', icon: 'more' },
   ];
