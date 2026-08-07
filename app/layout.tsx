@@ -15,6 +15,7 @@ import './theme-v3.css';
 import './public-enhancements.css';
 import './communication.css';
 import './mobile-nav-v3.css';
+import './theme-empty.css';
 
 const arabicFont = Noto_Sans_Arabic({
   subsets: ['arabic'],
