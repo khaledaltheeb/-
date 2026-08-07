@@ -53,7 +53,6 @@ Source repository: `khaledaltheeb/healthrenewal.org`
 ## Per-page record template
 
 ### MIG-XXXXXX — [Canonical topic/title]
-
 - Status: NOT STARTED
 - Lane:
 - Candidate canonical slug:
@@ -91,7 +90,6 @@ Source repository: `khaledaltheeb/healthrenewal.org`
 ## Completed pages
 
 ### MIG-000001 — الذاكرة العاملة
-
 - Lane: C0
 - Canonical: `/content/working-memory`
 - Type: `glossary_term`
@@ -107,7 +105,6 @@ Source repository: `khaledaltheeb/healthrenewal.org`
 - Claim: GitHub Issue #1 — CLOSED / COMPLETED
 
 ### MIG-000002 — الانتباه
-
 - Lane: C0
 - Canonical: `/content/attention`
 - Type: `glossary_term`
@@ -122,13 +119,28 @@ Source repository: `khaledaltheeb/healthrenewal.org`
 - Full record: `migration-records/C0/MIG-000002-attention.md`
 - Claim: GitHub Issue #2 — CLOSED / COMPLETED
 
+### MIG-000003 — الإدراك
+- Lane: C0
+- Canonical: `/content/perception`
+- Type: `glossary_term`
+- Status: **PUBLISHED / QA PASS**
+- Useful Arabic words: **1905**
+- FAQ: **11**
+- References: **8**
+- Versions: **8**
+- Duplicate canonicals after publish: **0**
+- Search validation: **PASS — first result for الإدراك**
+- Guessed redirects: **0**
+- Full record: `migration-records/C0/MIG-000003-perception.md`
+- Claim: GitHub Issue #3 — CLOSED / COMPLETED
+
 ## Totals
 
-- Completed canonical pages: **2**
-- Published canonical pages: **2**
-- C0 completed: **2**
+- Completed canonical pages: **3**
+- Published canonical pages: **3**
+- C0 completed: **3**
 - A1–A5 completed recorded in central ledger: **0**
 
 ## Next action
 
-C0 may start **MIG-000003** only after checking all open agent Claims and selecting a general encyclopedia topic that is not owned by A1–A5.
+C0 may start **MIG-000004** only after checking all open agent Claims and selecting a general encyclopedia topic that is not owned by A1–A5.
