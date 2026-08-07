@@ -68,10 +68,11 @@ export default async function SpecialistDashboard({ searchParams }: { searchPara
           <div>
             <span className="eyebrow">بوابة المختص</span>
             <h1>{specialist?.full_name || profile.display_name || 'الملف المهني'}</h1>
-            <p>إدارة البيانات المهنية والخصوصية ونمط تقديم الخدمة. الملفات لا تظهر في الدليل العام قبل التوثيق.</p>
+            <p>إدارة البيانات المهنية والخصوصية والمحتوى والتواصل والمواعيد من حساب واحد. الملفات لا تظهر في الدليل العام قبل التوثيق.</p>
           </div>
           <div className="dashboard-actions">
             <Link className="button" href="/account">حسابي</Link>
+            <Link className="button" href="/notifications">الإشعارات</Link>
             {specialist?.verification === 'verified' && <Link className="button" href={`/specialists/${specialist.slug}`}>عرض ملفي العام</Link>}
           </div>
         </div>
@@ -136,7 +137,12 @@ export default async function SpecialistDashboard({ searchParams }: { searchPara
 
         <section className="portal-section portal-modules">
           <div className="section-mini-heading"><h2>مساحة العمل</h2><span>الوحدات التالية مرتبطة بنفس حساب المختص</span></div>
-          <div className="admin-module-grid"><div><strong>مقالاتي</strong><span>المحتوى المهني ومسار المراجعة.</span></div><div><strong>المحادثات</strong><span>قناة التواصل داخل روافد — قيد الربط.</span></div><div><strong>المواعيد</strong><span>الطلبات والتأكيد والإلغاء — قيد الربط.</span></div></div>
+          <div className="admin-module-grid">
+            <Link href="/specialist/content"><strong>مقالاتي ومحتواي</strong><span>إنشاء المسودات وتعديلها ومتابعة مسار المراجعة.</span></Link>
+            <Link href="/messages"><strong>المحادثات</strong><span>استقبال الرسائل والرد عليها داخل روافد.</span></Link>
+            <Link href="/appointments"><strong>المواعيد</strong><span>طلبات المواعيد والتأكيد والإلغاء والحالات.</span></Link>
+            <Link href="/notifications"><strong>الإشعارات</strong><span>التحديثات والتنبيهات المرتبطة بالحساب.</span></Link>
+          </div>
         </section>
       </section>
     </main>
