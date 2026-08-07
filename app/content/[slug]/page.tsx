@@ -43,7 +43,8 @@ export default async function PublishedContentPage({ params }: { params: Params 
 
   const sector = Array.isArray(record.sectors) ? record.sectors[0] : record.sectors;
   const category = Array.isArray(record.categories) ? record.categories[0] : record.categories;
-  const paragraphs = String(record.body_text ?? '').split(/\n{2,}/).map((p) => p.trim()).filter(Boolean);
+  const paragraphs: string[] = String(record.body_text ?? '').split(/\n{2,}/).map((p: string) => p.trim()).filter(Boolean);
+  const audiences: string[] = Array.isArray(record.audience) ? record.audience.map((item: unknown) => String(item)) : [];
   const schemaType = ['article','guide','research','news'].includes(record.content_type) ? 'Article' : 'WebPage';
   const canonical = record.canonical_url || `/content/${record.slug}`;
   const url = canonical.startsWith('https://') ? canonical : `${SITE}${canonical}`;
@@ -79,12 +80,12 @@ export default async function PublishedContentPage({ params }: { params: Params 
           <h1>{record.title}</h1>
           {record.excerpt && <p>{record.excerpt}</p>}
           <div className="article-meta">
-            {(record.audience ?? []).map((audience) => <span key={audience}>{audience}</span>)}
+            {audiences.map((audience: string) => <span key={audience}>{audience}</span>)}
             {record.published_at && <span>نُشر {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(record.published_at))}</span>}
           </div>
         </header>
         <div className="article-body">
-          {paragraphs.map((paragraph, index) => <p key={`${record.id}-${index}`}>{paragraph}</p>)}
+          {paragraphs.map((paragraph: string, index: number) => <p key={`${record.id}-${index}`}>{paragraph}</p>)}
           {!paragraphs.length && <p>لا يتوفر نص منشور لهذه الصفحة.</p>}
         </div>
       </article>
