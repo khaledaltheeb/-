@@ -15,20 +15,13 @@ const WORKFLOW_TARGETS = new Set(['draft','scientific_review','editorial_review'
 function value(formData: FormData, key: string, max: number) {
   return String(formData.get(key) ?? '').trim().slice(0, max);
 }
-
 function list(formData: FormData, key: string, maxItems = 40) {
-  return value(formData, key, 3000)
-    .split(/[،,\n]/)
-    .map((item) => item.trim())
-    .filter(Boolean)
-    .slice(0, maxItems);
+  return value(formData, key, 3000).split(/[،,\n]/).map((item) => item.trim()).filter(Boolean).slice(0, maxItems);
 }
-
 function optionalUuid(formData: FormData, key: string) {
   const raw = value(formData, key, 60);
   return raw && UUID_RE.test(raw) ? raw : null;
 }
-
 function canonical(formData: FormData) {
   const raw = value(formData, 'canonical_url', 500);
   if (!raw) return null;
@@ -36,12 +29,9 @@ function canonical(formData: FormData) {
   try {
     const parsed = new URL(raw);
     if (parsed.protocol === 'https:' && parsed.hostname === 'healthrenewal.org') return parsed.toString();
-  } catch {
-    return null;
-  }
+  } catch { return null; }
   return null;
 }
-
 async function requireAdmin() {
   const supabase = await createClient();
   const { data: claimsData } = await supabase.auth.getClaims();
@@ -57,6 +47,9 @@ function payload(formData: FormData) {
   const slug = value(formData, 'slug', 140).toLowerCase();
   const title = value(formData, 'title', 300);
   if (!CONTENT_TYPES.has(contentType) || !SLUG_RE.test(slug) || title.length < 3) return null;
+  const seoTitle = value(formData, 'seo_title', 47);
+  const seoDescription = value(formData, 'seo_description', 160);
+  if (seoDescription && seoDescription.length < 150) return null;
 
   return {
     p_content_type: contentType,
@@ -68,8 +61,8 @@ function payload(formData: FormData) {
     p_category_id: optionalUuid(formData, 'category_id'),
     p_audience: list(formData, 'audience'),
     p_search_aliases: list(formData, 'search_aliases'),
-    p_seo_title: value(formData, 'seo_title', 180) || null,
-    p_seo_description: value(formData, 'seo_description', 500) || null,
+    p_seo_title: seoTitle || null,
+    p_seo_description: seoDescription || null,
     p_canonical_url: canonical(formData),
     p_robots_index: formData.get('robots_index') === 'on',
     p_robots_follow: formData.get('robots_follow') === 'on',
@@ -80,6 +73,7 @@ function refresh(slug?: string) {
   revalidatePath('/admin');
   revalidatePath('/admin/content');
   revalidatePath('/sitemap.xml');
+  revalidatePath('/sitemaps/content.xml');
   if (slug) revalidatePath(`/content/${slug}`);
 }
 
@@ -87,7 +81,6 @@ export async function createDraft(formData: FormData) {
   const supabase = await requireAdmin();
   const data = payload(formData);
   if (!data) redirect('/admin/content/new?error=invalid-input');
-
   const { data: id, error } = await supabase.rpc('create_content_draft', data);
   if (error || !id) redirect('/admin/content/new?error=create-failed');
   refresh(data.p_slug);
@@ -99,7 +92,6 @@ export async function updateDraft(formData: FormData) {
   const id = value(formData, 'id', 60);
   const data = payload(formData);
   if (!UUID_RE.test(id) || !data) redirect('/admin/content?error=invalid-input');
-
   const { error } = await supabase.rpc('update_content_draft', { p_id: id, ...data });
   if (error) redirect(`/admin/content/${id}?error=update-failed`);
   refresh(data.p_slug);
@@ -112,7 +104,6 @@ export async function transitionStatus(formData: FormData) {
   const target = value(formData, 'target', 40);
   const slug = value(formData, 'slug', 140);
   if (!UUID_RE.test(id) || !WORKFLOW_TARGETS.has(target)) redirect('/admin/content?error=invalid-transition');
-
   const { error } = await supabase.rpc('transition_content_status', { p_id: id, p_target: target });
   if (error) redirect(`/admin/content/${id}?error=transition-failed`);
   refresh(slug || undefined);
