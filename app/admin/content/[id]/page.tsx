@@ -53,7 +53,7 @@ export default async function EditContentPage({ params, searchParams }: { params
   if (!profile?.is_active || !['owner', 'admin'].includes(profile.role)) redirect('/account');
 
   const [{ data: record }, { data: sectors }, { data: categories }, { data: versions }] = await Promise.all([
-    supabase.from('content').select('id,content_type,slug,title,excerpt,body_text,sector_id,category_id,audience,search_aliases,seo_title,seo_description,canonical_url,robots_index,robots_follow,status,updated_at,published_at,primary_keyword,secondary_keywords,semantic_terms,search_intent,author_display_name,reviewer_display_name,reviewer_credentials,last_reviewed_at,references_json,medical_disclaimer,featured_image_alt').eq('id', id).maybeSingle(),
+    supabase.from('content').select('id,content_type,slug,title,excerpt,body_json,body_text,sector_id,category_id,audience,search_aliases,seo_title,seo_description,canonical_url,robots_index,robots_follow,status,updated_at,published_at,primary_keyword,secondary_keywords,semantic_terms,search_intent,author_display_name,reviewer_display_name,reviewer_credentials,last_reviewed_at,references_json,medical_disclaimer,featured_image_alt').eq('id', id).maybeSingle(),
     supabase.from('sectors').select('id,name_ar').order('sort_order').order('name_ar'),
     supabase.from('categories').select('id,sector_id,name_ar').order('sort_order').order('name_ar'),
     supabase.from('content_versions').select('version,created_at').eq('content_id', id).order('version', { ascending: false }).limit(12),
