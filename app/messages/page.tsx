@@ -1,0 +1,24 @@
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import { redirect } from 'next/navigation';
+import { createClient } from '@/lib/supabase/server';
+import SiteHeader from '@/components/site-header';
+import SiteFooter from '@/components/site-footer';
+
+export const dynamic='force-dynamic';
+export const metadata:Metadata={title:'الرسائل',description:'صندوق الرسائل الخاص في منصة روافد.',robots:{index:false,follow:false,noarchive:true}};
+type SearchParams=Promise<{archived?:string;error?:string}>;
+type Conversation={conversation_id:string;subject:string|null;specialist_id:string|null;center_id:string|null;counterpart_user_id:string;counterpart_name:string;counterpart_title:string|null;counterpart_slug:string|null;last_message_body:string|null;last_message_at:string;unread_count:number;archived_at:string|null;blocked_by_me:boolean;blocked_me:boolean;closed_at:string|null};
+function date(value:string){try{return new Intl.DateTimeFormat('ar',{dateStyle:'medium',timeStyle:'short'}).format(new Date(value))}catch{return''}}
+
+export default async function MessagesPage({searchParams}:{searchParams:SearchParams}){
+ const params=await searchParams;const includeArchived=params.archived==='1';const supabase=await createClient();const {data:claims}=await supabase.auth.getClaims();if(!claims?.claims?.sub)redirect('/login?next=/messages');
+ const {data,error}=await supabase.rpc('get_my_conversations',{p_include_archived:includeArchived,p_limit:100,p_offset:0});const rows:Conversation[]=Array.isArray(data)?data as Conversation[]:[];
+ return <><SiteHeader/><main className="communication-shell"><section className="communication-heading"><div><span className="eyebrow">Private Messaging</span><h1>الرسائل</h1><p>محادثاتك الخاصة مع المختصين والمراكز. لا تُعرض المحادثة إلا لأطرافها المخولين.</p></div><div className="communication-actions"><Link className="button" href="/notifications">الإشعارات</Link><Link className="button" href="/appointments">المواعيد</Link></div></section>
+ {params.error&&<div className="system-message error">تعذر تنفيذ العملية. لم يتم تغيير بيانات المحادثة.</div>}
+ <div className="inbox-toolbar"><div><strong>{rows.length}</strong><span>{includeArchived?'محادثة تشمل المؤرشفة':'محادثة نشطة'}</span></div><Link className="button" href={includeArchived?'/messages':'/messages?archived=1'}>{includeArchived?'إخفاء المؤرشفة':'عرض المؤرشفة'}</Link></div>
+ {error&&<div className="search-state error"><h2>تعذر تحميل الرسائل</h2><p>لم يتم عرض أي بيانات غير مؤكدة.</p></div>}
+ {!error&&rows.length===0&&<div className="search-state"><h2>لا توجد محادثات بعد</h2><p>ابدأ من ملف مختص موثق أو مركز موثق؛ لن تحتاج إلى مشاركة بيانات الاتصال الخاصة لبدء التواصل.</p><div className="section-actions"><Link className="primary-link" href="/specialists">دليل المختصين</Link><Link className="button" href="/centers">دليل المراكز</Link></div></div>}
+ <div className="inbox-list">{rows.map((row)=><Link className={`inbox-item ${row.unread_count>0?'unread':''}`} href={`/messages/${row.conversation_id}`} key={row.conversation_id}><div className="inbox-avatar" aria-hidden="true">{row.counterpart_name.slice(0,1)}</div><div className="inbox-copy"><div className="inbox-title"><strong>{row.counterpart_name}</strong>{row.unread_count>0&&<span className="unread-badge">{row.unread_count}</span>}</div><span className="inbox-subtitle">{row.counterpart_title||'مستخدم روافد'}{row.archived_at?' · مؤرشفة':''}{row.closed_at?' · مغلقة':''}</span><p>{row.last_message_body||row.subject||'ابدأ المحادثة برسالة واضحة ومختصرة.'}</p></div><time dateTime={row.last_message_at}>{date(row.last_message_at)}</time></Link>)}</div>
+ </main><SiteFooter/></>;
+}
