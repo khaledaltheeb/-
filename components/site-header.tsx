@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
+import { getPublicSectors } from '@/lib/public-taxonomy';
 
 const primaryLinks = [
   { href: '/specialists', label: 'المختصون' },
@@ -9,8 +10,8 @@ const primaryLinks = [
 
 export default async function SiteHeader() {
   const supabase = await createClient();
-  const [{ data: sectors }, { data: claims }] = await Promise.all([
-    supabase.from('sectors').select('slug,name_ar').eq('is_active', true).eq('visibility', 'public').order('sort_order').order('name_ar').limit(10),
+  const [sectors, { data: claims }] = await Promise.all([
+    getPublicSectors(10),
     supabase.auth.getClaims(),
   ]);
   const signedIn = Boolean(claims?.claims?.sub);
@@ -30,8 +31,8 @@ export default async function SiteHeader() {
             <div className="nav-dropdown-panel">
               <div className="nav-dropdown-heading"><strong>قطاعات روافد</strong><span>تنظيم معرفي وخدمي ديناميكي</span></div>
               <div className="nav-dropdown-grid">
-                {(sectors ?? []).map((sector) => <Link key={sector.slug} href={`/sectors/${sector.slug}`}>{sector.name_ar}</Link>)}
-                {(!sectors || sectors.length === 0) && <span className="nav-empty">تظهر القطاعات بعد تفعيلها من الإدارة.</span>}
+                {sectors.map((sector) => <Link key={sector.slug} href={`/sectors/${sector.slug}`}>{sector.name_ar}</Link>)}
+                {sectors.length === 0 && <span className="nav-empty">تظهر القطاعات بعد تفعيلها من الإدارة.</span>}
               </div>
             </div>
           </details>
@@ -53,7 +54,7 @@ export default async function SiteHeader() {
             <form className="mobile-search" action="/search" method="get"><input name="q" type="search" placeholder="ابحث في روافد" maxLength={120} /><button type="submit">بحث</button></form>
             <Link href="/">الرئيسية</Link>
             <span className="mobile-menu-label">القطاعات</span>
-            {(sectors ?? []).map((sector) => <Link key={sector.slug} href={`/sectors/${sector.slug}`}>{sector.name_ar}</Link>)}
+            {sectors.map((sector) => <Link key={sector.slug} href={`/sectors/${sector.slug}`}>{sector.name_ar}</Link>)}
             {primaryLinks.map((link) => <Link key={link.href} href={link.href}>{link.label}</Link>)}
             {signedIn ? <><Link href="/messages">الرسائل</Link><Link href="/appointments">المواعيد</Link><Link href="/notifications">الإشعارات</Link><Link href="/account">حسابي</Link></> : <Link href="/login">تسجيل الدخول</Link>}
           </div>
