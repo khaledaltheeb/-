@@ -6,14 +6,15 @@ export type SitemapEntry = { path: string; lastModified?: string | Date | null; 
 function escapeXml(value: string) {
   return value.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;');
 }
-
 function absolute(path: string) {
   if (/^https:\/\//i.test(path)) return path;
   return `${SITE_URL}${path.startsWith('/') ? path : `/${path}`}`;
 }
 
 export function sitemapResponse(entries: SitemapEntry[]) {
-  const urls = entries.map((entry) => {
+  const indexingEnabled = process.env.NEXT_PUBLIC_ALLOW_INDEXING === 'true';
+  const safeEntries = indexingEnabled ? entries : [];
+  const urls = safeEntries.map((entry) => {
     const lastmod = entry.lastModified ? new Date(entry.lastModified).toISOString() : undefined;
     return `<url><loc>${escapeXml(absolute(entry.path))}</loc>${lastmod ? `<lastmod>${lastmod}</lastmod>` : ''}${entry.changeFrequency ? `<changefreq>${escapeXml(entry.changeFrequency)}</changefreq>` : ''}${entry.priority !== undefined ? `<priority>${entry.priority.toFixed(1)}</priority>` : ''}</url>`;
   }).join('');
