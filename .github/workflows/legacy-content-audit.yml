@@ -1,0 +1,50 @@
+name: Legacy Content Migration Audit
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'scripts/legacy_content_extract.py'
+      - '.github/workflows/legacy-content-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inventory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout Rawafid V3
+        uses: actions/checkout@v7
+        with:
+          path: rawafid-v3
+
+      - name: Checkout legacy source read-only
+        uses: actions/checkout@v7
+        with:
+          repository: khaledaltheeb/healthrenewal.org
+          ref: main
+          path: legacy
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Extract published legacy content contract
+        working-directory: rawafid-v3
+        run: python scripts/legacy_content_extract.py ../legacy
+
+      - name: Upload migration inventory
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: legacy-content-migration-inventory
+          path: |
+            rawafid-v3/artifacts/legacy-content-summary.json
+            rawafid-v3/artifacts/legacy-content-inventory.json
+          if-no-files-found: error
+          retention-days: 14
