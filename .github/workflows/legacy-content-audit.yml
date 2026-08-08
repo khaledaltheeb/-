@@ -6,6 +6,10 @@ on:
     paths:
       - 'scripts/legacy_content_extract.py'
       - 'scripts/legacy_destination_coverage.py'
+      - 'scripts/library_migration_audit.py'
+      - 'scripts/library_legacy_map_validate.py'
+      - 'data/migration-batches/library-legacy-canonical-map-v1.json'
+      - 'docs/LIBRARY-MIGRATION-PLAN.md'
       - '.github/workflows/legacy-content-audit.yml'
   workflow_dispatch:
 
@@ -35,9 +39,29 @@ jobs:
         with:
           python-version: '3.13'
 
+      - name: Materialize generated legacy library in an ephemeral build
+        run: |
+          cp -a legacy legacy-library-source
+          cp -a legacy legacy-library-build
+          python legacy-library-source/scripts/publish_evidence_literacy_library_v322.py legacy-library-build
+
       - name: Extract published legacy content contract
         working-directory: rawafid-v3
-        run: python scripts/legacy_content_extract.py ../legacy
+        run: python scripts/legacy_content_extract.py ../legacy-library-build
+
+      - name: Audit legacy library migration scope
+        working-directory: rawafid-v3
+        run: >-
+          python scripts/library_migration_audit.py
+          artifacts/legacy-content-inventory.json
+          --quality-min-words 1500
+
+      - name: Validate foundational library canonical map
+        working-directory: rawafid-v3
+        run: >-
+          python scripts/library_legacy_map_validate.py
+          artifacts/legacy-content-inventory.json
+          data/migration-batches/library-legacy-canonical-map-v1.json
 
       - name: Compare legacy routes with Rawafid V3
         working-directory: rawafid-v3
@@ -55,5 +79,9 @@ jobs:
             rawafid-v3/artifacts/legacy-content-summary.json
             rawafid-v3/artifacts/legacy-content-inventory.json
             rawafid-v3/artifacts/legacy-destination-coverage.json
+            rawafid-v3/artifacts/library-migration-plan.json
+            rawafid-v3/artifacts/library-migration-report.md
+            rawafid-v3/artifacts/library-legacy-canonical-map-validation.json
+            rawafid-v3/artifacts/library-legacy-canonical-map-validation.md
           if-no-files-found: error
           retention-days: 14
