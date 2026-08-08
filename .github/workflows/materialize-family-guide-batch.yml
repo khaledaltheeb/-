@@ -1,0 +1,68 @@
+name: Materialize Family Guide Migration Batch
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/legacy_content_extract.py'
+      - 'scripts/prepare_legacy_batch.py'
+      - 'scripts/apply_v3_seo_contract.py'
+      - 'scripts/validate_migration_payload.py'
+      - 'scripts/validate_v3_release_metadata.py'
+      - 'data/migration-batches/family-guide-core-v1.config.json'
+      - '.github/workflows/materialize-family-guide-batch.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout Rawafid
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 1
+
+      - name: Checkout legacy source read-only
+        uses: actions/checkout@v7
+        with:
+          repository: khaledaltheeb/healthrenewal.org
+          ref: main
+          path: legacy-source
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Extract legacy source contract
+        run: python scripts/legacy_content_extract.py legacy-source --output artifacts/legacy-content-inventory.json --summary artifacts/legacy-content-summary.json
+
+      - name: Materialize Family Guide core batch
+        run: python scripts/prepare_legacy_batch.py artifacts/legacy-content-inventory.json data/migration-batches/family-guide-core-v1.config.json --legacy-root legacy-source --output data/migration-batches/generated/family-guide-core-v1.json
+
+      - name: Apply V3 SEO release contract
+        run: python scripts/apply_v3_seo_contract.py data/migration-batches/generated/family-guide-core-v1.json data/migration-batches/family-guide-core-v1.config.json
+
+      - name: Validate migration payload
+        run: python scripts/validate_migration_payload.py data/migration-batches/generated/family-guide-core-v1.json
+
+      - name: Validate V3 release metadata
+        run: python scripts/validate_v3_release_metadata.py data/migration-batches/generated/family-guide-core-v1.json
+
+      - name: Commit deterministic payload
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/migration-batches/generated/family-guide-core-v1.json
+          if git diff --cached --quiet; then
+            echo "Payload already materialized; no commit required."
+            exit 0
+          fi
+          git commit -m "Materialize audited Family Guide core payload"
+          git push origin HEAD:${{ github.ref_name }}

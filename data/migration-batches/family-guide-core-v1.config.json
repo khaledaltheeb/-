@@ -1,0 +1,131 @@
+{
+  "batch_id": "legacy-family-guide-core-v1",
+  "migration_date": "2026-08-08",
+  "expected_record_count": 9,
+  "defaults": {
+    "sector_slug": "special-needs-inclusion",
+    "category_slug": "parenting-family",
+    "content_type": "guide",
+    "search_intent": "informational",
+    "author_display_name": "فريق تحرير منصة روافد",
+    "medical_disclaimer": "محتوى تثقيفي وتنظيمي للأسرة ولا يقدّم تشخيصًا فرديًا أو وصفة علاجية؛ التقييم والرعاية والمتابعة يحددها مختص مؤهل وفق حالة الشخص وسياقه واحتياجاته."
+  },
+  "records": [
+    {
+      "source_path": "/family-guide/",
+      "target_slug": "family-guide-hub",
+      "target_canonical": "/family-guide/",
+      "seo_title": "دليل الأسرة | دعم ذوي الاحتياجات الخاصة",
+      "seo_description": "دليل مؤسسي للأسرة لفهم الحالات النمائية والعصبية والوراثية، وتنظيم التقييم والدعم اليومي والخطط والمتابعة والسلامة، مع أدوات عملية ومراجع موثوقة للأهل.",
+      "primary_keyword": "دليل الأسرة لذوي الاحتياجات الخاصة",
+      "secondary_keywords": ["دليل الأسرة", "دعم ذوي الاحتياجات الخاصة", "إرشاد الأسرة", "خطة الأسرة", "متابعة النمو"],
+      "semantic_terms": ["الأسرة", "الدعم الأسري", "النمو", "الوظيفة", "المشاركة", "التقييم", "الرعاية", "الاستقلال", "السلامة"],
+      "audience": ["الوالدان", "الأسرة", "مقدمو الرعاية", "المعلمون"],
+      "schema_json": {"page_role":"hub","family_category":"دليل الأسرة"}
+    },
+    {
+      "source_path": "/family-guide/conditions/autism/",
+      "target_slug": "family-guide-autism",
+      "target_canonical": "/family-guide/conditions/autism/",
+      "primary_capability": "/capabilities/autism/",
+      "seo_title": "دليل الأسرة للتوحد | دعم وخطة عملية",
+      "seo_description": "دليل أسري موسع لفهم اضطراب طيف التوحد، العلامات والتقييم والتواصل والحس والنوم والتعليم والسلوك، مع خطة دعم عملية ومؤشرات الأمان ومراجع موثوقة للأسرة.",
+      "primary_keyword": "دليل الأسرة للتوحد",
+      "secondary_keywords": ["التعامل مع طفل التوحد", "دعم طفل التوحد", "خطة الأسرة للتوحد", "Autism family guide"],
+      "semantic_terms": ["اضطراب طيف التوحد", "التواصل", "الحس", "التعلم", "السلوك", "النوم", "الاستقلال"],
+      "audience": ["الوالدان", "الأسرة", "مقدمو الرعاية", "المعلمون"],
+      "schema_json": {"page_role":"family_condition","family_rank":1,"title_en":"Autism spectrum disorder","family_category":"حالة نمائية عصبية"}
+    },
+    {
+      "source_path": "/family-guide/conditions/adhd/",
+      "target_slug": "family-guide-adhd",
+      "target_canonical": "/family-guide/conditions/adhd/",
+      "primary_capability": "/capabilities/adhd/",
+      "seo_title": "دليل الأسرة لـ ADHD | تنظيم ودعم عملي",
+      "seo_description": "دليل أسري موسع لفهم ADHD لدى الأطفال والمراهقين، وتنظيم المنزل والمدرسة والنوم والانفعالات والمتابعة، مع أهداف قابلة للقياس ومراجع موثوقة وآمنة للأسرة.",
+      "primary_keyword": "دليل الأسرة لاضطراب ADHD",
+      "secondary_keywords": ["التعامل مع طفل ADHD", "تنظيم طفل فرط الحركة", "دعم تشتت الانتباه", "ADHD family guide"],
+      "semantic_terms": ["اضطراب نقص الانتباه وفرط النشاط", "الوظائف التنفيذية", "التنظيم", "المدرسة", "النوم", "الانفعالات"],
+      "audience": ["الوالدان", "الأسرة", "المعلمون", "مقدمو الرعاية"],
+      "schema_json": {"page_role":"family_condition","family_rank":2,"title_en":"Attention-deficit/hyperactivity disorder","family_category":"اضطراب نمائي عصبي"}
+    },
+    {
+      "source_path": "/family-guide/conditions/down-syndrome/",
+      "target_slug": "family-guide-down-syndrome",
+      "target_canonical": "/family-guide/conditions/down-syndrome/",
+      "primary_capability": "/capabilities/down-syndrome/",
+      "seo_title": "دليل الأسرة لمتلازمة داون | رعاية ودعم",
+      "seo_description": "دليل أسري متقدم لمتلازمة داون يشرح النمو والصحة والتعلم والتواصل والاستقلال والمتابعة الدورية، مع خطة عملية للأسرة ومؤشرات السلامة ومراجع موثوقة حديثة.",
+      "primary_keyword": "دليل الأسرة لمتلازمة داون",
+      "secondary_keywords": ["رعاية طفل متلازمة داون", "تطور طفل داون", "تعليم متلازمة داون", "Down syndrome family guide"],
+      "semantic_terms": ["متلازمة داون", "الكروموسوم 21", "النمو", "الصحة", "التعلم", "التواصل", "الاستقلال"],
+      "audience": ["الوالدان", "الأسرة", "مقدمو الرعاية", "المعلمون"],
+      "schema_json": {"page_role":"family_condition","family_rank":3,"title_en":"Down syndrome","family_category":"حالة صبغية ووراثية"}
+    },
+    {
+      "source_path": "/family-guide/conditions/cerebral-palsy/",
+      "target_slug": "family-guide-cerebral-palsy",
+      "target_canonical": "/family-guide/conditions/cerebral-palsy/",
+      "primary_capability": "/capabilities/cerebral-palsy/",
+      "seo_title": "دليل الأسرة للشلل الدماغي | رعاية عملية",
+      "seo_description": "دليل أسري موسع للشلل الدماغي يشرح الحركة والتغذية والتواصل والألم والعظام والتعليم والاستقلال، مع خطة متابعة عملية وفريق الرعاية ومؤشرات الأمان للأسرة.",
+      "primary_keyword": "دليل الأسرة للشلل الدماغي",
+      "secondary_keywords": ["رعاية طفل الشلل الدماغي", "دعم الشلل الدماغي", "تغذية الشلل الدماغي", "Cerebral palsy family guide"],
+      "semantic_terms": ["الشلل الدماغي", "الحركة", "الوضعية", "الألم", "التغذية", "التواصل", "العظام", "الاستقلال"],
+      "audience": ["الوالدان", "الأسرة", "مقدمو الرعاية", "المعلمون"],
+      "schema_json": {"page_role":"family_condition","family_rank":4,"title_en":"Cerebral palsy","family_category":"حالة حركية نمائية عصبية"}
+    },
+    {
+      "source_path": "/family-guide/conditions/intellectual-disability/",
+      "target_slug": "family-guide-intellectual-disability",
+      "target_canonical": "/family-guide/conditions/intellectual-disability/",
+      "primary_capability": "/capabilities/intellectual-disability/",
+      "seo_title": "دليل الأسرة للإعاقة الذهنية | دعم عملي",
+      "seo_description": "دليل أسري للإعاقة الذهنية يشرح الأداء التكيفي والتعلم والتواصل والاستقلال والسلوك والصحة، مع خطة دعم وظيفية ومتابعة عملية ومؤشرات السلامة ومراجع موثوقة.",
+      "primary_keyword": "دليل الأسرة للإعاقة الذهنية",
+      "secondary_keywords": ["دعم الإعاقة الذهنية", "المهارات التكيفية", "استقلال ذوي الإعاقة الذهنية", "Intellectual disability family guide"],
+      "semantic_terms": ["الإعاقة الذهنية", "الأداء التكيفي", "التعلم", "التواصل", "الاستقلال", "الدعم الوظيفي"],
+      "audience": ["الوالدان", "الأسرة", "مقدمو الرعاية", "المعلمون"],
+      "schema_json": {"page_role":"family_condition","family_rank":5,"title_en":"Intellectual disability","family_category":"حالة نمائية وتكيفية"}
+    },
+    {
+      "source_path": "/family-guide/conditions/developmental-language-disorder/",
+      "target_slug": "family-guide-developmental-language-disorder",
+      "target_canonical": "/family-guide/conditions/developmental-language-disorder/",
+      "primary_capability": "/capabilities/developmental-language-disorder/",
+      "seo_title": "دليل الأسرة لاضطراب اللغة النمائي",
+      "seo_description": "دليل أسري موسع لاضطراب اللغة النمائي يشرح الفهم والتعبير والتقييم والسمع والتعليم والتواصل اليومي، مع خطوات دعم عملية وأهداف قابلة للقياس ومراجع موثوقة.",
+      "primary_keyword": "دليل الأسرة لاضطراب اللغة النمائي",
+      "secondary_keywords": ["اضطراب اللغة عند الأطفال", "تأخر اللغة", "دعم التواصل", "Developmental language disorder family guide"],
+      "semantic_terms": ["اضطراب اللغة النمائي", "فهم اللغة", "التعبير", "السمع", "التواصل", "التعليم"],
+      "audience": ["الوالدان", "الأسرة", "المعلمون", "مقدمو الرعاية"],
+      "schema_json": {"page_role":"family_condition","family_rank":6,"title_en":"Developmental language disorder","family_category":"اضطراب نمائي في اللغة والتواصل"}
+    },
+    {
+      "source_path": "/family-guide/conditions/hearing-loss-deafness/",
+      "target_slug": "family-guide-hearing-loss-deafness",
+      "target_canonical": "/family-guide/conditions/hearing-loss-deafness/",
+      "primary_capability": "/capabilities/hearing-loss/",
+      "seo_title": "دليل الأسرة لفقدان السمع والصمم",
+      "seo_description": "دليل أسري لفقدان السمع والصمم يشرح الأنواع والتقييم والوصول إلى اللغة والتواصل والتقنيات والتعليم، مع قرارات أسرية عملية وخطة متابعة ومراجع موثوقة حديثة.",
+      "primary_keyword": "دليل الأسرة لفقدان السمع والصمم",
+      "secondary_keywords": ["ضعف السمع عند الأطفال", "دعم الطفل الأصم", "الوصول إلى اللغة", "Hearing loss family guide"],
+      "semantic_terms": ["فقدان السمع", "الصمم", "اللغة", "التواصل", "المعينات السمعية", "زراعة القوقعة", "التعليم"],
+      "audience": ["الوالدان", "الأسرة", "المعلمون", "مقدمو الرعاية"],
+      "schema_json": {"page_role":"family_condition","family_rank":7,"title_en":"Hearing loss and deafness","family_category":"حالة حسية سمعية"}
+    },
+    {
+      "source_path": "/family-guide/conditions/visual-impairment/",
+      "target_slug": "family-guide-visual-impairment",
+      "target_canonical": "/family-guide/conditions/visual-impairment/",
+      "primary_capability": "/capabilities/visual-impairment/",
+      "seo_title": "دليل الأسرة لضعف البصر والعمى",
+      "seo_description": "دليل أسري لضعف البصر والعمى يشرح التقييم والوصول للمعلومات والحركة والتعليم والتقنيات والاستقلال، مع تكييفات عملية وخطة متابعة ومؤشرات سلامة ومراجع موثوقة.",
+      "primary_keyword": "دليل الأسرة لضعف البصر والعمى",
+      "secondary_keywords": ["ضعف البصر عند الأطفال", "دعم الطفل الكفيف", "التقنيات المساندة للبصر", "Visual impairment family guide"],
+      "semantic_terms": ["ضعف البصر", "العمى", "الحركة والتوجه", "برايل", "التقنيات المساندة", "التعليم", "الاستقلال"],
+      "audience": ["الوالدان", "الأسرة", "المعلمون", "مقدمو الرعاية"],
+      "schema_json": {"page_role":"family_condition","family_rank":8,"title_en":"Vision impairment and blindness","family_category":"حالة حسية بصرية"}
+    }
+  ]
+}
