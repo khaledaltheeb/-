@@ -1,0 +1,11 @@
+{
+  "batch_id": "legacy-quick-info-staging-v1",
+  "source_prefix": "quick-info",
+  "expected_record_count": 244,
+  "chunk_size": 20,
+  "sector_slug": "knowledge",
+  "category_slug": "legacy-migration-staging",
+  "author_display_name": "فريق تحرير منصة روافد",
+  "audience": ["الجمهور العام", "الأسر", "المختصون"],
+  "medical_disclaimer": "محتوى تثقيفي عام لا يقدّم تشخيصًا فرديًا ولا يغني عن التقييم المهني عند الحاجة."
+}
