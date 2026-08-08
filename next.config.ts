@@ -12,6 +12,20 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  async redirects() {
+    return [
+      {
+        source: '/content/capabilities-hub',
+        destination: '/capabilities/',
+        permanent: true,
+      },
+      {
+        source: '/content/capabilities-:slug',
+        destination: '/capabilities/:slug/',
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {
