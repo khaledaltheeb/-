@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import sys
 from pathlib import Path
 from typing import Any
@@ -24,6 +25,10 @@ def replace_strings(value: Any) -> Any:
     return value
 
 
+def word_count(text: str) -> int:
+    return len([part for part in re.split(r'\s+', text.strip()) if part])
+
+
 def stable_bytes(records: list[dict[str, Any]]) -> bytes:
     ordered = sorted(records, key=lambda row: str(row.get('source_path') or ''))
     return json.dumps(ordered, ensure_ascii=False, separators=(',', ':'), sort_keys=True).encode('utf-8')
@@ -39,6 +44,17 @@ def main() -> int:
         raise SystemExit('records array is required')
 
     normalized = replace_strings(records)
+    for row in normalized:
+        if not isinstance(row, dict):
+            continue
+        final_words = word_count(str(row.get('body_text') or ''))
+        schema = row.get('schema_json') if isinstance(row.get('schema_json'), dict) else {}
+        if schema.get('migration_enriched') is True:
+            schema['migration_final_word_count'] = final_words
+        if schema.get('addiction_enriched') is True:
+            schema['addiction_final_word_count'] = final_words
+        row['schema_json'] = schema
+
     payload['records'] = normalized
     payload['records_sha256'] = hashlib.sha256(stable_bytes(normalized)).hexdigest()
     payload.setdefault('addiction_enrichment', {})['release_language_normalized'] = True
