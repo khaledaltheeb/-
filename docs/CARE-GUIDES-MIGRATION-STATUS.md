@@ -11,29 +11,31 @@ Target section: `/care-guides/` and descendants.
 
 ## Verified legacy inventory
 
-The deterministic legacy audit verifies:
+The deterministic audit verifies:
 
 - 14 unique structured guides from `content/v18/care-guides*.json`.
 - 87 unique institutional topics from `scripts/care_guides_topics_v246_*.py`.
-- 0 overlapping slugs between those source groups.
+- 0 overlapping slugs between those groups.
 - **101 unique legacy care-guide source records in total.**
 
 The CI inventory gate must continue to fail if the institutional count differs from 87 or the combined total differs from 101.
 
 ## Migration contract
 
-For each historical guide/topic:
+For every source: inspect all useful legacy material, compare against V3 by search intent and practical scope, then classify it as `new`, `merge`, `redirect`, `retain-separate`, or `reject-placeholder`.
 
-1. Inspect the legacy source and any relevant versions/variants.
-2. Compare against existing V3 content by intent, audience, concepts and practical scope.
-3. Classify as `new`, `merge`, `redirect`, `retain-separate`, or `reject-placeholder`.
-4. Preserve unique useful knowledge while removing repetition, template filler and obsolete page chrome.
-5. Build one coherent canonical; target at least 1,500 useful Arabic words where the topic supports that depth.
-6. Use H1 from the page title, structured H2/H3 sections, search-intent FAQ, semantic terms and authoritative references.
-7. Keep warnings concise and topic-specific; do not fill pages with repetitive medical disclaimers or fear-based language.
-8. Scientific-review identity is not a mandatory publication gate. No reviewer identity or credential may be fabricated.
-9. Never create two pages that substantially answer the same search intent simply to preserve historical file count.
-10. When a legacy guide strengthens an existing canonical, merge the unique material and preserve the old URL through a redirect.
+A release-quality care guide must:
+
+1. preserve unique useful knowledge and provenance without copying the legacy visual/runtime layer;
+2. use one coherent canonical and avoid competing pages for the same intent;
+3. contain at least 1,500 useful Arabic words when the topic supports that depth;
+4. contain structured H2 and real H3 hierarchy plus at least 5 search-intent FAQ items;
+5. use authoritative, unique reference URLs appropriate to the health claim;
+6. keep the SEO title inside the V3 branded-title contract and the meta description at 150–160 characters;
+7. provide a primary keyword, semantic terms, audience and a concise topic-specific safety/content boundary;
+8. avoid repeated long sentences across the guide library and avoid template filler;
+9. never fabricate reviewer identity or credentials;
+10. merge unique legacy value into an existing stronger canonical when the intent is already adequately served, then preserve the old route with a permanent redirect.
 
 ## Route foundation
 
@@ -47,35 +49,24 @@ The dedicated V3 route foundation is in `main`:
 - `scripts/care_guides_legacy_audit.py`
 - `.github/workflows/care-guides-legacy-audit.yml`
 
-The hub lookup requires `care-guides-hub` to be `published`; child routes resolve published `guide` rows by their `/care-guides/.../` canonical URL.
+The hub resolves the published `care-guides-hub`; guide routes resolve published `guide` rows by their `/care-guides/.../` canonical URL.
 
 ## Current progress — 2026-08-08
 
 - Legacy inventory: **101**.
-- Legacy source records fully processed: **15 / 101**.
-- Published `/care-guides/` canonical guides: **14**.
+- Legacy source records fully processed: **20 / 101**.
+- Published `/care-guides/` canonical guides: **18**.
 - Published section hub: **1**.
-- Sources merged into a stronger existing canonical: **1**.
-- Remaining legacy source records to classify/process: **86**.
+- Sources merged into stronger existing V3 canonicals: **2**.
+- Remaining legacy source records to classify/process: **81**.
 
-All published care-guide pages in this completed batch passed the content QA contract before publication:
-
-- >= 1,500 Arabic words.
-- H2 + real H3 hierarchy.
-- >= 5 search-intent FAQ items for guide pages.
-- unique authoritative reference URLs (no duplicate reference rows counted as extra evidence).
-- SEO title within the V3 branded-title contract.
-- meta description 150–160 characters.
-- a single `/care-guides/.../` canonical.
-- no duplicate slug/title/canonical.
-- no care-guide page exceeded the sentence-duplication threshold; the completed batch measured 0% long-sentence reuse at the internal >=4-page threshold.
-- concise safety boundaries rather than repeated warning blocks.
+All 18 published guide pages passed the care-guide content QA contract before CMS publication. Publication records include a content-version snapshot and a `care_guides_batch_published` audit entry.
 
 ### Published hub
 
 - `care-guides-hub` → `/care-guides/`
 
-### Published guides processed so far
+### Published guides
 
 1. `support-person-in-distress` → `/care-guides/support-person-in-distress/`
 2. `panic-attack-immediate-support` → `/care-guides/panic-attack-immediate-support/`
@@ -91,32 +82,52 @@ All published care-guide pages in this completed batch passed the content QA con
 12. `self-harm-family-safety-support` → `/care-guides/self-harm-family-safety-support/`
 13. `trauma-ptsd-family-support` → `/care-guides/trauma-ptsd-family-support/`
 14. `eating-disorder-family-support` → `/care-guides/eating-disorder-family-support/`
+15. `grief-support` → `/care-guides/grief-support/`
+16. `bipolar-family-early-warning-plan` → `/care-guides/bipolar-family-early-warning-plan/`
+17. `autism-family-practical-guide` → `/care-guides/autism-family-practical-guide/`
+18. `child-emotional-change` → `/care-guides/child-emotional-change/`
 
-## Merge/redirect decision
+The four guides added in the latest QA publication batch (`grief-support`, `bipolar-family-early-warning-plan`, `autism-family-practical-guide`, `child-emotional-change`) each passed: >=1,700 words, 18 H2, 2 real H3, 6 FAQ items, 4–5 unique authoritative references, compliant SEO metadata, unique canonical/title, and zero long-sentence reuse at the internal >=4-page threshold.
 
-### `family-mental-health-crisis-plan` → `/content/family-care-plan`
+## Merge / redirect decisions
 
-A separate care-guide canonical was intentionally not created because V3 already had the same core intent in the stronger published `family-care-plan` canonical.
+### 1. `family-mental-health-crisis-plan` → `/content/family-care-plan`
 
-Unique legacy material was merged into that canonical, including:
+A separate care-guide canonical was not created because V3 already had the same core intent in the stronger published `family-care-plan` canonical. Unique legacy value was merged, including the stable-period crisis card, early-warning signs, one primary family contact, medicine/allergy summary without family dose changes, privacy preferences, fallback contacts and escalation levels.
 
-- preparing the crisis card during a stable period;
-- early-warning signs;
-- one primary family contact;
-- prescribed medicines/allergies without family dose changes;
-- communication and confidentiality preferences;
-- service and fallback contacts;
-- escalation levels from structured home support to urgent/emergency care.
-
-`next.config.ts` preserves the old route with a permanent redirect:
+Permanent redirect:
 
 `/care-guides/family-mental-health-crisis-plan` → `/content/family-care-plan`
 
-This remains the preferred pattern when an existing V3 canonical already answers the same search intent.
+### 2. `caregiver-self-care-boundaries` → `/content/caregiver-burnout`
 
-## Overlap screening rules for the remaining 86 sources
+A separate care-guide canonical is not justified because V3 already has the stronger caregiver-stress/burnout page. Unique boundary-specific material was merged into that canonical, including:
 
-Similarity is only a candidate signal, never an automatic merge decision. Examples that require scope-level review include:
+- tasks that can be done regularly, occasionally, or only by another person/service;
+- limits around time, money, sleep, driving, physical handling, medical decisions and 24/7 availability;
+- boundaries for abusive or unsafe behaviour;
+- concrete boundary language and realistic alternatives;
+- handling guilt after setting a safe limit.
+
+The canonical grew from roughly 2,297 to roughly 2,480 Arabic words and records `caregiver-self-care-boundaries` in merged provenance.
+
+Permanent redirect added by batch 004:
+
+`/care-guides/caregiver-self-care-boundaries` → `/content/caregiver-burnout`
+
+## Completion of the 14 structured legacy guides
+
+All 14 structured sources from `content/v18/care-guides*.json` are now substantively processed:
+
+- 12 are published as dedicated care-guide canonicals where their care/support intent is distinct.
+- `caregiver-self-care-boundaries` is merged into `/content/caregiver-burnout`.
+- the remaining structured-source intent already represented in the published set is preserved without duplicate page creation.
+
+The migration can now proceed through the remaining institutional topic inventory in thematic batches while continuing intent-level overlap checks against existing V3 content.
+
+## Overlap screening for the remaining 81 sources
+
+Similarity is only a candidate signal, never an automatic merge decision. High-priority intersections to review include:
 
 - `developmental-coordination-disorder-support` ↔ `/capabilities/developmental-coordination-disorder/`
 - `developmental-language-disorder-communication` ↔ `/capabilities/developmental-language-disorder/`
@@ -125,16 +136,14 @@ Similarity is only a candidate signal, never an automatic merge decision. Exampl
 - `executive-function-daily-support` ↔ `/content/executive-functions`
 - `separation-anxiety-school-transition` ↔ `/content/separation-anxiety-child`
 
-A care guide remains separate when it answers a distinct actionable care/support intent that the condition, comparison, capability or general article does not answer.
+A care guide remains separate only when it answers a materially distinct actionable care/support intent.
 
 ## Publication state vs production deployment
 
-The Hub and 14 completed care guides are now **published in Supabase CMS** and have version/audit records.
+CMS publication and public deployment remain separate facts:
 
-The route implementation exists in repository `main`, but public production reachability has not been independently verified from the connected GitHub deployment API: the repository currently returns no GitHub deployment records. Search-engine discovery also does not establish route deployment. Therefore reports must distinguish:
+- **CMS publication of the hub and 18 guides: verified.**
+- **Route implementation in repository `main`: verified.**
+- **Public production deployment/reachability: not independently verified from the connected GitHub deployment API.**
 
-- **CMS publication: verified.**
-- **Route code in `main`: verified.**
-- **Public production deployment/reachability: not independently verified yet.**
-
-This distinction must not block continued content migration of the remaining 86 legacy source records.
+This deployment uncertainty does not block continued content migration and QA of the remaining 81 sources.
