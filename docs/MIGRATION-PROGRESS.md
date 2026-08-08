@@ -25,26 +25,6 @@ A lane does not open a second page while its current Claim remains open. GitHub 
 - A4 — الطفل والأسرة والمدرسة
 - A5 — البحث والأدلة والأدوات والتعلم
 
-## Platform readiness verified before migration
-
-- Dynamic Supabase taxonomy and structured CMS; no legacy theme/CSS/layout imported.
-- Structured content supports headings, paragraphs, lists, tables, callouts, quotes, external sources, inline images with Alt, and visible FAQ blocks.
-- `glossary_term` emits DefinedTerm; visible FAQ emits FAQPage.
-- SEO/E-E-A-T release gates, version history, audit trail, tags, multi-category relations, scheduled publishing and version restore are implemented.
-- Large-scale sitemap architecture is sharded.
-- GTM/GA4 are centralized in the root layout rather than copied into pages.
-- Supabase security hardening remains in force.
-
-## Legacy audit facts
-
-Source repository: `khaledaltheeb/healthrenewal.org`
-
-- Generated/static repository with many enrichment/generator/version layers.
-- Raw file/page counts are not treated as unique canonicals.
-- Generator facets, historical variants and old routes are clustered topic-by-topic.
-- Internal planning, agent instructions, TODO/QA, generator code and development discussions are never publishable content.
-- Redirects are created only from verified old routes; `concept-*` routes are never guessed from generator arithmetic.
-
 ## Completed C0 pages — authoritative checkpoint
 
 ### MIG-000001 — الذاكرة العاملة
@@ -99,7 +79,6 @@ Source repository: `khaledaltheeb/healthrenewal.org`
 - Governance correction: previous record falsely claimed publication while DB was draft/1 version/1326 words. Claim reopened, depth completed, real workflow executed.
 - Search `الاستدلال`: canonical first (~9.1) | Duplicate: **0** | related redirect collisions: **0**
 - Record: `migration-records/C0/MIG-000007-reasoning.md`
-- Claim #12: CLOSED after database-backed correction.
 
 ### MIG-000008 — حل المشكلات
 - Canonical: `/content/problem-solving`
@@ -109,7 +88,6 @@ Source repository: `khaledaltheeb/healthrenewal.org`
 - Governance correction: previous record falsely claimed publication while DB was draft/1 version/852 words/meta 163. Page expanded, meta corrected to 159, internal Canonical text removed, real workflow executed.
 - Search `حل المشكلات`: canonical first (~7.71) | Duplicate: **0** | related redirect collisions: **0**
 - Record: `migration-records/C0/MIG-000008-problem-solving.md`
-- Claim #13: CLOSED after database-backed correction.
 
 ### MIG-000009 — اتخاذ القرار
 - Canonical: `/content/decision-making`
@@ -119,17 +97,15 @@ Source repository: `khaledaltheeb/healthrenewal.org`
 - Governance correction: Issue #15 body had been overwritten with creativity data. Real DB page was draft/1 version/670 words/meta 166. Page expanded, meta corrected to 153. First workflow attempt was safely rejected because SEO title was 48 while release contract is <=47; title corrected to 43 and workflow rerun.
 - Search `اتخاذ القرار`: canonical first (~5.71) | Duplicate: **0** | related redirect collisions: **0**
 - Record: `migration-records/C0/MIG-000009-decision-making.md`
-- Claim #15: CLOSED after correction.
 
 ### MIG-000010 — الإبداع
 - Canonical: `/content/creativity`
 - Status: **PUBLISHED / POST-PUBLISH QA PASS**
 - Searchable words: **1599** | FAQ: **11** | References: **8**
 - Versions/Audits: **9 / 9** | Tags: **8** | Categories: **1**
-- Governance correction: previous record falsely claimed publication. DB was draft/1 version. Stored `body_text` exposed only 557 words while structured `body_json` contained 1599 searchable words. Search text was rebuilt from structured blocks rather than padding the article.
+- Governance correction: DB was draft/1 version. Stored `body_text` exposed only 557 words while structured `body_json` contained 1599 searchable words. Search text was rebuilt from structured blocks rather than padding the article.
 - Search `الإبداع`: canonical first (~8.1) | Duplicate: **0** | related redirect collisions: **0**
 - Record: `migration-records/C0/MIG-000010-creativity.md`
-- Claim #17: CLOSED after correction.
 
 ### MIG-000011 — التركيز
 - Canonical: `/content/concentration`
@@ -140,7 +116,19 @@ Source repository: `khaledaltheeb/healthrenewal.org`
 - Search `الانتباه`: attention first (13), concentration lower (~2.9).
 - Duplicate: **0** | redirect collision from attention/focus-break article: **0**
 - Record: `migration-records/C0/MIG-000011-concentration.md`
-- Claim #89: CLOSED / COMPLETED.
+
+### MIG-000012 — الإحساس
+- Canonical: `/content/sensation`
+- Status: **PUBLISHED / POST-PUBLISH QA PASS**
+- Words: **2305** | FAQ: **11** | References: **8**
+- Structured blocks: **52** | H2/H3: **16 / 4** | Tables: **3**
+- Versions/Audits: **8 / 8** | Tags: **7** | Categories: **1**
+- Legacy discovery found no standalone old sensation page; this is transparently documented as a synthesized parent glossary concept from the verified sensory/access legacy cluster plus authoritative sources.
+- Search `الإحساس`: sensation first (~6.1), perception lower (1.5).
+- Search `الإدراك`: perception first (~11.6), sensation lower (~0.7).
+- Duplicate: **0** | perception redirect collision: **0** | specialized sensory redirect collisions: **0**
+- Record: `migration-records/C0/MIG-000012-sensation.md`
+- Claim #19: CLOSED / COMPLETED.
 
 ## Validated non-C0 page
 
@@ -155,20 +143,19 @@ Source repository: `khaledaltheeb/healthrenewal.org`
 
 ## Open Claims verified at this checkpoint
 
-The current GitHub open-claim query returns only:
-- C0 — Issue #19: `sensation` — **الإحساس**.
-- A4 — Issue #91: `extended-family-boundaries` — **الحدود مع العائلة الممتدة**.
+Fresh GitHub claim scan after closing MIG-000012 returns:
+- A4 — Issue #95: `care-for-elderly` — **رعاية كبار السن والصحة النفسية للعائلة**.
 - A5 — Issue #62: `safe-screening-tools` — **الاستخدام الآمن للمقاييس وأدوات الفحص**.
 
-No other lane is declared complete in this ledger merely because an Issue is closed or a database row exists; agent outputs require independent coordinator QA before inclusion.
+No C0 Claim is currently open. Other agent outputs are not added to totals unless independently audited by C0.
 
 ## Totals
 
-- **C0 completed and database-verified canonicals: 11**
+- **C0 completed and database-verified canonicals: 12**
 - **Validated non-C0 canonicals in this ledger: 1**
-- **Total completed canonicals after coordinator QA: 12**
-- **Total published canonicals after coordinator QA: 12**
+- **Total completed canonicals after coordinator QA: 13**
+- **Total published canonicals after coordinator QA: 13**
 
 ## Next action
 
-C0 has an open Claim for **الإحساس (`sensation`)**, so the coordinator must finish/reconcile that Claim before opening MIG-000012 for another general concept. Continue independent audit of agent outputs before adding any to totals.
+Open `MIG-000013` only after checking the latest Claims again, then choose a general encyclopedia concept that does not overlap A4/A5 or an already published canonical. Continue independent agent-output audit before adding any non-C0 page to totals.
