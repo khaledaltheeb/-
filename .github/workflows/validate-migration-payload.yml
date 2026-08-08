@@ -6,7 +6,9 @@ on:
     paths:
       - 'data/migration-batches/**'
       - 'scripts/prepare_legacy_batch.py'
+      - 'scripts/apply_v3_seo_contract.py'
       - 'scripts/validate_migration_payload.py'
+      - 'scripts/validate_v3_release_metadata.py'
       - '.github/workflows/validate-migration-payload.yml'
 
 permissions:
@@ -21,5 +23,7 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.13'
-      - name: Validate ADHD migration payload
+      - name: Validate migration payload structure and provenance
         run: python scripts/validate_migration_payload.py data/migration-batches/generated/adhd-v1.json
+      - name: Validate Supabase release metadata contract
+        run: python scripts/validate_v3_release_metadata.py data/migration-batches/generated/adhd-v1.json
