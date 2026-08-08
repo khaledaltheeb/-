@@ -15,7 +15,6 @@ export function resolveSectorAccent(value?: string | null, fallback = '#0b8f92')
   if (!value) return fallback;
   const normalized = value.trim().toLowerCase();
   if (sectorAccentAliases[normalized]) return sectorAccentAliases[normalized];
-  if (/^#[0-9a-f]{3,8}$/i.test(normalized)) return normalized;
-  if (/^(rgb|hsl)a?\(/i.test(normalized)) return normalized;
+  if (/^#[0-9a-f]{3}([0-9a-f]{3})?$/i.test(normalized)) return normalized;
   return fallback;
 }
