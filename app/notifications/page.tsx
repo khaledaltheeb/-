@@ -10,7 +10,15 @@ export const dynamic='force-dynamic';
 export const metadata:Metadata={title:'الإشعارات',robots:{index:false,follow:false,noarchive:true}};
 type Notification={notification_id:string;kind:string;title:string;body:string|null;data:Record<string,unknown>;read_at:string|null;created_at:string};
 function date(value:string){try{return new Intl.DateTimeFormat('ar',{dateStyle:'medium',timeStyle:'short'}).format(new Date(value))}catch{return''}}
-function destination(item:Notification){const data=item.data||{};const conversation=typeof data.conversation_id==='string'?data.conversation_id:null;const appointment=typeof data.appointment_id==='string'?data.appointment_id:null;if(conversation)return `/messages/${conversation}`;if(appointment)return '/appointments';return '/account';}
+function destination(item:Notification){
+ const data=item.data||{};const conversation=typeof data.conversation_id==='string'?data.conversation_id:null;const appointment=typeof data.appointment_id==='string'?data.appointment_id:null;
+ if(conversation)return `/messages/${conversation}`;if(appointment)return '/appointments';
+ if(item.kind==='provider_application'&&typeof data.specialist_id==='string')return '/admin/specialists?status=pending';
+ if(item.kind==='provider_application'&&typeof data.center_id==='string')return '/admin/centers?status=pending';
+ if(item.kind==='verification_update'&&typeof data.specialist_id==='string')return '/join/specialist';
+ if(item.kind==='verification_update'&&typeof data.center_id==='string')return '/join/center';
+ return '/account';
+}
 
 export default async function NotificationsPage(){
  const supabase=await createClient();const {data:claims}=await supabase.auth.getClaims();if(!claims?.claims?.sub)redirect('/login?next=/notifications');
