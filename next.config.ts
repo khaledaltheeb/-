@@ -15,6 +15,16 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
+        source: '/capabilities/deafness',
+        destination: '/capabilities/hearing-loss/',
+        permanent: true,
+      },
+      {
+        source: '/content/capabilities-deafness',
+        destination: '/capabilities/hearing-loss/',
+        permanent: true,
+      },
+      {
         source: '/content/capabilities-hub',
         destination: '/capabilities/',
         permanent: true,
