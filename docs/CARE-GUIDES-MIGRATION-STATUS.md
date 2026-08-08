@@ -55,10 +55,12 @@ The foundation passed the Rawafid Quality Gate and the care-guides 101-source in
 ## Current migration progress
 
 - Legacy guide inventory: **101**.
-- Legacy guides migrated into enriched V3 draft records: **5 / 101**.
+- Legacy guide sources fully processed so far: **8 / 101**.
+- Processed as enriched new `/care-guides/` drafts: **7**.
+- Processed by merging into a stronger existing V3 canonical: **1**.
 - Section hub draft: **1**.
-- Total records currently under `/care-guides/`: **6**.
-- All six records remain `draft` until production deployment of the new route is independently verified.
+- Total database records currently using `/care-guides/` canonicals: **8** (hub + 7 guides).
+- All eight `/care-guides/` records remain `draft` until production deployment of the new route is independently verified.
 
 ### `care-guides-hub`
 
@@ -67,7 +69,6 @@ The foundation passed the Rawafid Quality Gate and the care-guides 101-source in
 - Approximate Arabic word count: 1,814
 - SEO title: 29 characters
 - Meta description: 153 characters
-- Role: `hub`
 
 ### `care-guide-support-person-in-distress`
 
@@ -75,10 +76,8 @@ The foundation passed the Rawafid Quality Gate and the care-guides 101-source in
 - Canonical: `/care-guides/support-person-in-distress/`
 - State: `draft`
 - Approximate Arabic word count: 2,423
-- SEO title: 29 characters
 - Meta description: 152 characters
 - Authoritative references: 4
-- Expanded scope: immediate safety, first conversation, practical support, self-harm/suicide risk, privacy, children/adolescents, disability/communication needs, caregiver boundaries, escalation, follow-up, and visible search-intent FAQ.
 
 ### `care-guide-panic-attack-immediate-support`
 
@@ -86,10 +85,9 @@ The foundation passed the Rawafid Quality Gate and the care-guides 101-source in
 - Canonical: `/care-guides/panic-attack-immediate-support/`
 - State: `draft`
 - Approximate Arabic word count: 2,160
-- SEO title: 29 characters
 - Meta description: 151 characters
-- Authoritative references: 4 (NICE, NHS, NIMH).
-- Scope decision: `retain-separate` from `/comparisons/panic-attack-vs-panic-disorder/`; immediate-action intent is materially different from comparison/differential intent.
+- Authoritative references: 4 (NICE, NHS, NIMH)
+- Scope: `retain-separate` from `/comparisons/panic-attack-vs-panic-disorder/` because immediate-action intent differs from comparison intent.
 
 ### `care-guide-suicide-risk-conversation-safety-plan`
 
@@ -97,10 +95,8 @@ The foundation passed the Rawafid Quality Gate and the care-guides 101-source in
 - Canonical: `/care-guides/suicide-risk-conversation-safety-plan/`
 - State: `draft`
 - Approximate Arabic word count: 2,131
-- SEO title: 32 characters
 - Meta description: 156 characters
-- Authoritative references: 4 (NIMH, NICE, WHO).
-- Expanded scope: direct asking, imminent-risk escalation, collaborative safety planning, safer environment, confidentiality boundaries, children/adolescents, communication needs, substance/psychosis context, follow-up, and supporter boundaries.
+- Authoritative references: 4 (NIMH, NICE, WHO)
 
 ### `care-guide-agitation-aggression-deescalation`
 
@@ -108,11 +104,9 @@ The foundation passed the Rawafid Quality Gate and the care-guides 101-source in
 - Canonical: `/care-guides/agitation-aggression-deescalation/`
 - State: `draft`
 - Approximate Arabic word count: 2,253
-- SEO title: 31 characters
 - Meta description: 153 characters
-- Authoritative references: 3 (NICE NG10).
-- Scope decision: `retain-separate` from assertiveness/aggression comparison and nonviolent-communication content; this page answers immediate de-escalation and safety intent.
-- Safety boundary: does not teach physical restraint, weapon disarming, or unsupervised medication use.
+- Authoritative references: 3 (NICE NG10)
+- Safety boundary: no restraint, weapon-disarming, or unsupervised medication instructions.
 
 ### `care-guide-first-72-hours-after-traumatic-event`
 
@@ -120,11 +114,53 @@ The foundation passed the Rawafid Quality Gate and the care-guides 101-source in
 - Canonical: `/care-guides/first-72-hours-after-traumatic-event/`
 - State: `draft`
 - Approximate Arabic word count: 2,352
-- SEO title: 24 characters
 - Meta description: 153 characters
-- Authoritative references: 5 (WHO, VA National Center for PTSD, NICE).
-- Scope decision: `retain-separate` from `/comparisons/trauma-vs-ptsd/`; the care guide answers immediate post-event support rather than diagnostic/conceptual differentiation.
-- Safety/evidence boundary: prioritizes physical safety and practical assistance, does not force trauma narration, and distinguishes early stress reactions from a PTSD diagnosis.
+- Authoritative references: 5 (WHO, VA National Center for PTSD, NICE)
+- Scope: `retain-separate` from `/comparisons/trauma-vs-ptsd/`; immediate post-event support differs from diagnostic/conceptual comparison.
+
+### `care-guide-support-psychosis-family`
+
+- Legacy slug: `support-psychosis-family`
+- Canonical: `/care-guides/support-psychosis-family/`
+- State: `draft`
+- Approximate Arabic word count: 2,146
+- Meta description: 154 characters
+- Authoritative references: 4 (NICE adult and child/young-person psychosis guidance)
+- Scope: `retain-separate` from `/comparisons/psychosis-vs-schizophrenia/`; the guide answers family action, early referral, safety, relapse planning, and communication intent.
+
+### `care-guide-dissociation-flashback-grounding-support`
+
+- Legacy slug: `dissociation-flashback-grounding-support`
+- Canonical: `/care-guides/dissociation-flashback-grounding-support/`
+- State: `draft`
+- Approximate Arabic word count: 2,013
+- Meta description: 153 characters
+- Authoritative references: 4 (VA National Center for PTSD, NICE)
+- Safety boundary: grounding is optional and stopped if it worsens distress; altered consciousness and neurological/medical red flags are escalated rather than labelled as dissociation.
+
+## First merge/redirect decision
+
+### `family-mental-health-crisis-plan` → `/content/family-care-plan`
+
+The legacy source was **not** converted into another `/care-guides/` page because V3 already has a published canonical article with the same core intent: `family-care-plan` — “خطة العناية النفسية للأسرة”.
+
+Unique legacy material was merged into that canonical instead:
+
+- build the crisis card during a stable period;
+- define early-warning signs;
+- use one primary family contact to prevent conflicting instructions;
+- include prescribed medications/allergies without family dose changes;
+- record communication and confidentiality preferences;
+- define service contacts and fallback contacts;
+- define three escalation levels: structured home support, prompt professional contact, urgent/emergency care.
+
+After the merge the existing canonical is approximately 2,143 Arabic words (up from ~1,948) and records `family-mental-health-crisis-plan` in its merged legacy provenance.
+
+`next.config.ts` adds a permanent redirect:
+
+`/care-guides/family-mental-health-crisis-plan` → `/content/family-care-plan`
+
+This is the preferred pattern when the useful legacy material can strengthen an already adequate canonical rather than creating competing pages.
 
 ## Initial overlap screening
 
@@ -143,6 +179,6 @@ Similarity alone never authorizes a merge. A care guide can remain separate wher
 
 ## Publication guard
 
-The dedicated route code is now in `main`, but public deployment has not yet been independently verified. GitHub currently exposes no repository deployment records and there is no deployment workflow in the repository that establishes the public target.
+The dedicated route code is in `main`, but public deployment has not yet been independently verified. GitHub currently exposes no repository deployment records and the repository does not establish the public target through a deployment workflow.
 
-Therefore all six records remain drafts intentionally. Publishing them prematurely could expose `/care-guides/` canonicals to the content sitemap before the public application is confirmed to serve those routes. Production route verification must precede the status transition to `published`.
+Therefore all eight `/care-guides/` records remain drafts intentionally. Publishing them prematurely could expose `/care-guides/` canonicals to the content sitemap before the public application is confirmed to serve those routes. Production route verification must precede status transition to `published`.

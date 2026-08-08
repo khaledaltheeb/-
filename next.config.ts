@@ -15,6 +15,11 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
+        source: '/care-guides/family-mental-health-crisis-plan',
+        destination: '/content/family-care-plan',
+        permanent: true,
+      },
+      {
         source: '/capabilities/deafness',
         destination: '/capabilities/hearing-loss/',
         permanent: true,
