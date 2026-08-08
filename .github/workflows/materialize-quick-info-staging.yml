@@ -1,0 +1,67 @@
+name: Materialize Quick Info Staging
+
+on:
+  push:
+    branches:
+      - 'agent/quick-info-staging-migration'
+    paths:
+      - 'scripts/legacy_content_extract.py'
+      - 'scripts/legacy_destination_coverage.py'
+      - 'scripts/prepare_legacy_staging_batches.py'
+      - 'scripts/validate_legacy_staging_batch.py'
+      - 'data/migration-batches/quick-info-staging-v1.config.json'
+      - '.github/workflows/materialize-quick-info-staging.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout Rawafid V3
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 1
+
+      - name: Checkout legacy source read-only
+        uses: actions/checkout@v7
+        with:
+          repository: khaledaltheeb/healthrenewal.org
+          ref: main
+          path: legacy-source
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Extract current legacy source
+        run: python scripts/legacy_content_extract.py legacy-source --output artifacts/legacy-content-inventory.json --summary artifacts/legacy-content-summary.json
+
+      - name: Compute current destination coverage
+        env:
+          RAWAFID_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
+          RAWAFID_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
+        run: python scripts/legacy_destination_coverage.py artifacts/legacy-content-inventory.json --output artifacts/legacy-destination-coverage.json
+
+      - name: Materialize unmapped Quick Info drafts
+        run: python scripts/prepare_legacy_staging_batches.py artifacts/legacy-content-inventory.json artifacts/legacy-destination-coverage.json data/migration-batches/quick-info-staging-v1.config.json --output-dir data/migration-batches/generated/quick-info-staging-v1
+
+      - name: Validate generated staging payload
+        run: python scripts/validate_legacy_staging_batch.py data/migration-batches/generated/quick-info-staging-v1 --expected-records 244 --source-prefix quick-info
+
+      - name: Commit deterministic staging payload
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/migration-batches/generated/quick-info-staging-v1
+          if git diff --cached --quiet; then
+            echo "Staging payload already materialized."
+            exit 0
+          fi
+          git commit -m "Materialize 244 Quick Info staging drafts"
+          git push origin HEAD:${{ github.ref_name }}
