@@ -11,7 +11,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const { slug } = await params;
   const record = await getCapabilityRecord(slug);
   if (!record) return {};
-  return buildSeoMetadata({
+  const metadata = buildSeoMetadata({
     title: record.seo_title || record.title,
     description: record.seo_description || record.excerpt,
     path: record.canonical_url || `/capabilities/${slug}/`,
@@ -24,6 +24,10 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     modifiedTime: record.updated_at,
     authors: record.author_display_name ? [{ name: record.author_display_name }] : undefined,
   });
+  if (record.robots_index) {
+    metadata.robots = `index, ${record.robots_follow ? 'follow' : 'nofollow'}, max-image-preview:large, max-snippet:-1, max-video-preview:-1`;
+  }
+  return metadata;
 }
 
 export default async function CapabilityDetailPage({ params }: { params: Params }) {
