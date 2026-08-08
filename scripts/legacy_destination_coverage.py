@@ -78,6 +78,11 @@ def main() -> int:
         'redirects?select=source_path,destination_path,status_code,is_active&is_active=eq.true&limit=5000',
     )
     content_by_slug = {str(row.get('slug') or ''): row for row in destination_content if row.get('slug')}
+    content_by_canonical = {
+        normalize_path(str(row.get('canonical_url') or '')): row
+        for row in destination_content
+        if str(row.get('canonical_url') or '').strip()
+    }
     redirects = {normalize_path(str(row.get('source_path') or '')): row for row in destination_redirects if row.get('source_path')}
     routes = static_routes(args.v3_root.resolve())
 
@@ -106,19 +111,40 @@ def main() -> int:
         elif path in routes:
             status = 'same-route'
             target = path
+            evidence['route_kind'] = 'static'
         elif path in redirects:
             status = 'redirect'
             target = redirects[path].get('destination_path')
             evidence['status_code'] = redirects[path].get('status_code')
-        elif slug and slug in content_by_slug:
-            status = 'exact-content-no-redirect'
-            row = content_by_slug[slug]
-            target = row.get('canonical_url') or f'/content/{slug}'
-        elif slug and slug in historical:
-            status = 'historical-merged-no-redirect'
-            row = historical[slug][0]
-            target = row.get('canonical_url') or f"/content/{row.get('slug')}"
+        elif path in content_by_canonical:
+            status = 'same-route-content'
+            row = content_by_canonical[path]
+            target = row.get('canonical_url')
             evidence['destination_slug'] = row.get('slug')
+            evidence['route_kind'] = 'dynamic-content'
+        elif slug and slug in content_by_slug:
+            row = content_by_slug[slug]
+            canonical = normalize_path(str(row.get('canonical_url') or f'/content/{slug}'))
+            if canonical == path:
+                status = 'same-route-content'
+                target = row.get('canonical_url') or path
+                evidence['destination_slug'] = row.get('slug')
+                evidence['route_kind'] = 'dynamic-content'
+            else:
+                status = 'exact-content-no-redirect'
+                target = row.get('canonical_url') or f'/content/{slug}'
+        elif slug and slug in historical:
+            row = historical[slug][0]
+            canonical = normalize_path(str(row.get('canonical_url') or f"/content/{row.get('slug')}"))
+            if canonical == path:
+                status = 'same-route-content'
+                target = row.get('canonical_url') or path
+                evidence['destination_slug'] = row.get('slug')
+                evidence['route_kind'] = 'historical-canonical'
+            else:
+                status = 'historical-merged-no-redirect'
+                target = row.get('canonical_url') or f"/content/{row.get('slug')}"
+                evidence['destination_slug'] = row.get('slug')
 
         counts[status] += 1
         prefix_counts.setdefault(prefix, Counter())[status] += 1
@@ -132,7 +158,7 @@ def main() -> int:
             'evidence': evidence,
         })
 
-    page_statuses = {'same-route', 'redirect'}
+    page_statuses = {'same-route', 'same-route-content', 'redirect'}
     page_records = [item for item in coverage if item['kind'] != 'resource']
     fully_routed = [item for item in page_records if item['status'] in page_statuses]
     missing_redirect = [item for item in page_records if item['status'] in {'exact-content-no-redirect', 'historical-merged-no-redirect'}]
