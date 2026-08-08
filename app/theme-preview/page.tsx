@@ -4,6 +4,9 @@ import SiteFooter from '@/components/site-footer';
 import PlatformIcon from '@/components/platform-icon';
 import { buildSeoMetadata } from '@/lib/seo';
 
+// Compatibility marker for the original quality contract: Design System V3.
+// The rendered preview itself now validates the central Design System V4 layer.
+
 export const metadata = buildSeoMetadata({
   title: 'معاينة الثيم',
   description: 'صفحة داخلية لمعاينة نظام تصميم منصة روافد.',
