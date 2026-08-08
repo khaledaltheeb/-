@@ -31,8 +31,8 @@ export default async function LoginPage({ searchParams }: { searchParams: Search
   return (
     <main className="auth-shell">
       <section className="auth-card auth-card-polished" aria-labelledby="login-title">
-        <Link href="/" className="brand auth-brand"><span className="brand-mark">ر</span><span><strong>روافد</strong><small>Rawafid</small></span></Link>
-        <span className="eyebrow">حسابات روافد</span>
+        <Link href="/" className="brand auth-brand"><span className="brand-mark">ر</span><span><strong>منصة روافد</strong><small>Rawafid Platform</small></span></Link>
+        <span className="eyebrow">حسابات منصة روافد</span>
         <h1 id="login-title">تسجيل الدخول أو إنشاء حساب</h1>
         <p>وصول آمن إلى حسابك، المراسلات، المواعيد والبوابات المهنية وفق صلاحيات الحساب.</p>
 

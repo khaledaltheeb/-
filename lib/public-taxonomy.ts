@@ -1,3 +1,5 @@
+import { resolveSectorAccent } from '@/lib/theme';
+
 export type PublicSector = {
   slug: string;
   name_ar: string;
@@ -35,11 +37,12 @@ export async function getPublicSectors(limit = 12): Promise<PublicSector[]> {
       if (!row || typeof row !== 'object') return [];
       const item = row as Record<string, unknown>;
       if (typeof item.slug !== 'string' || typeof item.name_ar !== 'string') return [];
+      const accent = typeof item.accent === 'string' ? resolveSectorAccent(item.accent) : null;
       return [{
         slug: item.slug,
         name_ar: item.name_ar,
         description: typeof item.description === 'string' ? item.description : null,
-        accent: typeof item.accent === 'string' ? item.accent : null,
+        accent,
         sort_order: typeof item.sort_order === 'number' ? item.sort_order : null,
       }];
     });

@@ -2,32 +2,14 @@ import type { Metadata, Viewport } from 'next';
 import Script from 'next/script';
 import { Noto_Sans_Arabic } from 'next/font/google';
 import { BRAND_NAME, DEFAULT_DESCRIPTION, SITE_URL, organizationJsonLd } from '@/lib/seo';
-import './globals.css';
-import './sector-pages.css';
-import './admin-ui.css';
-import './admin-operations.css';
-import './cms.css';
-import './search.css';
-import './directory.css';
-import './portal.css';
-import './community.css';
-import './trust.css';
-import './theme-v3.css';
-import './public-enhancements.css';
-import './communication.css';
-import './mobile-nav-v3.css';
-import './theme-empty.css';
-import './dashboard-v3.css';
-import './theme-preview.css';
-import './public-modules-v3.css';
-import './system-states.css';
-import './content-v3.css';
-import './structured-content.css';
-import './block-editor-v3.css';
-import './profile-v3.css';
-import './admin-shell-v3.css';
-import './mega-nav-v3.css';
-import './media-v3.css';
+import './rawafid-theme.css';
+
+/* Compatibility modules now live behind the central entry point:
+ './theme-empty.css' './dashboard-v3.css' './theme-preview.css'
+ './public-modules-v3.css' './system-states.css' './content-v3.css'
+ './structured-content.css' './block-editor-v3.css' './profile-v3.css'
+ './admin-shell-v3.css'.
+*/
 
 const arabicFont = Noto_Sans_Arabic({
   subsets: ['arabic'],
@@ -51,7 +33,7 @@ export const metadata: Metadata = {
   },
   appleWebApp: {
     capable: true,
-    title: 'روافد',
+    title: 'منصة روافد',
     statusBarStyle: 'default',
   },
   formatDetection: { telephone: false, email: false, address: false },
@@ -63,7 +45,7 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
-  themeColor: '#075e5d',
+  themeColor: '#0b8f92',
   colorScheme: 'light',
 };
 

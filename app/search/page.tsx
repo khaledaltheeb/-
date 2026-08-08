@@ -7,7 +7,7 @@ import { createClient } from '@/lib/supabase/server';
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
   title: 'البحث في منصة روافد',
-  description: 'البحث الموحد في محتوى روافد والقطاعات والأقسام والمختصين والمراكز والمتدربين والمتطوعين.',
+  description: 'البحث الموحد في محتوى منصة روافد والقطاعات والأقسام والمختصين والمراكز والمتدربين والمتطوعين.',
   alternates: { canonical: '/search' },
   robots: { index: false, follow: true, noarchive: true },
 };
@@ -43,7 +43,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Searc
       <main className="search-page-shell">
         <section className="search-hero">
           <span className="eyebrow">بحث موحد ودلالي</span>
-          <h1>ابحث في روافد</h1>
+          <h1>ابحث في منصة روافد</h1>
           <p>المحتوى والقطاعات والأقسام والمختصون والمراكز والمتدربون والمتطوعون ضمن محرك واحد، مع أوزان أعلى للعناوين والكلمات الأساسية والمصطلحات الدلالية.</p>
           <form className="search search-page-form" action="/search" method="get" role="search">
             <label className="sr-only" htmlFor="platform-search">عبارة البحث</label>

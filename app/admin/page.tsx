@@ -39,7 +39,7 @@ export default async function AdminPage() {
     <main className="dashboard-shell">
       <section className="dashboard-card">
         <div className="admin-heading">
-          <div><span className="eyebrow">صلاحيات إدارية محكومة</span><h1>لوحة إدارة روافد</h1><p>إدارة البنية والمحتوى والحسابات والدلائل والتواصل والمواعيد والتحويلات من طبقة مترابطة ومُسجلة.</p></div>
+          <div><span className="eyebrow">صلاحيات إدارية محكومة</span><h1>لوحة إدارة منصة روافد</h1><p>إدارة البنية والمحتوى والحسابات والدلائل والتواصل والمواعيد والتحويلات من طبقة مترابطة ومُسجلة.</p></div>
           <div className="dashboard-actions"><Link className="button" href="/">الموقع العام</Link><Link className="button" href="/account">حسابي</Link></div>
         </div>
 
@@ -51,6 +51,16 @@ export default async function AdminPage() {
           <article><strong>{pendingAppointments}</strong><span>طلبات مواعيد</span></article><article><strong>{redirectCount}</strong><span>Redirects</span></article>
           <article><strong>{integrityIssues}</strong><span>ملاحظات Integrity</span></article>
         </div>
+
+        <section className="portal-section admin-attention" aria-labelledby="admin-attention-title">
+          <div className="section-mini-heading"><div><span className="eyebrow">الأولوية التشغيلية</span><h2 id="admin-attention-title">ما الذي يحتاج انتباهك الآن؟</h2></div><span>مبني على البيانات التي تقرؤها اللوحة أصلًا، دون استعلامات إضافية</span></div>
+          <div className="admin-module-grid">
+            <Link href="/admin/reports"><strong>{pendingReports} بلاغ محادثة</strong><span>{pendingReports ? 'تنتظر المراجعة واتخاذ الإجراء المناسب.' : 'لا توجد بلاغات معلقة حاليًا.'}</span></Link>
+            <Link href="/admin/appointments"><strong>{pendingAppointments} طلب موعد</strong><span>{pendingAppointments ? 'طلبات جديدة تحتاج متابعة الحالة التشغيلية.' : 'لا توجد طلبات مواعيد معلقة حاليًا.'}</span></Link>
+            <Link href="/admin/integrity"><strong>{integrityIssues} ملاحظة سلامة</strong><span>{integrityIssues ? 'راجع العلاقات والنواقص التي رصدها فحص سلامة المنصة.' : 'لا توجد ملاحظات سلامة مرصودة حاليًا.'}</span></Link>
+            <Link href="/admin/content"><strong>{contentCount ?? 0} مادة في CMS</strong><span>إدارة المسودات والمراجعة وSEO وحالة النشر من المسار المركزي.</span></Link>
+          </div>
+        </section>
 
         <div className="admin-module-grid">
           <Link href="/admin/integrity"><strong>سلامة وترابط المنصة</strong><span>فحص العلاقات والصلاحيات وجاهزية التواصل والتحويلات ونواقص المحتوى المنشور.</span></Link>

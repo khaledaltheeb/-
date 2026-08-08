@@ -62,7 +62,7 @@ export default async function SiteHeader() {
         <div className="site-header-inner">
           <a className="brand" href="/" aria-label="منصة روافد - الرئيسية">
             <span className="brand-mark" aria-hidden="true">ر</span>
-            <span className="brand-copy"><strong>روافد</strong><small>Rawafid Platform</small></span>
+            <span className="brand-copy"><strong>منصة روافد</strong><small>Rawafid Platform</small></span>
           </a>
 
           <nav className="desktop-nav" aria-label="التنقل الرئيسي">
@@ -70,7 +70,7 @@ export default async function SiteHeader() {
             <details className="nav-dropdown mega-nav">
               <summary>استكشف روافد</summary>
               <div className="nav-dropdown-panel mega-nav-panel">
-                <div className="nav-dropdown-heading"><div><strong>الوصول إلى روافد حسب احتياجك</strong><span>قطاعات ديناميكية، مسارات بحث، ودليل خدمات في مكان واحد</span></div><a href="/search">فتح البحث المتقدم ←</a></div>
+                <div className="nav-dropdown-heading"><div><strong>الوصول إلى منصة روافد حسب احتياجك</strong><span>قطاعات ديناميكية، مسارات بحث، ودليل خدمات في مكان واحد</span></div><a href="/search">فتح البحث المتقدم ←</a></div>
                 <div className="mega-nav-layout">
                   <section className="mega-nav-column mega-nav-sectors">
                     <h2>القطاعات</h2>
@@ -97,7 +97,7 @@ export default async function SiteHeader() {
 
           <form className="header-search" action="/search" method="get" role="search">
             <label className="sr-only" htmlFor="header-search-input">البحث في منصة روافد</label>
-            <input id="header-search-input" name="q" type="search" placeholder="ابحث في روافد" maxLength={120} />
+            <input id="header-search-input" name="q" type="search" placeholder="ابحث في منصة روافد" maxLength={120} />
             <button type="submit">بحث</button>
           </form>
 
@@ -106,7 +106,7 @@ export default async function SiteHeader() {
           <details className="mobile-menu">
             <summary aria-label="فتح القائمة">القائمة</summary>
             <div className="mobile-menu-panel">
-              <form className="mobile-search" action="/search" method="get"><input name="q" type="search" placeholder="ابحث في روافد" maxLength={120} /><button type="submit">بحث</button></form>
+              <form className="mobile-search" action="/search" method="get"><input name="q" type="search" placeholder="ابحث في منصة روافد" maxLength={120} /><button type="submit">بحث</button></form>
               <a href="/">الرئيسية</a>
               <span className="mobile-menu-label">ابدأ من احتياجك</span>
               {intentLinks.map((link) => <a key={link.href} href={link.href}>{link.label}</a>)}
