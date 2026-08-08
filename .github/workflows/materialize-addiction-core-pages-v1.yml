@@ -9,6 +9,7 @@ on:
       - 'scripts/prepare_legacy_batch.py'
       - 'scripts/apply_v3_seo_contract.py'
       - 'scripts/enrich_addiction_batch.py'
+      - 'scripts/normalize_addiction_release_language.py'
       - 'scripts/audit_addiction_core_payload.py'
       - 'scripts/validate_migration_payload.py'
       - 'scripts/validate_v3_release_metadata.py'
@@ -53,6 +54,8 @@ jobs:
           data/migration-batches/generated/addiction-core-pages-v1.json
           data/migration-batches/addiction-core-v1.core-enrichment.json
           data/migration-batches/addiction-core-pages-v1.release-depth.json
+      - name: Normalize release language without weakening safety rules
+        run: python scripts/normalize_addiction_release_language.py data/migration-batches/generated/addiction-core-pages-v1.json
       - name: Validate migration provenance and structure
         run: python scripts/validate_migration_payload.py data/migration-batches/generated/addiction-core-pages-v1.json
       - name: Validate release metadata
