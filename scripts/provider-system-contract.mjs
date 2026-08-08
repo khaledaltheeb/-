@@ -20,6 +20,7 @@ requireText('app/admin/specialists/actions.ts',['set_specialist_verification_v2'
 requireText('app/admin/centers/actions.ts',['set_center_verification_v2','note-required']);
 requireText('app/login/actions.ts',['safeNext','emailRedirectTo','redirect(next)']);
 requireText('app/login/page.tsx',['name="next"','/join']);
+requireText('lib/supabase/proxy.ts',["'/dashboard'","'/center'","'/specialist'","url.searchParams.set('next'"]);
 requireText('app/messages/actions.ts',["rpc('start_conversation'","rpc('send_message'","rpc('report_conversation'"]);
 requireText('app/appointments/actions.ts',["rpc('request_appointment'","rpc('requester_cancel_appointment'","rpc('provider_update_appointment'"]);
 requireText('app/centers/[slug]/page.tsx',['LocationMap','public_latitude','public_longitude']);
