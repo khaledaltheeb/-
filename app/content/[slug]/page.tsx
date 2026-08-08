@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import ContentRenderer from '@/components/content-renderer';
@@ -33,6 +33,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 
 export default async function PublishedContentPage({ params }: { params: Params }) {
   const { slug } = await params; const record = await getPublished(slug); if (!record) notFound();
+  if (slug.startsWith('capabilities-') && record.canonical_url?.startsWith('/capabilities/')) permanentRedirect(record.canonical_url);
   const supabase = await createClient(); const { data: relatedData } = await supabase.rpc('related_public_content', { p_content_id: record.id, p_limit: 6 });
   const related = (Array.isArray(relatedData) ? relatedData : []) as RelatedItem[];
   const sector = Array.isArray(record.sectors) ? record.sectors[0] : record.sectors; const category = Array.isArray(record.categories) ? record.categories[0] : record.categories;
