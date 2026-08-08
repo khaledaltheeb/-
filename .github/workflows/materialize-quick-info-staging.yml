@@ -64,4 +64,6 @@ jobs:
             exit 0
           fi
           git commit -m "Materialize 244 Quick Info staging drafts"
-          git push origin HEAD:${{ github.ref_name }}
+          git fetch origin "${{ github.ref_name }}"
+          git rebase "origin/${{ github.ref_name }}"
+          git push origin "HEAD:${{ github.ref_name }}"
