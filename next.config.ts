@@ -15,6 +15,11 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
+        source: '/care-guides/caregiver-self-care-boundaries',
+        destination: '/content/caregiver-burnout',
+        permanent: true,
+      },
+      {
         source: '/care-guides/family-mental-health-crisis-plan',
         destination: '/content/family-care-plan',
         permanent: true,
