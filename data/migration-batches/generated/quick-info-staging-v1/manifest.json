@@ -1,0 +1,101 @@
+{
+  "batch_id": "legacy-quick-info-staging-v1",
+  "source_prefix": "quick-info",
+  "source_repo": "khaledaltheeb/healthrenewal.org",
+  "destination_repo": "khaledaltheeb/-",
+  "record_count": 244,
+  "chunk_size": 20,
+  "chunk_count": 13,
+  "records_sha256": "dade844900d6162c710119ce15f4aa91e3517260a1284da7da8761fc8b6f0e1f",
+  "contract": {
+    "draft_only": true,
+    "redirects_created": false,
+    "robots_index": false,
+    "legacy_theme_copied": false,
+    "legacy_css_copied": false,
+    "legacy_js_copied": false,
+    "references_preserved": true,
+    "final_taxonomy_required_before_publish": true,
+    "release_seo_review_required_before_publish": true
+  },
+  "chunks": [
+    {
+      "file": "chunk-001.json",
+      "chunk": 1,
+      "record_count": 20,
+      "records_sha256": "765073ff57459f6c17a62781c2e70c65bf3702908002f4a386892f95014a8239"
+    },
+    {
+      "file": "chunk-002.json",
+      "chunk": 2,
+      "record_count": 20,
+      "records_sha256": "0b694d4f4eb9e8dbdb980eece78beb42a3d700d815a306bbda2ed2dd766be0da"
+    },
+    {
+      "file": "chunk-003.json",
+      "chunk": 3,
+      "record_count": 20,
+      "records_sha256": "b7ef21c4648542feb874c2ef8e8300d4014f6f070954f7e9c93082c2a9180837"
+    },
+    {
+      "file": "chunk-004.json",
+      "chunk": 4,
+      "record_count": 20,
+      "records_sha256": "462685d07c0d3e0951bad91a5882d79909cfffc4885a489494fcb273677ab174"
+    },
+    {
+      "file": "chunk-005.json",
+      "chunk": 5,
+      "record_count": 20,
+      "records_sha256": "f39def379bfebf5bb24fb3c53cdccadeb6bc91f35babeaa368db68ae1de990e3"
+    },
+    {
+      "file": "chunk-006.json",
+      "chunk": 6,
+      "record_count": 20,
+      "records_sha256": "39de5df460f2298332dbc110092e91e958ca9c0216e69129e56a6e0c4d3ad3c2"
+    },
+    {
+      "file": "chunk-007.json",
+      "chunk": 7,
+      "record_count": 20,
+      "records_sha256": "11a0d344158e287d846fab7b75cc6b3fbdc349a3d4146668e7e8dab28be5bcf5"
+    },
+    {
+      "file": "chunk-008.json",
+      "chunk": 8,
+      "record_count": 20,
+      "records_sha256": "f7d19ff30e6cb1c78f5003a4bce9f76720f4d971f0e0d1c043bdf0c655a8330f"
+    },
+    {
+      "file": "chunk-009.json",
+      "chunk": 9,
+      "record_count": 20,
+      "records_sha256": "ea396be5839e27cb277e7ac9a90d122d869a5dfa7b562fc886699ea4ad39a197"
+    },
+    {
+      "file": "chunk-010.json",
+      "chunk": 10,
+      "record_count": 20,
+      "records_sha256": "328ef7306437d37806ad5cdabd82976bb3658c6ef6d3fb50cd20cd4c5cef41c0"
+    },
+    {
+      "file": "chunk-011.json",
+      "chunk": 11,
+      "record_count": 20,
+      "records_sha256": "0e13c2db45d721f67eb13edb69ea10de439e8f73d3b32beeba1a8bf93d6b3f46"
+    },
+    {
+      "file": "chunk-012.json",
+      "chunk": 12,
+      "record_count": 20,
+      "records_sha256": "2ec2544c670f030872db6bf3f7f792681e8e4cd554f53e69be0e722dc74bfab0"
+    },
+    {
+      "file": "chunk-013.json",
+      "chunk": 13,
+      "record_count": 4,
+      "records_sha256": "7e149691d8a72f8a1a2ede4c2561865baca93fa46ef96dd5d603200082d3228c"
+    }
+  ]
+}
