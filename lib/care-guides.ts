@@ -22,6 +22,15 @@ export type CareGuideItem = {
   updatedAt: string | null;
 };
 
+export type CareGuideRelatedItem = {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string | null;
+  contentType: string;
+  href: string;
+};
+
 export type CareGuideRecord = {
   id: string;
   slug: string;
@@ -139,6 +148,38 @@ export async function getCareGuideItems(): Promise<CareGuideItem[]> {
       category: careGuideCategory(row.schema_json),
       audience: asStringArray(row.audience),
       updatedAt: typeof row.updated_at === 'string' ? row.updated_at : null,
+    }];
+  });
+}
+
+export async function getRelatedCareGuideContent(contentId: string): Promise<CareGuideRelatedItem[]> {
+  const supabase = await createClient();
+  const { data: relatedData } = await supabase.rpc('related_public_content', { p_content_id: contentId, p_limit: 6 });
+  const relatedRows = Array.isArray(relatedData) ? relatedData : [];
+  const orderedIds = relatedRows.map((row) => asString(asRecord(row)?.id)).filter(Boolean);
+  if (!orderedIds.length) return [];
+
+  const { data } = await supabase
+    .from('content')
+    .select('id,slug,title,excerpt,content_type,canonical_url')
+    .in('id', orderedIds)
+    .eq('status', 'published')
+    .lte('published_at', new Date().toISOString());
+
+  const rows = Array.isArray(data) ? data : [];
+  const byId = new Map(rows.map((row) => [String(row.id), row]));
+  return orderedIds.flatMap((id) => {
+    const row = byId.get(id);
+    if (!row) return [];
+    const slug = asString(row.slug);
+    const canonical = asString(row.canonical_url);
+    return [{
+      id,
+      slug,
+      title: asString(row.title),
+      excerpt: typeof row.excerpt === 'string' ? row.excerpt : null,
+      contentType: asString(row.content_type),
+      href: canonical || `/content/${slug}`,
     }];
   });
 }
