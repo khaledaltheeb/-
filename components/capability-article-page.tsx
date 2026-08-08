@@ -54,6 +54,12 @@ export default function CapabilityArticlePage({ record, routeSlug, registryItems
   const bodyJson = role === 'registry' ? capabilityBodyWithoutRegistryCards(record.body_json) : record.body_json;
   const audiences = Array.isArray(record.audience) ? record.audience.map(String) : [];
   const registry = role === 'registry' ? registryItems : [];
+  const sectionLinks = [
+    { href: '/capabilities/', title: 'مدخل القدرات', description: 'الفكرة، حدودها، وكيف يتحول السؤال عن القوة إلى قياس وظيفي يحترم الشخص.' },
+    { href: '/capabilities/registry/', title: 'سجل الحالات المئة', description: 'بحث وفلترة مباشرة للوصول إلى أدلة الحالات المئة بالعربية والإنجليزية.' },
+    { href: '/capabilities/methodology/', title: 'المنهجية والأدلة', description: 'كيف نختار المصادر، نضبط الادعاءات، ونمنع التعميم والتكرار والحشو.' },
+    { href: '/capabilities/protocol/', title: 'البروتوكول العملي', description: 'تسع مراحل من الأمان وصوت الشخص إلى التجربة والقياس والتعميم والقرار.' },
+  ].filter((item) => item.href !== canonical);
 
   const breadcrumbs = breadcrumbJsonLd([
     { name: 'الرئيسية', path: '/' },
@@ -193,6 +199,28 @@ export default function CapabilityArticlePage({ record, routeSlug, registryItems
               <p>{record.medical_disclaimer}</p>
               <Link href="/disclaimer">إخلاء المسؤولية الكامل</Link>
             </aside>
+          ) : null}
+
+          {sectionLinks.length > 0 ? (
+            <section className="article-related" aria-labelledby="capabilities-navigation-title">
+              <div className="section-mini-heading">
+                <div>
+                  <span className="eyebrow">ترابط القسم</span>
+                  <h2 id="capabilities-navigation-title">استكشف مكتبة القدرات</h2>
+                </div>
+                <span>المسارات المركزية للبحث والمنهج والتطبيق</span>
+              </div>
+              <div className="related-content-grid">
+                {sectionLinks.map((item) => (
+                  <article key={item.href}>
+                    <span>لنرتقي بقدراتهم</span>
+                    <h3><Link href={item.href}>{item.title}</Link></h3>
+                    <p>{item.description}</p>
+                    <Link href={item.href}>فتح المسار ←</Link>
+                  </article>
+                ))}
+              </div>
+            </section>
           ) : null}
 
           {references.length > 0 ? (
