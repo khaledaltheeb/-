@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false, noarchive: true, nosnippet: true },
 };
 
-type SearchParams = Promise<{ error?: string; status?: string }>;
+type SearchParams = Promise<{ error?: string; status?: string; next?: string }>;
 
 const errorMessages: Record<string, string> = {
   invalid_input: 'تحقق من البريد الإلكتروني وكلمة المرور ثم أعد المحاولة.',
@@ -19,14 +19,16 @@ const errorMessages: Record<string, string> = {
 };
 
 const statusMessages: Record<string, string> = {
-  check_email: 'تم استلام طلب إنشاء الحساب. تحقق من بريدك الإلكتروني لإكمال التفعيل.',
+  check_email: 'تم استلام طلب إنشاء الحساب. تحقق من بريدك الإلكتروني لإكمال التفعيل ثم ستعود إلى المسار الذي اخترته.',
   password_updated: 'تم تحديث كلمة المرور بنجاح. يمكنك تسجيل الدخول الآن.',
 };
+function safeNext(value?:string){return value&&value.startsWith('/')&&!value.startsWith('//')&&!value.includes('\\')?value:'/account';}
 
 export default async function LoginPage({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams;
   const errorMessage = params.error ? errorMessages[params.error] : null;
   const statusMessage = params.status ? statusMessages[params.status] : null;
+  const next=safeNext(params.next);
 
   return (
     <main className="auth-shell">
@@ -40,6 +42,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Search
         {statusMessage && <div className="system-message success" role="status">{statusMessage}</div>}
 
         <form className="auth-form">
+          <input type="hidden" name="next" value={next}/>
           <label htmlFor="email">البريد الإلكتروني</label>
           <input id="email" name="email" type="email" inputMode="email" autoComplete="email" required maxLength={254} placeholder="name@example.com" />
           <div className="auth-password-label"><label htmlFor="password">كلمة المرور</label><Link href="/forgot-password">نسيت كلمة المرور؟</Link></div>
@@ -48,7 +51,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Search
           <button className="auth-secondary" formAction={signup}>إنشاء حساب جديد</button>
         </form>
         <small className="auth-note">إنشاء الحساب لا يمنح صلاحيات مهنية أو إدارية ولا يعني اعتماد الملف كمختص أو مركز.</small>
-        <div className="auth-links"><Link href="/">الرئيسية</Link><Link href="/specialists">دليل المختصين</Link><Link href="/centers">دليل المراكز</Link></div>
+        <div className="auth-links"><Link href="/">الرئيسية</Link><Link href="/join">الانضمام المهني</Link><Link href="/specialists">دليل المختصين</Link><Link href="/centers">دليل المراكز</Link></div>
       </section>
     </main>
   );
