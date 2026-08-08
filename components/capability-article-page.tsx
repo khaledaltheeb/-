@@ -4,6 +4,7 @@ import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import ContentRenderer from '@/components/content-renderer';
 import CapabilitiesRegistryBrowser from '@/components/capabilities-registry-browser';
+import styles from './capability-article-page.module.css';
 import {
   capabilityBodyWithoutRegistryCards,
   safeCapabilityReferences,
@@ -45,6 +46,17 @@ function protocolSteps(value: unknown) {
   });
 }
 
+function ReferenceNav({ end = false }: { end?: boolean }) {
+  return (
+    <nav className={end ? styles.endNav : styles.referenceNav} aria-label={end ? 'الخطوة التالية في مرجع القدرات' : 'أقسام مرجع القدرات'}>
+      <Link href="/capabilities/">مدخل المرجع</Link>
+      <Link href="/capabilities/registry/">سجل الحالات المئة</Link>
+      <Link href="/capabilities/protocol/">البروتوكول العملي</Link>
+      <Link href="/capabilities/methodology/">المنهجية والأدلة</Link>
+    </nav>
+  );
+}
+
 export default function CapabilityArticlePage({ record, routeSlug, registryItems = [] }: Props) {
   const references = safeCapabilityReferences(record.references_json);
   const faqItems = visibleCapabilityFaq(record.body_json);
@@ -75,6 +87,9 @@ export default function CapabilityArticlePage({ record, routeSlug, registryItems
     lastReviewed: record.last_reviewed_at || undefined,
     publisher: { '@id': `${SITE_URL}/#organization` },
     isPartOf: { '@id': `${SITE_URL}/#website` },
+    image: record.featured_image_url
+      ? (record.featured_image_url.startsWith('https://') ? record.featured_image_url : `${SITE_URL}${record.featured_image_url}`)
+      : undefined,
   };
 
   const steps = role === 'protocol' ? protocolSteps(record.body_json) : [];
@@ -94,7 +109,15 @@ export default function CapabilityArticlePage({ record, routeSlug, registryItems
         },
       }
     : role === 'hub'
-      ? { ...common, '@type': 'CollectionPage' }
+      ? {
+          ...common,
+          '@type': 'CollectionPage',
+          hasPart: [
+            { '@type': 'CollectionPage', name: 'سجل القدرات', url: `${SITE_URL}/capabilities/registry/` },
+            { '@type': 'HowTo', name: 'بروتوكول اكتشاف وتنمية القدرة', url: `${SITE_URL}/capabilities/protocol/` },
+            { '@type': 'Article', name: 'منهجية اكتشاف القدرات', url: `${SITE_URL}/capabilities/methodology/` },
+          ],
+        }
       : role === 'protocol' && steps.length > 0
         ? {
             ...common,
@@ -168,6 +191,8 @@ export default function CapabilityArticlePage({ record, routeSlug, registryItems
             {audiences.length > 0 ? <div className="tag-list">{audiences.map((audience) => <span key={audience}>{audience}</span>)}</div> : null}
           </header>
 
+          <ReferenceNav />
+
           {role === 'registry' && registry.length > 0 ? <CapabilitiesRegistryBrowser items={registry} /> : null}
 
           <div className="article-body">
@@ -194,6 +219,8 @@ export default function CapabilityArticlePage({ record, routeSlug, registryItems
               <Link href="/disclaimer">إخلاء المسؤولية الكامل</Link>
             </aside>
           ) : null}
+
+          <ReferenceNav end />
 
           {references.length > 0 ? (
             <section className="article-references" aria-labelledby="capability-references-title">
