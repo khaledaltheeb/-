@@ -14,7 +14,8 @@ from urllib.parse import unquote, urlparse
 
 BASE_URL = "https://healthrenewal.org"
 SPACE_RE = re.compile(r"\s+")
-TAG_RE = re.compile(r"<[^>]+>")
+HTML_SUFFIXES = {".html", ".htm"}
+RESOURCE_SUFFIXES = {".json", ".xml", ".csv", ".txt"}
 
 
 def clean(value: str) -> str:
@@ -29,7 +30,7 @@ def path_for_url(root: Path, url: str) -> Path:
     if path.endswith("/"):
         return root / path / "index.html"
     candidate = root / path
-    if candidate.suffix.lower() in {".html", ".htm"}:
+    if candidate.suffix.lower() in HTML_SUFFIXES | RESOURCE_SUFFIXES:
         return candidate
     return candidate / "index.html"
 
@@ -53,6 +54,24 @@ def discover_urls(root: Path) -> tuple[list[str], list[str]]:
         sitemaps.append(path.name)
         urls.update(locations)
     return sorted(urls), sitemaps
+
+
+def structured_sources(root: Path, slug: str) -> list[str]:
+    if not slug:
+        return []
+    needles = (f'"slug": "{slug}"', f'"target_slug": "{slug}"')
+    matches: list[str] = []
+    content_root = root / "content"
+    if not content_root.is_dir():
+        return matches
+    for path in content_root.rglob("*.json"):
+        try:
+            payload = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        if any(needle in payload for needle in needles):
+            matches.append(path.relative_to(root).as_posix())
+    return sorted(set(matches))[:25]
 
 
 class Extractor(HTMLParser):
@@ -194,7 +213,9 @@ def main() -> int:
     urls, sitemaps = discover_urls(root)
     records: list[dict] = []
     prefixes: Counter[str] = Counter()
-    missing: list[str] = []
+    unresolved_missing: list[str] = []
+    recoverable: list[dict] = []
+    resource_urls: list[str] = []
     noindex: list[str] = []
     weak: list[str] = []
 
@@ -204,10 +225,38 @@ def main() -> int:
         prefixes[prefix] += 1
         file_path = path_for_url(root, url)
         rel = file_path.relative_to(root).as_posix()
-        if not file_path.is_file():
-            missing.append(url)
-            records.append({"url": url, "path": parsed_url.path, "source_html": rel, "html_exists": False})
+        suffix = file_path.suffix.lower()
+
+        if suffix in RESOURCE_SUFFIXES:
+            if file_path.is_file():
+                payload = file_path.read_bytes()
+                resource_urls.append(url)
+                records.append({
+                    "url": url,
+                    "path": parsed_url.path,
+                    "source_file": rel,
+                    "kind": "resource",
+                    "resource_exists": True,
+                    "size_bytes": len(payload),
+                    "sha256": hashlib.sha256(payload).hexdigest(),
+                })
+            else:
+                unresolved_missing.append(url)
+                records.append({"url": url, "path": parsed_url.path, "source_file": rel, "kind": "resource", "resource_exists": False})
             continue
+
+        if not file_path.is_file():
+            slug = parsed_url.path.strip("/").split("/")[-1]
+            candidates = structured_sources(root, slug)
+            if candidates:
+                item = {"url": url, "path": parsed_url.path, "source_html": rel, "kind": "recoverable-structured", "html_exists": False, "structured_sources": candidates}
+                recoverable.append(item)
+                records.append(item)
+            else:
+                unresolved_missing.append(url)
+                records.append({"url": url, "path": parsed_url.path, "source_html": rel, "kind": "html", "html_exists": False})
+            continue
+
         html = file_path.read_text(encoding="utf-8", errors="ignore")
         page = parse_page(html)
         text = clean(" ".join(page.all_text))
@@ -221,6 +270,7 @@ def main() -> int:
             "url": url,
             "path": parsed_url.path,
             "source_html": rel,
+            "kind": "html",
             "html_exists": True,
             "title": page.title,
             "h1": page.h1,
@@ -244,12 +294,16 @@ def main() -> int:
         "sitemaps": sitemaps,
         "sitemap_count": len(sitemaps),
         "published_url_count": len(urls),
-        "html_found": sum(1 for item in records if item.get("html_exists")),
-        "html_missing": len(missing),
+        "html_found": sum(1 for item in records if item.get("kind") == "html" and item.get("html_exists")),
+        "non_html_resource_count": len(resource_urls),
+        "recoverable_missing_html_count": len(recoverable),
+        "unresolved_missing_count": len(unresolved_missing),
         "noindex_count": len(noindex),
         "under_300_words": len(weak),
         "top_level_counts": dict(sorted(prefixes.items(), key=lambda item: (-item[1], item[0]))),
-        "missing_urls": missing,
+        "resource_urls": resource_urls,
+        "recoverable_missing_html": recoverable,
+        "unresolved_missing_urls": unresolved_missing,
         "noindex_urls": noindex,
         "under_300_word_urls": weak,
         "contract": {
@@ -266,8 +320,8 @@ def main() -> int:
     print(json.dumps(summary, ensure_ascii=False, indent=2))
     if len(urls) < 800:
         raise SystemExit(f"legacy inventory unexpectedly small: {len(urls)}")
-    if missing:
-        raise SystemExit(f"published URLs without matching HTML: {len(missing)}")
+    if unresolved_missing:
+        raise SystemExit(f"published sitemap resources without recoverable source: {len(unresolved_missing)}")
     return 0
 
 
