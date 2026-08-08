@@ -64,7 +64,16 @@ export function buildSeoMetadata(input: SeoMetadataInput): Metadata {
       follow: canFollow,
       noarchive: !canIndex,
       nosnippet: !canIndex,
-      googleBot: { index: canIndex, follow: canFollow, noimageindex: !canIndex },
+      googleBot: {
+        index: canIndex,
+        follow: canFollow,
+        noimageindex: !canIndex,
+        ...(canIndex ? {
+          'max-image-preview': 'large' as const,
+          'max-snippet': -1,
+          'max-video-preview': -1,
+        } : {}),
+      },
     },
     openGraph: {
       type: input.type === 'article' ? 'article' : 'website',
