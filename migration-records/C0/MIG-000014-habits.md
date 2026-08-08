@@ -1,39 +1,33 @@
 # MIG-000014 — العادات
 
 - Lane: C0 — الموسوعة والمصطلحات العامة
-- Status: **DRAFT QA PASS — WORKFLOW / POST-PUBLISH QA PENDING**
+- Status: **COMPLETE — PUBLISHED / POST-PUBLISH QA PASS**
 - Canonical key: `habits`
 - Canonical: `/content/habits`
 - Content type: `glossary_term`
 - Supabase content id: `6e592b09-4068-4107-9e78-4689a1b44d66`
-- Current version: **v1**
-- Database status: `draft`
+- Final versions: **8**
+- Audit events: **8**
+- Database status: **published**
 - Sector: `knowledge`
 - Primary category: `motivation-behavior` — الدافعية والسلوك
+- Published at: `2026-08-08T13:40:43Z`
 
 ## Taxonomy decision
 
-Before building this page, C0 inspected the live knowledge-sector taxonomy. Only `cognitive-processes` and `research-evidence-learning` existed, neither of which was appropriate for a general habit construct. A new public category was therefore created:
+Before building this page, C0 inspected the live knowledge-sector taxonomy. Only `cognitive-processes` and `research-evidence-learning` existed, neither of which was appropriate for a general habit construct. A new public category was therefore created and audited:
 
 - slug: `motivation-behavior`
 - name: `الدافعية والسلوك`
 - id: `e5d4f285-7b76-4fc6-a419-050af1f2af0d`
 
-The category creation/upsert was recorded in the audit log. It is intended to host general concepts such as habits, motivation, self-control and procrastination rather than forcing them into cognitive-process or research categories.
+It provides the correct home for general concepts such as habits, motivation, self-control and procrastination rather than forcing them into cognitive-process or research categories.
 
 ## Legacy evidence and canonical decision
 
 The old encyclopedia generator (`scripts/scale_site_v8.py`) lists `العادات / Habits` as an independent domain in category `الدافعية والسلوك`. Literal repository search did not verify a standalone non-generated habit page; no direct old canonical URL is claimed.
 
-The page is the general psychological habit construct. It does not consume:
-- addiction/substance-use canonicals,
-- compulsive-behavior pages,
-- motivation,
-- self-control,
-- routines,
-- implementation intentions.
-
-These are related concepts but not synonyms.
+The page is the general psychological habit construct. It does not consume addiction/substance-use canonicals, compulsive-behavior pages, motivation, self-control, routines or implementation intentions.
 
 ## Authoritative sources
 
@@ -69,8 +63,9 @@ All stored source URLs use HTTPS.
 - limits of apps/reminders as evidence of automaticity
 - common misconceptions and 11 visible FAQ items
 
-## Draft QA — verified directly from Supabase
+## Final content / SEO QA
 
+Verified directly from Supabase before workflow:
 - Searchable useful words: **1902**
 - Structured blocks: **42**
 - H2: **18**
@@ -82,7 +77,8 @@ All stored source URLs use HTTPS.
 - Category relations: **1**
 - Search aliases: **8**
 - Duplicate canonical: **0**
-- Versions before workflow: **1**
+- SEO title: `العادات: كيف تتكوّن ولماذا يصعب تغييرها` — **39 chars**
+- Meta Description: **159 chars**
 
 Internal/public-body scan:
 - TODO: PASS
@@ -91,25 +87,33 @@ Internal/public-body scan:
 - migration/agent language: PASS
 - banned term `معاقين`: PASS
 
-## SEO
+## Workflow / Audit
 
-- Primary entity: `العادات`
-- SEO title: `العادات: كيف تتكوّن ولماذا يصعب تغييرها`
-- SEO title length: **39 chars**
-- Meta Description length: **159 chars**
-- Canonical: `/content/habits`
-- Search intent: `informational`
-- Visible FAQ → FAQPage schema
-- `glossary_term` → DefinedTerm schema
+The page passed in Supabase:
+`Draft → Scientific Review → Editorial Review → SEO → Accessibility → Approved → Scheduled → Published`
+
+No human reviewer identity or credentials were fabricated; reviewer fields remain null for this non-diagnostic glossary page.
+
+Final database state:
+- **8 versions**
+- **8 audit events**
+- status: **published**
+
+## Post-publish QA
+
+Search query `العادات` returns `/content/habits` first with score ~**5.3**.
+
+Search query `الإدمان` remains correctly owned by the `/sectors/addiction-recovery` sector; `/content/habits` appears only as a low related result (~**0.4**) because the page explains the distinction.
+
+- Duplicate canonical: **0**
+- Redirect collisions from addiction/substance/compulsion/routine routes: **0**
+- Tags/category relations: **PASS**
+- Search: **PASS**
 
 ## Redirect decision
 
-No verified standalone legacy habits URL exists, so no generated `concept-*` URL or unrelated behavioral route is redirected.
+No verified standalone legacy habits URL exists, so no generated `concept-*` URL or unrelated behavioral route was redirected.
 
-## Remaining before COMPLETE
+## Final result
 
-1. Run the actual workflow through Scheduled → Published.
-2. Verify search `العادات` ranks this canonical first.
-3. Verify addiction-related search remains owned by addiction canonicals and habit does not cannibalize it.
-4. Confirm duplicate canonical and addiction/routine redirect collisions are zero.
-5. Close Claim #101 and update the central ledger.
+**MIG-000014 is genuinely closed and canonicalized after database-backed QA.**
