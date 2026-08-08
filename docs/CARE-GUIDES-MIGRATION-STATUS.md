@@ -9,13 +9,19 @@ Destination repository: `khaledaltheeb/-` (Rawafid V3).
 
 The legacy repository is a content and historical-URL source only. Theme, CSS, layout, page chrome, and scripts are not migrated.
 
-## Baseline discovered before import
+## Verified legacy inventory
 
-- Legacy care-guides publisher declares 101 source guides in total.
-- The legacy institutional catalog declares 87 generated/institutional guide topics; the remaining legacy source set is handled from the `content/v18/care-guides*.json` files.
-- Rawafid V3 already contained 142 rows with `content_type = guide` before this migration started.
-- Rawafid V3 contained zero rows with a canonical URL under `/care-guides/` before this migration started.
-- Existing V3 guides under other dedicated modules are not automatically duplicated into `/care-guides/`. Matching and canonical decisions come first.
+The care-guides-specific audit now checks out the legacy repository read-only and parses the structured source files deterministically.
+
+Verified result:
+
+- 14 unique guides from `content/v18/care-guides*.json`.
+- 87 unique institutional topics from `scripts/care_guides_topics_v246_*.py`.
+- 0 overlapping slugs between those two source groups.
+- 101 unique legacy care-guide source records in total.
+- The CI gate fails if the institutional count differs from 87 or the total differs from 101.
+
+Rawafid V3 already contained 142 rows with `content_type = guide` before this migration started, but zero rows with a canonical URL under `/care-guides/`. Existing V3 guides under other dedicated modules are not automatically duplicated into `/care-guides/`; matching and canonical decisions come first.
 
 ## Migration contract
 
@@ -38,9 +44,11 @@ Branch: `agent/care-guides-foundation`
 
 - `app/care-guides/page.tsx` — dedicated hub route.
 - `app/care-guides/[...slug]/page.tsx` — nested guide routes, including compatibility with historically nested branches when retained.
-- `lib/care-guides.ts` — canonical lookup and care-guide data access from the central `content` entity.
-- `components/care-guide-page.tsx` — V3 renderer using the institutional header/footer, ContentRenderer, breadcrumbs, Article/CollectionPage JSON-LD, visible FAQ JSON-LD, references, audience tags, and disclaimer.
+- `lib/care-guides.ts` — canonical lookup, care-guide data access, and canonical semantic-related-content resolution from the central `content` entity.
+- `components/care-guide-page.tsx` — V3 renderer using the institutional header/footer, ContentRenderer, breadcrumbs, Article/CollectionPage JSON-LD, visible FAQ JSON-LD, references, audience tags, disclaimer, and semantic internal links.
 - `components/care-guide-page.module.css` — scoped responsive styling only; no legacy visual code copied.
+- `scripts/care_guides_legacy_audit.py` — deterministic 101-source inventory gate.
+- `.github/workflows/care-guides-legacy-audit.yml` — read-only legacy checkout and artifact-producing inventory workflow.
 
 ## Content migrated so far
 
@@ -64,6 +72,21 @@ Branch: `agent/care-guides-foundation`
 - Authoritative references recorded: 4
 - Expanded scope: immediate safety, first conversation, practical support, self-harm/suicide risk, privacy, children/adolescents, disability/communication needs, caregiver boundaries, escalation, follow-up, and visible search-intent FAQ.
 
+### `care-guide-panic-attack-immediate-support`
+
+- Legacy slug: `panic-attack-immediate-support`
+- Canonical: `/care-guides/panic-attack-immediate-support/`
+- State: `draft`
+- Approximate Arabic word count at import: 2,160
+- SEO title: 29 characters
+- Meta description: 151 characters
+- Authoritative references recorded: 4 (NICE, NHS, NIMH).
+- Scope decision: retain separately from the existing comparison page about panic attack versus panic disorder because the search intent differs: immediate action/support versus conceptual differential explanation.
+
+## Initial overlap screening
+
+A first-pass `pg_trgm` similarity screen now compares every legacy title/slug against the V3 content table. This is a candidate generator only, not an automatic merge rule. It already identifies strong topical intersections such as developmental coordination disorder, developmental language disorder, Fragile X, chronic-illness adjustment, and executive-functions content. These require scope-level review before deciding between merge, redirect, or a separate practical care guide.
+
 ## Publication guard
 
-The two records above remain drafts intentionally. Publishing them before the `/care-guides/` route is merged and deployed would allow the existing content sitemap to expose canonical URLs that the production application cannot yet serve. Route deployment and validation must therefore precede status transition to `published`.
+All three care-guides records above remain drafts intentionally. Publishing them before the `/care-guides/` route is merged and deployed would allow the existing content sitemap to expose canonical URLs that the production application cannot yet serve. Route deployment and validation must therefore precede status transition to `published`.
