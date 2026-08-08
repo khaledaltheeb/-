@@ -18,8 +18,9 @@ requireText('app/admin/specialists/page.tsx',['admin_specialist_queue_v2','verif
 requireText('app/admin/centers/page.tsx',['admin_center_queue_v2','verification_note']);
 requireText('app/admin/specialists/actions.ts',['set_specialist_verification_v2','note-required']);
 requireText('app/admin/centers/actions.ts',['set_center_verification_v2','note-required']);
-requireText('app/login/actions.ts',['safeNext','emailRedirectTo','redirect(next)']);
-requireText('app/login/page.tsx',['name="next"','/join']);
+requireText('app/login/actions.ts',['safeNext','signInWithPassword','redirect(next)']);
+requireText('app/register/actions.ts',['safeNext','emailRedirectTo','signUp']);
+requireText('app/login/page.tsx',['name="next"','/join','/register?next=']);
 requireText('lib/supabase/proxy.ts',["'/dashboard'","'/center'","'/specialist'","url.searchParams.set('next'"]);
 requireText('app/messages/actions.ts',["rpc('start_conversation'","rpc('send_message'","rpc('report_conversation'"]);
 requireText('app/appointments/actions.ts',["rpc('request_appointment'","rpc('requester_cancel_appointment'","rpc('provider_update_appointment'"]);
