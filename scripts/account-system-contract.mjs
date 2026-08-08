@@ -11,7 +11,8 @@ for(const path of [
  'app/account/security/page.tsx','app/account/security/actions.ts','app/account/verification-documents/page.tsx','components/provider-document-manager.tsx',
  'app/admin/verification-documents/[userId]/page.tsx','app/admin/verification-documents/actions.ts','app/account-system-v1.css',
  'supabase/migrations/20260808210545_provider_verification_documents.sql','supabase/migrations/20260808210851_provider_verification_fk_index.sql',
- 'supabase/migrations/20260808211225_provider_verification_rpc_wrapper_security.sql','supabase/migrations/20260808211521_provider_verification_private_rpc_grants.sql'
+ 'supabase/migrations/20260808211225_provider_verification_rpc_wrapper_security.sql','supabase/migrations/20260808211521_provider_verification_private_rpc_grants.sql',
+ 'supabase/migrations/20260808214027_harden_provider_verification_storage_boundary.sql'
 ]) requireFile(path);
 
 requireText('app/register/actions.ts',['full_name','emailRedirectTo','signUp','safeNext']);
@@ -41,6 +42,8 @@ if(migration.includes("values('provider-verification','provider-verification',tr
 requireText('supabase/migrations/20260808210851_provider_verification_fk_index.sql',['provider_verification_documents_reviewer_idx','reviewed_by']);
 requireText('supabase/migrations/20260808211225_provider_verification_rpc_wrapper_security.sql',['register_provider_verification_document','delete_provider_verification_document','admin_review_provider_verification_document','security definer']);
 requireText('supabase/migrations/20260808211521_provider_verification_private_rpc_grants.sql',['security invoker','grant execute on function private.register_provider_verification_document','grant execute on function private.delete_provider_verification_document','grant execute on function private.admin_review_provider_verification_document']);
+const storageBoundary=read('supabase/migrations/20260808214027_harden_provider_verification_storage_boundary.sql');
+for(const marker of ['provider_verification_upload_allowed','private.provider_application_exists','< 20','array_length(storage.foldername(name),1)','not exists(','provider_verification_documents d']) if(!storageBoundary.includes(marker)) fail(`storage boundary migration missing ${marker}`);
 
 requireText('lib/supabase/proxy.ts',["'/account'","'/admin'"]);
 requireText('scripts/smoke.mjs',["'/register'","'/account/security'","'/account/verification-documents'"]);
