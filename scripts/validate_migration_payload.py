@@ -45,6 +45,7 @@ def validate(path: Path) -> dict[str, Any]:
     total_blocks = 0
     total_references = 0
     total_source_words = 0
+    final_word_counts: list[int] = []
     redirect_count = 0
     same_route_count = 0
     for index, row in enumerate(records, start=1):
@@ -96,11 +97,18 @@ def validate(path: Path) -> dict[str, Any]:
             fail(f'{prefix}: legacy source SHA-256 missing/invalid', errors)
         source_words = int(schema.get('legacy_source_word_count') or 0)
         total_source_words += source_words
-        if source_words < 1000:
+        final_words = len(str(row.get('body_text') or '').split())
+        final_word_counts.append(final_words)
+        if is_family_guide:
+            if schema.get('family_guide_enriched') is not True:
+                fail(f'{prefix}: family-guide page must pass the enrichment stage before release', errors)
+            if final_words < 1500:
+                fail(f'{prefix}: family-guide final content must be >=1500 words, got {final_words}', errors)
+        elif source_words < 1000:
             fail(f'{prefix}: expected a long-form source (>=1000 words), got {source_words}', errors)
         if schema.get('references_preserved') is not True:
             fail(f'{prefix}: references_preserved provenance flag missing', errors)
-        if schema.get('legacy_image_inventory') and row.get('featured_image_url'):
+        if not is_family_guide and schema.get('legacy_image_inventory') and row.get('featured_image_url'):
             fail(f'{prefix}: legacy image must not be auto-rendered before asset verification', errors)
 
         body = row.get('body_json') if isinstance(row.get('body_json'), dict) else {}
@@ -120,6 +128,8 @@ def validate(path: Path) -> dict[str, Any]:
         refs = row.get('references_json') if isinstance(row.get('references_json'), list) else []
         if not refs:
             fail(f'{prefix}: references_json is empty', errors)
+        if is_family_guide and len(refs) < 4:
+            fail(f'{prefix}: family-guide page requires at least 4 authoritative references, got {len(refs)}', errors)
         total_references += len(refs)
         for ref in refs:
             url = str(ref.get('url') or '') if isinstance(ref, dict) else ''
@@ -143,6 +153,8 @@ def validate(path: Path) -> dict[str, Any]:
         'total_body_blocks':total_blocks,
         'total_external_references':total_references,
         'total_source_words':total_source_words,
+        'min_final_words':min(final_word_counts) if final_word_counts else 0,
+        'max_final_words':max(final_word_counts) if final_word_counts else 0,
         'redirect_count':redirect_count,
         'same_route_count':same_route_count,
         'legacy_theme_copied':False,
