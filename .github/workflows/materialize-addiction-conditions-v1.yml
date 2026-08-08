@@ -1,0 +1,103 @@
+name: Materialize Addiction Conditions V1
+
+on:
+  push:
+    branches:
+      - 'agent/addiction-sector-migration-v1'
+    paths:
+      - 'data/migration-batches/addiction-conditions-v1.config.json'
+      - 'scripts/apply_addiction_condition_contract.py'
+      - 'supabase/migrations/*addiction_conditions_taxonomy.sql'
+      - '.github/workflows/materialize-addiction-conditions-v1.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'data/migration-batches/addiction-conditions-v1.config.json'
+      - 'data/migration-batches/generated/addiction-conditions-v1.json'
+      - 'scripts/apply_addiction_condition_contract.py'
+      - 'supabase/migrations/*addiction_conditions_taxonomy.sql'
+      - '.github/workflows/materialize-addiction-conditions-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout Rawafid V3
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
+
+      - name: Checkout legacy repository read-only
+        uses: actions/checkout@v7
+        with:
+          repository: khaledaltheeb/healthrenewal.org
+          ref: main
+          path: legacy-source
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Compile migration gates
+        run: |
+          python -m py_compile scripts/legacy_content_extract.py scripts/prepare_legacy_batch.py scripts/apply_addiction_condition_contract.py scripts/apply_v3_seo_contract.py scripts/validate_migration_payload.py scripts/validate_v3_release_metadata.py
+
+      - name: Extract current legacy content without theme/runtime
+        run: python scripts/legacy_content_extract.py legacy-source --output artifacts/legacy-content-inventory.json --summary artifacts/legacy-content-summary.json
+
+      - name: Materialize ten addiction condition pages
+        run: |
+          python scripts/prepare_legacy_batch.py artifacts/legacy-content-inventory.json data/migration-batches/addiction-conditions-v1.config.json --legacy-root legacy-source --output data/migration-batches/generated/addiction-conditions-v1.json
+
+      - name: Apply addiction evidence safety and depth contract
+        run: python scripts/apply_addiction_condition_contract.py data/migration-batches/generated/addiction-conditions-v1.json data/migration-batches/addiction-conditions-v1.config.json --legacy-root legacy-source
+
+      - name: Apply V3 release SEO contract
+        run: python scripts/apply_v3_seo_contract.py data/migration-batches/generated/addiction-conditions-v1.json data/migration-batches/addiction-conditions-v1.config.json
+
+      - name: Validate migration structure provenance and redirects
+        run: python scripts/validate_migration_payload.py data/migration-batches/generated/addiction-conditions-v1.json
+
+      - name: Validate Supabase release metadata contract
+        run: python scripts/validate_v3_release_metadata.py data/migration-batches/generated/addiction-conditions-v1.json
+
+      - name: Assert addiction-specific release invariants
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('data/migration-batches/generated/addiction-conditions-v1.json').read_text(encoding='utf-8'))
+          rows=p['records']
+          assert len(rows)==10
+          assert all(r['content_type']=='condition' for r in rows)
+          assert all(r['sector_slug']=='addiction-recovery' and r['category_slug']=='addiction-conditions' for r in rows)
+          assert all(len(r.get('references_json') or [])>=3 for r in rows)
+          assert all(len((r.get('body_text') or '').split())>=1500 for r in rows)
+          assert all(r.get('redirect',{}).get('status_code')==301 for r in rows)
+          assert all(r.get('schema_json',{}).get('recovered_protocol_definition_lists')==10 for r in rows)
+          assert all(r.get('schema_json',{}).get('addiction_safety_contract',{}).get('home_detox_plan') is False for r in rows)
+          assert p.get('contract',{}).get('legacy_theme_copied') is False
+          print(json.dumps({'status':'passed','records':len(rows),'sha256':p['records_sha256']},ensure_ascii=False))
+          PY
+
+      - name: Commit deterministic reviewed payload
+        if: github.event_name == 'push'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/migration-batches/generated/addiction-conditions-v1.json
+          if git diff --cached --quiet; then
+            echo "Payload already materialized."
+            exit 0
+          fi
+          git commit -m "Materialize audited addiction conditions payload"
+          git fetch origin "${{ github.ref_name }}"
+          git rebase "origin/${{ github.ref_name }}"
+          git push origin "HEAD:${{ github.ref_name }}"

@@ -1,0 +1,201 @@
+{
+  "batch_id": "legacy-addiction-conditions-v1",
+  "migration_date": "2026-08-09",
+  "expected_record_count": 10,
+  "defaults": {
+    "sector_slug": "addiction-recovery",
+    "category_slug": "addiction-conditions",
+    "content_type": "condition",
+    "search_intent": "informational",
+    "audience": [
+      "الشخص الذي يواجه مشكلة استخدام",
+      "الأسرة",
+      "المدربون وميسرو الأقران",
+      "المجتمع والمؤسسات",
+      "المختصون"
+    ],
+    "author_display_name": "فريق تحرير منصة روافد",
+    "medical_disclaimer": "محتوى تثقيفي عام لا يقدّم تشخيصًا فرديًا ولا يحدد جرعات أو خطة انسحاب منزلية. قد تكون بعض حالات التسمم أو الانسحاب أو الجرعة الزائدة طارئة؛ التقييم والعلاج يحددهما مختص مؤهل وخدمات الطوارئ بحسب الحالة."
+  },
+  "historical_commits": [
+    {"sha": "563d7652933b82067eaaaf99edf118998801d435", "role": "integrated-v3-core"},
+    {"sha": "313380598e3173bf9f524db2636a237f22567672", "role": "v4-populations-emerging-and-cumulative-safety"}
+  ],
+  "evidence_registries": [
+    "data/addiction-evidence/source-registry.json",
+    "data/addiction-evidence/claim-source-map.json",
+    "data/addiction-evidence/source-registry-v4.json",
+    "data/addiction-evidence/claim-source-map-v4.json"
+  ],
+  "safety_contract": {
+    "individual_dosing": false,
+    "home_detox_plan": false,
+    "abrupt_benzodiazepine_discontinuation": false,
+    "guaranteed_outcomes": false,
+    "emergency_section_each_page": true
+  },
+  "records": [
+    {
+      "source_path": "/addiction/alcohol-use-disorder/",
+      "target_slug": "alcohol-use-disorder",
+      "content_type": "condition",
+      "primary_keyword": "اضطراب استخدام الكحول",
+      "secondary_keywords": ["إدمان الكحول", "اعتماد الكحول", "انسحاب الكحول", "علاج اضطراب استخدام الكحول"],
+      "semantic_terms": ["الكحول", "الانسحاب", "الاعتماد", "الانتكاس", "السلامة", "التعافي"],
+      "audience": ["الشخص الذي يواجه مشكلة استخدام", "الأسرة", "المدربون وميسرو الأقران", "المجتمع والمؤسسات", "المختصون"],
+      "seo_title": "اضطراب استخدام الكحول | دليل التعافي",
+      "seo_description": "دليل عربي موثوق لاضطراب استخدام الكحول: العلامات والمخاطر، سلامة الانسحاب، خيارات العلاج، دعم الأسرة، قياس التعافي، ومتى تستلزم الحالة رعاية طارئة آمنة.",
+      "additional_references": [{"title": "NICE CG115: Alcohol-use disorders", "url": "https://www.nice.org.uk/guidance/cg115"}],
+      "enrichment_blocks": [],
+      "schema_json": {"page_role": "addiction-condition", "legacy_addiction_generation": "v4-integrated-over-v3", "migration_stage": "audited-published-migration"}
+    },
+    {
+      "source_path": "/addiction/opioid-use-disorder/",
+      "target_slug": "opioid-use-disorder",
+      "content_type": "condition",
+      "primary_keyword": "اضطراب استخدام الأفيونات",
+      "secondary_keywords": ["إدمان الأفيونات", "علاج إدمان الأفيونات", "الجرعة الزائدة", "استمرار علاج الأفيونات"],
+      "semantic_terms": ["الأفيونات", "الجرعة الزائدة", "النالوكسون", "العلاج الدوائي", "الاحتفاظ بالعلاج", "التعافي"],
+      "audience": ["الشخص الذي يواجه مشكلة استخدام", "الأسرة", "المدربون وميسرو الأقران", "المجتمع والمؤسسات", "المختصون"],
+      "seo_title": "اضطراب استخدام الأفيونات | دليل التعافي",
+      "seo_description": "دليل عربي موثوق لاضطراب استخدام الأفيونات: خطر الجرعة الزائدة، التقييم، العلاج القائم على الدليل، دعم الأسرة، استمرار الرعاية، ومتى تستلزم الحالة طوارئ.",
+      "additional_references": [{"title": "SAMHSA Federal Guidelines for Opioid Treatment Programs", "url": "https://www.samhsa.gov/substance-use/treatment/opioid-treatment-program/42-cfr-part-8"}],
+      "enrichment_blocks": [],
+      "schema_json": {"page_role": "addiction-condition", "legacy_addiction_generation": "v4-integrated-over-v3", "migration_stage": "audited-published-migration"}
+    },
+    {
+      "source_path": "/addiction/stimulant-use-disorder/",
+      "target_slug": "stimulant-use-disorder",
+      "content_type": "condition",
+      "primary_keyword": "اضطراب استخدام المنبهات",
+      "secondary_keywords": ["إدمان المنبهات", "إدمان الميثامفيتامين", "إدمان الكوكايين", "علاج استخدام المنبهات"],
+      "semantic_terms": ["المنبهات", "الميثامفيتامين", "الكوكايين", "الذهان", "مخاطر القلب", "العلاج السلوكي"],
+      "audience": ["الشخص الذي يواجه مشكلة استخدام", "الأسرة", "المدربون وميسرو الأقران", "المجتمع والمؤسسات", "المختصون"],
+      "seo_title": "اضطراب استخدام المنبهات | دليل التعافي",
+      "seo_description": "دليل عربي موثوق لاضطراب استخدام المنبهات: السمية الحادة، الانسحاب، الذهان ومخاطر القلب، التقييم، العلاج السلوكي، دعم الأسرة، ومتى تلزم رعاية طارئة متخصصة.",
+      "additional_references": [],
+      "enrichment_blocks": [],
+      "schema_json": {"page_role": "addiction-condition", "legacy_addiction_generation": "v4-integrated-over-v3", "migration_stage": "audited-published-migration"}
+    },
+    {
+      "source_path": "/addiction/cannabis-use-disorder/",
+      "target_slug": "cannabis-use-disorder",
+      "content_type": "condition",
+      "primary_keyword": "اضطراب استخدام القنب",
+      "secondary_keywords": ["إدمان القنب", "اعتماد القنب", "انسحاب القنب", "علاج استخدام القنب"],
+      "semantic_terms": ["القنب", "الانسحاب", "الاعتماد", "الصحة النفسية", "العلاج النفسي الاجتماعي", "التعافي"],
+      "audience": ["الشخص الذي يواجه مشكلة استخدام", "الأسرة", "المدربون وميسرو الأقران", "المجتمع والمؤسسات", "المختصون"],
+      "seo_title": "اضطراب استخدام القنب | دليل التعافي",
+      "seo_description": "دليل عربي موثوق لاضطراب استخدام القنب: العلامات والأثر الوظيفي، التقييم، الانسحاب، خيارات العلاج والدعم الأسري، والمخاطر التي تستدعي تدخلًا مهنيًا عاجلًا.",
+      "additional_references": [{"title": "WHO mhGAP guideline, third edition", "url": "https://www.who.int/publications/i/item/9789240084278"}],
+      "enrichment_blocks": [],
+      "schema_json": {"page_role": "addiction-condition", "legacy_addiction_generation": "v4-integrated-over-v3", "migration_stage": "audited-published-migration"}
+    },
+    {
+      "source_path": "/addiction/nicotine-tobacco-dependence/",
+      "target_slug": "nicotine-tobacco-dependence",
+      "content_type": "condition",
+      "primary_keyword": "الاعتماد على النيكوتين والتبغ",
+      "secondary_keywords": ["إدمان النيكوتين", "الإقلاع عن التدخين", "اعتماد التبغ", "علاج إدمان النيكوتين"],
+      "semantic_terms": ["النيكوتين", "التبغ", "التدخين", "الإقلاع", "الانسحاب", "الدعم السلوكي"],
+      "audience": ["الشخص الذي يواجه مشكلة استخدام", "الأسرة", "المدربون وميسرو الأقران", "المجتمع والمؤسسات", "المختصون"],
+      "seo_title": "اعتماد النيكوتين والتبغ | دليل التعافي",
+      "seo_description": "دليل عربي موثوق لاعتماد النيكوتين والتبغ: فهم الاعتماد، تقييم أنماط الاستخدام، خيارات الإقلاع المدعومة، التعامل مع المحفزات، ودعم الأسرة والمتابعة الآمنة.",
+      "additional_references": [
+        {"title": "CDC Clinical Interventions to Treat Tobacco Use and Dependence Among Adults", "url": "https://www.cdc.gov/tobacco/hcp/patient-care-settings/clinical.html"},
+        {"title": "USPSTF Tobacco Smoking Cessation in Adults, Including Pregnant Persons", "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/tobacco-use-in-adults-and-pregnant-women-counseling-and-interventions"}
+      ],
+      "enrichment_blocks": [
+        {"type": "heading", "level": 2, "text": "كيف تُبنى خطة إقلاع قابلة للمتابعة دون وصفة عامة؟"},
+        {"type": "paragraph", "text": "خطة الإقلاع الجيدة تبدأ بوصف نمط الاستخدام الفعلي بدل الاكتفاء بعدّ السجائر: نوع المنتج، وقت أول استخدام بعد الاستيقاظ، المواقف التي يتكرر فيها الاستخدام، المحاولات السابقة، وما الذي ساعد أو أعاق الاستمرار. هذا التقييم يوضح شدة الاعتماد والسياق السلوكي ويمنع التعامل مع جميع الأشخاص كحالة واحدة."},
+        {"type": "paragraph", "text": "ينبغي أيضًا مراجعة الصحة الجسدية والنفسية، الحمل عند انطباقه، الأدوية المستخدمة، وجود منتجات نيكوتين متعددة، والتعرض للتدخين داخل المنزل. هذه المعلومات تساعد المختص على اختيار تدخل مناسب وآمن، بينما تبقى الصفحة تثقيفية ولا تحدد دواءً أو جرعةً أو جدولًا فرديًا."},
+        {"type": "heading", "level": 3, "text": "المحفزات والبيئة اليومية"},
+        {"type": "list", "ordered": false, "items": ["تحديد أوقات ومواقف الاستخدام الأكثر ثباتًا، مثل القيادة أو الاستراحات أو بعد الوجبات.", "تقليل الإشارات البيئية التي تجعل الاستخدام تلقائيًا، مع إعداد بدائل سلوكية واقعية.", "إشراك الأسرة بطريقة داعمة دون مراقبة عقابية أو وصم عند التعثر.", "التخطيط للمواقف الاجتماعية والعمل والسفر بدل الاعتماد على قوة الإرادة وحدها."]},
+        {"type": "heading", "level": 3, "text": "المتابعة بعد يوم التوقف"},
+        {"type": "paragraph", "text": "التوقف ليس نهاية التدخل. المتابعة المبكرة تساعد على مراجعة أعراض الانسحاب والمحفزات والتعثر، ثم تعديل الدعم بصورة مشتركة. العودة المؤقتة إلى الاستخدام لا تعني فشل الشخص؛ هي معلومة تساعد على فهم الموقف الذي يحتاج إلى خطة أقوى، مع الاستمرار في حماية الآخرين من التعرض لدخان التبغ."}
+      ],
+      "schema_json": {"page_role": "addiction-condition", "legacy_addiction_generation": "v4-integrated-over-v3", "migration_stage": "audited-published-migration"}
+    },
+    {
+      "source_path": "/addiction/sedative-benzodiazepine-use-disorder/",
+      "target_slug": "sedative-benzodiazepine-use-disorder",
+      "content_type": "condition",
+      "primary_keyword": "اضطراب استخدام المهدئات والبنزوديازيبينات",
+      "secondary_keywords": ["إدمان البنزوديازيبينات", "اعتماد المهدئات", "انسحاب البنزوديازيبينات", "خفض البنزوديازيبينات"],
+      "semantic_terms": ["البنزوديازيبينات", "المهدئات", "الاعتماد الجسدي", "الانسحاب", "الخفض التدريجي", "المشاركة في القرار"],
+      "audience": ["الشخص الذي يواجه مشكلة استخدام", "الأسرة", "المدربون وميسرو الأقران", "المجتمع والمؤسسات", "المختصون"],
+      "seo_title": "استخدام المهدئات والبنزوديازيبينات | دليل",
+      "seo_description": "دليل عربي موثوق لاضطراب استخدام المهدئات والبنزوديازيبينات: مخاطر الاعتماد والانسحاب، التقييم، الخفض المهني التدريجي، السلامة، ودعم الأسرة والمتابعة الآمنة.",
+      "additional_references": [{"title": "VA/DoD Clinical Practice Guideline for the Management of Substance Use Disorders", "url": "https://www.healthquality.va.gov/guidelines/mh/sud/"}],
+      "enrichment_blocks": [],
+      "schema_json": {"page_role": "addiction-condition", "legacy_addiction_generation": "v4-integrated-over-v3", "migration_stage": "audited-published-migration"}
+    },
+    {
+      "source_path": "/addiction/gambling-related-harms/",
+      "target_slug": "gambling-related-harms",
+      "content_type": "condition",
+      "primary_keyword": "أضرار المقامرة واضطرابها",
+      "secondary_keywords": ["اضطراب المقامرة", "إدمان القمار", "أضرار المقامرة", "علاج اضطراب المقامرة"],
+      "semantic_terms": ["المقامرة", "الديون", "خطر الانتحار", "الأسرة", "العلاج النفسي", "الحماية المالية"],
+      "audience": ["الشخص الذي يواجه مشكلة استخدام", "الأسرة", "المدربون وميسرو الأقران", "المجتمع والمؤسسات", "المختصون"],
+      "seo_title": "أضرار المقامرة واضطرابها | دليل التعافي",
+      "seo_description": "دليل عربي موثوق لأضرار المقامرة واضطرابها: العلامات، المخاطر المالية والأسرية، خطر الانتحار، التقييم، العلاج والدعم، وحماية المتأثرين ومتى يلزم التصعيد.",
+      "additional_references": [
+        {"title": "WHO Gambling fact sheet", "url": "https://www.who.int/news-room/fact-sheets/detail/gambling"},
+        {"title": "WHO ICD-11 Clinical Descriptions and Diagnostic Requirements", "url": "https://www.who.int/publications/i/item/9789240077263/"}
+      ],
+      "enrichment_blocks": [
+        {"type": "heading", "level": 2, "text": "السلامة المالية والأسرية جزء من التقييم وليست موضوعًا جانبيًا"},
+        {"type": "paragraph", "text": "ضرر المقامرة لا يُقاس بحجم الخسارة المالية وحدها. قد يظهر في الديون المتراكمة، الاقتراض السري، استخدام أموال الاحتياجات الأساسية، النزاع الأسري، الإهمال، أو الخوف من العنف والضغط. لذلك يحتاج التقييم إلى سؤال منظم عن تأثير المقامرة في السكن والغذاء والفواتير والأطفال والعلاقات، مع احترام الخصوصية وعدم افتراض أن الأسرة قادرة على ضبط السلوك بالقوة."},
+        {"type": "paragraph", "text": "عند وجود ديون أو وصول غير منضبط إلى الأموال، يمكن أن تكون الاستشارة المالية المستقلة وترتيبات الحماية الطوعية جزءًا من خطة أوسع. يجب ألا تتحول الحماية إلى سيطرة قسرية أو حرمان تعسفي، خصوصًا عندما توجد مخاوف من عنف أسري أو استغلال مالي. في هذه الحالات تصبح السلامة وتقييم المخاطر أولوية تسبق أي نقاش عن الميزانية."},
+        {"type": "heading", "level": 3, "text": "الأشخاص المتأثرون يحتاجون دعمًا مستقلًا"},
+        {"type": "list", "ordered": false, "items": ["الشريك أو الوالدان قد يحتاجون إرشادًا حول الحدود المالية والسلامة حتى إن لم يطلب الشخص المقامر العلاج.", "الأطفال يحتاجون حماية من الإهمال أو انقطاع الاحتياجات الأساسية ومن إشراكهم في النزاعات المالية.", "ينبغي تقييم خطر العنف أو الإكراه أو الاحتيال الأسري دون افتراض أن المشكلة مالية فقط.", "عند وجود أفكار انتحارية أو يأس شديد يجب الانتقال إلى تقييم أمان عاجل وخدمات الطوارئ المناسبة."]},
+        {"type": "heading", "level": 3, "text": "التعافي يتجاوز إيقاف المقامرة"},
+        {"type": "paragraph", "text": "التحسن المستدام يشمل استعادة الوظيفة اليومية والثقة والعلاقات وإدارة الديون وتقليل التعرض للمحفزات، إلى جانب علاج المشكلات النفسية المصاحبة عند وجودها. وقد يحتاج الشخص إلى متابعة أطول مما يتوقعه لأن سهولة الوصول الرقمي والإعلانات والضغوط المالية يمكن أن تعيد تنشيط السلوك حتى بعد فترات من الامتناع."}
+      ],
+      "schema_json": {"page_role": "addiction-condition", "legacy_addiction_generation": "v4-integrated-over-v3", "migration_stage": "audited-published-migration"}
+    },
+    {
+      "source_path": "/addiction/gaming-disorder/",
+      "target_slug": "gaming-disorder",
+      "content_type": "condition",
+      "primary_keyword": "اضطراب الألعاب الرقمية",
+      "secondary_keywords": ["إدمان الألعاب", "اضطراب الألعاب", "Gaming disorder", "اللعب الرقمي المفرط"],
+      "semantic_terms": ["الألعاب الرقمية", "ICD-11", "فقدان السيطرة", "الأثر الوظيفي", "الأسرة", "التقييم"],
+      "audience": ["الشخص الذي يواجه مشكلة استخدام", "الأسرة", "المدربون وميسرو الأقران", "المجتمع والمؤسسات", "المختصون"],
+      "seo_title": "اضطراب الألعاب الرقمية | دليل التعافي",
+      "seo_description": "دليل عربي موثوق لاضطراب الألعاب الرقمية: متى يصبح اللعب مشكلة، العلامات والأثر الوظيفي، التقييم، الدعم الأسري والسلوكي، ومتى يلزم تدخل متخصص مبكر وآمن.",
+      "additional_references": [{"title": "WHO ICD-11 Clinical Descriptions and Diagnostic Requirements", "url": "https://www.who.int/publications/i/item/9789240077263/"}],
+      "enrichment_blocks": [],
+      "schema_json": {"page_role": "addiction-condition", "legacy_addiction_generation": "v4-integrated-over-v3", "migration_stage": "audited-published-migration"}
+    },
+    {
+      "source_path": "/addiction/inhalant-use-disorder/",
+      "target_slug": "inhalant-use-disorder",
+      "content_type": "condition",
+      "primary_keyword": "اضطراب استخدام المستنشقات",
+      "secondary_keywords": ["إدمان المستنشقات", "استنشاق المواد المتطايرة", "سمية المستنشقات", "علاج استخدام المستنشقات"],
+      "semantic_terms": ["المستنشقات", "السمية", "نقص الأكسجة", "اضطراب نظم القلب", "الدماغ", "الطوارئ"],
+      "audience": ["الشخص الذي يواجه مشكلة استخدام", "الأسرة", "المدربون وميسرو الأقران", "المجتمع والمؤسسات", "المختصون"],
+      "seo_title": "اضطراب استخدام المستنشقات | دليل التعافي",
+      "seo_description": "دليل عربي موثوق لاضطراب استخدام المستنشقات: السمية ومخاطر القلب ونقص الأكسجة، التقييم، الرعاية الآمنة، دعم الأسرة، ومؤشرات الطوارئ التي تتطلب إسعافًا.",
+      "additional_references": [{"title": "WHO mhGAP guideline, third edition", "url": "https://www.who.int/publications/i/item/9789240084278"}],
+      "enrichment_blocks": [],
+      "schema_json": {"page_role": "addiction-condition", "legacy_addiction_generation": "v4-integrated-over-v3", "migration_stage": "audited-published-migration"}
+    },
+    {
+      "source_path": "/addiction/polysubstance-use-and-overdose-risk/",
+      "target_slug": "polysubstance-use-and-overdose-risk",
+      "content_type": "condition",
+      "primary_keyword": "استخدام مواد متعددة وخطر الجرعة الزائدة",
+      "secondary_keywords": ["استخدام مواد متعددة", "خطر الجرعة الزائدة", "تعاطي متعدد المواد", "منع الجرعة الزائدة"],
+      "semantic_terms": ["تعدد المواد", "الجرعة الزائدة", "تثبيط التنفس", "النالوكسون", "التداخلات", "استمرارية الرعاية"],
+      "audience": ["الشخص الذي يواجه مشكلة استخدام", "الأسرة", "المدربون وميسرو الأقران", "المجتمع والمؤسسات", "المختصون"],
+      "seo_title": "تعدد المواد وخطر الجرعة الزائدة | دليل",
+      "seo_description": "دليل عربي موثوق لاستخدام مواد متعددة وخطر الجرعة الزائدة: تقييم المخاطر المتداخلة، منع الجرعة الزائدة، اختيار الرعاية، دعم الأسرة، واستمرار العلاج الآمن.",
+      "additional_references": [],
+      "enrichment_blocks": [],
+      "schema_json": {"page_role": "addiction-condition", "legacy_addiction_generation": "v4-integrated-over-v3", "migration_stage": "audited-published-migration"}
+    }
+  ]
+}
