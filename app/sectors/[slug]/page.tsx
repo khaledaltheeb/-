@@ -6,6 +6,7 @@ import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import { createClient } from '@/lib/supabase/server';
 import { buildSeoMetadata, breadcrumbJsonLd } from '@/lib/seo';
+import { resolveSectorAccent } from '@/lib/theme';
 
 export const dynamic = 'force-dynamic';
 type Params = Promise<{ slug: string }>;
@@ -45,7 +46,7 @@ export default async function SectorPage({ params }: { params: Params }) {
   const roots = categoryRows.filter((category) => !category.parent_id);
   const contentRows = (content ?? []) as PublishedItem[];
   const breadcrumbs = breadcrumbJsonLd([{ name: 'الرئيسية', path: '/' }, { name: sector.name_ar, path: `/sectors/${sector.slug}` }]);
-  const accentStyle = { '--accent': sector.accent || '#08716d' } as CSSProperties;
+  const accentStyle = { '--accent': resolveSectorAccent(sector.accent) } as CSSProperties;
 
   return (
     <>
@@ -55,7 +56,7 @@ export default async function SectorPage({ params }: { params: Params }) {
         <nav className="breadcrumbs" aria-label="مسار الصفحة"><Link href="/">الرئيسية</Link><span>/</span><span aria-current="page">{sector.name_ar}</span></nav>
         <section className="sector-hero">
           <span className="eyebrow">قطاع ديناميكي</span><h1>{sector.name_ar}</h1><p>{sector.description || 'قطاع معرفي وخدمي ضمن منصة روافد.'}</p>
-          <form className="sector-search" action="/search" method="get"><label className="sr-only" htmlFor="sector-search">ابحث في روافد</label><input id="sector-search" name="q" placeholder={`ابحث عن موضوع مرتبط بـ ${sector.name_ar}`} maxLength={160} /><button type="submit">بحث</button></form>
+          <form className="sector-search" action="/search" method="get"><label className="sr-only" htmlFor="sector-search">ابحث في منصة روافد</label><input id="sector-search" name="q" placeholder={`ابحث عن موضوع مرتبط بـ ${sector.name_ar}`} maxLength={160} /><button type="submit">بحث</button></form>
         </section>
 
         <section className="section">
