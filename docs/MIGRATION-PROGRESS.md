@@ -6,7 +6,7 @@ Last updated: 2026-08-08
 
 **PAGE-BY-PAGE LEGACY MIGRATION — ACTIVE**
 
-No legacy page is considered migrated unless it has a completed record and passes coordinator QA.
+No legacy page is considered migrated unless it has a completed record **and** the coordinator verifies the authoritative Supabase state, version history, audit trail, taxonomy, search and duplicate/redirect behavior.
 
 ## Mandatory operating rule
 
@@ -14,7 +14,7 @@ Migration proceeds **one canonical page at a time per lane**:
 
 `Discovery → Variant history → Dedupe cluster → Exclusions → Source verification → Rewrite → SEO/E-E-A-T → CMS draft → Review → Redirect map → QA → Final status`
 
-A lane does not open a second page while its current Claim remains open. Any possible duplicate/synonym/sector conflict stops that page until C0 resolves the canonical owner.
+A lane does not open a second page while its current Claim remains open. GitHub records alone are never accepted as proof of publication; Supabase is authoritative for content status.
 
 ## Parallel lanes
 
@@ -45,118 +45,130 @@ Source repository: `khaledaltheeb/healthrenewal.org`
 - Internal planning, agent instructions, TODO/QA, generator code and development discussions are never publishable content.
 - Redirects are created only from verified old routes; `concept-*` routes are never guessed from generator arithmetic.
 
-## Completed pages
+## Completed C0 pages — authoritative checkpoint
 
 ### MIG-000001 — الذاكرة العاملة
-- Lane: C0
 - Canonical: `/content/working-memory`
-- Type: `glossary_term`
 - Status: **PUBLISHED / QA PASS**
-- Words: **2240** | FAQ: **11** | References: **8** | Versions: **9**
-- Duplicate canonical: **0** | Search: **PASS** | wrong tool redirect: **0**
+- Words: **2240** | FAQ: **11** | References: **8**
+- Versions/Audits: **9 / 9** | Tags: **4** | Categories: **1**
 - Record: `migration-records/C0/MIG-000001-working-memory.md`
-- Claim #1: CLOSED / COMPLETED
 
 ### MIG-000002 — الانتباه
-- Lane: C0
 - Canonical: `/content/attention`
-- Type: `glossary_term`
 - Status: **PUBLISHED / QA PASS**
-- Words: **2017** | FAQ: **11** | References: **8** | Versions: **9**
-- Duplicate canonical: **0** | Search: **PASS** | wrong quick-info/tool redirects: **0**
-- Exact `التركيز` alias/secondary keyword was removed in a versioned canonical-boundary correction before publishing the separate concentration page.
+- Words: **2017** | FAQ: **11** | References: **8**
+- Versions/Audits: **9 / 9** | Tags: **5** | Categories: **1**
+- Exact `التركيز` alias/secondary keyword was removed in a versioned boundary correction before the concentration canonical was published.
 - Record: `migration-records/C0/MIG-000002-attention.md`
-- Claim #2: CLOSED / COMPLETED
 
 ### MIG-000003 — الإدراك
-- Lane: C0
 - Canonical: `/content/perception`
-- Type: `glossary_term`
 - Status: **PUBLISHED / QA PASS**
-- Words: **1905** | FAQ: **11** | References: **8** | Versions: **8**
-- Duplicate canonical: **0** | Search: **PASS** | guessed redirects: **0**
+- Words: **1905** | FAQ: **11** | References: **8**
+- Versions/Audits: **8 / 8** | Tags: **5** | Categories: **1**
 - Record: `migration-records/C0/MIG-000003-perception.md`
-- Claim #3: CLOSED / COMPLETED
 
 ### MIG-000004 — الذاكرة
-- Lane: C0
 - Canonical: `/content/memory`
-- Type: `glossary_term`
 - Status: **PUBLISHED / QA PASS**
-- Words: **1808** | FAQ: **11** | References: **8** | Versions: **8**
-- Duplicate canonical: **0** | Search: **PASS**
+- Words: **1808** | FAQ: **11** | References: **8**
+- Versions/Audits: **8 / 8** | Tags: **6** | Categories: **1**
 - `/content/working-memory` remains a distinct related canonical.
 - Record: `migration-records/C0/MIG-000004-memory.md`
-- Claim #4: CLOSED / COMPLETED
 
 ### MIG-000005 — اللغة
-- Lane: C0
 - Canonical: `/content/language`
-- Type: `glossary_term`
 - Status: **PUBLISHED / QA PASS**
-- Words: **1891** | FAQ: **11** | References: **8** | Versions: **8**
-- Duplicate canonical: **0** | Search: **PASS** | specialized redirect collisions: **0**
+- Words: **1891** | FAQ: **11** | References: **8**
+- Versions/Audits: **8 / 8** | Tags: **7** | Categories: **1**
 - Record: `migration-records/C0/MIG-000005-language.md`
-- Claim #9: CLOSED / COMPLETED
 
 ### MIG-000006 — الوظائف التنفيذية
-- Lane: C0
 - Canonical: `/content/executive-functions`
-- Type: `glossary_term`
 - Status: **PUBLISHED / QA PASS**
-- Words: **1687** | FAQ: **11** | References: **8** | Versions: **8**
-- Duplicate canonical: **0** | Search: **PASS** | child/autism/ADHD redirect collisions: **0**
+- Words: **1687** | FAQ: **11** | References: **8**
+- Versions/Audits: **8 / 8** | Tags: **8** | Categories: **1**
 - Record: `migration-records/C0/MIG-000006-executive-functions.md`
-- Claim #11: CLOSED / COMPLETED
 
-### MIG-000007 — التركيز
-- Lane: C0
-- Canonical: `/content/concentration`
-- Type: `glossary_term`
+### MIG-000007 — الاستدلال
+- Canonical: `/content/reasoning`
 - Status: **PUBLISHED / POST-PUBLISH QA PASS**
-- Words: **1766** | FAQ: **11** | References: **8** | Versions: **9**
-- Tags: **6** | Category relations: **1** | Audit events: **9**
-- Duplicate canonical: **0**
-- Search `التركيز`: concentration first (~9.3), attention related lower (1.0).
-- Search `الانتباه`: attention first (13), concentration related second (~2.9).
-- Wrong redirect from attention: **0** | wrong redirect from focus-break quick-info: **0**
-- Record: `migration-records/C0/MIG-000007-concentration.md`
-- Claim #89: CLOSED / COMPLETED
+- Words: **1917** | FAQ: **11** | References: **8**
+- Versions/Audits: **9 / 9** | Tags: **8** | Categories: **1**
+- Governance correction: previous record falsely claimed publication while DB was draft/1 version/1326 words. Claim reopened, depth completed, real workflow executed.
+- Search `الاستدلال`: canonical first (~9.1) | Duplicate: **0** | related redirect collisions: **0**
+- Record: `migration-records/C0/MIG-000007-reasoning.md`
+- Claim #12: CLOSED after database-backed correction.
+
+### MIG-000008 — حل المشكلات
+- Canonical: `/content/problem-solving`
+- Status: **PUBLISHED / POST-PUBLISH QA PASS**
+- Words: **2206** | FAQ: **11** | References: **8**
+- Versions/Audits: **10 / 10** | Tags: **8** | Categories: **1**
+- Governance correction: previous record falsely claimed publication while DB was draft/1 version/852 words/meta 163. Page expanded, meta corrected to 159, internal Canonical text removed, real workflow executed.
+- Search `حل المشكلات`: canonical first (~7.71) | Duplicate: **0** | related redirect collisions: **0**
+- Record: `migration-records/C0/MIG-000008-problem-solving.md`
+- Claim #13: CLOSED after database-backed correction.
+
+### MIG-000009 — اتخاذ القرار
+- Canonical: `/content/decision-making`
+- Status: **PUBLISHED / POST-PUBLISH QA PASS**
+- Words: **2161** | FAQ: **11** | References: **8**
+- Versions/Audits: **10 / 10** | Tags: **8** | Categories: **1**
+- Governance correction: Issue #15 body had been overwritten with creativity data. Real DB page was draft/1 version/670 words/meta 166. Page expanded, meta corrected to 153. First workflow attempt was safely rejected because SEO title was 48 while release contract is <=47; title corrected to 43 and workflow rerun.
+- Search `اتخاذ القرار`: canonical first (~5.71) | Duplicate: **0** | related redirect collisions: **0**
+- Record: `migration-records/C0/MIG-000009-decision-making.md`
+- Claim #15: CLOSED after correction.
+
+### MIG-000010 — الإبداع
+- Canonical: `/content/creativity`
+- Status: **PUBLISHED / POST-PUBLISH QA PASS**
+- Searchable words: **1599** | FAQ: **11** | References: **8**
+- Versions/Audits: **9 / 9** | Tags: **8** | Categories: **1**
+- Governance correction: previous record falsely claimed publication. DB was draft/1 version. Stored `body_text` exposed only 557 words while structured `body_json` contained 1599 searchable words. Search text was rebuilt from structured blocks rather than padding the article.
+- Search `الإبداع`: canonical first (~8.1) | Duplicate: **0** | related redirect collisions: **0**
+- Record: `migration-records/C0/MIG-000010-creativity.md`
+- Claim #17: CLOSED after correction.
+
+### MIG-000011 — التركيز
+- Canonical: `/content/concentration`
+- Status: **PUBLISHED / POST-PUBLISH QA PASS**
+- Words: **1766** | FAQ: **11** | References: **8**
+- Versions/Audits: **9 / 9** | Tags: **6** | Categories: **1**
+- Search `التركيز`: concentration first (~9.3), attention lower (1.0).
+- Search `الانتباه`: attention first (13), concentration lower (~2.9).
+- Duplicate: **0** | redirect collision from attention/focus-break article: **0**
+- Record: `migration-records/C0/MIG-000011-concentration.md`
+- Claim #89: CLOSED / COMPLETED.
+
+## Validated non-C0 page
 
 ### A4-000001 — الانضباط الإيجابي أم العقاب؟
-- Lane: A4
 - Canonical: `/content/discipline-vs-punishment`
-- Type: `article`
 - Status: **PUBLISHED / C0 QA PASS AFTER GOVERNANCE CORRECTION**
 - Words: **2673** | FAQ: **10** | References: **8**
 - SEO title: **42 chars** | Meta: **150 chars**
 - Redirect: `/quick-info/discipline-vs-punishment/` → canonical, **301 active**
-- Duplicate canonical: **0** | Search: **PASS**
-- Initial agent publish had only 1 version, 0 audit events, 0 tags, and 0 `content_categories` relations.
-- C0 reopened it transparently, preserved the accepted text/SEO/references/redirect, added **5 tags + 1 primary category relation**, and reran the full workflow.
 - Final database state: **9 versions, 8 audit events, 5 tags, 1 category relation**.
-- Claim #6: CLOSED / COMPLETED after C0 correction.
-- Agent record: `migration-records/A4/MIG-A4-000001-discipline-vs-punishment.md`
+- Record: `migration-records/A4/MIG-A4-000001-discipline-vs-punishment.md`
 
-## Active / pending lanes at this checkpoint
+## Open Claims verified at this checkpoint
 
-- A1: `depression` — enriched 2800+ word draft; intentionally blocked at scientific review because no qualified human reviewer is registered. No reviewer identity may be fabricated.
-- A2: `withdrawal-safety` — high-stakes addiction page intentionally blocked at scientific review because no qualified human reviewer is registered.
-- A3: `autism` — active Claim; C0 must not touch autism while claimed.
-- A4: multiple family/home Claims active; C0 must not take those canonicals.
-- A5: `safe-screening-tools` active plus other A5 work; C0 must not take those canonicals.
-- C0: `sensation` and `creativity` Claims remain active in parallel; coordinator work must not duplicate them.
+The current GitHub open-claim query returns only:
+- C0 — Issue #19: `sensation` — **الإحساس**.
+- A4 — Issue #91: `extended-family-boundaries` — **الحدود مع العائلة الممتدة**.
+- A5 — Issue #62: `safe-screening-tools` — **الاستخدام الآمن للمقاييس وأدوات الفحص**.
+
+No other lane is declared complete in this ledger merely because an Issue is closed or a database row exists; agent outputs require independent coordinator QA before inclusion.
 
 ## Totals
 
-- **Completed canonical pages after coordinator QA: 8**
-- **Published canonical pages after coordinator QA: 8**
-- C0 completed: **7**
-- Validated agent pages: **1 (A4)**
-- High-stakes pages blocked pending real qualified scientific review are not counted as complete.
+- **C0 completed and database-verified canonicals: 11**
+- **Validated non-C0 canonicals in this ledger: 1**
+- **Total completed canonicals after coordinator QA: 12**
+- **Total published canonicals after coordinator QA: 12**
 
 ## Next action
 
-1. Continue C0 with the next unused migration number on a non-conflicting general encyclopedia concept.
-2. Monitor all open Claims immediately before each new C0 topic.
-3. Independently audit every agent-completed page for content quality **and** versions/audit/tags/category relations before adding it to this ledger.
+C0 has an open Claim for **الإحساس (`sensation`)**, so the coordinator must finish/reconcile that Claim before opening MIG-000012 for another general concept. Continue independent audit of agent outputs before adding any to totals.
