@@ -34,6 +34,16 @@ const nextConfig: NextConfig = {
         destination: '/capabilities/:slug/',
         permanent: true,
       },
+      {
+        source: '/content/comparisons-hub',
+        destination: '/comparisons/',
+        permanent: true,
+      },
+      {
+        source: '/content/comparisons-:slug',
+        destination: '/comparisons/:slug/',
+        permanent: true,
+      },
     ];
   },
   async headers() {
