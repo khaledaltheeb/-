@@ -14,7 +14,7 @@ const agents = read('AGENTS.md');
 
 if (!layout.includes("'./rawafid-theme.css'")) fail('root layout must import the central theme entry point');
 
-const directCssImports = [...layout.matchAll(/import\s+["'](\.\/[^"]+\.css)["'];?/g)].map((match) => match[1]);
+const directCssImports = [...layout.matchAll(/^import\s+["'](\.\/[^"']+\.css)["'];?\s*$/gm)].map((match) => match[1]);
 if (directCssImports.length !== 1 || directCssImports[0] !== './rawafid-theme.css') {
   fail(`root layout must have exactly one direct global CSS import; found: ${directCssImports.join(', ')}`);
 }
