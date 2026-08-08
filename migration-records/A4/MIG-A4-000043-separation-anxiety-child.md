@@ -1,7 +1,7 @@
 # MIG-A4-000043 — قلق الانفصال لدى الطفل ودعم الوداع
 
 - Lane: A4 — الطفل والأسرة والمدرسة
-- Claim: #123
+- Claim: #135
 - Canonical key: `separation-anxiety-child`
 - Canonical: `/content/separation-anxiety-child`
 - CMS content id: `e1c6331a-386c-429d-a6e0-e1c2b8dc6c03`
@@ -14,7 +14,7 @@
 
 ## Claim / dedupe checks
 
-قبل العمل فُحص GitHub Issues و`docs/MIGRATION-PROGRESS.md` وSupabase باستخدام slug وCanonical والمرادفات العربية والإنجليزية. لم توجد Canonical أو Claim منافسة. الموجود `/content/co-parenting-after-separation` موضوع مختلف خاص بانفصال الوالدين. تم فتح Claim واحد فقط #123 ولم يُفتح Claim ثانٍ أثناء العمل.
+قبل العمل فُحص GitHub Issues و`docs/MIGRATION-PROGRESS.md` وSupabase باستخدام slug وCanonical والمرادفات العربية والإنجليزية. لم توجد Canonical أو Claim منافسة. الموجود `/content/co-parenting-after-separation` موضوع مختلف خاص بانفصال الوالدين. Claim A4 الفعلي هو #135، ولم يُفتح Claim A4 ثانٍ أثناء العمل.
 
 ## Legacy discovery and history
 
@@ -75,7 +75,7 @@ No verified predecessor public URL was proven after repository search. **No spec
 
 `draft → scientific_review → editorial_review → seo_review → accessibility_review → approved → published`
 
-اتصال الإدارة في Supabase لا يولد تلقائيًا سجلات `content_versions` و`audit_logs`، لذلك بعد اكتمال الانتقالات تم تسجيل المراحل الفعلية السبع في جدولي النسخ والتدقيق كتوثيق رجعي مطابق للتسلسل الذي نُفذ، دون اختلاق مرحلة إضافية.
+اتصال الإدارة في Supabase لا يولد تلقائيًا سجلات `content_versions` و`audit_logs`، لذلك بعد اكتمال الانتقالات تم تسجيل المراحل الفعلية السبع في جدولي النسخ والتدقيق كتوثيق رجعي مطابق للتسلسل الذي نُفذ، دون اختلاق مرحلة إضافية. كما صُحح مرجع Claim داخل سجل التدقيق إلى #135 بعد كشف عدم تطابق رقم الإرجاع الأولي من موصل GitHub مع رقم القضية الفعلي.
 
 ## Final QA
 
@@ -97,6 +97,10 @@ No verified predecessor public URL was proven after repository search. **No spec
 - TODO/FIXME/QA/agent-instruction scan: **0 matches**
 - Search vector: present
 - Featured image: none / Alt N/A
+
+## GitHub numbering incident
+
+موصل GitHub أعاد في استجابة الإنشاء رقمًا غير متطابق مع القضية الفعلية. فحص البحث اللاحق أثبت أن Claim A4 الصحيح هو #135، بينما #123 قضية A3 مغلقة خاصة بـ`capabilities-cerebral-visual-impairment`. أُعيدت #123 إلى عنوانها ونطاقها وCanonical الصحيح وحالتها المغلقة، ثم صُحح هذا السجل وAudit metadata إلى #135 قبل الإغلاق النهائي.
 
 ## Governance
 
