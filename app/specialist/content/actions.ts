@@ -48,6 +48,7 @@ export async function submitSpecialistDraft(formData:FormData){
   const {supabase}=await requireSpecialist();
   const id=field(formData,'id',60);
   if(!validUuid(id)) redirect('/specialist/content?error=invalid-input');
+  // scientific_review remains a legacy optional state; normal submissions go directly to editorial review.
   const {error}=await supabase.rpc('transition_content_status',{p_id:id,p_target:'editorial_review'});
   if(error) redirect(`/specialist/content/${id}?error=submit-failed`);
   refresh();
