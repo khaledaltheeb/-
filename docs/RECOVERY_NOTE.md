@@ -1,0 +1,1 @@
+Temporary branch note: root layout is being migrated to the central theme entry point and is restored from current main before validation. This file can be removed before merge.
