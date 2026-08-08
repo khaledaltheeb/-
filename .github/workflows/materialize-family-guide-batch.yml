@@ -6,10 +6,12 @@ on:
     paths:
       - 'scripts/legacy_content_extract.py'
       - 'scripts/prepare_legacy_batch.py'
+      - 'scripts/enrich_family_guide_batch.py'
       - 'scripts/apply_v3_seo_contract.py'
       - 'scripts/validate_migration_payload.py'
       - 'scripts/validate_v3_release_metadata.py'
       - 'data/migration-batches/family-guide-core-v1.config.json'
+      - 'data/migration-batches/family-guide-core-v1.enrichment.json'
       - '.github/workflows/materialize-family-guide-batch.yml'
   workflow_dispatch:
 
@@ -45,6 +47,9 @@ jobs:
 
       - name: Materialize Family Guide core batch
         run: python scripts/prepare_legacy_batch.py artifacts/legacy-content-inventory.json data/migration-batches/family-guide-core-v1.config.json --legacy-root legacy-source --output data/migration-batches/generated/family-guide-core-v1.json
+
+      - name: Enrich with reviewed Family Guide evidence layer
+        run: python scripts/enrich_family_guide_batch.py data/migration-batches/generated/family-guide-core-v1.json data/migration-batches/family-guide-core-v1.enrichment.json
 
       - name: Apply V3 SEO release contract
         run: python scripts/apply_v3_seo_contract.py data/migration-batches/generated/family-guide-core-v1.json data/migration-batches/family-guide-core-v1.config.json
