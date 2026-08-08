@@ -1,0 +1,25 @@
+import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
+import Link from 'next/link';
+import SiteHeader from '@/components/site-header';
+import SiteFooter from '@/components/site-footer';
+import ContentRenderer from '@/components/content-renderer';
+import { breadcrumbJsonLd, buildSeoMetadata, SITE_URL } from '@/lib/seo';
+import { evidenceGuideCategory, getEvidenceGuideRecord, getRelatedEvidenceGuides, safeEvidenceReferences } from '@/lib/evidence-guides';
+import styles from '@/components/evidence-guides.module.css';
+
+type Params=Promise<{slug:string}>;
+export const dynamic='force-dynamic';
+
+export async function generateMetadata({params}:{params:Params}):Promise<Metadata>{
+ const {slug}=await params; const record=await getEvidenceGuideRecord(slug); if(!record) return {};
+ return buildSeoMetadata({title:record.seo_title||record.title,description:record.seo_description||record.excerpt,path:record.canonical_url||`/evidence-guides/${slug}/`,index:record.robots_index,follow:record.robots_follow,type:'article',keywords:[record.primary_keyword,...(record.secondary_keywords??[]),...(record.semantic_terms??[])].filter(Boolean) as string[],publishedTime:record.published_at,modifiedTime:record.updated_at,authors:record.author_display_name?[{name:record.author_display_name}]:undefined,hreflang:{ar:record.canonical_url||`/evidence-guides/${slug}/`,'x-default':record.canonical_url||`/evidence-guides/${slug}/`}});
+}
+
+export default async function EvidenceGuideDetail({params}:{params:Params}){
+ const {slug}=await params; const record=await getEvidenceGuideRecord(slug); if(!record) notFound();
+ const [related]=await Promise.all([getRelatedEvidenceGuides(record)]); const refs=safeEvidenceReferences(record.references_json); const category=evidenceGuideCategory(record); const canonical=record.canonical_url||`/evidence-guides/${slug}/`; const url=`${SITE_URL}${canonical}`;
+ const breadcrumbs=breadcrumbJsonLd([{name:'الرئيسية',path:'/'},{name:'الأدلة المبنية على المصادر',path:'/evidence-guides/'},{name:record.title,path:canonical}]);
+ const schema={'@context':'https://schema.org','@type':['MedicalWebPage','Article'],'@id':`${url}#article`,url,headline:record.title,name:record.title,description:record.seo_description||record.excerpt||undefined,inLanguage:'ar',datePublished:record.published_at||undefined,dateModified:record.updated_at,lastReviewed:record.last_reviewed_at||undefined,articleSection:category,author:record.author_display_name?{'@type':'Organization',name:record.author_display_name}:{'@id':`${SITE_URL}/#organization`},publisher:{'@id':`${SITE_URL}/#organization`},isPartOf:{'@id':`${SITE_URL}/evidence-guides/#page`},citation:refs.map((r)=>r.url)};
+ return <><SiteHeader/><main className={styles.shell}><script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify([breadcrumbs,schema]).replace(/</g,'\\u003c')}}/><nav className="breadcrumbs" aria-label="مسار الصفحة"><Link href="/">الرئيسية</Link><span>/</span><Link href="/evidence-guides/">الأدلة المبنية على المصادر</Link><span>/</span><span aria-current="page">{record.title}</span></nav><article><header className={styles.articleHero}><span className="eyebrow">{category}</span><h1>{record.title}</h1>{record.excerpt&&<p>{record.excerpt}</p>}<div className={styles.meta}>{record.author_display_name&&<span>إعداد: {record.author_display_name}</span>}{record.last_reviewed_at&&<span>آخر مراجعة: {new Intl.DateTimeFormat('ar',{dateStyle:'long'}).format(new Date(record.last_reviewed_at))}</span>}<span>{refs.length} مصادر أصلية</span></div></header><nav className={styles.localNav} aria-label="التنقل داخل الأدلة"><Link href="/evidence-guides/">كل الأدلة</Link><Link href="/magazine/">المجلة والأبحاث</Link><Link href="/care-guides/">أدلة التعامل والرعاية</Link><Link href="/specialists/">دليل المختصين</Link></nav><div className={`article-body ${styles.body}`}><ContentRenderer bodyJson={record.body_json} bodyText={record.body_text} recordId={record.id}/></div>{record.medical_disclaimer&&<aside className="medical-disclaimer" aria-label="حدود المحتوى"><strong>تنبيه صحي ومنهجي</strong><p>{record.medical_disclaimer}</p><Link href="/disclaimer">إخلاء المسؤولية الكامل</Link></aside>}{refs.length>0&&<section className="article-references" aria-labelledby="evidence-sources-title"><h2 id="evidence-sources-title">المصادر والمراجع الأصلية</h2><ol>{refs.map((ref,index)=><li key={`${ref.url}-${index}`}><a href={ref.url} target="_blank" rel="noopener noreferrer">{ref.title||ref.url}</a></li>)}</ol></section>}{related.length>0&&<section className={styles.related} aria-labelledby="related-evidence-title"><div className={styles.groupHead}><h2 id="related-evidence-title">أدلة مرتبطة</h2><span>وفق الصلة الموضوعية</span></div><div className={styles.grid}>{related.map((item)=><article className={styles.card} key={item.id}><h3><Link href={item.canonical_url||'#'}>{item.title}</Link></h3>{item.excerpt&&<p>{item.excerpt}</p>}</article>)}</div></section>}</article></main><SiteFooter/></>;
+}
