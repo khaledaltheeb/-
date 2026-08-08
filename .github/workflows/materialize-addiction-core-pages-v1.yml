@@ -1,0 +1,74 @@
+name: Materialize Addiction Core Pages V1
+
+on:
+  push:
+    branches:
+      - 'agent/addiction-core-integration-v2'
+    paths:
+      - 'scripts/legacy_content_extract.py'
+      - 'scripts/prepare_legacy_batch.py'
+      - 'scripts/apply_v3_seo_contract.py'
+      - 'scripts/enrich_addiction_batch.py'
+      - 'scripts/audit_addiction_core_payload.py'
+      - 'scripts/validate_migration_payload.py'
+      - 'scripts/validate_v3_release_metadata.py'
+      - 'data/migration-batches/addiction-core-pages-v1.config.json'
+      - 'data/migration-batches/addiction-core-v1.core-enrichment.json'
+      - 'data/migration-batches/addiction-core-pages-v1.release-depth.json'
+      - '.github/workflows/materialize-addiction-core-pages-v1.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout integration branch
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 1
+      - name: Checkout legacy source read-only
+        uses: actions/checkout@v7
+        with:
+          repository: khaledaltheeb/healthrenewal.org
+          ref: main
+          path: legacy-source
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - name: Extract legacy content only
+        run: python scripts/legacy_content_extract.py legacy-source --output artifacts/legacy-content-inventory.json --summary artifacts/legacy-content-summary.json
+      - name: Materialize six core pages
+        run: python scripts/prepare_legacy_batch.py artifacts/legacy-content-inventory.json data/migration-batches/addiction-core-pages-v1.config.json --legacy-root legacy-source --output data/migration-batches/generated/addiction-core-pages-v1.json
+      - name: Apply release SEO contract
+        run: python scripts/apply_v3_seo_contract.py data/migration-batches/generated/addiction-core-pages-v1.json data/migration-batches/addiction-core-pages-v1.config.json
+      - name: Enrich evidence and final depth
+        run: >-
+          python scripts/enrich_addiction_batch.py
+          data/migration-batches/generated/addiction-core-pages-v1.json
+          data/migration-batches/addiction-core-v1.core-enrichment.json
+          data/migration-batches/addiction-core-pages-v1.release-depth.json
+      - name: Validate migration provenance and structure
+        run: python scripts/validate_migration_payload.py data/migration-batches/generated/addiction-core-pages-v1.json
+      - name: Validate release metadata
+        run: python scripts/validate_v3_release_metadata.py data/migration-batches/generated/addiction-core-pages-v1.json
+      - name: Audit safety depth uniqueness and search intent
+        run: python scripts/audit_addiction_core_payload.py data/migration-batches/generated/addiction-core-pages-v1.json
+      - name: Commit deterministic release payload
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/migration-batches/generated/addiction-core-pages-v1.json
+          if git diff --cached --quiet; then
+            echo "Payload already materialized."
+            exit 0
+          fi
+          git commit -m "Materialize addiction core pages release payload"
+          git fetch origin "${{ github.ref_name }}"
+          git rebase "origin/${{ github.ref_name }}"
+          git push origin "HEAD:${{ github.ref_name }}"
