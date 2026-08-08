@@ -13,6 +13,8 @@ ALLOWED_CONTENT_TYPES = {'article','guide','research','news','condition','protoc
 SHA256_RE = re.compile(r'^[0-9a-f]{64}$')
 CARE_GUIDE_RE = re.compile(r'^/care-guides/[a-z0-9][a-z0-9/-]*/$')
 FAMILY_GUIDE_RE = re.compile(r'^/family-guide(?:/[a-z0-9][a-z0-9/-]*)?/$')
+ADDICTION_RE = re.compile(r'^/addiction(?:/[a-z0-9][a-z0-9/-]*)?/$')
+ADDICTION_ROLES = {'hub','safety','recovery','family','sources','methodology','addiction_condition'}
 FORBIDDEN_TEXT = ('معاقين', '<script', '<style', 'javascript:')
 
 
@@ -73,12 +75,15 @@ def validate(path: Path) -> dict[str, Any]:
         is_content_route = canonical == f'/content/{slug}'
         is_care_guide = bool(CARE_GUIDE_RE.fullmatch(canonical)) and row.get('content_type') == 'guide'
         is_family_guide = bool(FAMILY_GUIDE_RE.fullmatch(canonical)) and row.get('content_type') == 'guide'
-        if not (is_content_route or is_care_guide or is_family_guide):
-            fail(f'{prefix}: canonical is not an approved V3 content route', errors)
+        is_addiction = bool(ADDICTION_RE.fullmatch(canonical)) and row.get('content_type') == 'guide'
+        if not (is_content_route or is_care_guide or is_family_guide or is_addiction):
+            fail(f'{prefix}: canonical is not an approved V4 content route', errors)
         if is_care_guide and schema.get('page_role') != 'care-guide':
             fail(f'{prefix}: care-guide canonical requires schema_json.page_role=care-guide', errors)
         if is_family_guide and schema.get('page_role') not in {'hub','family_condition','family_tool','family_guide'}:
             fail(f'{prefix}: family-guide canonical requires an approved family schema_json.page_role', errors)
+        if is_addiction and schema.get('page_role') not in ADDICTION_ROLES:
+            fail(f'{prefix}: addiction canonical requires an approved addiction schema_json.page_role', errors)
 
         redirect = row.get('redirect') if isinstance(row.get('redirect'), dict) else None
         if source == canonical:
@@ -99,16 +104,28 @@ def validate(path: Path) -> dict[str, Any]:
         total_source_words += source_words
         final_words = len(str(row.get('body_text') or '').split())
         final_word_counts.append(final_words)
+        migration_enriched = schema.get('migration_enriched') is True
+        recorded_final_words = int(schema.get('migration_final_word_count') or 0)
+        if migration_enriched and recorded_final_words != final_words:
+            fail(f'{prefix}: migration_final_word_count does not match body_text ({recorded_final_words} != {final_words})', errors)
         if is_family_guide:
             if schema.get('family_guide_enriched') is not True:
                 fail(f'{prefix}: family-guide page must pass the enrichment stage before release', errors)
             if final_words < 1500:
                 fail(f'{prefix}: family-guide final content must be >=1500 words, got {final_words}', errors)
+        elif is_addiction:
+            if not migration_enriched or schema.get('addiction_enriched') is not True:
+                fail(f'{prefix}: addiction page must pass the enrichment stage before release', errors)
+            if final_words < 1500:
+                fail(f'{prefix}: addiction final content must be >=1500 words, got {final_words}', errors)
         elif source_words < 1000:
-            fail(f'{prefix}: expected a long-form source (>=1000 words), got {source_words}', errors)
+            if not migration_enriched:
+                fail(f'{prefix}: expected a long-form source (>=1000 words) or verified enrichment, got {source_words}', errors)
+            elif final_words < 1500:
+                fail(f'{prefix}: enriched final content must be >=1500 words, got {final_words}', errors)
         if schema.get('references_preserved') is not True:
             fail(f'{prefix}: references_preserved provenance flag missing', errors)
-        if not is_family_guide and schema.get('legacy_image_inventory') and row.get('featured_image_url'):
+        if not is_family_guide and schema.get('legacy_image_inventory') and row.get('featured_image_url') and schema.get('migration_featured_image_verified') is not True:
             fail(f'{prefix}: legacy image must not be auto-rendered before asset verification', errors)
 
         body = row.get('body_json') if isinstance(row.get('body_json'), dict) else {}
@@ -130,6 +147,8 @@ def validate(path: Path) -> dict[str, Any]:
             fail(f'{prefix}: references_json is empty', errors)
         if is_family_guide and len(refs) < 4:
             fail(f'{prefix}: family-guide page requires at least 4 authoritative references, got {len(refs)}', errors)
+        if is_addiction and len(refs) < 4:
+            fail(f'{prefix}: addiction page requires at least 4 authoritative references, got {len(refs)}', errors)
         total_references += len(refs)
         for ref in refs:
             url = str(ref.get('url') or '') if isinstance(ref, dict) else ''
