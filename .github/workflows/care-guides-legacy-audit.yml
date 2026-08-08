@@ -1,0 +1,56 @@
+name: Care Guides Legacy Inventory
+
+on:
+  push:
+    branches:
+      - 'agent/care-guides-*'
+    paths:
+      - 'scripts/care_guides_legacy_audit.py'
+      - '.github/workflows/care-guides-legacy-audit.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'scripts/care_guides_legacy_audit.py'
+      - '.github/workflows/care-guides-legacy-audit.yml'
+      - 'app/care-guides/**'
+      - 'components/care-guide-page*'
+      - 'lib/care-guides.ts'
+
+permissions:
+  contents: read
+
+jobs:
+  inventory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout Rawafid V3
+        uses: actions/checkout@v7
+        with:
+          path: rawafid-v3
+
+      - name: Checkout legacy source read-only
+        uses: actions/checkout@v7
+        with:
+          repository: khaledaltheeb/healthrenewal.org
+          ref: main
+          path: legacy
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Build deterministic care-guides inventory
+        working-directory: rawafid-v3
+        run: python scripts/care_guides_legacy_audit.py ../legacy
+
+      - name: Upload care-guides inventory
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: care-guides-legacy-inventory
+          path: rawafid-v3/artifacts/care-guides-legacy-inventory.json
+          if-no-files-found: error
+          retention-days: 14
