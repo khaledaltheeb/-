@@ -105,22 +105,56 @@ export async function getCapabilityRegistryItems(): Promise<CapabilityRegistryIt
       const schema = asRecord(row.schema_json);
       const rank = Number(schema?.legacy_rank);
       if (!Number.isInteger(rank) || rank < 1 || rank > 100) return [];
+
       const canonical = asString(row.canonical_url);
+      const rowSlug = asString(row.slug).replace(/^capabilities-/, '');
       const categoryKey = asString(schema?.legacy_category);
       const evidenceRouteKey = asString(schema?.evidence_route);
-      return [
-        {
-          rank,
-          slug: asString(row.slug).replace(/^capabilities-/, ''),
-          title: asString(row.title),
-          titleEn: asString(schema?.legacy_title_en),
-          href: canonical || `/capabilities/${asString(row.slug).replace(/^capabilities-/, '')}/`,
-          category: CATEGORY_LABELS[categoryKey] || categoryKey,
-          categoryKey,
-          evidenceRoute: asString(schema?.evidence_route_label) || evidenceRouteKey,
-          evidenceRouteKey,
-        },
-      ];
+      const category = CATEGORY_LABELS[categoryKey] || categoryKey;
+      const evidenceRoute = asString(schema?.evidence_route_label) || evidenceRouteKey;
+      const canonicalHref = canonical || `/capabilities/${rowSlug}/`;
+
+      const primary: CapabilityRegistryItem = {
+        rank,
+        slug: rowSlug,
+        title: asString(row.title),
+        titleEn: asString(schema?.legacy_title_en),
+        href: canonicalHref,
+        category,
+        categoryKey,
+        evidenceRoute,
+        evidenceRouteKey,
+      };
+
+      const mergedRegistryEntries = Array.isArray(schema?.merged_registry_entries)
+        ? schema.merged_registry_entries
+        : [];
+
+      const aliases = mergedRegistryEntries.flatMap((entry) => {
+        const alias = asRecord(entry);
+        if (!alias) return [];
+        const aliasRank = Number(alias.rank);
+        if (!Number.isInteger(aliasRank) || aliasRank < 1 || aliasRank > 100) return [];
+        const aliasSlug = asString(alias.slug);
+        const aliasTitle = asString(alias.title);
+        if (!aliasSlug || !aliasTitle) return [];
+
+        return [
+          {
+            rank: aliasRank,
+            slug: aliasSlug,
+            title: aliasTitle,
+            titleEn: asString(alias.title_en),
+            href: canonicalHref,
+            category,
+            categoryKey,
+            evidenceRoute,
+            evidenceRouteKey,
+          } satisfies CapabilityRegistryItem,
+        ];
+      });
+
+      return [primary, ...aliases];
     })
     .sort((a, b) => a.rank - b.rank);
 }
