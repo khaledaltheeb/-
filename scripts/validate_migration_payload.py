@@ -12,6 +12,7 @@ ALLOWED_BLOCKS = {'paragraph','heading','list','quote','callout','table','resour
 ALLOWED_CONTENT_TYPES = {'article','guide','research','news','condition','protocol','intervention','assessment','resource','glossary_term'}
 SHA256_RE = re.compile(r'^[0-9a-f]{64}$')
 CARE_GUIDE_RE = re.compile(r'^/care-guides/[a-z0-9][a-z0-9/-]*/$')
+FAMILY_GUIDE_RE = re.compile(r'^/family-guide(?:/[a-z0-9][a-z0-9/-]*)?/$')
 FORBIDDEN_TEXT = ('معاقين', '<script', '<style', 'javascript:')
 
 
@@ -70,10 +71,13 @@ def validate(path: Path) -> dict[str, Any]:
         schema = row.get('schema_json') if isinstance(row.get('schema_json'), dict) else {}
         is_content_route = canonical == f'/content/{slug}'
         is_care_guide = bool(CARE_GUIDE_RE.fullmatch(canonical)) and row.get('content_type') == 'guide'
-        if not (is_content_route or is_care_guide):
+        is_family_guide = bool(FAMILY_GUIDE_RE.fullmatch(canonical)) and row.get('content_type') == 'guide'
+        if not (is_content_route or is_care_guide or is_family_guide):
             fail(f'{prefix}: canonical is not an approved V3 content route', errors)
         if is_care_guide and schema.get('page_role') != 'care-guide':
             fail(f'{prefix}: care-guide canonical requires schema_json.page_role=care-guide', errors)
+        if is_family_guide and schema.get('page_role') not in {'hub','family_condition','family_tool','family_guide'}:
+            fail(f'{prefix}: family-guide canonical requires an approved family schema_json.page_role', errors)
 
         redirect = row.get('redirect') if isinstance(row.get('redirect'), dict) else None
         if source == canonical:
