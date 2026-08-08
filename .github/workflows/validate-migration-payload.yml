@@ -1,0 +1,25 @@
+name: Validate Legacy Migration Payload
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'data/migration-batches/**'
+      - 'scripts/prepare_legacy_batch.py'
+      - 'scripts/validate_migration_payload.py'
+      - '.github/workflows/validate-migration-payload.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - name: Validate ADHD migration payload
+        run: python scripts/validate_migration_payload.py data/migration-batches/generated/adhd-v1.json

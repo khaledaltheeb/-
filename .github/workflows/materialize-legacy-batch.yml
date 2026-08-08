@@ -1,0 +1,55 @@
+name: Materialize Legacy Migration Batch
+
+on:
+  push:
+    branches:
+      - 'agent/adhd-migration-batch'
+    paths:
+      - 'scripts/prepare_legacy_batch.py'
+      - 'data/migration-batches/adhd-v1.config.json'
+      - '.github/workflows/materialize-legacy-batch.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout migration branch
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 1
+
+      - name: Checkout legacy source read-only
+        uses: actions/checkout@v7
+        with:
+          repository: khaledaltheeb/healthrenewal.org
+          ref: main
+          path: legacy-source
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Extract current legacy source
+        run: python scripts/legacy_content_extract.py legacy-source --output artifacts/legacy-content-inventory.json --summary artifacts/legacy-content-summary.json
+
+      - name: Materialize ADHD batch
+        run: python scripts/prepare_legacy_batch.py artifacts/legacy-content-inventory.json data/migration-batches/adhd-v1.config.json --legacy-root legacy-source --output data/migration-batches/generated/adhd-v1.json
+
+      - name: Commit deterministic payload
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/migration-batches/generated/adhd-v1.json
+          if git diff --cached --quiet; then
+            echo "Payload already materialized; no commit required."
+            exit 0
+          fi
+          git commit -m "Materialize audited ADHD migration payload"
+          git push origin HEAD:${{ github.ref_name }}

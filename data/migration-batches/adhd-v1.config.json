@@ -1,0 +1,117 @@
+{
+  "batch_id": "legacy-adhd-v1",
+  "migration_date": "2026-08-08",
+  "expected_record_count": 9,
+  "defaults": {
+    "sector_slug": "special-needs-inclusion",
+    "category_slug": "autism-neurodevelopment",
+    "search_intent": "informational",
+    "author_display_name": "فريق تحرير منصة روافد",
+    "medical_disclaimer": "محتوى تثقيفي عام لا يقدّم تشخيصًا فرديًا ولا وصفة علاجية؛ التقييم وخيارات العلاج والمتابعة يحددها مختص مؤهل بحسب احتياجات الشخص وسياقه."
+  },
+  "records": [
+    {
+      "source_path": "/adhd/adult-coaching/",
+      "target_slug": "adhd-adult-coaching",
+      "content_type": "guide",
+      "primary_capability": "/capabilities/adhd/",
+      "primary_keyword": "تدريب ADHD للبالغين",
+      "secondary_keywords": ["تدريب اضطراب نقص الانتباه للبالغين", "مدرب ADHD", "ADHD coaching", "اختيار مدرب ADHD", "حدود التدريب المهني"],
+      "semantic_terms": ["اضطراب نقص الانتباه وفرط الحركة", "التدريب", "الوظائف التنفيذية", "الأهداف الوظيفية", "حدود الدور", "قياس النتائج"],
+      "audience": ["البالغون ذوو ADHD", "الأسر", "المدربون", "المختصون"]
+    },
+    {
+      "source_path": "/adhd/consensus/",
+      "target_slug": "adhd-international-consensus",
+      "content_type": "research",
+      "primary_capability": "/capabilities/adhd/",
+      "primary_keyword": "بيان الإجماع الدولي حول ADHD",
+      "secondary_keywords": ["الإجماع الدولي ADHD", "208 استنتاجات ADHD", "أدلة ADHD", "World Federation of ADHD"],
+      "semantic_terms": ["اضطراب نقص الانتباه وفرط الحركة", "الإجماع العلمي", "التشخيص", "الانتشار", "الأسباب", "العلاج", "الوصمة"],
+      "audience": ["الأشخاص ذوو ADHD", "الأسر", "المختصون", "الباحثون"]
+    },
+    {
+      "source_path": "/adhd/expert-questions/",
+      "target_slug": "adhd-expert-questions",
+      "content_type": "guide",
+      "primary_capability": "/capabilities/adhd/",
+      "primary_keyword": "أسئلة خبراء ADHD",
+      "secondary_keywords": ["علاج ADHD", "متابعة ADHD", "استجابة علاج ADHD", "نوم ADHD", "شهية ADHD"],
+      "semantic_terms": ["اضطراب نقص الانتباه وفرط الحركة", "العلاج", "المتابعة", "النوم", "الشهية", "الحالات المصاحبة", "القرار السريري"],
+      "audience": ["الأسر", "الأشخاص ذوو ADHD", "المختصون", "مقدمو الخدمات"]
+    },
+    {
+      "source_path": "/adhd/federation-guide/",
+      "target_slug": "adhd-world-federation-guide",
+      "content_type": "guide",
+      "primary_capability": "/capabilities/adhd/",
+      "primary_keyword": "دليل الاتحاد العالمي لاضطراب ADHD",
+      "secondary_keywords": ["World Federation of ADHD Guide", "دليل ADHD", "تقييم ADHD", "علاج ADHD", "الدعم النفسي الاجتماعي"],
+      "semantic_terms": ["اضطراب نقص الانتباه وفرط الحركة", "التقييم", "الرعاية", "العلاج", "الدعم النفسي الاجتماعي", "التواصل"],
+      "audience": ["الأشخاص ذوو ADHD", "الأسر", "المعلمون", "المختصون"]
+    },
+    {
+      "source_path": "/adhd/language-guide/",
+      "target_slug": "adhd-language-guide",
+      "content_type": "guide",
+      "primary_capability": "/capabilities/adhd/",
+      "primary_keyword": "اللغة غير الوصمية حول ADHD",
+      "secondary_keywords": ["الحديث عن ADHD", "لغة ADHD", "وصمة ADHD", "Talking about ADHD"],
+      "semantic_terms": ["اضطراب نقص الانتباه وفرط الحركة", "اللغة غير الوصمية", "الخصوصية", "الهوية", "التواصل", "المدرسة", "العمل"],
+      "audience": ["الأشخاص ذوو ADHD", "الأسر", "المعلمون", "المختصون", "الإعلاميون"]
+    },
+    {
+      "source_path": "/adhd/practice-guidelines/",
+      "target_slug": "adhd-practice-guidelines",
+      "content_type": "guide",
+      "primary_capability": "/capabilities/adhd/",
+      "primary_keyword": "إرشادات ADHD المهنية",
+      "secondary_keywords": ["إرشادات علاج ADHD", "NICE ADHD", "CADDRA", "EAGG ADHD", "AWMF ADHD"],
+      "semantic_terms": ["اضطراب نقص الانتباه وفرط الحركة", "الإرشادات السريرية", "التقييم", "العلاج", "المتابعة", "حوكمة التوصيات"],
+      "audience": ["المختصون", "مقدمو الخدمات", "الباحثون", "صناع السياسات"]
+    },
+    {
+      "source_path": "/adhd/sources-and-rights/",
+      "target_slug": "adhd-sources-and-rights",
+      "content_type": "resource",
+      "primary_capability": "/capabilities/adhd/",
+      "primary_keyword": "مصادر وحقوق قسم ADHD",
+      "secondary_keywords": ["مصادر ADHD", "حقوق ترجمة ADHD", "World Federation of ADHD", "منهج الإثراء العربي"],
+      "semantic_terms": ["المصادر", "حقوق الترجمة", "الإسناد", "الملكية الفكرية", "الشفافية", "ADHD"],
+      "audience": ["القراء", "الباحثون", "المختصون", "الناشرون"]
+    },
+    {
+      "source_path": "/adhd/transfer-of-care/",
+      "target_slug": "adhd-transfer-of-care",
+      "content_type": "guide",
+      "primary_capability": "/capabilities/adhd/",
+      "primary_keyword": "انتقال رعاية ADHD",
+      "secondary_keywords": ["إحالة ADHD", "نقل رعاية ADHD", "ADHD referral", "Transfer of care ADHD"],
+      "semantic_terms": ["اضطراب نقص الانتباه وفرط الحركة", "الإحالة", "انتقال الرعاية", "التقرير الطبي", "الخصوصية", "استمرارية العلاج"],
+      "audience": ["الأشخاص ذوو ADHD", "الأسر", "المختصون", "مقدمو الخدمات"]
+    },
+    {
+      "source_path": "/care-guides/adhd-family-practical-guide/",
+      "source_kind": "structured_json",
+      "structured_source": "content/v18/care-guides-adhd-ar.json",
+      "structured_collection": "guides",
+      "structured_selector_slug": "adhd-family-practical-guide",
+      "target_slug": "adhd-family-practical-guide",
+      "target_canonical": "/care-guides/adhd-family-practical-guide/",
+      "content_type": "guide",
+      "sector_slug": "child-family-education",
+      "category_slug": "parenting-family",
+      "primary_capability": "/capabilities/adhd/",
+      "primary_keyword": "دليل الأسرة لاضطراب ADHD",
+      "secondary_keywords": ["كيف أتعامل مع طفل ADHD", "دليل الأسرة لفرط الحركة", "تنظيم الواجبات لطفل ADHD", "نوم طفل ADHD", "دعم الطفل ذي تشتت الانتباه"],
+      "semantic_terms": ["اضطراب نقص الانتباه وفرط النشاط", "الوالدية", "الوظائف التنفيذية", "التنظيم المنزلي", "الدعم المدرسي", "النوم", "الانفعالات", "متابعة العلاج", "السلامة"],
+      "audience": ["الوالدان", "الأسرة", "المعلمون", "مقدمو الرعاية"],
+      "schema_json": {
+        "page_role": "care-guide",
+        "care_guide_category": "اضطرابات النمو العصبي والأسرة",
+        "legacy_slug": "adhd-family-practical-guide",
+        "migration_stage": "audited-published-migration"
+      }
+    }
+  ]
+}
