@@ -8,6 +8,7 @@ const fail = (message) => { console.error(`THEME V4 CONTRACT FAILED: ${message}`
 const layout = read('app/layout.tsx');
 const header = read('components/site-header.tsx');
 const theme = read('app/rawafid-theme.css');
+const adminTheme = read('app/theme-admin-v4.css');
 const themeLib = read('lib/theme.ts');
 const agents = read('AGENTS.md');
 
@@ -22,9 +23,14 @@ for (const token of ['--rf-brand:', '--rf-page:', '--rf-ink:', '--rf-radius-lg:'
   if (!theme.includes(token)) fail(`central theme missing semantic token ${token}`);
 }
 
-for (const rule of ['.site-header', '.rawafid-hero', '.rawafid-platform-grid', '@media (max-width: 720px)', '@media (prefers-reduced-motion: reduce)']) {
+for (const rule of ['.site-header', '.rawafid-hero', '.rawafid-platform-grid']) {
   if (!theme.includes(rule)) fail(`central theme missing core rule ${rule}`);
 }
+
+if (!/@media\s*\(max-width:\s*720px\)/.test(theme)) fail('central theme missing mobile breakpoint');
+if (!/@media\s*\(prefers-reduced-motion:\s*reduce\)/.test(theme)) fail('central theme missing reduced-motion contract');
+if (!theme.includes("@import './theme-admin-v4.css'")) fail('central theme must load the scoped V4 admin layer');
+if (!adminTheme.includes('.admin-app-shell') || !adminTheme.includes('.dashboard-card')) fail('admin V4 layer missing core admin selectors');
 
 if (!header.includes('<strong>منصة روافد</strong>')) fail('global header must use the full institutional brand name');
 if (!themeLib.includes("RAWAFID_BRAND_NAME = 'منصة روافد'")) fail('theme library must centralize the institutional brand name');
