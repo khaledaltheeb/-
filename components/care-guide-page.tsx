@@ -11,10 +11,16 @@ import {
   visibleCareGuideFaq,
   type CareGuideItem,
   type CareGuideRecord,
+  type CareGuideRelatedItem,
 } from '@/lib/care-guides';
 import { breadcrumbJsonLd, SITE_URL } from '@/lib/seo';
 
-type Props = { record: CareGuideRecord; items?: CareGuideItem[]; routeSegments?: string[] };
+type Props = {
+  record: CareGuideRecord;
+  items?: CareGuideItem[];
+  related?: CareGuideRelatedItem[];
+  routeSegments?: string[];
+};
 
 function CareGuidesNav({ end = false }: { end?: boolean }) {
   return <nav className={end ? styles.endNav : styles.referenceNav} aria-label="التنقل داخل أدلة التعامل والرعاية">
@@ -50,7 +56,7 @@ function GuideBrowser({ items }: { items: CareGuideItem[] }) {
   </section>;
 }
 
-export default function CareGuidePage({ record, items = [], routeSegments = [] }: Props) {
+export default function CareGuidePage({ record, items = [], related = [], routeSegments = [] }: Props) {
   const role = careGuidePageRole(record.schema_json);
   const references = safeCareGuideReferences(record.references_json);
   const faqItems = visibleCareGuideFaq(record.body_json);
@@ -135,6 +141,7 @@ export default function CareGuidePage({ record, items = [], routeSegments = [] }
         <ContentRenderer bodyJson={record.body_json} bodyText={record.body_text} recordId={record.id} />
       </div>
       {record.medical_disclaimer ? <aside className="medical-disclaimer" aria-label="حدود المحتوى"><strong>تنبيه صحي ومنهجي</strong><p>{record.medical_disclaimer}</p><Link href="/disclaimer">إخلاء المسؤولية الكامل</Link></aside> : null}
+      {related.length ? <section className="article-related" aria-labelledby="care-guide-related-title"><div className="section-mini-heading"><div><span className="eyebrow">روابط داخلية دلالية</span><h2 id="care-guide-related-title">محتوى مرتبط</h2></div><span>اختيار من المحتوى المنشور وفق الصلة الموضوعية</span></div><div className="related-content-grid">{related.map((item) => <article key={item.id}><span>{item.contentType}</span><h3><Link href={item.href}>{item.title}</Link></h3>{item.excerpt ? <p>{item.excerpt}</p> : null}<Link href={item.href}>متابعة القراءة ←</Link></article>)}</div></section> : null}
       <CareGuidesNav end />
       {references.length ? <section className="article-references" aria-labelledby="care-guide-references-title"><h2 id="care-guide-references-title">المصادر والمراجع</h2><ol>{references.map((reference, index) => <li key={`${reference.url || reference.title}-${index}`}>{reference.url ? <a href={reference.url} target="_blank" rel="noopener noreferrer">{reference.title || reference.url}</a> : <span>{reference.title}</span>}{reference.publisher ? <small>{reference.publisher}</small> : null}{reference.year ? <small>{String(reference.year)}</small> : null}</li>)}</ol></section> : null}
     </article>
