@@ -1,6 +1,6 @@
 # Rawafid — Migration Progress Ledger
 
-Last updated: 2026-08-07
+Last updated: 2026-08-08
 
 ## Current phase
 
@@ -62,8 +62,9 @@ Source repository: `khaledaltheeb/healthrenewal.org`
 - Canonical: `/content/attention`
 - Type: `glossary_term`
 - Status: **PUBLISHED / QA PASS**
-- Words: **2017** | FAQ: **11** | References: **8** | Versions: **8**
+- Words: **2017** | FAQ: **11** | References: **8** | Versions: **9**
 - Duplicate canonical: **0** | Search: **PASS** | wrong quick-info/tool redirects: **0**
+- Exact `التركيز` alias/secondary keyword was removed in a versioned canonical-boundary correction before publishing the separate concentration page.
 - Record: `migration-records/C0/MIG-000002-attention.md`
 - Claim #2: CLOSED / COMPLETED
 
@@ -108,6 +109,20 @@ Source repository: `khaledaltheeb/healthrenewal.org`
 - Record: `migration-records/C0/MIG-000006-executive-functions.md`
 - Claim #11: CLOSED / COMPLETED
 
+### MIG-000007 — التركيز
+- Lane: C0
+- Canonical: `/content/concentration`
+- Type: `glossary_term`
+- Status: **PUBLISHED / POST-PUBLISH QA PASS**
+- Words: **1766** | FAQ: **11** | References: **8** | Versions: **9**
+- Tags: **6** | Category relations: **1** | Audit events: **9**
+- Duplicate canonical: **0**
+- Search `التركيز`: concentration first (~9.3), attention related lower (1.0).
+- Search `الانتباه`: attention first (13), concentration related second (~2.9).
+- Wrong redirect from attention: **0** | wrong redirect from focus-break quick-info: **0**
+- Record: `migration-records/C0/MIG-000007-concentration.md`
+- Claim #89: CLOSED / COMPLETED
+
 ### A4-000001 — الانضباط الإيجابي أم العقاب؟
 - Lane: A4
 - Canonical: `/content/discipline-vs-punishment`
@@ -126,21 +141,22 @@ Source repository: `khaledaltheeb/healthrenewal.org`
 ## Active / pending lanes at this checkpoint
 
 - A1: `depression` — enriched 2800+ word draft; intentionally blocked at scientific review because no qualified human reviewer is registered. No reviewer identity may be fabricated.
+- A2: `withdrawal-safety` — high-stakes addiction page intentionally blocked at scientific review because no qualified human reviewer is registered.
 - A3: `autism` — active Claim; C0 must not touch autism while claimed.
-- A5: `accessible-fair-multimodal-assessment` — active Claim. A premature second A5 Claim (`evidence-literacy`) was closed by C0 because one lane may not have two open pages.
-- A2: no verified active Claim at the last coordinator check.
-- A4: first page completed; lane may claim its next page only after checking the global registry again.
+- A4: multiple family/home Claims active; C0 must not take those canonicals.
+- A5: `safe-screening-tools` active plus other A5 work; C0 must not take those canonicals.
+- C0: `sensation` and `creativity` Claims remain active in parallel; coordinator work must not duplicate them.
 
 ## Totals
 
-- **Completed canonical pages after coordinator QA: 7**
-- **Published canonical pages after coordinator QA: 7**
-- C0 completed: **6**
+- **Completed canonical pages after coordinator QA: 8**
+- **Published canonical pages after coordinator QA: 8**
+- C0 completed: **7**
 - Validated agent pages: **1 (A4)**
 - High-stakes pages blocked pending real qualified scientific review are not counted as complete.
 
 ## Next action
 
-1. Continue C0 with `MIG-000007` on a non-conflicting general encyclopedia concept.
-2. Monitor agent Claims before each new C0 topic.
+1. Continue C0 with the next unused migration number on a non-conflicting general encyclopedia concept.
+2. Monitor all open Claims immediately before each new C0 topic.
 3. Independently audit every agent-completed page for content quality **and** versions/audit/tags/category relations before adding it to this ledger.
