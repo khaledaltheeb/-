@@ -1,6 +1,6 @@
 const groups = [
   {
-    title: 'روافد',
+    title: 'منصة روافد',
     links: [
       { href: '/about', label: 'عن المنصة' },
       { href: '/search', label: 'البحث' },
@@ -11,8 +11,11 @@ const groups = [
   {
     title: 'المشاركة المهنية',
     links: [
+      { href: '/join', label: 'الانضمام المهني' },
+      { href: '/join/specialist', label: 'التقدم كمختص' },
+      { href: '/join/center', label: 'تسجيل مركز' },
       { href: '/community', label: 'المتدربون والمتطوعون' },
-      { href: '/community/join', label: 'طلب الانضمام' },
+      { href: '/community/join', label: 'الانضمام للمجتمع' },
       { href: '/specialist', label: 'بوابة المختص' },
       { href: '/center', label: 'بوابة المركز' },
     ],

@@ -14,6 +14,7 @@ export default async function ForgotPasswordPage({ searchParams }: { searchParam
   const params = await searchParams;
   const sent = params.status === 'sent';
   const invalid = params.error === 'invalid_email';
+  const expired = params.error === 'session_expired';
 
   return (
     <main className="auth-shell">
@@ -25,6 +26,7 @@ export default async function ForgotPasswordPage({ searchParams }: { searchParam
 
         {sent && <div className="system-message success" role="status">إذا كان البريد مرتبطًا بحساب، فقد أرسلنا تعليمات الاستعادة. افحص صندوق الوارد والرسائل غير المرغوب فيها.</div>}
         {invalid && <div className="system-message error" role="alert">أدخل بريدًا إلكترونيًا صالحًا.</div>}
+        {expired && <div className="system-message error" role="alert">جلسة الاستعادة غير صالحة أو انتهت. اطلب رابطًا جديدًا من النموذج أدناه.</div>}
 
         <form className="auth-form" action={requestPasswordReset}>
           <label htmlFor="email">البريد الإلكتروني</label>

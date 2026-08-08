@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
+import LocationMap from '@/components/location-map';
 import { createClient } from '@/lib/supabase/server';
 import { buildSeoMetadata, breadcrumbJsonLd, SITE_URL } from '@/lib/seo';
 
@@ -95,9 +96,10 @@ export default async function CenterProfile({ params }: { params: Params }) {
             {license && (license.license_number || license.regulatory_authority || license.license_expiry_date) && <section><h2>الترخيص والجهة التنظيمية</h2><div className="license-card"><strong>بيانات الترخيص الموثقة</strong>{license.license_number && <span>رقم الترخيص/التسجيل: <bdi dir="ltr">{license.license_number}</bdi></span>}{license.regulatory_authority && <span>الجهة التنظيمية: {license.regulatory_authority}</span>}{license.license_expiry_date && <span>تاريخ الانتهاء: {new Intl.DateTimeFormat('ar',{dateStyle:'medium'}).format(new Date(`${license.license_expiry_date}T00:00:00Z`))}</span>}<small>يُنصح بالتحقق من حالة الترخيص لدى الجهة التنظيمية المختصة عند اتخاذ قرار خدمة.</small></div></section>}
             {specialists.length > 0 && <section><h2>الفريق المهني</h2><div className="linked-specialists">{specialists.map((specialist) => <Link href={`/specialists/${specialist.slug}`} key={specialist.id}><strong>{specialist.full_name}</strong><span>{specialist.professional_title || (specialist.specialties ?? []).slice(0, 2).join('، ')}</span></Link>)}</div></section>}
             {hours.length > 0 && <section><h2>ساعات العمل</h2><div className="hours-list">{hours.map((row) => <span key={row}>{row}</span>)}</div></section>}
+            <LocationMap latitude={center.public_latitude} longitude={center.public_longitude} label={center.name} address={location||null}/>
           </article>
           <aside className="profile-sidebar">
-            <div className="contact-card"><h2>بيانات المركز</h2><div className="contact-actions">{canContact===true&&<><Link className="primary-link" href={`/messages/new?center=${center.id}`}>محادثة مع المركز</Link><Link className="button" href={`/appointments/new?center=${center.id}`}>طلب موعد</Link></>}{canContact!==true&&<span className="contact-unavailable">التواصل والمواعيد داخل روافد غير مفعلة لهذا المركز بعد.</span>}{phone && <a className="button" href={`tel:${phone}`}>اتصال</a>}{email && <a className="button" href={`mailto:${email}`}>البريد الإلكتروني</a>}{website && <a className="button" href={website} target="_blank" rel="noopener noreferrer">الموقع الإلكتروني</a>}{mapUrl && <a className="button" href={mapUrl} target="_blank" rel="noopener noreferrer">الخريطة</a>}</div></div>
+            <div className="contact-card"><h2>بيانات المركز</h2><div className="contact-actions">{canContact===true&&<><Link className="primary-link" href={`/messages/new?center=${center.id}`}>محادثة مع المركز</Link><Link className="button" href={`/appointments/new?center=${center.id}`}>طلب موعد</Link></>}{canContact!==true&&<span className="contact-unavailable">التواصل والمواعيد داخل روافد غير مفعلة لهذا المركز بعد.</span>}{phone && <a className="button" href={`tel:${phone}`}>اتصال</a>}{email && <a className="button" href={`mailto:${email}`}>البريد الإلكتروني</a>}{website && <a className="button" href={website} target="_blank" rel="noopener noreferrer">الموقع الإلكتروني</a>}{mapUrl && <a className="button" href={mapUrl} target="_blank" rel="noopener noreferrer">فتح الموقع في الخرائط</a>}</div></div>
             <div className="trust-card"><strong>حالة المركز</strong><span>موثق ونشط في منصة روافد{center.verified_at ? ` منذ ${new Intl.DateTimeFormat('ar',{dateStyle:'medium'}).format(new Date(center.verified_at))}` : ''}</span></div>
           </aside>
         </div>

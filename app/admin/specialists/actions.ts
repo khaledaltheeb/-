@@ -65,18 +65,24 @@ export async function setSpecialistStatus(formData: FormData) {
   const slug = text(formData, 'slug', 140);
   const status = text(formData, 'status', 30);
   const active = formData.get('is_active') === 'on';
+  const note = text(formData, 'verification_note', 2000) || null;
   if (!UUID_RE.test(id) || !STATUSES.has(status)) redirect('/admin/specialists?error=invalid-input');
+  if ((status === 'rejected' || status === 'suspended') && !note) redirect('/admin/specialists?error=note-required');
 
-  const { error } = await supabase.rpc('set_specialist_verification', {
+  const { error } = await supabase.rpc('set_specialist_verification_v2', {
     p_id: id,
     p_status: status,
     p_is_active: active,
+    p_note: note,
   });
   if (error) redirect('/admin/specialists?error=update-failed');
 
   revalidatePath('/admin');
   revalidatePath('/admin/specialists');
   revalidatePath('/specialists');
+  revalidatePath('/account');
+  revalidatePath('/join/specialist');
+  revalidatePath('/notifications');
   if (slug) revalidatePath(`/specialists/${slug}`);
   revalidatePath('/sitemap.xml');
   redirect('/admin/specialists?ok=updated');
