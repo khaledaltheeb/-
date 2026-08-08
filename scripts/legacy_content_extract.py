@@ -10,7 +10,7 @@ from collections import Counter
 from html import unescape
 from html.parser import HTMLParser
 from pathlib import Path
-from urllib.parse import unquote, urlparse
+from urllib.parse import unquote, urljoin, urlparse
 
 BASE_URL = "https://healthrenewal.org"
 SPACE_RE = re.compile(r"\s+")
@@ -77,8 +77,9 @@ def structured_sources(root: Path, slug: str) -> list[str]:
 class Extractor(HTMLParser):
     ignored = {"script", "style", "svg", "noscript", "template", "form", "nav", "header", "footer"}
 
-    def __init__(self) -> None:
+    def __init__(self, page_url: str) -> None:
         super().__init__(convert_charrefs=True)
+        self.page_url = page_url
         self.title = ""
         self.h1 = ""
         self.canonical = ""
@@ -95,13 +96,32 @@ class Extractor(HTMLParser):
         self._list_kind: str | None = None
         self._list_items: list[str] = []
         self._li_buffer: list[str] | None = None
+        self._anchor_href: str | None = None
+        self._anchor_buffer: list[str] = []
+        self._table_active = False
+        self._table_headers: list[str] = []
+        self._table_rows: list[list[str]] = []
+        self._table_row: list[str] | None = None
+        self._table_cell: list[str] | None = None
+        self._table_cell_header = False
+        self._table_row_had_header = False
         self.blocks: list[dict] = []
         self.all_text: list[str] = []
+        self.links: list[dict] = []
+        self.images: list[dict] = []
 
     def active(self) -> bool:
         if self._skip:
             return False
         return self._main_depth > 0 if self._main_seen else self._body_depth > 0
+
+    def _absolute(self, href: str) -> str:
+        href = clean(href)
+        if not href:
+            return ""
+        if href.startswith(("mailto:", "tel:", "javascript:", "#")):
+            return href
+        return urljoin(self.page_url, href)
 
     def handle_starttag(self, tag: str, attrs_list: list[tuple[str, str | None]]) -> None:
         tag = tag.lower()
@@ -139,6 +159,29 @@ class Extractor(HTMLParser):
             self._list_items = []
         elif tag == "li" and self._list_kind:
             self._li_buffer = []
+        elif tag == "a":
+            self._anchor_href = self._absolute(attrs.get("href", ""))
+            self._anchor_buffer = []
+        elif tag == "img":
+            src = self._absolute(attrs.get("src", ""))
+            if src:
+                image = {
+                    "src": src,
+                    "alt": clean(attrs.get("alt", "")),
+                    "title": clean(attrs.get("title", "")),
+                }
+                if image not in self.images:
+                    self.images.append(image)
+        elif tag == "table" and not self._table_active:
+            self._table_active = True
+            self._table_headers = []
+            self._table_rows = []
+        elif tag == "tr" and self._table_active:
+            self._table_row = []
+            self._table_row_had_header = False
+        elif tag in {"th", "td"} and self._table_active and self._table_row is not None:
+            self._table_cell = []
+            self._table_cell_header = tag == "th"
 
     def handle_endtag(self, tag: str) -> None:
         tag = tag.lower()
@@ -174,6 +217,47 @@ class Extractor(HTMLParser):
                 self.blocks.append({"type": "list", "ordered": tag == "ol", "items": self._list_items[:]})
             self._list_kind = None
             self._list_items = []
+        if tag == "a" and self._anchor_href is not None:
+            href = self._anchor_href
+            label = clean(" ".join(self._anchor_buffer))
+            if href and not href.startswith(("javascript:", "#")):
+                parsed = urlparse(href)
+                kind = "internal" if parsed.netloc in {"", urlparse(BASE_URL).netloc} else "external"
+                if href.startswith("mailto:"):
+                    kind = "email"
+                elif href.startswith("tel:"):
+                    kind = "telephone"
+                item = {"href": href, "label": label or href, "kind": kind}
+                if item not in self.links:
+                    self.links.append(item)
+            self._anchor_href = None
+            self._anchor_buffer = []
+        if tag in {"th", "td"} and self._table_cell is not None and self._table_row is not None:
+            value = clean(" ".join(self._table_cell))
+            self._table_row.append(value)
+            self._table_row_had_header = self._table_row_had_header or self._table_cell_header
+            self._table_cell = None
+            self._table_cell_header = False
+        elif tag == "tr" and self._table_active and self._table_row is not None:
+            row = self._table_row
+            if any(row):
+                if self._table_row_had_header and not self._table_headers:
+                    self._table_headers = row
+                else:
+                    self._table_rows.append(row)
+            self._table_row = None
+        elif tag == "table" and self._table_active:
+            if self._table_headers or self._table_rows:
+                headers = self._table_headers
+                if not headers and self._table_rows:
+                    width = max(len(row) for row in self._table_rows)
+                    headers = [f"عمود {i + 1}" for i in range(width)]
+                width = len(headers)
+                rows = [(row + [""] * width)[:width] for row in self._table_rows]
+                self.blocks.append({"type": "table", "headers": headers, "rows": rows})
+            self._table_active = False
+            self._table_headers = []
+            self._table_rows = []
         if tag == "main" and self._main_depth:
             self._main_depth -= 1
         elif self._main_depth and tag == "section":
@@ -194,10 +278,14 @@ class Extractor(HTMLParser):
             self._buffer.append(value)
         if self._li_buffer is not None:
             self._li_buffer.append(value)
+        if self._anchor_href is not None:
+            self._anchor_buffer.append(value)
+        if self._table_cell is not None:
+            self._table_cell.append(value)
 
 
-def parse_page(html: str) -> Extractor:
-    parser = Extractor()
+def parse_page(html: str, page_url: str) -> Extractor:
+    parser = Extractor(page_url)
     parser.feed(html)
     parser.close()
     return parser
@@ -218,6 +306,9 @@ def main() -> int:
     resource_urls: list[str] = []
     noindex: list[str] = []
     weak: list[str] = []
+    external_link_count = 0
+    internal_link_count = 0
+    image_ref_count = 0
 
     for url in urls:
         parsed_url = urlparse(url)
@@ -226,6 +317,8 @@ def main() -> int:
         file_path = path_for_url(root, url)
         rel = file_path.relative_to(root).as_posix()
         suffix = file_path.suffix.lower()
+        slug = parsed_url.path.strip("/").split("/")[-1] if parsed_url.path.strip("/") else ""
+        candidates = structured_sources(root, slug)
 
         if suffix in RESOURCE_SUFFIXES:
             if file_path.is_file():
@@ -239,26 +332,25 @@ def main() -> int:
                     "resource_exists": True,
                     "size_bytes": len(payload),
                     "sha256": hashlib.sha256(payload).hexdigest(),
+                    "structured_sources": candidates,
                 })
             else:
                 unresolved_missing.append(url)
-                records.append({"url": url, "path": parsed_url.path, "source_file": rel, "kind": "resource", "resource_exists": False})
+                records.append({"url": url, "path": parsed_url.path, "source_file": rel, "kind": "resource", "resource_exists": False, "structured_sources": candidates})
             continue
 
         if not file_path.is_file():
-            slug = parsed_url.path.strip("/").split("/")[-1]
-            candidates = structured_sources(root, slug)
             if candidates:
                 item = {"url": url, "path": parsed_url.path, "source_html": rel, "kind": "recoverable-structured", "html_exists": False, "structured_sources": candidates}
                 recoverable.append(item)
                 records.append(item)
             else:
                 unresolved_missing.append(url)
-                records.append({"url": url, "path": parsed_url.path, "source_html": rel, "kind": "html", "html_exists": False})
+                records.append({"url": url, "path": parsed_url.path, "source_html": rel, "kind": "html", "html_exists": False, "structured_sources": []})
             continue
 
         html = file_path.read_text(encoding="utf-8", errors="ignore")
-        page = parse_page(html)
+        page = parse_page(html, url)
         text = clean(" ".join(page.all_text))
         words = len(text.split())
         is_noindex = "noindex" in page.robots
@@ -266,6 +358,11 @@ def main() -> int:
             noindex.append(url)
         if words < 300:
             weak.append(url)
+        external_links = [link for link in page.links if link["kind"] == "external"]
+        internal_links = [link for link in page.links if link["kind"] == "internal"]
+        external_link_count += len(external_links)
+        internal_link_count += len(internal_links)
+        image_ref_count += len(page.images)
         records.append({
             "url": url,
             "path": parsed_url.path,
@@ -283,7 +380,12 @@ def main() -> int:
                 "stylesheets": len(re.findall(r"<link[^>]+stylesheet", html, re.I)),
                 "scripts": len(re.findall(r"<script\b", html, re.I)),
                 "inline_styles": len(re.findall(r"<style\b", html, re.I)),
+                "images": page.images,
             },
+            "references": external_links,
+            "internal_links": internal_links,
+            "contact_links": [link for link in page.links if link["kind"] in {"email", "telephone"}],
+            "structured_sources": candidates,
             "body_json": {"blocks": page.blocks},
             "body_text": text,
         })
@@ -300,6 +402,9 @@ def main() -> int:
         "unresolved_missing_count": len(unresolved_missing),
         "noindex_count": len(noindex),
         "under_300_words": len(weak),
+        "external_reference_count": external_link_count,
+        "internal_link_count": internal_link_count,
+        "image_reference_count": image_ref_count,
         "top_level_counts": dict(sorted(prefixes.items(), key=lambda item: (-item[1], item[0]))),
         "resource_urls": resource_urls,
         "recoverable_missing_html": recoverable,
@@ -311,7 +416,12 @@ def main() -> int:
             "legacy_theme_copied": False,
             "legacy_css_copied": False,
             "legacy_js_copied": False,
-            "extracted_payload": "semantic text/blocks + metadata only",
+            "semantic_text_preserved": True,
+            "external_reference_urls_preserved": True,
+            "internal_link_targets_preserved": True,
+            "legacy_image_references_preserved_for_later_asset_review": True,
+            "structured_source_candidates_recorded": True,
+            "extracted_payload": "semantic blocks + metadata + references/link/image provenance only",
         },
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)
