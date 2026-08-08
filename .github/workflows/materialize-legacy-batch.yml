@@ -5,7 +5,9 @@ on:
     branches:
       - 'agent/adhd-migration-batch'
     paths:
+      - 'scripts/legacy_content_extract.py'
       - 'scripts/prepare_legacy_batch.py'
+      - 'scripts/apply_v3_seo_contract.py'
       - 'data/migration-batches/adhd-v1.config.json'
       - '.github/workflows/materialize-legacy-batch.yml'
 
@@ -41,6 +43,9 @@ jobs:
 
       - name: Materialize ADHD batch
         run: python scripts/prepare_legacy_batch.py artifacts/legacy-content-inventory.json data/migration-batches/adhd-v1.config.json --legacy-root legacy-source --output data/migration-batches/generated/adhd-v1.json
+
+      - name: Apply V3 SEO release contract
+        run: python scripts/apply_v3_seo_contract.py data/migration-batches/generated/adhd-v1.json data/migration-batches/adhd-v1.config.json
 
       - name: Commit deterministic payload
         run: |
