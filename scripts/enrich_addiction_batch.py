@@ -95,6 +95,17 @@ def merge_refs(existing: Any, added: Any) -> list[dict[str, Any]]:
     return out
 
 
+def merge_spec(base: dict[str, Any] | None, added: dict[str, Any]) -> dict[str, Any]:
+    merged = dict(base or {})
+    for key in ('sections', 'faq', 'references'):
+        current = merged.get(key) if isinstance(merged.get(key), list) else []
+        incoming = added.get(key) if isinstance(added.get(key), list) else []
+        merged[key] = [*current, *incoming]
+    if str(added.get('image_alt') or '').strip():
+        merged['image_alt'] = added['image_alt']
+    return merged
+
+
 def build_added_blocks(spec: dict[str, Any]) -> list[dict[str, Any]]:
     out: list[dict[str, Any]] = []
     for section in spec.get('sections', []):
@@ -143,7 +154,10 @@ def main() -> int:
         part = load(path)
         if not isinstance(part, dict) or not isinstance(part.get('records'), dict):
             raise SystemExit(f'invalid enrichment file: {path}')
-        specs.update(part['records'])
+        for slug, spec in part['records'].items():
+            if not isinstance(spec, dict):
+                raise SystemExit(f'invalid enrichment record for {slug}: {path}')
+            specs[str(slug)] = merge_spec(specs.get(str(slug)), spec)
         version = str(part.get('version') or version)
         reviewed_at = str(part.get('reviewed_at') or reviewed_at)
 
