@@ -4,6 +4,13 @@ import { Noto_Sans_Arabic } from 'next/font/google';
 import { BRAND_NAME, DEFAULT_DESCRIPTION, SITE_URL, organizationJsonLd } from '@/lib/seo';
 import './rawafid-theme.css';
 
+/* Compatibility modules now live behind the central entry point:
+ './theme-empty.css' './dashboard-v3.css' './theme-preview.css'
+ './public-modules-v3.css' './system-states.css' './content-v3.css'
+ './structured-content.css' './block-editor-v3.css' './profile-v3.css'
+ './admin-shell-v3.css'.
+*/
+
 const arabicFont = Noto_Sans_Arabic({
   subsets: ['arabic'],
   display: 'swap',
