@@ -10,6 +10,8 @@ on:
       - 'scripts/apply_v3_seo_contract.py'
       - 'scripts/enrich_addiction_batch.py'
       - 'scripts/audit_addiction_payload.py'
+      - 'scripts/validate_migration_payload.py'
+      - 'scripts/validate_v3_release_metadata.py'
       - 'data/migration-batches/addiction-core-v1.config.json'
       - 'data/migration-batches/addiction-core-v1.core-enrichment.json'
       - 'data/migration-batches/addiction-core-v1.conditions-a-enrichment.json'
