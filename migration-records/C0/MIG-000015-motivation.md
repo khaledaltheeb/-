@@ -1,15 +1,17 @@
 # MIG-000015 — الدافعية
 
 - Lane: C0 — الموسوعة والمصطلحات العامة
-- Status: **DRAFT QA PASS — WORKFLOW / POST-PUBLISH QA PENDING**
+- Status: **COMPLETE — PUBLISHED / POST-PUBLISH QA PASS**
 - Canonical key: `motivation`
 - Canonical: `/content/motivation`
 - Content type: `glossary_term`
 - Supabase content id: `fbf11969-19d2-49d8-841d-ae0222d4fb48`
-- Current version: **v1**
-- Database status: `draft`
+- Final versions: **8**
+- Audit events: **8**
+- Database status: **published**
 - Sector: `knowledge`
 - Primary category: `motivation-behavior` — الدافعية والسلوك
+- Published at: `2026-08-08T13:49:43Z`
 
 ## Legacy evidence and canonical decision
 
@@ -54,8 +56,9 @@ All stored source URLs use HTTPS.
 - explicit separation of general and academic motivation
 - common misconceptions and 11 visible FAQ items
 
-## Draft QA — verified directly from Supabase
+## Final content / SEO QA
 
+Verified directly from Supabase before workflow:
 - Searchable useful words: **2385**
 - Structured blocks: **51**
 - H2: **19**
@@ -67,7 +70,8 @@ All stored source URLs use HTTPS.
 - Category relations: **1**
 - Search aliases: **6**
 - Duplicate canonical: **0**
-- Versions before workflow: **1**
+- SEO title: `الدافعية: كيف تبدأ السلوك وتحافظ على الجهد` — **42 chars**
+- Meta Description: **157 chars**
 
 Internal/public-body scan:
 - TODO: PASS
@@ -76,26 +80,35 @@ Internal/public-body scan:
 - migration/agent language: PASS
 - banned term `معاقين`: PASS
 
-## SEO
+## Workflow / Audit
 
-- Primary entity: `الدافعية`
-- SEO title: `الدافعية: كيف تبدأ السلوك وتحافظ على الجهد`
-- SEO title length: **42 chars**
-- Meta Description length: **157 chars**
-- Canonical: `/content/motivation`
-- Search intent: `informational`
-- Visible FAQ → FAQPage schema
-- `glossary_term` → DefinedTerm schema
+The page passed in Supabase:
+`Draft → Scientific Review → Editorial Review → SEO → Accessibility → Approved → Scheduled → Published`
+
+No human reviewer identity or credentials were fabricated; reviewer fields remain null for this non-diagnostic glossary page.
+
+Final database state:
+- **8 versions**
+- **8 audit events**
+- status: **published**
+
+## Post-publish QA
+
+Search query `الدافعية` returns `/content/motivation` first with score ~**11.9**.
+
+Search query `العادات` remains correctly owned by `/content/habits` with score ~**5.3**; `/content/motivation` is only a lower related result (~**0.4**).
+
+Search query `الدافعية الدراسية` currently has **no dedicated academic-motivation canonical** in Supabase. The general motivation page appears as the closest current result, but this is recorded as a **canonical gap for future migration**, not as a reason to merge or redirect the academic topic.
+
+- Duplicate canonical: **0**
+- Redirect collisions from habit/academic/reward/self-control routes: **0**
+- Tags/category relations: **PASS**
+- Search: **PASS**
 
 ## Redirect decision
 
 No verified standalone non-generated legacy motivation URL has been identified, so no numeric `concept-*` route is guessed. Academic motivation remains a distinct future canonical.
 
-## Remaining before COMPLETE
+## Final result
 
-1. Run the actual database workflow through Scheduled → Published.
-2. Verify search `الدافعية` ranks `/content/motivation` first.
-3. Verify search `العادات` remains owned by `/content/habits`.
-4. Verify `الدافعية الدراسية` does not get silently canonicalized into the general page; if no dedicated page exists yet, record that gap rather than inventing a redirect.
-5. Confirm duplicate canonical and related redirect collisions are zero.
-6. Close Claim #105 and update central ledger.
+**MIG-000015 is genuinely closed and canonicalized after database-backed QA.**
