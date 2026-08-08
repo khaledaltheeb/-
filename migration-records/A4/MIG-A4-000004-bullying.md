@@ -1,7 +1,7 @@
 # MIG-A4-000004 — التعامل مع التنمر
 
 - Agent: A4 — الطفل والأسرة والمدرسة
-- Claim: #58
+- Claim: #30
 - Status: COMPLETED
 - Canonical: `/content/bullying`
 - Legacy slug: `bullying`
@@ -11,7 +11,7 @@
 
 ## Pre-claim collision checks
 
-تم البحث قبل إنشاء الـClaim عن `bullying` و«التنمر» و«التعامل مع التنمر» ومرادفاتها في GitHub Issues و`docs/MIGRATION-PROGRESS.md` وSupabase. لم يظهر Claim منافس أو Canonical/slug/redirect قائم. أُنشئ Claim واحد فقط: #58.
+تم البحث قبل إنشاء الـClaim عن `bullying` و«التنمر» و«التعامل مع التنمر» ومرادفاتها في GitHub Issues و`docs/MIGRATION-PROGRESS.md` وSupabase. لم يظهر Claim منافس أو Canonical/slug/redirect قائم. أُنشئ Claim واحد فقط: #30.
 
 الموضوع يقع ضمن A4 لأنه موضوع حماية طفل/أسرة/مدرسة، وليس تشخيصًا نفسيًا بحتًا يحال إلى A1 ولا حالة ذوي احتياجات خاصة يكون التشخيص فيها هو الموضوع المركزي ليحال إلى A3.
 
