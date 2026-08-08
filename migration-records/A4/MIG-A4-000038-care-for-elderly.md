@@ -2,7 +2,7 @@
 
 ## الحالة
 - Agent: A4 — الطفل والأسرة والمدرسة
-- Claim: #93
+- Claim: #95
 - Canonical key: `care-for-elderly`
 - Canonical: `/content/care-for-elderly`
 - العنوان: **رعاية كبار السن داخل الأسرة: دليل عملي يحفظ الكرامة ويمنع استنزاف الأسرة**
