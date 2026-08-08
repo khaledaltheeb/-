@@ -92,8 +92,8 @@ export default async function HomePage() {
           <div className="rawafid-section-head">
             <div className="rawafid-section-title"><span>ابدأ حسب احتياجك</span><h2 id="intent-title">اختر ما تريد فعله الآن</h2><p>مسارات قصيرة تقود إلى المعرفة أو الخدمة المناسبة بدل إغراق المستخدم في قوائم طويلة.</p></div>
           </div>
-          <div className="rawafid-intent-grid">
-            {intentRoutes.map((intent) => <a href={intent.href} className="rawafid-intent-card" key={intent.title}><span className="icon-shell"><PlatformIcon name={intent.icon} /></span><div><h3>{intent.title}</h3><p>{intent.text}</p></div><span className="intent-arrow" aria-hidden="true">←</span></a>)}
+          <div className="rawafid-platform-grid rawafid-intent-grid">
+            {intentRoutes.map((intent) => <a href={intent.href} className="rawafid-platform-card rawafid-intent-card" key={intent.title}><span className="icon-shell"><PlatformIcon name={intent.icon} /></span><div><h3>{intent.title}</h3><p>{intent.text}</p></div><span className="intent-arrow" aria-hidden="true">فتح المسار ←</span></a>)}
           </div>
         </section>
 
