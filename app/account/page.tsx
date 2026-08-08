@@ -15,10 +15,11 @@ export default async function AccountPage({ searchParams }: { searchParams: Sear
   let specialistApplication:ApplicationStatus|null=null,centerApplication:ApplicationStatus|null=null;
   if(profile.role==='user'){
     const [{data:specialist},{data:center}]=await Promise.all([
-      supabase.from('specialists').select('verification,verification_note,updated_at').eq('user_id',userId).maybeSingle(),
-      supabase.from('centers').select('verification,verification_note,updated_at').eq('manager_user_id',userId).is('parent_center_id',null).maybeSingle(),
+      supabase.rpc('get_my_specialist_application'),
+      supabase.rpc('get_my_center_application'),
     ]);
-    specialistApplication=specialist as ApplicationStatus|null;centerApplication=center as ApplicationStatus|null;
+    specialistApplication=Array.isArray(specialist)&&specialist[0]?specialist[0] as ApplicationStatus:null;
+    centerApplication=Array.isArray(center)&&center[0]?center[0] as ApplicationStatus:null;
   }
   const params = await searchParams;
 
