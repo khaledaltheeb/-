@@ -1,172 +1,118 @@
 # Care Guides migration — working register
 
-## Scope
+## Scope and source of truth
 
 Target public section: `/care-guides/` and descendants.
 
-Legacy source repository: `khaledaltheeb/healthrenewal.org`.
-Destination repository: `khaledaltheeb/-` (Rawafid V3).
+Legacy content source: `khaledaltheeb/healthrenewal.org`.
+Destination: `khaledaltheeb/-` (Rawafid V3).
 
-The legacy repository is a content and historical-URL source only. Theme, CSS, layout, page chrome, and scripts are not migrated.
+The legacy repository is a content and historical-URL source only. Theme, CSS, components, headers, footers, layouts, and runtime scripts are not migrated.
 
 ## Verified legacy inventory
 
-The care-guides-specific audit checks out the legacy repository read-only and parses the structured source files deterministically.
-
-Verified result:
+The dedicated audit checks out the legacy repository read-only and deterministically verifies:
 
 - 14 unique guides from `content/v18/care-guides*.json`.
 - 87 unique institutional topics from `scripts/care_guides_topics_v246_*.py`.
-- 0 overlapping slugs between those two source groups.
-- 101 unique legacy care-guide source records in total.
-- The CI gate fails if the institutional count differs from 87 or the total differs from 101.
+- 0 overlapping slugs between those source groups.
+- **101 unique legacy care-guide sources total**.
 
-Rawafid V3 already contained 142 rows with `content_type = guide` before this migration started, but zero rows with a canonical URL under `/care-guides/`. Existing V3 guides under other dedicated modules are not automatically duplicated into `/care-guides/`; matching and canonical decisions come first.
+CI fails if the institutional count differs from 87 or the total differs from 101.
 
 ## Migration contract
 
-For every historical guide or variant:
+Each legacy source must be classified as `new`, `merge`, `redirect`, `retain-separate`, or `reject-placeholder` after checking existing V3 content by intent, title, audience, concepts, and practical scope.
 
-1. Identify every legacy source file and historical URL.
-2. Compare the topic against existing V3 content by title, intent, concepts, audience, and practical scope.
-3. Classify the source as `new`, `merge`, `redirect`, `retain-separate`, or `reject-placeholder`.
-4. Preserve useful legacy information but rewrite it into V3 structured content blocks.
-5. Expand pages to a complete practical answer; target at least 1,500 Arabic words where the topic supports that depth, without artificial filler.
-6. Add a single canonical URL, search-intent fields, semantic terms, audience, evidence references where needed, and a clear content boundary/disclaimer.
-7. Keep imported records in `draft` until the dedicated route exists on the deployed V3 application and validation passes.
-8. Publish only after route, SEO, accessibility, structured data, internal links, mobile layout, and sitemap behavior are verified.
-9. Preserve old URLs through redirects when a historical page is merged into a different canonical entity.
-10. Never publish two pages that answer substantially the same search intent merely to preserve file count.
+Rules:
 
-## Implemented V3 route foundation
+1. Preserve useful legacy information and provenance.
+2. Never copy the legacy visual/runtime layer.
+3. Prefer one strong canonical over competing thin pages.
+4. Target at least 1,500 Arabic words where the topic genuinely supports that depth, without filler.
+5. Add useful search intent, semantic terms, audience, evidence references, internal links, and clear safety/content boundaries.
+6. Preserve historical URLs with permanent redirects when a source is merged into another canonical.
+7. Keep new `/care-guides/` records in `draft` until public deployment of the dedicated route is independently verified.
 
-The foundation was merged to `main` in commit `3985ba4d76d39ead9361421bd9c1588699ee0aab`.
+## V3 route foundation
 
-- `app/care-guides/page.tsx` — dedicated hub route.
-- `app/care-guides/[...slug]/page.tsx` — nested guide routes, including compatibility with historically nested branches when retained.
-- `lib/care-guides.ts` — canonical lookup, care-guide data access, and canonical semantic-related-content resolution from the central `content` entity.
-- `components/care-guide-page.tsx` — V3 renderer using the institutional header/footer, ContentRenderer, breadcrumbs, Article/CollectionPage JSON-LD, visible FAQ JSON-LD, references, audience tags, disclaimer, and semantic internal links.
-- `components/care-guide-page.module.css` — scoped responsive styling only; no legacy visual code copied.
-- `scripts/care_guides_legacy_audit.py` — deterministic 101-source inventory gate.
-- `.github/workflows/care-guides-legacy-audit.yml` — read-only legacy checkout and artifact-producing inventory workflow.
+Merged to `main` in commit `3985ba4d76d39ead9361421bd9c1588699ee0aab` after the Rawafid Quality Gate and the 101-source care-guides inventory gate passed.
 
-The foundation passed the Rawafid Quality Gate and the care-guides 101-source inventory gate before merge.
+Implemented:
 
-## Current migration progress
+- `app/care-guides/page.tsx` — hub.
+- `app/care-guides/[...slug]/page.tsx` — nested guide route.
+- `lib/care-guides.ts` — central content lookup and semantic related-content resolution.
+- `components/care-guide-page.tsx` — V3 renderer with breadcrumbs, metadata, Article/CollectionPage JSON-LD, visible FAQ schema, references, audience, disclaimers, and related links.
+- `components/care-guide-page.module.css` — scoped responsive styling.
+- `scripts/care_guides_legacy_audit.py` and `.github/workflows/care-guides-legacy-audit.yml` — deterministic inventory gate.
 
-- Legacy guide inventory: **101**.
-- Legacy guide sources fully processed so far: **8 / 101**.
-- Processed as enriched new `/care-guides/` drafts: **7**.
-- Processed by merging into a stronger existing V3 canonical: **1**.
+## Current progress — batch 003
+
+- Legacy inventory: **101**.
+- Legacy sources fully processed: **12 / 101**.
+- New enriched `/care-guides/` drafts: **10**.
+- Sources merged into stronger existing V3 canonicals: **2**.
 - Section hub draft: **1**.
-- Total database records currently using `/care-guides/` canonicals: **8** (hub + 7 guides).
-- All eight `/care-guides/` records remain `draft` until production deployment of the new route is independently verified.
+- Database records currently using `/care-guides/` canonicals: **11** (hub + 10 guides).
+- All 11 remain `draft` pending independent production-route verification.
 
-### `care-guides-hub`
+## New `/care-guides/` drafts processed so far
 
-- Canonical: `/care-guides/`
-- State: `draft`
-- Approximate Arabic word count: 1,814
-- SEO title: 29 characters
-- Meta description: 153 characters
+| Legacy source | Canonical | Approx. Arabic words | Meta chars | Evidence / scope |
+|---|---|---:|---:|---|
+| `support-person-in-distress` | `/care-guides/support-person-in-distress/` | 2,423 | 152 | WHO, NIMH; first support, risk, privacy, children, disability, caregiver boundaries |
+| `panic-attack-immediate-support` | `/care-guides/panic-attack-immediate-support/` | 2,160 | 151 | NICE, NHS, NIMH; immediate-action intent, separate from panic comparison |
+| `suicide-risk-conversation-safety-plan` | `/care-guides/suicide-risk-conversation-safety-plan/` | 2,131 | 156 | NIMH, NICE, WHO; direct asking, imminent risk, collaborative safety planning |
+| `agitation-aggression-deescalation` | `/care-guides/agitation-aggression-deescalation/` | 2,253 | 153 | NICE NG10; no restraint, weapon-disarming, or unsupervised medication instructions |
+| `first-72-hours-after-traumatic-event` | `/care-guides/first-72-hours-after-traumatic-event/` | 2,352 | 153 | WHO, VA PTSD Center, NICE; immediate post-event support, no forced trauma narration |
+| `support-psychosis-family` | `/care-guides/support-psychosis-family/` | 2,146 | 154 | NICE; family action, early referral, relapse planning, non-confrontational communication |
+| `dissociation-flashback-grounding-support` | `/care-guides/dissociation-flashback-grounding-support/` | 2,013 | 153 | VA PTSD Center, NICE; optional grounding with medical/neurological red flags |
+| `family-support-depression` | `/care-guides/family-support-depression/` | 2,167 | 153 | NICE NG222, WHO, NIMH; family support intent separate from the depression condition page |
+| `family-ocd-support` | `/care-guides/family-ocd-support/` | 1,877 | 153 | NICE CG31, NIMH; family accommodation, reassurance, rituals, and safe support for ERP |
+| `family-anxiety-panic-support` | `/care-guides/family-anxiety-panic-support/` | 1,995 | 151 | NICE CG113, NIMH; family reassurance/avoidance and gradual return intent, separate from acute panic guide |
 
-### `care-guide-support-person-in-distress`
+The hub `/care-guides/` remains a draft at approximately 1,814 Arabic words with a 153-character meta description.
 
-- Legacy slug: `support-person-in-distress`
-- Canonical: `/care-guides/support-person-in-distress/`
-- State: `draft`
-- Approximate Arabic word count: 2,423
-- Meta description: 152 characters
-- Authoritative references: 4
+## Merge / redirect decisions
 
-### `care-guide-panic-attack-immediate-support`
+### 1. `family-mental-health-crisis-plan` → `/content/family-care-plan`
 
-- Legacy slug: `panic-attack-immediate-support`
-- Canonical: `/care-guides/panic-attack-immediate-support/`
-- State: `draft`
-- Approximate Arabic word count: 2,160
-- Meta description: 151 characters
-- Authoritative references: 4 (NICE, NHS, NIMH)
-- Scope: `retain-separate` from `/comparisons/panic-attack-vs-panic-disorder/` because immediate-action intent differs from comparison intent.
+V3 already had a strong published `family-care-plan` canonical with the same core intent. Unique legacy material was merged instead of creating another page:
 
-### `care-guide-suicide-risk-conversation-safety-plan`
+- crisis card built during stable periods;
+- early-warning signs;
+- one primary family contact;
+- prescribed medicines/allergies summary without family dose changes;
+- communication/privacy preferences;
+- service and fallback contacts;
+- three escalation levels: structured home support, prompt professional contact, urgent/emergency care.
 
-- Legacy slug: `suicide-risk-conversation-safety-plan`
-- Canonical: `/care-guides/suicide-risk-conversation-safety-plan/`
-- State: `draft`
-- Approximate Arabic word count: 2,131
-- Meta description: 156 characters
-- Authoritative references: 4 (NIMH, NICE, WHO)
-
-### `care-guide-agitation-aggression-deescalation`
-
-- Legacy slug: `agitation-aggression-deescalation`
-- Canonical: `/care-guides/agitation-aggression-deescalation/`
-- State: `draft`
-- Approximate Arabic word count: 2,253
-- Meta description: 153 characters
-- Authoritative references: 3 (NICE NG10)
-- Safety boundary: no restraint, weapon-disarming, or unsupervised medication instructions.
-
-### `care-guide-first-72-hours-after-traumatic-event`
-
-- Legacy slug: `first-72-hours-after-traumatic-event`
-- Canonical: `/care-guides/first-72-hours-after-traumatic-event/`
-- State: `draft`
-- Approximate Arabic word count: 2,352
-- Meta description: 153 characters
-- Authoritative references: 5 (WHO, VA National Center for PTSD, NICE)
-- Scope: `retain-separate` from `/comparisons/trauma-vs-ptsd/`; immediate post-event support differs from diagnostic/conceptual comparison.
-
-### `care-guide-support-psychosis-family`
-
-- Legacy slug: `support-psychosis-family`
-- Canonical: `/care-guides/support-psychosis-family/`
-- State: `draft`
-- Approximate Arabic word count: 2,146
-- Meta description: 154 characters
-- Authoritative references: 4 (NICE adult and child/young-person psychosis guidance)
-- Scope: `retain-separate` from `/comparisons/psychosis-vs-schizophrenia/`; the guide answers family action, early referral, safety, relapse planning, and communication intent.
-
-### `care-guide-dissociation-flashback-grounding-support`
-
-- Legacy slug: `dissociation-flashback-grounding-support`
-- Canonical: `/care-guides/dissociation-flashback-grounding-support/`
-- State: `draft`
-- Approximate Arabic word count: 2,013
-- Meta description: 153 characters
-- Authoritative references: 4 (VA National Center for PTSD, NICE)
-- Safety boundary: grounding is optional and stopped if it worsens distress; altered consciousness and neurological/medical red flags are escalated rather than labelled as dissociation.
-
-## First merge/redirect decision
-
-### `family-mental-health-crisis-plan` → `/content/family-care-plan`
-
-The legacy source was **not** converted into another `/care-guides/` page because V3 already has a published canonical article with the same core intent: `family-care-plan` — “خطة العناية النفسية للأسرة”.
-
-Unique legacy material was merged into that canonical instead:
-
-- build the crisis card during a stable period;
-- define early-warning signs;
-- use one primary family contact to prevent conflicting instructions;
-- include prescribed medications/allergies without family dose changes;
-- record communication and confidentiality preferences;
-- define service contacts and fallback contacts;
-- define three escalation levels: structured home support, prompt professional contact, urgent/emergency care.
-
-After the merge the existing canonical is approximately 2,143 Arabic words (up from ~1,948) and records `family-mental-health-crisis-plan` in its merged legacy provenance.
-
-`next.config.ts` adds a permanent redirect:
+The existing canonical increased from about 1,948 to about **2,143 words** and records the merged legacy slug. Permanent redirect:
 
 `/care-guides/family-mental-health-crisis-plan` → `/content/family-care-plan`
 
-This is the preferred pattern when the useful legacy material can strengthen an already adequate canonical rather than creating competing pages.
+### 2. `caregiver-self-care-boundaries` → `/content/caregiver-burnout`
 
-## Initial overlap screening
+V3 already had a strong published caregiver-stress canonical (about 2,297 words) covering workload, respite, task distribution, caregiver health, and care planning. The legacy boundary-specific value was merged rather than duplicated:
 
-A first-pass `pg_trgm` similarity screen compares every legacy title/slug against the V3 content table. This is a candidate generator only, not an automatic merge rule.
+- distinguish tasks that can be done regularly, occasionally, or only by another person/service;
+- explicit limits around time, money, sleep, driving, physical handling, medical decisions, and 24/7 availability;
+- boundaries for abusive or unsafe behaviour;
+- specific boundary language plus realistic alternatives;
+- handling guilt after setting a safe limit.
 
-Examples requiring scope-level review before migration:
+The canonical is now about **2,480 words** and records `caregiver-self-care-boundaries` in merged provenance. Permanent redirect added in batch 003:
+
+`/care-guides/caregiver-self-care-boundaries` → `/content/caregiver-burnout`
+
+This follows current CDC and NIA caregiver guidance emphasizing consistent breaks, caregiver health, shared responsibilities, and maintained care plans.
+
+## Overlap screening
+
+`pg_trgm` is used only as a candidate generator. Similarity never authorizes an automatic merge.
+
+Examples still requiring scope-level review:
 
 - `developmental-coordination-disorder-support` ↔ `/capabilities/developmental-coordination-disorder/`
 - `developmental-language-disorder-communication` ↔ `/capabilities/developmental-language-disorder/`
@@ -175,10 +121,10 @@ Examples requiring scope-level review before migration:
 - `executive-function-daily-support` ↔ `/content/executive-functions`
 - `separation-anxiety-school-transition` ↔ `/content/separation-anxiety-child`
 
-Similarity alone never authorizes a merge. A care guide can remain separate where it answers an actionable care intent that the existing condition, glossary, capability, comparison, or general article does not answer.
+A care guide remains separate when it answers an actionable care/search intent that an existing condition, glossary, capability, comparison, or general article does not answer.
 
 ## Publication guard
 
-The dedicated route code is in `main`, but public deployment has not yet been independently verified. GitHub currently exposes no repository deployment records and the repository does not establish the public target through a deployment workflow.
+The route code is in `main`, but public deployment of the new Next.js route has not yet been independently established from repository deployment records or a deployment workflow that identifies the public target.
 
-Therefore all eight `/care-guides/` records remain drafts intentionally. Publishing them prematurely could expose `/care-guides/` canonicals to the content sitemap before the public application is confirmed to serve those routes. Production route verification must precede status transition to `published`.
+Therefore all new `/care-guides/` records stay `draft`. Publishing them before production-route verification could expose canonicals in the content sitemap before the public application is confirmed to serve them.
