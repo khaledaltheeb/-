@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import CareGuidePage from '@/components/care-guide-page';
-import { getCareGuideRecord } from '@/lib/care-guides';
+import { getCareGuideRecord, getRelatedCareGuideContent } from '@/lib/care-guides';
 import { buildSeoMetadata } from '@/lib/seo';
 
 type Params = Promise<{ slug: string[] }>;
@@ -30,5 +30,6 @@ export default async function CareGuideDetailPage({ params }: { params: Params }
   const { slug } = await params;
   const record = await getCareGuideRecord(slug);
   if (!record) notFound();
-  return <CareGuidePage record={record} routeSegments={slug} />;
+  const related = await getRelatedCareGuideContent(record.id);
+  return <CareGuidePage record={record} related={related} routeSegments={slug} />;
 }
