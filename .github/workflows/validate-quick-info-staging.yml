@@ -1,0 +1,26 @@
+name: Validate Quick Info Staging
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'data/migration-batches/generated/quick-info-staging-v1/**'
+      - 'data/migration-batches/quick-info-staging-v1.config.json'
+      - 'scripts/prepare_legacy_staging_batches.py'
+      - 'scripts/validate_legacy_staging_batch.py'
+      - '.github/workflows/validate-quick-info-staging.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - name: Validate complete Quick Info staging payload
+        run: python scripts/validate_legacy_staging_batch.py data/migration-batches/generated/quick-info-staging-v1 --expected-records 244 --source-prefix quick-info
