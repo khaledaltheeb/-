@@ -21,10 +21,12 @@
 - Source completeness: 37/37 titles, excerpts and canonicals present; 37/37 had external authoritative references.
 - Text integrity: 37/37 transformed guide bodies retained the exact source-body word count after markup removal (380–1694 words; average 769).
 - Database release: 38 unique canonicals, 38 published records, 37/37 guides with references.
-- Structured body depth: 55–165 blocks per guide.
+- Safety deduplication: the source safety notice is retained once through the dedicated `medical_disclaimer` field, not duplicated in body blocks.
+- Structured body depth after safety deduplication: 54–164 blocks per guide.
 - SEO release contract: title length 29–47; description length 151–158.
 
 ## Application routes
 - `/evidence-guides/` — collection page grouped by editorial category.
 - `/evidence-guides/[slug]/` — individual guide page.
 - Existing content sitemap includes these published canonical URLs automatically.
+- The global navigation exposes the collection directly as «الأدلة» so the section is not orphaned.
