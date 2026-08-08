@@ -16,6 +16,7 @@ on:
       - 'data/migration-batches/addiction-core-v1.core-enrichment.json'
       - 'data/migration-batches/addiction-core-v1.conditions-a-enrichment.json'
       - 'data/migration-batches/addiction-core-v1.conditions-b-enrichment.json'
+      - 'data/migration-batches/addiction-core-v1.release-depth-enrichment.json'
       - '.github/workflows/materialize-addiction-batch.yml'
 
 permissions:
@@ -61,6 +62,7 @@ jobs:
           data/migration-batches/addiction-core-v1.core-enrichment.json
           data/migration-batches/addiction-core-v1.conditions-a-enrichment.json
           data/migration-batches/addiction-core-v1.conditions-b-enrichment.json
+          data/migration-batches/addiction-core-v1.release-depth-enrichment.json
 
       - name: Validate migration payload
         run: python scripts/validate_migration_payload.py data/migration-batches/generated/addiction-core-v1.json
