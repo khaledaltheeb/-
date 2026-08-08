@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
 export async function generateMetadata(): Promise<Metadata> {
   const record = await getCapabilityRecord();
   if (!record) return {};
-  return buildSeoMetadata({
+  const metadata = buildSeoMetadata({
     title: record.seo_title || record.title,
     description: record.seo_description || record.excerpt,
     path: record.canonical_url || '/capabilities/',
@@ -22,6 +22,10 @@ export async function generateMetadata(): Promise<Metadata> {
     modifiedTime: record.updated_at,
     authors: record.author_display_name ? [{ name: record.author_display_name }] : undefined,
   });
+  if (record.robots_index) {
+    metadata.robots = `index, ${record.robots_follow ? 'follow' : 'nofollow'}, max-image-preview:large, max-snippet:-1, max-video-preview:-1`;
+  }
+  return metadata;
 }
 
 export default async function CapabilitiesPage() {
