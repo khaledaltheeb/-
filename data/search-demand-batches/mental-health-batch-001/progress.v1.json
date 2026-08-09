@@ -8,20 +8,30 @@
     "file_overlap_with_parent_pr": 0,
     "strategy": "stacked child branch; content/research/taxonomy additions only; do not modify parent renderer, CMS or release-gate files"
   },
+  "validation": {
+    "contract_version": 6,
+    "github_actions_run": 31324700900,
+    "head_sha": "210720d12314dfb6cae8a28334f6c179d4b06936",
+    "status": "passed",
+    "records": 5,
+    "release_ready": 5,
+    "blocked": 0,
+    "error_count": 0
+  },
   "pages": [
     {
       "slug": "generalized-anxiety-disorder",
       "title": "اضطراب القلق المعمم: الأعراض والأسباب والتشخيص والعلاج",
-      "status": "staged",
-      "quality": {"arabic_words":3152,"h2":13,"h3":6,"faq":8,"search_questions":10,"references":7,"mapped_claims":8},
+      "status": "v6-passed-draft",
+      "quality": {"arabic_words":3152,"h2":14,"h3":6,"faq":8,"search_questions":10,"references":7,"mapped_claims":8},
       "route": "/content/generalized-anxiety-disorder",
       "category": "anxiety-disorders"
     },
     {
       "slug": "obsessive-compulsive-disorder",
       "title": "الوسواس القهري: الأعراض والأسباب والتشخيص والعلاج",
-      "status": "staged",
-      "quality": {"arabic_words":3007,"h2":16,"h3":6,"faq":8,"search_questions":12,"references":7,"mapped_claims":8},
+      "status": "v6-passed-draft",
+      "quality": {"arabic_words":3000,"h2":16,"h3":6,"faq":8,"search_questions":12,"references":7,"mapped_claims":8},
       "route": "/content/obsessive-compulsive-disorder",
       "category": "ocd-related",
       "existing_content_preserved": ["/evidence-guides/clinical-anxiety/","/care-guides/family-ocd-support/","/comparisons/ocd-vs-generalized-anxiety/"]
@@ -29,23 +39,40 @@
     {
       "slug": "social-anxiety-disorder",
       "title": "اضطراب القلق الاجتماعي: الأعراض والأسباب والتشخيص والعلاج",
-      "status": "staged",
-      "quality": {"arabic_words":2610,"h2":16,"h3":7,"faq":8,"search_questions":12,"references":7,"mapped_claims":8},
+      "status": "v6-passed-draft",
+      "quality": {"arabic_words":2604,"h2":16,"h3":7,"faq":8,"search_questions":12,"references":7,"mapped_claims":8},
       "route": "/content/social-anxiety-disorder",
       "category": "anxiety-disorders",
       "existing_content_preserved": ["/care-guides/social-anxiety-gradual-support/","/comparisons/introversion-vs-social-anxiety/"]
+    },
+    {
+      "slug": "evidence-guides-panic-disorder-safe-guide",
+      "title": "اضطراب الهلع ونوبات الهلع: الأعراض والتشخيص والعلاج",
+      "status": "v6-passed-existing-canonical-upgrade-draft",
+      "quality": {"arabic_words":2545,"h2":16,"h3":6,"faq":8,"search_questions":12,"references":7,"mapped_claims":8},
+      "route": "/evidence-guides/panic-disorder-safe-guide/",
+      "category": "anxiety-disorders",
+      "existing_content_preserved": ["/care-guides/panic-attack-immediate-support/","/care-guides/family-anxiety-panic-support/","/comparisons/panic-attack-vs-panic-disorder/"]
+    },
+    {
+      "slug": "evidence-guides-dissociation-safe-guide",
+      "title": "تبدد الشخصية والواقع: لماذا أشعر كأني في حلم؟",
+      "status": "v6-passed-existing-canonical-upgrade-draft",
+      "quality": {"arabic_words":2537,"h2":17,"h3":6,"faq":8,"search_questions":12,"references":8,"mapped_claims":8},
+      "route": "/evidence-guides/dissociation-safe-guide/",
+      "category": "dissociative-disorders"
     }
   ],
   "release_blockers": [
     "scientific reviewer fields intentionally remain empty while pages are drafts",
-    "new categories exist in the child Supabase migration but are not yet reflected in the parent taxonomy.v6 snapshot",
-    "no Supabase content DML or Cloudflare publish until parent V6 contract is finalized and taxonomy snapshots agree"
+    "new categories are persisted by the child migration and validation overlay but still need final harmonisation with the parent V6 taxonomy snapshot before production release",
+    "no Supabase content DML or Cloudflare publish while the parent V6 workstream remains active and before scientific/editorial/SEO/accessibility review"
   ],
   "next_gap_checks": [
-    "health anxiety versus existing family guide",
+    "central health-anxiety intent while preserving the existing family-boundaries guide",
     "specific phobias versus existing gradual-support guide",
-    "depersonalization/derealization symptom intent versus existing evidence guide",
-    "depression search-question coverage against existing condition page",
-    "panic condition intent versus existing evidence and care guides"
+    "depression Google-question coverage against the existing condition page rather than duplicating it",
+    "sleep and overthinking clusters",
+    "maladaptive-daydreaming symptom intent"
   ]
 }
