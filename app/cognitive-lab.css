@@ -122,7 +122,7 @@
   cursor: pointer;
 }
 
-.cognitive-primary-link,
+.cognitive-hero__actions a.cognitive-primary-link,
 .cognitive-primary-button {
   min-height: 48px;
   display: inline-flex;
