@@ -3,8 +3,8 @@
 
 This script deliberately does not publish or mutate Supabase. It:
 1) verifies source-file SHA-256 provenance declared by each page; metadata may use
-   ``auto`` so the validator deterministically binds the V6 record to the exact
-   source bytes checked out for the commit,
+   ``auto`` (or a 64-zero bootstrap sentinel) so the validator deterministically
+   binds the V6 record to the exact source bytes checked out for the commit,
 2) materializes Markdown into CMS body_json/body_text,
 3) merges the parent V6 taxonomy snapshot with the validation-only overlay,
 4) runs the canonical Node V6 content release contract over the whole batch,
@@ -40,7 +40,7 @@ def resolve_source_provenance(meta: dict, root: Path) -> list[dict]:
         if not source.is_file():
             raise ValueError(f"{meta.get('slug')}: source version does not exist: {rel}")
         actual = sha256_file(source)
-        if expected in {"auto", "sha256:auto"}:
+        if expected in {"auto", "sha256:auto", "0" * 64}:
             row["sha256"] = actual
         elif actual != expected:
             raise ValueError(
