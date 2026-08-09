@@ -1,7 +1,6 @@
 import { addictionOgImage } from '@/components/addiction-og-image';
 import { createClient } from '@/lib/supabase/server';
 
-export const runtime = 'edge';
 type Params = Promise<{ slug: string }>;
 
 export async function GET(_: Request, { params }: { params: Params }) {
