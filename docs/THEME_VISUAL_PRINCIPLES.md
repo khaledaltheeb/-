@@ -10,3 +10,7 @@
 - User intent determines information architecture: search and guided discovery precede exhaustive navigation.
 - Public pages favor readability, trust, references and progressive disclosure over dense control surfaces.
 - Admin/portal surfaces may be denser, but they reuse the same tokens and accessibility foundation.
+- Technical implementation language stays in engineering and admin contexts; public trust language stays human and outcome-oriented.
+- The tributary mark is the single brand symbol across browser chrome, authentication, admin, social identity and PWA surfaces.
+- Content creation begins with a semantic template and a visible four-step authoring path instead of an undifferentiated long form.
+- Verification is presented as an attention queue with readiness signals; private documents retain their existing signed-link boundary.

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import RawafidMark from '@/components/rawafid-mark';
 import { requestPasswordReset } from './actions';
 
 export const metadata: Metadata = {
@@ -19,7 +20,7 @@ export default async function ForgotPasswordPage({ searchParams }: { searchParam
   return (
     <main className="auth-shell">
       <section className="auth-card auth-card-polished" aria-labelledby="forgot-title">
-        <Link href="/" className="brand auth-brand"><span className="brand-mark">ر</span><span><strong>منصة روافد</strong><small>Rawafid Platform</small></span></Link>
+        <Link href="/" className="brand auth-brand"><span className="brand-mark"><RawafidMark /></span><span><strong>منصة روافد</strong><small>Rawafid Platform</small></span></Link>
         <span className="eyebrow">استعادة الحساب</span>
         <h1 id="forgot-title">نسيت كلمة المرور؟</h1>
         <p>أدخل بريد الحساب. إذا كان البريد مسجلًا، سيصلك رابط آمن لتعيين كلمة مرور جديدة.</p>

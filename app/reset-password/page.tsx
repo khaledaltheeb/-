@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import RawafidMark from '@/components/rawafid-mark';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { updatePassword } from './actions';
@@ -28,7 +29,7 @@ export default async function ResetPasswordPage({ searchParams }: { searchParams
   return (
     <main className="auth-shell">
       <section className="auth-card auth-card-polished" aria-labelledby="reset-title">
-        <Link href="/" className="brand auth-brand"><span className="brand-mark">ر</span><span><strong>منصة روافد</strong><small>Rawafid Platform</small></span></Link>
+        <Link href="/" className="brand auth-brand"><span className="brand-mark"><RawafidMark /></span><span><strong>منصة روافد</strong><small>Rawafid Platform</small></span></Link>
         <span className="eyebrow">حماية الحساب</span>
         <h1 id="reset-title">تعيين كلمة مرور جديدة</h1>
         <p>استخدم كلمة مرور قوية وفريدة لا تستخدمها في خدمة أخرى.</p>

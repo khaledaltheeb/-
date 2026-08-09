@@ -17,11 +17,20 @@
 ## ترتيب الطبقات
 
 1. Compatibility foundations (ملفات V3 الحالية بالترتيب الأصلي)
-2. Semantic Rawafid V4 tokens
+2. Semantic Rawafid V5 tokens
 3. Global application shell
 4. Shared public components
 5. Responsive and accessibility hardening
 6. Reduced-motion and print contracts
+
+## طبقة V5 المؤسسية
+
+- الواجهة العامة تبدأ من نية الزائر، ثم تقوده إلى المعرفة أو الدليل أو الدعم، ولا تعرض مصطلحات البنية التقنية.
+- `components/rawafid-mark.tsx` هو الرمز البصري الموحد للرأس والتذييل والحسابات ولوحة الإدارة وأيقونات PWA.
+- `lib/public-content.ts` يقرأ أحدث المحتوى المنشور عبر المفتاح العام وRLS مع إعادة تحقق دورية؛ لا توجد مفاتيح سرية أو استعلامات خدمة في الواجهة العامة.
+- `lib/content-templates.ts` يعرّف نقاط بداية مشتركة للمدير والمختص، بينما يبقى نموذج المحتوى وإصداراته وسير المراجعة واحدًا.
+- `/admin/verification` يجمع إشارات طوابير المختصين والمراكز والمجتمع والمستندات في واجهة أولوية واحدة، لكن تنفيذ القرارات يبقى داخل RPC ومسارات المراجعة الآمنة القائمة.
+- V5 لا يضيف Schema أو سياسة RLS جديدة؛ التحسين بصري وتشغيلي فوق الحدود الأمنية الموجودة.
 
 ## قواعد منع التكرار والكود الميت
 
@@ -38,7 +47,7 @@
 - تحسين بصري لا يضيف Client JavaScript ما لم توجد حاجة تفاعلية حقيقية.
 - القطاعات العامة تستخدم Cache/Revalidation الموجود في Adapter.
 - يتم الحفاظ على Server Components حيث لا نحتاج تفاعل Client.
-- أي تعديل يجب أن يجتاز TypeScript + ESLint + Build + Smoke + Lighthouse contract.
+- أي تعديل يجب أن يجتاز TypeScript + ESLint + Architecture Contracts + Next Build + OpenNext Build + Wrangler Dry Run، ثم Smoke وLighthouse على بيئة النشر.
 
 ## استراتيجية Supabase
 

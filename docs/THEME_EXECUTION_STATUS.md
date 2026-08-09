@@ -1,6 +1,33 @@
-# Central Theme V4 — Execution Status
+# Central Theme V5 — Execution Status
 
-## Implemented
+## V5 implemented
+
+- Human-centered public homepage with search, guided starting paths, plain-language trust signals, dynamic sectors, recent published knowledge and professional participation calls to action.
+- Simplified institutional navigation: Discover, sectors, providers/centers, tools and knowledge, plus a compact utility layer.
+- Unified tributary identity mark across public chrome, authentication, admin, PWA and the root social card.
+- Read-only homepage content adapter using the public Supabase boundary, RLS and five-minute revalidation.
+- Task-led administrator overview with direct page creation, verification priority and frequent-action shortcuts.
+- New `/admin/verification` hub aggregating specialists, centers, community members and private-document review signals without bypassing the existing decision RPCs.
+- Readiness indicators in provider/community review cards and collapsed exceptional manual-entry forms.
+- Correct community status totals when a filtered queue is open.
+- Shared content templates for administrators and specialists, plus a visible four-step authoring path in the existing versioned block editor.
+- Central V5 responsive, focus, reduced-motion, editorial, verification and authoring styles in `app/rawafid-theme.css`.
+- Dedicated V5 regression contract added to the standard architecture and theme commands.
+
+## V5 verification
+
+- TypeScript: passed.
+- ESLint with zero warnings: passed.
+- Architecture, privacy, account, provider and theme contracts: passed.
+- Next.js 16.3 production build: passed.
+- OpenNext for Cloudflare 1.20.2 bundle: passed.
+- Wrangler 4.120.0 deployment dry run: passed (48 assets; Worker bundle validated).
+- Supabase project health, RLS coverage and security/performance advisors were reviewed before implementation; no schema change was required.
+- Live HTTP smoke and Lighthouse remain staging-deployment checks and must not be marked complete before the new Worker version is published.
+
+## V4 baseline preserved
+
+### Implemented
 
 - Single global theme entry point: `app/rawafid-theme.css`.
 - Existing V3 CSS modules kept in their proven cascade order behind the central entry point instead of duplicating or rewriting them.
@@ -19,7 +46,7 @@
 - Agent rules and architecture documentation preventing new duplicated global CSS patterns.
 - Dedicated V4 regression contract and theme import-graph guard.
 
-## Explicitly unchanged
+### Explicitly unchanged
 
 - Supabase schema.
 - Supabase rows/content.
@@ -29,7 +56,7 @@
 - Authentication and protected-route behavior.
 - Existing compatibility CSS modules while they are still referenced.
 
-## Verification
+### Historical verification
 
 Pull-request quality run **#584** passed on the synthesized merge ref with the then-current `main`:
 
@@ -51,6 +78,6 @@ Pull-request quality run **#584** passed on the synthesized merge ref with the t
 
 The first Lighthouse run showed a lab-only TBT outlier of 1.43s while runs two and three were 110ms and 80ms. The median performance gate remained 0.90; this variance is recorded rather than hidden.
 
-## Merge policy
+### Merge policy
 
 The branch is merged only after the final post-documentation PR gate is green and GitHub reports it mergeable against the current `main`. Because the implementation branch contains iterative setup commits, production integration must use **squash merge** so `main` receives one clean institutional-theme commit.

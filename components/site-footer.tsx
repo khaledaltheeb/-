@@ -37,7 +37,7 @@ export default function SiteFooter() {
     <footer className="site-footer">
       <div className="site-footer-inner">
         <div className="footer-brand-block">
-          <a className="brand footer-brand" href="/"><span className="brand-mark" aria-hidden="true">ر</span><span className="brand-copy"><strong>منصة روافد</strong><small>Rawafid Platform</small></span></a>
+          <a className="brand footer-brand" href="/"><span className="brand-mark" aria-hidden="true"><RawafidMark /></span><span className="brand-copy"><strong>منصة روافد</strong><small>Rawafid Platform</small></span></a>
           <p>منصة عربية مؤسسية للمعرفة والخدمات في الصحة النفسية والتعافي والدمج والتمكين، مبنية على الثقة، الوصول الآمن، والمراجعة المنهجية.</p>
           <span className="footer-trust-note">المحتوى التثقيفي لا يحل محل التقييم أو التشخيص أو العلاج المهني الفردي.</span>
         </div>
@@ -50,7 +50,8 @@ export default function SiteFooter() {
           ))}
         </div>
       </div>
-      <div className="footer-bottom"><span>© {new Date().getFullYear()} منصة روافد</span><span>RTL · Mobile-first · Accessibility · Privacy by design</span></div>
+      <div className="footer-bottom"><span>© {new Date().getFullYear()} منصة روافد</span><span>تجربة عربية أصيلة · إتاحة رقمية · خصوصية بالتصميم</span></div>
     </footer>
   );
 }
+import RawafidMark from '@/components/rawafid-mark';
