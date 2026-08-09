@@ -10,7 +10,8 @@ This script deliberately does not publish or mutate Supabase. It:
 3) materializes Markdown into CMS body_json/body_text,
 4) merges the parent V6 taxonomy snapshot with the validation-only overlay,
 5) runs the canonical Node V6 content release contract over the whole batch,
-6) preserves reports/materialized records as deterministic build artifacts.
+6) preserves reports/materialized records as deterministic build artifacts,
+7) records preflight failures so GitHub Actions artifacts explain why a page stopped.
 """
 
 from __future__ import annotations
@@ -107,6 +108,20 @@ def merged_taxonomy(base_path: Path, overlay_path: Path) -> dict:
     return base
 
 
+def write_preflight_error(output_dir: Path, meta_path: Path, meta: dict, error: Exception) -> None:
+    payload = {
+        "status": "failed-preflight",
+        "slug": meta.get("slug"),
+        "meta_path": str(meta_path),
+        "body_path": meta.get("body_path"),
+        "error_type": type(error).__name__,
+        "error": str(error),
+    }
+    (output_dir / "preflight-error.json").write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("batch_dir", type=Path)
@@ -125,21 +140,26 @@ def main() -> int:
     snapshots = []
 
     for meta_path in sorted(pages_dir.glob("*.meta.json")):
-        meta = json.loads(meta_path.read_text(encoding="utf-8"))
-        resolved_versions = resolve_source_provenance(meta, root)
-        body_path = root / str(meta.get("body_path") or "")
-        if not body_path.is_file():
-            raise ValueError(f"{meta.get('slug')}: body file not found: {body_path}")
-        record = materialize(meta_path, body_path)
-        schema = dict(record.get("schema_json") or {})
-        schema["source_versions_reviewed"] = resolved_versions
-        record["schema_json"] = schema
-        merge_reference_inventory(record, research_references(meta, root))
-        records.append(record)
-        snapshots.append({"slug": record.get("slug"), **(record.get("quality_snapshot") or {})})
-        (args.output_dir / f"{record['slug']}.json").write_text(
-            json.dumps(record, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-        )
+        meta: dict = {}
+        try:
+            meta = json.loads(meta_path.read_text(encoding="utf-8"))
+            resolved_versions = resolve_source_provenance(meta, root)
+            body_path = root / str(meta.get("body_path") or "")
+            if not body_path.is_file():
+                raise ValueError(f"{meta.get('slug')}: body file not found: {body_path}")
+            record = materialize(meta_path, body_path)
+            schema = dict(record.get("schema_json") or {})
+            schema["source_versions_reviewed"] = resolved_versions
+            record["schema_json"] = schema
+            merge_reference_inventory(record, research_references(meta, root))
+            records.append(record)
+            snapshots.append({"slug": record.get("slug"), **(record.get("quality_snapshot") or {})})
+            (args.output_dir / f"{record['slug']}.json").write_text(
+                json.dumps(record, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+            )
+        except Exception as exc:
+            write_preflight_error(args.output_dir, meta_path, meta, exc)
+            raise
 
     taxonomy = merged_taxonomy(args.taxonomy, args.overlay)
     taxonomy_path = args.output_dir / "taxonomy.merged.json"
