@@ -1,0 +1,88 @@
+{
+  "topic": "social-anxiety-disorder",
+  "researched_at": "2026-08-09",
+  "research_scope": "official definitions, current clinical guidance, systematic reviews, academic books, existing-site overlap",
+  "sources": [
+    {
+      "id": "WHO-ANXIETY-2025",
+      "title": "Anxiety disorders",
+      "publisher": "World Health Organization",
+      "year": "2025",
+      "source_type": "official-definition",
+      "authority_tier": "primary",
+      "url": "https://www.who.int/news-room/fact-sheets/detail/anxiety-disorders",
+      "use": "anxiety-disorder framework and functional burden"
+    },
+    {
+      "id": "NIMH-SAD-2025",
+      "title": "Social Anxiety Disorder: What You Need to Know",
+      "publisher": "National Institute of Mental Health",
+      "year": "2025",
+      "source_type": "institutional",
+      "authority_tier": "authoritative",
+      "url": "https://www.nimh.nih.gov/health/publications/social-anxiety-disorder-more-than-just-shyness",
+      "use": "definition, symptoms, diagnosis, treatment and support"
+    },
+    {
+      "id": "NICE-CG159",
+      "title": "Social anxiety disorder: recognition, assessment and treatment",
+      "publisher": "National Institute for Health and Care Excellence",
+      "year": "2024",
+      "source_type": "guideline",
+      "authority_tier": "primary",
+      "url": "https://www.nice.org.uk/guidance/cg159",
+      "use": "recognition, assessment, adult and child treatment; last reviewed 21 May 2024"
+    },
+    {
+      "id": "MAYO-WILSON-LANCET-2014",
+      "title": "Psychological and pharmacological interventions for social anxiety disorder in adults: a systematic review and network meta-analysis",
+      "publisher": "The Lancet Psychiatry",
+      "year": "2014",
+      "source_type": "systematic-review",
+      "authority_tier": "scholarly",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/26361000/",
+      "use": "comparative psychological and pharmacological treatment evidence"
+    },
+    {
+      "id": "ZHANG-PSYCHOTHERAPY-2025",
+      "title": "Psychotherapies for social anxiety disorder in adults: A systematic review and Bayesian network meta-analysis",
+      "publisher": "Journal of Affective Disorders",
+      "year": "2025",
+      "source_type": "systematic-review",
+      "authority_tier": "scholarly",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/40023260/",
+      "use": "updated comparative psychotherapy evidence and delivery formats"
+    },
+    {
+      "id": "WILLIAMS-PHARMACO-2020",
+      "title": "Pharmacological treatments for social anxiety disorder in adults: a systematic review and network meta-analysis",
+      "publisher": "CNS Spectrums",
+      "year": "2020",
+      "source_type": "systematic-review",
+      "authority_tier": "scholarly",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/32039743/",
+      "use": "comparative pharmacotherapy evidence"
+    },
+    {
+      "id": "HOPE-HEIMBERG-OXFORD-2019",
+      "title": "Managing Social Anxiety, Workbook: A Cognitive-Behavioral Therapy Approach",
+      "publisher": "Oxford University Press",
+      "year": "2019",
+      "source_type": "book",
+      "authority_tier": "scholarly",
+      "isbn": "9780190247638",
+      "url": "https://academic.oup.com/book/28747",
+      "use": "case formulation and evidence-based CBT practice"
+    }
+  ],
+  "existing_site_overlap": [
+    {
+      "canonical": "/care-guides/social-anxiety-gradual-support/",
+      "decision": "retain as practical gradual-support guide; new page serves condition-level search intent"
+    },
+    {
+      "canonical": "/comparisons/introversion-vs-social-anxiety/",
+      "decision": "retain as dedicated differential comparison and link from condition page"
+    }
+  ]
+}
