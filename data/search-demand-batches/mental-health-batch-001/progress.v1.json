@@ -10,58 +10,21 @@
   },
   "validation": {
     "contract_version": 6,
-    "github_actions_run": 31324700900,
-    "head_sha": "210720d12314dfb6cae8a28334f6c179d4b06936",
+    "github_actions_run": 31324975283,
+    "head_sha": "856d54ea10a12ef2c1358cc2a602248d8309fe27",
     "status": "passed",
-    "records": 5,
-    "release_ready": 5,
+    "records": 6,
+    "release_ready": 6,
     "blocked": 0,
     "error_count": 0
   },
   "pages": [
-    {
-      "slug": "generalized-anxiety-disorder",
-      "title": "اضطراب القلق المعمم: الأعراض والأسباب والتشخيص والعلاج",
-      "status": "v6-passed-draft",
-      "quality": {"arabic_words":3152,"h2":14,"h3":6,"faq":8,"search_questions":10,"references":7,"mapped_claims":8},
-      "route": "/content/generalized-anxiety-disorder",
-      "category": "anxiety-disorders"
-    },
-    {
-      "slug": "obsessive-compulsive-disorder",
-      "title": "الوسواس القهري: الأعراض والأسباب والتشخيص والعلاج",
-      "status": "v6-passed-draft",
-      "quality": {"arabic_words":3000,"h2":16,"h3":6,"faq":8,"search_questions":12,"references":7,"mapped_claims":8},
-      "route": "/content/obsessive-compulsive-disorder",
-      "category": "ocd-related",
-      "existing_content_preserved": ["/evidence-guides/clinical-anxiety/","/care-guides/family-ocd-support/","/comparisons/ocd-vs-generalized-anxiety/"]
-    },
-    {
-      "slug": "social-anxiety-disorder",
-      "title": "اضطراب القلق الاجتماعي: الأعراض والأسباب والتشخيص والعلاج",
-      "status": "v6-passed-draft",
-      "quality": {"arabic_words":2604,"h2":16,"h3":7,"faq":8,"search_questions":12,"references":7,"mapped_claims":8},
-      "route": "/content/social-anxiety-disorder",
-      "category": "anxiety-disorders",
-      "existing_content_preserved": ["/care-guides/social-anxiety-gradual-support/","/comparisons/introversion-vs-social-anxiety/"]
-    },
-    {
-      "slug": "evidence-guides-panic-disorder-safe-guide",
-      "title": "اضطراب الهلع ونوبات الهلع: الأعراض والتشخيص والعلاج",
-      "status": "v6-passed-existing-canonical-upgrade-draft",
-      "quality": {"arabic_words":2545,"h2":16,"h3":6,"faq":8,"search_questions":12,"references":7,"mapped_claims":8},
-      "route": "/evidence-guides/panic-disorder-safe-guide/",
-      "category": "anxiety-disorders",
-      "existing_content_preserved": ["/care-guides/panic-attack-immediate-support/","/care-guides/family-anxiety-panic-support/","/comparisons/panic-attack-vs-panic-disorder/"]
-    },
-    {
-      "slug": "evidence-guides-dissociation-safe-guide",
-      "title": "تبدد الشخصية والواقع: لماذا أشعر كأني في حلم؟",
-      "status": "v6-passed-existing-canonical-upgrade-draft",
-      "quality": {"arabic_words":2537,"h2":17,"h3":6,"faq":8,"search_questions":12,"references":8,"mapped_claims":8},
-      "route": "/evidence-guides/dissociation-safe-guide/",
-      "category": "dissociative-disorders"
-    }
+    {"slug":"generalized-anxiety-disorder","title":"اضطراب القلق المعمم: الأعراض والأسباب والتشخيص والعلاج","status":"v6-passed-draft","quality":{"arabic_words":3152,"h2":14,"h3":6,"faq":8,"search_questions":10,"references":7,"mapped_claims":8},"route":"/content/generalized-anxiety-disorder","category":"anxiety-disorders"},
+    {"slug":"obsessive-compulsive-disorder","title":"الوسواس القهري: الأعراض والأسباب والتشخيص والعلاج","status":"v6-passed-draft","quality":{"arabic_words":3000,"h2":16,"h3":6,"faq":8,"search_questions":12,"references":7,"mapped_claims":8},"route":"/content/obsessive-compulsive-disorder","category":"ocd-related","existing_content_preserved":["/evidence-guides/clinical-anxiety/","/care-guides/family-ocd-support/","/comparisons/ocd-vs-generalized-anxiety/"]},
+    {"slug":"social-anxiety-disorder","title":"اضطراب القلق الاجتماعي: الأعراض والأسباب والتشخيص والعلاج","status":"v6-passed-draft","quality":{"arabic_words":2604,"h2":16,"h3":7,"faq":8,"search_questions":12,"references":7,"mapped_claims":8},"route":"/content/social-anxiety-disorder","category":"anxiety-disorders","existing_content_preserved":["/care-guides/social-anxiety-gradual-support/","/comparisons/introversion-vs-social-anxiety/"]},
+    {"slug":"evidence-guides-panic-disorder-safe-guide","title":"اضطراب الهلع ونوبات الهلع: الأعراض والتشخيص والعلاج","status":"v6-passed-existing-canonical-upgrade-draft","quality":{"arabic_words":2545,"h2":16,"h3":6,"faq":8,"search_questions":12,"references":7,"mapped_claims":8},"route":"/evidence-guides/panic-disorder-safe-guide/","category":"anxiety-disorders","existing_content_preserved":["/care-guides/panic-attack-immediate-support/","/care-guides/family-anxiety-panic-support/","/comparisons/panic-attack-vs-panic-disorder/"]},
+    {"slug":"evidence-guides-dissociation-safe-guide","title":"تبدد الشخصية والواقع: لماذا أشعر كأني في حلم؟","status":"v6-passed-existing-canonical-upgrade-draft","quality":{"arabic_words":2537,"h2":17,"h3":6,"faq":8,"search_questions":12,"references":8,"mapped_claims":8},"route":"/evidence-guides/dissociation-safe-guide/","category":"dissociative-disorders"},
+    {"slug":"health-anxiety","title":"القلق الصحي: لماذا أخاف من المرض رغم الطمأنة؟","status":"v6-passed-draft","quality":{"arabic_words":3005,"h2":19,"h3":8,"faq":8,"search_questions":12,"references":8,"mapped_claims":8},"route":"/content/health-anxiety","category":"somatic-health-anxiety","existing_content_preserved":["/care-guides/health-anxiety-family-boundaries/","/content/obsessive-compulsive-disorder","/content/generalized-anxiety-disorder","/evidence-guides/panic-disorder-safe-guide/"]}
   ],
   "release_blockers": [
     "scientific reviewer fields intentionally remain empty while pages are drafts",
@@ -69,10 +32,10 @@
     "no Supabase content DML or Cloudflare publish while the parent V6 workstream remains active and before scientific/editorial/SEO/accessibility review"
   ],
   "next_gap_checks": [
-    "central health-anxiety intent while preserving the existing family-boundaries guide",
-    "specific phobias versus existing gradual-support guide",
     "depression Google-question coverage against the existing condition page rather than duplicating it",
+    "specific phobias versus existing gradual-support guide",
     "sleep and overthinking clusters",
-    "maladaptive-daydreaming symptom intent"
+    "maladaptive-daydreaming symptom intent",
+    "child and adolescent mental-health clusters"
   ]
 }
