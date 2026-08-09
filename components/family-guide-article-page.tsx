@@ -3,6 +3,7 @@ import Link from 'next/link';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import ContentRenderer from '@/components/content-renderer';
+import ContentDisclaimerLink from '@/components/content-disclaimer-link';
 import FamilyGuideBrowser from '@/components/family-guide-browser';
 import { breadcrumbJsonLd, SITE_URL } from '@/lib/seo';
 import { familyGuidePageRole, safeFamilyGuideReferences, visibleFamilyGuideFaq, type FamilyGuideItem, type FamilyGuideRecord } from '@/lib/family-guide';
@@ -56,7 +57,7 @@ export default function FamilyGuideArticlePage({ record, items = [] }: Props) {
             {record.featured_image_url ? <figure className="article-featured-image"><Image src={record.featured_image_url} alt={record.featured_image_alt || record.title} width={1200} height={675} sizes="(max-width:900px) 100vw, 900px" priority={role === 'hub'} unoptimized /></figure> : null}
             <ContentRenderer bodyJson={record.body_json} bodyText={record.body_text} recordId={record.id} />
           </div>
-          {record.medical_disclaimer ? <aside className="medical-disclaimer" aria-label="تنبيه صحي"><strong>تنبيه منهجي وصحي</strong><p>{record.medical_disclaimer}</p><Link href="/disclaimer">إخلاء المسؤولية الكامل</Link></aside> : null}
+          <ContentDisclaimerLink />
           {references.length ? <section className="article-references" aria-labelledby="family-guide-references"><h2 id="family-guide-references">المصادر والمراجع</h2><ol>{references.map((reference, index) => <li key={`${reference.url || reference.title}-${index}`}>{reference.url ? <a href={reference.url} target="_blank" rel="noopener noreferrer">{reference.title || reference.url}</a> : <span>{reference.title}</span>}{reference.publisher ? <small>{reference.publisher}</small> : null}{reference.year ? <small>{String(reference.year)}</small> : null}</li>)}</ol></section> : null}
         </article>
       </main>

@@ -14,9 +14,11 @@
     "generate:og-assets": "node scripts/generate-static-og-assets.mjs",
     "validate:og-assets": "node scripts/validate-static-og-assets.mjs",
     "cognitive-lab-check": "node scripts/cognitive-lab-contract.mjs",
+    "content-v6-check": "node scripts/content-release-contract-v6.mjs --self-test",
+    "migration-queue-v6-check": "node scripts/migration-queue-v6-contract.mjs",
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit",
-    "architecture-check": "node scripts/quality-contract.mjs && node scripts/theme-contract-v5.mjs && node scripts/theme-dead-code-check.mjs && node scripts/provider-system-contract.mjs && node scripts/account-system-contract.mjs && node scripts/validate-static-og-assets.mjs && node scripts/cognitive-lab-contract.mjs",
+    "architecture-check": "node scripts/quality-contract.mjs && node scripts/theme-contract-v5.mjs && node scripts/theme-dead-code-check.mjs && node scripts/provider-system-contract.mjs && node scripts/account-system-contract.mjs && node scripts/validate-static-og-assets.mjs && node scripts/cognitive-lab-contract.mjs && node scripts/content-release-contract-v6.mjs --self-test && node scripts/migration-queue-v6-contract.mjs",
     "theme-check": "node scripts/theme-contract-v5.mjs && node scripts/theme-dead-code-check.mjs",
     "provider-system-check": "node scripts/provider-system-contract.mjs && node scripts/account-system-contract.mjs",
     "smoke": "node scripts/smoke.mjs"
