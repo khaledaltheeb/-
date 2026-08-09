@@ -1,0 +1,86 @@
+{
+  "source_path": "data/search-demand-batches/mental-health-batch-001/research/dissociation-safe-guide.sources.json",
+  "body_path": "data/search-demand-batches/mental-health-batch-001/content/dissociation-safe-guide.md",
+  "slug": "evidence-guides-dissociation-safe-guide",
+  "title": "تبدد الشخصية والواقع: لماذا أشعر كأني في حلم؟",
+  "content_type": "guide",
+  "status": "draft",
+  "excerpt": "مرجع موسع لفهم تبدد الشخصية وتبدد الواقع والتفارق بلغة الأعراض التي يصفها الناس، مع الفرق عن الهلع والذهان، التشخيص التفريقي، العلاج وحدود الأدلة الحالية.",
+  "sector_slug": "mental-health",
+  "category_slug": "dissociative-disorders",
+  "audience": ["الأشخاص الذين يمرون بتجارب عدم الواقعية", "الأسر", "مقدمو الرعاية", "المختصون", "طلاب الصحة النفسية"],
+  "search_aliases": ["تبدد الشخصية", "تبدد الواقع", "Depersonalization", "Derealization", "DPDR", "أشعر كأني في حلم", "الدنيا غير حقيقية", "أشعر أنني غير موجود", "أشعر أنني خارج جسمي", "أراقب نفسي من الخارج", "العالم غريب", "عدم الواقعية"],
+  "seo_title": "تبدد الشخصية والواقع: الأعراض والتشخيص والعلاج",
+  "seo_description": "مرجع عربي موثوق عن تبدد الشخصية والواقع يشرح شعور الحلم وعدم الواقعية والانفصال عن الجسد، الفرق عن الذهان والهلع، التشخيص، العلاج، وحدود الأدلة الحالية.",
+  "canonical_url": "/evidence-guides/dissociation-safe-guide/",
+  "robots_index": true,
+  "robots_follow": true,
+  "primary_keyword": "تبدد الشخصية والواقع",
+  "secondary_keywords": ["أشعر كأني في حلم", "الدنيا غير حقيقية", "علاج تبدد الشخصية", "أعراض تبدد الواقع", "الفرق بين تبدد الواقع والذهان", "هل القلق يسبب تبدد الواقع", "أشعر أنني خارج جسمي", "DPDR"],
+  "semantic_terms": ["التفارق", "عدم الواقعية", "الانفصال عن الذات", "اختبار الواقع", "الخدر العاطفي", "المراقبة الذاتية", "Cambridge Depersonalization Scale", "الهلع", "الذهان", "قلة النوم", "المواد", "العلاج السلوكي المعرفي", "CBT", "التأريض", "التشخيص التفريقي", "الوظيفة اليومية"],
+  "search_intent": "informational",
+  "author_display_name": "فريق تحرير منصة روافد",
+  "reviewer_display_name": null,
+  "reviewer_credentials": null,
+  "last_reviewed_at": null,
+  "medical_disclaimer": "",
+  "featured_image_url": null,
+  "featured_image_alt": null,
+  "references_json": [
+    {"id":"MSD-DPDR-2026","title":"Depersonalization/Derealization Disorder","publisher":"MSD Manual Professional Edition","year":"2026","source_type":"institutional","authority_tier":"authoritative","url":"https://www.msdmanuals.com/professional/psychiatric-disorders/dissociative-disorders/depersonalization-derealization-disorder"},
+    {"id":"WANG-DPDR-SR-2024","title":"The Treatment of Depersonalization-Derealization Disorder: A Systematic Review","publisher":"Journal of Trauma & Dissociation","year":"2024","source_type":"systematic-review","authority_tier":"scholarly","url":"https://pubmed.ncbi.nlm.nih.gov/37431255/"},
+    {"id":"HUNTER-CBT-FEASIBILITY-2025","title":"Cognitive Behavior Therapy for Depersonalization-Derealization Disorder (CBT-f-DDD): a feasibility randomized trial","publisher":"Pilot and Feasibility Studies","year":"2025","source_type":"primary-research","authority_tier":"scholarly","url":"https://pubmed.ncbi.nlm.nih.gov/41373023/"},
+    {"id":"HUNTER-CBT-2023","title":"Cognitive Behaviour Therapy for Depersonalization Derealization Disorder: a self-controlled cross-over study of waiting list vs active treatment","publisher":"Cognitive Behaviour Therapy","year":"2023","source_type":"primary-research","authority_tier":"scholarly","url":"https://pubmed.ncbi.nlm.nih.gov/37711065/"},
+    {"id":"SIERRA-CDS-2000","title":"The Cambridge Depersonalization Scale: a new instrument for the measurement of depersonalization","publisher":"Psychiatry Research","year":"2000","source_type":"primary-research","authority_tier":"scholarly","url":"https://pubmed.ncbi.nlm.nih.gov/10725532/"},
+    {"id":"SIMEON-ABUGEL-OXFORD-2023","title":"Feeling Unreal: Depersonalization and the Loss of the Self","publisher":"Oxford University Press","year":"2023","source_type":"book","authority_tier":"scholarly","isbn":"9780197622445"},
+    {"id":"MEDFORD-SIERRA-OXFORD-2012","title":"Depersonalization disorder","publisher":"Oxford University Press","year":"2012","source_type":"book","authority_tier":"scholarly","isbn":"9780199696758"}
+  ],
+  "schema_json": {
+    "content_contract_version": 6,
+    "page_kind": "editorial",
+    "strategic_scientific_value": "standard",
+    "rewrite_method": "evidence-led-rewrite",
+    "disclaimer_url": "/disclaimer",
+    "disclaimer_label": "إخلاء المسؤولية والتنبيهات",
+    "search_intent_questions": [
+      "لماذا أشعر كأني في حلم؟",
+      "لماذا أشعر أن الدنيا غير حقيقية؟",
+      "لماذا أشعر أنني غير موجود؟",
+      "لماذا أشعر أنني خارج جسمي؟",
+      "ما الفرق بين تبدد الشخصية وتبدد الواقع؟",
+      "هل تبدد الشخصية يعني أنني سأجن؟",
+      "هل القلق يسبب تبدد الواقع؟",
+      "هل نوبات الهلع تسبب الشعور بعدم الواقعية؟",
+      "هل تبدد الشخصية يضر الدماغ؟",
+      "كيف يتم تشخيص اضطراب تبدد الشخصية والواقع؟",
+      "ما علاج تبدد الشخصية والواقع؟",
+      "هل يوجد دواء يعالج DPDR؟"
+    ],
+    "claim_source_map": [
+      {"claim":"تبدد الشخصية يشير إلى الانفصال عن الذات أو الجسد أو العمليات النفسية، بينما تبدد الواقع يشير إلى الإحساس بأن البيئة بعيدة أو غير حقيقية مع بقاء اختبار الواقع سليمًا عادة.","reference_ids":["MSD-DPDR-2026","SIMEON-ABUGEL-OXFORD-2023","MEDFORD-SIERRA-OXFORD-2012"]},
+      {"claim":"تجارب تبدد الشخصية أو الواقع قد تكون عابرة في سياقات مثل الضغط والإرهاق، ويُبحث الاضطراب عندما تكون الخبرات مستمرة أو متكررة وتسبب ضيقًا أو تعطيلًا وبعد استبعاد أسباب أخرى.","reference_ids":["MSD-DPDR-2026","SIMEON-ABUGEL-OXFORD-2023","MEDFORD-SIERRA-OXFORD-2012"]},
+      {"claim":"Cambridge Depersonalization Scale أداة لقياس تكرار ومدة جوانب متعددة من أعراض تبدد الشخصية والواقع، لكنها لا تستبدل التشخيص السريري أو الاستبعاد الطبي والنفسي.","reference_ids":["SIERRA-CDS-2000","SIMEON-ABUGEL-OXFORD-2023"]},
+      {"claim":"قاعدة الأدلة العلاجية لاضطراب تبدد الشخصية والواقع ما تزال محدودة وغير متجانسة، لذلك لا يدعم البحث الحالي وعدًا بعلاج واحد مضمون أو دواء محدد للجميع.","reference_ids":["WANG-DPDR-SR-2024","MSD-DPDR-2026"]},
+      {"claim":"دراسة CBT المخصصة للاضطراب في 2023 أظهرت تحسنًا في عينة صغيرة بتصميم غير عشوائي، ما يقدم إشارة واعدة لكنه لا يثبت فعالية نهائية بمفرده.","reference_ids":["HUNTER-CBT-2023","WANG-DPDR-SR-2024"]},
+      {"claim":"التجربة العشوائية للجدوى المنشورة في 2025 دعمت إمكانية وقبول دراسة CBT المكيف وأظهرت اتجاهات أولية، لكنها صُممت أساسًا لتقييم الجدوى وليست تجربة حاسمة لإثبات الفعالية.","reference_ids":["HUNTER-CBT-FEASIBILITY-2025"]},
+      {"claim":"الأعراض المشابهة لعدم الواقعية قد تظهر مع الهلع والقلق والمواد واضطرابات أخرى وحالات طبية أو عصبية، ولذلك يعتمد التشخيص على السياق والاستبعاد وليس على عبارة عرضية واحدة.","reference_ids":["MSD-DPDR-2026","SIMEON-ABUGEL-OXFORD-2023","MEDFORD-SIERRA-OXFORD-2012"]},
+      {"claim":"قياس التعافي يجب أن يشمل انخفاض الخوف والمراقبة والتجنب واستعادة النوم والعمل والدراسة والعلاقات إلى جانب تغير شدة أعراض عدم الواقعية.","reference_ids":["HUNTER-CBT-2023","HUNTER-CBT-FEASIBILITY-2025","SIMEON-ABUGEL-OXFORD-2023"]}
+    ],
+    "source_versions_reviewed": [
+      {"path":"data/search-demand-batches/mental-health-batch-001/research/dissociation-safe-guide.sources.json","sha256":"0000000000000000000000000000000000000000000000000000000000000000","decision":"بحث جديد لترقية canonical موجود، يربط لغة الأعراض العربية بالمراجع المهنية والمراجعة المنهجية وأحدث تجربة جدوى وكتاب Oxford الحديث دون ادعاء يقين علاجي غير موجود."}
+    ],
+    "page_mechanism": {
+      "purpose":"ترقية المرجع الحالي للتفارق وتبدد الشخصية والواقع إلى صفحة عربية شاملة تبدأ من لغة الباحث مثل الشعور بالحلم وعدم الواقعية ثم تشرح التشخيص والعلاج وحدود الأدلة.",
+      "audience":"الأشخاص الذين يمرون بإحساس الانفصال أو عدم الواقعية وأسرهم ومقدمو الرعاية والمختصون والطلاب الذين يحتاجون تفسيرًا دقيقًا وغير مخيف.",
+      "interaction_model":"رحلة قراءة تبدأ بالأعراض البشرية ثم تفرق بين DPDR والذهان والهلع وتشرح الأسباب والتقييم والعلاج وتقدم أسئلة شائعة وروابط إلى الحالات المتداخلة.",
+      "content_model":"ترقية Evidence Guide قائم بدل إنشاء صفحة جديدة، مع استهداف symptom-first search intent والحفاظ على تشخيص تفريقي واضح وعدم تحويل الأعراض إلى تشخيص ذاتي."
+    },
+    "taxonomy_reviewed": true,
+    "classification_confidence": 0.99,
+    "classification_rationale": "المسار الموجود يملك بالفعل النية العامة للتفارق وتبدد الشخصية والواقع، لذلك يُرقى في مكانه داخل قطاع الصحة النفسية وفئة الاضطرابات الانفصالية؛ الصفحة الجديدة تستوعب أسئلة عدم الواقعية والحلم والانفصال عن الجسد مع إبقاء الهلع والوسواس كروابط تشخيصية متقاطعة لا كنسخ محتوى.",
+    "originality_report": {"passed":true,"longest_verbatim_run_words":0,"legacy_sentence_reuse_ratio":0.0,"method":"evidence-led full rewrite preserving the existing canonical and symptom-first intent"}
+  },
+  "quality_snapshot": {
+    "validation_state": "awaiting-full-v6-validation-and-auto-provenance"
+  }
+}
