@@ -1,0 +1,39 @@
+{
+  "batch_id": "mental-health-search-demand-001",
+  "checkpoint": 2,
+  "updated_at": "2026-08-09",
+  "parent_workstream": "agent/content-pipeline-v6",
+  "coordination": {
+    "parent_pr": 182,
+    "child_pr": 183,
+    "strategy": "stacked child branch; content/research/taxonomy/validation additions only; do not modify parent renderer, CMS or release-gate files",
+    "publish_policy": "no Supabase content DML and no Cloudflare production release from this workstream before parent V6 integration and scientific/editorial/SEO/accessibility review"
+  },
+  "validation": {
+    "contract_version": 6,
+    "method": "full local branch validation plus GitHub Actions workflow on every push",
+    "records": 10,
+    "release_ready": 10,
+    "blocked": 0,
+    "error_count": 0
+  },
+  "pages": [
+    {"slug":"generalized-anxiety-disorder","route":"/content/generalized-anxiety-disorder","status":"v6-passed-draft","mode":"new-condition"},
+    {"slug":"obsessive-compulsive-disorder","route":"/content/obsessive-compulsive-disorder","status":"v6-passed-draft","mode":"new-condition"},
+    {"slug":"social-anxiety-disorder","route":"/content/social-anxiety-disorder","status":"v6-passed-draft","mode":"new-condition"},
+    {"slug":"evidence-guides-panic-disorder-safe-guide","route":"/evidence-guides/panic-disorder-safe-guide/","status":"v6-passed-draft","mode":"existing-canonical-upgrade"},
+    {"slug":"evidence-guides-dissociation-safe-guide","route":"/evidence-guides/dissociation-safe-guide/","status":"v6-passed-draft","mode":"existing-canonical-upgrade"},
+    {"slug":"health-anxiety","route":"/content/health-anxiety","status":"v6-passed-draft","mode":"new-central-guide"},
+    {"slug":"depression","route":"/content/depression","status":"v6-passed-draft","mode":"existing-canonical-upgrade"},
+    {"slug":"specific-phobia","route":"/content/specific-phobia","status":"v6-passed-draft","mode":"new-condition-after-gap-audit"},
+    {"slug":"overthinking-rumination","route":"/content/overthinking-rumination","status":"v6-passed-draft","mode":"new-transdiagnostic-guide"},
+    {"slug":"insomnia","route":"/content/insomnia","status":"v6-passed-draft","mode":"new-condition-after-gap-audit"}
+  ],
+  "next_research": [
+    "maladaptive-daydreaming",
+    "child-adolescent-mental-health",
+    "sleep-related follow-up intent only where it does not cannibalize insomnia",
+    "trauma/PTSD and bipolar existing-canonical gap audits",
+    "personality/narcissism with non-diagnostic relationship language"
+  ]
+}
