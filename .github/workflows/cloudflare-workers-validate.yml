@@ -1,0 +1,43 @@
+name: Cloudflare Workers Validate
+
+on:
+  push:
+    branches: [main, cloudflare-workers-deploy]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: cloudflare-workers-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
+      NEXT_PUBLIC_SITE_URL: https://healthrenewal.org
+      NEXT_PUBLIC_ALLOW_INDEXING: 'false'
+      NEXT_PUBLIC_ENABLE_ANALYTICS: 'false'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Type check
+        run: npm run typecheck
+      - name: Lint
+        run: npm run lint
+      - name: Architecture contracts
+        run: npm run architecture-check
+      - name: Build Cloudflare Worker with OpenNext
+        run: npx opennextjs-cloudflare build
+      - name: Validate Wrangler package
+        run: npx wrangler deploy --dry-run

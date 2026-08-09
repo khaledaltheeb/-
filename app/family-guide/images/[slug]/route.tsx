@@ -1,8 +1,6 @@
 import { familyGuideOgImage } from '@/components/family-guide-og-image';
 import { createClient } from '@/lib/supabase/server';
 
-export const runtime = 'edge';
-
 type Params = Promise<{ slug: string }>;
 
 export async function GET(_: Request, { params }: { params: Params }) {

@@ -11,5 +11,5 @@ export default defineConfig([
       '@next/next/no-html-link-for-pages': 'off',
     },
   },
-  globalIgnores(['.next/**','out/**','build/**','next-env.d.ts']),
+  globalIgnores(['.next/**','.open-next/**','.wrangler/**','out/**','build/**','next-env.d.ts']),
 ]);
