@@ -483,7 +483,7 @@ body {
 .brand-copy small {
   margin-top: 1px;
   letter-spacing: 1.15px;
-  font-size: 8px;
+  font-size: 10px;
 }
 
 .desktop-nav { gap: 1px; }
@@ -526,6 +526,16 @@ body {
   border-radius: 22px;
   box-shadow: 0 30px 90px rgba(5,49,54,.16);
 }
+
+.mega-nav-panel .nav-dropdown-heading span,
+.mega-nav-panel .nav-dropdown-heading>a { font-size: 12px!important; }
+.mega-nav-column h2 { color: #4d686d; font-size: 12px; }
+.mega-sector-grid>a,
+.mega-intent-list strong,
+.mega-services>div>a,
+.mega-empty strong { font-size: 12px; }
+.mega-intent-list span,
+.mega-empty span { color: #536d72; font-size: 11px; }
 
 .rawafid-home:before {
   height: 710px;
@@ -728,6 +738,11 @@ body {
 
 .rawafid-platform-card { min-height: 245px; padding: 25px; }
 .rawafid-platform-card:before { height: 3px; }
+.rawafid-platform-card>span:last-child,
+.rawafid-sector-card>span {
+  color: var(--rf-brand-deep);
+  font-size: 13px;
+}
 .rawafid-sector-grid { grid-template-columns: repeat(3,minmax(0,1fr)); }
 .rawafid-sector-card { min-height: 215px; padding: 25px; }
 .rawafid-sector-card h3 { font-size: 20px; line-height: 1.55; }
@@ -760,6 +775,7 @@ body {
 
 .editorial-card-meta { display: flex; justify-content: space-between; gap: 15px; color: var(--rf-muted); font-size: 11px; }
 .editorial-card-meta>span { color: var(--rf-brand-strong); font-weight: 850; }
+.editorial-card-meta time { color: #536d72; }
 .rawafid-editorial-grid h3 { margin: 24px 0 12px; font-size: 20px; line-height: 1.65; }
 .rawafid-editorial-grid .featured h3 { max-width: 760px; font-size: clamp(1.6rem,3vw,2.45rem); }
 .rawafid-editorial-grid h3 a { color: var(--rf-ink); text-decoration: none; }
@@ -799,7 +815,10 @@ body {
 .rawafid-professional-callout .button { border-color: rgba(255,255,255,.28); background: transparent; color: #fff; }
 
 .site-footer {
+  display: block;
+  overflow: hidden;
   margin-top: clamp(70px,9vw,120px);
+  padding: 0;
   border-top: 0;
   background:
     radial-gradient(circle at 85% 8%,rgba(22,198,199,.08),transparent 26%),
