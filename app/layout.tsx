@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from 'next';
 import Script from 'next/script';
-import { Noto_Sans_Arabic } from 'next/font/google';
 import { BRAND_NAME, DEFAULT_DESCRIPTION, SITE_URL, organizationJsonLd } from '@/lib/seo';
 import './rawafid-theme.css';
 
@@ -10,13 +9,6 @@ import './rawafid-theme.css';
  './structured-content.css' './block-editor-v3.css' './profile-v3.css'
  './admin-shell-v3.css'.
 */
-
-const arabicFont = Noto_Sans_Arabic({
-  subsets: ['arabic'],
-  display: 'swap',
-  variable: '--font-arabic',
-  preload: true,
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -75,7 +67,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   const gaId = validatedAnalyticsId(process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID, /^G-[A-Z0-9]+$/i);
 
   return (
-    <html lang="ar" dir="rtl" className={arabicFont.variable}>
+    <html lang="ar" dir="rtl">
       <body>
         {analyticsEnabled && gtmId ? (
           <>

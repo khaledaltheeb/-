@@ -1,3 +1,4 @@
+@import '@fontsource-variable/noto-sans-arabic/wght.css';
 @import './globals.css';
 @import './sector-pages.css';
 @import './admin-ui.css';
@@ -25,6 +26,7 @@
 @import './mega-nav-v3.css';
 @import './media-v3.css';
 @import './theme-admin-v4.css';
+@import './cognitive-lab.css';
 
 /*
  * Rawafid Central Theme V4
@@ -36,6 +38,7 @@
 
 :root {
   color-scheme: light;
+  --font-arabic: 'Noto Sans Arabic Variable';
   --rf-brand: #0b8f92;
   --rf-brand-strong: #08716d;
   --rf-brand-deep: #064f50;
