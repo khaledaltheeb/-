@@ -2,7 +2,9 @@
 """Materialize and fully validate a Rawafid search-demand batch against V6.
 
 This script deliberately does not publish or mutate Supabase. It:
-1) verifies source-file SHA-256 provenance declared by each page,
+1) verifies source-file SHA-256 provenance declared by each page; metadata may use
+   ``auto`` so the validator deterministically binds the V6 record to the exact
+   source bytes checked out for the commit,
 2) materializes Markdown into CMS body_json/body_text,
 3) merges the parent V6 taxonomy snapshot with the validation-only overlay,
 4) runs the canonical Node V6 content release contract over the whole batch,
@@ -25,21 +27,27 @@ def sha256_file(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def verify_source_provenance(meta: dict, root: Path) -> None:
+def resolve_source_provenance(meta: dict, root: Path) -> list[dict]:
     versions = (meta.get("schema_json") or {}).get("source_versions_reviewed") or []
     if not versions:
         raise ValueError(f"{meta.get('slug')}: source_versions_reviewed is empty")
-    for row in versions:
+    resolved: list[dict] = []
+    for raw in versions:
+        row = dict(raw)
         rel = str(row.get("path") or "")
         expected = str(row.get("sha256") or "").lower()
         source = root / rel
         if not source.is_file():
             raise ValueError(f"{meta.get('slug')}: source version does not exist: {rel}")
         actual = sha256_file(source)
-        if actual != expected:
+        if expected in {"auto", "sha256:auto"}:
+            row["sha256"] = actual
+        elif actual != expected:
             raise ValueError(
                 f"{meta.get('slug')}: SHA-256 mismatch for {rel}: expected {expected}, actual {actual}"
             )
+        resolved.append(row)
+    return resolved
 
 
 def merged_taxonomy(base_path: Path, overlay_path: Path) -> dict:
@@ -78,11 +86,14 @@ def main() -> int:
 
     for meta_path in sorted(pages_dir.glob("*.meta.json")):
         meta = json.loads(meta_path.read_text(encoding="utf-8"))
-        verify_source_provenance(meta, root)
+        resolved_versions = resolve_source_provenance(meta, root)
         body_path = root / str(meta.get("body_path") or "")
         if not body_path.is_file():
             raise ValueError(f"{meta.get('slug')}: body file not found: {body_path}")
         record = materialize(meta_path, body_path)
+        schema = dict(record.get("schema_json") or {})
+        schema["source_versions_reviewed"] = resolved_versions
+        record["schema_json"] = schema
         records.append(record)
         snapshots.append({"slug": record.get("slug"), **(record.get("quality_snapshot") or {})})
         (args.output_dir / f"{record['slug']}.json").write_text(
