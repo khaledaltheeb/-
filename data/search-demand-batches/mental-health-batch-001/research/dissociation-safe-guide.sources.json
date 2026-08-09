@@ -2,7 +2,7 @@
   "topic": "depersonalization-derealization-and-dissociation",
   "researched_at": "2026-08-09",
   "target_existing_canonical": "/evidence-guides/dissociation-safe-guide/",
-  "research_scope": "current professional reference, systematic treatment review, recent feasibility RCT, academic measurement research, Oxford University Press monograph, symptom-first Arabic search intent, existing-site overlap",
+  "research_scope": "current professional reference, systematic treatment and prevalence reviews, recent feasibility RCT, academic measurement research, Oxford University Press monograph, symptom-first Arabic search intent, existing-site overlap",
   "sources": [
     {
       "id": "MSD-DPDR-2026",
@@ -23,6 +23,16 @@
       "authority_tier": "scholarly",
       "url": "https://pubmed.ncbi.nlm.nih.gov/37431255/",
       "use": "quality and limits of psychotherapy, pharmacotherapy and neuromodulation evidence"
+    },
+    {
+      "id": "YANG-PREVALENCE-SR-2023",
+      "title": "The Prevalence of Depersonalization-Derealization Disorder: A Systematic Review",
+      "publisher": "Journal of Trauma & Dissociation",
+      "year": "2023",
+      "source_type": "systematic-review",
+      "authority_tier": "scholarly",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/35699456/",
+      "use": "systematic evidence distinguishing transient depersonalization/derealization experiences from disorder prevalence across populations"
     },
     {
       "id": "HUNTER-CBT-FEASIBILITY-2025",
