@@ -4,6 +4,7 @@ const groups = [
     links: [
       { href: '/about', label: 'عن المنصة' },
       { href: '/search', label: 'البحث' },
+      { href: '/cognitive-lab', label: 'مختبر القدرات' },
       { href: '/specialists', label: 'دليل المختصين' },
       { href: '/centers', label: 'دليل المراكز' },
     ],

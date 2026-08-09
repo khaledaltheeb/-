@@ -1,0 +1,479 @@
+[
+  {
+    "slug": "simple-reaction",
+    "title": "سرعة الاستجابة البسيطة",
+    "category": "سرعة الاستجابة",
+    "mode": "simple_reaction",
+    "summary": "نشاط قصير لتدريب الاستعداد والاستجابة لإشارة بصرية بعد مدة انتظار متغيرة، مع عرض الزمن الوسيط من دون تحويله إلى حكم معياري.",
+    "instructions": "انتظر ظهور الإشارة، ثم اضغط الزر مرة واحدة. الضغط المبكر لا يُحسب إجابة صحيحة.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "choice-reaction",
+    "title": "سرعة الاستجابة الاختيارية",
+    "category": "سرعة الاستجابة",
+    "mode": "choice_reaction",
+    "summary": "تدريب على ربط الإشارة باتجاه صحيح مع زيادة عدد البدائل وتبديل القاعدة تدريجيًا.",
+    "instructions": "اقرأ قاعدة المحاولة أولًا، ثم اختر الاتجاه المطابق لها مع تقديم الدقة على السرعة.",
+    "difficultyStatus": "verified"
+  },
+  {
+    "slug": "visual-reaction",
+    "title": "سرعة الاكتشاف البصري",
+    "category": "سرعة الاستجابة",
+    "mode": "visual_reaction",
+    "summary": "مهمة بحث بصري عن عنصر مختلف بين مشتتات يزداد عددها وتقاربها عبر المستويات.",
+    "instructions": "افحص الصف وحدد الرمز المختلف قبل اختيار الإجابة.",
+    "difficultyStatus": "verified"
+  },
+  {
+    "slug": "auditory-symbol",
+    "title": "ربط النغمة بالرمز",
+    "category": "التمييز السمعي",
+    "mode": "auditory_symbol",
+    "summary": "نشاط يربط عددًا من النغمات برمز ظاهر في مفتاح ثابت، مع بديل نصي للإتاحة.",
+    "instructions": "شغّل النغمات، احسبها، ثم اختر الرمز المقابل في المفتاح الظاهر.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "go-no-go",
+    "title": "اذهب أو توقف",
+    "category": "كبح الاستجابة",
+    "mode": "go_no_go",
+    "summary": "تدريب على الاستجابة للهدف والامتناع أمام المشتت وفق قاعدة واضحة تتغير بين الجلسات.",
+    "instructions": "اختر «استجب» عندما يطابق المثير قاعدة الهدف، وإلا اختر «امتنع».",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "stroop-basic",
+    "title": "مهمة ستروب الأساسية",
+    "category": "كبح الاستجابة",
+    "mode": "stroop_basic",
+    "summary": "نشاط تعليمي يطلب تحديد لون الحبر مع تجاهل معنى كلمة اللون.",
+    "instructions": "اختر لون الحبر المرئي، لا الكلمة المكتوبة.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "stroop-advanced",
+    "title": "مهمة ستروب المتقدمة",
+    "category": "كبح الاستجابة والمرونة",
+    "mode": "stroop_advanced",
+    "summary": "تدريب على تبديل القاعدة بين لون الحبر ومعنى الكلمة مع بقاء الإشارة المطلوبة ظاهرة.",
+    "instructions": "اقرأ الإشارة أعلى كل محاولة واختر اللون أو المعنى بحسبها.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "response-inhibition",
+    "title": "كبح الاستجابة للمشتتات",
+    "category": "كبح الاستجابة",
+    "mode": "response_inhibition",
+    "summary": "تدريب على اختيار اتجاه الهدف المركزي وتجاهل أسهم محيطة متقاربة أو متعارضة.",
+    "instructions": "استجب لاتجاه السهم الأوسط فقط، واترك الأسهم المحيطة خارج قرارك.",
+    "difficultyStatus": "verified"
+  },
+  {
+    "slug": "digit-span-forward",
+    "title": "مدى الأرقام الأمامي",
+    "category": "الذاكرة العاملة",
+    "mode": "digit_span_forward",
+    "summary": "تدريب على الاحتفاظ بتسلسل رقمي واستعادته بالترتيب نفسه بعد إخفائه.",
+    "instructions": "ادرس التسلسل، أخفه عندما تكون جاهزًا، ثم اختر النسخة المطابقة.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "digit-span-backward",
+    "title": "مدى الأرقام العكسي",
+    "category": "الذاكرة العاملة",
+    "mode": "digit_span_backward",
+    "summary": "تدريب يجمع الاحتفاظ والمعالجة عبر استعادة تسلسل رقمي بترتيب معكوس.",
+    "instructions": "احفظ الأرقام ثم اختر التسلسل كاملًا من الأخير إلى الأول.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "letter-span",
+    "title": "مدى الحروف المتسلسل",
+    "category": "الذاكرة العاملة",
+    "mode": "letter_span",
+    "summary": "تدريب على الاحتفاظ المتسلسل بحروف عربية يزداد طولها تدريجيًا.",
+    "instructions": "احفظ سلسلة الحروف ثم اخترها بالترتيب الأصلي بعد إخفائها.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "spatial-span",
+    "title": "المدى المكاني المتسلسل",
+    "category": "الذاكرة العاملة",
+    "mode": "spatial_span",
+    "summary": "تدريب على تذكر مسار من مواقع شبكة واستعادته بالترتيب.",
+    "instructions": "ادرس أرقام المواقع في المسار ثم اختر المسار المطابق.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "one-back",
+    "title": "مهمة المطابقة 1-Back",
+    "category": "الذاكرة العاملة",
+    "mode": "one_back",
+    "summary": "نشاط مطابقة مستمرة يقارن الرمز الحالي بالرمز السابق مباشرة.",
+    "instructions": "حدد هل الرمز الأخير يطابق الرمز الذي سبقه بخطوة واحدة.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "two-back",
+    "title": "مهمة المطابقة 2-Back",
+    "category": "الذاكرة العاملة",
+    "mode": "two_back",
+    "summary": "نشاط مطابقة يقارن الرمز الأخير بما ظهر قبله بخطوتين ضمن سجل قصير ظاهر للدراسة.",
+    "instructions": "قارن الرمز الأخير بالرمز الواقع قبله بخطوتين ثم اختر نعم أو لا.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "three-back",
+    "title": "مهمة المطابقة 3-Back",
+    "category": "الذاكرة العاملة",
+    "mode": "three_back",
+    "summary": "نشاط مطابقة أعلى حملًا يقارن الرمز الأخير بما ظهر قبله بثلاث خطوات.",
+    "instructions": "احتفظ بالسجل القصير وحدد هل آخر رمز يطابق الرمز قبل ثلاث خطوات.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "memory-update",
+    "title": "تحديث محتوى الذاكرة",
+    "category": "الذاكرة العاملة",
+    "mode": "memory_update",
+    "summary": "تدريب على متابعة قيمة ابتدائية وتحديثها بسلسلة عمليات قصيرة قبل اختيار الناتج.",
+    "instructions": "طبّق العمليات بالترتيب على القيمة الابتدائية، ثم اختر الناتج النهائي.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "visual-grid",
+    "title": "ذاكرة مواقع الشبكة",
+    "category": "الذاكرة البصرية",
+    "mode": "visual_grid",
+    "summary": "تدريب على تذكر مجموعة مواقع داخل شبكة بعد إخفاء نمط الدراسة.",
+    "instructions": "ادرس المواقع المميزة ثم اختر المجموعة المطابقة بعد إخفائها.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "sequence-memory",
+    "title": "ذاكرة ترتيب الرموز",
+    "category": "الذاكرة",
+    "mode": "sequence_memory",
+    "summary": "تدريب على استعادة ترتيب كامل لرموز متعددة مع بدائل متقاربة.",
+    "instructions": "احفظ الرموز وترتيبها ثم اختر التسلسل المطابق كاملًا.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "paired-associates",
+    "title": "ذاكرة الأزواج المترابطة",
+    "category": "الذاكرة",
+    "mode": "paired_associates",
+    "summary": "نشاط تعلم أزواج يربط كلمة بشريكها ثم يختبر الاستدعاء بعد إخفاء قائمة الدراسة.",
+    "instructions": "ادرس الأزواج ثم اختر شريك كلمة السؤال.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "symbol-memory",
+    "title": "ذاكرة الرموز المستهدفة",
+    "category": "الذاكرة البصرية",
+    "mode": "symbol_memory",
+    "summary": "نشاط تعرف بصري يعرض مجموعة رموز ثم يسأل عن وجود رمز بينها.",
+    "instructions": "ادرس المجموعة، أخفها، ثم حدد الرمز الذي كان موجودًا.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "visual-search",
+    "title": "البحث البصري عن الهدف",
+    "category": "الانتباه البصري",
+    "mode": "visual_search",
+    "summary": "تدريب بحث عن هدف محدد بين مشتتات يزيد عددها وتشابهها.",
+    "instructions": "اقرأ رمز الهدف ثم ابحث عنه داخل صف المثيرات.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "symbol-search",
+    "title": "مقارنة الرموز السريعة",
+    "category": "الانتباه البصري",
+    "mode": "symbol_search",
+    "summary": "نشاط قرار حول وجود رمز هدف داخل مجموعة قصيرة ومتغيرة.",
+    "instructions": "حدد هل يظهر رمز الهدف داخل المجموعة المعروضة.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "sustained-attention",
+    "title": "الانتباه المستمر",
+    "category": "الانتباه",
+    "mode": "sustained_attention",
+    "summary": "تدريب متكرر على الحفاظ على قاعدة هدف واحدة عبر محاولات متتابعة.",
+    "instructions": "استجب فقط عندما يطابق المثير الهدف المحدد في رأس المحاولة.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "divided-attention",
+    "title": "الانتباه المزدوج",
+    "category": "الانتباه",
+    "mode": "divided_attention",
+    "summary": "نشاط يجمع قرارين بسيطين عن الشكل والعدد في إجابة واحدة.",
+    "instructions": "لاحظ الشكل وحدد في الوقت نفسه هل العدد زوجي أم فردي.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "selective-attention",
+    "title": "الانتباه الانتقائي",
+    "category": "الانتباه",
+    "mode": "selective_attention",
+    "summary": "تدريب على انتقاء هدف واضح وتجاهل مثيرات لا تطابق القاعدة.",
+    "instructions": "اختر «استجب» للهدف المحدد فقط، و«تجاهل» لغيره.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "attention-switch",
+    "title": "تحويل الانتباه",
+    "category": "المرونة الانتباهية",
+    "mode": "attention_switch",
+    "summary": "تدريب على تحويل الانتباه بين خاصيتي اللون والشكل وفق إشارة كل محاولة.",
+    "instructions": "اقرأ القاعدة الحالية ثم اختر اللون أو الشكل المطلوب، لا الخاصية الأخرى.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "number-series",
+    "title": "استكمال السلاسل العددية",
+    "category": "الاستدلال",
+    "mode": "number_series",
+    "summary": "تدريب على اكتشاف نمط عددي متدرج واستكمال الحد التالي.",
+    "instructions": "حدد علاقة الحدود السابقة ثم اختر الرقم التالي.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "matrix-patterns",
+    "title": "المصفوفات النمطية",
+    "category": "الاستدلال البصري",
+    "mode": "matrix_patterns",
+    "summary": "نشاط مبسط لاكتشاف قاعدة تربط عناصر صفوف مصفوفة واستخدامها لإكمال الخانة.",
+    "instructions": "استنتج قاعدة الصف الأول وطبقها على الصف الثاني.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "odd-one-out",
+    "title": "العنصر المختلف منطقيًا",
+    "category": "الاستدلال",
+    "mode": "odd_one_out",
+    "summary": "تدريب تصنيف يطلب تحديد العنصر الذي لا يشارك بقية المجموعة خاصيتها.",
+    "instructions": "ابحث عن الفئة المشتركة ثم اختر العنصر الخارج عنها.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "verbal-analogy",
+    "title": "التناظر اللفظي",
+    "category": "الاستدلال اللفظي",
+    "mode": "verbal_analogy",
+    "summary": "تدريب على نقل علاقة واضحة بين زوج كلمات إلى زوج آخر.",
+    "instructions": "سمِّ العلاقة في الزوج الأول ثم اختر ما يكمل العلاقة الثانية.",
+    "difficultyStatus": "verified"
+  },
+  {
+    "slug": "logical-rules",
+    "title": "تطبيق القواعد المنطقية",
+    "category": "الاستدلال",
+    "mode": "logical_rules",
+    "summary": "نشاط يطلب تطبيق قاعدة صريحة متعددة الشروط على مثال جديد.",
+    "instructions": "اقرأ جميع شروط القاعدة وطبق الشرط المنطبق فقط.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "conditional-reasoning",
+    "title": "الاستدلال الشرطي",
+    "category": "الاستدلال",
+    "mode": "conditional_reasoning",
+    "summary": "تدريب على تمييز ما يلزم منطقيًا من شرط معطى وما لا يمكن الجزم به.",
+    "instructions": "استخدم المعلومات المكتوبة فقط، ولا تضف افتراضات غير مذكورة.",
+    "difficultyStatus": "verified"
+  },
+  {
+    "slug": "mental-arithmetic",
+    "title": "الحساب الذهني المتدرج",
+    "category": "المرونة العددية",
+    "mode": "mental_arithmetic",
+    "summary": "تدريب حسابي قصير تتدرج فيه العمليات وعدد الخطوات.",
+    "instructions": "نفذ العمليات من اليمين إلى اليسار كما تظهر في التعليمات، ثم اختر الناتج.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "estimation",
+    "title": "التقدير العددي السريع",
+    "category": "المرونة العددية",
+    "mode": "estimation",
+    "summary": "تدريب على اختيار أقرب تقدير معقول من دون الحاجة إلى دقة الحساب الكامل.",
+    "instructions": "قرّب القيم وفق المطلوب ثم اختر أقرب نتيجة.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "mental-rotation",
+    "title": "الدوران الذهني للأشكال",
+    "category": "القدرات المكانية",
+    "mode": "mental_rotation",
+    "summary": "نشاط مكاني لتتبع اتجاه سهم بعد عدد محدد من أرباع الدوران.",
+    "instructions": "تابع اتجاه الدوران وعدد أرباع الدورة ثم اختر الاتجاه النهائي.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "spatial-relations",
+    "title": "العلاقات المكانية",
+    "category": "القدرات المكانية",
+    "mode": "spatial_relations",
+    "summary": "تدريب على دمج علاقتين مكانيتين واستنتاج موضع عنصر بالنسبة لآخر.",
+    "instructions": "كوّن خريطة ذهنية صغيرة من الوصف ثم اختر العلاقة الناتجة.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "trail-switching",
+    "title": "المسار المتناوب",
+    "category": "المرونة التنفيذية",
+    "mode": "trail_switching",
+    "summary": "تدريب على متابعة تسلسل يتناوب بين أرقام وحروف أو فئتين ظاهرتين.",
+    "instructions": "حافظ على نمط التناوب واختر العنصر التالي.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "task-switching",
+    "title": "تبديل قاعدة المهمة",
+    "category": "المرونة التنفيذية",
+    "mode": "task_switching",
+    "summary": "نشاط يغير قاعدة التصنيف بحسب إشارة كل محاولة.",
+    "instructions": "اقرأ اسم القاعدة قبل الإجابة ثم صنف المثير وفقها وحدها.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "planning-steps",
+    "title": "ترتيب خطوات الخطة",
+    "category": "الوظائف التنفيذية",
+    "mode": "planning_steps",
+    "summary": "تدريب على ترتيب خطوات عملية وفق الاعتماد والزمن ونقطة التحقق.",
+    "instructions": "ابحث عما يجب أن يحدث أولًا، ثم ما يعتمد عليه، ثم خطوة المراجعة.",
+    "difficultyStatus": "verified"
+  },
+  {
+    "slug": "rule-discovery",
+    "title": "اكتشاف القاعدة",
+    "category": "الوظائف التنفيذية",
+    "mode": "rule_discovery",
+    "summary": "نشاط استدلال من أمثلة متعددة لاكتشاف القاعدة الأقصر التي تفسرها.",
+    "instructions": "اختبر القاعدة على جميع الأمثلة قبل تطبيقها على القيمة الجديدة.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "priority-planning",
+    "title": "ترتيب الأولويات",
+    "category": "الوظائف التنفيذية",
+    "mode": "priority_planning",
+    "summary": "تدريب تعليمي على الموازنة بين الموعد والأثر والاعتماد عند ترتيب مهام قصيرة.",
+    "instructions": "قارن الاستعجال والأهمية وما يمنع بقية المهام، ثم اختر البداية الأنسب.",
+    "difficultyStatus": "verified"
+  },
+  {
+    "slug": "problem-solving",
+    "title": "حل المشكلات المنظم",
+    "category": "الوظائف التنفيذية",
+    "mode": "problem_solving",
+    "summary": "نشاط يميز خطوة حل المشكلة المناسبة: التعريف، جمع الدليل، توليد البدائل، الاختبار أو المراجعة.",
+    "instructions": "حدد مرحلة المشكلة أولًا ثم اختر الخطوة التي تخدمها.",
+    "difficultyStatus": "verified"
+  },
+  {
+    "slug": "emotion-recognition",
+    "title": "تمييز الانفعالات من السياق",
+    "category": "المعالجة الاجتماعية",
+    "mode": "emotion_recognition",
+    "summary": "نشاط تعليمي يربط قرائن موقف مكتوب بانفعال محتمل، مع الاعتراف بأن الواقع قد يحتمل أكثر من قراءة.",
+    "instructions": "اختر الانفعال الأكثر اتساقًا مع القرائن المذكورة في المثال فقط.",
+    "difficultyStatus": "verified"
+  },
+  {
+    "slug": "perspective-taking",
+    "title": "فهم منظور الآخر",
+    "category": "المعالجة الاجتماعية",
+    "mode": "perspective_taking",
+    "summary": "نشاط قصصي يميز ما يعرفه شخص وما حدث في غيابه، من دون تقييم السمات الشخصية.",
+    "instructions": "تتبع ما رآه كل شخص وما لم يره، ثم أجب من منظوره.",
+    "difficultyStatus": "verified"
+  },
+  {
+    "slug": "social-scenarios",
+    "title": "الاستجابة للمواقف الاجتماعية",
+    "category": "المعالجة الاجتماعية",
+    "mode": "social_scenarios",
+    "summary": "أمثلة تعليمية على استجابات تحترم الحدود والموافقة والسياق؛ ليست اختبارًا للشخصية أو الكفاءة.",
+    "instructions": "اختر الاستجابة التي تحترم الحدود وتطلب التوضيح عند الحاجة.",
+    "difficultyStatus": "verified"
+  },
+  {
+    "slug": "context-clues",
+    "title": "استنتاج معنى الكلمة من السياق",
+    "category": "اللغة",
+    "mode": "context_clues",
+    "summary": "تدريب لغوي على استخدام قرائن الجملة لتحديد معنى كلمة غير مألوفة.",
+    "instructions": "اقرأ ما قبل الكلمة وما بعدها واختر المعنى الذي يجعل الجملة متماسكة.",
+    "difficultyStatus": "verified"
+  },
+  {
+    "slug": "word-categories",
+    "title": "تصنيف الكلمات الدلالي",
+    "category": "اللغة",
+    "mode": "word_categories",
+    "summary": "نشاط تصنيف يربط كلمة بفئتها المباشرة أو الأكثر تحديدًا بحسب المستوى.",
+    "instructions": "اختر الفئة التي تضم الكلمة وفق درجة التحديد المطلوبة.",
+    "difficultyStatus": "verified"
+  },
+  {
+    "slug": "semantic-fluency",
+    "title": "الطلاقة الدلالية الموجهة",
+    "category": "اللغة",
+    "mode": "semantic_fluency",
+    "summary": "نشاط اختيار مجموعة تتشارك فئة دلالية واحدة، وليس اختبار طلاقة معياريًا.",
+    "instructions": "اختر المجموعة التي تنتمي جميع عناصرها إلى الفئة المطلوبة.",
+    "difficultyStatus": "verified"
+  },
+  {
+    "slug": "associative-binding",
+    "title": "ربط العنصر بسياقه",
+    "category": "الذاكرة الترابطية",
+    "mode": "associative_binding",
+    "summary": "تدريب على تذكر ارتباط عنصر بمكان أو لون محدد بعد إخفاء مشهد الدراسة.",
+    "instructions": "ادرس الأزواج بين العنصر والسياق ثم اختر السياق المرتبط بعنصر السؤال.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "working-memory-updating",
+    "title": "تحديث الذاكرة العاملة",
+    "category": "الذاكرة العاملة",
+    "mode": "working_memory_updating",
+    "summary": "نشاط تحديث متوازٍ لقيمتين أو أكثر وفق سلسلة تغييرات قصيرة.",
+    "instructions": "احتفظ بالقيم الحالية وطبّق كل تحديث على خانته ثم اختر الحالة النهائية.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "prospective-memory",
+    "title": "تذكر النية المستقبلية",
+    "category": "الذاكرة المستقبلية",
+    "mode": "prospective_memory",
+    "summary": "نشاط تعليمي على تذكر تنفيذ نية عندما تظهر إشارة متفق عليها داخل مهمة أخرى.",
+    "instructions": "احفظ قاعدة النية، ثم اختر الفعل المرتبط بالإشارة الحالية.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "temporal-order-memory",
+    "title": "ذاكرة الترتيب الزمني",
+    "category": "الذاكرة",
+    "mode": "temporal_order_memory",
+    "summary": "تدريب على تذكر ترتيب ظهور أحداث أو رموز لا مجرد التعرف عليها.",
+    "instructions": "ادرس التسلسل ثم حدد أي عنصر ظهر أولًا أو في الموضع المطلوب.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "visual-change-detection",
+    "title": "اكتشاف التغير البصري",
+    "category": "الذاكرة البصرية",
+    "mode": "visual_change_detection",
+    "summary": "نشاط يقارن بين نمط دراسة ونمط لاحق لتحديد الموقع الذي تغير.",
+    "instructions": "ادرس النمط الأول ثم اختر موضع التغير في النمط الثاني.",
+    "difficultyStatus": "review"
+  }
+]

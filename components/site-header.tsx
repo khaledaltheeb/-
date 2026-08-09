@@ -6,7 +6,7 @@ import RawafidMark from '@/components/rawafid-mark';
 const primaryLinks = [
   { href: '/#sectors', label: 'القطاعات' },
   { href: '/specialists', label: 'المختصون والمراكز' },
-  { href: '/search?q=أداة', label: 'الأدوات' },
+  { href: '/cognitive-lab', label: 'الأدوات' },
   { href: '/sections', label: 'المعرفة' },
 ];
 
