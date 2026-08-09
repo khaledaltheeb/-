@@ -1,0 +1,107 @@
+{
+  "topic": "depression",
+  "researched_at": "2026-08-09",
+  "target_existing_canonical": "/content/depression",
+  "research_scope": "current WHO/NIMH/NICE guidance, psychotherapy and antidepressant network meta-analyses, behavioral activation and exercise evidence, Oxford psychiatry reference, Arabic symptom-first search intent, existing-page preservation",
+  "sources": [
+    {
+      "id": "WHO-DEPRESSION-2025",
+      "title": "Depressive disorder (depression)",
+      "publisher": "World Health Organization",
+      "year": "2025",
+      "source_type": "official-definition",
+      "authority_tier": "primary",
+      "url": "https://www.who.int/news-room/fact-sheets/detail/depression",
+      "use": "definition, symptoms, global context, effective psychological treatments, self-care and suicide-risk framing"
+    },
+    {
+      "id": "NIMH-DEPRESSION-2024",
+      "title": "Depression",
+      "publisher": "National Institute of Mental Health",
+      "year": "2024",
+      "source_type": "institutional",
+      "authority_tier": "authoritative",
+      "url": "https://www.nimh.nih.gov/health/publications/depression",
+      "use": "signs, somatic symptoms, irritability, diagnosis, medical differential and treatment overview"
+    },
+    {
+      "id": "NICE-NG222-2026",
+      "title": "Depression in adults: treatment and management (NG222)",
+      "publisher": "National Institute for Health and Care Excellence",
+      "year": "2026",
+      "source_type": "guideline",
+      "authority_tier": "primary",
+      "url": "https://www.nice.org.uk/guidance/ng222",
+      "use": "adult assessment, severity, shared decision-making, first and further-line treatment, relapse prevention; reviewed January 2026 with no update recommended"
+    },
+    {
+      "id": "FUKUMORI-PSYCHOTHERAPY-NMA-2024",
+      "title": "Network meta-analysis of the effectiveness of psychotherapies with or without medication for treating adult depression",
+      "publisher": "Acta Neuropsychiatrica",
+      "year": "2024",
+      "source_type": "systematic-review",
+      "authority_tier": "scholarly",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/39565153/",
+      "use": "comparative evidence across behavioral activation, CBT, IPT and other psychotherapy formats with or without medication"
+    },
+    {
+      "id": "CIPRIANI-ANTIDEPRESSANT-NMA-2018",
+      "title": "Comparative efficacy and acceptability of 21 antidepressant drugs for the acute treatment of adults with major depressive disorder: a systematic review and network meta-analysis",
+      "publisher": "The Lancet",
+      "year": "2018",
+      "source_type": "systematic-review",
+      "authority_tier": "scholarly",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/29477251/",
+      "use": "large comparative evidence base for acute antidepressant treatment in adults; interpreted without public drug ranking or individualized prescribing"
+    },
+    {
+      "id": "NOETEL-EXERCISE-NMA-2024",
+      "title": "Effect of exercise for depression: systematic review and network meta-analysis of randomised controlled trials",
+      "publisher": "BMJ",
+      "year": "2024",
+      "source_type": "systematic-review",
+      "authority_tier": "scholarly",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/38355154/",
+      "use": "exercise as an evidence-supported treatment component, with attention to feasibility, health status and study heterogeneity"
+    },
+    {
+      "id": "CUIJPERS-BA-META-2023",
+      "title": "Individual behavioral activation in the treatment of depression: A meta analysis",
+      "publisher": "Psychotherapy Research",
+      "year": "2023",
+      "source_type": "systematic-review",
+      "authority_tier": "scholarly",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/37068380/",
+      "use": "behavioral activation evidence and rationale for action before motivation fully returns"
+    },
+    {
+      "id": "TRIVEDI-STRAKOWSKI-OXFORD-2019",
+      "title": "Depression",
+      "publisher": "Oxford University Press",
+      "year": "2019",
+      "source_type": "book",
+      "authority_tier": "scholarly",
+      "isbn": "9780190929565",
+      "url": "https://academic.oup.com/book/29488",
+      "use": "etiology, differential diagnosis, pharmacotherapy, psychotherapy, neuromodulation and special populations"
+    }
+  ],
+  "existing_site_overlap": [
+    {
+      "canonical": "/content/depression",
+      "decision": "upgrade this existing condition canonical in place; preserve its broad clinical content and add missing search-intent language and V6 provenance"
+    },
+    {
+      "canonical": "/comparisons/sadness-vs-depression/",
+      "decision": "preserve as dedicated comparison; summarize and link rather than reproduce its full comparison intent"
+    },
+    {
+      "canonical": "/care-guides/emotional-numbness-anhedonia-support/",
+      "decision": "preserve as practical support guide for emotional numbness/anhedonia; condition page explains the symptom and links to deeper support"
+    },
+    {
+      "canonical": "/care-guides/seasonal-mood-change-plan/",
+      "decision": "preserve as seasonal support guide rather than expanding the central condition page into a duplicate seasonal-management page"
+    }
+  ]
+}
