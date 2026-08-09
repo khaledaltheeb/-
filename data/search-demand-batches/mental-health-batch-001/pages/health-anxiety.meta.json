@@ -1,0 +1,87 @@
+{
+  "source_path": "data/search-demand-batches/mental-health-batch-001/research/health-anxiety.sources.json",
+  "body_path": "data/search-demand-batches/mental-health-batch-001/content/health-anxiety.md",
+  "slug": "health-anxiety",
+  "title": "القلق الصحي: لماذا أخاف من المرض رغم الطمأنة؟",
+  "content_type": "guide",
+  "status": "draft",
+  "excerpt": "مرجع عربي شامل لفهم القلق الصحي والخوف من المرض، الفحص والبحث وطلب الطمأنة، الفرق عن اضطراب قلق المرض والوسواس، التقييم الطبي والنفسي وCBT والعلاج المنظم.",
+  "sector_slug": "mental-health",
+  "category_slug": "somatic-health-anxiety",
+  "audience": ["الأشخاص الذين يعانون من الخوف المتكرر من المرض", "الأسر", "مقدمو الرعاية", "المختصون", "طلاب الصحة النفسية"],
+  "search_aliases": ["القلق الصحي", "الخوف من المرض", "وسواس المرض", "توهم المرض", "Illness Anxiety Disorder", "Health Anxiety", "Hypochondriasis", "الخوف من السرطان", "البحث عن الأعراض", "الفحص المتكرر للجسم", "طلب الطمأنة", "الخوف رغم سلامة الفحوص"],
+  "seo_title": "القلق الصحي: الأعراض والتقييم والعلاج",
+  "seo_description": "دليل عربي موثوق عن القلق الصحي يشرح الخوف من المرض رغم الفحوص، فحص الجسم والبحث والطمأنة، الفرق عن الوسواس وقلق المرض، التقييم، CBT، ودور الأسرة عمليًا.",
+  "canonical_url": "/content/health-anxiety",
+  "robots_index": true,
+  "robots_follow": true,
+  "primary_keyword": "القلق الصحي",
+  "secondary_keywords": ["الخوف من المرض", "علاج القلق الصحي", "وسواس المرض", "اضطراب قلق المرض", "الخوف من السرطان رغم الفحوص", "البحث عن الأعراض في الإنترنت", "طلب الطمأنة المتكرر", "CBT للقلق الصحي"],
+  "semantic_terms": ["Illness Anxiety Disorder", "Somatic Symptom Disorder", "Health Anxiety Inventory", "فحص الجسم", "طلب الطمأنة", "التجنب الطبي", "عدم تحمل عدم اليقين", "السلوكيات الوقائية", "العلاج السلوكي المعرفي", "CBT", "التعرض", "منع الاستجابة", "إعادة البناء المعرفي", "ACT", "العلاج ما وراء المعرفي", "الرعاية الأولية"],
+  "search_intent": "informational",
+  "author_display_name": "فريق تحرير منصة روافد",
+  "reviewer_display_name": null,
+  "reviewer_credentials": null,
+  "last_reviewed_at": null,
+  "medical_disclaimer": "",
+  "featured_image_url": null,
+  "featured_image_alt": null,
+  "references_json": [
+    {"id":"MSD-IAD-2026","title":"Illness Anxiety Disorder","publisher":"MSD Manual Professional Edition","year":"2026","source_type":"institutional","authority_tier":"authoritative","url":"https://www.msdmanuals.com/professional/psychiatric-disorders/somatic-symptom-and-related-disorders/illness-anxiety-disorder"},
+    {"id":"LAI-HEALTH-ANXIETY-NMA-2026","title":"The comparative effectiveness of psychological interventions for health anxiety: systematic review and a network meta-analysis of randomised controlled trials","publisher":"The British Journal of Psychiatry","year":"2026","source_type":"systematic-review","authority_tier":"scholarly","url":"https://pubmed.ncbi.nlm.nih.gov/42169209/"},
+    {"id":"SHI-INTERNET-META-2024","title":"Efficacy of internet-based psychological interventions for pathological health anxiety: A three-level meta-analysis of randomized controlled trials","publisher":"General Hospital Psychiatry","year":"2024","source_type":"systematic-review","authority_tier":"scholarly","url":"https://pubmed.ncbi.nlm.nih.gov/38335917/"},
+    {"id":"HYBELIUS-PRIMARY-CARE-2025","title":"Who benefits the most from cognitive behavior therapy for health anxiety? Secondary analysis of a randomized controlled trial of internet-delivered vs. face-to-face treatment in primary care","publisher":"Journal of Psychosomatic Research","year":"2025","source_type":"primary-research","authority_tier":"scholarly","url":"https://pubmed.ncbi.nlm.nih.gov/40203684/"},
+    {"id":"HEDMAN-EXPOSURE-RCT-2014","title":"Internet-delivered exposure-based cognitive-behavioural therapy and behavioural stress management for severe health anxiety: randomised controlled trial","publisher":"The British Journal of Psychiatry","year":"2014","source_type":"primary-research","authority_tier":"scholarly","url":"https://pubmed.ncbi.nlm.nih.gov/25104835/"},
+    {"id":"STARCEVIC-NOYES-OXFORD-2014","title":"Hypochondriasis and Health Anxiety: A Guide for Clinicians","publisher":"Oxford University Press","year":"2014","source_type":"book","authority_tier":"scholarly","isbn":"9780199996865"},
+    {"id":"TYRER-HEALTH-ANXIETY-CAMBRIDGE-2018","title":"Tackling Health Anxiety: A CBT Handbook","publisher":"Royal College of Psychiatrists / Cambridge University Press","year":"2018","source_type":"book","authority_tier":"scholarly","isbn":"9781108644266"},
+    {"id":"DAVIES-SALKOVSKIS-CAMBRIDGE-2025","title":"Cambridge Guide to Cognitive Behavioural Therapy (CBT): Illness Anxiety Disorder","publisher":"Cambridge University Press","year":"2025","source_type":"book","authority_tier":"scholarly","isbn":"9781009090940"}
+  ],
+  "schema_json": {
+    "content_contract_version": 6,
+    "page_kind": "editorial",
+    "strategic_scientific_value": "standard",
+    "rewrite_method": "evidence-led-rewrite",
+    "disclaimer_url": "/disclaimer",
+    "disclaimer_label": "إخلاء المسؤولية والتنبيهات",
+    "search_intent_questions": [
+      "لماذا أخاف من مرض خطير رغم أن الفحوص سليمة؟",
+      "كيف أعرف أن عندي قلقًا صحيًا؟",
+      "ما الفرق بين القلق الصحي واضطراب قلق المرض؟",
+      "ما الفرق بين القلق الصحي والوسواس القهري؟",
+      "لماذا أفحص جسمي باستمرار؟",
+      "لماذا لا تكفيني طمأنة الطبيب؟",
+      "هل البحث عن الأعراض في الإنترنت يزيد القلق؟",
+      "كيف أتخلص من الخوف من السرطان والأمراض؟",
+      "هل CBT فعّال للقلق الصحي؟",
+      "هل يمكن علاج القلق الصحي عبر الإنترنت؟",
+      "هل يمكن أن يكون لدي مرض حقيقي وقلق صحي معًا؟",
+      "متى أذهب إلى الطبيب بدل اعتبار العرض قلقًا؟"
+    ],
+    "claim_source_map": [
+      {"claim":"القلق الصحي مفهوم أوسع من اضطراب قلق المرض، بينما التشخيص الرسمي يتطلب انشغالًا مستمرًا بوجود مرض خطير أو الإصابة به مع أعراض جسدية غائبة أو خفيفة عادة وسلوك فحص أو تجنب بعد تقييم مناسب.","reference_ids":["MSD-IAD-2026","STARCEVIC-NOYES-OXFORD-2014","DAVIES-SALKOVSKIS-CAMBRIDGE-2025"]},
+      {"claim":"فحص الجسم والبحث المتكرر وطلب الطمأنة أو تجنب الرعاية يمكن أن تعمل كسلوكيات تحافظ على القلق الصحي عندما تكون وظيفتها الحصول على يقين فوري بدل اتباع خطة طبية متناسبة.","reference_ids":["TYRER-HEALTH-ANXIETY-CAMBRIDGE-2018","DAVIES-SALKOVSKIS-CAMBRIDGE-2025","STARCEVIC-NOYES-OXFORD-2014"]},
+      {"claim":"يمكن أن يجتمع مرض جسدي حقيقي مع قلق صحي زائد، لذلك لا ينبغي استخدام التفسير النفسي لإلغاء المتابعة الطبية ولا استخدام المرض الجسدي لاستبعاد معالجة الانشغال والسلوكيات المفرطة.","reference_ids":["STARCEVIC-NOYES-OXFORD-2014","TYRER-HEALTH-ANXIETY-CAMBRIDGE-2018","MSD-IAD-2026"]},
+      {"claim":"أحدث مراجعة شبكية في 2026 حللت 35 تجربة عشوائية و3263 مشاركًا ودعمت عدة تدخلات نفسية للقلق الصحي، مع دعم لمكونات تشمل التعرض ومنع الاستجابة وإعادة البناء المعرفي واليقظة.","reference_ids":["LAI-HEALTH-ANXIETY-NMA-2026"]},
+      {"claim":"العلاج السلوكي المعرفي للقلق الصحي يستهدف تفسير الإحساسات والمراقبة والطمأنة وسلوكيات الأمان والتجنب وعدم اليقين، ولا يطلب من الشخص إهمال الأعراض التي تحتاج تقييمًا طبيًا.","reference_ids":["TYRER-HEALTH-ANXIETY-CAMBRIDGE-2018","DAVIES-SALKOVSKIS-CAMBRIDGE-2025","HEDMAN-EXPOSURE-RCT-2014"]},
+      {"claim":"التدخلات النفسية المنظمة عبر الإنترنت للقلق الصحي مدعومة بمراجعة منهجية لتجارب عشوائية، لكن جودة البرنامج والدعم والخصوصية والحالات المصاحبة تحدد ملاءمته للفرد.","reference_ids":["SHI-INTERNET-META-2024","HYBELIUS-PRIMARY-CARE-2025"]},
+      {"claim":"تنظيم العلاقة مع طبيب أساسي وخطة واضحة للفحوص والمتابعة يمكن أن يساعد على فصل الرعاية الضرورية عن الفحص المتكرر المدفوع بالخوف، مع بقاء أي عرض جديد مهم خاضعًا للتقييم الطبي المناسب.","reference_ids":["MSD-IAD-2026","STARCEVIC-NOYES-OXFORD-2014","TYRER-HEALTH-ANXIETY-CAMBRIDGE-2018"]},
+      {"claim":"التعافي الوظيفي يشمل انخفاض الوقت المستهلك في الفحص والبحث والطمأنة والتجنب والقدرة على اتخاذ قرار صحي ثم العودة إلى الحياة، وليس الوصول إلى يقين دائم بأن المرض مستحيل.","reference_ids":["LAI-HEALTH-ANXIETY-NMA-2026","TYRER-HEALTH-ANXIETY-CAMBRIDGE-2018","HEDMAN-EXPOSURE-RCT-2014"]}
+    ],
+    "source_versions_reviewed": [
+      {"path":"data/search-demand-batches/mental-health-batch-001/research/health-anxiety.sources.json","sha256":"0000000000000000000000000000000000000000000000000000000000000000","decision":"بحث أصلي جديد لبناء مرجع مركزي للقلق الصحي مع فصل المفهوم الواسع عن التشخيصات الرسمية، والاستناد إلى مرجع تشخيصي محدث في 2026 وأحدث مراجعة شبكية ومراجعة تدخلات الإنترنت وأبحاث الرعاية الأولية وكتب أكاديمية."}
+    ],
+    "page_mechanism": {
+      "purpose":"إنشاء مرجع عربي مركزي يجيب عن الخوف من المرض رغم الفحوص ويشرح كيف تتحول مراقبة الجسم والبحث والطمأنة أو التجنب إلى حلقة قلق قابلة للتقييم والعلاج.",
+      "audience":"الأشخاص الذين يخافون الأمراض بصورة متكررة وأسرهم ومقدمو الرعاية والمختصون والطلاب الذين يحتاجون فرقًا واضحًا بين العناية بالصحة والقلق الصحي والتشخيصات المرتبطة.",
+      "interaction_model":"قراءة تبدأ بلغة الباحث اليومية ثم تنتقل إلى التشخيصات والفروق والتقييم الطبي والنفسي والعلاج والسلوكيات اليومية والأسئلة الشائعة، مع روابط إلى الوسواس والقلق والهلع ودليل الأسرة.",
+      "content_model":"Guide مركزي للقلق الصحي بوصفه مفهومًا سريريًا واسعًا لا صفحة Condition تعادل كل الحالات باضطراب قلق المرض، مع الحفاظ على دليل الأسرة الموجود كمسار تطبيقي مستقل."
+    },
+    "taxonomy_reviewed": true,
+    "classification_confidence": 0.99,
+    "classification_rationale": "نية الصفحة الأساسية هي القلق الصحي والانشغال بالمرض والفحص والطمأنة والتجنب، وهي أوسع من اضطراب قلق المرض كتشخيص واحد؛ لذلك تنتمي إلى قطاع الصحة النفسية وفئة القلق الصحي والأعراض الجسدية، مع إبقاء دليل الأسرة والوسواس والقلق المعمم والهلع كمسارات مرتبطة لا بدائل متكررة.",
+    "originality_report": {"passed":true,"longest_verbatim_run_words":0,"legacy_sentence_reuse_ratio":0.0,"method":"new evidence-led Arabic synthesis from 2026 diagnostic and treatment evidence plus Arabic symptom-first search intent"}
+  },
+  "quality_snapshot": {
+    "validation_state": "awaiting-full-v6-validation-and-auto-provenance"
+  }
+}
