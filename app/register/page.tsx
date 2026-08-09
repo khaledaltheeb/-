@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import RawafidMark from '@/components/rawafid-mark';
 import { register } from './actions';
 
 export const metadata: Metadata = {
@@ -24,7 +25,7 @@ export default async function RegisterPage({ searchParams }: { searchParams: Sea
   return (
     <main className="auth-shell">
       <section className="auth-card auth-card-polished" aria-labelledby="register-title">
-        <Link href="/" className="brand auth-brand"><span className="brand-mark">ر</span><span><strong>منصة روافد</strong><small>Rawafid Platform</small></span></Link>
+        <Link href="/" className="brand auth-brand"><span className="brand-mark"><RawafidMark /></span><span><strong>منصة روافد</strong><small>Rawafid Platform</small></span></Link>
         <span className="eyebrow">حساب جديد</span>
         <h1 id="register-title">إنشاء حساب في منصة روافد</h1>
         <p>أنشئ حسابًا شخصيًا أولًا. الصلاحيات المهنية والإدارية لا تُمنح إلا بعد التوثيق أو قرار الإدارة.</p>

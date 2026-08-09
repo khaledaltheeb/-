@@ -1,4 +1,5 @@
 import { ImageResponse } from 'next/og';
+import RawafidMark from '@/components/rawafid-mark';
 
 export const ADDICTION_OG_SIZE = { width: 1200, height: 675 } as const;
 
@@ -13,7 +14,7 @@ export function addictionOgImage(title: string) {
           <div style={{display:'flex',padding:'10px 18px',borderRadius:999,background:'#fff0df',color:'#963f2e',fontSize:23,fontWeight:800}}>الإدمان والتعافي · منصة روافد</div>
           <div style={{display:'flex',marginTop:30,fontSize:safeTitle.length>72?48:58,lineHeight:1.42,fontWeight:900,letterSpacing:-1,maxWidth:860}}>{safeTitle}</div>
         </div>
-        <div style={{display:'flex',alignItems:'center',gap:16}}><div style={{width:54,height:54,borderRadius:18,display:'flex',alignItems:'center',justifyContent:'center',background:'linear-gradient(135deg,#0f8f88,#3ec7ad)',color:'#fff',fontWeight:900,fontSize:30}}>ر</div><div style={{display:'flex',flexDirection:'column'}}><div style={{display:'flex',fontSize:25,fontWeight:900}}>منصة روافد</div><div style={{display:'flex',fontSize:17,color:'#657d82'}}>سلامة · علاج قائم على الدليل · تعافٍ وظيفي</div></div></div>
+        <div style={{display:'flex',alignItems:'center',gap:16}}><div style={{width:54,height:54,borderRadius:18,display:'flex',alignItems:'center',justifyContent:'center',background:'linear-gradient(135deg,#0f8f88,#3ec7ad)',color:'#fff'}}><RawafidMark accent="#f4b942" style={{width:38,height:38}} /></div><div style={{display:'flex',flexDirection:'column'}}><div style={{display:'flex',fontSize:25,fontWeight:900}}>منصة روافد</div><div style={{display:'flex',fontSize:17,color:'#657d82'}}>سلامة · علاج قائم على الدليل · تعافٍ وظيفي</div></div></div>
       </div>
     </div>
   ), ADDICTION_OG_SIZE);

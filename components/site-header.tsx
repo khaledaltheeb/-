@@ -1,12 +1,13 @@
 import { createClient } from '@/lib/supabase/server';
 import { getPublicSectors } from '@/lib/public-taxonomy';
 import PlatformIcon from '@/components/platform-icon';
+import RawafidMark from '@/components/rawafid-mark';
 
 const primaryLinks = [
-  { href: '/evidence-guides/', label: 'الأدلة' },
-  { href: '/specialists', label: 'المختصون' },
-  { href: '/centers', label: 'المراكز' },
-  { href: '/community', label: 'المجتمع' },
+  { href: '/#sectors', label: 'القطاعات' },
+  { href: '/specialists', label: 'المختصون والمراكز' },
+  { href: '/search?q=أداة', label: 'الأدوات' },
+  { href: '/sections', label: 'المعرفة' },
 ];
 
 const intentLinks = [
@@ -60,18 +61,27 @@ export default async function SiteHeader() {
   return (
     <>
       <header className="site-header">
+        <div className="site-assurance-bar">
+          <div>
+            <span>معرفة عربية موثوقة وخدمات مهنية أكثر وضوحًا</span>
+            <nav aria-label="روابط مؤسسية مساندة">
+              <a href="/about">عن روافد</a>
+              <a href="/medical-review-policy">منهجية المراجعة</a>
+              <a href="/join">للمختصين والجهات</a>
+            </nav>
+          </div>
+        </div>
         <div className="site-header-inner">
           <a className="brand" href="/" aria-label="منصة روافد - الرئيسية">
-            <span className="brand-mark" aria-hidden="true">ر</span>
+            <span className="brand-mark" aria-hidden="true"><RawafidMark /></span>
             <span className="brand-copy"><strong>منصة روافد</strong><small>Rawafid Platform</small></span>
           </a>
 
           <nav className="desktop-nav" aria-label="التنقل الرئيسي">
-            <a href="/">الرئيسية</a>
             <details className="nav-dropdown mega-nav">
-              <summary>استكشف روافد</summary>
+              <summary>اكتشف</summary>
               <div className="nav-dropdown-panel mega-nav-panel">
-                <div className="nav-dropdown-heading"><div><strong>الوصول إلى منصة روافد حسب احتياجك</strong><span>قطاعات ديناميكية، مسارات بحث، ودليل خدمات في مكان واحد</span></div><a href="/search">فتح البحث المتقدم ←</a></div>
+                <div className="nav-dropdown-heading"><div><strong>ابدأ من احتياجك، لا من هيكل الموقع</strong><span>معرفة وخدمات وأدلة مهنية مترابطة في مكان واحد</span></div><a href="/search">فتح البحث المتقدم ←</a></div>
                 <div className="mega-nav-layout">
                   <section className="mega-nav-column mega-nav-sectors">
                     <h2>القطاعات</h2>
@@ -93,13 +103,12 @@ export default async function SiteHeader() {
               </div>
             </details>
             {primaryLinks.map((link) => <a key={link.href} href={link.href}>{link.label}</a>)}
-            {signedIn && <a href="/messages">الرسائل</a>}
           </nav>
 
           <form className="header-search" action="/search" method="get" role="search">
             <label className="sr-only" htmlFor="header-search-input">البحث في منصة روافد</label>
-            <input id="header-search-input" name="q" type="search" placeholder="ابحث في منصة روافد" maxLength={120} />
-            <button type="submit">بحث</button>
+            <input id="header-search-input" name="q" type="search" placeholder="ما الذي تبحث عنه؟" maxLength={120} />
+            <button type="submit" aria-label="تنفيذ البحث"><PlatformIcon name="search" size={18} /><span>بحث</span></button>
           </form>
 
           <div className="header-actions">{signedIn ? <a className="button header-login" href="/account">حسابي</a> : <a className="button header-login" href="/login">تسجيل الدخول</a>}</div>
@@ -116,6 +125,8 @@ export default async function SiteHeader() {
               {sectors.length === 0 && <span className="nav-empty">تظهر القطاعات بعد إضافتها من الإدارة.</span>}
               <span className="mobile-menu-label">الدليل والخدمات</span>
               {primaryLinks.map((link) => <a key={link.href} href={link.href}>{link.label}</a>)}
+              <a href="/centers">المراكز</a>
+              <a href="/community">المتدربون والمتطوعون</a>
               {signedIn ? <><a href="/messages">الرسائل</a><a href="/appointments">المواعيد</a><a href="/notifications">الإشعارات</a><a href="/account">حسابي</a></> : <a href="/login">تسجيل الدخول</a>}
             </div>
           </details>

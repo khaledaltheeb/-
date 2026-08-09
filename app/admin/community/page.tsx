@@ -27,24 +27,22 @@ export default async function AdminCommunityPage({ searchParams }: { searchParam
   if (!profile?.is_active || !['owner','admin'].includes(profile.role)) redirect('/account');
 
   const filter = statusOptions.includes(String(params.status)) ? String(params.status) : '';
-  let query = supabase.from('community_profiles').select('*').order('updated_at', { ascending: false }).limit(300);
-  if (filter) query = query.eq('verification', filter);
-  const { data, error } = await query;
-  const rows = (Array.isArray(data) ? data : []) as CommunityRow[];
-
-  const counts = Object.fromEntries(statusOptions.map((status) => [status, rows.filter((row) => row.verification === status).length]));
+  const { data, error } = await supabase.from('community_profiles').select('*').order('updated_at', { ascending: false }).limit(300);
+  const allRows = (Array.isArray(data) ? data : []) as CommunityRow[];
+  const rows = filter ? allRows.filter((row) => row.verification === filter) : allRows;
+  const counts = Object.fromEntries(statusOptions.map((status) => [status, allRows.filter((row) => row.verification === status).length]));
 
   return (
     <main className="dashboard-shell">
       <section className="dashboard-card specialist-admin-card">
-        <div className="admin-heading"><div><span className="eyebrow">Community Governance</span><h1>إدارة المتدربين والمتطوعين</h1><p>إضافة ملفات، مراجعتها واعتمادها أو تعليقها. هذه الملفات مستقلة تمامًا عن دليل المختصين المرخصين.</p></div><div className="dashboard-actions"><Link className="button" href="/admin">لوحة المدير</Link><Link className="button" href="/community">الدليل العام</Link></div></div>
+        <div className="admin-heading"><div><span className="eyebrow">حوكمة المجتمع</span><h1>إدارة المتدربين والمتطوعين</h1><p>إضافة ملفات، مراجعتها واعتمادها أو تعليقها. هذه الملفات مستقلة تمامًا عن دليل المختصين المرخصين.</p></div><div className="dashboard-actions"><Link className="button" href="/admin/verification">مركز التحقق</Link><Link className="button" href="/community">الدليل العام</Link></div></div>
 
         {params.ok && <div className="system-message success">تم تنفيذ العملية بنجاح.</div>}
         {params.error && <div className="system-message error">تعذر تنفيذ العملية ({params.error}).</div>}
         {error && <div className="system-message error">تعذر تحميل ملفات المجتمع.</div>}
 
-        <section className="portal-section admin-create-section">
-          <div className="section-mini-heading"><div><span className="eyebrow">إضافة مباشرة من المدير</span><h2>إضافة متدرب أو متطوع</h2></div><span>يُنشأ الملف بحالة Pending حتى يراجعه المدير ويعتمده صراحةً.</span></div>
+        <details className="portal-section admin-create-section admin-create-disclosure">
+          <summary><div><span className="eyebrow">إضافة مباشرة من المدير</span><h2>إضافة متدرب أو متطوع</h2><small>يُنشأ الملف بانتظار المراجعة حتى يعتمده المدير صراحةً.</small></div><span>فتح النموذج ＋</span></summary>
           <form className="admin-form" action={createCommunityMember}>
             <div className="admin-form-grid">
               <label>الصفة<select name="member_type" defaultValue="trainee"><option value="trainee">متدرب</option><option value="volunteer">متطوع</option></select></label>
@@ -65,10 +63,10 @@ export default async function AdminCommunityPage({ searchParams }: { searchParam
             </div>
             <button className="primary-action" type="submit">إضافة الملف للمراجعة</button>
           </form>
-        </section>
+        </details>
 
         <nav className="verification-filters" aria-label="تصفية حالة الملفات">
-          <Link className={!filter ? 'active' : ''} href="/admin/community">الكل <span>{rows.length}</span></Link>
+          <Link className={!filter ? 'active' : ''} href="/admin/community">الكل <span>{allRows.length}</span></Link>
           {statusOptions.map((status) => <Link className={filter === status ? 'active' : ''} href={`/admin/community?status=${status}`} key={status}>{statusAr[status]} <span>{counts[status] ?? 0}</span></Link>)}
         </nav>
 
@@ -79,6 +77,7 @@ export default async function AdminCommunityPage({ searchParams }: { searchParam
               <div className="verification-main">
                 <div className="verification-title"><div><span className={`community-badge ${member.member_type}`}>{typeAr[member.member_type]}</span><h2>{member.full_name}</h2><p>{member.headline || [member.city,member.country].filter(Boolean).join('، ') || 'لا يوجد وصف مختصر'}</p></div>{member.verification === 'verified' && <Link href={`/community/${member.slug}`}>معاينة عامة</Link>}</div>
                 <div className="review-facts"><span>{statusAr[member.verification] || member.verification}</span>{member.training_institution && <span>التدريب: {member.training_institution}</span>}{member.supervisor_name && <span>المشرف: {member.supervisor_name}</span>}{member.organization && <span>{member.organization}</span>}</div>
+                <div className="review-readiness" aria-label="اكتمال عناصر مراجعة الملف"><span className={member.user_id?'ready':'missing'}>حساب مرتبط</span><span className={(member.member_type==='trainee'?member.training_institution:member.organization)?'ready':'missing'}>الجهة</span><span className={member.bio?'ready':'missing'}>نبذة</span><span className={(member.skills||[]).length?'ready':'missing'}>مهارات</span><span className={(member.city||member.country)?'ready':'missing'}>الموقع</span></div>
                 {member.bio && <p className="review-bio">{member.bio}</p>}
                 <details className="review-details"><summary>بيانات المراجعة</summary><div className="review-details-grid">
                   <div><strong>Slug</strong><span dir="ltr">{member.slug}</span></div><div><strong>User ID</strong><span dir="ltr">{member.user_id || 'غير مرتبط'}</span></div>

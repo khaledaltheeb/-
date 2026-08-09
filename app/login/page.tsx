@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import RawafidMark from '@/components/rawafid-mark';
 import { login } from './actions';
 
 export const metadata: Metadata = {
@@ -31,7 +32,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Search
   return (
     <main className="auth-shell">
       <section className="auth-card auth-card-polished" aria-labelledby="login-title">
-        <Link href="/" className="brand auth-brand"><span className="brand-mark">ر</span><span><strong>منصة روافد</strong><small>Rawafid Platform</small></span></Link>
+        <Link href="/" className="brand auth-brand"><span className="brand-mark"><RawafidMark /></span><span><strong>منصة روافد</strong><small>Rawafid Platform</small></span></Link>
         <span className="eyebrow">حسابات منصة روافد</span>
         <h1 id="login-title">تسجيل الدخول</h1>
         <p>وصول آمن إلى حسابك، المراسلات، المواعيد والبوابات المهنية وفق صلاحيات الحساب.</p>
