@@ -5,10 +5,12 @@ This script deliberately does not publish or mutate Supabase. It:
 1) verifies source-file SHA-256 provenance declared by each page; metadata may use
    ``auto`` (or a 64-zero bootstrap sentinel) so the validator deterministically
    binds the V6 record to the exact source bytes checked out for the commit,
-2) materializes Markdown into CMS body_json/body_text,
-3) merges the parent V6 taxonomy snapshot with the validation-only overlay,
-4) runs the canonical Node V6 content release contract over the whole batch,
-5) preserves reports/materialized records as deterministic build artifacts.
+2) treats the research map as the canonical reference inventory and merges any
+   missing research references into the materialized V6 record by stable id,
+3) materializes Markdown into CMS body_json/body_text,
+4) merges the parent V6 taxonomy snapshot with the validation-only overlay,
+5) runs the canonical Node V6 content release contract over the whole batch,
+6) preserves reports/materialized records as deterministic build artifacts.
 """
 
 from __future__ import annotations
@@ -48,6 +50,44 @@ def resolve_source_provenance(meta: dict, root: Path) -> list[dict]:
             )
         resolved.append(row)
     return resolved
+
+
+def research_references(meta: dict, root: Path) -> list[dict]:
+    source_path = root / str(meta.get("source_path") or "")
+    if not source_path.is_file():
+        raise ValueError(f"{meta.get('slug')}: research source map not found: {source_path}")
+    payload = json.loads(source_path.read_text(encoding="utf-8"))
+    rows = payload.get("sources") or []
+    if not isinstance(rows, list):
+        raise ValueError(f"{meta.get('slug')}: research sources must be an array")
+    references: list[dict] = []
+    for raw in rows:
+        if not isinstance(raw, dict):
+            continue
+        row = {key: raw[key] for key in (
+            "id", "title", "publisher", "year", "source_type", "authority_tier", "url", "isbn"
+        ) if raw.get(key) not in (None, "")}
+        if row.get("id"):
+            references.append(row)
+    return references
+
+
+def merge_reference_inventory(record: dict, research_refs: list[dict]) -> None:
+    merged: dict[str, dict] = {}
+    for raw in list(record.get("references_json") or []) + research_refs:
+        if not isinstance(raw, dict):
+            continue
+        key = str(raw.get("id") or "").strip()
+        if not key:
+            continue
+        if key in merged:
+            merged[key] = {**raw, **merged[key]}
+        else:
+            merged[key] = dict(raw)
+    record["references_json"] = list(merged.values())
+    quality = dict(record.get("quality_snapshot") or {})
+    quality["references"] = len(record["references_json"])
+    record["quality_snapshot"] = quality
 
 
 def merged_taxonomy(base_path: Path, overlay_path: Path) -> dict:
@@ -94,6 +134,7 @@ def main() -> int:
         schema = dict(record.get("schema_json") or {})
         schema["source_versions_reviewed"] = resolved_versions
         record["schema_json"] = schema
+        merge_reference_inventory(record, research_references(meta, root))
         records.append(record)
         snapshots.append({"slug": record.get("slug"), **(record.get("quality_snapshot") or {})})
         (args.output_dir / f"{record['slug']}.json").write_text(
