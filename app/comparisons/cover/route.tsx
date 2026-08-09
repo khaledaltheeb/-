@@ -1,7 +1,5 @@
-import { capabilityOgImage } from '@/components/capability-og-image';
-import { getComparisonRecord } from '@/lib/comparisons';
+import { staticOgRedirect } from '@/lib/static-og-assets';
 
-export async function GET() {
-  const record = await getComparisonRecord();
-  return capabilityOgImage(record?.title || 'موسوعة المقارنات النفسية والمنهجية', 'موسوعة المقارنات المنهجية');
+export function GET(request: Request) {
+  return staticOgRedirect(request, 'comparisons');
 }
