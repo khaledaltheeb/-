@@ -11,9 +11,11 @@
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
     "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
+    "generate:og-assets": "node scripts/generate-static-og-assets.mjs",
+    "validate:og-assets": "node scripts/validate-static-og-assets.mjs",
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit",
-    "architecture-check": "node scripts/quality-contract.mjs && node scripts/theme-contract-v5.mjs && node scripts/theme-dead-code-check.mjs && node scripts/provider-system-contract.mjs && node scripts/account-system-contract.mjs",
+    "architecture-check": "node scripts/quality-contract.mjs && node scripts/theme-contract-v5.mjs && node scripts/theme-dead-code-check.mjs && node scripts/provider-system-contract.mjs && node scripts/account-system-contract.mjs && node scripts/validate-static-og-assets.mjs",
     "theme-check": "node scripts/theme-contract-v5.mjs && node scripts/theme-dead-code-check.mjs",
     "provider-system-check": "node scripts/provider-system-contract.mjs && node scripts/account-system-contract.mjs",
     "smoke": "node scripts/smoke.mjs"
@@ -33,6 +35,7 @@
     "@types/react-dom": "^19.0.0",
     "eslint": "^9.0.0",
     "eslint-config-next": "^16.0.0",
+    "sharp": "^0.35.3",
     "typescript": "^5.9.0",
     "wrangler": "^4.115.0"
   }
