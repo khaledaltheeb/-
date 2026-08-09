@@ -1,0 +1,19 @@
+{
+  "topic": "separation-anxiety-disorder",
+  "researched_at": "2026-08-09",
+  "research_scope": "child/adolescent anxiety guideline, CBT systematic review, CAMS randomized trial and follow-up, professional diagnostic reference, WHO anxiety context, parent/school search intent, existing-site overlap",
+  "sources": [
+    {"id":"AACAP-ANXIETY-CPG-2020","title":"Clinical Practice Guideline for the Assessment and Treatment of Children and Adolescents With Anxiety Disorders","publisher":"Journal of the American Academy of Child & Adolescent Psychiatry","year":"2020","source_type":"guideline","authority_tier":"primary","url":"https://pubmed.ncbi.nlm.nih.gov/?term=Clinical+Practice+Guideline+Assessment+Treatment+Children+Adolescents+Anxiety+Disorders+Walter","use":"assessment and treatment of pediatric separation anxiety, generalized anxiety and social anxiety; CBT and SSRI evidence"},
+    {"id":"COCHRANE-CHILD-ANXIETY-CBT-2020","title":"Cognitive behavioural therapy for anxiety disorders in children and adolescents","publisher":"Cochrane Database of Systematic Reviews","year":"2020","source_type":"systematic-review","authority_tier":"scholarly","url":"https://pubmed.ncbi.nlm.nih.gov/?term=Cognitive+behavioural+therapy+anxiety+disorders+children+adolescents+Cochrane+2020","use":"systematic evidence for CBT across childhood anxiety disorders including separation anxiety"},
+    {"id":"WALKUP-CAMS-2008","title":"Cognitive Behavioral Therapy, Sertraline, or a Combination in Childhood Anxiety","publisher":"New England Journal of Medicine","year":"2008","source_type":"primary-research","authority_tier":"primary","url":"https://pubmed.ncbi.nlm.nih.gov/18974308/","use":"large randomized CAMS trial including separation anxiety, generalized anxiety and social phobia; CBT, sertraline and combination outcomes"},
+    {"id":"GINSBURG-CAMELS-2014","title":"Naturalistic Follow-up of Youths Treated for Pediatric Anxiety Disorders","publisher":"JAMA Psychiatry","year":"2014","source_type":"primary-research","authority_tier":"primary","url":"https://pubmed.ncbi.nlm.nih.gov/?term=Naturalistic+Follow-up+Youths+Treated+Pediatric+Anxiety+Disorders+Ginsburg","use":"long-term course after evidence-based treatment and importance of follow-up rather than assuming permanent cure after acute response"},
+    {"id":"MSD-SEPARATION-ANXIETY","title":"Separation Anxiety Disorder","publisher":"MSD Manual Professional Edition","year":"2025","source_type":"institutional","authority_tier":"authoritative","url":"https://www.msdmanuals.com/professional/pediatrics/mental-disorders-in-children-and-adolescents/separation-anxiety-disorder","use":"developmentally inappropriate separation anxiety, presentation, school refusal, differential and treatment overview"},
+    {"id":"WHO-ANXIETY-2025-SEPARATION","title":"Anxiety disorders","publisher":"World Health Organization","year":"2025","source_type":"official-definition","authority_tier":"primary","url":"https://www.who.int/news-room/fact-sheets/detail/anxiety-disorders","use":"broad anxiety-disorder definition, impairment and effective psychological treatment context"}
+  ],
+  "existing_site_overlap": [
+    {"canonical":"/content/school-refusal","decision":"cross-link because separation anxiety may drive school refusal, but school refusal has multiple possible functions and causes"},
+    {"canonical":"/content/generalized-anxiety-disorder","decision":"cross-link when worries extend broadly beyond separation and attachment figures"},
+    {"canonical":"/content/social-anxiety-disorder","decision":"cross-link when school or social avoidance is driven by scrutiny/evaluation rather than separation"},
+    {"canonical":"/content/adolescent-depression","decision":"cross-link when withdrawal, low mood and loss of interest are prominent rather than fear focused on separation"}
+  ]
+}
