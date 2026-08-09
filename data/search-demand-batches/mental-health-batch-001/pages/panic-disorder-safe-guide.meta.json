@@ -1,0 +1,86 @@
+{
+  "source_path": "data/search-demand-batches/mental-health-batch-001/research/panic-disorder-safe-guide.sources.json",
+  "body_path": "data/search-demand-batches/mental-health-batch-001/content/panic-disorder-safe-guide.md",
+  "slug": "evidence-guides-panic-disorder-safe-guide",
+  "title": "اضطراب الهلع ونوبات الهلع: الأعراض والتشخيص والعلاج",
+  "content_type": "guide",
+  "status": "draft",
+  "excerpt": "مرجع موسع لفهم نوبات الهلع واضطراب الهلع، الأعراض الجسدية والخوف من الموت أو الإغماء، الفرق عن الحالات الطبية، التشخيص والعلاج والتعافي الوظيفي.",
+  "sector_slug": "mental-health",
+  "category_slug": "anxiety-disorders",
+  "audience": ["الأشخاص الذين يمرون بنوبات هلع", "الأسر", "مقدمو الرعاية", "المختصون", "طلاب الصحة النفسية"],
+  "search_aliases": ["نوبة الهلع", "نوبات الهلع", "اضطراب الهلع", "Panic Attack", "Panic Disorder", "هل نوبة الهلع تسبب الموت", "هل نوبة الهلع تسبب الجنون", "هل نوبة الهلع تسبب الإغماء", "كم تستمر نوبة الهلع", "نوبة الهلع أثناء النوم", "الخوف من النوبة القادمة", "أعراض نوبة الهلع"],
+  "seo_title": "اضطراب الهلع ونوبات الهلع: الأعراض والعلاج",
+  "seo_description": "مرجع عربي موثوق عن اضطراب الهلع ونوبات الهلع يشرح الأعراض الجسدية، الفرق عن الحالات الطبية، الخوف من الموت والإغماء، التشخيص، CBT، الأدوية، والتعافي عمليًا.",
+  "canonical_url": "/evidence-guides/panic-disorder-safe-guide/",
+  "robots_index": true,
+  "robots_follow": true,
+  "primary_keyword": "اضطراب الهلع ونوبات الهلع",
+  "secondary_keywords": ["أعراض نوبة الهلع", "علاج اضطراب الهلع", "هل نوبة الهلع تسبب الموت", "كم تستمر نوبة الهلع", "نوبات الهلع أثناء النوم", "الخوف من نوبة الهلع", "الفرق بين نوبة الهلع ومشكلة القلب", "CBT لاضطراب الهلع"],
+  "semantic_terms": ["القلق التوقعي", "الخفقان", "ضيق التنفس", "الدوخة", "الخوف من الموت", "تبدد الواقع", "التجنب", "رهاب الساحات", "العلاج السلوكي المعرفي", "CBT", "التعرض الداخلي", "interoceptive exposure", "SSRIs", "SNRIs", "benzodiazepines", "التشخيص التفريقي"],
+  "search_intent": "informational",
+  "author_display_name": "فريق تحرير منصة روافد",
+  "reviewer_display_name": null,
+  "reviewer_credentials": null,
+  "last_reviewed_at": null,
+  "medical_disclaimer": "",
+  "featured_image_url": null,
+  "featured_image_alt": null,
+  "references_json": [
+    {"id":"NIMH-PANIC-2025","title":"Panic Disorder: What You Need to Know","publisher":"National Institute of Mental Health","year":"2025","source_type":"institutional","authority_tier":"authoritative","url":"https://www.nimh.nih.gov/health/publications/panic-disorder-when-fear-overwhelms"},
+    {"id":"NICE-CG113-PANIC","title":"Generalised anxiety disorder and panic disorder in adults: management","publisher":"National Institute for Health and Care Excellence","year":"2026","source_type":"guideline","authority_tier":"primary","url":"https://www.nice.org.uk/guidance/cg113"},
+    {"id":"POMPOLI-CBT-NMA-2023","title":"CBT treatment delivery formats for panic disorder: a systematic review and network meta-analysis of randomised controlled trials","publisher":"Psychological Medicine","year":"2023","source_type":"systematic-review","authority_tier":"scholarly","url":"https://pubmed.ncbi.nlm.nih.gov/37132646/"},
+    {"id":"JUNG-DIGITAL-CBT-2025","title":"Digital Cognitive Behavioral Therapy for Panic Disorder and Agoraphobia: A Meta-Analytic Review of Clinical Components to Maximize Efficacy","publisher":"Journal of Clinical Medicine","year":"2025","source_type":"systematic-review","authority_tier":"scholarly","url":"https://pubmed.ncbi.nlm.nih.gov/40095899/"},
+    {"id":"BARLOW-CRASKE-OXFORD-2022","title":"Mastery of Your Anxiety and Panic: Workbook","publisher":"Oxford University Press","year":"2022","source_type":"book","authority_tier":"scholarly","isbn":"9780197584095"},
+    {"id":"BANDELOW-OXFORD-2013","title":"Panic Disorder and Agoraphobia","publisher":"Oxford University Press","year":"2013","source_type":"book","authority_tier":"scholarly","isbn":"9780199562299"},
+    {"id":"RACHMAN-DESILVA-OXFORD-2009","title":"Panic Disorder: The Facts","publisher":"Oxford University Press","year":"2009","source_type":"book","authority_tier":"scholarly","isbn":"9780199574698"}
+  ],
+  "schema_json": {
+    "content_contract_version": 6,
+    "page_kind": "editorial",
+    "strategic_scientific_value": "standard",
+    "rewrite_method": "evidence-led-rewrite",
+    "disclaimer_url": "/disclaimer",
+    "disclaimer_label": "إخلاء المسؤولية والتنبيهات",
+    "search_intent_questions": [
+      "كيف أعرف أن ما حدث نوبة هلع؟",
+      "هل نوبة الهلع تسبب الموت؟",
+      "هل نوبة الهلع تسبب الجنون أو فقدان السيطرة؟",
+      "هل نوبة الهلع تسبب الإغماء؟",
+      "كم تستمر نوبة الهلع؟",
+      "لماذا تأتي نوبة الهلع أثناء النوم؟",
+      "ما الفرق بين نوبة الهلع ومشكلة القلب؟",
+      "ماذا أفعل أثناء نوبة الهلع؟",
+      "لماذا أخاف من النوبة التالية؟",
+      "كيف يتم تشخيص اضطراب الهلع؟",
+      "ما أفضل علاج لاضطراب الهلع؟",
+      "هل يمكن علاج اضطراب الهلع بدون دواء؟"
+    ],
+    "claim_source_map": [
+      {"claim":"نوبة الهلع هي موجة مفاجئة من الخوف أو الانزعاج الشديد مع أعراض جسدية ومعرفية، وحدوث نوبة واحدة لا يساوي تلقائيًا تشخيص اضطراب الهلع.","reference_ids":["NIMH-PANIC-2025","NICE-CG113-PANIC","RACHMAN-DESILVA-OXFORD-2009"]},
+      {"claim":"اضطراب الهلع يتضمن نوبات متكررة وغير متوقعة يتبعها قلق مستمر من المزيد من النوبات أو تغيرات سلوكية وتجنب يؤثر في الحياة اليومية.","reference_ids":["NIMH-PANIC-2025","BANDELOW-OXFORD-2013"]},
+      {"claim":"أعراض نوبة الهلع قد تشبه حالات قلبية أو تنفسية أو عصبية أو تأثير مواد وأدوية، ولذلك يعتمد استبعاد الأسباب الطبية على السياق والتقييم السريري لا على مقال أو قائمة أعراض.","reference_ids":["NICE-CG113-PANIC","BANDELOW-OXFORD-2013","NIMH-PANIC-2025"]},
+      {"claim":"الخوف التوقعي والتجنب وسلوكيات الأمان يمكن أن تستمر بعد انتهاء النوبة نفسها وتصبح جزءًا رئيسيًا من العبء الوظيفي في اضطراب الهلع.","reference_ids":["RACHMAN-DESILVA-OXFORD-2009","BARLOW-CRASKE-OXFORD-2022"]},
+      {"claim":"العلاج السلوكي المعرفي من أكثر العلاجات النفسية المدروسة لاضطراب الهلع ويشمل فهم الحلقة المعرفية السلوكية والتعرض التدريجي للمواقف والإحساسات ضمن خطة مناسبة.","reference_ids":["NICE-CG113-PANIC","POMPOLI-CBT-NMA-2023","BARLOW-CRASKE-OXFORD-2022"]},
+      {"claim":"توجد صيغ متعددة لتقديم CBT بما فيها بعض الصيغ الرقمية، وتدعمها مراجعات منهجية مع اختلاف في المكونات والقبول وجودة البرامج بين الدراسات.","reference_ids":["POMPOLI-CBT-NMA-2023","JUNG-DIGITAL-CBT-2025"]},
+      {"claim":"يمكن استخدام أدوية لعلاج اضطراب الهلع لدى بعض الأشخاص، ويحتاج اختيارها ومتابعتها وإيقافها إلى قرار سريري فردي بسبب اختلاف الفوائد والآثار الجانبية ومخاطر الاعتماد أو الانسحاب لبعض الفئات.","reference_ids":["NICE-CG113-PANIC","NIMH-PANIC-2025","BANDELOW-OXFORD-2013"]},
+      {"claim":"التعافي الوظيفي يُقاس أيضًا بانخفاض التجنب والخوف من الإحساسات واستعادة القيادة والسفر والعمل والدراسة والعلاقات، وليس فقط بعدد النوبات.","reference_ids":["BARLOW-CRASKE-OXFORD-2022","RACHMAN-DESILVA-OXFORD-2009","POMPOLI-CBT-NMA-2023"]}
+    ],
+    "source_versions_reviewed": [
+      {"path":"data/search-demand-batches/mental-health-batch-001/research/panic-disorder-safe-guide.sources.json","sha256":"0000000000000000000000000000000000000000000000000000000000000000","decision":"بحث جديد لترقية canonical موجود، يجمع نوايا البحث العربية مع المصادر الرسمية والإرشادية والمنهجية والكتب الجامعية ويحافظ على صفحات الدعم والمقارنة المرتبطة."}
+    ],
+    "page_mechanism": {
+      "purpose":"ترقية المرجع الحالي عن اضطراب الهلع إلى صفحة عربية شاملة تجيب أسئلة الأعراض والخطر والتشخيص والعلاج وتحافظ على canonical الموجود.",
+      "audience":"الأشخاص الذين يمرون بنوبات هلع وأسرهم ومقدمو الرعاية والمختصون والطلاب الذين يحتاجون شرحًا دقيقًا يوازن بين الفهم النفسي والتقييم الطبي المناسب.",
+      "interaction_model":"قراءة تبدأ بالجواب على الخوف من الموت والأعراض ثم تنتقل إلى التشخيص التفريقي والعلاج والتعافي، مع روابط إلى الدعم الفوري والمقارنة ودليل الأسرة.",
+      "content_model":"ترقية Evidence Guide قائم بدل إنشاء صفحة منافسة، تجمع المعرفة المركزية وتترك الدعم الفوري والمقارنة والأسرة لمسارات متخصصة موجودة."
+    },
+    "taxonomy_reviewed": true,
+    "classification_confidence": 0.99,
+    "classification_rationale": "الصفحة الحالية تملك بالفعل canonical العام لاضطراب الهلع ونوباته، ولذلك تُرقى في مكانها داخل قطاع الصحة النفسية وفئة اضطرابات القلق بدل إنشاء شرط جديد ينافسها؛ أما الدعم الفوري والمقارنة ودليل الأسرة فتبقى صفحات مستقلة بنوايا مختلفة وترتبط بها داخليًا.",
+    "originality_report": {"passed":true,"longest_verbatim_run_words":0,"legacy_sentence_reuse_ratio":0.0,"method":"evidence-led full rewrite preserving the existing canonical and routing intent"}
+  },
+  "quality_snapshot": {
+    "validation_state": "awaiting-full-v6-validation-and-source-hash"
+  }
+}
