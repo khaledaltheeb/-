@@ -1,5 +1,6 @@
 name: Cloudflare Workers Validate
 
+# Cloudflare Workers Builds staging trigger.
 on:
   push:
     branches: [cloudflare-workers-deploy]
