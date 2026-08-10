@@ -1,0 +1,50 @@
+name: Special Needs Search Demand Validate
+
+on:
+  push:
+    branches:
+      - agent/special-needs-batch-001-pda
+    paths:
+      - 'data/search-demand-batches/special-needs-batch-001/**'
+      - 'scripts/materialize_search_demand_page.py'
+      - 'scripts/validate_search_demand_batch.py'
+      - '.github/workflows/special-needs-search-demand-validate.yml'
+  pull_request:
+    branches:
+      - agent/special-needs-demand-coverage-v1
+    paths:
+      - 'data/search-demand-batches/special-needs-batch-001/**'
+      - 'scripts/materialize_search_demand_page.py'
+      - 'scripts/validate_search_demand_batch.py'
+      - '.github/workflows/special-needs-search-demand-validate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Compile materializer and validator
+        run: python -m py_compile scripts/materialize_search_demand_page.py scripts/validate_search_demand_batch.py
+      - name: Run V6 special-needs batch validation
+        run: >-
+          python scripts/validate_search_demand_batch.py
+          data/search-demand-batches/special-needs-batch-001
+          --output-dir artifacts/special-needs-search-demand-validation
+      - name: Upload deterministic validation artifacts
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: special-needs-search-demand-validation
+          path: artifacts/special-needs-search-demand-validation
+          if-no-files-found: warn
