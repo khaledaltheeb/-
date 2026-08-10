@@ -23,32 +23,32 @@
     {
       "path": "data/editorial-demand/crosswalk-parts/editorial-topic-crosswalk.v1.part-01.csv",
       "rows": 20,
-      "bytes": 6575,
-      "sha256": "01072780fe1bc1f2068992f692c6ed52680cb68906aff702238374d7bb82e11a"
+      "bytes": 6554,
+      "sha256": "08283bc04fe57463632afa6776a138872d21c2747d7ca90eb2a9d102c661491b"
     },
     {
       "path": "data/editorial-demand/crosswalk-parts/editorial-topic-crosswalk.v1.part-02.csv",
       "rows": 20,
-      "bytes": 6233,
-      "sha256": "297355a5c212f1f1e0e70330d981267c6b15f4b7300ca6319dce86ff32e74b30"
+      "bytes": 6212,
+      "sha256": "580b1b6b40aac04c5137472177988227ccdded772c7afa0afeead9d8591a6a13"
     },
     {
       "path": "data/editorial-demand/crosswalk-parts/editorial-topic-crosswalk.v1.part-03.csv",
       "rows": 20,
-      "bytes": 5802,
-      "sha256": "6ada8a13e9433d875a961b962fa1867518eca5b6bfe3e315567e5b307ec31791"
+      "bytes": 5781,
+      "sha256": "c960126074bbbd5589d647e245bb8483bf460020b731d96c361c6c66bf994384"
     },
     {
       "path": "data/editorial-demand/crosswalk-parts/editorial-topic-crosswalk.v1.part-04.csv",
       "rows": 20,
-      "bytes": 5611,
-      "sha256": "92ea056d933917dc69f6b041106979f56dbe09cc821e941968c3fbc226dbbd89"
+      "bytes": 5590,
+      "sha256": "949123b4fb06f6164a0f9c85f83f70989375b1a9edf2485c9cf4df5307c2b63e"
     },
     {
       "path": "data/editorial-demand/crosswalk-parts/editorial-topic-crosswalk.v1.part-05.csv",
       "rows": 20,
-      "bytes": 5679,
-      "sha256": "71808d39f08240d362d939069588ebf85753651d00ec08f6c4f52e7e114e4f5f"
+      "bytes": 5658,
+      "sha256": "855b102abe94716262a2db9fd556fafff54d36493ddad16d2b7f21ccd2d0165e"
     }
   ]
 }
