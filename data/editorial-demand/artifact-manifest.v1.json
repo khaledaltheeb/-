@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "generated_at": "2026-08-10",
+  "purpose": "Provenance and integrity manifest for the reviewable editorial-demand control plane.",
+  "files": [
+    {
+      "path": "data/editorial-demand/editorial-demand.v1.summary.json",
+      "bytes": 6506,
+      "sha256": "69920f03cb5fae961725dc6e02cd73c45dfb5598c4df04073bc0c3aff8a56f05"
+    },
+    {
+      "path": "data/editorial-demand/editorial-topic-crosswalk.v1.csv",
+      "bytes": 45708,
+      "sha256": "0ee8e30c770c26934def83602e81b22be3ba3fc96b98207b96dba2843f433a55"
+    },
+    {
+      "path": "data/editorial-demand/special-needs-inclusive-batch-001.plan.json",
+      "bytes": 25815,
+      "sha256": "eb33799e7d07e80687a788f3fcc5d9a9fba3f4aaa062a91310b3e5cf77934237"
+    },
+    {
+      "path": "data/editorial-demand/legacy-inventory-reconciliation.v1.json",
+      "bytes": 1717,
+      "sha256": "1408557898ce323a2e26ffbb45a2cc262104d9049d6d7cc57a16b4ead0131973"
+    }
+  ],
+  "source_workbooks": [
+    {
+      "name": "special_needs_inclusive_psychology_2000_COMPLETE_VERIFIED(2).xlsx",
+      "bytes": 371691,
+      "sha256": "f671ad51fd32f227d454c7b83864dd0a3615b678b4388d0d7d2134f40ca8a931"
+    },
+    {
+      "name": "special_needs_inclusive_psychology_2000_ar(3).xlsx",
+      "bytes": 131013,
+      "sha256": "11d639802420bed5702e0d87f24ce3a5a0721c839dde74a0c79fe174aa9162d5"
+    }
+  ],
+  "generated_binary_artifacts": [
+    {
+      "name": "editorial-demand.v1.json.xz",
+      "bytes": 93188,
+      "sha256": "8fe70aae1147d9d8db89a8517c84913e094f8e66991ccb9cde2eba370fd78980",
+      "committed": false,
+      "reason": "Full 4,000-intent generated payload; digest retained while PR review uses the compact crosswalk and summary."
+    },
+    {
+      "name": "editorial-topic-crosswalk.v1.json.xz",
+      "bytes": 18020,
+      "sha256": "2098ce884eba06f9a99cf7adca8b85e40daecf2c052b64f168b8b30463757acb",
+      "committed": false,
+      "reason": "Compressed machine representation; CSV is the committed review surface."
+    },
+    {
+      "name": "rawafid-editorial-demand-audit.xlsx",
+      "bytes": 423607,
+      "sha256": "73eee6588016d47c8e333a55d4b6b522782f0fac22cdea8c72d5a79c964179c1",
+      "committed": false,
+      "reason": "Reviewer workbook generated from the control plane and supplied as an external audit artifact."
+    }
+  ],
+  "safety": {
+    "production_write_allowed": false,
+    "supabase_content_dml_allowed": false,
+    "cloudflare_production_publish_allowed": false,
+    "human_review_required": true,
+    "release_blocked_until_inventory_delta_zero": true
+  }
+}
