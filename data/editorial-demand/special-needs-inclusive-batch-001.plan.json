@@ -1,0 +1,200 @@
+{
+  "batch_id": "special-needs-inclusive-demand-001",
+  "date": "2026-08-10",
+  "parent_workstream": "agent/content-pipeline-v6",
+  "coordination": {
+    "do_not_overlap_pr_183": true,
+    "no_supabase_content_dml": true,
+    "no_cloudflare_production_publish": true,
+    "prerequisites": [
+      "Regenerate the V6 queue from the same pinned legacy commit and require a zero unexplained inventory delta.",
+      "Merge or rebase PR 182 before materializing pages.",
+      "Confirm taxonomy and canonical target for each record."
+    ]
+  },
+  "records": [
+    {
+      "canonical_id": "demand-avoidance-pda-eda",
+      "routing": {
+        "canonical_id": "demand-avoidance-pda-eda",
+        "cluster": "autism",
+        "content_type": "guide",
+        "action": "new-page-after-evidence-review",
+        "route_candidate": "/content/demand-avoidance-pda-eda",
+        "coordination": "Must state that PDA/EDA terminology and diagnostic status vary across systems."
+      },
+      "source_topics": [
+        "تجنب المطالب PDA / EDA"
+      ],
+      "intent_count": 40,
+      "source_urls": [
+        "https://link.springer.com/article/10.1007/s10803-026-07432-y"
+      ],
+      "state": "research-and-canonical-audit-required"
+    },
+    {
+      "canonical_id": "adhd-girls-late-diagnosis",
+      "routing": {
+        "canonical_id": "adhd-girls-late-diagnosis",
+        "cluster": "adhd",
+        "content_type": "guide",
+        "action": "new-page-after-gap-audit",
+        "route_candidate": "/content/adhd-girls-late-diagnosis"
+      },
+      "source_topics": [
+        "ADHD عند البنات والتشخيص المتأخر"
+      ],
+      "intent_count": 40,
+      "source_urls": [
+        "https://pubmed.ncbi.nlm.nih.gov/41804225/"
+      ],
+      "state": "research-and-canonical-audit-required"
+    },
+    {
+      "canonical_id": "autism-adhd-cooccurrence",
+      "routing": {
+        "canonical_id": "autism-adhd-cooccurrence",
+        "cluster": "autism-adhd",
+        "content_type": "guide",
+        "action": "upgrade-legacy-canonical",
+        "route_candidate": "/evidence-guides/autism-adhd-differences-guide/",
+        "coordination": "Legacy evidence-guide exists and is currently unmapped; upgrade instead of competing page."
+      },
+      "source_topics": [
+        "AuDHD: اجتماع التوحد وADHD"
+      ],
+      "intent_count": 40,
+      "source_urls": [
+        "https://pubmed.ncbi.nlm.nih.gov/42376236/"
+      ],
+      "state": "research-and-canonical-audit-required"
+    },
+    {
+      "canonical_id": "autistic-masking",
+      "routing": {
+        "canonical_id": "autistic-masking",
+        "cluster": "autism",
+        "content_type": "guide",
+        "action": "new-central-guide-after-gap-audit",
+        "route_candidate": "/content/autistic-masking"
+      },
+      "source_topics": [
+        "الإخفاء الاجتماعي والتوقف عن Masking"
+      ],
+      "intent_count": 40,
+      "source_urls": [
+        "https://pubmed.ncbi.nlm.nih.gov/42435102/"
+      ],
+      "state": "research-and-canonical-audit-required"
+    },
+    {
+      "canonical_id": "dld-reading-skills",
+      "routing": {
+        "canonical_id": "dld-reading-skills",
+        "cluster": "speech-language",
+        "content_type": "guide",
+        "action": "child-page-under-existing-capability",
+        "route_candidate": "/content/dld-reading-skills",
+        "coordination": "Parent capability already routes to /capabilities/developmental-language-disorder/."
+      },
+      "source_topics": [
+        "اضطراب اللغة النمائي DLD ومهارات القراءة"
+      ],
+      "intent_count": 40,
+      "source_urls": [
+        "https://pubmed.ncbi.nlm.nih.gov/42467730/"
+      ],
+      "state": "research-and-canonical-audit-required"
+    },
+    {
+      "canonical_id": "autistic-student-school-wellbeing",
+      "routing": {
+        "canonical_id": "autistic-student-school-wellbeing",
+        "cluster": "inclusive-education",
+        "content_type": "guide",
+        "action": "new-page-after-gap-audit",
+        "route_candidate": "/content/autistic-student-school-wellbeing"
+      },
+      "source_topics": [
+        "الرفاه النفسي للطلاب المتوحدين في المدرسة"
+      ],
+      "intent_count": 40,
+      "source_urls": [
+        "https://link.springer.com/article/10.1007/s40489-026-00540-6"
+      ],
+      "state": "research-and-canonical-audit-required"
+    },
+    {
+      "canonical_id": "autism-adhd-sensory-processing",
+      "routing": {
+        "canonical_id": "autism-adhd-sensory-processing",
+        "cluster": "sensory-processing",
+        "content_type": "guide",
+        "action": "upgrade-and-synthesize-existing-research",
+        "route_candidate": "/content/autism-adhd-sensory-processing"
+      },
+      "source_topics": [
+        "المعالجة الحسية المشتركة في التوحد وADHD"
+      ],
+      "intent_count": 40,
+      "source_urls": [
+        "https://pubmed.ncbi.nlm.nih.gov/42376236/"
+      ],
+      "state": "research-and-canonical-audit-required"
+    },
+    {
+      "canonical_id": "autistic-burnout",
+      "routing": {
+        "canonical_id": "autistic-burnout",
+        "cluster": "autism",
+        "content_type": "guide",
+        "action": "new-page-after-gap-audit",
+        "route_candidate": "/content/autistic-burnout"
+      },
+      "source_topics": [
+        "الاحتراق التوحدي Autistic burnout"
+      ],
+      "intent_count": 40,
+      "source_urls": [
+        "https://www.autism.org.uk/advice-and-guidance/topics/mental-health/autistic-fatigue"
+      ],
+      "state": "research-and-canonical-audit-required"
+    },
+    {
+      "canonical_id": "dld-classroom-language-interventions",
+      "routing": {
+        "canonical_id": "dld-classroom-language-interventions",
+        "cluster": "speech-language",
+        "content_type": "guide",
+        "action": "new-practice-guide",
+        "route_candidate": "/content/dld-classroom-language-interventions"
+      },
+      "source_topics": [
+        "التدخلات الصفية للغة لدى طلاب DLD"
+      ],
+      "intent_count": 40,
+      "source_urls": [
+        "https://pubmed.ncbi.nlm.nih.gov/42273712/"
+      ],
+      "state": "research-and-canonical-audit-required"
+    },
+    {
+      "canonical_id": "late-autism-diagnosis",
+      "routing": {
+        "canonical_id": "late-autism-diagnosis",
+        "cluster": "autism",
+        "content_type": "guide",
+        "action": "new-page-after-gap-audit",
+        "route_candidate": "/content/late-autism-diagnosis"
+      },
+      "source_topics": [
+        "التشخيص المتأخر للتوحد"
+      ],
+      "intent_count": 40,
+      "source_urls": [
+        "https://www.cdc.gov/autism/"
+      ],
+      "state": "research-and-canonical-audit-required"
+    }
+  ]
+}
