@@ -155,10 +155,10 @@
     "search_intent_questions": [
       "ما هو PDA أو تجنب المطالب المرضي؟",
       "هل PDA تشخيص رسمي أم وصف سلوكي؟",
-      "ما الفرق بين PDA وEDA والعناد؟",
+      "ما الفرق بين مصطلحي PDA وEDA والعناد؟",
       "هل تجنب المطالب يعني أن الطفل متوحد؟",
       "كيف أعرف سبب رفض الطفل للمطالب؟",
-      "هل استبانة EDA-Q تشخص PDA؟",
+      "هل تستطيع استبانة EDA-Q تشخيص نمط PDA؟",
       "كيف تتعامل الأسرة مع تجنب المطالب الشديد؟",
       "ما التكييفات المدرسية المناسبة لتجنب المطالب؟",
       "ما الفرق بين تجنب المطالب واضطراب التحدي المعارض؟",
@@ -185,7 +185,8 @@
       "longest_verbatim_run_words": 0,
       "legacy_sentence_reuse_ratio": 0.0,
       "method": "new Arabic synthesis from systematic reviews, empirical studies, clinical guidelines and current search intent"
-    }
+    },
+    "uniqueness_rationale": "تغطي الصفحة نية بحث عربية لا تملك مسارًا مطابقًا في قاعدة المحتوى أو سجل التحويلات، وتختلف عن مرجع التوحد العام لأنها تركز على حدود مصطلحات PDA وEDA، جودة الأدلة، التقييم الوظيفي متعدد الأسباب، وخطط الدعم المنزلية والمدرسية. كما تمنع التشخيص الذاتي وتربط النمط بالقلق والحس والتواصل والوظائف التنفيذية من دون تحويل فرضية بحثية إلى حقيقة تشخيصية."
   },
   "references_json": [
     {
@@ -211,7 +212,7 @@
       "title": "Intolerance of uncertainty and anxiety as explanatory frameworks for extreme demand avoidance in children and adolescents",
       "publisher": "Child and Adolescent Mental Health",
       "year": 2020,
-      "source_type": "empirical-study",
+      "source_type": "primary-research",
       "authority_tier": "scholarly",
       "url": "https://pubmed.ncbi.nlm.nih.gov/32307839/"
     },
@@ -220,7 +221,7 @@
       "title": "Understanding the Contributions of Trait Autism and Anxiety to Extreme Demand Avoidance in the Adult General Population",
       "publisher": "Journal of Autism and Developmental Disorders",
       "year": 2022,
-      "source_type": "empirical-study",
+      "source_type": "primary-research",
       "authority_tier": "scholarly",
       "url": "https://pubmed.ncbi.nlm.nih.gov/35437676/"
     },
@@ -229,7 +230,7 @@
       "title": "Development of the Extreme Demand Avoidance Questionnaire (EDA-Q): preliminary observations on a trait measure for Pathological Demand Avoidance",
       "publisher": "Journal of Child Psychology and Psychiatry",
       "year": 2014,
-      "source_type": "instrument-development",
+      "source_type": "primary-research",
       "authority_tier": "scholarly",
       "url": "https://pubmed.ncbi.nlm.nih.gov/24117718/"
     },
@@ -238,7 +239,7 @@
       "title": "Autism spectrum disorder in under 19s: support and management",
       "publisher": "National Institute for Health and Care Excellence",
       "year": 2021,
-      "source_type": "clinical-guideline",
+      "source_type": "guideline",
       "authority_tier": "primary",
       "url": "https://www.nice.org.uk/guidance/cg170/chapter/recommendations"
     },
@@ -247,7 +248,7 @@
       "title": "Autism spectrum disorder in adults: diagnosis and management",
       "publisher": "National Institute for Health and Care Excellence",
       "year": 2021,
-      "source_type": "clinical-guideline",
+      "source_type": "guideline",
       "authority_tier": "primary",
       "url": "https://www.nice.org.uk/guidance/cg142/chapter/recommendations"
     },
@@ -256,16 +257,16 @@
       "title": "Demand avoidance",
       "publisher": "National Autistic Society",
       "year": 2026,
-      "source_type": "institutional-guidance",
+      "source_type": "institutional",
       "authority_tier": "authoritative",
       "url": "https://www.autism.org.uk/advice-and-guidance/behaviour/demand-avoidance"
     }
   ],
   "quality_snapshot": {
-    "arabic_visible_words": 3410,
+    "arabic_visible_words": 3411,
     "h1_inside_body": 0,
-    "h2_sections": 14,
-    "h3_subsections": 26,
+    "h2_sections": 13,
+    "h3_subsections": 18,
     "faq_items": 8,
     "minimum_faq_answer_arabic_words": 52,
     "explicit_search_questions": 10,
@@ -273,7 +274,6 @@
     "mapped_claims": 10,
     "seo_title_characters": 33,
     "seo_description_characters": 154,
-    "forbidden_visible_patterns_found": 0,
-    "validation_state": "staged-passed-key-v6-checks"
+    "validation_state": "materialized-passed-key-v6-checks"
   }
 }

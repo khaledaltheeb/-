@@ -5,10 +5,10 @@
   "search_intent_questions": [
     "ما هو PDA أو تجنب المطالب المرضي؟",
     "هل PDA تشخيص رسمي أم وصف سلوكي؟",
-    "ما الفرق بين PDA وEDA والعناد؟",
+    "ما الفرق بين مصطلحي PDA وEDA والعناد؟",
     "هل تجنب المطالب يعني أن الطفل متوحد؟",
     "كيف أعرف سبب رفض الطفل للمطالب؟",
-    "هل استبانة EDA-Q تشخص PDA؟",
+    "هل تستطيع استبانة EDA-Q تشخيص نمط PDA؟",
     "كيف تتعامل الأسرة مع تجنب المطالب الشديد؟",
     "ما التكييفات المدرسية المناسبة لتجنب المطالب؟",
     "ما الفرق بين تجنب المطالب واضطراب التحدي المعارض؟",
@@ -38,7 +38,7 @@
       "title": "Intolerance of uncertainty and anxiety as explanatory frameworks for extreme demand avoidance in children and adolescents",
       "publisher": "Child and Adolescent Mental Health",
       "year": 2020,
-      "source_type": "empirical-study",
+      "source_type": "primary-research",
       "authority_tier": "scholarly",
       "url": "https://pubmed.ncbi.nlm.nih.gov/32307839/"
     },
@@ -47,7 +47,7 @@
       "title": "Understanding the Contributions of Trait Autism and Anxiety to Extreme Demand Avoidance in the Adult General Population",
       "publisher": "Journal of Autism and Developmental Disorders",
       "year": 2022,
-      "source_type": "empirical-study",
+      "source_type": "primary-research",
       "authority_tier": "scholarly",
       "url": "https://pubmed.ncbi.nlm.nih.gov/35437676/"
     },
@@ -56,7 +56,7 @@
       "title": "Development of the Extreme Demand Avoidance Questionnaire (EDA-Q): preliminary observations on a trait measure for Pathological Demand Avoidance",
       "publisher": "Journal of Child Psychology and Psychiatry",
       "year": 2014,
-      "source_type": "instrument-development",
+      "source_type": "primary-research",
       "authority_tier": "scholarly",
       "url": "https://pubmed.ncbi.nlm.nih.gov/24117718/"
     },
@@ -65,7 +65,7 @@
       "title": "Autism spectrum disorder in under 19s: support and management",
       "publisher": "National Institute for Health and Care Excellence",
       "year": 2021,
-      "source_type": "clinical-guideline",
+      "source_type": "guideline",
       "authority_tier": "primary",
       "url": "https://www.nice.org.uk/guidance/cg170/chapter/recommendations"
     },
@@ -74,7 +74,7 @@
       "title": "Autism spectrum disorder in adults: diagnosis and management",
       "publisher": "National Institute for Health and Care Excellence",
       "year": 2021,
-      "source_type": "clinical-guideline",
+      "source_type": "guideline",
       "authority_tier": "primary",
       "url": "https://www.nice.org.uk/guidance/cg142/chapter/recommendations"
     },
@@ -83,7 +83,7 @@
       "title": "Demand avoidance",
       "publisher": "National Autistic Society",
       "year": 2026,
-      "source_type": "institutional-guidance",
+      "source_type": "institutional",
       "authority_tier": "authoritative",
       "url": "https://www.autism.org.uk/advice-and-guidance/behaviour/demand-avoidance"
     }
