@@ -1,0 +1,76 @@
+{
+  "version": 2,
+  "batch_id": "special-needs-inclusive-demand-001",
+  "updated_at": "2026-08-10",
+  "state": "draft-validation-passed",
+  "records": 2,
+  "release_ready_under_v6": 2,
+  "published_to_supabase": 0,
+  "published_to_cloudflare_production": 0,
+  "pages": [
+    {
+      "slug": "adhd-girls-late-diagnosis",
+      "canonical_url": "/content/adhd-girls-late-diagnosis",
+      "title": "اضطراب ADHD لدى الفتيات والنساء: لماذا يتأخر التشخيص؟",
+      "status": "draft",
+      "canonical_audit": "new-canonical-after-gap-audit",
+      "v6_contract": "passed",
+      "quality": {
+        "arabic_visible_words": 3328,
+        "h1_inside_body": 0,
+        "h2_sections": 16,
+        "h3_subsections": 24,
+        "faq_items": 8,
+        "minimum_faq_answer_arabic_words": 43,
+        "explicit_search_questions": 10,
+        "references": 8,
+        "mapped_claims": 10,
+        "seo_title_characters": 38,
+        "seo_description_characters": 155,
+        "validation_state": "materialized-passed-key-v6-checks"
+      },
+      "remaining_human_gates": [
+        "scientific-review",
+        "editorial-review",
+        "seo-review",
+        "accessibility-review",
+        "final-canonical-review-after-parent-prs-merge"
+      ]
+    },
+    {
+      "slug": "demand-avoidance-pda-eda",
+      "canonical_url": "/content/demand-avoidance-pda-eda",
+      "title": "تجنب المطالب الشديد لدى بعض المتوحدين: فهم PDA وEDA دون تشخيص متسرع",
+      "status": "draft",
+      "canonical_audit": "new-canonical-after-gap-audit",
+      "v6_contract": "passed",
+      "quality": {
+        "arabic_visible_words": 3411,
+        "h1_inside_body": 0,
+        "h2_sections": 13,
+        "h3_subsections": 18,
+        "faq_items": 8,
+        "minimum_faq_answer_arabic_words": 52,
+        "explicit_search_questions": 10,
+        "references": 8,
+        "mapped_claims": 10,
+        "seo_title_characters": 33,
+        "seo_description_characters": 154,
+        "validation_state": "materialized-passed-key-v6-checks"
+      },
+      "remaining_human_gates": [
+        "scientific-review",
+        "editorial-review",
+        "seo-review",
+        "accessibility-review",
+        "final-canonical-review-after-parent-prs-merge"
+      ]
+    }
+  ],
+  "safety": {
+    "supabase_content_dml_allowed": false,
+    "cloudflare_production_publish_allowed": false,
+    "human_review_required": true,
+    "stacked_after_pr_185": true
+  }
+}
