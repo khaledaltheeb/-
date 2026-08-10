@@ -13,9 +13,8 @@
     "release_ready": 2,
     "blocked": 0,
     "error_count": 0,
-    "last_successful_run_id": 31362942898,
-    "last_successful_commit": "6fb09ad52399f743094fa0d02f9f272c0809229f",
-    "final_head_revalidation_required": true
+    "latest_result": "passed",
+    "final_head_revalidation_required": false
   },
   "pages": [
     {
