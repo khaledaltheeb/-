@@ -1,0 +1,94 @@
+{
+  "version": 1,
+  "topic_id": "pda-eda-demand-avoidance",
+  "canonical_candidate": "/content/demand-avoidance-autism",
+  "evidence_position": "limited-and-contested",
+  "diagnostic_boundary": "PDA/EDA is not presented as a standalone formal diagnosis. The page treats severe demand avoidance as a functional pattern requiring individualized assessment and support.",
+  "sources": [
+    {
+      "id": "kildahl-2021-systematic-review",
+      "title": "Pathological demand avoidance in children and adolescents: A systematic review",
+      "publisher": "Autism / SAGE Publications",
+      "year": 2021,
+      "source_type": "systematic_review",
+      "authority_tier": "A",
+      "url": "https://doi.org/10.1177/13623613211034382"
+    },
+    {
+      "id": "onions-2014-edaq",
+      "title": "Development of the Extreme Demand Avoidance Questionnaire (EDA-Q): preliminary observations on a trait measure for Pathological Demand Avoidance",
+      "publisher": "Journal of Child Psychology and Psychiatry / Wiley",
+      "year": 2014,
+      "source_type": "measure_development_study",
+      "authority_tier": "B",
+      "url": "https://doi.org/10.1111/jcpp.12149"
+    },
+    {
+      "id": "green-2018-symptoms-not-syndrome",
+      "title": "Pathological demand avoidance: symptoms but not a syndrome",
+      "publisher": "The Lancet Child & Adolescent Health",
+      "year": 2018,
+      "source_type": "clinical_commentary",
+      "authority_tier": "B",
+      "url": "https://doi.org/10.1016/S2352-4642(18)30044-0"
+    },
+    {
+      "id": "nice-cg170",
+      "title": "Autism spectrum disorder in under 19s: support and management",
+      "publisher": "National Institute for Health and Care Excellence",
+      "year": 2013,
+      "source_type": "clinical_guideline",
+      "authority_tier": "A",
+      "url": "https://www.nice.org.uk/guidance/cg170"
+    },
+    {
+      "id": "nice-ng11",
+      "title": "Challenging behaviour and learning disabilities: prevention and interventions for people with learning disabilities whose behaviour challenges",
+      "publisher": "National Institute for Health and Care Excellence",
+      "year": 2015,
+      "source_type": "clinical_guideline",
+      "authority_tier": "A",
+      "url": "https://www.nice.org.uk/guidance/ng11"
+    },
+    {
+      "id": "who-icd11-autism",
+      "title": "ICD-11 for Mortality and Morbidity Statistics: Autism spectrum disorder (6A02)",
+      "publisher": "World Health Organization",
+      "year": 2025,
+      "source_type": "diagnostic_classification",
+      "authority_tier": "A",
+      "url": "https://icd.who.int/browse/2025-01/mms/en#437815624"
+    },
+    {
+      "id": "nas-demand-avoidance",
+      "title": "Demand avoidance",
+      "publisher": "National Autistic Society",
+      "year": 2025,
+      "source_type": "professional_and_lived_experience_guidance",
+      "authority_tier": "B",
+      "url": "https://www.autism.org.uk/advice-and-guidance/topics/behaviour/demand-avoidance"
+    }
+  ],
+  "claim_source_map": [
+    {
+      "claim": "الأدلة المنشورة حول PDA/EDA محدودة وغير متجانسة ولا تكفي لتثبيته كمتلازمة مستقلة متفق عليها.",
+      "source_ids": ["kildahl-2021-systematic-review", "green-2018-symptoms-not-syndrome"]
+    },
+    {
+      "claim": "EDA-Q أداة بحثية أولية لوصف سمات وليست اختبارًا تشخيصيًا مستقلًا.",
+      "source_ids": ["onions-2014-edaq", "kildahl-2021-systematic-review"]
+    },
+    {
+      "claim": "التقييم والدعم ينبغي أن يركزا على الوظيفة والسياق والاحتياجات المصاحبة بدل افتراض العناد أو التلاعب.",
+      "source_ids": ["nice-cg170", "nice-ng11"]
+    },
+    {
+      "claim": "PDA/EDA ليس رمزًا تشخيصيًا مستقلًا ضمن تصنيف ICD-11 للتوحد.",
+      "source_ids": ["who-icd11-autism", "kildahl-2021-systematic-review"]
+    },
+    {
+      "claim": "لغة المجتمع والخبرة المعيشة مفيدة لفهم التجربة لكنها لا تحل محل التقييم السريري والوظيفي.",
+      "source_ids": ["nas-demand-avoidance", "nice-cg170"]
+    }
+  ]
+}
