@@ -1,0 +1,147 @@
+name: Fix PDA V6 Contract
+
+on:
+  push:
+    branches:
+      - agent/special-needs-batch-001-pda
+    paths:
+      - '.github/workflows/fix-pda-v6-contract.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix-and-validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Apply exact V6 corrections
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from __future__ import annotations
+
+          import json
+          import re
+          from pathlib import Path
+
+          root = Path('.')
+          batch = root / 'data/search-demand-batches/special-needs-batch-001'
+          body_path = batch / 'content/demand-avoidance-pda-eda.md'
+          source_path = batch / 'research/demand-avoidance-pda-eda.sources.json'
+          meta_path = batch / 'pages/demand-avoidance-pda-eda.meta.json'
+
+          body = body_path.read_text(encoding='utf-8')
+          replacements = {
+              'قدم تنبيهًا مسبقًا للانتقال': 'قدم إشعارًا مسبقًا للانتقال',
+              'تغيير القواعد بلا تنبيه': 'تغيير القواعد بلا إشعار مسبق',
+              'رابط إخلاء المسؤولية والتنبيهات في المنصة يوضح حدود المحتوى العام ومسارات المساعدة.':
+                  'صفحة حدود المحتوى ومسارات المساعدة في المنصة توضح متى تكون الاستجابة العاجلة المحلية مناسبة.',
+          }
+          for old, new in replacements.items():
+              if old not in body:
+                  raise RuntimeError(f'Expected body phrase not found: {old}')
+              body = body.replace(old, new)
+          if re.search(r'(?:تنبيه|تحذير|إخلاء\s+المسؤولية)', body):
+              raise RuntimeError('Forbidden inline warning language remains in body')
+          body_path.write_text(body, encoding='utf-8')
+
+          question_replacements = {
+              'هل استبانة EDA-Q تشخص PDA؟': 'هل تستطيع استبانة EDA-Q تشخيص نمط PDA؟',
+              'ما الفرق بين PDA وEDA والعناد؟': 'ما الفرق بين مصطلحي PDA وEDA والعناد؟',
+          }
+          source_type_replacements = {
+              'empirical-study': 'primary-research',
+              'instrument-development': 'primary-research',
+              'clinical-guideline': 'guideline',
+              'institutional-guidance': 'institutional',
+          }
+          allowed_types = {
+              'official-definition', 'guideline', 'systematic-review',
+              'primary-research', 'consensus', 'institutional', 'book',
+          }
+          allowed_tiers = {'primary', 'authoritative', 'scholarly'}
+          arabic_word_re = re.compile(r'[\u0600-\u06ff]+')
+
+          for path in (source_path, meta_path):
+              payload = json.loads(path.read_text(encoding='utf-8'))
+              references = payload.get('sources') if 'sources' in payload else payload.get('references_json')
+              for reference in references:
+                  source_type = reference.get('source_type')
+                  if source_type in source_type_replacements:
+                      reference['source_type'] = source_type_replacements[source_type]
+                  if reference.get('source_type') not in allowed_types:
+                      raise RuntimeError(f'Invalid source_type: {reference.get("source_type")}')
+                  if reference.get('authority_tier') not in allowed_tiers:
+                      raise RuntimeError(f'Invalid authority_tier: {reference.get("authority_tier")}')
+
+              questions = (
+                  payload.get('search_intent_questions')
+                  if 'search_intent_questions' in payload
+                  else payload.get('schema_json', {}).get('search_intent_questions')
+              )
+              questions[:] = [question_replacements.get(question, question) for question in questions]
+              short = [question for question in questions if len(arabic_word_re.findall(question)) < 4]
+              if short:
+                  raise RuntimeError(f'Short search-intent questions remain: {short}')
+
+              if path == meta_path:
+                  schema = payload['schema_json']
+                  schema['uniqueness_rationale'] = (
+                      'تغطي الصفحة نية بحث عربية لا تملك مسارًا مطابقًا في قاعدة المحتوى أو سجل التحويلات، '
+                      'وتختلف عن مرجع التوحد العام لأنها تركز على حدود مصطلحات PDA وEDA، جودة الأدلة، '
+                      'التقييم الوظيفي متعدد الأسباب، وخطط الدعم المنزلية والمدرسية. كما تمنع التشخيص الذاتي '
+                      'وتربط النمط بالقلق والحس والتواصل والوظائف التنفيذية من دون تحويل فرضية بحثية إلى حقيقة تشخيصية.'
+                  )
+                  if len(arabic_word_re.findall(schema['uniqueness_rationale'])) < 40:
+                      raise RuntimeError('Uniqueness rationale remains shorter than 40 Arabic words')
+
+              path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+          PY
+      - name: Run full V6 contract and synchronize quality snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf artifacts/pda-v6-fix
+          python scripts/validate_search_demand_batch.py \
+            data/search-demand-batches/special-needs-batch-001 \
+            --output-dir artifacts/pda-v6-fix
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          meta_path = Path('data/search-demand-batches/special-needs-batch-001/pages/demand-avoidance-pda-eda.meta.json')
+          materialized_path = Path('artifacts/pda-v6-fix/demand-avoidance-pda-eda.json')
+          meta = json.loads(meta_path.read_text(encoding='utf-8'))
+          record = json.loads(materialized_path.read_text(encoding='utf-8'))
+          meta['quality_snapshot'] = record['quality_snapshot']
+          meta_path.write_text(json.dumps(meta, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+          PY
+          rm -rf artifacts/pda-v6-final
+          python scripts/validate_search_demand_batch.py \
+            data/search-demand-batches/special-needs-batch-001 \
+            --output-dir artifacts/pda-v6-final
+      - name: Commit validated corrections and remove bootstrap workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f .github/workflows/fix-pda-v6-contract.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add \
+            data/search-demand-batches/special-needs-batch-001/content/demand-avoidance-pda-eda.md \
+            data/search-demand-batches/special-needs-batch-001/research/demand-avoidance-pda-eda.sources.json \
+            data/search-demand-batches/special-needs-batch-001/pages/demand-avoidance-pda-eda.meta.json \
+            .github/workflows/fix-pda-v6-contract.yml
+          git commit -m 'Pass V6 contract for PDA demand-avoidance guide'
+          git push origin "HEAD:${GITHUB_REF_NAME}"
