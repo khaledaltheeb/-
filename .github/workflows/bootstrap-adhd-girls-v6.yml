@@ -155,13 +155,19 @@ jobs:
           python scripts/validate_search_demand_batch.py \
             data/search-demand-batches/special-needs-batch-001 \
             --output-dir artifacts/special-needs-v6-final
-      - name: Commit only the twice-validated bundle
+      - name: Commit only validated editorial data
         shell: bash
         run: |
           set -euo pipefail
-          rm -f .github/workflows/bootstrap-adhd-girls-v6.yml
+          rm -rf artifacts/special-needs-v6-first artifacts/special-needs-v6-final scripts/__pycache__
+          git checkout -- .github/workflows/special-needs-search-demand-validate.yml
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -A
+          git add \
+            data/search-demand-batches/special-needs-batch-001/content/adhd-girls-late-diagnosis.md \
+            data/search-demand-batches/special-needs-batch-001/research/adhd-girls-late-diagnosis.sources.json \
+            data/search-demand-batches/special-needs-batch-001/pages/adhd-girls-late-diagnosis.meta.json \
+            data/search-demand-batches/special-needs-batch-001/progress.v2.json
+          git diff --cached --check
           git commit -m 'Add V6 ADHD girls late-diagnosis guide'
           git push origin "HEAD:${GITHUB_REF_NAME}"
