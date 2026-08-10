@@ -9,14 +9,39 @@
       "sha256": "69920f03cb5fae961725dc6e02cd73c45dfb5598c4df04073bc0c3aff8a56f05"
     },
     {
-      "path": "data/editorial-demand/editorial-topic-crosswalk.v1.csv",
-      "bytes": 45708,
-      "sha256": "0ee8e30c770c26934def83602e81b22be3ba3fc96b98207b96dba2843f433a55"
+      "path": "data/editorial-demand/editorial-topic-crosswalk.v1.index.json",
+      "bytes": 1541,
+      "sha256": "95b83da0825428aad235a6ffde6cd5921952133e6456483c3a3b35ca4eeff619"
+    },
+    {
+      "path": "data/editorial-demand/crosswalk-parts/editorial-topic-crosswalk.v1.part-01.csv",
+      "bytes": 6575,
+      "sha256": "01072780fe1bc1f2068992f692c6ed52680cb68906aff702238374d7bb82e11a"
+    },
+    {
+      "path": "data/editorial-demand/crosswalk-parts/editorial-topic-crosswalk.v1.part-02.csv",
+      "bytes": 6233,
+      "sha256": "297355a5c212f1f1e0e70330d981267c6b15f4b7300ca6319dce86ff32e74b30"
+    },
+    {
+      "path": "data/editorial-demand/crosswalk-parts/editorial-topic-crosswalk.v1.part-03.csv",
+      "bytes": 5802,
+      "sha256": "6ada8a13e9433d875a961b962fa1867518eca5b6bfe3e315567e5b307ec31791"
+    },
+    {
+      "path": "data/editorial-demand/crosswalk-parts/editorial-topic-crosswalk.v1.part-04.csv",
+      "bytes": 5611,
+      "sha256": "92ea056d933917dc69f6b041106979f56dbe09cc821e941968c3fbc226dbbd89"
+    },
+    {
+      "path": "data/editorial-demand/crosswalk-parts/editorial-topic-crosswalk.v1.part-05.csv",
+      "bytes": 5679,
+      "sha256": "71808d39f08240d362d939069588ebf85753651d00ec08f6c4f52e7e114e4f5f"
     },
     {
       "path": "data/editorial-demand/special-needs-inclusive-batch-001.plan.json",
-      "bytes": 25815,
-      "sha256": "eb33799e7d07e80687a788f3fcc5d9a9fba3f4aaa062a91310b3e5cf77934237"
+      "bytes": 6865,
+      "sha256": "53f58bbbf958ac25fba09b0b22018996cfa908d96eea6081d3b6eb11aae6ec66"
     },
     {
       "path": "data/editorial-demand/legacy-inventory-reconciliation.v1.json",
@@ -65,5 +90,9 @@
     "cloudflare_production_publish_allowed": false,
     "human_review_required": true,
     "release_blocked_until_inventory_delta_zero": true
+  },
+  "review_surface": {
+    "crosswalk": "Deterministic 100-topic canonical crosswalk split into five 20-row UTF-8 CSV parts with a signed index.",
+    "batch_plan": "Compact first-batch routing plan; per-route legacy-match evidence remains in the external audit workbook."
   }
 }
