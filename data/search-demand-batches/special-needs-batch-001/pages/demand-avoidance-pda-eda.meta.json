@@ -1,0 +1,279 @@
+{
+  "source_path": "data/search-demand-batches/special-needs-batch-001/research/demand-avoidance-pda-eda.sources.json",
+  "body_path": "data/search-demand-batches/special-needs-batch-001/content/demand-avoidance-pda-eda.md",
+  "slug": "demand-avoidance-pda-eda",
+  "title": "تجنب المطالب الشديد لدى بعض المتوحدين: فهم PDA وEDA دون تشخيص متسرع",
+  "content_type": "guide",
+  "status": "draft",
+  "excerpt": "دليل عربي يشرح نمط تجنب المطالب الشديد وتسميات PDA وEDA وحدود الأدلة، مع تقييم وظيفي وخطوات عملية للأسرة والمدرسة دون وصم أو تشخيص متسرع.",
+  "sector_slug": "special-needs-inclusion",
+  "category_slug": "autism",
+  "audience": [
+    "الأشخاص المتوحدون وذوو التنوع العصبي",
+    "الأسر ومقدمو الرعاية",
+    "المعلمون وفرق الدمج",
+    "المختصون في الصحة والنمو والتربية",
+    "البالغون الذين يلاحظون تجنبًا شديدًا للمطالب"
+  ],
+  "search_aliases": [
+    "PDA",
+    "EDA",
+    "Pathological Demand Avoidance",
+    "Extreme Demand Avoidance",
+    "تجنب المطالب المرضي",
+    "تجنب المطالب الشديد",
+    "رفض المطالب عند الطفل المتوحد",
+    "مقاومة المطالب في التوحد",
+    "دافع الاستقلالية الشامل",
+    "Pervasive Drive for Autonomy",
+    "التوحد وتجنب الأوامر"
+  ],
+  "seo_title": "تجنب المطالب الشديد: فهم PDA وEDA",
+  "seo_description": "دليل عربي موثوق يشرح تجنب المطالب الشديد وتسميات PDA وEDA، حدود الأدلة، التقييم المتكامل، واستراتيجيات عملية وآمنة للأسرة والمدرسة مع أمثلة واضحة ومباشرة.",
+  "canonical_url": "/content/demand-avoidance-pda-eda",
+  "robots_index": true,
+  "robots_follow": true,
+  "primary_keyword": "تجنب المطالب الشديد",
+  "secondary_keywords": [
+    "ما هو PDA",
+    "تجنب المطالب المرضي",
+    "Extreme Demand Avoidance",
+    "الفرق بين PDA والعناد",
+    "التوحد ورفض المطالب",
+    "التعامل مع تجنب المطالب",
+    "EDA-Q",
+    "تكييفات المدرسة لتجنب المطالب"
+  ],
+  "semantic_terms": [
+    "عدم تحمل عدم اليقين",
+    "القلق في التوحد",
+    "التحليل الوظيفي للسلوك",
+    "الاستقلالية",
+    "الوظائف التنفيذية",
+    "الحمل الحسي",
+    "التواصل الاستقبالي",
+    "اضطراب التحدي المعارض",
+    "خفض التصعيد",
+    "التعديلات البيئية",
+    "التعاون بين الأسرة والمدرسة",
+    "استبانة EDA-Q",
+    "مقابلة DISCO",
+    "السلوك الدال على الضيق"
+  ],
+  "search_intent": "informational-practical",
+  "author_display_name": "فريق تحرير منصة روافد",
+  "reviewer_display_name": null,
+  "reviewer_credentials": null,
+  "last_reviewed_at": null,
+  "medical_disclaimer": "",
+  "featured_image_url": null,
+  "featured_image_alt": null,
+  "schema_json": {
+    "content_contract_version": 6,
+    "page_kind": "editorial",
+    "strategic_scientific_value": "high",
+    "rewrite_method": "evidence-led-rewrite",
+    "disclaimer_url": "/disclaimer",
+    "disclaimer_label": "إخلاء المسؤولية والتنبيهات",
+    "claim_source_map": [
+      {
+        "claim": "الأدلة الحالية لا تثبت PDA بوصفه اضطرابًا مستقلاً أو نوعًا فرعيًا ثابتًا من التوحد، كما أن التعريف والقياس غير متسقين.",
+        "reference_ids": [
+          "COMPANY-PDA-2026",
+          "KILDAHL-PDA-2021"
+        ]
+      },
+      {
+        "claim": "مراجعة 2026 وجدت اثنتي عشرة دراسة، واستخدامًا غير متسق لـ EDA-Q وDISCO، وارتفاع خطر التحيز في جميع الدراسات المشمولة.",
+        "reference_ids": [
+          "COMPANY-PDA-2026"
+        ]
+      },
+      {
+        "claim": "مراجعة 2021 وجدت اعتمادًا واسعًا على تقارير الوالدين ونقصًا في فحص التفسيرات البديلة ومسارات التطور عبر الزمن.",
+        "reference_ids": [
+          "KILDAHL-PDA-2021"
+        ]
+      },
+      {
+        "claim": "القلق وعدم تحمل عدم اليقين قد يساهمان في تجنب المطالب لدى بعض الأطفال والمراهقين، لكنهما لا يفسران كل الحالات ولا يثبتان تشخيصًا.",
+        "reference_ids": [
+          "STUART-IU-2020",
+          "KILDAHL-PDA-2021"
+        ]
+      },
+      {
+        "claim": "في دراستين مسحيتين للبالغين ارتبطت السمات التوحدية والقلق بدرجات تجنب المطالب، وهي نتائج ارتباطية لا تحدد السبب أو التشخيص.",
+        "reference_ids": [
+          "WHITE-EDA-2022"
+        ]
+      },
+      {
+        "claim": "استبانة EDA-Q طورت بوصفها مقياس سمات أوليًا للبحث والوصف، ولا تكفي وحدها لتشخيص PDA.",
+        "reference_ids": [
+          "ONIONS-EDAQ-2014",
+          "COMPANY-PDA-2026"
+        ]
+      },
+      {
+        "claim": "التقييم المتكامل للسلوك الذي يسبب صعوبة ينبغي أن يفحص التواصل والصحة الجسدية والنفسية والبيئة الحسية والاجتماعية والروتين والتوقع.",
+        "reference_ids": [
+          "NICE-CG170",
+          "NICE-CG142"
+        ]
+      },
+      {
+        "claim": "عندما لا يظهر سبب واضح، توصي الإرشادات بتدخل نفسي اجتماعي يستند إلى تقييم وظيفي يحدد المحفزات والاحتياجات والنتائج البيئية.",
+        "reference_ids": [
+          "NICE-CG170",
+          "NICE-CG142"
+        ]
+      },
+      {
+        "claim": "الدعم ينبغي أن يكون فرديًا، وأن يغير العوائق البيئية ويزيد التوقع والتواصل والاختيار الحقيقي بدل التركيز على الامتثال المجرد.",
+        "reference_ids": [
+          "NICE-CG170",
+          "NICE-CG142",
+          "NAS-DEMAND-AVOIDANCE"
+        ]
+      },
+      {
+        "claim": "الاختلاف على مسمى PDA لا يلغي الحاجة إلى الاعتراف بتجنب المطالب المستمر وبناء دعم يتناسب مع أثره الوظيفي.",
+        "reference_ids": [
+          "NAS-DEMAND-AVOIDANCE",
+          "KILDAHL-PDA-2021"
+        ]
+      }
+    ],
+    "source_versions_reviewed": [
+      {
+        "path": "data/search-demand-batches/special-needs-batch-001/research/demand-avoidance-pda-eda.sources.json",
+        "sha256": "auto",
+        "decision": "بحث جديد من خريطة الطلب؛ راجعنا أحدث مراجعتين منهجيتين والدراسات التفسيرية والإرشادات السريرية، وفحصنا Supabase والمستودع القديم ولم نجد Canonical أو Redirect مطابقًا."
+      }
+    ],
+    "search_intent_questions": [
+      "ما هو PDA أو تجنب المطالب المرضي؟",
+      "هل PDA تشخيص رسمي أم وصف سلوكي؟",
+      "ما الفرق بين PDA وEDA والعناد؟",
+      "هل تجنب المطالب يعني أن الطفل متوحد؟",
+      "كيف أعرف سبب رفض الطفل للمطالب؟",
+      "هل استبانة EDA-Q تشخص PDA؟",
+      "كيف تتعامل الأسرة مع تجنب المطالب الشديد؟",
+      "ما التكييفات المدرسية المناسبة لتجنب المطالب؟",
+      "ما الفرق بين تجنب المطالب واضطراب التحدي المعارض؟",
+      "متى يحتاج تجنب المطالب إلى تقييم مهني؟"
+    ],
+    "page_mechanism": {
+      "purpose": "تقديم مرجع عربي يشرح نمط تجنب المطالب الشديد وحدود تسميات PDA وEDA، ثم يحول الفهم إلى تقييم وظيفي وخطة دعم قابلة للتنفيذ.",
+      "audience": "الأشخاص المتوحدون والأسر والمعلمون والمختصون والبالغون الذين يواجهون تجنبًا شديدًا للمطالب ويحتاجون لغة دقيقة غير وصمية.",
+      "interaction_model": "قراءة متدرجة تبدأ بإجابة مباشرة، ثم الأدلة والتفسيرات والتقييم والخطط المنزلية والمدرسية، وتنتهي بأسئلة شائعة وروابط داخلية.",
+      "content_model": "صفحة guide مستقلة لا تنافس مرجع التوحد؛ تركز على النمط الوظيفي والقرار العملي، وتحيل التفاصيل العامة إلى صفحات التوحد والحس والمدرسة والسلوك."
+    },
+    "taxonomy_reviewed": true,
+    "classification_confidence": 0.98,
+    "classification_rationale": "النية الأساسية ليست تشخيص التوحد ولا تعريف حالة مستقلة، بل فهم نمط وظيفي يرتبط غالبًا بنقاشات التوحد ويحتاج دعمًا عمليًا؛ لذلك يصنف كدليل داخل قطاع الاحتياجات الخاصة والدمج وفئة التوحد.",
+    "canonical_audit": {
+      "supabase_exact_matches": 0,
+      "supabase_redirect_matches": 0,
+      "current_repository_code_matches": 0,
+      "legacy_repository_code_matches": 0,
+      "decision": "new-canonical-after-gap-audit"
+    },
+    "originality_report": {
+      "passed": true,
+      "longest_verbatim_run_words": 0,
+      "legacy_sentence_reuse_ratio": 0.0,
+      "method": "new Arabic synthesis from systematic reviews, empirical studies, clinical guidelines and current search intent"
+    }
+  },
+  "references_json": [
+    {
+      "id": "COMPANY-PDA-2026",
+      "title": "A Systematic Review of Pathological Demand Avoidance (PDA): A Veritable Diagnosis or a Case of Circular Logic?",
+      "publisher": "Journal of Autism and Developmental Disorders",
+      "year": 2026,
+      "source_type": "systematic-review",
+      "authority_tier": "scholarly",
+      "url": "https://link.springer.com/article/10.1007/s10803-026-07432-y"
+    },
+    {
+      "id": "KILDAHL-PDA-2021",
+      "title": "Pathological demand avoidance in children and adolescents: A systematic review",
+      "publisher": "Autism",
+      "year": 2021,
+      "source_type": "systematic-review",
+      "authority_tier": "scholarly",
+      "url": "https://doi.org/10.1177/13623613211034382"
+    },
+    {
+      "id": "STUART-IU-2020",
+      "title": "Intolerance of uncertainty and anxiety as explanatory frameworks for extreme demand avoidance in children and adolescents",
+      "publisher": "Child and Adolescent Mental Health",
+      "year": 2020,
+      "source_type": "empirical-study",
+      "authority_tier": "scholarly",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/32307839/"
+    },
+    {
+      "id": "WHITE-EDA-2022",
+      "title": "Understanding the Contributions of Trait Autism and Anxiety to Extreme Demand Avoidance in the Adult General Population",
+      "publisher": "Journal of Autism and Developmental Disorders",
+      "year": 2022,
+      "source_type": "empirical-study",
+      "authority_tier": "scholarly",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/35437676/"
+    },
+    {
+      "id": "ONIONS-EDAQ-2014",
+      "title": "Development of the Extreme Demand Avoidance Questionnaire (EDA-Q): preliminary observations on a trait measure for Pathological Demand Avoidance",
+      "publisher": "Journal of Child Psychology and Psychiatry",
+      "year": 2014,
+      "source_type": "instrument-development",
+      "authority_tier": "scholarly",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/24117718/"
+    },
+    {
+      "id": "NICE-CG170",
+      "title": "Autism spectrum disorder in under 19s: support and management",
+      "publisher": "National Institute for Health and Care Excellence",
+      "year": 2021,
+      "source_type": "clinical-guideline",
+      "authority_tier": "primary",
+      "url": "https://www.nice.org.uk/guidance/cg170/chapter/recommendations"
+    },
+    {
+      "id": "NICE-CG142",
+      "title": "Autism spectrum disorder in adults: diagnosis and management",
+      "publisher": "National Institute for Health and Care Excellence",
+      "year": 2021,
+      "source_type": "clinical-guideline",
+      "authority_tier": "primary",
+      "url": "https://www.nice.org.uk/guidance/cg142/chapter/recommendations"
+    },
+    {
+      "id": "NAS-DEMAND-AVOIDANCE",
+      "title": "Demand avoidance",
+      "publisher": "National Autistic Society",
+      "year": 2026,
+      "source_type": "institutional-guidance",
+      "authority_tier": "authoritative",
+      "url": "https://www.autism.org.uk/advice-and-guidance/behaviour/demand-avoidance"
+    }
+  ],
+  "quality_snapshot": {
+    "arabic_visible_words": 3410,
+    "h1_inside_body": 0,
+    "h2_sections": 14,
+    "h3_subsections": 26,
+    "faq_items": 8,
+    "minimum_faq_answer_arabic_words": 52,
+    "explicit_search_questions": 10,
+    "references": 8,
+    "mapped_claims": 10,
+    "seo_title_characters": 33,
+    "seo_description_characters": 154,
+    "forbidden_visible_patterns_found": 0,
+    "validation_state": "staged-passed-key-v6-checks"
+  }
+}
