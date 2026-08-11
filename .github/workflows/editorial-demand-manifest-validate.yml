@@ -1,0 +1,70 @@
+name: Editorial Demand Manifest Validate
+
+on:
+  push:
+    branches:
+      - agent/special-needs-demand-coverage-v1
+    paths:
+      - 'data/editorial-demand/**'
+      - 'scripts/validate_editorial_demand_manifest.py'
+      - 'docs/EDITORIAL-DEMAND-CONTROL-PLANE.md'
+      - 'docs/RAWAFID-5000-PAGE-ROADMAP.md'
+      - 'docs/RAWAFID-CURRENT-STATE-AUDIT-2026-08-10.md'
+      - '.github/workflows/editorial-demand-manifest-validate.yml'
+  pull_request:
+    branches:
+      - agent/search-demand-mental-health-batch-001
+      - agent/content-pipeline-v6
+      - cloudflare-workers-deploy
+      - main
+    paths:
+      - 'data/editorial-demand/**'
+      - 'scripts/validate_editorial_demand_manifest.py'
+      - 'docs/EDITORIAL-DEMAND-CONTROL-PLANE.md'
+      - 'docs/RAWAFID-5000-PAGE-ROADMAP.md'
+      - 'docs/RAWAFID-CURRENT-STATE-AUDIT-2026-08-10.md'
+      - '.github/workflows/editorial-demand-manifest-validate.yml'
+  workflow_dispatch:
+    inputs:
+      release_gate:
+        description: Require a reconciled zero-delta legacy inventory
+        type: boolean
+        required: true
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: editorial-demand-manifest-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - name: Compile manifest validator
+        run: python -m py_compile scripts/validate_editorial_demand_manifest.py
+      - name: Validate reviewable control-plane manifest
+        run: |
+          python scripts/validate_editorial_demand_manifest.py \
+            --summary data/editorial-demand/editorial-demand.v1.summary.json \
+            --crosswalk-index data/editorial-demand/editorial-topic-crosswalk.v1.index.json \
+            --batch-plan data/editorial-demand/special-needs-inclusive-batch-001.plan.json \
+            --reconciliation data/editorial-demand/legacy-inventory-reconciliation.v1.json \
+            --artifact-manifest data/editorial-demand/artifact-manifest.v1.json
+      - name: Enforce release reconciliation when explicitly requested
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.release_gate }}
+        run: |
+          python scripts/validate_editorial_demand_manifest.py \
+            --summary data/editorial-demand/editorial-demand.v1.summary.json \
+            --crosswalk-index data/editorial-demand/editorial-topic-crosswalk.v1.index.json \
+            --batch-plan data/editorial-demand/special-needs-inclusive-batch-001.plan.json \
+            --reconciliation data/editorial-demand/legacy-inventory-reconciliation.v1.json \
+            --artifact-manifest data/editorial-demand/artifact-manifest.v1.json \
+            --require-reconciled

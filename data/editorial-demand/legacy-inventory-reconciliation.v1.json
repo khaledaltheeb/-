@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "as_of": "2026-08-10",
+  "status": "blocking",
+  "publication_blocked": true,
+  "current_audit": {
+    "source": "GitHub Actions artifact legacy-content-migration-inventory",
+    "artifact_sha256": "4deb38e80b8f59d03bfc75adf3271d313c7f137736a3b5766ac50638b3106f1d",
+    "published_url_count": 902,
+    "source_page_count": 898,
+    "source_resource_count": 4,
+    "sitemap_count": 30,
+    "fully_routed_page_count": 174,
+    "unmapped_page_count": 723,
+    "known_content_missing_redirect_count": 1,
+    "source_repo": "khaledaltheeb/healthrenewal.org",
+    "workflow_run_id": 31279004857,
+    "workflow_run_started_at": "2026-08-08T21:18:45Z",
+    "source_commit_candidate": "1682bb641dabbbed15e52627191b33fc557b10a8",
+    "source_commit_provenance": "inferred-latest-commit-before-run-start",
+    "source_commit_recorded_in_artifact": false
+  },
+  "v6_queue": {
+    "source": "PR 182 data/migration-v6/legacy-queue.v6.summary.json",
+    "commit": "cf634740c22e70d8ea82ddaede6fb9bc333ec1f7",
+    "summary_blob_sha": "5d2c26e5340c23ac4a50aabea1a42018212aab56",
+    "record_count": 852
+  },
+  "delta": 50,
+  "required_resolution": [
+    "Regenerate the legacy audit and the V6 queue from the same explicitly pinned healthrenewal.org commit.",
+    "Record git rev-parse HEAD in the generated audit summary so source provenance is artifact-recorded rather than inferred.",
+    "Produce a route-level diff for every URL present in one inventory but absent from the other.",
+    "Classify each delta route as page, resource, obsolete duplicate, merged canonical or invalid sitemap entry.",
+    "Require zero unexplained delta before any claim of complete migration or production-domain cutover."
+  ]
+}
