@@ -1,0 +1,94 @@
+{
+  "topic": "obsessive-compulsive-disorder",
+  "researched_at": "2026-08-09",
+  "research_scope": "official definitions, clinical guidance, systematic reviews, academic books, existing-site overlap",
+  "sources": [
+    {
+      "id": "NIMH-OCD-2024",
+      "title": "Obsessive-Compulsive Disorder: When Unwanted Thoughts or Repetitive Behaviors Take Over",
+      "publisher": "National Institute of Mental Health",
+      "year": "2024",
+      "source_type": "institutional",
+      "authority_tier": "authoritative",
+      "url": "https://www.nimh.nih.gov/health/publications/obsessive-compulsive-disorder-when-unwanted-thoughts-or-repetitive-behaviors-take-over",
+      "use": "definition, symptoms, recognition, treatment overview"
+    },
+    {
+      "id": "NICE-CG31",
+      "title": "Obsessive-compulsive disorder and body dysmorphic disorder: treatment",
+      "publisher": "National Institute for Health and Care Excellence",
+      "year": "2024",
+      "source_type": "guideline",
+      "authority_tier": "primary",
+      "url": "https://www.nice.org.uk/guidance/cg31",
+      "use": "assessment, stepped care, CBT with ERP, medication, children and families",
+      "currency_note": "Published 2005; last reviewed 11 July 2024; NICE states that several areas are being updated, so recommendations are presented with this limitation."
+    },
+    {
+      "id": "HEZEL-ERP-2021",
+      "title": "Cognitive behavioural therapy with exposure and response prevention in the treatment of obsessive-compulsive disorder: A systematic review and meta-analysis of randomised controlled trials",
+      "publisher": "Comprehensive Psychiatry",
+      "year": "2021",
+      "source_type": "systematic-review",
+      "authority_tier": "scholarly",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/33618297/",
+      "use": "evidence for CBT with ERP across age groups"
+    },
+    {
+      "id": "SKAPINAKIS-NMA-2016",
+      "title": "Pharmacological and psychotherapeutic interventions for management of obsessive-compulsive disorder in adults: a systematic review and network meta-analysis",
+      "publisher": "The Lancet Psychiatry",
+      "year": "2016",
+      "source_type": "systematic-review",
+      "authority_tier": "scholarly",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4967667/",
+      "use": "comparative evidence for psychological and pharmacological treatments"
+    },
+    {
+      "id": "SUHAS-RESISTANT-2023",
+      "title": "Treatment strategies for serotonin reuptake inhibitor-resistant obsessive-compulsive disorder: A network meta-analysis of randomised controlled trials",
+      "publisher": "World Journal of Biological Psychiatry",
+      "year": "2023",
+      "source_type": "systematic-review",
+      "authority_tier": "scholarly",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/35615998/",
+      "use": "treatment-resistant OCD and limits of later-line interventions"
+    },
+    {
+      "id": "PITTENGER-OXFORD-2017",
+      "title": "Obsessive-compulsive Disorder: Phenomenology, Pathophysiology, and Treatment",
+      "publisher": "Oxford University Press",
+      "year": "2017",
+      "source_type": "book",
+      "authority_tier": "scholarly",
+      "isbn": "9780190228163",
+      "url": "https://academic.oup.com/book/24387",
+      "use": "phenomenology, differential diagnosis, mechanisms, treatment context"
+    },
+    {
+      "id": "DRUMMOND-CAMBRIDGE-2022",
+      "title": "Everything You Need to Know About OCD",
+      "publisher": "Cambridge University Press",
+      "year": "2022",
+      "source_type": "book",
+      "authority_tier": "scholarly",
+      "isbn": "9781009004152",
+      "url": "https://www.cambridge.org/core/books/everything-you-need-to-know-about-ocd/EB69827D516B4CC6A9477998A23B3519",
+      "use": "practical explanation of obsessions, compulsions, reassurance, avoidance, ERP and family support"
+    }
+  ],
+  "existing_site_overlap": [
+    {
+      "canonical": "/evidence-guides/clinical-anxiety/",
+      "decision": "retain as broad anxiety/OCD evidence guide; new page serves condition-level search intent"
+    },
+    {
+      "canonical": "/care-guides/family-ocd-support/",
+      "decision": "retain as family-support action guide; link from condition page"
+    },
+    {
+      "canonical": "/comparisons/ocd-vs-generalized-anxiety/",
+      "decision": "retain as dedicated comparison; link instead of duplicating comparison depth"
+    }
+  ]
+}

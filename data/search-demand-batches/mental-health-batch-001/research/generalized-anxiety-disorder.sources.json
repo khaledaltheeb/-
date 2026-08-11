@@ -1,0 +1,32 @@
+{
+  "id": "search-demand-gad-2026-08-09",
+  "topic": "اضطراب القلق المعمم",
+  "purpose": "بحث تأسيسي لصفحة عربية مرجعية مستقلة عن اضطراب القلق المعمم، تربط نية البحث العربية بالتعريف العلمي والتقييم والتشخيص التفريقي والعلاج والدعم العملي دون تشخيص ذاتي.",
+  "search_intent_questions": [
+    "كيف أعرف أن عندي اضطراب القلق المعمم؟",
+    "ما الفرق بين القلق الطبيعي واضطراب القلق؟",
+    "هل القلق يسبب ضيق التنفس والخفقان والدوخة؟",
+    "لماذا أقلق من كل شيء طوال الوقت؟",
+    "ما أعراض القلق النفسي والجسدية؟",
+    "كيف يتم تشخيص اضطراب القلق المعمم؟",
+    "ما أفضل علاج لاضطراب القلق المعمم؟",
+    "هل اضطراب القلق المعمم يشفى أو يتحسن؟",
+    "هل القلق يسبب الأرق وضعف التركيز؟",
+    "متى أراجع مختصا بسبب القلق المستمر؟"
+  ],
+  "references": [
+    {"id":"WHO-ANXIETY-2025","title":"Anxiety disorders","publisher":"World Health Organization","year":2025,"source_type":"official-definition","authority_tier":"primary","url":"https://www.who.int/news-room/fact-sheets/detail/anxiety-disorders"},
+    {"id":"NIMH-GAD-2025","title":"Generalized Anxiety Disorder: What You Need to Know","publisher":"National Institute of Mental Health","year":2025,"source_type":"institutional","authority_tier":"authoritative","url":"https://www.nimh.nih.gov/health/publications/generalized-anxiety-disorder-gad"},
+    {"id":"NICE-CG113","title":"Generalised anxiety disorder and panic disorder in adults: management","publisher":"National Institute for Health and Care Excellence","year":2026,"source_type":"guideline","authority_tier":"primary","url":"https://www.nice.org.uk/guidance/cg113"},
+    {"id":"PAPOLA-JAMA-2024","title":"Psychotherapies for Generalized Anxiety Disorder in Adults: A Systematic Review and Network Meta-Analysis of Randomized Clinical Trials","publisher":"JAMA Psychiatry","year":2024,"source_type":"systematic-review","authority_tier":"scholarly","url":"https://pubmed.ncbi.nlm.nih.gov/37851421/"},
+    {"id":"SLEE-LANCET-2019","title":"Pharmacological treatments for generalised anxiety disorder: a systematic review and network meta-analysis","publisher":"The Lancet","year":2019,"source_type":"systematic-review","authority_tier":"scholarly","url":"https://pubmed.ncbi.nlm.nih.gov/30712879/"},
+    {"id":"OXFORD-GAD-2011","title":"Generalized Anxiety Disorders","publisher":"Oxford University Press","year":2011,"source_type":"book","authority_tier":"scholarly","isbn":"9780199557837"},
+    {"id":"OXFORD-ANXIETY-2015","title":"Anxiety Disorders","publisher":"Oxford University Press","year":2015,"source_type":"book","authority_tier":"scholarly","isbn":"9780199395125"}
+  ],
+  "decisions": [
+    "إنشاء صفحة condition مستقلة لأن نية البحث التعريفية والتشخيصية أوسع من دليل الدعم اليومي الموجود.",
+    "عدم تكرار صفحة care-guide-generalized-anxiety-daily-support؛ تربط الصفحة الجديدة إليها بوصفها دليلا تطبيقيا.",
+    "عدم تكرار evidence-guides-clinical-anxiety؛ تستخدم الصفحة الجديدة كمرجع للحالة بينما يبقى الدليل الحالي بوابة أوسع لاضطرابات القلق والوسواس.",
+    "تخصيص الفئة anxiety-disorders داخل قطاع mental-health بعد تطبيق توسعة التصنيف."
+  ]
+}

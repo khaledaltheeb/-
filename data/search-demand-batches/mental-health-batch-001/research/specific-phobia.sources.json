@@ -1,0 +1,19 @@
+{
+  "topic": "specific-phobia",
+  "researched_at": "2026-08-09",
+  "research_scope": "official anxiety/phobia references, exposure meta-analyses, child one-session systematic review, digital and VR evidence, Oxford exposure workbook, Arabic fear-specific search intent, existing-site overlap",
+  "sources": [
+    {"id":"WHO-ANXIETY-2025","title":"Anxiety disorders","publisher":"World Health Organization","year":"2025","source_type":"official-definition","authority_tier":"primary","url":"https://www.who.int/news-room/fact-sheets/detail/anxiety-disorders","use":"anxiety-disorder framework, burden and effective psychological treatment context"},
+    {"id":"NIMH-PHOBIAS-2025","title":"Phobias and Phobia-Related Disorders","publisher":"National Institute of Mental Health","year":"2025","source_type":"institutional","authority_tier":"authoritative","url":"https://www.nimh.nih.gov/health/publications/phobias-and-phobia-related-disorders","use":"specific-phobia recognition, symptoms, CBT, exposure and medication context"},
+    {"id":"ODGERS-EXPOSURE-META-2022","title":"The relative efficacy and efficiency of single- and multi-session exposure therapies for specific phobia: A meta-analysis","publisher":"Behaviour Research and Therapy","year":"2022","source_type":"systematic-review","authority_tier":"scholarly","url":"https://pubmed.ncbi.nlm.nih.gov/36323055/","use":"single-session versus multi-session in-vivo exposure across 85 study arms and 1758 participants"},
+    {"id":"WOLITZKY-PHOBIA-META-2008","title":"Psychological approaches in the treatment of specific phobias: a meta-analysis","publisher":"Clinical Psychology Review","year":"2008","source_type":"systematic-review","authority_tier":"scholarly","url":"https://pubmed.ncbi.nlm.nih.gov/18410984/","use":"33 randomized studies supporting exposure-based treatment and in-vivo exposure evidence"},
+    {"id":"MOR-DIGITAL-PHOBIA-2021","title":"Internet- and mobile-based interventions for the treatment of specific phobia: A systematic review and preliminary meta-analysis","publisher":"Internet Interventions","year":"2021","source_type":"systematic-review","authority_tier":"scholarly","url":"https://pubmed.ncbi.nlm.nih.gov/34646752/","use":"digital/mobile interventions and exposure as core component"},
+    {"id":"DAVIS-CHILD-OST-2019","title":"One-Session Treatment of Specific Phobias in Children: Recent Developments and a Systematic Review","publisher":"Annual Review of Clinical Psychology","year":"2019","source_type":"systematic-review","authority_tier":"scholarly","url":"https://pubmed.ncbi.nlm.nih.gov/30550722/","use":"evidence and structure of one-session treatment for children and adolescents"},
+    {"id":"ANTONY-CRASKE-BARLOW-OXFORD-2006","title":"Mastering Your Fears and Phobias: Workbook","publisher":"Oxford University Press","year":"2006","source_type":"book","authority_tier":"scholarly","isbn":"9780195189186","url":"https://academic.oup.com/book/1076","use":"assessment of feared objects/situations, coping behaviors, graduated exposure and phobia-specific adaptations"}
+  ],
+  "existing_site_overlap": [
+    {"canonical":"/care-guides/specific-phobia-gradual-support/","decision":"preserve as practical support/exposure-planning guide; new condition page owns definition, diagnosis, subtypes, differential and treatment evidence"},
+    {"canonical":"/content/social-anxiety-disorder","decision":"cross-link to distinguish fear of social evaluation from fear tied to a specific object or situation"},
+    {"canonical":"/evidence-guides/panic-disorder-safe-guide/","decision":"cross-link where panic symptoms occur in the feared situation but the core fear is object/situation-specific"}
+  ]
+}

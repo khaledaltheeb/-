@@ -1,0 +1,100 @@
+{
+  "topic": "panic-disorder-and-panic-attacks",
+  "researched_at": "2026-08-09",
+  "target_existing_canonical": "/evidence-guides/panic-disorder-safe-guide/",
+  "research_scope": "official definitions, current clinical guidance, systematic reviews, university books, symptom-first Arabic search intent, existing-site overlap",
+  "sources": [
+    {
+      "id": "NIMH-PANIC-2025",
+      "title": "Panic Disorder: What You Need to Know",
+      "publisher": "National Institute of Mental Health",
+      "year": "2025",
+      "source_type": "institutional",
+      "authority_tier": "authoritative",
+      "url": "https://www.nimh.nih.gov/health/publications/panic-disorder-when-fear-overwhelms",
+      "use": "definition, symptoms, panic attack versus disorder, diagnosis, treatment and medication context"
+    },
+    {
+      "id": "NICE-CG113-PANIC",
+      "title": "Generalised anxiety disorder and panic disorder in adults: management",
+      "publisher": "National Institute for Health and Care Excellence",
+      "year": "2026",
+      "source_type": "guideline",
+      "authority_tier": "primary",
+      "url": "https://www.nice.org.uk/guidance/cg113",
+      "use": "recognition, assessment, emergency presentation, stepped care, CBT and medication",
+      "currency_note": "NICE update information includes an April 2026 medicines-with-dependence/withdrawal link and earlier amendments; recommendations are used with their dated evidence context."
+    },
+    {
+      "id": "POMPOLI-CBT-NMA-2023",
+      "title": "CBT treatment delivery formats for panic disorder: a systematic review and network meta-analysis of randomised controlled trials",
+      "publisher": "Psychological Medicine",
+      "year": "2023",
+      "source_type": "systematic-review",
+      "authority_tier": "scholarly",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/37132646/",
+      "use": "comparative evidence for face-to-face and remote CBT delivery formats"
+    },
+    {
+      "id": "JUNG-DIGITAL-CBT-2025",
+      "title": "Digital Cognitive Behavioral Therapy for Panic Disorder and Agoraphobia: A Meta-Analytic Review of Clinical Components to Maximize Efficacy",
+      "publisher": "Journal of Clinical Medicine",
+      "year": "2025",
+      "source_type": "systematic-review",
+      "authority_tier": "scholarly",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/40095899/",
+      "use": "updated evidence on digital CBT components and heterogeneity"
+    },
+    {
+      "id": "BARLOW-CRASKE-OXFORD-2022",
+      "title": "Mastery of Your Anxiety and Panic: Workbook",
+      "publisher": "Oxford University Press",
+      "year": "2022",
+      "source_type": "book",
+      "authority_tier": "scholarly",
+      "isbn": "9780197584095",
+      "url": "https://academic.oup.com/book/41297",
+      "use": "CBT formulation, monitoring, cognitive skills, interoceptive and situational exposure, relapse prevention"
+    },
+    {
+      "id": "BANDELOW-OXFORD-2013",
+      "title": "Panic Disorder and Agoraphobia",
+      "publisher": "Oxford University Press",
+      "year": "2013",
+      "source_type": "book",
+      "authority_tier": "scholarly",
+      "isbn": "9780199562299",
+      "url": "https://academic.oup.com/book/31786",
+      "use": "diagnosis, differential diagnosis, aetiology and clinical management"
+    },
+    {
+      "id": "RACHMAN-DESILVA-OXFORD-2009",
+      "title": "Panic Disorder: The Facts",
+      "publisher": "Oxford University Press",
+      "year": "2009",
+      "source_type": "book",
+      "authority_tier": "scholarly",
+      "isbn": "9780199574698",
+      "url": "https://academic.oup.com/book/52679",
+      "use": "panic experience, fear of future attacks, avoidance, assessment and practical questions"
+    }
+  ],
+  "existing_site_overlap": [
+    {
+      "canonical": "/evidence-guides/panic-disorder-safe-guide/",
+      "decision": "upgrade this existing canonical in place; it currently owns the broad panic-disorder intent and must not be duplicated"
+    },
+    {
+      "canonical": "/care-guides/panic-attack-immediate-support/",
+      "decision": "retain as acute-support action guide and link from the upgraded evidence guide"
+    },
+    {
+      "canonical": "/care-guides/family-anxiety-panic-support/",
+      "decision": "retain as family-support guide"
+    },
+    {
+      "canonical": "/comparisons/panic-attack-vs-panic-disorder/",
+      "decision": "retain as focused comparison; upgraded guide provides summary and links to it"
+    }
+  ]
+}

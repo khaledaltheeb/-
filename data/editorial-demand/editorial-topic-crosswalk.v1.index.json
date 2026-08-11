@@ -1,0 +1,54 @@
+{
+  "version": 1,
+  "generated_at": "2026-08-10",
+  "row_count": 100,
+  "part_count": 5,
+  "columns": [
+    "source_file",
+    "topic",
+    "domain",
+    "priority_max",
+    "intent_count",
+    "keyword_count",
+    "question_count",
+    "canonical_id",
+    "cluster",
+    "content_type",
+    "action",
+    "route_candidate",
+    "coordination",
+    "source_urls"
+  ],
+  "parts": [
+    {
+      "path": "data/editorial-demand/crosswalk-parts/editorial-topic-crosswalk.v1.part-01.csv",
+      "rows": 20,
+      "bytes": 6554,
+      "sha256": "08283bc04fe57463632afa6776a138872d21c2747d7ca90eb2a9d102c661491b"
+    },
+    {
+      "path": "data/editorial-demand/crosswalk-parts/editorial-topic-crosswalk.v1.part-02.csv",
+      "rows": 20,
+      "bytes": 6212,
+      "sha256": "580b1b6b40aac04c5137472177988227ccdded772c7afa0afeead9d8591a6a13"
+    },
+    {
+      "path": "data/editorial-demand/crosswalk-parts/editorial-topic-crosswalk.v1.part-03.csv",
+      "rows": 20,
+      "bytes": 5781,
+      "sha256": "c960126074bbbd5589d647e245bb8483bf460020b731d96c361c6c66bf994384"
+    },
+    {
+      "path": "data/editorial-demand/crosswalk-parts/editorial-topic-crosswalk.v1.part-04.csv",
+      "rows": 20,
+      "bytes": 5590,
+      "sha256": "949123b4fb06f6164a0f9c85f83f70989375b1a9edf2485c9cf4df5307c2b63e"
+    },
+    {
+      "path": "data/editorial-demand/crosswalk-parts/editorial-topic-crosswalk.v1.part-05.csv",
+      "rows": 20,
+      "bytes": 5658,
+      "sha256": "855b102abe94716262a2db9fd556fafff54d36493ddad16d2b7f21ccd2d0165e"
+    }
+  ]
+}

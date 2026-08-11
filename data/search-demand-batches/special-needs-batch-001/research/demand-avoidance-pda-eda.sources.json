@@ -1,0 +1,98 @@
+{
+  "id": "special-needs-demand-avoidance-2026-08-10",
+  "topic": "تجنب المطالب الشديد وتسميات PDA وEDA",
+  "purpose": "بحث تأسيسي لصفحة عربية تشرح نمط تجنب المطالب الشديد وحدود مصطلحات PDA وEDA، وتربط الأدلة التشخيصية المحدودة بالتقييم الوظيفي والدعم الفردي في المنزل والمدرسة دون تحويل المصطلح إلى تشخيص ذاتي.",
+  "search_intent_questions": [
+    "ما هو PDA أو تجنب المطالب المرضي؟",
+    "هل PDA تشخيص رسمي أم وصف سلوكي؟",
+    "ما الفرق بين مصطلحي PDA وEDA والعناد؟",
+    "هل تجنب المطالب يعني أن الطفل متوحد؟",
+    "كيف أعرف سبب رفض الطفل للمطالب؟",
+    "هل تستطيع استبانة EDA-Q تشخيص نمط PDA؟",
+    "كيف تتعامل الأسرة مع تجنب المطالب الشديد؟",
+    "ما التكييفات المدرسية المناسبة لتجنب المطالب؟",
+    "ما الفرق بين تجنب المطالب واضطراب التحدي المعارض؟",
+    "متى يحتاج تجنب المطالب إلى تقييم مهني؟"
+  ],
+  "sources": [
+    {
+      "id": "COMPANY-PDA-2026",
+      "title": "A Systematic Review of Pathological Demand Avoidance (PDA): A Veritable Diagnosis or a Case of Circular Logic?",
+      "publisher": "Journal of Autism and Developmental Disorders",
+      "year": 2026,
+      "source_type": "systematic-review",
+      "authority_tier": "scholarly",
+      "url": "https://link.springer.com/article/10.1007/s10803-026-07432-y"
+    },
+    {
+      "id": "KILDAHL-PDA-2021",
+      "title": "Pathological demand avoidance in children and adolescents: A systematic review",
+      "publisher": "Autism",
+      "year": 2021,
+      "source_type": "systematic-review",
+      "authority_tier": "scholarly",
+      "url": "https://doi.org/10.1177/13623613211034382"
+    },
+    {
+      "id": "STUART-IU-2020",
+      "title": "Intolerance of uncertainty and anxiety as explanatory frameworks for extreme demand avoidance in children and adolescents",
+      "publisher": "Child and Adolescent Mental Health",
+      "year": 2020,
+      "source_type": "primary-research",
+      "authority_tier": "scholarly",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/32307839/"
+    },
+    {
+      "id": "WHITE-EDA-2022",
+      "title": "Understanding the Contributions of Trait Autism and Anxiety to Extreme Demand Avoidance in the Adult General Population",
+      "publisher": "Journal of Autism and Developmental Disorders",
+      "year": 2022,
+      "source_type": "primary-research",
+      "authority_tier": "scholarly",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/35437676/"
+    },
+    {
+      "id": "ONIONS-EDAQ-2014",
+      "title": "Development of the Extreme Demand Avoidance Questionnaire (EDA-Q): preliminary observations on a trait measure for Pathological Demand Avoidance",
+      "publisher": "Journal of Child Psychology and Psychiatry",
+      "year": 2014,
+      "source_type": "primary-research",
+      "authority_tier": "scholarly",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/24117718/"
+    },
+    {
+      "id": "NICE-CG170",
+      "title": "Autism spectrum disorder in under 19s: support and management",
+      "publisher": "National Institute for Health and Care Excellence",
+      "year": 2021,
+      "source_type": "guideline",
+      "authority_tier": "primary",
+      "url": "https://www.nice.org.uk/guidance/cg170/chapter/recommendations"
+    },
+    {
+      "id": "NICE-CG142",
+      "title": "Autism spectrum disorder in adults: diagnosis and management",
+      "publisher": "National Institute for Health and Care Excellence",
+      "year": 2021,
+      "source_type": "guideline",
+      "authority_tier": "primary",
+      "url": "https://www.nice.org.uk/guidance/cg142/chapter/recommendations"
+    },
+    {
+      "id": "NAS-DEMAND-AVOIDANCE",
+      "title": "Demand avoidance",
+      "publisher": "National Autistic Society",
+      "year": 2026,
+      "source_type": "institutional",
+      "authority_tier": "authoritative",
+      "url": "https://www.autism.org.uk/advice-and-guidance/behaviour/demand-avoidance"
+    }
+  ],
+  "decisions": [
+    "إنشاء صفحة guide مستقلة لأن نية البحث تجمع المصطلح المثير للجدل مع التقييم الوظيفي والدعم الأسري والمدرسي، ولا توجد صفحة أو إعادة توجيه مطابقة في المحتوى الحالي.",
+    "عدم تقديم PDA أو EDA بوصفه تشخيصًا مستقلاً ثابتًا؛ تستخدم الصفحة صياغة نمط تجنب المطالب الشديد وتوضح حدود الأدلة الحالية.",
+    "عدم إنشاء اختبار ذاتي؛ تشرح الصفحة أن EDA-Q أداة أولية للبحث والوصف وليست معيارًا تشخيصيًا مستقلاً.",
+    "ربط الصفحة بمرجع التوحد وصفحات الحس والمدرسة والسلوك غير الملبى بدل تكرار محتواها.",
+    "إبقاء الحالة draft ومنع Supabase DML أو نشر Cloudflare إلى أن تجتاز المراجعة العلمية والتحريرية وSEO والإتاحة."
+  ]
+}

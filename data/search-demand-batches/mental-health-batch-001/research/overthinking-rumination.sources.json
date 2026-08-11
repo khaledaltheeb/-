@@ -1,0 +1,97 @@
+{
+  "topic": "overthinking-rumination-repetitive-negative-thinking",
+  "researched_at": "2026-08-09",
+  "research_scope": "transdiagnostic repetitive negative thinking meta-analysis, rumination-depression meta-analysis, experimental emotion-regulation meta-analysis, intervention meta-analyses, youth and sleep evidence, Cambridge CBT compendium, Arabic symptom-first search intent",
+  "sources": [
+    {
+      "id": "STENZEL-RNT-META-2025",
+      "title": "Efficacy of cognitive behavioral therapy in treating repetitive negative thinking, rumination, and worry: A transdiagnostic meta-analysis",
+      "publisher": "Psychological Bulletin",
+      "year": "2025",
+      "source_type": "systematic-review",
+      "authority_tier": "scholarly",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/39916353/",
+      "use": "transdiagnostic CBT evidence for repetitive negative thinking, rumination and worry",
+      "currency_note": "A 2026 corrigendum corrected bibliography/reference errors; the substantive meta-analytic conclusions were not described as retracted."
+    },
+    {
+      "id": "WINNEBECK-RUMINATION-META-2024",
+      "title": "The relationship between rumination and depressive symptoms: What is the role of gender and employment status?",
+      "publisher": "Journal of Affective Disorders",
+      "year": "2024",
+      "source_type": "systematic-review",
+      "authority_tier": "scholarly",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/38341384/",
+      "use": "meta-analytic association between rumination and depressive symptoms with moderation context"
+    },
+    {
+      "id": "LOPEZ-RUMINATION-REAPPRAISAL-META-2024",
+      "title": "The effects of rumination, cognitive reappraisal, and distraction on negative affect and physiological responses: A meta-analysis of experimental studies",
+      "publisher": "Psychological Bulletin",
+      "year": "2024",
+      "source_type": "systematic-review",
+      "authority_tier": "scholarly",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/38427138/",
+      "use": "experimental evidence comparing rumination, reappraisal and distraction effects on negative affect and physiology"
+    },
+    {
+      "id": "SPINHOVEN-RNT-INTERVENTIONS-META-2018",
+      "title": "The effects of psychological interventions on repetitive negative thinking: a meta-analysis",
+      "publisher": "Journal of Consulting and Clinical Psychology",
+      "year": "2018",
+      "source_type": "systematic-review",
+      "authority_tier": "scholarly",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/30240526/",
+      "use": "intervention effects on repetitive negative thinking and transdiagnostic treatment rationale"
+    },
+    {
+      "id": "YOUTH-RNT-META-2023",
+      "title": "A systematic review and meta-analysis of interventions targeting repetitive negative thinking in youth",
+      "publisher": "Journal of Affective Disorders",
+      "year": "2023",
+      "source_type": "systematic-review",
+      "authority_tier": "scholarly",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/37220972/",
+      "use": "youth intervention evidence and limits of applying adult protocols directly to adolescents"
+    },
+    {
+      "id": "RNT-SLEEP-META-2024",
+      "title": "Repetitive negative thinking and sleep disturbance: A systematic review and meta-analysis",
+      "publisher": "Sleep Medicine Reviews",
+      "year": "2024",
+      "source_type": "systematic-review",
+      "authority_tier": "scholarly",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/38391950/",
+      "use": "relationship between repetitive negative thinking, worry/rumination and sleep disturbance"
+    },
+    {
+      "id": "TODD-BRANCH-CAMBRIDGE-2022",
+      "title": "Evidence-Based Treatment for Anxiety Disorders and Depression: A Cognitive Behavioral Therapy Compendium",
+      "publisher": "Cambridge University Press",
+      "year": "2022",
+      "source_type": "book",
+      "authority_tier": "scholarly",
+      "isbn": "9781108431071",
+      "url": "https://www.cambridge.org/core/books/evidencebased-treatment-for-anxiety-disorders-and-depression/F96CF92B6865B3028E88D93D55C4891D",
+      "use": "CBT formulations for worry, rumination and maintaining cognitive-behavioral processes across anxiety and depression"
+    }
+  ],
+  "existing_site_overlap": [
+    {
+      "canonical": "/comparisons/confirmation-bias-vs-motivated-reasoning/",
+      "decision": "not a substitute; cognitive-bias comparison remains separate from clinically relevant repetitive negative thinking"
+    },
+    {
+      "canonical": "/content/generalized-anxiety-disorder",
+      "decision": "cross-link when repetitive thinking is predominantly future-oriented worry across multiple life domains"
+    },
+    {
+      "canonical": "/content/depression",
+      "decision": "cross-link when repetitive thinking is depressive rumination with low mood and loss of interest"
+    },
+    {
+      "canonical": "/content/obsessive-compulsive-disorder",
+      "decision": "cross-link when intrusive thoughts lead to compulsions, reassurance or mental rituals rather than treating all repetitive thinking as OCD"
+    }
+  ]
+}
