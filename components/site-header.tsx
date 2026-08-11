@@ -116,7 +116,7 @@ export default async function SiteHeader() {
           <details className="mobile-menu">
             <summary aria-label="فتح القائمة">القائمة</summary>
             <div className="mobile-menu-panel">
-              <form className="mobile-search" action="/search" method="get"><input name="q" type="search" placeholder="ابحث في منصة روافد" maxLength={120} /><button type="submit">بحث</button></form>
+              <form className="mobile-search" action="/search" method="get"><input name="q" type="search" aria-label="البحث في منصة روافد" placeholder="ابحث في منصة روافد" maxLength={120} /><button type="submit">بحث</button></form>
               <a href="/">الرئيسية</a>
               <span className="mobile-menu-label">ابدأ من احتياجك</span>
               {intentLinks.map((link) => <a key={link.href} href={link.href}>{link.label}</a>)}
