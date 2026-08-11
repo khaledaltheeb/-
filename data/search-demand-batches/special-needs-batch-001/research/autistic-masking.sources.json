@@ -1,0 +1,16 @@
+{
+  "id": "special-needs-autistic-masking-2026-08-11",
+  "topic": "الإخفاء أو التمويه الاجتماعي لدى الأشخاص المتوحدين",
+  "purpose": "بناء دليل عربي يشرح masking/camouflaging بوصفه مجموعة استراتيجيات لإخفاء أو تعويض السمات في بعض السياقات، مع توضيح حدود القياس والأدلة والآثار المحتملة والدعم الآمن دون تحويل unmasking إلى وصفة عامة.",
+  "search_intent_questions": ["ما هو masking في التوحد؟", "هل الإخفاء التوحدي تشخيص رسمي؟", "كيف يبدو masking عند الأطفال والبالغين؟", "هل masking أكثر شيوعًا لدى النساء؟", "هل masking يسبب الاحتراق التوحدي؟", "كيف أعرف أنني أخفي سماتي؟", "ما معنى unmasking؟", "هل يجب التوقف عن masking تمامًا؟", "كيف تدعم المدرسة طفلًا يخفي صعوباته؟", "كيف يناقش المختص masking أثناء تقييم التوحد؟"],
+  "sources": [
+    {"id": "COOK-CAMOUFLAGING-2021", "title": "Camouflaging in autism: A systematic review", "publisher": "Clinical Psychology Review", "year": 2021, "source_type": "systematic-review", "authority_tier": "scholarly", "url": "https://pubmed.ncbi.nlm.nih.gov/34563942/"},
+    {"id": "HULL-CATQ-2019", "title": "Development and Validation of the Camouflaging Autistic Traits Questionnaire (CAT-Q)", "publisher": "Journal of Autism and Developmental Disorders", "year": 2019, "source_type": "primary-research", "authority_tier": "scholarly", "url": "https://pubmed.ncbi.nlm.nih.gov/30361940/"},
+    {"id": "HULL-CAMOUFLAGE-2017", "title": "Putting on My Best Normal: Social Camouflaging in Adults with Autism Spectrum Conditions", "publisher": "Journal of Autism and Developmental Disorders", "year": 2017, "source_type": "qualitative-research", "authority_tier": "scholarly", "url": "https://pubmed.ncbi.nlm.nih.gov/28527095/"},
+    {"id": "CAGE-CAMOUFLAGING-2019", "title": "Understanding the Reasons, Contexts and Costs of Camouflaging for Autistic Adults", "publisher": "Journal of Autism and Developmental Disorders", "year": 2019, "source_type": "mixed-methods", "authority_tier": "scholarly", "url": "https://pubmed.ncbi.nlm.nih.gov/30945091/"},
+    {"id": "NICE-AUTISM-ADULTS-CG142", "title": "Autism spectrum disorder in adults: diagnosis and management", "publisher": "National Institute for Health and Care Excellence", "year": 2021, "source_type": "guideline", "authority_tier": "primary", "url": "https://www.nice.org.uk/guidance/cg142/chapter/recommendations"},
+    {"id": "NAS-MASKING", "title": "Masking", "publisher": "National Autistic Society", "year": 2026, "source_type": "institutional", "authority_tier": "authoritative", "url": "https://www.autism.org.uk/advice-and-guidance/topics/behaviour/masking"}
+  ],
+  "decisions": ["عدم تقديم masking كعرض تشخيصي لازم أو خاص بالنساء.", "الفصل بين التكيف الاجتماعي الطبيعي والتمويه المرتبط بكلفة أو ضغط وظيفي.", "عدم اعتبار CAT-Q أداة تشخيص للتوحد.", "تقديم unmasking كقرار سياقي تدريجي مرتبط بالأمان والاختيار لا كواجب.", "ربط الدعم بتقليل الحاجة إلى الإخفاء القسري وتحسين القبول والتكييفات."
+  ]
+}
