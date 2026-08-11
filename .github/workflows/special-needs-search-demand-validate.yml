@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - agent/special-needs-batch-001-pda
+      - agent/special-needs-batch-001-adhd-girls
     paths:
       - 'data/search-demand-batches/special-needs-batch-001/**'
       - 'scripts/materialize_search_demand_page.py'
@@ -12,6 +13,7 @@ on:
   pull_request:
     branches:
       - agent/special-needs-demand-coverage-v1
+      - agent/special-needs-batch-001-pda
     paths:
       - 'data/search-demand-batches/special-needs-batch-001/**'
       - 'scripts/materialize_search_demand_page.py'
