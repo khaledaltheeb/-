@@ -3,6 +3,7 @@ import { getPublicSectors } from '@/lib/public-taxonomy';
 import PlatformIcon from '@/components/platform-icon';
 
 const primaryLinks = [
+  { href: '/sections', label: 'الأقسام' },
   { href: '/evidence-guides/', label: 'الأدلة' },
   { href: '/specialists', label: 'المختصون' },
   { href: '/centers', label: 'المراكز' },
