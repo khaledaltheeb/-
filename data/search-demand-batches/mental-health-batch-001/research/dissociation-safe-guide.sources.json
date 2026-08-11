@@ -1,0 +1,100 @@
+{
+  "topic": "depersonalization-derealization-and-dissociation",
+  "researched_at": "2026-08-09",
+  "target_existing_canonical": "/evidence-guides/dissociation-safe-guide/",
+  "research_scope": "current professional reference, systematic treatment and prevalence reviews, recent feasibility RCT, academic measurement research, Oxford University Press monograph, symptom-first Arabic search intent, existing-site overlap",
+  "sources": [
+    {
+      "id": "MSD-DPDR-2026",
+      "title": "Depersonalization/Derealization Disorder",
+      "publisher": "MSD Manual Professional Edition",
+      "year": "2026",
+      "source_type": "institutional",
+      "authority_tier": "authoritative",
+      "url": "https://www.msdmanuals.com/professional/psychiatric-disorders/dissociative-disorders/depersonalization-derealization-disorder",
+      "use": "current professional overview, symptoms, differential diagnosis and management"
+    },
+    {
+      "id": "WANG-DPDR-SR-2024",
+      "title": "The Treatment of Depersonalization-Derealization Disorder: A Systematic Review",
+      "publisher": "Journal of Trauma & Dissociation",
+      "year": "2024",
+      "source_type": "systematic-review",
+      "authority_tier": "scholarly",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/37431255/",
+      "use": "quality and limits of psychotherapy, pharmacotherapy and neuromodulation evidence"
+    },
+    {
+      "id": "YANG-PREVALENCE-SR-2023",
+      "title": "The Prevalence of Depersonalization-Derealization Disorder: A Systematic Review",
+      "publisher": "Journal of Trauma & Dissociation",
+      "year": "2023",
+      "source_type": "systematic-review",
+      "authority_tier": "scholarly",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/35699456/",
+      "use": "systematic evidence distinguishing transient depersonalization/derealization experiences from disorder prevalence across populations"
+    },
+    {
+      "id": "HUNTER-CBT-FEASIBILITY-2025",
+      "title": "Cognitive Behavior Therapy for Depersonalization-Derealization Disorder (CBT-f-DDD): a feasibility randomized trial",
+      "publisher": "Pilot and Feasibility Studies",
+      "year": "2025",
+      "source_type": "primary-research",
+      "authority_tier": "scholarly",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/41373023/",
+      "use": "latest randomized feasibility evidence for adapted CBT and limits before definitive efficacy claims"
+    },
+    {
+      "id": "HUNTER-CBT-2023",
+      "title": "Cognitive Behaviour Therapy for Depersonalization Derealization Disorder: a self-controlled cross-over study of waiting list vs active treatment",
+      "publisher": "Cognitive Behaviour Therapy",
+      "year": "2023",
+      "source_type": "primary-research",
+      "authority_tier": "scholarly",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/37711065/",
+      "use": "specialized CBT outcomes with explicit methodological limitations"
+    },
+    {
+      "id": "SIERRA-CDS-2000",
+      "title": "The Cambridge Depersonalization Scale: a new instrument for the measurement of depersonalization",
+      "publisher": "Psychiatry Research",
+      "year": "2000",
+      "source_type": "primary-research",
+      "authority_tier": "scholarly",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/10725532/",
+      "use": "measurement domains and the limits of self-report scales"
+    },
+    {
+      "id": "SIMEON-ABUGEL-OXFORD-2023",
+      "title": "Feeling Unreal: Depersonalization and the Loss of the Self",
+      "publisher": "Oxford University Press",
+      "year": "2023",
+      "source_type": "book",
+      "authority_tier": "scholarly",
+      "isbn": "9780197622445",
+      "url": "https://academic.oup.com/book/45731",
+      "use": "contemporary phenomenology, diagnosis, differential diagnosis, measurement and treatment context"
+    },
+    {
+      "id": "MEDFORD-SIERRA-OXFORD-2012",
+      "title": "Depersonalization disorder",
+      "publisher": "Oxford University Press",
+      "year": "2012",
+      "source_type": "book",
+      "authority_tier": "scholarly",
+      "isbn": "9780199696758",
+      "url": "https://academic.oup.com/book/24770/chapter/188332462",
+      "use": "psychiatric textbook context for transient experiences, chronic disorder and differential diagnosis"
+    }
+  ],
+  "existing_site_overlap": [
+    {
+      "canonical": "/evidence-guides/dissociation-safe-guide/",
+      "decision": "upgrade this existing canonical in place because it already owns the broad dissociation/depersonalization/derealization intent"
+    },
+    {
+      "canonical": "/evidence-guides/panic-disorder-safe-guide/",
+      "decision": "cross-link because derealization can occur during panic but persistent DPDR requires broader assessment"
+    }
+  ]
+}

@@ -1,0 +1,98 @@
+{
+  "id": "special-needs-adhd-girls-late-diagnosis-2026-08-10",
+  "topic": "اضطراب ADHD لدى الفتيات والنساء والتشخيص المتأخر",
+  "purpose": "بحث تأسيسي لصفحة عربية تشرح لماذا قد يتأخر التعرف على ADHD لدى الفتيات والنساء، وكيف تختلف بعض أنماط العرض والإحالة والتعويض، وما الذي يتطلبه التقييم الشامل دون اختراع نوع أنثوي مستقل أو تشخيص ذاتي.",
+  "search_intent_questions": [
+    "لماذا يتأخر تشخيص ADHD لدى الفتيات؟",
+    "ما أعراض ADHD عند البنات؟",
+    "هل الهدوء والدرجات الجيدة يستبعدان ADHD؟",
+    "ما الفرق بين ADHD والقلق عند الفتيات؟",
+    "كيف يظهر فرط الحركة لدى النساء؟",
+    "هل يوجد اختبار خاص لتشخيص ADHD عند النساء؟",
+    "هل الإخفاء والتعويض من علامات ADHD؟",
+    "كيف تؤثر الدورة الشهرية في أعراض ADHD؟",
+    "ماذا أجهز قبل تقييم ADHD؟",
+    "ما التكييفات المدرسية المناسبة للطالبة ذات ADHD؟"
+  ],
+  "sources": [
+    {
+      "id": "MARTIN-LATE-DX-2026",
+      "title": "Antecedents and outcomes of a later attention–deficit hyperactivity disorder (ADHD) diagnosis in females",
+      "publisher": "The British Journal of Psychiatry",
+      "year": 2026,
+      "source_type": "primary-research",
+      "authority_tier": "scholarly",
+      "url": "https://doi.org/10.1192/bjp.2026.10556"
+    },
+    {
+      "id": "WILLIAMS-FEMALE-PRESENTATION-2025",
+      "title": "An item-level systematic review of the presentation of ADHD in females",
+      "publisher": "Neuroscience & Biobehavioral Reviews",
+      "year": 2025,
+      "source_type": "systematic-review",
+      "authority_tier": "scholarly",
+      "url": "https://doi.org/10.1016/j.neubiorev.2025.106064"
+    },
+    {
+      "id": "SKOGLUND-FEMALES-2023",
+      "title": "Time after time: failure to identify and support females with ADHD – a Swedish population register study",
+      "publisher": "Journal of Child Psychology and Psychiatry",
+      "year": 2023,
+      "source_type": "primary-research",
+      "authority_tier": "scholarly",
+      "url": "https://doi.org/10.1111/jcpp.13920"
+    },
+    {
+      "id": "NTINI-DIAGNOSTIC-DELAY-2025",
+      "title": "Influence of sex and depressive symptoms on diagnostic delay of attention deficit hyperactivity disorder in adolescent psychiatric patients",
+      "publisher": "Nordic Journal of Psychiatry",
+      "year": 2025,
+      "source_type": "primary-research",
+      "authority_tier": "scholarly",
+      "url": "https://doi.org/10.1080/08039488.2025.2588759"
+    },
+    {
+      "id": "OSIANLIS-HORMONES-2025",
+      "title": "ADHD and Sex Hormones in Females: A Systematic Review",
+      "publisher": "Journal of Attention Disorders",
+      "year": 2025,
+      "source_type": "systematic-review",
+      "authority_tier": "scholarly",
+      "url": "https://doi.org/10.1177/10870547251332319"
+    },
+    {
+      "id": "NICE-NG87",
+      "title": "Attention deficit hyperactivity disorder: diagnosis and management",
+      "publisher": "National Institute for Health and Care Excellence",
+      "year": 2019,
+      "source_type": "guideline",
+      "authority_tier": "primary",
+      "url": "https://www.nice.org.uk/guidance/ng87/chapter/recommendations"
+    },
+    {
+      "id": "YOUNG-FEMALES-CONSENSUS-2020",
+      "title": "Females with ADHD: An expert consensus statement taking a lifespan approach providing guidance for the identification and treatment of attention-deficit/hyperactivity disorder in girls and women",
+      "publisher": "BMC Psychiatry",
+      "year": 2020,
+      "source_type": "consensus",
+      "authority_tier": "scholarly",
+      "url": "https://doi.org/10.1186/s12888-020-02707-9"
+    },
+    {
+      "id": "MOWLEM-SEX-DIAGNOSIS-2019",
+      "title": "Sex differences in predicting ADHD clinical diagnosis and pharmacological treatment",
+      "publisher": "European Child & Adolescent Psychiatry",
+      "year": 2019,
+      "source_type": "primary-research",
+      "authority_tier": "scholarly",
+      "url": "https://doi.org/10.1007/s00787-018-1211-3"
+    }
+  ],
+  "decisions": [
+    "إنشاء صفحة guide مستقلة لأن نية البحث تركز على فجوة التعرف والإحالة والتشخيص لدى الفتيات والنساء، ولا توجد صفحة أو إعادة توجيه مطابقة في المحتوى الحالي.",
+    "عدم تقديم ADHD لدى الإناث بوصفه نوعًا تشخيصيًا منفصلًا؛ تستخدم الصفحة المعايير نفسها وتشرح فروق المتوسطات والتحيز في الإحالة والتعويض.",
+    "عدم تحويل القلق أو الاكتئاب أو الإخفاء أو التغيرات الهرمونية إلى علامات تشخيصية حاسمة؛ تشرح الصفحة إمكان التزامن وحدود الأدلة.",
+    "ربط الصفحة بمرجع ADHD المركزي وصفحات الوظائف التنفيذية والأسرة والمدرسة وانتقال الرعاية بدل تكرار محتواها.",
+    "إبقاء الحالة draft ومنع Supabase DML أو نشر Cloudflare إلى أن تجتاز المراجعة العلمية والتحريرية وSEO والإتاحة."
+  ]
+}

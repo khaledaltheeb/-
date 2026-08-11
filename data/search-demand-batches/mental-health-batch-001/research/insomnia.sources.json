@@ -1,0 +1,96 @@
+{
+  "topic": "insomnia",
+  "researched_at": "2026-08-09",
+  "research_scope": "2025 VA/DoD guideline, AASM behavioral guideline, European 2023 insomnia guideline, NIH/NHLBI patient reference, CBT-I meta-analysis, digital-treatment context, Arabic symptom-first search intent, existing-site overlap",
+  "sources": [
+    {
+      "id": "VADOD-INSOMNIA-2025",
+      "title": "VA/DoD Clinical Practice Guideline for the Management of Chronic Insomnia Disorder and Obstructive Sleep Apnea",
+      "publisher": "U.S. Department of Veterans Affairs / Department of Defense",
+      "year": "2025",
+      "source_type": "guideline",
+      "authority_tier": "primary",
+      "url": "https://www.healthquality.va.gov/guidelines/CD/insomnia/",
+      "use": "current chronic-insomnia assessment, CBT-I, behavioral treatment, medications, comorbidity and sleep-apnea differential"
+    },
+    {
+      "id": "AASM-BEHAVIORAL-2021",
+      "title": "Behavioral and psychological treatments for chronic insomnia disorder in adults: an American Academy of Sleep Medicine clinical practice guideline",
+      "publisher": "American Academy of Sleep Medicine / Journal of Clinical Sleep Medicine",
+      "year": "2021",
+      "source_type": "guideline",
+      "authority_tier": "primary",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7853203/",
+      "use": "strong recommendation for multicomponent CBT-I and recommendations for behavioral components"
+    },
+    {
+      "id": "EUROPE-INSOMNIA-2023",
+      "title": "The European Insomnia Guideline: An update on the diagnosis and treatment of insomnia 2023",
+      "publisher": "Journal of Sleep Research / European Sleep Research Society",
+      "year": "2023",
+      "source_type": "guideline",
+      "authority_tier": "primary",
+      "url": "https://doi.org/10.1111/jsr.14035",
+      "use": "European diagnostic work-up, CBT-I first-line treatment and medication context"
+    },
+    {
+      "id": "NHLBI-INSOMNIA",
+      "title": "Insomnia",
+      "publisher": "National Heart, Lung, and Blood Institute, NIH",
+      "year": "2022",
+      "source_type": "institutional",
+      "authority_tier": "authoritative",
+      "url": "https://www.nhlbi.nih.gov/health/insomnia",
+      "use": "symptoms, causes, risk factors, diagnosis, sleep diary and treatment overview"
+    },
+    {
+      "id": "ACP-INSOMNIA-2016",
+      "title": "Management of Chronic Insomnia Disorder in Adults: A Clinical Practice Guideline From the American College of Physicians",
+      "publisher": "Annals of Internal Medicine",
+      "year": "2016",
+      "source_type": "guideline",
+      "authority_tier": "primary",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/27136449/",
+      "use": "CBT-I as initial treatment and shared decision-making before short-term medication"
+    },
+    {
+      "id": "TRAUER-CBTI-META-2015",
+      "title": "Cognitive Behavioral Therapy for Chronic Insomnia: A Systematic Review and Meta-analysis",
+      "publisher": "Annals of Internal Medicine",
+      "year": "2015",
+      "source_type": "systematic-review",
+      "authority_tier": "scholarly",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/26054060/",
+      "use": "quantitative evidence for sleep-onset latency, wake after sleep onset, sleep efficiency and durability of CBT-I effects"
+    },
+    {
+      "id": "RIEMANN-OXFORD-SLEEP-2012",
+      "title": "Insomnia",
+      "publisher": "Oxford University Press",
+      "year": "2012",
+      "source_type": "book",
+      "authority_tier": "scholarly",
+      "isbn": "9780199587858",
+      "url": "https://academic.oup.com/book/25023",
+      "use": "clinical assessment, differential diagnosis and behavioral/psychological treatment context"
+    }
+  ],
+  "existing_site_overlap": [
+    {
+      "canonical": "/comparisons/insomnia-vs-sleep-deprivation/",
+      "decision": "preserve as focused comparison; new page owns the central insomnia intent and links to the comparison"
+    },
+    {
+      "canonical": "/content/overthinking-rumination",
+      "decision": "cross-link when repetitive negative thinking is prominent before sleep without treating all insomnia as overthinking"
+    },
+    {
+      "canonical": "/content/depression",
+      "decision": "cross-link because insomnia or hypersomnia may accompany depression but sleep disturbance alone does not diagnose depression"
+    },
+    {
+      "canonical": "/content/generalized-anxiety-disorder",
+      "decision": "cross-link when worry is a major contributor while preserving insomnia as a potentially independent disorder"
+    }
+  ]
+}

@@ -1,0 +1,244 @@
+{
+  "source_path": "data/search-demand-batches/mental-health-batch-001/research/separation-anxiety.sources.json",
+  "body_path": "data/search-demand-batches/mental-health-batch-001/content/separation-anxiety.md",
+  "slug": "separation-anxiety-disorder",
+  "title": "اضطراب قلق الانفصال: الأعراض والتشخيص والعلاج",
+  "content_type": "condition",
+  "status": "draft",
+  "excerpt": "مرجع عربي عن اضطراب قلق الانفصال عند الأطفال والمراهقين يشرح الخوف من ابتعاد الأهل ورفض المدرسة والنوم، التقييم، CBT والتعرض التدريجي، ودور الأسرة والمدرسة.",
+  "sector_slug": "mental-health",
+  "category_slug": "anxiety-disorders",
+  "audience": [
+    "الأطفال والمراهقون",
+    "الوالدان والأسرة",
+    "المعلمون والمرشدون",
+    "مقدمو الرعاية",
+    "المختصون",
+    "طلاب الصحة النفسية"
+  ],
+  "search_aliases": [
+    "قلق الانفصال",
+    "اضطراب قلق الانفصال",
+    "قلق الانفصال عند الأطفال",
+    "Separation Anxiety Disorder",
+    "طفلي لا يريد أن يتركني",
+    "طفلي يبكي عند المدرسة",
+    "طفلي لا ينام وحده",
+    "الخوف من ابتعاد الأم",
+    "رفض المدرسة وقلق الانفصال",
+    "علاج قلق الانفصال",
+    "التعلق الزائد عند الطفل"
+  ],
+  "seo_title": "اضطراب قلق الانفصال: الأعراض والتشخيص والعلاج",
+  "seo_description": "دليل عربي موثوق عن قلق الانفصال عند الأطفال يشرح الخوف من ابتعاد الأهل ورفض المدرسة وألم البطن والنوم، الفرق عن القلق الطبيعي، CBT، ودور الأسرة والمدرسة.",
+  "canonical_url": "/content/separation-anxiety-disorder",
+  "robots_index": true,
+  "robots_follow": true,
+  "primary_keyword": "اضطراب قلق الانفصال",
+  "secondary_keywords": [
+    "قلق الانفصال عند الأطفال",
+    "أعراض قلق الانفصال",
+    "علاج قلق الانفصال",
+    "رفض المدرسة وقلق الانفصال",
+    "الخوف من ابتعاد الأم",
+    "الطفل لا ينام وحده",
+    "CBT لقلق الانفصال",
+    "Separation Anxiety Disorder"
+  ],
+  "semantic_terms": [
+    "قلق الانفصال",
+    "التعلق",
+    "الخوف من الفقد",
+    "رفض المدرسة",
+    "الأعراض الجسدية",
+    "العلاج المعرفي السلوكي",
+    "CBT",
+    "التعرض التدريجي",
+    "الطمأنة",
+    "قلق الانفصال عند المراهق",
+    "القلق الاجتماعي",
+    "القلق المعمم",
+    "CAMS",
+    "الاستقلال",
+    "النوم",
+    "الأسرة",
+    "المدرسة",
+    "SSRIs"
+  ],
+  "search_intent": "informational",
+  "author_display_name": "فريق تحرير منصة روافد",
+  "reviewer_display_name": null,
+  "reviewer_credentials": null,
+  "last_reviewed_at": null,
+  "medical_disclaimer": "",
+  "featured_image_url": null,
+  "featured_image_alt": null,
+  "references_json": [
+    {
+      "id": "AACAP-ANXIETY-CPG-2020",
+      "title": "Clinical Practice Guideline for the Assessment and Treatment of Children and Adolescents With Anxiety Disorders",
+      "publisher": "Journal of the American Academy of Child & Adolescent Psychiatry",
+      "year": "2020",
+      "source_type": "guideline",
+      "authority_tier": "primary",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/?term=Clinical+Practice+Guideline+Assessment+Treatment+Children+Adolescents+Anxiety+Disorders+Walter"
+    },
+    {
+      "id": "COCHRANE-CHILD-ANXIETY-CBT-2020",
+      "title": "Cognitive behavioural therapy for anxiety disorders in children and adolescents",
+      "publisher": "Cochrane Database of Systematic Reviews",
+      "year": "2020",
+      "source_type": "systematic-review",
+      "authority_tier": "scholarly",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/?term=Cognitive+behavioural+therapy+anxiety+disorders+children+adolescents+Cochrane+2020"
+    },
+    {
+      "id": "WALKUP-CAMS-2008",
+      "title": "Cognitive Behavioral Therapy, Sertraline, or a Combination in Childhood Anxiety",
+      "publisher": "New England Journal of Medicine",
+      "year": "2008",
+      "source_type": "primary-research",
+      "authority_tier": "primary",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/18974308/"
+    },
+    {
+      "id": "GINSBURG-CAMELS-2014",
+      "title": "Naturalistic Follow-up of Youths Treated for Pediatric Anxiety Disorders",
+      "publisher": "JAMA Psychiatry",
+      "year": "2014",
+      "source_type": "primary-research",
+      "authority_tier": "primary",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/?term=Naturalistic+Follow-up+Youths+Treated+Pediatric+Anxiety+Disorders+Ginsburg"
+    },
+    {
+      "id": "MSD-SEPARATION-ANXIETY",
+      "title": "Separation Anxiety Disorder",
+      "publisher": "MSD Manual Professional Edition",
+      "year": "2025",
+      "source_type": "institutional",
+      "authority_tier": "authoritative",
+      "url": "https://www.msdmanuals.com/professional/pediatrics/mental-disorders-in-children-and-adolescents/separation-anxiety-disorder"
+    },
+    {
+      "id": "WHO-ANXIETY-2025-SEPARATION",
+      "title": "Anxiety disorders",
+      "publisher": "World Health Organization",
+      "year": "2025",
+      "source_type": "official-definition",
+      "authority_tier": "primary",
+      "url": "https://www.who.int/news-room/fact-sheets/detail/anxiety-disorders"
+    }
+  ],
+  "schema_json": {
+    "content_contract_version": 6,
+    "page_kind": "editorial",
+    "strategic_scientific_value": "standard",
+    "rewrite_method": "evidence-led-rewrite",
+    "disclaimer_url": "/disclaimer",
+    "disclaimer_label": "إخلاء المسؤولية والتنبيهات",
+    "search_intent_questions": [
+      "كيف أعرف أن طفلي لديه قلق انفصال؟",
+      "هل قلق الانفصال طبيعي عند الأطفال؟",
+      "متى يصبح تعلق الطفل بوالديه مشكلة؟",
+      "هل قلق الانفصال يسبب ألم البطن؟",
+      "هل قلق الانفصال يسبب رفض المدرسة؟",
+      "كيف أفرق بين قلق الانفصال والقلق الاجتماعي؟",
+      "كيف أعالج قلق الانفصال عند طفلي؟",
+      "هل التعرض التدريجي يفيد قلق الانفصال؟",
+      "ما دور الأسرة في علاج قلق الانفصال؟",
+      "ماذا أفعل إذا كان طفلي لا ينام وحده؟",
+      "هل يحتاج قلق الانفصال إلى دواء؟",
+      "هل يظهر قلق الانفصال عند المراهقين والبالغين؟",
+      "هل يختفي قلق الانفصال مع العمر؟",
+      "متى يحتاج قلق الانفصال إلى مختص؟"
+    ],
+    "claim_source_map": [
+      {
+        "claim": "اضطراب قلق الانفصال يتضمن خوفًا مفرطًا وغير مناسب للمرحلة النمائية من الابتعاد عن أشخاص التعلق أو حدوث مكروه لهم، مع ضيق أو تعطيل في المدرسة أو النوم أو الاستقلال أو النشاط.",
+        "reference_ids": [
+          "MSD-SEPARATION-ANXIETY",
+          "AACAP-ANXIETY-CPG-2020",
+          "WHO-ANXIETY-2025-SEPARATION"
+        ]
+      },
+      {
+        "claim": "قلق الانفصال الطبيعي في الطفولة لا يساوي الاضطراب، ويعتمد التفريق على العمر والشدة والاستمرار والتعطيل لا على بكاء واحد عند الوداع.",
+        "reference_ids": [
+          "MSD-SEPARATION-ANXIETY",
+          "AACAP-ANXIETY-CPG-2020"
+        ]
+      },
+      {
+        "claim": "قد يسبب قلق الانفصال رفض المدرسة وأعراضًا جسدية عند توقع الابتعاد، لكن رفض المدرسة له أسباب متعددة ولا ينبغي مساواته تلقائيًا بقلق الانفصال.",
+        "reference_ids": [
+          "MSD-SEPARATION-ANXIETY",
+          "AACAP-ANXIETY-CPG-2020"
+        ]
+      },
+      {
+        "claim": "تدعم الإرشادات والمراجعات المنهجية العلاج المعرفي السلوكي والتعرض التدريجي كعلاجات أساسية لاضطرابات القلق لدى الأطفال والمراهقين ومنها قلق الانفصال.",
+        "reference_ids": [
+          "AACAP-ANXIETY-CPG-2020",
+          "COCHRANE-CHILD-ANXIETY-CBT-2020"
+        ]
+      },
+      {
+        "claim": "تجربة CAMS العشوائية دعمت فعالية CBT والسيرترالين والجمع بينهما لدى الأطفال المصابين باضطرابات قلق مختارة ومنها قلق الانفصال، مع استجابة أعلى في المتوسط للعلاج المركب ضمن الدراسة دون أن يعني ذلك ملاءمته لكل طفل.",
+        "reference_ids": [
+          "WALKUP-CAMS-2008",
+          "AACAP-ANXIETY-CPG-2020"
+        ]
+      },
+      {
+        "claim": "مشاركة الوالدين والمدرسة تساعد على تقليل التجنب والطمأنة المفرطة وبناء انفصال تدريجي واستعادة المدرسة والنوم والاستقلال، مع تجنب لوم الأسرة أو استخدام الإكراه كعلاج.",
+        "reference_ids": [
+          "AACAP-ANXIETY-CPG-2020",
+          "COCHRANE-CHILD-ANXIETY-CBT-2020",
+          "MSD-SEPARATION-ANXIETY"
+        ]
+      },
+      {
+        "claim": "وجود دواء كخيار في بعض حالات قلق الأطفال لا يبرر وصف دواء أو جرعة من محتوى عام، ويحتاج القرار إلى تقييم متخصص ومراقبة الفوائد والآثار الجانبية والسلامة حسب العمر والحالة.",
+        "reference_ids": [
+          "AACAP-ANXIETY-CPG-2020",
+          "WALKUP-CAMS-2008"
+        ]
+      },
+      {
+        "claim": "المتابعة طويلة المدى لاضطرابات القلق لدى الشباب تظهر أن مسار التعافي يختلف بين الأفراد، لذلك يقاس التحسن بالوظيفة والاستقلال والحضور والنوم مع متابعة الانتكاس أو الأعراض المتبقية عند الحاجة.",
+        "reference_ids": [
+          "GINSBURG-CAMELS-2014",
+          "AACAP-ANXIETY-CPG-2020"
+        ]
+      }
+    ],
+    "source_versions_reviewed": [
+      {
+        "path": "data/search-demand-batches/mental-health-batch-001/research/separation-anxiety.sources.json",
+        "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+        "decision": "بحث أصلي جديد بعد تدقيق المحتوى المنشور وعدم العثور على canonical مركزي؛ الصفحة تبني اضطراب قلق الانفصال كحالة معترف بها وتفصله عن التعلق الطبيعي ورفض المدرسة والقلق الاجتماعي، مع AACAP وCochrane وCAMS وMSD وWHO."
+      }
+    ],
+    "page_mechanism": {
+      "purpose": "إنشاء مرجع عربي مركزي يجيب متى يصبح خوف الطفل من الابتعاد اضطراب قلق انفصال، ويشرح العلامات والتقييم والتعرض والعلاج ودور الأسرة والمدرسة دون وصم التعلق الطبيعي.",
+      "audience": "الأطفال والمراهقون ووالدوهم وأسرهم والمعلمون والمرشدون ومقدمو الرعاية والمختصون والطلاب الذين يحتاجون فهمًا نمائيًا ودقيقًا لقلق الانفصال.",
+      "interaction_model": "قراءة تبدأ بالفرق بين الطبيعي والاضطراب ثم الأعراض ورفض المدرسة والفروق التشخيصية والأسباب والتقييم وCBT والتعرض والأسرة والمدرسة والدواء والنوم والأسئلة الشائعة.",
+      "content_model": "Condition page مركزية لاضطراب قلق الانفصال مع روابط إلى رفض المدرسة والقلق العام والاجتماعي واكتئاب المراهقين، من دون دمج تلك النوايا أو تحويل كل تعلق أو غياب إلى التشخيص نفسه."
+    },
+    "taxonomy_reviewed": true,
+    "classification_confidence": 0.99,
+    "classification_rationale": "المحتوى يتناول اضطراب قلق الانفصال كتشخيص قلق معترف به من التعريف والتقييم إلى العلاج ويظهر غالبًا في الطفولة لكنه لا يقتصر عليها، لذلك موضعه الأدق قطاع الصحة النفسية وفئة اضطرابات القلق، مع ربط المدرسة والأسرة كمجالات وظيفية لا كتصنيف بديل.",
+    "originality_report": {
+      "passed": true,
+      "longest_verbatim_run_words": 0,
+      "legacy_sentence_reuse_ratio": 0,
+      "method": "new evidence-led Arabic developmental anxiety synthesis grounded in AACAP, Cochrane, CAMS, MSD and WHO"
+    }
+  },
+  "quality_snapshot": {
+    "validation_state": "awaiting-full-v6-validation-and-auto-provenance",
+    "arabic_visible_words_measured": 3168,
+    "minimum_required": 2500,
+    "coordinator_checked_at": "2026-08-11"
+  }
+}

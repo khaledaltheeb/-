@@ -3,6 +3,7 @@ import Link from 'next/link';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import ContentRenderer from '@/components/content-renderer';
+import ContentDisclaimerLink from '@/components/content-disclaimer-link';
 import CapabilitiesRegistryBrowser from '@/components/capabilities-registry-browser';
 import styles from './capability-article-page.module.css';
 import {
@@ -212,13 +213,7 @@ export default function CapabilityArticlePage({ record, routeSlug, registryItems
             <ContentRenderer bodyJson={bodyJson} bodyText={record.body_text} recordId={record.id} />
           </div>
 
-          {record.medical_disclaimer ? (
-            <aside className="medical-disclaimer" aria-label="إخلاء المسؤولية الطبية">
-              <strong>تنبيه منهجي وصحي</strong>
-              <p>{record.medical_disclaimer}</p>
-              <Link href="/disclaimer">إخلاء المسؤولية الكامل</Link>
-            </aside>
-          ) : null}
+          <ContentDisclaimerLink />
 
           <ReferenceNav end />
 

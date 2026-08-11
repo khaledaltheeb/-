@@ -1,0 +1,36 @@
+{
+  "summary": {
+    "contract_version": 6,
+    "generated_at": "2026-08-09T15:08:09.449Z",
+    "source_repo": "khaledaltheeb/healthrenewal.org",
+    "record_count": 852,
+    "target_minimum_editorial_words": 2500,
+    "encyclopedia_last_enforced": true,
+    "lane_counts": {
+      "scientific-strategic": 186,
+      "core-sectors": 225,
+      "quick-information": 286,
+      "interactive-quality": 30,
+      "general-editorial": 123,
+      "encyclopedia-last": 2
+    },
+    "records_below_2500": 465,
+    "records_with_multiple_source_versions": 84,
+    "records_with_editorial_leakage": 0,
+    "records_with_warning_language": 710,
+    "taxonomy_gaps": 151,
+    "taxonomy_unclassified": 491
+  },
+  "contract": {
+    "content_only": true,
+    "copy_and_paste_forbidden": true,
+    "source_versions_must_be_reviewed": true,
+    "page_mechanism_must_be_understood": true,
+    "scientific_and_strategic_pages_prioritized": true,
+    "encyclopedia_migrated_last": true,
+    "exact_taxonomy_required_before_release": true,
+    "inline_warnings_forbidden": true,
+    "central_disclaimer_link_required": true,
+    "editorial_minimum_useful_words": 2500
+  }
+}

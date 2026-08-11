@@ -1,0 +1,98 @@
+{
+  "version": 1,
+  "generated_at": "2026-08-10",
+  "purpose": "Provenance and integrity manifest for the reviewable editorial-demand control plane.",
+  "files": [
+    {
+      "path": "data/editorial-demand/editorial-demand.v1.summary.json",
+      "bytes": 6506,
+      "sha256": "69920f03cb5fae961725dc6e02cd73c45dfb5598c4df04073bc0c3aff8a56f05"
+    },
+    {
+      "path": "data/editorial-demand/editorial-topic-crosswalk.v1.index.json",
+      "bytes": 1541,
+      "sha256": "debb12c4984141151a1e4af194d5cf2da1a2d7e506fa6f8178f050dbee447bab"
+    },
+    {
+      "path": "data/editorial-demand/crosswalk-parts/editorial-topic-crosswalk.v1.part-01.csv",
+      "bytes": 6554,
+      "sha256": "08283bc04fe57463632afa6776a138872d21c2747d7ca90eb2a9d102c661491b"
+    },
+    {
+      "path": "data/editorial-demand/crosswalk-parts/editorial-topic-crosswalk.v1.part-02.csv",
+      "bytes": 6212,
+      "sha256": "580b1b6b40aac04c5137472177988227ccdded772c7afa0afeead9d8591a6a13"
+    },
+    {
+      "path": "data/editorial-demand/crosswalk-parts/editorial-topic-crosswalk.v1.part-03.csv",
+      "bytes": 5781,
+      "sha256": "c960126074bbbd5589d647e245bb8483bf460020b731d96c361c6c66bf994384"
+    },
+    {
+      "path": "data/editorial-demand/crosswalk-parts/editorial-topic-crosswalk.v1.part-04.csv",
+      "bytes": 5590,
+      "sha256": "949123b4fb06f6164a0f9c85f83f70989375b1a9edf2485c9cf4df5307c2b63e"
+    },
+    {
+      "path": "data/editorial-demand/crosswalk-parts/editorial-topic-crosswalk.v1.part-05.csv",
+      "bytes": 5658,
+      "sha256": "855b102abe94716262a2db9fd556fafff54d36493ddad16d2b7f21ccd2d0165e"
+    },
+    {
+      "path": "data/editorial-demand/special-needs-inclusive-batch-001.plan.json",
+      "bytes": 6865,
+      "sha256": "53f58bbbf958ac25fba09b0b22018996cfa908d96eea6081d3b6eb11aae6ec66"
+    },
+    {
+      "path": "data/editorial-demand/legacy-inventory-reconciliation.v1.json",
+      "bytes": 1717,
+      "sha256": "1408557898ce323a2e26ffbb45a2cc262104d9049d6d7cc57a16b4ead0131973"
+    }
+  ],
+  "source_workbooks": [
+    {
+      "name": "special_needs_inclusive_psychology_2000_COMPLETE_VERIFIED(2).xlsx",
+      "bytes": 371691,
+      "sha256": "f671ad51fd32f227d454c7b83864dd0a3615b678b4388d0d7d2134f40ca8a931"
+    },
+    {
+      "name": "special_needs_inclusive_psychology_2000_ar(3).xlsx",
+      "bytes": 131013,
+      "sha256": "11d639802420bed5702e0d87f24ce3a5a0721c839dde74a0c79fe174aa9162d5"
+    }
+  ],
+  "generated_binary_artifacts": [
+    {
+      "name": "editorial-demand.v1.json.xz",
+      "bytes": 93188,
+      "sha256": "8fe70aae1147d9d8db89a8517c84913e094f8e66991ccb9cde2eba370fd78980",
+      "committed": false,
+      "reason": "Full 4,000-intent generated payload; digest retained while PR review uses the compact crosswalk and summary."
+    },
+    {
+      "name": "editorial-topic-crosswalk.v1.json.xz",
+      "bytes": 18020,
+      "sha256": "2098ce884eba06f9a99cf7adca8b85e40daecf2c052b64f168b8b30463757acb",
+      "committed": false,
+      "reason": "Compressed machine representation; CSV is the committed review surface."
+    },
+    {
+      "name": "rawafid-editorial-demand-audit.xlsx",
+      "bytes": 423607,
+      "sha256": "73eee6588016d47c8e333a55d4b6b522782f0fac22cdea8c72d5a79c964179c1",
+      "committed": false,
+      "reason": "Reviewer workbook generated from the control plane and supplied as an external audit artifact."
+    }
+  ],
+  "safety": {
+    "production_write_allowed": false,
+    "supabase_content_dml_allowed": false,
+    "cloudflare_production_publish_allowed": false,
+    "human_review_required": true,
+    "release_blocked_until_inventory_delta_zero": true
+  },
+  "review_surface": {
+    "crosswalk": "Deterministic 100-topic canonical crosswalk split into five 20-row UTF-8 CSV parts with a signed index.",
+    "batch_plan": "Compact first-batch routing plan; per-route legacy-match evidence remains in the external audit workbook."
+  }
+}

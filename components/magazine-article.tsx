@@ -2,6 +2,7 @@ import Link from 'next/link';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import ContentRenderer from '@/components/content-renderer';
+import ContentDisclaimerLink from '@/components/content-disclaimer-link';
 import { breadcrumbJsonLd, SITE_URL } from '@/lib/seo';
 import { evidenceKind, sourceUrl, type MagazineRecord } from '@/lib/magazine';
 import styles from './magazine.module.css';
@@ -76,7 +77,7 @@ export default function MagazineArticle({ record, related }: { record: MagazineR
             <div className={styles.methodNote}><strong>طريقة القراءة:</strong> افصل بين نتيجة الدراسة ودلالتها العملية، واقرأ حدود الدليل قبل تعميم النتيجة. هذه الصفحة تحليل تثقيفي وليست توصية علاجية فردية.</div>
             <div className={styles.articleBody}><ContentRenderer bodyJson={record.body_json} bodyText={record.body_text} recordId={record.id} /></div>
 
-            {record.medical_disclaimer && <aside className={styles.disclaimer}><strong>تنبيه صحي ومنهجي</strong><p>{record.medical_disclaimer}</p><Link href="/disclaimer">إخلاء المسؤولية الكامل</Link></aside>}
+            <ContentDisclaimerLink />
 
             {references.length > 0 && <section className={styles.references} aria-labelledby="magazine-references"><h2 id="magazine-references">المصدر والمراجع</h2><ol>{references.map((ref, index) => <li key={`${ref.url || ref.title}-${index}`}>{ref.url ? <a href={ref.url} target="_blank" rel="noopener noreferrer">{ref.title || ref.url}</a> : <span>{ref.title}</span>}{ref.publisher && <small>{ref.publisher}</small>}{ref.year && <small>{String(ref.year)}</small>}</li>)}</ol></section>}
           </article>

@@ -77,7 +77,23 @@ requireText('app/loading.tsx',['system-loading-shell','aria-busy']);
 requireText('app/error.tsx',["'use client'",'إعادة المحاولة']);
 
 requireText('components/content-renderer.tsx',["type === 'heading'","type === 'list'","type === 'table'","type === 'callout'","type === 'resource'"]);
-requireText('app/content/[slug]/page.tsx',['body_json','ContentRenderer']);
+requireText('components/content-disclaimer-link.tsx',['إخلاء المسؤولية والتنبيهات','/disclaimer']);
+requireText('app/content/[slug]/page.tsx',['body_json','ContentRenderer','ContentDisclaimerLink']);
+for(const file of [
+ 'components/addiction-article-page.tsx','components/capability-article-page.tsx','components/care-guide-page.tsx',
+ 'components/comparison-article-page.tsx','components/family-guide-article-page.tsx','components/magazine-article.tsx',
+ 'app/evidence-guides/[slug]/page.tsx'
+]) requireText(file,['ContentDisclaimerLink']);
+requireText('scripts/content-release-contract-v6.mjs',['minimum-words','source_versions_reviewed','claim_source_map','encyclopedia-order']);
+requireText('scripts/build-migration-queue-v6.mjs',['encyclopedia-last','target_minimum_words','source_versions_to_review']);
+requireText('scripts/migration-queue-v6-contract.mjs',['legacy queue lost published routes','source versions are missing','encyclopedia record is not explicitly deferred']);
+requireText('data/migration-v6/taxonomy.v6.json',['encyclopedia_last','exact_sector_and_category_required']);
+requireText('supabase/migrations/20260809150000_content_release_contract_v6.sql',['V6 editorial pages require at least 2500 Arabic words','all discovered legacy source versions must be listed and reviewed','warning and danger callouts are forbidden','encyclopedia content remains blocked','security invoker','set_content_contract_v6','content_contract_v6_update']);
+requireText('docs/CONTENT-MIGRATION-V6.md',['852 رابطًا منشورًا','5000 صفحة','الموسوعة أخيرًا','إخلاء المسؤولية والتنبيهات','1000 حالة']);
+requireText('app/admin/content/content-contract-v6-panel.tsx',['نسخ المصدر التي تمت قراءتها','خريطة الادعاءات والمراجع','مراجعة التصنيف والأصالة','اختبارات الأداة أو اللعبة أو المقياس']);
+requireText('app/admin/content/contract-actions.ts',['source_versions_reviewed','claim_source_map','evidence-led-rewrite','set_content_contract_v6']);
+requireText('app/admin/content/[id]/page.tsx',['ContentContractV6Panel','updateContentContractV6','schema_json']);
+requireText('app/specialist/content/[id]/page.tsx',['ContentContractV6Panel','updateContentContractV6','schema_json']);
 requireText('app/admin/content/block-editor.tsx',['body_json','body_text','إضافة وحدة','table','callout']);
 requireText('app/admin/content/content-form.tsx',['BlockEditor','bodyJson={record?.body_json}','allowedTypes','featured_image_url','featured_image_alt','mediaLibraryHref']);
 requireText('lib/content-editor-payload.ts',['sanitizeBody','SITE_URL','SPECIALIST_CONTENT_TYPES','buildContentPayload','p_featured_image_url','p_featured_image_alt']);

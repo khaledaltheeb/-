@@ -1,0 +1,21 @@
+{
+  "topic": "ptsd-canonical-upgrade",
+  "researched_at": "2026-08-09",
+  "target_existing_canonical": "/evidence-guides/ptsd-safe-guide/",
+  "research_scope": "VA/DoD 2023 PTSD guideline, NICE NG116, NIMH PTSD reference, ICD-11 PTSD/CPTSD distinction, trauma-focused psychotherapy reviews, Arabic symptom-first search intent, existing comparison/family-guide preservation",
+  "sources": [
+    {"id":"VADOD-PTSD-2023","title":"VA/DoD Clinical Practice Guideline for Management of Posttraumatic Stress Disorder and Acute Stress Disorder","publisher":"U.S. Department of Veterans Affairs / Department of Defense","year":"2023","source_type":"guideline","authority_tier":"primary","url":"https://www.healthquality.va.gov/guidelines/MH/ptsd/","use":"assessment, trauma-focused psychotherapy, medication, comorbidity, acute stress and treatment recommendations"},
+    {"id":"NICE-NG116-PTSD","title":"Post-traumatic stress disorder (NG116)","publisher":"National Institute for Health and Care Excellence","year":"2025","source_type":"guideline","authority_tier":"primary","url":"https://www.nice.org.uk/guidance/ng116","use":"recognition, assessment, trauma-focused CBT, EMDR, children and young people, medicines and follow-up"},
+    {"id":"NIMH-PTSD","title":"Post-Traumatic Stress Disorder","publisher":"National Institute of Mental Health","year":"2024","source_type":"institutional","authority_tier":"authoritative","url":"https://www.nimh.nih.gov/health/publications/post-traumatic-stress-disorder-ptsd","use":"symptom clusters, course, risk, diagnosis, psychotherapy and medication overview"},
+    {"id":"WHO-ICD11-PTSD-CPTSD","title":"ICD-11 for Mortality and Morbidity Statistics: Disorders specifically associated with stress","publisher":"World Health Organization","year":"2026","source_type":"official-definition","authority_tier":"primary","url":"https://icd.who.int/browse/2026-01/mms/en","use":"ICD-11 distinction between PTSD and complex PTSD; diagnostic classification context"},
+    {"id":"COCHRANE-PTSD-PSYCHOTHERAPY","title":"Psychological therapies for post-traumatic stress disorder in adults","publisher":"Cochrane Database of Systematic Reviews","year":"2022","source_type":"systematic-review","authority_tier":"scholarly","url":"https://pubmed.ncbi.nlm.nih.gov/?term=psychological+therapies+post-traumatic+stress+disorder+adults+Cochrane","use":"comparative evidence for trauma-focused psychological therapies and evidence limitations"},
+    {"id":"PTSD-PSYCH-NMA","title":"Psychological interventions for post-traumatic stress disorder in adults: systematic review and network meta-analysis","publisher":"Peer-reviewed PTSD treatment literature","year":"2020","source_type":"systematic-review","authority_tier":"scholarly","url":"https://pubmed.ncbi.nlm.nih.gov/?term=PTSD+psychotherapy+network+meta-analysis+adults+EMDR+trauma-focused+CBT","use":"comparative evidence across trauma-focused CBT, EMDR and other psychotherapies without turning rankings into individual prescriptions"},
+    {"id":"ISTSS-PTSD-GUIDELINES","title":"Posttraumatic Stress Disorder Prevention and Treatment Guidelines","publisher":"International Society for Traumatic Stress Studies","year":"2019","source_type":"guideline","authority_tier":"authoritative","url":"https://istss.org/clinical-resources/trauma-treatment/","use":"international trauma-treatment context and evidence-based psychotherapy principles"}
+  ],
+  "existing_site_overlap": [
+    {"canonical":"/evidence-guides/ptsd-safe-guide/","decision":"upgrade this existing canonical in place; do not create a second PTSD condition URL"},
+    {"canonical":"/comparisons/trauma-vs-ptsd/","decision":"preserve as the dedicated comparison between exposure/trauma reactions and PTSD; central guide summarizes and links"},
+    {"canonical":"/care-guides/trauma-ptsd-family-support/","decision":"preserve as the family-action guide; central PTSD guide covers diagnosis/evidence and links to family support"},
+    {"canonical":"/evidence-guides/dissociation-safe-guide/","decision":"cross-link when depersonalization/derealization symptoms are prominent; do not equate dissociation with PTSD"}
+  ]
+}

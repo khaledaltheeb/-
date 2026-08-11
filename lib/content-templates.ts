@@ -7,7 +7,7 @@ export type ContentTemplate = {
 
 export const ADMIN_CONTENT_TEMPLATES: ContentTemplate[] = [
   { type: 'article', label: 'مقال معرفي', description: 'شرح موثوق لسؤال أو موضوع محدد.', cue: 'مقدمة · نقاط رئيسية · تطبيق عملي · مصادر' },
-  { type: 'guide', label: 'دليل عملي', description: 'مسار متدرج يساعد القارئ على اتخاذ خطوة.', cue: 'لمن الدليل · خطوات · تنبيهات · موارد' },
+  { type: 'guide', label: 'دليل عملي', description: 'مسار متدرج يساعد القارئ على اتخاذ خطوة.', cue: 'لمن الدليل · خطوات · أمثلة · موارد' },
   { type: 'condition', label: 'صفحة حالة', description: 'مرجع منظم للأعراض والتقييم وخيارات الدعم.', cue: 'نظرة عامة · مؤشرات · تقييم · مساعدة' },
   { type: 'comparison', label: 'مقارنة', description: 'مقارنة عادلة بين خيارات أو مفاهيم متقاربة.', cue: 'معايير · جدول · فروق · اختيار مناسب' },
   { type: 'tool', label: 'أداة إرشادية', description: 'أداة عملية آمنة لا تدّعي التشخيص.', cue: 'هدف · تعليمات · نتيجة إرشادية · حدود' },

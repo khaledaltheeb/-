@@ -3,6 +3,7 @@ import Link from 'next/link';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import ContentRenderer from '@/components/content-renderer';
+import ContentDisclaimerLink from '@/components/content-disclaimer-link';
 import AddictionBrowser from '@/components/addiction-browser';
 import { breadcrumbJsonLd, SITE_URL } from '@/lib/seo';
 import { addictionPageRole, safeAddictionReferences, visibleAddictionFaq, type AddictionItem, type AddictionRecord } from '@/lib/addiction';
@@ -50,11 +51,6 @@ export default function AddictionArticlePage({ record, items = [] }: Props) {
             {record.last_reviewed_at ? <span>آخر مراجعة {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(record.last_reviewed_at))}</span> : null}
           </div>
         </header>
-        <aside className={styles.safetyNotice} aria-label="تنبيه سلامة عاجل">
-          <strong>السلامة أولًا</strong>
-          <p>عدم الاستجابة، بطء أو توقف التنفس، اختلاج، ألم صدر، ارتباك أو هياج شديد، ذهان حاد، أو خطر مباشر لإيذاء النفس أو الآخرين يحتاج إلى خدمة طوارئ محلية فورًا. لا تترك الشخص وحده عندما يكون ذلك غير آمن.</p>
-          <Link href="/addiction/withdrawal-safety/">دليل سلامة الانسحاب والطوارئ</Link>
-        </aside>
         <nav className={styles.sectionNav} aria-label="التنقل في قطاع الإدمان والتعافي">
           <Link href="/addiction/">المركز</Link><Link href="/addiction/withdrawal-safety/">سلامة الانسحاب</Link><Link href="/addiction/recovery-roadmap/">خريطة التعافي</Link><Link href="/addiction/family-guide/">للأسرة</Link><Link href="/addiction/sources/">المراجع</Link>
         </nav>
@@ -63,7 +59,7 @@ export default function AddictionArticlePage({ record, items = [] }: Props) {
           {record.featured_image_url ? <figure className="article-featured-image"><Image src={record.featured_image_url} alt={record.featured_image_alt || record.title} width={1200} height={675} sizes="(max-width:900px) 100vw, 900px" priority={role === 'hub'} unoptimized /></figure> : null}
           <ContentRenderer bodyJson={record.body_json} bodyText={record.body_text} recordId={record.id} />
         </div>
-        {record.medical_disclaimer ? <aside className="medical-disclaimer" aria-label="تنبيه صحي"><strong>تنبيه طبي ومنهجي</strong><p>{record.medical_disclaimer}</p><Link href="/disclaimer">إخلاء المسؤولية الكامل</Link></aside> : null}
+        <ContentDisclaimerLink />
         {references.length ? <section className="article-references" aria-labelledby="addiction-references"><h2 id="addiction-references">المصادر والمراجع</h2><ol>{references.map((reference, index) => <li key={`${reference.url || reference.title}-${index}`}>{reference.url ? <a href={reference.url} target="_blank" rel="noopener noreferrer">{reference.title || reference.url}</a> : <span>{reference.title}</span>}{reference.publisher ? <small>{reference.publisher}</small> : null}{reference.year ? <small>{String(reference.year)}</small> : null}</li>)}</ol></section> : null}
       </article>
     </main>

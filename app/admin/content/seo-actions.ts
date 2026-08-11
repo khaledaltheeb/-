@@ -6,6 +6,8 @@ import { createClient } from '@/lib/supabase/server';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const INTENTS = new Set(['informational','transactional','navigational','commercial','local']);
+const SOURCE_TYPES = new Set(['official-definition','guideline','systematic-review','primary-research','consensus','institutional','book']);
+const AUTHORITY_TIERS = new Set(['primary','authoritative','scholarly']);
 
 function field(formData: FormData, key: string, max: number) {
   return String(formData.get(key) ?? '').trim().slice(0, max);
@@ -14,11 +16,26 @@ function list(formData: FormData, key: string, maxItems = 50) {
   return field(formData, key, 4000).split(/[،,\n]/).map((value) => value.trim()).filter(Boolean).slice(0, maxItems);
 }
 function parseReferences(raw: string) {
-  return raw.split('\n').map((line) => line.trim()).filter(Boolean).slice(0, 100).flatMap((line) => {
-    const [titleRaw, urlRaw, publisherRaw, yearRaw] = line.split('|').map((part) => part?.trim() || '');
-    if (!titleRaw && !urlRaw) return [];
+  return raw.split('\n').map((line) => line.trim()).filter(Boolean).slice(0, 100).flatMap((line, index) => {
+    const parts = line.split('|').map((part) => part?.trim() || '');
+    const expanded = parts.length >= 5;
+    const [idRaw, titleRaw, urlRaw, publisherRaw, yearRaw, sourceTypeRaw, authorityTierRaw, isbnRaw] = expanded
+      ? parts
+      : [`ref-${index + 1}`, parts[0] || '', parts[1] || '', parts[2] || '', parts[3] || '', 'institutional', 'authoritative', ''];
+    if (!titleRaw && !urlRaw && !isbnRaw) return [];
     const url = /^https:\/\//i.test(urlRaw) ? urlRaw.slice(0, 1000) : undefined;
-    return [{ title: titleRaw.slice(0, 400) || undefined, url, publisher: publisherRaw.slice(0, 240) || undefined, year: yearRaw.slice(0, 20) || undefined }];
+    const source_type = SOURCE_TYPES.has(sourceTypeRaw) ? sourceTypeRaw : 'institutional';
+    const authority_tier = AUTHORITY_TIERS.has(authorityTierRaw) ? authorityTierRaw : 'authoritative';
+    return [{
+      id: idRaw.slice(0, 120) || `ref-${index + 1}`,
+      title: titleRaw.slice(0, 400) || undefined,
+      url,
+      publisher: publisherRaw.slice(0, 240) || undefined,
+      year: yearRaw.slice(0, 20) || undefined,
+      source_type,
+      authority_tier,
+      isbn: isbnRaw.replace(/[-\s]/g, '').slice(0, 20) || undefined,
+    }];
   });
 }
 
@@ -51,7 +68,7 @@ export async function updateSeoAuthority(formData: FormData) {
     p_reviewer_credentials: field(formData, 'reviewer_credentials', 300) || null,
     p_last_reviewed_at: reviewedDate ? reviewedDate.toISOString() : null,
     p_references: references,
-    p_medical_disclaimer: field(formData, 'medical_disclaimer', 3000) || null,
+    p_medical_disclaimer: null,
     p_featured_image_alt: field(formData, 'featured_image_alt', 500) || null,
   });
   if (error) redirect(`/admin/content/${id}?error=seo-authority-update-failed`);

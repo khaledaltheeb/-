@@ -1,0 +1,104 @@
+{
+  "topic": "health-anxiety",
+  "researched_at": "2026-08-09",
+  "research_scope": "current diagnostic reference, latest network meta-analysis, internet intervention meta-analysis, contemporary primary-care treatment research, Oxford and Royal College/Cambridge books, Arabic symptom-first search intent, existing-site overlap",
+  "sources": [
+    {
+      "id": "MSD-IAD-2026",
+      "title": "Illness Anxiety Disorder",
+      "publisher": "MSD Manual Professional Edition",
+      "year": "2026",
+      "source_type": "institutional",
+      "authority_tier": "authoritative",
+      "url": "https://www.msdmanuals.com/professional/psychiatric-disorders/somatic-symptom-and-related-disorders/illness-anxiety-disorder",
+      "use": "current professional diagnostic framing, care-seeking/care-avoidant patterns, medical evaluation and treatment overview"
+    },
+    {
+      "id": "LAI-HEALTH-ANXIETY-NMA-2026",
+      "title": "The comparative effectiveness of psychological interventions for health anxiety: systematic review and a network meta-analysis of randomised controlled trials",
+      "publisher": "The British Journal of Psychiatry",
+      "year": "2026",
+      "source_type": "systematic-review",
+      "authority_tier": "scholarly",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/42169209/",
+      "use": "latest comparative evidence across 35 randomized trials and treatment components"
+    },
+    {
+      "id": "SHI-INTERNET-META-2024",
+      "title": "Efficacy of internet-based psychological interventions for pathological health anxiety: A three-level meta-analysis of randomized controlled trials",
+      "publisher": "General Hospital Psychiatry",
+      "year": "2024",
+      "source_type": "systematic-review",
+      "authority_tier": "scholarly",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/38335917/",
+      "use": "internet intervention efficacy across randomized trials and follow-up"
+    },
+    {
+      "id": "HYBELIUS-PRIMARY-CARE-2025",
+      "title": "Who benefits the most from cognitive behavior therapy for health anxiety? Secondary analysis of a randomized controlled trial of internet-delivered vs. face-to-face treatment in primary care",
+      "publisher": "Journal of Psychosomatic Research",
+      "year": "2025",
+      "source_type": "primary-research",
+      "authority_tier": "scholarly",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/40203684/",
+      "use": "primary-care exposure-focused CBT, face-to-face versus internet delivery, individual variability"
+    },
+    {
+      "id": "HEDMAN-EXPOSURE-RCT-2014",
+      "title": "Internet-delivered exposure-based cognitive-behavioural therapy and behavioural stress management for severe health anxiety: randomised controlled trial",
+      "publisher": "The British Journal of Psychiatry",
+      "year": "2014",
+      "source_type": "primary-research",
+      "authority_tier": "scholarly",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/25104835/",
+      "use": "exposure-focused CBT mechanisms and active-comparator randomized evidence"
+    },
+    {
+      "id": "STARCEVIC-NOYES-OXFORD-2014",
+      "title": "Hypochondriasis and Health Anxiety: A Guide for Clinicians",
+      "publisher": "Oxford University Press",
+      "year": "2014",
+      "source_type": "book",
+      "authority_tier": "scholarly",
+      "isbn": "9780199996865",
+      "url": "https://academic.oup.com/book/24468",
+      "use": "conceptual distinctions, assessment, differential diagnosis, patient-clinician relationship and treatment models"
+    },
+    {
+      "id": "TYRER-HEALTH-ANXIETY-CAMBRIDGE-2018",
+      "title": "Tackling Health Anxiety: A CBT Handbook",
+      "publisher": "Royal College of Psychiatrists / Cambridge University Press",
+      "year": "2018",
+      "source_type": "book",
+      "authority_tier": "scholarly",
+      "isbn": "9781108644266",
+      "url": "https://www.cambridge.org/core/books/tackling-health-anxiety/CA056FC9546B149D36ED890C967C3281",
+      "use": "CBT formulation, checking, monitoring, reassurance, behavioural experiments, goals and relapse prevention"
+    },
+    {
+      "id": "DAVIES-SALKOVSKIS-CAMBRIDGE-2025",
+      "title": "Illness Anxiety Disorder",
+      "publisher": "Cambridge University Press",
+      "year": "2025",
+      "source_type": "book",
+      "authority_tier": "scholarly",
+      "isbn": "9781009090940",
+      "url": "https://www.cambridge.org/core/books/abs/cambridge-guide-to-cognitive-behavioural-therapy-cbt/illness-anxiety-disorder/9086AC9AB87CADD4FD04325BB119AD22",
+      "use": "contemporary CBT presentation, attentional focus, safety behaviours, treatment planning and comorbidity"
+    }
+  ],
+  "existing_site_overlap": [
+    {
+      "canonical": "/care-guides/health-anxiety-family-boundaries/",
+      "decision": "preserve as a family/caregiver action guide; the new central page targets the person's broad health-anxiety search intent"
+    },
+    {
+      "canonical": "/content/obsessive-compulsive-disorder",
+      "decision": "cross-link where checking and reassurance resemble compulsive processes while preserving diagnostic boundaries"
+    },
+    {
+      "canonical": "/content/generalized-anxiety-disorder",
+      "decision": "cross-link when worry is broad across life domains rather than predominantly illness-focused"
+    }
+  ]
+}

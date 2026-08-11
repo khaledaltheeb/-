@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import ContentForm from '@/app/admin/content/content-form';
+import ContentContractV6Panel from '@/app/admin/content/content-contract-v6-panel';
+import { updateContentContractV6 } from '@/app/admin/content/contract-actions';
 import { deleteSpecialistDraft, submitSpecialistDraft, updateSpecialistDraft } from '../actions';
 
 export const dynamic='force-dynamic';
@@ -18,7 +20,7 @@ export default async function SpecialistContentEditor({params,searchParams}:{par
   const {data:profile}=await supabase.from('profiles').select('role,is_active').eq('id',userId).single();
   if(!profile?.is_active||profile.role!=='specialist') redirect('/account');
   const [{data:record},{data:sectors},{data:categories},{data:versions}]=await Promise.all([
-    supabase.from('content').select('id,author_id,content_type,slug,title,excerpt,body_json,body_text,sector_id,category_id,audience,search_aliases,seo_title,seo_description,canonical_url,robots_index,robots_follow,featured_image_url,featured_image_alt,status,updated_at,published_at').eq('id',id).eq('author_id',userId).maybeSingle(),
+    supabase.from('content').select('id,author_id,content_type,slug,title,excerpt,body_json,body_text,sector_id,category_id,audience,search_aliases,seo_title,seo_description,canonical_url,robots_index,robots_follow,featured_image_url,featured_image_alt,status,updated_at,published_at,schema_json').eq('id',id).eq('author_id',userId).maybeSingle(),
     supabase.from('sectors').select('id,name_ar').eq('is_active',true).order('sort_order').order('name_ar'),
     supabase.from('categories').select('id,sector_id,name_ar').eq('is_active',true).order('sort_order').order('name_ar'),
     supabase.from('content_versions').select('version,created_at').eq('content_id',id).order('version',{ascending:false}).limit(10),
@@ -29,6 +31,7 @@ export default async function SpecialistContentEditor({params,searchParams}:{par
     {query.ok&&<p className="system-message success">تم تنفيذ العملية بنجاح.</p>}{query.error&&<p className="system-message error">تعذر تنفيذ العملية. لم تُحفظ حالة جزئية.</p>}
     {draft?<>
       <ContentForm action={updateSpecialistDraft} sectors={sectors??[]} categories={categories??[]} record={record} submitLabel="حفظ نسخة جديدة" allowedTypes={['article','guide','resource']} mediaLibraryHref="/specialist/media" />
+      <ContentContractV6Panel action={updateContentContractV6} id={record.id} slug={record.slug} schemaJson={record.schema_json} editable />
       <section className="portal-section specialist-submit-panel"><div className="section-mini-heading"><div><h2>إرسال للتحرير</h2><span>بعد الإرسال يُقفل التحرير لدى المختص حتى يعيده فريق التحرير لمسودة عند الحاجة.</span></div></div><div className="specialist-content-actions"><form action={submitSpecialistDraft}><input type="hidden" name="id" value={record.id}/><button className="primary-action" type="submit">إرسال للمراجعة التحريرية</button></form><form action={deleteSpecialistDraft}><input type="hidden" name="id" value={record.id}/><button className="danger-action" type="submit">حذف المسودة</button></form></div></section>
     </>:<div className="locked-content"><strong>المحتوى خارج مرحلة المسودة.</strong><p>يمكنك متابعة حالته، لكن التعديل متوقف حتى يعيده فريق التحرير إلى Draft. لا يمكن للمختص نشر المحتوى مباشرة.</p></div>}
     <aside className="version-panel"><div className="section-mini-heading"><h2>سجل النسخ</h2><span>{versions?.length??0} نسخة حديثة</span></div><div className="version-list">{(versions??[]).map((version)=><div key={version.version}><strong>v{version.version}</strong><span>{new Intl.DateTimeFormat('ar',{dateStyle:'medium',timeStyle:'short'}).format(new Date(version.created_at))}</span></div>)}</div></aside>

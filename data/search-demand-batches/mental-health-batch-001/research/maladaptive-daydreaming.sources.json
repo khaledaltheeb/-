@@ -1,0 +1,96 @@
+{
+  "topic": "maladaptive-daydreaming",
+  "researched_at": "2026-08-09",
+  "research_scope": "foundational primary research, scale validation, proposed diagnostic interview research, comorbidity studies, randomized self-guided intervention trial, current nosology limits, Arabic symptom-first search intent",
+  "nosology_note": "Maladaptive daydreaming is an active research construct and is not currently established as an independent DSM-5-TR or ICD-11 diagnosis. The page must not present proposed criteria or MDS-16 cutoffs as a formal diagnosis.",
+  "sources": [
+    {
+      "id": "SOMER-MD-2002",
+      "title": "Maladaptive Daydreaming: A Qualitative Inquiry",
+      "publisher": "Journal of Contemporary Psychotherapy",
+      "year": "2002",
+      "source_type": "primary-research",
+      "authority_tier": "primary",
+      "url": "https://doi.org/10.1023/A:1020597026919",
+      "use": "foundational qualitative description and historical origin of the research construct"
+    },
+    {
+      "id": "BIGELSEN-MD-2016",
+      "title": "Maladaptive daydreaming: Evidence for an under-researched mental health disorder",
+      "publisher": "Consciousness and Cognition",
+      "year": "2016",
+      "source_type": "primary-research",
+      "authority_tier": "primary",
+      "url": "https://doi.org/10.1016/j.concog.2016.03.017",
+      "use": "phenomenology, impairment, associated symptoms and comparison with non-maladaptive daydreaming"
+    },
+    {
+      "id": "SOMER-MDS-2016",
+      "title": "Development and validation of the Maladaptive Daydreaming Scale (MDS)",
+      "publisher": "Consciousness and Cognition",
+      "year": "2016",
+      "source_type": "primary-research",
+      "authority_tier": "primary",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/?term=Development+and+validation+of+the+Maladaptive+Daydreaming+Scale",
+      "use": "measurement development; supports research screening/measurement, not self-diagnosis"
+    },
+    {
+      "id": "SOMER-DIAGNOSTIC-2017",
+      "title": "Maladaptive daydreaming: Proposed diagnostic criteria and their assessment with a structured clinical interview",
+      "publisher": "Psychology of Consciousness: Theory, Research, and Practice",
+      "year": "2017",
+      "source_type": "primary-research",
+      "authority_tier": "primary",
+      "url": "https://psycnet.apa.org/search/results?query=Maladaptive%20daydreaming%20proposed%20diagnostic%20criteria",
+      "use": "proposed research criteria and structured interview; explicitly not an official DSM/ICD standard"
+    },
+    {
+      "id": "SOMER-COMORBIDITY-2017",
+      "title": "The Comorbidity of Daydreaming Disorder (Maladaptive Daydreaming)",
+      "publisher": "The Journal of Nervous and Mental Disease",
+      "year": "2017",
+      "source_type": "primary-research",
+      "authority_tier": "primary",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/?term=The+Comorbidity+of+Daydreaming+Disorder+Maladaptive+Daydreaming",
+      "use": "high rates of comorbid symptoms/diagnoses in a selected clinical research sample; not population prevalence"
+    },
+    {
+      "id": "SOMER-MD-RCT-2023",
+      "title": "Mindfulness meditation and self-monitoring reduced maladaptive daydreaming symptoms: A randomized controlled trial of a self-guided web-based program",
+      "publisher": "Journal of Consulting and Clinical Psychology",
+      "year": "2023",
+      "source_type": "primary-research",
+      "authority_tier": "primary",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/?term=Mindfulness+meditation+and+self-monitoring+reduced+maladaptive+daydreaming+symptoms",
+      "use": "first randomized evidence for a self-guided web-based intervention; promising but not sufficient to establish a universal treatment protocol"
+    },
+    {
+      "id": "WEST-SOMER-MD-REVIEW-2020",
+      "title": "Empowering the voice of individuals with maladaptive daydreaming: Research synthesis and clinical implications",
+      "publisher": "Clinical literature on maladaptive daydreaming",
+      "year": "2020",
+      "source_type": "institutional",
+      "authority_tier": "scholarly",
+      "url": "https://scholar.google.com/scholar?q=maladaptive+daydreaming+review+Somer",
+      "use": "secondary context only; treatment and diagnostic claims remain anchored to the primary studies above"
+    }
+  ],
+  "existing_site_overlap": [
+    {
+      "canonical": "/evidence-guides/dissociation-safe-guide/",
+      "decision": "cross-link because immersive fantasy may coexist with dissociative symptoms, while maladaptive daydreaming is not simply equivalent to depersonalization/derealization"
+    },
+    {
+      "canonical": "/content/obsessive-compulsive-disorder",
+      "decision": "cross-link when repetitive or compulsive qualities are prominent; do not classify all immersive daydreaming as OCD"
+    },
+    {
+      "canonical": "/content/overthinking-rumination",
+      "decision": "cross-link to distinguish verbal repetitive negative thinking from immersive narrative fantasy"
+    },
+    {
+      "canonical": "/content/depression",
+      "decision": "cross-link when low mood, withdrawal or loss of functioning coexist; daydreaming itself does not diagnose depression"
+    }
+  ]
+}

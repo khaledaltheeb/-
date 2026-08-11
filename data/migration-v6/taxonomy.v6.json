@@ -1,0 +1,69 @@
+{
+  "version": 6,
+  "snapshot_date": "2026-08-09",
+  "source": "Supabase project ghljwfwqsyfnthvlzxjy",
+  "classification_policy": {
+    "exact_sector_and_category_required": true,
+    "category_must_belong_to_sector": true,
+    "force_fit_when_taxonomy_is_missing": false,
+    "taxonomy_gap_blocks_release": true
+  },
+  "sectors": [
+    { "slug": "knowledge", "name_ar": "المعرفة والموسوعة" },
+    { "slug": "mental-health", "name_ar": "الصحة النفسية" },
+    { "slug": "special-needs-inclusion", "name_ar": "ذوو الاحتياجات الخاصة والدمج والتمكين" },
+    { "slug": "child-family-education", "name_ar": "الطفل والأسرة والمدرسة" },
+    { "slug": "trainees-volunteers", "name_ar": "المتدربون والمتطوعون" },
+    { "slug": "addiction-recovery", "name_ar": "الإدمان والتعافي" }
+  ],
+  "categories": [
+    { "slug": "addiction-conditions", "name_ar": "اضطرابات الإدمان والحالات الأساسية", "sector_slug": "addiction-recovery" },
+    { "slug": "withdrawal-management", "name_ar": "الانسحاب وإدارة الأعراض", "sector_slug": "addiction-recovery" },
+    { "slug": "addiction-recovery-core", "name_ar": "التعافي والرعاية المستمرة", "sector_slug": "addiction-recovery" },
+    { "slug": "addiction-family-support", "name_ar": "الأسرة ومقدمو الرعاية", "sector_slug": "addiction-recovery" },
+    { "slug": "addiction-evidence-governance", "name_ar": "المراجع والمنهجية والحوكمة", "sector_slug": "addiction-recovery" },
+    { "slug": "parenting-family", "name_ar": "التربية والوالدية والأسرة", "sector_slug": "child-family-education" },
+    { "slug": "cognitive-processes", "name_ar": "المصطلحات والعمليات المعرفية", "sector_slug": "knowledge" },
+    { "slug": "motivation-behavior", "name_ar": "الدافعية والسلوك", "sector_slug": "knowledge" },
+    { "slug": "research-evidence-learning", "name_ar": "البحث والأدلة والتعلم", "sector_slug": "knowledge" },
+    { "slug": "depression-mood", "name_ar": "الاكتئاب واضطرابات المزاج", "sector_slug": "mental-health" },
+    { "slug": "autism-neurodevelopment", "name_ar": "التوحد والنمو العصبي", "sector_slug": "special-needs-inclusion" },
+    { "slug": "capabilities-strengths-access", "name_ar": "القدرات ونقاط القوة والوصول", "sector_slug": "special-needs-inclusion" },
+    { "slug": "safe-practice-supervision", "name_ar": "الممارسة الآمنة والإشراف", "sector_slug": "trainees-volunteers" }
+  ],
+  "migration_priority": {
+    "scientific_and_strategic_first": [
+      "/outside-the-box/",
+      "/evidence-guides/",
+      "/learning-paths/",
+      "/cochrane/",
+      "/iris/",
+      "/special-needs/",
+      "/capabilities/"
+    ],
+    "core_sectors_next": [
+      "/care-guides/",
+      "/family-guide/",
+      "/addiction/",
+      "/sectors/"
+    ],
+    "encyclopedia_last": [
+      "/encyclopedia/",
+      "/terms/",
+      "/hubs/"
+    ]
+  },
+  "prefix_suggestions": [
+    { "prefix": "/outside-the-box/", "sector_slug": "knowledge", "category_slug": "research-evidence-learning" },
+    { "prefix": "/evidence-guides/", "sector_slug": "knowledge", "category_slug": "research-evidence-learning" },
+    { "prefix": "/learning-paths/", "sector_slug": "knowledge", "category_slug": "research-evidence-learning" },
+    { "prefix": "/cochrane/", "sector_slug": "knowledge", "category_slug": "research-evidence-learning" },
+    { "prefix": "/iris/", "sector_slug": "knowledge", "category_slug": "research-evidence-learning" },
+    { "prefix": "/special-needs/", "sector_slug": "special-needs-inclusion", "category_slug": null },
+    { "prefix": "/capabilities/", "sector_slug": "special-needs-inclusion", "category_slug": "capabilities-strengths-access" },
+    { "prefix": "/family-guide/", "sector_slug": "child-family-education", "category_slug": "parenting-family" },
+    { "prefix": "/care-guides/", "sector_slug": null, "category_slug": null },
+    { "prefix": "/addiction/", "sector_slug": "addiction-recovery", "category_slug": null },
+    { "prefix": "/provider-assessment-demo/", "sector_slug": "trainees-volunteers", "category_slug": "safe-practice-supervision" }
+  ]
+}

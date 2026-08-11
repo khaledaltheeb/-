@@ -1,0 +1,50 @@
+name: Search Demand Content Validate
+
+on:
+  push:
+    branches:
+      - agent/search-demand-mental-health-batch-001
+    paths:
+      - 'data/search-demand-batches/**'
+      - 'scripts/materialize_search_demand_page.py'
+      - 'scripts/validate_search_demand_batch.py'
+      - '.github/workflows/search-demand-content-validate.yml'
+  pull_request:
+    branches:
+      - agent/content-pipeline-v6
+    paths:
+      - 'data/search-demand-batches/**'
+      - 'scripts/materialize_search_demand_page.py'
+      - 'scripts/validate_search_demand_batch.py'
+      - '.github/workflows/search-demand-content-validate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Compile materializer and validator
+        run: python -m py_compile scripts/materialize_search_demand_page.py scripts/validate_search_demand_batch.py
+      - name: Run V6 search-demand batch validation
+        run: >-
+          python scripts/validate_search_demand_batch.py
+          data/search-demand-batches/mental-health-batch-001
+          --output-dir artifacts/search-demand-validation
+      - name: Upload deterministic validation artifacts
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: search-demand-validation
+          path: artifacts/search-demand-validation
+          if-no-files-found: warn

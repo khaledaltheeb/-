@@ -26,7 +26,7 @@ const groups = [
     links: [
       { href: '/medical-review-policy', label: 'سياسة المراجعة العلمية' },
       { href: '/editorial-policy', label: 'السياسة التحريرية' },
-      { href: '/disclaimer', label: 'إخلاء المسؤولية' },
+      { href: '/disclaimer', label: 'إخلاء المسؤولية والتنبيهات' },
       { href: '/privacy', label: 'الخصوصية' },
       { href: '/terms', label: 'شروط الاستخدام' },
     ],

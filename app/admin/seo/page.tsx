@@ -22,7 +22,7 @@ export default async function SeoDashboard() {
   const now = new Date().toISOString();
   const [
     total, published, indexable, missingTitle, missingDescription, missingKeyword, missingCanonical,
-    missingAuthor, missingReviewer, missingReviewedAt, missingReferences, missingDisclaimer, missingImageAlt,
+    missingAuthor, missingReviewer, missingReviewedAt, missingReferences, inlineDisclaimer, missingImageAlt,
     redirectCount, sectorCount, categoryCount, specialistCount, centerCount,
   ] = await Promise.all([
     supabase.from('content').select('id',{count:'exact',head:true}),
@@ -36,7 +36,7 @@ export default async function SeoDashboard() {
     supabase.from('content').select('id',{count:'exact',head:true}).in('content_type',medicalTypes).or('reviewer_display_name.is.null,reviewer_display_name.eq.'),
     supabase.from('content').select('id',{count:'exact',head:true}).in('content_type',medicalTypes).is('last_reviewed_at',null),
     supabase.from('content').select('id',{count:'exact',head:true}).in('content_type',medicalTypes).eq('references_json','[]'),
-    supabase.from('content').select('id',{count:'exact',head:true}).in('content_type',medicalTypes).or('medical_disclaimer.is.null,medical_disclaimer.eq.'),
+    supabase.from('content').select('id',{count:'exact',head:true}).not('medical_disclaimer','is',null).neq('medical_disclaimer',''),
     supabase.from('content').select('id',{count:'exact',head:true}).not('featured_image_url','is',null).or('featured_image_alt.is.null,featured_image_alt.eq.'),
     supabase.from('redirects').select('id',{count:'exact',head:true}).eq('is_active',true),
     supabase.from('sectors').select('id',{count:'exact',head:true}).eq('is_active',true).eq('visibility','public'),
@@ -48,7 +48,7 @@ export default async function SeoDashboard() {
   const number = (value: number | null) => value ?? 0;
   const totalCount = number(total.count);
   const publishedCount = number(published.count);
-  const issues = [missingTitle,missingDescription,missingKeyword,missingCanonical,missingAuthor,missingReviewer,missingReviewedAt,missingReferences,missingDisclaimer,missingImageAlt].reduce((sum,item)=>sum+number(item.count),0);
+  const issues = [missingTitle,missingDescription,missingKeyword,missingCanonical,missingAuthor,missingReviewer,missingReviewedAt,missingReferences,inlineDisclaimer,missingImageAlt].reduce((sum,item)=>sum+number(item.count),0);
   const readiness = totalCount === 0 ? 100 : Math.max(0, Math.round((1 - issues / Math.max(totalCount * 10,1)) * 100));
 
   const metrics: Metric[] = [
@@ -60,7 +60,7 @@ export default async function SeoDashboard() {
     { label:'Scientific Reviewer ناقص', count:number(missingReviewer.count), note:'مطلوب لأنواع YMYL الصحية قبل الاعتماد.', tone:number(missingReviewer.count)?'danger':'ok' },
     { label:'Last Reviewed ناقص', count:number(missingReviewedAt.count), note:'تاريخ المراجعة العلمية جزء من E-E-A-T.', tone:number(missingReviewedAt.count)?'warn':'ok' },
     { label:'References ناقصة', count:number(missingReferences.count), note:'مرجع علمي واحد على الأقل لأنواع YMYL.', tone:number(missingReferences.count)?'danger':'ok' },
-    { label:'Medical Disclaimer ناقص', count:number(missingDisclaimer.count), note:'التنبيه الطبي إلزامي للمحتوى الصحي المحدد.', tone:number(missingDisclaimer.count)?'danger':'ok' },
+    { label:'تنبيهات داخلية تحتاج أرشفة', count:number(inlineDisclaimer.count), note:'العرض العام يستخدم رابط «إخلاء المسؤولية والتنبيهات» الموحد بدل الكتل المتكررة.', tone:number(inlineDisclaimer.count)?'warn':'ok' },
     { label:'Alt للصورة ناقص', count:number(missingImageAlt.count), note:'أي صورة بارزة يجب أن تملك وصفًا بديلًا.', tone:number(missingImageAlt.count)?'warn':'ok' },
   ];
 
