@@ -17,7 +17,7 @@ type FaqItem = { question:string; answer:string };
 
 async function getPublished(slug: string) {
   const supabase = await createClient();
-  const { data } = await supabase.from('content').select('id,slug,title,excerpt,body_json,body_text,content_type,audience,seo_title,seo_description,canonical_url,robots_index,robots_follow,published_at,updated_at,featured_image_url,featured_image_alt,primary_keyword,secondary_keywords,semantic_terms,search_intent,author_display_name,reviewer_display_name,reviewer_credentials,last_reviewed_at,references_json,medical_disclaimer,sector_id,category_id,sectors(slug,name_ar),categories(slug,name_ar)').eq('slug', slug).eq('status', 'published').lte('published_at', new Date().toISOString()).maybeSingle();
+  const { data } = await supabase.from('content').select('id,slug,title,excerpt,body_json,body_text,content_type,audience,seo_title,seo_description,canonical_url,robots_index,robots_follow,published_at,updated_at,featured_image_url,featured_image_alt,primary_keyword,secondary_keywords,semantic_terms,search_intent,author_display_name,reviewer_display_name,reviewer_credentials,last_reviewed_at,references_json,medical_disclaimer,sector_id,category_id,sectors!content_sector_id_fkey(slug,name_ar),categories!content_category_id_fkey(slug,name_ar)').eq('slug', slug).eq('status', 'published').lte('published_at', new Date().toISOString()).maybeSingle();
   return data;
 }
 function asRecord(value:unknown):JsonRecord|null{return value&&typeof value==='object'&&!Array.isArray(value)?value as JsonRecord:null;}
