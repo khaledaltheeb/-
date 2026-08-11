@@ -57,10 +57,20 @@ jobs:
           done
           npm run smoke
           for run in 1 2 3; do
-            npx --yes lighthouse@12.8.2 http://127.0.0.1:3000/ \
-              --quiet --chrome-flags="--headless --no-sandbox" \
-              --only-categories=performance,accessibility,best-practices \
-              --output=json --output-path="/tmp/rawafid-lighthouse-${run}.json"
+            ok=0
+            for attempt in 1 2 3; do
+              if npx --yes lighthouse@12.8.2 http://127.0.0.1:3000/ \
+                --quiet --chrome-flags="--headless --no-sandbox" \
+                --only-categories=performance,accessibility,best-practices \
+                --output=json --output-path="/tmp/rawafid-lighthouse-${run}.json"; then
+                ok=1
+                break
+              fi
+              echo "Lighthouse run ${run} attempt ${attempt} failed; retrying after Chrome cleanup"
+              pkill -f 'chrome|chromium' 2>/dev/null || true
+              sleep 2
+            done
+            test "$ok" -eq 1
           done
           node - <<'NODE'
           const fs=require('fs');
