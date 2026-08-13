@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "batch_id": "library-research-foundations-v1",
+  "migration_date": "2026-08-08",
+  "canonical_map_id": "library-legacy-foundational-v1",
+  "collection": "research",
+  "expected_record_count": 5,
+  "destination": {
+    "sector_slug": "knowledge",
+    "category_slug": "research-evidence-learning"
+  },
+  "release_contract": {
+    "minimum_editorial_words": 1500,
+    "minimum_references": 5,
+    "required_status_before_review": "draft",
+    "required_robots_index_before_review": false,
+    "activate_redirects_before_publication": false,
+    "legacy_theme_copied": false,
+    "thin_legacy_source_requires_editorial_recovery": true
+  },
+  "records": [
+    {
+      "source_path": "/library/research/research-01/",
+      "source_title": "الفرضية",
+      "target_slug": "research-hypothesis",
+      "target_path": "/content/research-hypothesis",
+      "title": "الفرضية البحثية: من سؤال واضح إلى اختبار قابل للتفسير",
+      "db_snapshot": {"status":"draft","robots_index":false,"word_count":1659,"reference_count":6},
+      "review_state": "draft_noindex"
+    },
+    {
+      "source_path": "/library/research/research-02/",
+      "source_title": "المتغير المستقل",
+      "target_slug": "independent-variable",
+      "target_path": "/content/independent-variable",
+      "title": "المتغير المستقل: متى يكون عاملًا مُتلاعبًا به ومتى يكون مجرد متنبئ؟",
+      "db_snapshot": {"status":"draft","robots_index":false,"word_count":1587,"reference_count":6},
+      "review_state": "draft_noindex"
+    },
+    {
+      "source_path": "/library/research/research-03/",
+      "source_title": "المتغير التابع",
+      "target_slug": "dependent-variable",
+      "target_path": "/content/dependent-variable",
+      "title": "المتغير التابع: كيف نعرّف النتيجة ونقيسها ونفسرها دون انتقاء؟",
+      "db_snapshot": {"status":"draft","robots_index":false,"word_count":1588,"reference_count":6},
+      "review_state": "draft_noindex"
+    },
+    {
+      "source_path": "/library/research/research-04/",
+      "source_title": "العينة",
+      "target_slug": "research-sample",
+      "target_path": "/content/research-sample",
+      "title": "العينة البحثية: كيف نختارها ونحدد حجمها ونفهم حدود التعميم؟",
+      "db_snapshot": {"status":"draft","robots_index":false,"word_count":1546,"reference_count":6},
+      "review_state": "draft_noindex"
+    },
+    {
+      "source_path": "/library/research/research-05/",
+      "source_title": "المجتمع الإحصائي",
+      "target_slug": "statistical-population",
+      "target_path": "/content/statistical-population",
+      "title": "المجتمع الإحصائي: من هو مجتمع الدراسة وما حدود التعميم؟",
+      "db_snapshot": {"status":"draft","robots_index":false,"word_count":1701,"reference_count":6},
+      "review_state": "draft_noindex"
+    }
+  ]
+}
