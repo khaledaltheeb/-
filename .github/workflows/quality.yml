@@ -16,7 +16,7 @@ permissions:
 jobs:
   quality:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -38,15 +38,18 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
           NEXT_PUBLIC_SITE_URL: https://healthrenewal.org
-          NEXT_PUBLIC_ALLOW_INDEXING: 'false'
+          NEXT_PUBLIC_ALLOW_INDEXING: 'true'
         run: npm run build
-      - name: Production HTTP smoke and Lighthouse lab audit
+      - name: Production HTTP smoke, full sitemap SEO gate, and Lighthouse lab audit
         env:
           NEXT_PUBLIC_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
           NEXT_PUBLIC_SITE_URL: https://healthrenewal.org
-          NEXT_PUBLIC_ALLOW_INDEXING: 'false'
+          NEXT_PUBLIC_ALLOW_INDEXING: 'true'
           SMOKE_BASE_URL: http://127.0.0.1:3000
+          SEO_GATE_BASE_URL: http://127.0.0.1:3000
+          SEO_GATE_CONCURRENCY: '12'
+          SEO_GATE_TIMEOUT_MS: '12000'
         run: |
           npm run start -- --hostname 127.0.0.1 --port 3000 > /tmp/rawafid-server.log 2>&1 &
           SERVER_PID=$!
@@ -56,12 +59,13 @@ jobs:
             sleep 1
           done
           npm run smoke
+          node scripts/seo-gate.mjs
           for run in 1 2 3; do
             ok=0
             for attempt in 1 2 3; do
               if npx --yes lighthouse@12.8.2 http://127.0.0.1:3000/ \
                 --quiet --chrome-flags="--headless --no-sandbox" \
-                --only-categories=performance,accessibility,best-practices \
+                --only-categories=performance,accessibility,best-practices,seo \
                 --output=json --output-path="/tmp/rawafid-lighthouse-${run}.json"; then
                 ok=1
                 break
@@ -85,6 +89,7 @@ jobs:
             console.log(`Lighthouse lab run ${result.run}:`,result.scores,result.metrics);
             if((result.scores.accessibility??0)<0.90) throw new Error(`Accessibility Lighthouse score below 0.90 on run ${result.run}: ${result.scores.accessibility}`);
             if((result.scores['best-practices']??0)<0.90) throw new Error(`Best Practices Lighthouse score below 0.90 on run ${result.run}: ${result.scores['best-practices']}`);
+            if((result.scores.seo??0)<0.95) throw new Error(`SEO Lighthouse score below 0.95 on run ${result.run}: ${result.scores.seo}`);
           }
           const performances=runs.map((result)=>result.scores.performance??0).sort((a,b)=>a-b);
           const median=performances[1];
