@@ -15,13 +15,17 @@ export function generateStaticParams() {
   return cognitiveTools.map((tool) => ({ slug: tool.slug }));
 }
 
+function toolDescription(summary: string) {
+  return summary.trim().length >= 50 ? summary : `${summary.trim()} مع شرح للنتيجة وحدود الاستخدام.`;
+}
+
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params;
   const tool = getCognitiveTool(slug);
   if (!tool) return {};
   return buildSeoMetadata({
     title: tool.title,
-    description: tool.summary,
+    description: toolDescription(tool.summary),
     path: `/cognitive-lab/${tool.slug}`,
     index: true,
     follow: true,
@@ -35,6 +39,7 @@ export default async function CognitiveToolPage({ params }: { params: Params }) 
   const tool = getCognitiveTool(slug);
   if (!tool) notFound();
   const related = getRelatedCognitiveTools(tool);
+  const description = toolDescription(tool.summary);
   const breadcrumbSchema = breadcrumbJsonLd([
     { name: 'الرئيسية', path: '/' },
     { name: 'مختبر القدرات', path: '/cognitive-lab' },
@@ -46,7 +51,7 @@ export default async function CognitiveToolPage({ params }: { params: Params }) 
     '@id': `${SITE_URL}/cognitive-lab/${tool.slug}#learning-resource`,
     url: `${SITE_URL}/cognitive-lab/${tool.slug}`,
     name: tool.title,
-    description: tool.summary,
+    description,
     inLanguage: 'ar',
     educationalUse: 'practice',
     learningResourceType: 'interactive cognitive training activity',
