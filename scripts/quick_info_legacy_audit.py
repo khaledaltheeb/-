@@ -2,9 +2,13 @@
 from __future__ import annotations
 
 import argparse
+import collections
 import hashlib
 import json
 import re
+import time
+import urllib.request
+import xml.etree.ElementTree as ET
 from html import unescape
 from html.parser import HTMLParser
 from pathlib import Path
@@ -116,26 +120,20 @@ def _https_sources(parser: PageParser) -> list[str]:
     return sorted(urls)
 
 
-def audit_page(index_file: Path, root: Path) -> dict[str, object]:
-    source = index_file.read_text(encoding="utf-8", errors="replace")
+def audit_html(source: str, slug: str, source_path: str, origin: str) -> dict[str, object]:
     parser = PageParser()
     parser.feed(source)
-    slug = index_file.parent.name
-    rel = index_file.relative_to(root).as_posix()
     visible = parser.visible_text
-    title = _clean_text(parser.title)
-    h1 = next((h["text"] for h in parser.headings if h["level"] == "h1"), "")
-    description = parser.meta.get("description", "")
-    canonical = parser.canonical
     sources = _https_sources(parser)
     return {
         "slug": slug,
-        "source_path": rel,
+        "origin": origin,
+        "source_path": source_path,
         "sha256": hashlib.sha256(source.encode("utf-8")).hexdigest(),
-        "title": title,
-        "h1": h1,
-        "description": description,
-        "canonical": canonical,
+        "title": _clean_text(parser.title),
+        "h1": next((h["text"] for h in parser.headings if h["level"] == "h1"), ""),
+        "description": parser.meta.get("description", ""),
+        "canonical": parser.canonical,
         "robots": parser.meta.get("robots", ""),
         "published_time": parser.meta.get("article:published_time", ""),
         "modified_time": parser.meta.get("article:modified_time", ""),
@@ -152,47 +150,140 @@ def audit_page(index_file: Path, root: Path) -> dict[str, object]:
     }
 
 
+def _get(url: str, retries: int = 4) -> bytes:
+    request = urllib.request.Request(url, headers={"User-Agent": "Rawafid-Quick-Info-Audit/1.0"})
+    last: Exception | None = None
+    for attempt in range(retries):
+        try:
+            with urllib.request.urlopen(request, timeout=30) as response:
+                return response.read()
+        except Exception as exc:
+            last = exc
+            if attempt + 1 < retries:
+                time.sleep(1.5 * (attempt + 1))
+    assert last is not None
+    raise last
+
+
+def live_quick_info_slugs(base: str) -> list[str]:
+    sitemap_seeds = {base.rstrip("/") + "/sitemap.xml"}
+    try:
+        robots = _get(base.rstrip("/") + "/robots.txt").decode("utf-8", "ignore")
+        sitemap_seeds.update(
+            line.split(":", 1)[1].strip()
+            for line in robots.splitlines()
+            if line.lower().startswith("sitemap:")
+        )
+    except Exception:
+        pass
+
+    queue = collections.deque(sorted(sitemap_seeds))
+    seen: set[str] = set()
+    urls: set[str] = set()
+    while queue and len(seen) < 500:
+        sitemap = queue.popleft()
+        if sitemap in seen:
+            continue
+        seen.add(sitemap)
+        root = ET.fromstring(_get(sitemap))
+        locs = [node.text.strip() for node in root.iter() if node.tag.endswith("loc") and node.text]
+        if root.tag.endswith("sitemapindex"):
+            queue.extend(loc for loc in locs if loc.startswith(base))
+        else:
+            urls.update(loc for loc in locs if loc.startswith(base))
+
+    prefix = "/quick-info/"
+    slugs: set[str] = set()
+    for url in urls:
+        path = urlparse(url).path
+        if not path.startswith(prefix):
+            continue
+        rest = path[len(prefix):].strip("/")
+        if rest and "/" not in rest and re.fullmatch(r"[a-z0-9][a-z0-9-]*", rest):
+            slugs.add(rest)
+    return sorted(slugs)
+
+
 def main() -> int:
-    ap = argparse.ArgumentParser(description="Inventory legacy quick-info pages without mutating the source repository.")
+    ap = argparse.ArgumentParser(description="Inventory and reconcile legacy quick-info pages without mutating the source repository.")
     ap.add_argument("legacy_root", type=Path)
     ap.add_argument("--output", type=Path, default=Path("artifacts/quick-info-legacy-inventory.json"))
     ap.add_argument("--expected", type=int, default=396)
+    ap.add_argument("--live-base", default="https://healthrenewal.org")
     args = ap.parse_args()
 
     quick_root = args.legacy_root / "quick-info"
     if not quick_root.is_dir():
         raise SystemExit(f"missing legacy quick-info directory: {quick_root}")
 
-    files = sorted(quick_root.glob("*/index.html"))
-    pages = [audit_page(path, args.legacy_root) for path in files]
-    slugs = [str(page["slug"]) for page in pages]
-    duplicates = sorted({slug for slug in slugs if slugs.count(slug) > 1})
-    missing_metadata = [
-        page["slug"] for page in pages
-        if not page["title"] or not page["h1"] or not page["description"] or not page["canonical"]
-    ]
-    wrong_canonical = [
-        page["slug"] for page in pages
-        if page["canonical"] != f"https://healthrenewal.org/quick-info/{page['slug']}/"
-    ]
-    thin_under_500 = [page["slug"] for page in pages if int(page["word_count"]) < 500]
-    no_external_sources = [page["slug"] for page in pages if int(page["external_source_count"]) == 0]
+    source_pages: dict[str, dict[str, object]] = {}
+    for index_file in sorted(quick_root.glob("*/index.html")):
+        slug = index_file.parent.name
+        html = index_file.read_text(encoding="utf-8", errors="replace")
+        source_pages[slug] = audit_html(html, slug, index_file.relative_to(args.legacy_root).as_posix(), "repository")
 
+    live_slugs = live_quick_info_slugs(args.live_base.rstrip("/"))
+    source_slugs = sorted(source_pages)
+    live_only = sorted(set(live_slugs) - set(source_slugs))
+    source_only = sorted(set(source_slugs) - set(live_slugs))
+
+    pages = dict(source_pages)
+    live_fetch_errors: dict[str, str] = {}
+    for i, slug in enumerate(live_only, start=1):
+        url = f"{args.live_base.rstrip('/')}/quick-info/{slug}/"
+        try:
+            html = _get(url).decode("utf-8", "replace")
+            pages[slug] = audit_html(html, slug, url, "live-production")
+        except Exception as exc:
+            live_fetch_errors[slug] = repr(exc)
+        if i % 25 == 0:
+            print(f"fetched live-only pages: {i}/{len(live_only)}")
+        time.sleep(0.05)
+
+    ordered = [pages[slug] for slug in sorted(pages)]
+    slugs = [str(page["slug"]) for page in ordered]
+    duplicates = sorted({slug for slug in slugs if slugs.count(slug) > 1})
+    missing_metadata = [page["slug"] for page in ordered if not page["title"] or not page["h1"] or not page["description"] or not page["canonical"]]
+    wrong_canonical = [page["slug"] for page in ordered if page["canonical"] != f"https://healthrenewal.org/quick-info/{page['slug']}/"]
+    thin_under_500 = [page["slug"] for page in ordered if int(page["word_count"]) < 500]
+    no_external_sources = [page["slug"] for page in ordered if int(page["external_source_count"]) == 0]
+
+    complete_count = len(ordered)
+    passed = (
+        len(live_slugs) == args.expected
+        and complete_count == args.expected
+        and not source_only
+        and not live_fetch_errors
+        and not duplicates
+        and not missing_metadata
+        and not wrong_canonical
+    )
     report = {
-        "version": 1,
-        "source": "khaledaltheeb/healthrenewal.org:main/quick-info",
+        "version": 2,
+        "repository_source": "khaledaltheeb/healthrenewal.org:main/quick-info",
+        "live_source": args.live_base.rstrip("/") + "/quick-info/",
         "expected_pages": args.expected,
-        "page_count": len(pages),
-        "status": "passed" if len(pages) == args.expected and not duplicates and not missing_metadata and not wrong_canonical else "failed",
+        "repository_page_count": len(source_pages),
+        "live_sitemap_page_count": len(live_slugs),
+        "reconciled_page_count": complete_count,
+        "status": "passed" if passed else "failed",
         "summary": {
+            "live_only_pages": len(live_only),
+            "source_only_pages": len(source_only),
+            "live_fetch_errors": len(live_fetch_errors),
             "duplicate_slugs": len(duplicates),
             "missing_metadata": len(missing_metadata),
             "wrong_canonical": len(wrong_canonical),
             "thin_under_500": len(thin_under_500),
             "no_external_sources": len(no_external_sources),
-            "minimum_words": min((int(p["word_count"]) for p in pages), default=0),
-            "maximum_words": max((int(p["word_count"]) for p in pages), default=0),
-            "average_words": round(sum(int(p["word_count"]) for p in pages) / len(pages), 1) if pages else 0,
+            "minimum_words": min((int(p["word_count"]) for p in ordered), default=0),
+            "maximum_words": max((int(p["word_count"]) for p in ordered), default=0),
+            "average_words": round(sum(int(p["word_count"]) for p in ordered) / len(ordered), 1) if ordered else 0,
+        },
+        "reconciliation": {
+            "live_only_slugs": live_only,
+            "source_only_slugs": source_only,
+            "live_fetch_errors": live_fetch_errors,
         },
         "failures": {
             "duplicate_slugs": duplicates,
@@ -203,16 +294,23 @@ def main() -> int:
             "thin_under_500": thin_under_500,
             "no_external_sources": no_external_sources,
         },
-        "pages": pages,
+        "pages": ordered,
     }
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(json.dumps({"status": report["status"], "page_count": len(pages), **report["summary"]}, ensure_ascii=False))
-    if len(pages) != args.expected:
-        print(f"expected {args.expected} quick-info pages, found {len(pages)}")
-        return 1
-    return 0 if report["status"] == "passed" else 1
+    print(json.dumps({
+        "status": report["status"],
+        "repository_page_count": len(source_pages),
+        "live_sitemap_page_count": len(live_slugs),
+        "reconciled_page_count": complete_count,
+        **report["summary"],
+    }, ensure_ascii=False))
+    if live_only:
+        print("LIVE_ONLY_SLUGS=" + ",".join(live_only))
+    if source_only:
+        print("SOURCE_ONLY_SLUGS=" + ",".join(source_only))
+    return 0 if passed else 1
 
 
 if __name__ == "__main__":
