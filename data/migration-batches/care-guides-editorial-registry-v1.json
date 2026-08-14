@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "scope": "/care-guides/",
+  "source_repository": "khaledaltheeb/healthrenewal.org",
+  "destination_repository": "khaledaltheeb/-",
+  "quality_policy": {
+    "one_canonical_per_intent": true,
+    "preserve_unique_legacy_value": true,
+    "copy_legacy_ui_or_runtime": false,
+    "index_only_after_review": true,
+    "reference_policy": "authoritative-primary-first",
+    "filler_forbidden": true
+  },
+  "sectors": [
+    {"id":"mental-health","label":"الصحة النفسية والدعم النفسي"},
+    {"id":"neurodevelopment","label":"النمو العصبي والاختلافات النمائية"},
+    {"id":"family-caregiving","label":"الأسرة ومقدمو الرعاية"},
+    {"id":"child-adolescent","label":"الطفل والمراهق"},
+    {"id":"education-inclusion","label":"التعليم والدمج المدرسي والجامعي"},
+    {"id":"work-independence","label":"العمل والاستقلال الوظيفي"},
+    {"id":"older-adults","label":"كبار السن والرعاية الممتدة"},
+    {"id":"services-access-rights","label":"الوصول للخدمات والحقوق والإتاحة"},
+    {"id":"daily-living","label":"الحياة اليومية والاستقلال والمهارات التنفيذية"},
+    {"id":"professional-practice","label":"الأدلة المهنية للمختصين ومقدمي الخدمة"}
+  ],
+  "page_types": ["guide","protocol","plan","checklist","record","card","definition","comparison","faq-hub"],
+  "audiences": ["self","parent-guardian","family","caregiver","school-educator","university-training","employer-manager","health-psychology-education-professional","service-provider","general-public"],
+  "migration_states": ["new-canonical","merge-into-existing","retain-separate","redirect-only","expand-before-import","reject-with-reason"],
+  "required_page_fields": [
+    "slug","title","sector","section","topic_cluster","page_type","primary_audience","secondary_audiences","primary_intent","intent_type","primary_keyword","secondary_keywords","question_cluster","legacy_sources","authoritative_sources","migration_state","canonical_url","robots_index","editorial_status"
+  ],
+  "editorial_statuses": ["inventory","research","draft","qa","reviewed","published","rejected"]
+}
