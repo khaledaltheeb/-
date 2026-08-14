@@ -4,16 +4,22 @@ on:
   pull_request:
     paths:
       - 'data/encyclopedia/**'
+      - 'docs/PSYCHOLOGICAL-ENCYCLOPEDIA-STATUS.md'
       - 'scripts/validate_psych_encyclopedia.py'
+      - 'scripts/encyclopedia_coverage_report.py'
       - 'app/encyclopedia/**'
       - 'lib/encyclopedia.ts'
       - 'app/sitemaps/encyclopedia.xml/route.ts'
       - 'app/sitemap.xml/route.ts'
+      - 'package.json'
   push:
     branches: [main]
     paths:
       - 'data/encyclopedia/**'
+      - 'docs/PSYCHOLOGICAL-ENCYCLOPEDIA-STATUS.md'
       - 'scripts/validate_psych_encyclopedia.py'
+      - 'scripts/encyclopedia_coverage_report.py'
+      - 'package.json'
 
 permissions:
   contents: read
@@ -30,3 +36,5 @@ jobs:
           python-version: '3.12'
       - name: Validate psychological encyclopedia batches
         run: python scripts/validate_psych_encyclopedia.py
+      - name: Audit encyclopedia coverage
+        run: python scripts/encyclopedia_coverage_report.py --json
