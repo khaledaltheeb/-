@@ -24,6 +24,20 @@ jobs:
             curl -sS --retry 4 --retry-delay 2 --connect-timeout 15 --max-time 45 -o /tmp/body -w '%{http_code}' "$1"
           }
 
+          check_redirect() {
+            src="$1"
+            expected="$2"
+            h="$(mktemp)"
+            status="$(curl -sS --retry 4 --retry-delay 2 --connect-timeout 15 --max-time 45 -o /dev/null -D "$h" -w '%{http_code}' "$BASE$src")"
+            location="$(awk 'BEGIN{IGNORECASE=1} /^location:/ {sub(/^[^:]+:[[:space:]]*/, ""); sub(/\r$/, ""); print; exit}' "$h")"
+            echo "REDIRECT $src HTTP=$status LOCATION=$location"
+            case "$status" in 301|308) ;; *) return 1 ;; esac
+            case "$location" in
+              "$expected"|"$expected/"|"$BASE$expected"|"$BASE$expected/") ;;
+              *) return 1 ;;
+            esac
+          }
+
           code="$(fetch_code "$BASE/sections/cognitive-processes")"
           test "$code" = "200"
           grep -q 'العمليات المعرفية' /tmp/body
@@ -52,15 +66,8 @@ jobs:
           test "$failed" -eq 0
           echo "COGNITIVE_LAB_ROUTES=${#slugs[@]}/53_PASS"
 
-          h1="$(mktemp)"
-          curl -sS --retry 4 --retry-delay 2 --connect-timeout 15 --max-time 45 -o /dev/null -D "$h1" "$BASE/cognitive-lab/associative-context-binding"
-          grep -Eq '^HTTP/[^ ]+ 308' "$h1"
-          grep -Eiq '^location: .*/cognitive-lab/associative-binding/?\r?$' "$h1"
-
-          h2="$(mktemp)"
-          curl -sS --retry 4 --retry-delay 2 --connect-timeout 15 --max-time 45 -o /dev/null -D "$h2" "$BASE/cognitive-lab/prospective-memory-cues"
-          grep -Eq '^HTTP/[^ ]+ 308' "$h2"
-          grep -Eiq '^location: .*/cognitive-lab/prospective-memory/?\r?$' "$h2"
+          check_redirect '/cognitive-lab/associative-context-binding' '/cognitive-lab/associative-binding'
+          check_redirect '/cognitive-lab/prospective-memory-cues' '/cognitive-lab/prospective-memory'
           echo "LEGACY_REDIRECTS=2/2_PASS"
 
           code="$(fetch_code "$BASE/content/visuospatial-working-memory-work-study")"
