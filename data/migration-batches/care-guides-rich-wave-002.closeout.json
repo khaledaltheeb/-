@@ -42,6 +42,7 @@
     "All ten pages are independent canonical pages selected from measured taxonomy gaps.",
     "International rights frameworks are used as general frameworks and are not presented as local legal advice.",
     "No specialist reviewer identity was fabricated.",
-    "Publication was performed only after the database release and render-parity gates accepted each page."
+    "Publication was performed only after the database release and render-parity gates accepted each page.",
+    "The full sitemap SEO gate keeps strict HTTP failure semantics while reusing successful sitemap GET results and retrying only transient network request failures before reporting request-failed."
   ]
 }
