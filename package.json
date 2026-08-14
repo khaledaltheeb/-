@@ -17,6 +17,7 @@
     "theme-check": "node scripts/theme-contract-v4.mjs && node scripts/theme-dead-code-check.mjs",
     "provider-system-check": "node scripts/provider-system-contract.mjs && node scripts/account-system-contract.mjs",
     "encyclopedia:validate": "python scripts/validate_psych_encyclopedia.py",
+    "encyclopedia:coverage": "python scripts/encyclopedia_coverage_report.py",
     "encyclopedia:import:dry": "node scripts/import_psych_encyclopedia.mjs",
     "encyclopedia:import": "node scripts/import_psych_encyclopedia.mjs --apply",
     "smoke": "node scripts/smoke.mjs"

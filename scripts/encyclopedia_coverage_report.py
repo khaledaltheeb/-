@@ -10,6 +10,54 @@ ROOT = Path(__file__).resolve().parents[1]
 BATCH_DIR = ROOT / "data" / "encyclopedia" / "batches"
 ARABIC_WORD_RE = re.compile(r"[\u0600-\u06FF]+")
 
+# Editorial coverage families, not diagnostic codes. They collapse historical
+# spelling variants so the report remains useful as the encyclopedia grows.
+CLASSIFICATION_ALIASES = {
+    "anxiety-disorder": "anxiety-disorders",
+    "anxiety-disorders": "anxiety-disorders",
+    "bipolar-and-related-disorder": "mood-and-depressive-disorders",
+    "depressive-disorder": "mood-and-depressive-disorders",
+    "mood-disorders": "mood-and-depressive-disorders",
+    "premenstrual-dysphoric-disorder": "mood-and-depressive-disorders",
+    "disorders-specifically-associated-with-stress": "disorders-specifically-associated-with-stress",
+    "dissociative-disorder": "dissociative-disorders",
+    "dissociative-disorders": "dissociative-disorders",
+    "feeding-and-eating-disorder": "feeding-or-eating-disorders",
+    "feeding-or-eating-disorders": "feeding-or-eating-disorders",
+    "impulse-control-disorders": "impulse-control-disorders",
+    "neurodevelopmental-disorder": "neurodevelopmental-disorders",
+    "neurodevelopmental-disorders": "neurodevelopmental-disorders",
+    "obsessive-compulsive-and-related-disorder": "obsessive-compulsive-and-related-disorders",
+    "obsessive-compulsive-or-related-disorders": "obsessive-compulsive-and-related-disorders",
+    "personality-disorder": "personality-disorders",
+    "personality-disorders": "personality-disorders",
+    "schizophrenia-or-other-primary-psychotic-disorders": "schizophrenia-spectrum-and-other-psychotic-disorders",
+    "schizophrenia-spectrum-and-other-psychotic-disorder": "schizophrenia-spectrum-and-other-psychotic-disorders",
+    "schizophrenia-spectrum-and-other-psychotic-disorders": "schizophrenia-spectrum-and-other-psychotic-disorders",
+    "somatic-symptom-and-bodily-distress": "somatic-symptom-and-bodily-distress",
+}
+
+# The first two historical batches predate the classification field. Keep the
+# original clinical copy immutable and map their four known slugs explicitly.
+SLUG_CLASSIFICATION_FALLBACKS = {
+    "generalized-anxiety-disorder": "anxiety-disorders",
+    "panic-disorder": "anxiety-disorders",
+    "obsessive-compulsive-disorder": "obsessive-compulsive-and-related-disorders",
+    "post-traumatic-stress-disorder": "disorders-specifically-associated-with-stress",
+}
+
+PUBLISHER_ALIASES = {
+    "National Institute for Health and Care Excellence (NICE)": "NICE",
+    "U.S. National Library of Medicine - MedlinePlus": "MedlinePlus",
+    "MedlinePlus / U.S. National Library of Medicine": "MedlinePlus",
+}
+
+AUTHORITY_TIER_ALIASES = {
+    "primary": "primary",
+    "secondary": "secondary",
+    "scholarly": "secondary",
+}
+
 
 def text(value):
     return value.strip() if isinstance(value, str) else ""
@@ -45,15 +93,25 @@ def faq_count(record):
 
 def classification(record):
     schema = record.get("schema_json") if isinstance(record, dict) else None
-    if not isinstance(schema, dict):
-        return "unclassified"
-    return text(schema.get("classification")) or "unclassified"
+    raw = text(schema.get("classification")) if isinstance(schema, dict) else ""
+    if raw:
+        return CLASSIFICATION_ALIASES.get(raw, raw)
+    slug = text(record.get("slug")) if isinstance(record, dict) else ""
+    return SLUG_CLASSIFICATION_FALLBACKS.get(slug, "unclassified")
 
 
 def source_tier(reference):
     if not isinstance(reference, dict):
         return "unknown"
-    return text(reference.get("authority_tier")) or "unknown"
+    raw = text(reference.get("authority_tier")) or "unknown"
+    return AUTHORITY_TIER_ALIASES.get(raw, raw)
+
+
+def publisher_name(reference):
+    if not isinstance(reference, dict):
+        return "unknown"
+    raw = text(reference.get("publisher")) or "unknown"
+    return PUBLISHER_ALIASES.get(raw, raw)
 
 
 def load_records():
@@ -77,20 +135,25 @@ def build_report():
     reference_counts = []
     faq_counts = []
     word_counts = []
+    unclassified_slugs = []
     draft_count = 0
     noindex_count = 0
     canonical_ok = 0
 
     for _, record in rows:
-        classifications[classification(record)] += 1
+        family = classification(record)
+        classifications[family] += 1
+        if family == "unclassified":
+            unclassified_slugs.append(text(record.get("slug")) or "<missing-slug>")
+
         references = record.get("references_json") if isinstance(record.get("references_json"), list) else []
         reference_counts.append(len(references))
         for reference in references:
             if not isinstance(reference, dict):
                 continue
-            publisher = text(reference.get("publisher")) or "unknown"
-            publishers[publisher] += 1
+            publishers[publisher_name(reference)] += 1
             authority_tiers[source_tier(reference)] += 1
+
         faq_counts.append(faq_count(record))
         word_counts.append(word_count(record))
         if record.get("status") == "draft":
@@ -109,6 +172,7 @@ def build_report():
         "noindex_count": noindex_count,
         "canonical_ok_count": canonical_ok,
         "duplicate_slugs": duplicate_slugs,
+        "unclassified_slugs": sorted(unclassified_slugs),
         "classification_counts": dict(sorted(classifications.items())),
         "reference_total": sum(reference_counts),
         "reference_average": round(sum(reference_counts) / total, 2) if total else 0,
@@ -134,6 +198,7 @@ def markdown(report):
         f"- FAQs: **{report['faq_total']} total**, **{report['faq_average']} average/page**",
         f"- References: **{report['reference_total']} total**, **{report['reference_average']} average/page**",
         f"- Duplicate slugs: **{len(report['duplicate_slugs'])}**",
+        f"- Unclassified slugs: **{len(report['unclassified_slugs'])}**",
         "",
         "## Classification coverage",
         "",
@@ -149,6 +214,9 @@ def markdown(report):
     if report["duplicate_slugs"]:
         lines.extend(["", "## Duplicate slugs", ""])
         lines.extend(f"- `{slug}`" for slug in report["duplicate_slugs"])
+    if report["unclassified_slugs"]:
+        lines.extend(["", "## Unclassified slugs", ""])
+        lines.extend(f"- `{slug}`" for slug in report["unclassified_slugs"])
     return "\n".join(lines) + "\n"
 
 
@@ -161,6 +229,8 @@ def main():
     report = build_report()
     if report["duplicate_slugs"]:
         raise SystemExit(f"Duplicate encyclopedia slugs: {', '.join(report['duplicate_slugs'])}")
+    if report["unclassified_slugs"]:
+        raise SystemExit(f"Unclassified encyclopedia slugs: {', '.join(report['unclassified_slugs'])}")
     if report["draft_records"] != report["draft_status_count"] or report["draft_records"] != report["noindex_count"]:
         raise SystemExit("Coverage report found a non-draft or indexable batch record")
     if report["draft_records"] != report["canonical_ok_count"]:
