@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import ContentRenderer from '@/components/content-renderer';
+import ContentDisclaimerLink from '@/components/content-disclaimer-link';
 import { createClient } from '@/lib/supabase/server';
 import { buildSeoMetadata, breadcrumbJsonLd, SITE_URL } from '@/lib/seo';
 import { getCognitivePageBySlug, getCognitivePageIndexItem } from '@/lib/cognitive-program';
@@ -348,6 +349,7 @@ export default async function PublishedContentPage({ params }: { params: Params 
         {record.medical_disclaimer && <aside className="medical-disclaimer" aria-label="إخلاء المسؤولية الطبية">
           <strong>تنبيه طبي</strong><p>{record.medical_disclaimer}</p><Link href="/disclaimer">إخلاء المسؤولية الكامل</Link>
         </aside>}
+        <ContentDisclaimerLink />
         {related.length > 0 && <section className="article-related" aria-labelledby="related-title">
           <div className="section-mini-heading"><div><span className="eyebrow">Topical Authority</span><h2 id="related-title">محتوى مرتبط</h2></div><span>روابط منتقاة من خريطة المفاهيم ونية البحث</span></div>
           <div className="related-content-grid">{related.map((item) => <article key={item.id}>
