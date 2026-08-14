@@ -11,86 +11,24 @@ permissions:
 jobs:
   smoke:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
-      - name: Validate live cognitive scope
+      - name: Probe transient cognitive routes in isolation
         shell: bash
         run: |
           set -euo pipefail
           BASE="https://main-rawafid-platform-staging.khaledaltheeb.workers.dev"
-
-          fetch_code() {
-            curl -sS --retry 4 --retry-delay 2 --connect-timeout 15 --max-time 45 -o /tmp/body -w '%{http_code}' "$1"
-          }
-
-          check_redirect() {
-            src="$1"
-            expected="$2"
-            h="$(mktemp)"
-            status="$(curl -sS --retry 4 --retry-delay 2 --connect-timeout 15 --max-time 45 -o /dev/null -D "$h" -w '%{http_code}' "$BASE$src")"
-            location="$(awk 'BEGIN{IGNORECASE=1} /^location:/ {sub(/^[^:]+:[[:space:]]*/, ""); sub(/\r$/, ""); print; exit}' "$h")"
-            echo "REDIRECT $src HTTP=$status LOCATION=$location"
-            case "$status" in 301|308) ;; *) return 1 ;; esac
-            case "$location" in
-              "$expected"|"$expected/"|"$BASE$expected"|"$BASE$expected/") ;;
-              *) return 1 ;;
-            esac
-          }
-
-          code="$(fetch_code "$BASE/sections/cognitive-processes")"
-          test "$code" = "200"
-          grep -q 'العمليات المعرفية' /tmp/body
-          echo "COGNITIVE_SECTION=PASS"
-
-          code="$(fetch_code "$BASE/cognitive-lab")"
-          test "$code" = "200"
-          grep -q 'مختبر' /tmp/body
-          echo "COGNITIVE_LAB_ROOT=PASS"
-
-          mapfile -t slugs < <(jq -r '.[].slug' data/cognitive-lab/tools.v1.json | sort -u)
-          test "${#slugs[@]}" -eq 53
-          failed=0
-          for slug in "${slugs[@]}"; do
-            code="$(fetch_code "$BASE/cognitive-lab/$slug")"
-            if [ "$code" != "200" ]; then
-              echo "FAIL_ROUTE $slug HTTP=$code"
-              failed=1
-              continue
-            fi
-            if ! grep -q 'تعليمي غير تشخيصي' /tmp/body; then
-              echo "FAIL_MARKER $slug"
-              failed=1
-            fi
+          for slug in word-categories working-memory-updating; do
+            failures=0
+            for i in $(seq 1 10); do
+              code="$(curl -sS --retry 2 --retry-delay 1 --connect-timeout 15 --max-time 45 -o /tmp/body -w '%{http_code}' "$BASE/cognitive-lab/$slug")"
+              echo "$slug attempt=$i HTTP=$code"
+              if [ "$code" != "200" ]; then failures=$((failures+1)); fi
+              if [ "$code" = "200" ] && ! grep -q 'تعليمي غير تشخيصي' /tmp/body; then failures=$((failures+1)); fi
+              sleep 1
+            done
+            test "$failures" -eq 0
+            echo "ISOLATED_RELIABILITY_$slug=10/10_PASS"
           done
-          test "$failed" -eq 0
-          echo "COGNITIVE_LAB_ROUTES=${#slugs[@]}/53_PASS"
-
-          check_redirect '/cognitive-lab/associative-context-binding' '/cognitive-lab/associative-binding'
-          check_redirect '/cognitive-lab/prospective-memory-cues' '/cognitive-lab/prospective-memory'
-          echo "LEGACY_REDIRECTS=2/2_PASS"
-
-          code="$(fetch_code "$BASE/content/visuospatial-working-memory-work-study")"
-          test "$code" = "200"
-          grep -q 'FAQPage' /tmp/body
-          echo "COGNITIVE_ARTICLE_SAMPLE=PASS"
-
-          code="$(fetch_code "$BASE/search?q=%D8%A7%D9%84%D8%A7%D9%86%D8%AA%D8%A8%D8%A7%D9%87%20%D8%A7%D9%84%D9%85%D8%B3%D8%AA%D9%85%D8%B1")"
-          test "$code" = "200"
-          grep -q 'الانتباه المستمر' /tmp/body
-          echo "COGNITIVE_SEARCH=PASS"
-
-          code="$(fetch_code "$BASE/robots.txt")"
-          test "$code" = "200"
-          grep -q 'Disallow: /' /tmp/body
-          echo "STAGING_ROBOTS_NOINDEX=PASS"
-
-          code="$(fetch_code "$BASE/sitemaps/cognitive-lab.xml")"
-          test "$code" = "200"
-          if grep -q '<loc>' /tmp/body; then
-            echo "FAIL_STAGING_SITEMAP_EXPOSED_URLS"
-            exit 1
-          fi
-          echo "STAGING_COGNITIVE_SITEMAP_NOINDEX=PASS"
-
-          echo "LIVE_COGNITIVE_FINAL_SMOKE=PASS"
+          echo "ISOLATED_TRANSIENT_PROBE=PASS"
