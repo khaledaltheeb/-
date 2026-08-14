@@ -90,6 +90,21 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
+        source: '/evidence-guides/sibling-and-family-balance',
+        destination: '/care-guides/sibling-responsibility-boundaries-plan/',
+        permanent: true,
+      },
+      {
+        source: '/evidence-guides/supported-decision-making-transition-guide',
+        destination: '/evidence-guides/supported-adulthood-transition/',
+        permanent: true,
+      },
+      {
+        source: '/evidence-guides/caregiver-wellbeing',
+        destination: '/content/caregiver-burnout',
+        permanent: true,
+      },
+      {
         source: '/capabilities/deafness',
         destination: '/capabilities/hearing-loss/',
         permanent: true,
