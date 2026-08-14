@@ -46,6 +46,11 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
+        source: '/evidence-guides/autism-adhd-differences-guide',
+        destination: '/comparisons/autism-vs-adhd/',
+        permanent: true,
+      },
+      {
         source: '/capabilities/deafness',
         destination: '/capabilities/hearing-loss/',
         permanent: true,
