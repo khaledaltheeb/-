@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Validate live cognitive scope
         shell: bash
         run: |
@@ -34,7 +34,7 @@ jobs:
           grep -q 'مختبر' /tmp/body
           echo "COGNITIVE_LAB_ROOT=PASS"
 
-          mapfile -t slugs < <(grep -oE "slug: '[a-z0-9-]+'" lib/cognitive-lab/catalog.ts | sed -E "s/slug: '([^']+)'/\1/" | sort -u)
+          mapfile -t slugs < <(jq -r '.[].slug' data/cognitive-lab/tools.v1.json | sort -u)
           test "${#slugs[@]}" -eq 53
           failed=0
           for slug in "${slugs[@]}"; do
