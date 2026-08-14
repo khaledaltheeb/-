@@ -10,11 +10,31 @@ const securityHeaders = [
   { key: 'X-DNS-Prefetch-Control', value: 'on' },
 ];
 
+const encyclopediaConditionRedirects = [
+  'autism',
+  'depression',
+  'alcohol-use-disorder',
+  'cannabis-use-disorder',
+  'gambling-related-harms',
+  'gaming-disorder',
+  'inhalant-use-disorder',
+  'nicotine-tobacco-dependence',
+  'opioid-use-disorder',
+  'polysubstance-use-and-overdose-risk',
+  'sedative-benzodiazepine-use-disorder',
+  'stimulant-use-disorder',
+].map((slug) => ({
+  source: `/content/${slug}`,
+  destination: `/encyclopedia/${slug}/`,
+  permanent: true,
+}));
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   async redirects() {
     return [
+      ...encyclopediaConditionRedirects,
       {
         source: '/care-guides/caregiver-self-care-boundaries',
         destination: '/content/caregiver-burnout',
