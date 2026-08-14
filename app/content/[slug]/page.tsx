@@ -1,15 +1,367 @@
 import type { Metadata } from 'next';
-import Image from 'next/image';import Link from 'next/link';import { notFound } from 'next/navigation';
-import SiteHeader from '@/components/site-header';import SiteFooter from '@/components/site-footer';import ContentRenderer from '@/components/content-renderer';
-import { createClient } from '@/lib/supabase/server';import { buildSeoMetadata,breadcrumbJsonLd,SITE_URL } from '@/lib/seo';
-import { getCognitivePageBySlug,getCognitivePageIndexItem } from '@/lib/cognitive-program';
-export const dynamic='force-dynamic';type Params=Promise<{slug:string}>;type R={title?:string;url?:string;publisher?:string;year?:string|number};type Rel={id:string;slug:string;title:string;excerpt:string|null;content_type:string;score:number};type TaxonomyNode={slug:string;name_ar:string};type Rec={id:string;slug:string;title:string;excerpt:string|null;body_json:unknown;body_text:string|null;schema_json:Record<string,unknown>;content_type:string;audience:string[];seo_title:string|null;seo_description:string|null;canonical_url:string|null;robots_index:boolean;robots_follow:boolean;published_at:string|null;updated_at:string|null;featured_image_url:string|null;featured_image_alt:string|null;primary_keyword:string|null;secondary_keywords:string[];semantic_terms:string[];search_intent:string|null;author_display_name:string|null;reviewer_display_name:string|null;reviewer_credentials:string|null;last_reviewed_at:string|null;references_json:unknown;medical_disclaimer:string|null;sector_id:string|null;category_id:string|null;sectors:TaxonomyNode|TaxonomyNode[]|null;categories:TaxonomyNode|TaxonomyNode[]|null;generated_program?:boolean};type UnknownRecord=Record<string,unknown>;
-const RELEASE='2026-08-14T00:00:00.000Z';
-async function db(slug:string){const s=await createClient();const {data}=await s.from('content').select('id,slug,title,excerpt,body_json,body_text,schema_json,content_type,audience,seo_title,seo_description,canonical_url,robots_index,robots_follow,published_at,updated_at,featured_image_url,featured_image_alt,primary_keyword,secondary_keywords,semantic_terms,search_intent,author_display_name,reviewer_display_name,reviewer_credentials,last_reviewed_at,references_json,medical_disclaimer,sector_id,category_id,sectors!content_sector_id_fkey(slug,name_ar),categories!content_category_id_fkey(slug,name_ar)').eq('slug',slug).eq('status','published').lte('published_at',new Date().toISOString()).maybeSingle();return data as Rec|null;}
-function generated(slug:string):Rec|null{const p=getCognitivePageBySlug(slug);if(!p)return null;return{id:`cognitive:${p.slug}`,slug:p.slug,title:p.title,excerpt:p.excerpt,body_json:p.bodyJson,body_text:p.bodyText,schema_json:p.schemaJson,content_type:p.contentType,audience:p.audience,seo_title:p.seoTitle,seo_description:p.seoDescription,canonical_url:`/content/${p.slug}`,robots_index:true,robots_follow:true,published_at:RELEASE,updated_at:RELEASE,featured_image_url:null,featured_image_alt:null,primary_keyword:p.primaryKeyword,secondary_keywords:p.secondaryKeywords,semantic_terms:p.semanticTerms,search_intent:p.searchIntent,author_display_name:'فريق روافد التحريري',reviewer_display_name:null,reviewer_credentials:null,last_reviewed_at:null,references_json:p.references,medical_disclaimer:null,sector_id:'f9af56ce-734c-4867-9999-957db0933414',category_id:`cognitive:${p.categorySlug}`,sectors:{slug:'knowledge',name_ar:'المعرفة والموسوعة'},categories:{slug:p.categorySlug,name_ar:p.categoryName},generated_program:true};}
-async function record(slug:string){return await db(slug)??generated(slug)}
-const node=(v:TaxonomyNode|TaxonomyNode[]|null):TaxonomyNode|null=>Array.isArray(v)?v[0]??null:v;const refs=(v:unknown):R[]=>Array.isArray(v)?v.flatMap((item):R[]=>{if(!item||typeof item!=='object'||Array.isArray(item))return[];const x=item as UnknownRecord;const title=typeof x.title==='string'?x.title:undefined;const url=typeof x.url==='string'?x.url:undefined;const publisher=typeof x.publisher==='string'?x.publisher:undefined;const year=typeof x.year==='string'||typeof x.year==='number'?x.year:undefined;return title?[{title,url,publisher,year}]:[];}).slice(0,50):[];
-type Faq={question:string;answer:string};function faq(v:unknown):Faq[]{if(!v||typeof v!=='object'||Array.isArray(v))return[];const root=v as UnknownRecord;const b=Array.isArray(root.blocks)?root.blocks:[];return b.flatMap((item):Faq[]=>{if(!item||typeof item!=='object'||Array.isArray(item))return[];const x=item as UnknownRecord;if(x.type!=='faq'||!Array.isArray(x.items))return[];return x.items.flatMap((entry):Faq[]=>{if(!entry||typeof entry!=='object'||Array.isArray(entry))return[];const row=entry as UnknownRecord;return typeof row.question==='string'&&typeof row.answer==='string'?[{question:row.question,answer:row.answer}]:[];});}).slice(0,40)}
-async function related(r:Rec):Promise<Rel[]>{const rawRelated=r.schema_json.curated_related_slugs;const slugs:string[]=Array.isArray(rawRelated)?rawRelated.filter((x):x is string=>typeof x==='string').slice(0,6):[];const local=slugs.flatMap((slug:string)=>{const i=getCognitivePageIndexItem(slug);return i?[{id:`cognitive:${slug}`,slug,title:i.title,excerpt:i.excerpt,content_type:i.contentType,score:100}]:[]});const have=new Set(local.map((x:Rel)=>x.slug));const need=slugs.filter((x:string)=>!have.has(x));let remote:Rel[]=[];const s=await createClient();if(need.length){const {data}=await s.from('content').select('id,slug,title,excerpt,content_type').in('slug',need).eq('status','published').eq('robots_index',true).lte('published_at',new Date().toISOString());remote=(data??[]).map((x)=>({...x,score:100} as Rel));}if(slugs.length){const by=new Map([...local,...remote].map((x:Rel)=>[x.slug,x]));return slugs.flatMap((x:string)=>by.get(x)?[by.get(x)!]:[])}if(r.generated_program)return[];const {data}=await s.rpc('related_public_content',{p_content_id:r.id,p_limit:6});return (data??[]) as Rel[];}
-export async function generateMetadata({params}:{params:Params}):Promise<Metadata>{const {slug}=await params;const r=await record(slug);if(!r)return{};return buildSeoMetadata({title:r.seo_title||r.title,description:r.seo_description||r.excerpt,path:r.canonical_url||`/content/${r.slug}`,index:r.robots_index,follow:r.robots_follow,type:['article','guide','research','news','condition','protocol','intervention','assessment'].includes(r.content_type)?'article':'website',image:r.featured_image_url,keywords:[r.primary_keyword,...(r.secondary_keywords??[]),...(r.semantic_terms??[]).slice(0,12)].filter((x):x is string=>typeof x==='string'&&x.length>0),publishedTime:r.published_at,modifiedTime:r.updated_at,authors:r.generated_program?undefined:r.author_display_name?[{name:r.author_display_name}]:undefined});}
-export default async function Page({params}:{params:Params}){const {slug}=await params;const r=await record(slug);if(!r)notFound();const sec=node(r.sectors),cat=node(r.categories),aud=Array.isArray(r.audience)?r.audience.map(String):[],references=refs(r.references_json),rel=await related(r);const canonical=r.canonical_url||`/content/${r.slug}`,url=canonical.startsWith('https://')?canonical:`${SITE_URL}${canonical}`;const fs=faq(r.body_json);const schemas=[breadcrumbJsonLd([{name:'الرئيسية',path:'/'},...(sec?[{name:sec.name_ar,path:`/sectors/${sec.slug}`}]:[]),...(cat?[{name:cat.name_ar,path:`/sections/${cat.slug}`}]:[]),{name:r.title,path:canonical}]),{'@context':'https://schema.org','@type':['article','guide','research','news'].includes(r.content_type)?'Article':'WebPage','@id':`${url}#content`,url,mainEntityOfPage:{'@type':'WebPage','@id':url},headline:r.title,description:r.seo_description||r.excerpt,inLanguage:'ar',datePublished:r.published_at,dateModified:r.updated_at,author:r.generated_program?{'@id':`${SITE_URL}/#organization`}:r.author_display_name?{'@type':'Person',name:r.author_display_name}:{'@id':`${SITE_URL}/#organization`},publisher:{'@id':`${SITE_URL}/#organization`},keywords:[r.primary_keyword,...(r.secondary_keywords??[]),...(r.semantic_terms??[]).slice(0,8)].filter((x):x is string=>typeof x==='string'&&x.length>0).join(', '),articleSection:cat?.name_ar,wordCount:String(r.body_text??'').trim().split(/\s+/u).filter(Boolean).length,citation:references.flatMap(x=>x.url?[x.url]:[]),isPartOf:{'@id':`${SITE_URL}/#website`}},...(fs.length?[{'@context':'https://schema.org','@type':'FAQPage','@id':`${url}#faq`,mainEntity:fs.map((x)=>({'@type':'Question',name:x.question,acceptedAnswer:{'@type':'Answer',text:x.answer}}))}]:[])];return <><SiteHeader/><main className="article-shell"><script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(schemas).replace(/</g,'\\u003c')}}/><nav className="breadcrumbs" aria-label="مسار الصفحة"><Link href="/">الرئيسية</Link>{sec&&<><span>/</span><Link href={`/sectors/${sec.slug}`}>{sec.name_ar}</Link></>}{cat&&<><span>/</span><Link href={`/sections/${cat.slug}`}>{cat.name_ar}</Link></>}<span>/</span><span aria-current="page">{r.title}</span></nav><article><header className="article-hero"><span className="eyebrow">{r.content_type}</span><h1>{r.title}</h1>{r.excerpt&&<p>{r.excerpt}</p>}<div className="article-meta">{r.author_display_name&&<span>إعداد: {r.author_display_name}</span>}{r.published_at&&<span>نُشر {new Intl.DateTimeFormat('ar',{dateStyle:'long'}).format(new Date(r.published_at))}</span>}</div>{aud.length>0&&<div className="tag-list">{aud.map((x:string)=><span key={x}>{x}</span>)}</div>}</header><div className="article-body">{r.featured_image_url&&<figure className="article-featured-image"><Image src={r.featured_image_url} alt={r.featured_image_alt||r.title} width={1200} height={675} sizes="(max-width: 900px) 100vw, 900px" priority unoptimized/></figure>}<ContentRenderer bodyJson={r.body_json} bodyText={r.body_text} recordId={r.id}/></div>{rel.length>0&&<section className="article-related" aria-labelledby="related-title"><div className="section-mini-heading"><div><span className="eyebrow">Topical Authority</span><h2 id="related-title">محتوى مرتبط</h2></div><span>روابط منتقاة من خريطة المفاهيم ونية البحث</span></div><div className="related-content-grid">{rel.map(x=><article key={x.id}><span>{x.content_type}</span><h3><Link href={`/content/${x.slug}`}>{x.title}</Link></h3>{x.excerpt&&<p>{x.excerpt}</p>}<Link href={`/content/${x.slug}`}>متابعة القراءة ←</Link></article>)}</div></section>}{references.length>0&&<section className="article-references" aria-labelledby="references-title"><h2 id="references-title">المصادر والمراجع</h2><ol>{references.map((x,i)=><li key={`${x.url||x.title}-${i}`}>{x.url?<a href={x.url} target="_blank" rel="noopener noreferrer">{x.title||x.url}</a>:<span>{x.title}</span>}{x.publisher&&<small>{x.publisher}</small>}</li>)}</ol></section>}</article></main><SiteFooter/></>}
+import Image from 'next/image';
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
+import SiteHeader from '@/components/site-header';
+import SiteFooter from '@/components/site-footer';
+import ContentRenderer from '@/components/content-renderer';
+import { createClient } from '@/lib/supabase/server';
+import { buildSeoMetadata, breadcrumbJsonLd, SITE_URL } from '@/lib/seo';
+import { getCognitivePageBySlug, getCognitivePageIndexItem } from '@/lib/cognitive-program';
+
+export const dynamic = 'force-dynamic';
+
+type Params = Promise<{ slug: string }>;
+type ReferenceItem = { title?: string; url?: string; publisher?: string; year?: string | number };
+type RelatedItem = { id: string; slug: string; title: string; excerpt: string | null; content_type: string; score: number };
+type TaxonomyNode = { slug: string; name_ar: string };
+type UnknownRecord = Record<string, unknown>;
+type FaqItem = { question: string; answer: string };
+type ContentRecord = {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string | null;
+  body_json: unknown;
+  body_text: string | null;
+  schema_json: Record<string, unknown>;
+  content_type: string;
+  audience: string[];
+  seo_title: string | null;
+  seo_description: string | null;
+  canonical_url: string | null;
+  robots_index: boolean;
+  robots_follow: boolean;
+  published_at: string | null;
+  updated_at: string | null;
+  featured_image_url: string | null;
+  featured_image_alt: string | null;
+  primary_keyword: string | null;
+  secondary_keywords: string[];
+  semantic_terms: string[];
+  search_intent: string | null;
+  author_display_name: string | null;
+  reviewer_display_name: string | null;
+  reviewer_credentials: string | null;
+  last_reviewed_at: string | null;
+  references_json: unknown;
+  medical_disclaimer: string | null;
+  sector_id: string | null;
+  category_id: string | null;
+  sectors: TaxonomyNode | TaxonomyNode[] | null;
+  categories: TaxonomyNode | TaxonomyNode[] | null;
+  generated_program?: boolean;
+};
+
+const GENERATED_RELEASE = '2026-08-14T00:00:00.000Z';
+
+async function getDatabaseRecord(slug: string): Promise<ContentRecord | null> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from('content')
+    .select('id,slug,title,excerpt,body_json,body_text,schema_json,content_type,audience,seo_title,seo_description,canonical_url,robots_index,robots_follow,published_at,updated_at,featured_image_url,featured_image_alt,primary_keyword,secondary_keywords,semantic_terms,search_intent,author_display_name,reviewer_display_name,reviewer_credentials,last_reviewed_at,references_json,medical_disclaimer,sector_id,category_id,sectors!content_sector_id_fkey(slug,name_ar),categories!content_category_id_fkey(slug,name_ar)')
+    .eq('slug', slug)
+    .eq('status', 'published')
+    .lte('published_at', new Date().toISOString())
+    .maybeSingle();
+  return data as ContentRecord | null;
+}
+
+function getGeneratedRecord(slug: string): ContentRecord | null {
+  const page = getCognitivePageBySlug(slug);
+  if (!page) return null;
+  return {
+    id: `cognitive:${page.slug}`,
+    slug: page.slug,
+    title: page.title,
+    excerpt: page.excerpt,
+    body_json: page.bodyJson,
+    body_text: page.bodyText,
+    schema_json: page.schemaJson,
+    content_type: page.contentType,
+    audience: page.audience,
+    seo_title: page.seoTitle,
+    seo_description: page.seoDescription,
+    canonical_url: `/content/${page.slug}`,
+    robots_index: true,
+    robots_follow: true,
+    published_at: GENERATED_RELEASE,
+    updated_at: GENERATED_RELEASE,
+    featured_image_url: null,
+    featured_image_alt: null,
+    primary_keyword: page.primaryKeyword,
+    secondary_keywords: page.secondaryKeywords,
+    semantic_terms: page.semanticTerms,
+    search_intent: page.searchIntent,
+    author_display_name: 'فريق روافد التحريري',
+    reviewer_display_name: null,
+    reviewer_credentials: null,
+    last_reviewed_at: null,
+    references_json: page.references,
+    medical_disclaimer: null,
+    sector_id: 'f9af56ce-734c-4867-9999-957db0933414',
+    category_id: `cognitive:${page.categorySlug}`,
+    sectors: { slug: 'knowledge', name_ar: 'المعرفة والموسوعة' },
+    categories: { slug: page.categorySlug, name_ar: page.categoryName },
+    generated_program: true,
+  };
+}
+
+async function getPublishedRecord(slug: string): Promise<ContentRecord | null> {
+  return (await getDatabaseRecord(slug)) ?? getGeneratedRecord(slug);
+}
+
+function taxonomyNode(value: TaxonomyNode | TaxonomyNode[] | null): TaxonomyNode | null {
+  return Array.isArray(value) ? value[0] ?? null : value;
+}
+
+function safeReferences(value: unknown): ReferenceItem[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((item): ReferenceItem[] => {
+    if (!item || typeof item !== 'object' || Array.isArray(item)) return [];
+    const row = item as UnknownRecord;
+    const title = typeof row.title === 'string' ? row.title : undefined;
+    const url = typeof row.url === 'string' && /^https:\/\//i.test(row.url) ? row.url : undefined;
+    const publisher = typeof row.publisher === 'string' ? row.publisher : undefined;
+    const year = typeof row.year === 'string' || typeof row.year === 'number' ? row.year : undefined;
+    return title ? [{ title, url, publisher, year }] : [];
+  }).slice(0, 50);
+}
+
+function visibleFaq(value: unknown): FaqItem[] {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return [];
+  const root = value as UnknownRecord;
+  const blocks = Array.isArray(root.blocks) ? root.blocks : [];
+  return blocks.flatMap((block): FaqItem[] => {
+    if (!block || typeof block !== 'object' || Array.isArray(block)) return [];
+    const row = block as UnknownRecord;
+    if (row.type !== 'faq' || !Array.isArray(row.items)) return [];
+    return row.items.flatMap((entry): FaqItem[] => {
+      if (!entry || typeof entry !== 'object' || Array.isArray(entry)) return [];
+      const item = entry as UnknownRecord;
+      return typeof item.question === 'string' && typeof item.answer === 'string'
+        ? [{ question: item.question, answer: item.answer }]
+        : [];
+    });
+  }).slice(0, 40);
+}
+
+function curatedRelatedSlugs(schema: Record<string, unknown>): string[] {
+  const raw = schema.curated_related_slugs;
+  if (!Array.isArray(raw)) return [];
+  return raw.filter((item): item is string => typeof item === 'string').slice(0, 6);
+}
+
+async function relatedContent(record: ContentRecord): Promise<RelatedItem[]> {
+  const slugs = curatedRelatedSlugs(record.schema_json);
+  const local = slugs.flatMap((slug): RelatedItem[] => {
+    const item = getCognitivePageIndexItem(slug);
+    return item ? [{ id: `cognitive:${slug}`, slug, title: item.title, excerpt: item.excerpt, content_type: item.contentType, score: 100 }] : [];
+  });
+  const localSlugs = new Set(local.map((item) => item.slug));
+  const missing = slugs.filter((slug) => !localSlugs.has(slug));
+  const supabase = await createClient();
+  let remote: RelatedItem[] = [];
+  if (missing.length) {
+    const { data } = await supabase
+      .from('content')
+      .select('id,slug,title,excerpt,content_type')
+      .in('slug', missing)
+      .eq('status', 'published')
+      .eq('robots_index', true)
+      .lte('published_at', new Date().toISOString());
+    remote = (data ?? []).map((item) => ({ ...item, score: 100 } as RelatedItem));
+  }
+  if (slugs.length) {
+    const bySlug = new Map([...local, ...remote].map((item) => [item.slug, item]));
+    return slugs.flatMap((slug) => {
+      const item = bySlug.get(slug);
+      return item ? [item] : [];
+    });
+  }
+  if (record.generated_program) return [];
+  const { data } = await supabase.rpc('related_public_content', { p_content_id: record.id, p_limit: 6 });
+  return (data ?? []) as RelatedItem[];
+}
+
+export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
+  const { slug } = await params;
+  const record = await getPublishedRecord(slug);
+  if (!record) return {};
+  const keywords = [record.primary_keyword, ...record.secondary_keywords, ...record.semantic_terms.slice(0, 12)]
+    .filter((item): item is string => typeof item === 'string' && item.length > 0);
+  return buildSeoMetadata({
+    title: record.seo_title || record.title,
+    description: record.seo_description || record.excerpt,
+    path: record.canonical_url || `/content/${record.slug}`,
+    index: record.robots_index,
+    follow: record.robots_follow,
+    type: ['article', 'guide', 'research', 'news', 'condition', 'protocol', 'intervention', 'assessment'].includes(record.content_type) ? 'article' : 'website',
+    image: record.featured_image_url,
+    keywords,
+    publishedTime: record.published_at,
+    modifiedTime: record.updated_at,
+    authors: record.generated_program ? undefined : record.author_display_name ? [{ name: record.author_display_name }] : undefined,
+  });
+}
+
+export default async function PublishedContentPage({ params }: { params: Params }) {
+  const { slug } = await params;
+  const record = await getPublishedRecord(slug);
+  if (!record) notFound();
+
+  const sector = taxonomyNode(record.sectors);
+  const category = taxonomyNode(record.categories);
+  const audiences = Array.isArray(record.audience) ? record.audience.map(String) : [];
+  const references = safeReferences(record.references_json);
+  const related = await relatedContent(record);
+  const canonical = record.canonical_url || `/content/${record.slug}`;
+  const url = canonical.startsWith('https://') ? canonical : `${SITE_URL}${canonical}`;
+  const faqItems = visibleFaq(record.body_json);
+
+  const breadcrumbs = breadcrumbJsonLd([
+    { name: 'الرئيسية', path: '/' },
+    ...(sector ? [{ name: sector.name_ar, path: `/sectors/${sector.slug}` }] : []),
+    ...(category ? [{ name: category.name_ar, path: `/sections/${category.slug}` }] : []),
+    { name: record.title, path: canonical },
+  ]);
+
+  const medicalTypes = new Set(['condition', 'protocol', 'intervention', 'assessment']);
+  const schemaType = medicalTypes.has(record.content_type)
+    ? 'MedicalWebPage'
+    : ['article', 'guide', 'research', 'news'].includes(record.content_type)
+      ? 'Article'
+      : 'WebPage';
+  const conditionId = `${url}#condition`;
+  const termId = `${url}#defined-term`;
+  const contentSchema: Record<string, unknown> = {
+    '@context': 'https://schema.org',
+    '@type': schemaType,
+    '@id': `${url}#content`,
+    url,
+    mainEntityOfPage: { '@type': 'WebPage', '@id': url },
+    headline: record.title,
+    description: record.seo_description || record.excerpt || undefined,
+    inLanguage: 'ar',
+    datePublished: record.published_at || undefined,
+    dateModified: record.updated_at || undefined,
+    lastReviewed: record.last_reviewed_at || undefined,
+    author: record.generated_program
+      ? { '@id': `${SITE_URL}/#organization` }
+      : record.author_display_name
+        ? { '@type': 'Person', name: record.author_display_name }
+        : { '@id': `${SITE_URL}/#organization` },
+    reviewedBy: record.reviewer_display_name
+      ? { '@type': 'Person', name: record.reviewer_display_name, description: record.reviewer_credentials || undefined }
+      : undefined,
+    publisher: { '@id': `${SITE_URL}/#organization` },
+    image: record.featured_image_url || undefined,
+    keywords: [record.primary_keyword, ...record.secondary_keywords, ...record.semantic_terms.slice(0, 8)]
+      .filter((item): item is string => typeof item === 'string' && item.length > 0)
+      .join(', '),
+    articleSection: category?.name_ar,
+    wordCount: String(record.body_text ?? '').trim().split(/\s+/u).filter(Boolean).length,
+    citation: references.flatMap((reference) => reference.url ? [reference.url] : []),
+    isPartOf: { '@id': `${SITE_URL}/#website` },
+  };
+
+  const conditionSchema = record.content_type === 'condition' ? {
+    '@context': 'https://schema.org',
+    '@type': 'MedicalCondition',
+    '@id': conditionId,
+    name: record.title,
+    description: record.seo_description || record.excerpt || undefined,
+    url,
+    alternateName: record.secondary_keywords.slice(0, 8),
+  } : null;
+
+  const termSchema = record.content_type === 'glossary_term' ? {
+    '@context': 'https://schema.org',
+    '@type': 'DefinedTerm',
+    '@id': termId,
+    name: record.title,
+    description: record.seo_description || record.excerpt || undefined,
+    url,
+    inLanguage: 'ar',
+    alternateName: [...record.secondary_keywords, ...record.semantic_terms].slice(0, 12),
+    ...(category ? {
+      inDefinedTermSet: {
+        '@type': 'DefinedTermSet',
+        '@id': `${SITE_URL}/sections/${category.slug}#termset`,
+        name: category.name_ar,
+        url: `${SITE_URL}/sections/${category.slug}`,
+      },
+    } : {}),
+  } : null;
+
+  if (conditionSchema) contentSchema.about = { '@id': conditionId };
+  if (termSchema) contentSchema.about = { '@id': termId };
+
+  const faqSchema = faqItems.length ? {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    '@id': `${url}#faq`,
+    mainEntity: faqItems.map((item) => ({
+      '@type': 'Question',
+      name: item.question,
+      acceptedAnswer: { '@type': 'Answer', text: item.answer },
+    })),
+  } : null;
+
+  const schemas = [
+    breadcrumbs,
+    contentSchema,
+    ...(conditionSchema ? [conditionSchema] : []),
+    ...(termSchema ? [termSchema] : []),
+    ...(faqSchema ? [faqSchema] : []),
+  ];
+
+  return <>
+    <SiteHeader />
+    <main className="article-shell">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schemas).replace(/</g, '\\u003c') }} />
+      <nav className="breadcrumbs" aria-label="مسار الصفحة">
+        <Link href="/">الرئيسية</Link>
+        {sector && <><span>/</span><Link href={`/sectors/${sector.slug}`}>{sector.name_ar}</Link></>}
+        {category && <><span>/</span><Link href={`/sections/${category.slug}`}>{category.name_ar}</Link></>}
+        <span>/</span><span aria-current="page">{record.title}</span>
+      </nav>
+      <article>
+        <header className="article-hero">
+          <span className="eyebrow">{record.content_type}</span>
+          <h1>{record.title}</h1>
+          {record.excerpt && <p>{record.excerpt}</p>}
+          <div className="article-meta">
+            {record.author_display_name && <span>إعداد: {record.author_display_name}</span>}
+            {record.reviewer_display_name && <span>مراجعة: {record.reviewer_display_name}{record.reviewer_credentials ? ` — ${record.reviewer_credentials}` : ''}</span>}
+            {record.published_at && <span>نُشر {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(record.published_at))}</span>}
+            {record.last_reviewed_at && <span>آخر مراجعة {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(record.last_reviewed_at))}</span>}
+          </div>
+          {audiences.length > 0 && <div className="tag-list">{audiences.map((audience) => <span key={audience}>{audience}</span>)}</div>}
+        </header>
+        <div className="article-body">
+          {record.featured_image_url && <figure className="article-featured-image">
+            <Image src={record.featured_image_url} alt={record.featured_image_alt || record.title} width={1200} height={675} sizes="(max-width: 900px) 100vw, 900px" priority unoptimized />
+          </figure>}
+          <ContentRenderer bodyJson={record.body_json} bodyText={record.body_text} recordId={record.id} />
+        </div>
+        {record.medical_disclaimer && <aside className="medical-disclaimer" aria-label="إخلاء المسؤولية الطبية">
+          <strong>تنبيه طبي</strong><p>{record.medical_disclaimer}</p><Link href="/disclaimer">إخلاء المسؤولية الكامل</Link>
+        </aside>}
+        {related.length > 0 && <section className="article-related" aria-labelledby="related-title">
+          <div className="section-mini-heading"><div><span className="eyebrow">Topical Authority</span><h2 id="related-title">محتوى مرتبط</h2></div><span>روابط منتقاة من خريطة المفاهيم ونية البحث</span></div>
+          <div className="related-content-grid">{related.map((item) => <article key={item.id}>
+            <span>{item.content_type}</span><h3><Link href={`/content/${item.slug}`}>{item.title}</Link></h3>{item.excerpt && <p>{item.excerpt}</p>}<Link href={`/content/${item.slug}`}>متابعة القراءة ←</Link>
+          </article>)}</div>
+        </section>}
+        {references.length > 0 && <section className="article-references" aria-labelledby="references-title">
+          <h2 id="references-title">المصادر والمراجع</h2><ol>{references.map((reference, index) => <li key={`${reference.url || reference.title}-${index}`}>
+            {reference.url ? <a href={reference.url} target="_blank" rel="noopener noreferrer">{reference.title || reference.url}</a> : <span>{reference.title}</span>}
+            {reference.publisher && <small>{reference.publisher}</small>}{reference.year && <small>{String(reference.year)}</small>}
+          </li>)}</ol>
+        </section>}
+      </article>
+    </main>
+    <SiteFooter />
+  </>;
+}
