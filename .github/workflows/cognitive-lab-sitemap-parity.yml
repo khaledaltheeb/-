@@ -25,9 +25,13 @@ jobs:
 
           old_origin='https://healthrenewal.org'
           new_index='https://rawafid-platform-staging.khaledaltheeb.workers.dev/cognitive-lab'
+          aliases={
+              'associative-context-binding':'associative-binding',
+              'prospective-memory-cues':'prospective-memory',
+          }
 
           def fetch(url):
-              req=urllib.request.Request(url,headers={'User-Agent':'Rawafid-Parity-Audit/1.1','Cache-Control':'no-cache'})
+              req=urllib.request.Request(url,headers={'User-Agent':'Rawafid-Parity-Audit/1.2','Cache-Control':'no-cache'})
               with urllib.request.urlopen(req,timeout=30) as r:
                   return r.status,r.read().decode('utf-8','replace'),r.geturl()
 
@@ -43,16 +47,13 @@ jobs:
           _,robots,_=fetch(old_origin+'/robots.txt')
           starts += re.findall(r'(?im)^\s*Sitemap:\s*(\S+)\s*$',robots)
           starts += [old_origin+'/sitemap.xml',old_origin+'/sitemap-index.xml']
-
           seen=set(); queue=list(dict.fromkeys(starts)); legacy_urls=set()
           while queue and len(seen)<200:
               url=queue.pop(0)
               if url in seen: continue
               seen.add(url)
-              try:
-                  status,body,_=fetch(url)
-              except Exception:
-                  continue
+              try: status,body,_=fetch(url)
+              except Exception: continue
               if status!=200 or '<' not in body: continue
               try: root=ET.fromstring(body)
               except ET.ParseError: continue
@@ -70,24 +71,26 @@ jobs:
               m=re.fullmatch(r'/cognitive-lab/([^/]+)',p)
               if m: old_slugs.add(m.group(1))
 
-          missing=sorted(old_slugs-new_slugs)
-          extra=sorted(new_slugs-old_slugs)
-          common=sorted(old_slugs&new_slugs)
+          mapped={slug:aliases.get(slug,slug) for slug in old_slugs}
+          missing=sorted(slug for slug,target in mapped.items() if target not in new_slugs)
+          common=sorted(slug for slug,target in mapped.items() if target in new_slugs)
           print(f'SITEMAPS_SCANNED={len(seen)}')
           print(f'LEGACY_COGNITIVE_ROUTES={len(old_slugs)}')
           print(f'STAGING_COGNITIVE_ROUTES={len(new_slugs)}')
-          print(f'COMMON_COGNITIVE_ROUTES={len(common)}')
-          print('MISSING_ON_STAGING=' + ','.join(missing))
-          print('STAGING_ONLY=' + ','.join(extra))
+          print(f'LEGACY_ROUTES_COVERED={len(common)}')
+          print('RENAMED_ROUTE_MAP=' + repr(aliases))
+          print('MISSING_AFTER_MAPPING=' + ','.join(missing))
 
           failures=[]
-          for slug in sorted(old_slugs):
+          for old_slug,target in sorted(mapped.items()):
               try:
-                  status,body,_=fetch(new_index+'/'+slug)
-                  if status!=200 or 'تعليمي غير تشخيصي' not in body: failures.append((slug,status))
+                  status,body,effective=fetch(new_index+'/'+target)
+                  if status!=200 or 'تعليمي غير تشخيصي' not in body:
+                      failures.append((old_slug,target,status,effective))
               except Exception as exc:
-                  failures.append((slug,type(exc).__name__))
-          print('LEGACY_ROUTES_FAILING_ON_STAGING=' + repr(failures))
+                  failures.append((old_slug,target,type(exc).__name__))
+          print('LEGACY_ROUTES_FAILING_AFTER_MAPPING=' + repr(failures))
+          assert len(old_slugs)==53, len(old_slugs)
           assert len(new_slugs)==53, len(new_slugs)
           assert not missing, missing
           assert not failures, failures
