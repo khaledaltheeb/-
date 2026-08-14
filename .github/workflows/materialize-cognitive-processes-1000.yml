@@ -63,6 +63,8 @@ jobs:
           source = source.replace("new Map([...local,...remote].map(x=>[x.slug,x]))", "new Map([...local,...remote].map((x:Rel)=>[x.slug,x]))")
           source = source.replace("remote=(data??[]).map((x:any)=>({...x,score:100}));", "remote=(data??[]).map((x)=>({...x,score:100} as Rel));")
           source = source.replace("fs.map((x:any)=>", "fs.map((x)=>")
+          source = source.replace("].filter(Boolean),publishedTime", "].filter((x):x is string=>typeof x==='string'&&x.length>0),publishedTime")
+          source = source.replace("].filter(Boolean).join(', '),articleSection", "].filter((x):x is string=>typeof x==='string'&&x.length>0).join(', '),articleSection")
           path.write_text(source, encoding="utf-8")
 
           for filename in ["app/sitemaps/content.xml/route.ts", "app/sitemaps/taxonomy.xml/route.ts"]:
