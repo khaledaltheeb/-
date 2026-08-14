@@ -1,0 +1,32 @@
+name: Psychological Encyclopedia Quality
+
+on:
+  pull_request:
+    paths:
+      - 'data/encyclopedia/**'
+      - 'scripts/validate_psych_encyclopedia.py'
+      - 'app/encyclopedia/**'
+      - 'lib/encyclopedia.ts'
+      - 'app/sitemaps/encyclopedia.xml/route.ts'
+      - 'app/sitemap.xml/route.ts'
+  push:
+    branches: [main]
+    paths:
+      - 'data/encyclopedia/**'
+      - 'scripts/validate_psych_encyclopedia.py'
+
+permissions:
+  contents: read
+
+jobs:
+  validate-content-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate psychological encyclopedia batches
+        run: python scripts/validate_psych_encyclopedia.py
