@@ -1,67 +1,84 @@
 # Care Guides rich expansion — Wave 001
 
-## Purpose
+## Release outcome
 
-This wave starts the post-migration expansion of Rawafid V3 with new, distinct Arabic care guides. It does not copy the legacy runtime or blindly multiply pages. Each candidate must serve a distinct user/search intent, map to an existing V3 sector/category, cite authoritative sources, remain draft/noindex until quality review is complete, and preserve a single canonical destination per intent.
+Wave 001 was released in the Rawafid V3 Supabase CMS on 2026-08-14 only after the database V6 publication gate passed.
 
-## Current database baseline
+Final outcome:
 
-The live Supabase content store already contains a large care-guide collection, so the database — not the older migration-status document — is the source of truth for overlap checks. Before this wave, published care-guide bodies were observed at roughly 18k–30k serialized JSON characters with at least five references per guide. Wave 001 therefore uses that corpus as a quality comparison baseline rather than treating mere record creation as publication readiness.
+- **7 net-new guides** were promoted through `approved` to `published` and `robots_index=true`.
+- **3 overlapping candidates were not published as competing URLs**. Their unique value was merged into stronger existing canonicals.
+- The three rejected candidate rows are `archived` and `noindex`.
+- No scientific reviewer identity or credential was fabricated. The recorded review is structural, source, taxonomy, originality and publication-gate review.
 
-## Wave 001 candidates
+## Net-new published guides
 
-All ten records are currently **draft + noindex** in Supabase and have passed exact slug/canonical/title/primary-keyword collision checks against published content.
+| # | Canonical | V3 category |
+|---|---|---|
+| 1 | `/care-guides/aac-communication-partner-training/` | التواصل المعزز والبديل AAC |
+| 2 | `/care-guides/assistive-technology-trial-follow-up/` | التقنيات المساعدة |
+| 3 | `/care-guides/first-developmental-services-referral/` | دعم الأسرة والتنقل بين الخدمات |
+| 4 | `/care-guides/inclusive-school-field-trip-plan/` | التعليم الدامج والمشاركة الصفية |
+| 5 | `/care-guides/multidisciplinary-assessment-preparation/` | التنسيق متعدد التخصصات |
+| 6 | `/care-guides/pediatric-to-adult-healthcare-transition/` | الانتقال إلى الرشد |
+| 7 | `/care-guides/public-transport-independence-training/` | الحياة اليومية والاستقلال |
 
-| # | Canonical | V3 category | References | State |
-|---|---|---|---:|---|
-| 1 | `/care-guides/aac-communication-partner-training/` | التواصل المعزز والبديل AAC | 5 | draft / noindex |
-| 2 | `/care-guides/assistive-technology-trial-follow-up/` | التقنيات المساعدة | 5 | draft / noindex |
-| 3 | `/care-guides/accessible-dental-visit-disability/` | الوصول للرعاية الصحية | 5 | draft / noindex |
-| 4 | `/care-guides/supported-decision-making-disability/` | المناصرة الذاتية والاختيار والموافقة | 5 | draft / noindex |
-| 5 | `/care-guides/pediatric-to-adult-healthcare-transition/` | الانتقال إلى الرشد | 5 | draft / noindex |
-| 6 | `/care-guides/school-accommodation-trial-review/` | التسهيلات والتكييفات المدرسية | 5 | draft / noindex |
-| 7 | `/care-guides/inclusive-school-field-trip-plan/` | التعليم الدامج والمشاركة الصفية | 5 | draft / noindex |
-| 8 | `/care-guides/public-transport-independence-training/` | الحياة اليومية والاستقلال | 5 | draft / noindex |
-| 9 | `/care-guides/first-developmental-services-referral/` | دعم الأسرة والتنقل بين الخدمات | 5 | draft / noindex |
-| 10 | `/care-guides/multidisciplinary-assessment-preparation/` | التنسيق متعدد التخصصات | 5 | draft / noindex |
+## Canonical upgrades instead of duplicate publication
 
-## Editorial distinction
+| Candidate rejected as duplicate | Canonical retained and upgraded | Decision |
+|---|---|---|
+| `/care-guides/school-accommodation-trial-review/` | `/content/classroom-accommodations` | unique trial/review methodology merged into the established school-accommodations canonical |
+| `/care-guides/accessible-dental-visit-disability/` | `/care-guides/sensory-friendly-dental-visit/` | existing dental canonical expanded to cover sensory, communication and physical access |
+| `/care-guides/supported-decision-making-disability/` | `/care-guides/supported-decision-making-special-needs/` | existing supported-decision canonical replaced with the richer evidence-led version |
 
-The ten pages intentionally use different operational models rather than one repeated long-form template:
+This preserves one canonical destination per intent rather than publishing thin or competing variants.
 
-- AAC partner training: partner behavior, modeling, wait time, repair and access to the communication system.
-- Assistive-technology trial: functional goal, baseline, real-environment trial, maintenance, privacy and continue/modify/replace decision.
-- Accessible dental visit: pre-visit access card, sensory/mobility preparation, stop signal and learning from each visit.
-- Supported decision-making: accessible options, will/preferences, support-network roles, coercion boundaries and documentation.
-- Pediatric-to-adult transition: readiness skills, medical summary, transfer completion, privacy and closing the referral loop.
-- School accommodation trial: barrier hypothesis, baseline, outcome measures, accommodation-vs-modification distinction and review.
-- Inclusive field trip: educational purpose, venue/transport audit, student voice, peer-support boundaries and contingency planning.
-- Public-transport independence: task analysis, graded travel training, disruption plan, backup access and safety skills.
-- First developmental referral: monitoring-vs-screening-vs-evaluation, observable concerns, referral tracking and early-service navigation.
-- Multidisciplinary assessment: functional questions, ICF framing, document selection, information-sharing boundaries and synthesis of conflicting findings.
+## V6 publication contract passed
 
-## Source model
+Before release, the rich guides were brought above the database-enforced thresholds, including:
 
-Sources are selected per topic rather than copied as one universal bibliography. The current wave uses combinations of WHO, UNICEF, United Nations CRPD resources, CDC, American Academy of Pediatrics, ASHA, NHS England, CAST, Got Transition and World Bank material. Official/professional sources are primary; research papers and academic books may be added during depth review where they materially strengthen a topic.
+- at least 2,500 Arabic words;
+- at least 8 H2 and 4 H3 headings;
+- at least 6 structured FAQ items;
+- at least 8 explicit search-intent questions;
+- at least 5 secondary keywords and 8 semantic terms;
+- at least 5 references, including the required authoritative/primary/guideline/systematic-review coverage;
+- at least 5 explicit claim-to-source mappings;
+- source-version provenance;
+- `evidence-led-rewrite` and a passing originality record;
+- reviewed taxonomy, classification confidence >= 0.9 and a substantive rationale;
+- a documented page mechanism covering purpose, audience, interaction model and content model;
+- the central `/disclaimer` contract instead of duplicate inline disclaimer copy;
+- active category/sector integrity;
+- canonical and SEO metadata within the release limits.
 
-## Publication gate
+Final candidate measurements were approximately **2,635–2,917 Arabic words** before publication, with **6–8 references** in the new candidates and four or more level-3 subsections in every released/upgrade source page.
 
-A record is **not publication-ready merely because it exists in the CMS**. Before promotion from draft, each page must pass:
+## Evidence model
 
-1. semantic overlap review against all published Rawafid canonicals;
-2. topic-specific depth review against the current long-form guide corpus;
-3. claim-to-source verification and link/source metadata review;
-4. Arabic language and terminology review;
-5. removal of generic or repeated paragraphs that do not earn their place;
-6. SEO title/description/primary intent and internal-link review;
-7. accessibility and renderer review on mobile/desktop;
-8. scientific/editorial/SEO/accessibility workflow states without fabricating reviewer identities;
-9. `robots_index=true` only when the final release decision is made.
+Bibliographies are topic-specific rather than copied as one universal source bundle. The wave uses combinations of WHO, UNICEF, UN CRPD resources, CDC, AAP, ASHA, NHS England, CAST, Got Transition, U.S. Department of Education and World Bank material, plus peer-reviewed systematic reviews or research where they materially strengthen the topic.
+
+Reference records were normalized with stable IDs, source types and authority tiers. `schema_json.claim_source_map` links substantive claims to the source records used by each page.
+
+## Deduplication method
+
+Publication decisions combined exact collision checks with semantic similarity review against the current published Rawafid corpus. Exact canonical/title/primary-keyword collisions were zero at candidate creation. Semantic review then identified the three intent-level overlaps above and forced canonical upgrades instead of new indexed URLs.
+
+## Application exposure
+
+Rawafid's care-guide detail route is dynamic and resolves an exact `/care-guides/.../` canonical only when the CMS row is `published` and its publication time has arrived. The content sitemap independently selects `published` + `robots_index=true` records. The seven new guides satisfy those database states.
+
+Direct browser/HTTP verification of the `workers.dev` staging host could not be completed from the execution environment because the host could not be fetched/resolved there. CMS state, the V6 database release gate, route contract and sitemap contract were verified instead.
 
 ## Audit trail
 
-Supabase `audit_logs` contains one `care_guides_rich_draft_created` record for each of the ten candidates. The audit payload records batch id, slug, canonical, draft/noindex state, reference count, current serialized body size, collision-gate result, and `publication_ready=false`.
+Supabase `audit_logs` records:
 
-## Next action
+- original rich-draft creation/review records;
+- `rich_wave_publish` for the seven new pages;
+- `canonical_content_upgrade` for the three retained canonicals;
+- `deduplication_merge` for the rejected candidate routes.
 
-Enrich these ten candidates to release quality, then promote only those that pass all gates. The next expansion wave should be selected from measured taxonomy/search gaps after this first batch is validated, rather than generating another arbitrary list of pages.
+## Rule for the next wave
+
+Future pages continue from measured taxonomy/search gaps. A candidate must prove a distinct user/search intent and canonical destination first, then meet the same source, depth, originality, SEO, accessibility and V6 release contracts before publication.
