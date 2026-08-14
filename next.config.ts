@@ -85,6 +85,11 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
+        source: '/evidence-guides/puberty-body-safety-inclusive-guide',
+        destination: '/care-guides/puberty-personal-safety-special-needs/',
+        permanent: true,
+      },
+      {
         source: '/capabilities/deafness',
         destination: '/capabilities/hearing-loss/',
         permanent: true,
