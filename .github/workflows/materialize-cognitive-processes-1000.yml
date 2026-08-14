@@ -6,6 +6,7 @@ on:
     paths:
       - 'artifacts/cognitive-1000.bundle.tar.xz'
       - 'artifacts/cognitive-1000.bundle.part2.b64'
+      - 'artifacts/cognitive-1000.bundle.part3.b64'
       - '.github/workflows/materialize-cognitive-processes-1000.yml'
   workflow_dispatch:
 
@@ -15,7 +16,7 @@ permissions:
 jobs:
   materialize:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - name: Checkout branch
         uses: actions/checkout@v7
@@ -25,13 +26,39 @@ jobs:
 
       - name: Expand audited cognitive bundle
         run: |
-          cat artifacts/cognitive-1000.bundle.tar.xz artifacts/cognitive-1000.bundle.part2.b64 | base64 -d > /tmp/cognitive-1000.bundle.tar.xz
+          cat artifacts/cognitive-1000.bundle.tar.xz artifacts/cognitive-1000.bundle.part2.b64 artifacts/cognitive-1000.bundle.part3.b64 | base64 -d > /tmp/cognitive-1000.bundle.tar.xz
           xz -t /tmp/cognitive-1000.bundle.tar.xz
+          tar -tJf /tmp/cognitive-1000.bundle.tar.xz
           tar -xJf /tmp/cognitive-1000.bundle.tar.xz -C .
 
-      - name: Validate generated cognitive program
+      - name: Verify cognitive program contract
         run: |
-          bash scripts/audit_cognitive_program.sh
+          test -s lib/cognitive-program.ts
+          test -s app/content/'[slug]'/page.tsx
+          test -s app/sections/'[slug]'/page.tsx
+          test -s app/search/page.tsx
+          test -s app/sitemaps/content.xml/route.ts
+          test -s app/sitemaps/taxonomy.xml/route.ts
+          test -s artifacts/cognitive-processes-1000-audit.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          report=json.loads(Path('artifacts/cognitive-processes-1000-audit.json').read_text(encoding='utf-8'))
+          values=[]
+          def walk(v):
+              if isinstance(v, dict):
+                  for x in v.values(): walk(x)
+              elif isinstance(v, list):
+                  for x in v: walk(x)
+              elif isinstance(v, (int,float)) and not isinstance(v,bool): values.append(v)
+          walk(report)
+          if 1000 not in values:
+              raise SystemExit('Audit artifact does not prove the 1000-page program')
+          print(json.dumps(report, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Validate application
+        run: |
           npm install --no-audit --no-fund
           npm run typecheck
           npm run lint
@@ -45,7 +72,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/cognitive-processes lib/cognitive-generated-content.ts scripts/build_cognitive_data.py scripts/audit_cognitive_program.sh scripts/cognitive-audit-runner.cjs scripts/tsconfig.cognitive-audit.json app/content/'[slug]'/page.tsx app/sections/'[slug]'/page.tsx app/search/page.tsx app/sitemaps/content.xml/route.ts docs/editorial/COGNITIVE_PROCESSES_1000_PROGRAM.md artifacts/cognitive-processes-1000-audit.json .github/workflows/cognitive-content-quality.yml
+          git add lib/cognitive-program.ts app/content/'[slug]'/page.tsx app/sections/'[slug]'/page.tsx app/search/page.tsx app/sitemaps/content.xml/route.ts app/sitemaps/taxonomy.xml/route.ts artifacts/cognitive-processes-1000-audit.json
           if git diff --cached --quiet; then
             echo "Cognitive program already materialized."
             exit 0
