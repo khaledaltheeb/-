@@ -36,6 +36,16 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
+        source: '/evidence-guides/safe-screening-tools-explainer',
+        destination: '/evidence-guides/safe-screening-tools/',
+        permanent: true,
+      },
+      {
+        source: '/evidence-guides/first-mental-health-appointment-guide',
+        destination: '/care-guides/preparing-first-mental-health-appointment/',
+        permanent: true,
+      },
+      {
         source: '/capabilities/deafness',
         destination: '/capabilities/hearing-loss/',
         permanent: true,
