@@ -15,36 +15,67 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Verify deployed cognitive section and generated routes
+      - name: Verify deployed cognitive program comprehensively
         shell: bash
         run: |
           set -euo pipefail
           base='https://rawafid-platform-staging.khaledaltheeb.workers.dev'
-          paths=(
-            '/sections/cognitive-processes'
-            '/content/visuospatial-working-memory-work-study'
-            '/content/sustained-attention-classroom-learning'
-            '/content/memory-consolidation-mechanisms'
+          tmp=/tmp/rawafid-cognitive-live
+          rm -rf "$tmp" && mkdir -p "$tmp"
+
+          fetch() {
+            local path="$1" out="$2"
+            local code
+            code=$(curl --connect-timeout 10 --max-time 45 -L -sS -o "$out" -w '%{http_code}' "${base}${path}")
+            echo "${path} => HTTP ${code} bytes=$(wc -c < "$out")"
+            test "$code" = '200'
+          }
+
+          fetch '/sections/cognitive-processes' "$tmp/root.html"
+          fetch '/sections/cognitive-processes?page=2' "$tmp/page2.html"
+
+          clusters=(
+            attention-focus
+            working-memory-control
+            long-term-memory
+            memory-learning-processes
+            perception-integration
+            language-processing
+            communication-executive
+            self-regulation-metacognition
+            reasoning-problem-solving
+            applied-cognition
           )
-          for attempt in $(seq 1 30); do
-            ok=1
-            rm -rf /tmp/rawafid-smoke && mkdir -p /tmp/rawafid-smoke
-            for path in "${paths[@]}"; do
-              safe=$(printf '%s' "$path" | tr '/?' '__')
-              code=$(curl --connect-timeout 10 --max-time 30 -L -sS -o "/tmp/rawafid-smoke/${safe}.html" -w '%{http_code}' "${base}${path}" || true)
-              echo "attempt=${attempt} ${path} => HTTP ${code}"
-              if [ "$code" != '200' ]; then ok=0; fi
-            done
-            if [ "$ok" = '1' ]; then
-              grep -q 'المصادر والمراجع' /tmp/rawafid-smoke/_content_visuospatial-working-memory-work-study.html
-              grep -q 'المصادر والمراجع' /tmp/rawafid-smoke/_content_sustained-attention-classroom-learning.html
-              grep -q 'المصادر والمراجع' /tmp/rawafid-smoke/_content_memory-consolidation-mechanisms.html
-              echo 'LIVE_COGNITIVE_SMOKE=PASS'
-              echo "LIVE_BASE=${base}"
-              wc -c /tmp/rawafid-smoke/*.html
-              exit 0
-            fi
-            sleep 10
+          for slug in "${clusters[@]}"; do
+            grep -q "/sections/${slug}" "$tmp/root.html"
+            fetch "/sections/${slug}" "$tmp/cluster-${slug}.html"
           done
-          echo 'LIVE_COGNITIVE_SMOKE=FAIL'
-          exit 1
+
+          samples=(
+            visuospatial-working-memory-work-study
+            sustained-attention-classroom-learning
+            memory-consolidation-mechanisms
+            interoception-assessment
+            deductive-reasoning-interpreting-results
+          )
+          for slug in "${samples[@]}"; do
+            fetch "/content/${slug}" "$tmp/content-${slug}.html"
+            grep -q 'المصادر والمراجع' "$tmp/content-${slug}.html"
+          done
+
+          fetch '/search?q=%D8%A7%D9%84%D8%A7%D9%86%D8%AA%D8%A8%D8%A7%D9%87%20%D8%A7%D9%84%D9%85%D8%B3%D8%AA%D9%85%D8%B1' "$tmp/search.html"
+          grep -q '/content/sustained-attention-' "$tmp/search.html"
+
+          fetch '/sitemaps/content.xml' "$tmp/content-sitemap.xml"
+          grep -q 'visuospatial-working-memory-work-study' "$tmp/content-sitemap.xml"
+          grep -q 'memory-consolidation-mechanisms' "$tmp/content-sitemap.xml"
+
+          fetch '/sitemaps/taxonomy.xml' "$tmp/taxonomy-sitemap.xml"
+          for slug in "${clusters[@]}"; do grep -q "/sections/${slug}" "$tmp/taxonomy-sitemap.xml"; done
+
+          grep -Eq 'page=2|الصفحة التالية' "$tmp/root.html"
+          echo 'LIVE_COGNITIVE_COMPREHENSIVE_SMOKE=PASS'
+          echo "LIVE_BASE=${base}"
+          echo "CLUSTERS_TESTED=${#clusters[@]}"
+          echo "CONTENT_SAMPLES_TESTED=${#samples[@]}"
+          echo "TOTAL_RESPONSE_BYTES=$(du -cb "$tmp"/* | tail -1 | cut -f1)"
