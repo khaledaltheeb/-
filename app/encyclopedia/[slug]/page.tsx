@@ -48,7 +48,7 @@ export default async function EncyclopediaConditionPage({ params }: { params: Pa
   const audiences = Array.isArray(record.audience) ? record.audience.map(String) : [];
   const breadcrumbs = breadcrumbJsonLd([
     { name: 'الرئيسية', path: '/' },
-    { name: 'الموسوعة النفسية', path: '/encyclopedia/' },
+    { name: 'موسوعة روافد', path: '/encyclopedia/' },
     { name: record.title, path: canonical },
   ]);
 
@@ -94,10 +94,10 @@ export default async function EncyclopediaConditionPage({ params }: { params: Pa
 
   return <><SiteHeader /><main className="article-shell">
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schemas).replace(/</g, '\\u003c') }} />
-    <nav className="breadcrumbs" aria-label="مسار الصفحة"><Link href="/">الرئيسية</Link><span>/</span><Link href="/encyclopedia/">الموسوعة النفسية</Link><span>/</span><span aria-current="page">{record.title}</span></nav>
+    <nav className="breadcrumbs" aria-label="مسار الصفحة"><Link href="/">الرئيسية</Link><span>/</span><Link href="/encyclopedia/">موسوعة روافد</Link><span>/</span><span aria-current="page">{record.title}</span></nav>
     <article>
       <header className="article-hero">
-        <span className="eyebrow">الموسوعة النفسية</span>
+        <span className="eyebrow">موسوعة روافد</span>
         <h1>{record.title}</h1>
         {record.excerpt ? <p>{record.excerpt}</p> : null}
         <div className="article-meta">
@@ -108,12 +108,12 @@ export default async function EncyclopediaConditionPage({ params }: { params: Pa
         </div>
         {audiences.length ? <div className="tag-list">{audiences.map((audience) => <span key={audience}>{audience}</span>)}</div> : null}
       </header>
-      <nav className="article-related" aria-label="التنقل في الموسوعة"><Link href="/encyclopedia/">كل حالات الموسوعة</Link> · <Link href="/search/?type=condition">البحث في الحالات</Link> · <Link href="/specialists/">دليل المختصين</Link></nav>
+      <nav className="article-related" aria-label="التنقل في الموسوعة"><Link href="/encyclopedia/">كل صفحات الموسوعة</Link> · <Link href="/search/?type=condition">البحث في الحالات</Link> · <Link href="/specialists/">دليل المختصين</Link></nav>
       <div className="article-body">
         {record.featured_image_url ? <figure className="article-featured-image"><Image src={record.featured_image_url} alt={record.featured_image_alt || record.title} width={1200} height={675} sizes="(max-width: 900px) 100vw, 900px" priority unoptimized /></figure> : null}
         <ContentRenderer bodyJson={record.body_json} bodyText={record.body_text} recordId={record.id} />
       </div>
-      <aside className="medical-disclaimer" aria-label="حدود المحتوى الطبي"><strong>تنبيه طبي</strong><p>{record.medical_disclaimer || 'هذا المحتوى للتثقيف العام ولا يقدم تشخيصًا فرديًا أو وصفة علاجية، ولا يغني عن تقييم مختص مؤهل عند الحاجة.'}</p><Link href="/disclaimer">إخلاء المسؤولية الكامل</Link></aside>
+      <aside className="medical-disclaimer" aria-label="حدود المحتوى الطبي والتثقيفي"><strong>تنبيه منهجي</strong><p>{record.medical_disclaimer || 'هذا المحتوى للتثقيف العام ولا يقدم تشخيصًا فرديًا أو وصفة علاجية، ولا يغني عن تقييم مختص مؤهل عند الحاجة.'}</p><Link href="/disclaimer">إخلاء المسؤولية الكامل</Link></aside>
       {references.length ? <section className="article-references" aria-labelledby="encyclopedia-references-title"><h2 id="encyclopedia-references-title">المصادر والمراجع</h2><ol>{references.map((reference, index) => <li key={`${reference.url || reference.title}-${index}`}>{reference.url ? <a href={reference.url} target="_blank" rel="noopener noreferrer">{reference.title || reference.url}</a> : <span>{reference.title}</span>}{reference.publisher ? <small>{reference.publisher}</small> : null}{reference.year ? <small>{String(reference.year)}</small> : null}</li>)}</ol></section> : null}
     </article>
   </main><SiteFooter /></>;
