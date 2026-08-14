@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "policy": "إذا كان الكيان موجودًا في مسار موسوعي آخر على canonical نفسه، فلا يُنشأ سجل ثانٍ. تُنقل المادة التخصصية إلى إثراء ومراجعة للصفحة المالكة للـcanonical.",
+  "adoptions": [
+    {
+      "slug": "attention-deficit-hyperactivity-disorder",
+      "canonical_url": "/encyclopedia/attention-deficit-hyperactivity-disorder/",
+      "decision": "merge-into-existing-canonical",
+      "canonical_owner": "psychological-encyclopedia",
+      "owner_source": "data/encyclopedia/batches/003-social-anxiety-adhd.json",
+      "specialty_research_source": "data/encyclopedia/research/batch-01-source-plan.json",
+      "specialty_enrichment_source": "data/encyclopedia/enrichment/attention-deficit-hyperactivity-disorder-v1.json",
+      "import_as_new_record": false,
+      "reason": "الموسوعة النفسية الحالية تملك بالفعل نفس slug ونفس canonical. تحتفظ موسوعة الإعاقة والدمج ببحثها ومادتها العلمية لإثراء الصفحة الموحدة دون إنشاء URL أو سجل content منافس."
+    }
+  ]
+}
