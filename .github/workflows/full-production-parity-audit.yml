@@ -1,0 +1,110 @@
+name: Full Production Parity Audit
+
+on:
+  push:
+    branches:
+      - agent/full-production-parity-audit
+
+permissions:
+  contents: read
+
+jobs:
+  inventory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Inventory live legacy public route families
+        shell: python
+        run: |
+          import collections
+          import re
+          import time
+          import urllib.request
+          import urllib.parse
+          import xml.etree.ElementTree as ET
+
+          BASE = 'https://healthrenewal.org'
+          UA = {'User-Agent': 'Rawafid-Migration-Audit/1.0'}
+
+          def get(url):
+              req = urllib.request.Request(url, headers=UA)
+              last = None
+              for i in range(4):
+                  try:
+                      with urllib.request.urlopen(req, timeout=30) as r:
+                          return r.read(), r.headers.get('content-type','')
+                  except Exception as e:
+                      last = e
+                      time.sleep(1.5 * (i + 1))
+              raise last
+
+          seeds = {BASE + '/sitemap.xml'}
+          try:
+              robots, _ = get(BASE + '/robots.txt')
+              for line in robots.decode('utf-8', 'ignore').splitlines():
+                  if line.lower().startswith('sitemap:'):
+                      seeds.add(line.split(':', 1)[1].strip())
+          except Exception as e:
+              print('ROBOTS_ERROR', repr(e))
+
+          queue = collections.deque(sorted(seeds))
+          seen_sitemaps = set()
+          urls = set()
+          sitemap_errors = []
+
+          while queue and len(seen_sitemaps) < 500:
+              sm = queue.popleft()
+              if sm in seen_sitemaps:
+                  continue
+              seen_sitemaps.add(sm)
+              try:
+                  body, _ = get(sm)
+                  root = ET.fromstring(body)
+              except Exception as e:
+                  sitemap_errors.append((sm, repr(e)))
+                  continue
+              locs = []
+              for node in root.iter():
+                  if node.tag.endswith('loc') and node.text:
+                      locs.append(node.text.strip())
+              if root.tag.endswith('sitemapindex'):
+                  for loc in locs:
+                      if loc.startswith(BASE):
+                          queue.append(loc)
+              else:
+                  for loc in locs:
+                      if loc.startswith(BASE):
+                          urls.add(loc)
+
+          paths = sorted({urllib.parse.urlsplit(u).path or '/' for u in urls})
+          families = collections.Counter()
+          second = collections.Counter()
+          for p in paths:
+              seg = [x for x in p.split('/') if x]
+              fam = '/' if not seg else '/' + seg[0]
+              families[fam] += 1
+              if len(seg) >= 2:
+                  second['/' + seg[0] + '/' + seg[1]] += 1
+
+          print(f'LEGACY_SITEMAPS_SCANNED={len(seen_sitemaps)}')
+          print(f'LEGACY_PUBLIC_URLS={len(paths)}')
+          print(f'LEGACY_SITEMAP_ERRORS={len(sitemap_errors)}')
+          for sm, err in sitemap_errors[:20]:
+              print('SITEMAP_ERROR', sm, err)
+          print('=== TOP_LEVEL_FAMILIES ===')
+          for fam, count in families.most_common():
+              print(f'{count:6d} {fam}')
+          print('=== SECOND_LEVEL_TOP_150 ===')
+          for fam, count in second.most_common(150):
+              print(f'{count:6d} {fam}')
+          print('=== REPRESENTATIVE_PATHS_BY_FAMILY ===')
+          grouped = collections.defaultdict(list)
+          for p in paths:
+              seg = [x for x in p.split('/') if x]
+              fam = '/' if not seg else '/' + seg[0]
+              if len(grouped[fam]) < 5:
+                  grouped[fam].append(p)
+          for fam in sorted(grouped):
+              print(f'FAMILY {fam} COUNT={families[fam]}')
+              for p in grouped[fam]:
+                  print('  ', p)
