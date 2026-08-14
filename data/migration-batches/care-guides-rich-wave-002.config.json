@@ -1,0 +1,108 @@
+{
+  "batch_id": "care-guides-rich-wave-002",
+  "created_at": "2026-08-14",
+  "target_count": 10,
+  "initial_status": "draft",
+  "robots_index": false,
+  "principles": [
+    "fill measured taxonomy gaps rather than duplicate existing explainers",
+    "one canonical page per distinct search intent",
+    "topic-specific workflow and measurement model",
+    "minimum five authoritative references per page",
+    "international rights frameworks are not local legal advice",
+    "no fabricated reviewer identity",
+    "publish only after depth, originality, metadata, render parity and collision gates pass"
+  ],
+  "records": [
+    {
+      "slug": "care-guide-strengths-participation-profile",
+      "canonical_url": "/care-guides/strengths-participation-profile/",
+      "title": "ملف نقاط القوة والمشاركة: كيف نحول ما يستطيع الشخص فعله إلى أهداف ودعم قابل للقياس؟",
+      "category_slug": "strengths-participation",
+      "primary_keyword": "ملف نقاط القوة والمشاركة",
+      "source_ids": ["WHO-ICF","UNICEF-Participation","UN-CRPD","WHO-Health-Equity-Disability-2022","UNICEF-LiFE-2026"],
+      "distinctiveness": "يبني ملفًا وظيفيًا من نقاط القوة والاختيارات والعوائق إلى أهداف مشاركة قابلة للقياس، لا صفحة قدرات تشخيصية ولا قائمة مهارات عامة."
+    },
+    {
+      "slug": "care-guide-educational-assessment-family-preparation",
+      "canonical_url": "/care-guides/educational-assessment-family-preparation/",
+      "title": "التحضير للتقييم التعليمي: دليل الأسرة لجمع الأدلة وطرح الأسئلة وفهم حدود النتائج",
+      "category_slug": "educational-assessment",
+      "primary_keyword": "التحضير للتقييم التعليمي",
+      "source_ids": ["WHO-ICF","UNICEF-Inclusive-Education","UNICEF-LiFE-2026","CAST-UDL-3","UN-CRPD"],
+      "distinctiveness": "يركز على ما قبل التقييم وأثناءه وبعده وتحويل النتائج إلى قرار تعليمي، ولا يكرر التقييم متعدد التخصصات الصحي أو قائمة التسهيلات."
+    },
+    {
+      "slug": "care-guide-communication-access-passport",
+      "canonical_url": "/care-guides/communication-access-passport/",
+      "title": "جواز الوصول للتواصل: وثيقة عملية تنقل طريقة الفهم والتعبير والاختيار بين الخدمات",
+      "category_slug": "communication-language-aac",
+      "primary_keyword": "جواز الوصول للتواصل",
+      "source_ids": ["NHS-AIS-2025","NHS-AIS-Implementation-2025","ASHA-AAC","UN-CRPD","WHO-ICF"],
+      "distinctiveness": "يركز على وثيقة قابلة للنقل بين الصحة والتعليم والمجتمع توضح الفهم والتعبير والاختيار والألم، لا على تدريب شريك AAC أو اختيار الجهاز."
+    },
+    {
+      "slug": "care-guide-seating-positioning-trial-review",
+      "canonical_url": "/care-guides/seating-positioning-trial-review/",
+      "title": "تجربة الجلوس والوضعية ومراجعتها: من الراحة والجلد إلى الحركة والمشاركة اليومية",
+      "category_slug": "sensory-motor-assistive-tech",
+      "primary_keyword": "تجربة الجلوس والوضعية",
+      "source_ids": ["WHO-Wheelchair-2023","WHO-UNICEF-GReAT-2022","WHO-ICF","WHO-Health-Equity-Disability-2022","UN-CRPD"],
+      "distinctiveness": "يركز على تجربة وضعية أو نظام جلوس وقياس الراحة والجلد والتنفس والوصول والمشاركة، لا على وصف كرسي بعينه أو وصفة علاجية."
+    },
+    {
+      "slug": "care-guide-inclusive-group-work-participation",
+      "canonical_url": "/care-guides/inclusive-group-work-participation/",
+      "title": "العمل الجماعي الدامج في الصف: توزيع الأدوار والتواصل والتقييم دون عزل الطالب",
+      "category_slug": "inclusion-accommodations",
+      "primary_keyword": "العمل الجماعي الدامج",
+      "source_ids": ["CAST-UDL-3","UNICEF-Inclusive-Education","UNICEF-Inclusive-Education-Kit","UNICEF-LiFE-2026","UN-CRPD"],
+      "distinctiveness": "يعالج مهمة العمل الجماعي نفسها: تكوين المجموعة والأدوار والتواصل والمخرجات والتقييم، وليس الدمج الصفي العام أو التسهيلات العامة."
+    },
+    {
+      "slug": "care-guide-community-event-accessibility-plan",
+      "canonical_url": "/care-guides/community-event-accessibility-plan/",
+      "title": "خطة فعالية مجتمعية دامجة: الوصول والمعلومات والتنقل والاختيار والمشاركة الفعلية",
+      "category_slug": "rights-transition-community",
+      "primary_keyword": "فعالية مجتمعية دامجة",
+      "source_ids": ["UN-CRPD-Article19","UNICEF-Participation","WHO-ICF","WHO-Health-Equity-Disability-2022","UN-CRPD"],
+      "distinctiveness": "يوجه منظم الفعالية والمشارك إلى فحص الوصول قبل الحدث وأثناءه وبعده، لا إلى دليل نقل عام أو حقوق عامة مجردة."
+    },
+    {
+      "slug": "care-guide-workplace-accommodation-request-review",
+      "canonical_url": "/care-guides/workplace-accommodation-request-review/",
+      "title": "طلب تكييفات العمل ومراجعتها: من حاجز وظيفي محدد إلى تجربة قابلة للقياس",
+      "category_slug": "employment-community",
+      "primary_keyword": "طلب تكييفات العمل لذوي الإعاقة",
+      "source_ids": ["ILO-Reasonable-Accommodation-2026","UN-CRPD-Article27","CRPD-GC8-Work-2022","WHO-ICF","WHO-Health-Equity-Disability-2022"],
+      "distinctiveness": "يركز على صياغة الحاجة الوظيفية وتجربة التكييف وقياس أثره ومراجعته مع حماية الخصوصية، لا على حقوق العمل العامة أو العودة النفسية للعمل."
+    },
+    {
+      "slug": "care-guide-stuttering-oral-reading-presentation-plan",
+      "canonical_url": "/care-guides/stuttering-oral-reading-presentation-plan/",
+      "title": "التأتأة والقراءة الجهرية والعروض: خطة مدرسية تقلل ضغط الأداء وتحافظ على المشاركة",
+      "category_slug": "speech-fluency",
+      "primary_keyword": "التأتأة والقراءة الجهرية",
+      "source_ids": ["ASHA-Fluency-2025","ASHA-Fluency-ICF","CAST-UDL-3","UNICEF-Inclusive-Education","UN-CRPD"],
+      "distinctiveness": "يركز على القراءة الجهرية والعرض الشفهي والتقييم الصفّي، بينما الصفحة العامة الموجودة تتناول التأتأة في المدرسة على نطاق أوسع."
+    },
+    {
+      "slug": "care-guide-udl-lesson-review-checklist",
+      "canonical_url": "/care-guides/udl-lesson-review-checklist/",
+      "title": "مراجعة الدرس وفق UDL: قائمة عملية لاكتشاف الحواجز قبل التدريس وقياس المشاركة بعده",
+      "category_slug": "universal-design-learning",
+      "primary_keyword": "مراجعة درس UDL",
+      "source_ids": ["CAST-UDL-3","CAST-UDL-3-Downloads","UNICEF-LiFE-2026","UNICEF-Inclusive-Education","UNESCO-Jordan-Inclusion-Framework-2025"],
+      "distinctiveness": "يحوّل UDL من شرح نظري إلى دورة مراجعة درس محدد قبل التنفيذ وأثناءه وبعده، مع مؤشرات مشاركة وتعلم."
+    },
+    {
+      "slug": "care-guide-accessibility-barrier-reporting-record",
+      "canonical_url": "/care-guides/accessibility-barrier-reporting-record/",
+      "title": "سجل عائق الوصول: كيف نوثق المشكلة والأثر والتعديل المطلوب والمتابعة دون تصعيد غير منظم؟",
+      "category_slug": "accessibility-rights",
+      "primary_keyword": "توثيق عوائق الوصول",
+      "source_ids": ["WHO-Disability-Inclusion-Action-2024","WHO-Health-Equity-Disability-2022","UN-CRPD","NHS-AIS-2025","WHO-ICF"],
+      "distinctiveness": "يركز على توثيق عائق محدد في خدمة أو بيئة وطلب تعديل ومتابعة النتيجة؛ لا يقدم مشورة قانونية محلية ولا يكرر دليل الإخلاء أو الوصول الصحي."
+    }
+  ]
+}
