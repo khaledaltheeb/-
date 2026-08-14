@@ -34,6 +34,24 @@ jobs:
           fetch '/sections/cognitive-processes' "$tmp/root.html"
           fetch '/sections/cognitive-processes?page=2' "$tmp/page2.html"
 
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+          html=Path('/tmp/rawafid-cognitive-live/root.html').read_text(encoding='utf-8')
+          nums=re.findall(r'([0-9٠-٩٬,]+)\s*صفحة',html)
+          trans=str.maketrans('٠١٢٣٤٥٦٧٨٩٬','0123456789,')
+          values=[]
+          for raw in nums:
+              try: values.append(int(raw.translate(trans).replace(',','')))
+              except ValueError: pass
+          if not values:
+              raise SystemExit('Could not extract live cognitive page count')
+          live=max(values)
+          print(f'LIVE_COGNITIVE_PAGE_COUNT={live}')
+          if live < 1000:
+              raise SystemExit(f'Live cognitive page count below target: {live}')
+          PY
+
           clusters=(
             attention-focus
             working-memory-control
@@ -61,6 +79,7 @@ jobs:
           for slug in "${samples[@]}"; do
             fetch "/content/${slug}" "$tmp/content-${slug}.html"
             grep -q 'المصادر والمراجع' "$tmp/content-${slug}.html"
+            grep -q 'FAQPage' "$tmp/content-${slug}.html"
           done
 
           fetch '/search?q=%D8%A7%D9%84%D8%A7%D9%86%D8%AA%D8%A8%D8%A7%D9%87%20%D8%A7%D9%84%D9%85%D8%B3%D8%AA%D9%85%D8%B1' "$tmp/search.html"
@@ -83,5 +102,6 @@ jobs:
           echo "LIVE_BASE=${base}"
           echo "CLUSTERS_TESTED=${#clusters[@]}"
           echo "CONTENT_SAMPLES_TESTED=${#samples[@]}"
+          echo 'FAQ_SCHEMA_SAMPLES=PASS'
           echo 'STAGING_NOINDEX_GUARD=PASS'
           echo "TOTAL_RESPONSE_BYTES=$(du -cb "$tmp"/* | tail -1 | cut -f1)"
