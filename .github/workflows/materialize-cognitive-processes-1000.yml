@@ -43,6 +43,17 @@ jobs:
           tar -tJf /tmp/cognitive-1000.bundle.tar.xz
           tar -xJf /tmp/cognitive-1000.bundle.tar.xz -C .
 
+      - name: Apply strict TypeScript patch
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path("app/content/[slug]/page.tsx")
+          source = path.read_text(encoding="utf-8")
+          source = source.replace("const have=new Set(local.map(x=>x.slug));", "const have=new Set(local.map((x:Rel)=>x.slug));")
+          source = source.replace("new Map([...local,...remote].map(x=>[x.slug,x]))", "new Map([...local,...remote].map((x:Rel)=>[x.slug,x]))")
+          path.write_text(source, encoding="utf-8")
+          PY
+
       - name: Verify cognitive program contract
         run: |
           test -s lib/cognitive-program.ts
