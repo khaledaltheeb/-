@@ -21,8 +21,18 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
-        source: '/care-guides/family-mental-health-crisis-plan',
-        destination: '/content/family-care-plan',
+        source: '/care-guides/fetal-alcohol-spectrum-support',
+        destination: '/care-guides/prenatal-exposure-neurodevelopment-support/',
+        permanent: true,
+      },
+      {
+        source: '/care-guides/gambling-disorder-family-financial-safety',
+        destination: '/care-guides/compulsive-financial-behavior-family-safety/',
+        permanent: true,
+      },
+      {
+        source: '/care-guides/nicotine-dependence-cessation-support',
+        destination: '/care-guides/dependence-cessation-relapse-support/',
         permanent: true,
       },
       {
