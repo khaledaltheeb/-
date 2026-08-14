@@ -5,7 +5,7 @@ import CognitiveLabRunner from '@/components/cognitive-lab-runner';
 import SiteFooter from '@/components/site-footer';
 import SiteHeader from '@/components/site-header';
 import { cognitiveTools, getCognitiveTool, getRelatedCognitiveTools } from '@/lib/cognitive-lab/catalog';
-import { breadcrumbJsonLd, buildSeoMetadata } from '@/lib/seo';
+import { breadcrumbJsonLd, buildSeoMetadata, SITE_URL } from '@/lib/seo';
 
 type Params = Promise<{ slug: string }>;
 
@@ -23,8 +23,10 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     title: tool.title,
     description: tool.summary,
     path: `/cognitive-lab/${tool.slug}`,
-    index: false,
-    follow: false,
+    index: true,
+    follow: true,
+    type: 'article',
+    keywords: [tool.title, tool.category, 'تدريب معرفي', 'مختبر القدرات', 'منصة روافد'],
   });
 }
 
@@ -38,12 +40,27 @@ export default async function CognitiveToolPage({ params }: { params: Params }) 
     { name: 'مختبر القدرات', path: '/cognitive-lab' },
     { name: tool.title, path: `/cognitive-lab/${tool.slug}` },
   ]);
+  const learningResourceSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'LearningResource',
+    '@id': `${SITE_URL}/cognitive-lab/${tool.slug}#learning-resource`,
+    url: `${SITE_URL}/cognitive-lab/${tool.slug}`,
+    name: tool.title,
+    description: tool.summary,
+    inLanguage: 'ar',
+    educationalUse: 'practice',
+    learningResourceType: 'interactive cognitive training activity',
+    isAccessibleForFree: true,
+    provider: { '@id': `${SITE_URL}/#organization` },
+    isPartOf: { '@id': `${SITE_URL}/#website` },
+  };
 
   return (
     <>
       <SiteHeader />
       <main className="cognitive-lab-page cognitive-tool-page">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema).replace(/</g, '\\u003c') }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(learningResourceSchema).replace(/</g, '\\u003c') }} />
 
         <section className="cognitive-tool-hero">
           <div className="cognitive-shell">
@@ -114,7 +131,7 @@ export default async function CognitiveToolPage({ params }: { params: Params }) 
         <section className="cognitive-shell cognitive-related" aria-labelledby="cognitive-related-title">
           <div className="cognitive-section-heading"><div><span>تابع التعلم</span><h2 id="cognitive-related-title">أنشطة مرتبطة</h2></div><Link href="/cognitive-lab">عرض المختبر كاملًا</Link></div>
           <div>
-            {related.map((item) => <article key={item.slug}><span>{item.category}</span><h3><a href={`/cognitive-lab/${item.slug}`}>{item.title}</a></h3><p>{item.summary}</p></article>)}
+            {related.map((item) => <article key={item.slug}><span>{item.category}</span><h3><Link href={`/cognitive-lab/${item.slug}`}>{item.title}</Link></h3><p>{item.summary}</p></article>)}
           </div>
         </section>
       </main>
