@@ -1,0 +1,45 @@
+{
+  "generated_at": "2026-08-14T13:23:00Z",
+  "program": {
+    "program": "cognitive-processes-1000-v6",
+    "profiles": 50,
+    "lenses": 20,
+    "pages": 1000,
+    "categories": 10,
+    "minWords": 3882
+  },
+  "existing_core_pages_preserved": 13,
+  "total_scope_pages": 1013,
+  "word_count": {
+    "min": 3882,
+    "max": 4593,
+    "average": 4125
+  },
+  "seo": {
+    "unique_slugs": 1000,
+    "unique_titles": 1000,
+    "unique_meta_descriptions": 1000,
+    "invalid_title_or_meta": 0
+  },
+  "references": {
+    "min": 5,
+    "max": 8,
+    "pages_below_5": 0
+  },
+  "v6": {
+    "pages_missing_8_search_questions": 0,
+    "pages_missing_5_claim_maps": 0,
+    "forbidden_inline_warning_or_disclaimer_phrases": 0
+  },
+  "originality": {
+    "definition": "long sentences >= 90 chars occurring in >=20 generated pages",
+    "worst_page_ratio": {
+      "ratio": 0.13432835820895522,
+      "slug": "visuospatial-working-memory-work-study",
+      "repeated": 18,
+      "total": 134
+    },
+    "threshold": 0.15,
+    "passed": true
+  }
+}

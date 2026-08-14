@@ -1,16 +1,3 @@
-import { createClient } from '@/lib/supabase/server';
-import { sitemapResponse } from '@/lib/sitemap-xml';
-
-export const dynamic = 'force-dynamic';
-
-export async function GET() {
-  const supabase = await createClient();
-  const [{ data: sectors }, { data: categories }] = await Promise.all([
-    supabase.from('sectors').select('slug,updated_at').eq('is_active',true).eq('visibility','public').order('sort_order').limit(20000),
-    supabase.from('categories').select('slug,updated_at').eq('is_active',true).eq('visibility','public').order('sort_order').limit(50000),
-  ]);
-  return sitemapResponse([
-    ...(sectors ?? []).map((item) => ({ path:`/sectors/${item.slug}`, lastModified:item.updated_at, changeFrequency:'weekly', priority:.8 })),
-    ...(categories ?? []).map((item) => ({ path:`/sections/${item.slug}`, lastModified:item.updated_at, changeFrequency:'weekly', priority:.7 })),
-  ]);
-}
+import { createClient } from '@/lib/supabase/server';import { sitemapResponse } from '@/lib/sitemap-xml';import { getCognitiveCategories } from '@/lib/cognitive-program';
+export const dynamic='force-dynamic';const RELEASE='2026-08-14T00:00:00.000Z';
+export async function GET(){const s=await createClient();const [{data:sectors},{data:categories}]=await Promise.all([s.from('sectors').select('slug,updated_at').eq('is_active',true).eq('visibility','public').order('sort_order').limit(20000),s.from('categories').select('slug,updated_at').eq('is_active',true).eq('visibility','public').order('sort_order').limit(50000)]);const rows=[...(sectors??[]).map(x=>({path:`/sectors/${x.slug}`,lastModified:x.updated_at,changeFrequency:'weekly',priority:.8})),...(categories??[]).map(x=>({path:`/sections/${x.slug}`,lastModified:x.updated_at,changeFrequency:'weekly',priority:.7})),...getCognitiveCategories().map(x=>({path:`/sections/${x.slug}`,lastModified:RELEASE,changeFrequency:'weekly',priority:.72}))];type SitemapRow={path:string;lastModified:string|null;changeFrequency:string;priority:number};const by=new Map<string,SitemapRow>();for(const x of rows)if(!by.has(x.path))by.set(x.path,x);return sitemapResponse([...by.values()]);}
