@@ -29,12 +29,26 @@ const encyclopediaConditionRedirects = [
   permanent: true,
 }));
 
+const cognitiveLabLegacyRedirects = [
+  {
+    source: '/cognitive-lab/associative-context-binding',
+    destination: '/cognitive-lab/associative-binding',
+    permanent: true,
+  },
+  {
+    source: '/cognitive-lab/prospective-memory-cues',
+    destination: '/cognitive-lab/prospective-memory',
+    permanent: true,
+  },
+];
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   async redirects() {
     return [
       ...encyclopediaConditionRedirects,
+      ...cognitiveLabLegacyRedirects,
       {
         source: '/care-guides/caregiver-self-care-boundaries',
         destination: '/content/caregiver-burnout',
