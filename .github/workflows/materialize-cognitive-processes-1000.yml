@@ -23,7 +23,10 @@ jobs:
           fetch-depth: 1
 
       - name: Expand audited cognitive bundle
-        run: tar -xJf artifacts/cognitive-1000.bundle.tar.xz -C .
+        run: |
+          base64 -d artifacts/cognitive-1000.bundle.tar.xz > /tmp/cognitive-1000.bundle.tar.xz
+          xz -t /tmp/cognitive-1000.bundle.tar.xz
+          tar -xJf /tmp/cognitive-1000.bundle.tar.xz -C .
 
       - name: Validate generated cognitive program
         run: |
