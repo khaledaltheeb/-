@@ -7,6 +7,10 @@ on:
       - 'artifacts/cognitive-1000.bundle.tar.xz'
       - 'artifacts/cognitive-1000.bundle.part2.b64'
       - 'artifacts/cognitive-1000.bundle.part3.b64'
+      - 'artifacts/cognitive-1000.bundle.part4.b64'
+      - 'artifacts/cognitive-1000.bundle.part5.b64'
+      - 'artifacts/cognitive-1000.bundle.part6.b64'
+      - 'artifacts/cognitive-1000.bundle.part7.b64'
       - '.github/workflows/materialize-cognitive-processes-1000.yml'
   workflow_dispatch:
 
@@ -26,7 +30,15 @@ jobs:
 
       - name: Expand audited cognitive bundle
         run: |
-          cat artifacts/cognitive-1000.bundle.tar.xz artifacts/cognitive-1000.bundle.part2.b64 artifacts/cognitive-1000.bundle.part3.b64 | base64 -d > /tmp/cognitive-1000.bundle.tar.xz
+          cat \
+            artifacts/cognitive-1000.bundle.tar.xz \
+            artifacts/cognitive-1000.bundle.part2.b64 \
+            artifacts/cognitive-1000.bundle.part3.b64 \
+            artifacts/cognitive-1000.bundle.part4.b64 \
+            artifacts/cognitive-1000.bundle.part5.b64 \
+            artifacts/cognitive-1000.bundle.part6.b64 \
+            artifacts/cognitive-1000.bundle.part7.b64 \
+            | base64 -d > /tmp/cognitive-1000.bundle.tar.xz
           xz -t /tmp/cognitive-1000.bundle.tar.xz
           tar -tJf /tmp/cognitive-1000.bundle.tar.xz
           tar -xJf /tmp/cognitive-1000.bundle.tar.xz -C .
