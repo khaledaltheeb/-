@@ -1,0 +1,95 @@
+name: Cognitive Lab Sitemap Parity
+
+on:
+  push:
+    branches: [agent/production-domain-smoke]
+    paths:
+      - '.github/workflows/cognitive-lab-sitemap-parity.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  parity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Compare legacy production sitemap routes with staging
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import html, re, urllib.request, xml.etree.ElementTree as ET
+          from urllib.parse import urljoin, urlparse
+
+          old_origin='https://healthrenewal.org'
+          new_index='https://rawafid-platform-staging.khaledaltheeb.workers.dev/cognitive-lab'
+
+          def fetch(url):
+              req=urllib.request.Request(url,headers={'User-Agent':'Rawafid-Parity-Audit/1.1','Cache-Control':'no-cache'})
+              with urllib.request.urlopen(req,timeout=30) as r:
+                  return r.status,r.read().decode('utf-8','replace'),r.geturl()
+
+          status,new_html,_=fetch(new_index)
+          assert status==200
+          new_slugs=set()
+          for href in re.findall(r'href=["\']([^"\']+)["\']',new_html,re.I):
+              p=urlparse(urljoin(new_index,html.unescape(href))).path.rstrip('/')
+              m=re.fullmatch(r'/cognitive-lab/([^/]+)',p)
+              if m:new_slugs.add(m.group(1))
+
+          starts=[]
+          _,robots,_=fetch(old_origin+'/robots.txt')
+          starts += re.findall(r'(?im)^\s*Sitemap:\s*(\S+)\s*$',robots)
+          starts += [old_origin+'/sitemap.xml',old_origin+'/sitemap-index.xml']
+
+          seen=set(); queue=list(dict.fromkeys(starts)); legacy_urls=set()
+          while queue and len(seen)<200:
+              url=queue.pop(0)
+              if url in seen: continue
+              seen.add(url)
+              try:
+                  status,body,_=fetch(url)
+              except Exception:
+                  continue
+              if status!=200 or '<' not in body: continue
+              try: root=ET.fromstring(body)
+              except ET.ParseError: continue
+              tag=root.tag.rsplit('}',1)[-1]
+              if tag=='sitemapindex':
+                  for loc in root.findall('.//{*}sitemap/{*}loc'):
+                      if loc.text: queue.append(loc.text.strip())
+              elif tag=='urlset':
+                  for loc in root.findall('.//{*}url/{*}loc'):
+                      if loc.text: legacy_urls.add(loc.text.strip())
+
+          old_slugs=set()
+          for u in legacy_urls:
+              p=urlparse(u).path.rstrip('/')
+              m=re.fullmatch(r'/cognitive-lab/([^/]+)',p)
+              if m: old_slugs.add(m.group(1))
+
+          missing=sorted(old_slugs-new_slugs)
+          extra=sorted(new_slugs-old_slugs)
+          common=sorted(old_slugs&new_slugs)
+          print(f'SITEMAPS_SCANNED={len(seen)}')
+          print(f'LEGACY_COGNITIVE_ROUTES={len(old_slugs)}')
+          print(f'STAGING_COGNITIVE_ROUTES={len(new_slugs)}')
+          print(f'COMMON_COGNITIVE_ROUTES={len(common)}')
+          print('MISSING_ON_STAGING=' + ','.join(missing))
+          print('STAGING_ONLY=' + ','.join(extra))
+
+          failures=[]
+          for slug in sorted(old_slugs):
+              try:
+                  status,body,_=fetch(new_index+'/'+slug)
+                  if status!=200 or 'تعليمي غير تشخيصي' not in body: failures.append((slug,status))
+              except Exception as exc:
+                  failures.append((slug,type(exc).__name__))
+          print('LEGACY_ROUTES_FAILING_ON_STAGING=' + repr(failures))
+          assert len(new_slugs)==53, len(new_slugs)
+          assert not missing, missing
+          assert not failures, failures
+          print('COGNITIVE_LAB_SITEMAP_PARITY=PASS')
+          PY
