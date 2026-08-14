@@ -1,0 +1,50 @@
+name: Materialize Cognitive Processes 1000
+
+on:
+  push:
+    branches: [cognitive-processes-1000]
+    paths:
+      - 'artifacts/cognitive-1000.bundle.tar.xz'
+      - '.github/workflows/materialize-cognitive-processes-1000.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 1
+
+      - name: Expand audited cognitive bundle
+        run: tar -xJf artifacts/cognitive-1000.bundle.tar.xz -C .
+
+      - name: Validate generated cognitive program
+        run: |
+          bash scripts/audit_cognitive_program.sh
+          npm install --no-audit --no-fund
+          npm run typecheck
+          npm run lint
+          NEXT_PUBLIC_SUPABASE_URL=https://ghljwfwqsyfnthvlzxjy.supabase.co \
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs \
+          NEXT_PUBLIC_SITE_URL=https://healthrenewal.org \
+          NEXT_PUBLIC_ALLOW_INDEXING=true \
+          npm run build
+
+      - name: Commit materialized program
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/cognitive-processes lib/cognitive-generated-content.ts scripts/build_cognitive_data.py scripts/audit_cognitive_program.sh scripts/cognitive-audit-runner.cjs scripts/tsconfig.cognitive-audit.json app/content/'[slug]'/page.tsx app/sections/'[slug]'/page.tsx app/search/page.tsx app/sitemaps/content.xml/route.ts docs/editorial/COGNITIVE_PROCESSES_1000_PROGRAM.md artifacts/cognitive-processes-1000-audit.json .github/workflows/cognitive-content-quality.yml
+          if git diff --cached --quiet; then
+            echo "Cognitive program already materialized."
+            exit 0
+          fi
+          git commit -m "Materialize audited cognitive processes 1000 program"
+          git push origin HEAD:${{ github.ref_name }}
