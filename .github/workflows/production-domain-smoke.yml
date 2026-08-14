@@ -1,0 +1,47 @@
+name: Production Domain Smoke
+
+on:
+  push:
+    branches: [agent/production-domain-smoke]
+    paths:
+      - '.github/workflows/production-domain-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Inspect production domain
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://healthrenewal.org'
+          tmp=/tmp/rawafid-production-domain
+          rm -rf "$tmp" && mkdir -p "$tmp"
+
+          probe() {
+            local path="$1" name="$2"
+            local code effective
+            code=$(curl --connect-timeout 10 --max-time 30 -L -sS -D "$tmp/${name}.headers" -o "$tmp/${name}.body" -w '%{http_code}' "${base}${path}" || true)
+            effective=$(curl --connect-timeout 10 --max-time 30 -L -sS -o /dev/null -w '%{url_effective}' "${base}${path}" || true)
+            echo "${path} => HTTP ${code} effective=${effective} bytes=$(wc -c < "$tmp/${name}.body" 2>/dev/null || echo 0)"
+          }
+
+          probe '/' root
+          probe '/robots.txt' robots
+          probe '/sections/cognitive-processes' cognitive
+          probe '/content/visuospatial-working-memory-work-study' cognitive_sample
+
+          echo '--- ROOT HEADERS ---'
+          sed -n '1,40p' "$tmp/root.headers" || true
+          echo '--- ROBOTS ---'
+          sed -n '1,80p' "$tmp/robots.body" || true
+          echo '--- COGNITIVE MARKERS ---'
+          grep -Eo '1013|١٬٠١٣|١٠١٣|المصطلحات والعمليات المعرفية|المصادر والمراجع' "$tmp/cognitive.body" | head -20 || true
+          grep -Eo 'المصادر والمراجع|FAQPage|visuospatial-working-memory' "$tmp/cognitive_sample.body" | head -20 || true
+
+          echo 'PRODUCTION_DOMAIN_SMOKE_COMPLETE=1'
