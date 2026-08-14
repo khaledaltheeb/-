@@ -26,6 +26,7 @@ export default function robots(): MetadataRoute.Robots {
       `${SITE_URL}/sitemaps/static.xml`,
       `${SITE_URL}/sitemaps/content.xml`,
       `${SITE_URL}/sitemaps/taxonomy.xml`,
+      `${SITE_URL}/sitemaps/cognitive-lab.xml`,
       `${SITE_URL}/sitemaps/specialists.xml`,
       `${SITE_URL}/sitemaps/centers.xml`,
       `${SITE_URL}/sitemaps/community.xml`,
