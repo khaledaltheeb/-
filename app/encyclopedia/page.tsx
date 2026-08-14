@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
-import { getEncyclopediaItems } from '@/lib/encyclopedia';
+import { getEncyclopediaCount, getEncyclopediaItems } from '@/lib/encyclopedia';
 import { buildSeoMetadata, breadcrumbJsonLd, SITE_URL } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
@@ -20,7 +20,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function EncyclopediaHubPage() {
-  const items = await getEncyclopediaItems();
+  const [items, total] = await Promise.all([getEncyclopediaItems(60), getEncyclopediaCount()]);
   const breadcrumbs = breadcrumbJsonLd([
     { name: 'الرئيسية', path: '/' },
     { name: 'الموسوعة النفسية', path: '/encyclopedia/' },
@@ -54,16 +54,23 @@ export default async function EncyclopediaHubPage() {
       <span className="eyebrow">مرجع علمي عربي</span>
       <h1>الموسوعة النفسية</h1>
       <p>تعريفات موثقة للحالات والاضطرابات النفسية، مع الأعراض والأسباب وعوامل الخطورة والتقييم وخيارات العلاج والدعم والأسئلة التي يبحث عنها المستخدمون. لا تُنشأ صفحة بوصفها «اضطرابًا» ما لم يكن لها أساس تصنيفي أو سريري واضح؛ وتُفصل المفاهيم والأعراض النفسية في أنواع محتوى مستقلة لتجنب التضليل.</p>
+      <div className="tag-list"><span>{total} حالة منشورة</span><span>مراجع موثقة</span><span>مراجعة تحريرية قبل الفهرسة</span></div>
     </section>
+    <nav className="article-related" aria-label="أدوات الموسوعة">
+      <Link href="/encyclopedia/index/1/">الفهرس الكامل</Link> · <Link href="/search/?type=condition">البحث في الحالات</Link> · <Link href="/specialists/">دليل المختصين</Link>
+    </nav>
     <section className="article-related" aria-labelledby="encyclopedia-index-title">
-      <div className="section-mini-heading"><div><span className="eyebrow">فهرس الحالات</span><h2 id="encyclopedia-index-title">الحالات المنشورة</h2></div><span>{items.length} صفحة موثقة حاليًا</span></div>
+      <div className="section-mini-heading"><div><span className="eyebrow">مدخل الفهرس</span><h2 id="encyclopedia-index-title">أول الحالات أبجديًا</h2></div><span>نعرض 60 صفحة فقط هنا لحماية سرعة صفحة المدخل</span></div>
       <div className="related-content-grid">
         {items.map((item) => <article key={item.id}><span>حالة نفسية</span><h3><Link href={item.canonicalUrl}>{item.title}</Link></h3>{item.excerpt ? <p>{item.excerpt}</p> : null}<Link href={item.canonicalUrl}>قراءة الدليل ←</Link></article>)}
       </div>
+      {total > items.length ? <p><Link href="/encyclopedia/index/1/">استعراض الفهرس الكامل للموسوعة ←</Link></p> : null}
     </section>
     <section className="article-body">
       <h2>كيف تُبنى صفحات الموسوعة؟</h2>
       <p>كل صفحة تُبنى حول نية بحث مستقلة، وتبدأ بالتعريف العلمي ثم العلامات والأعراض، الأسباب وعوامل الخطورة، التشخيص والتقييم، التشخيص التفريقي عند الحاجة، خيارات العلاج والدعم، متى تُطلب المساعدة، ثم أسئلة شائعة بصياغة قريبة من لغة البحث. تُوثق الادعاءات الأساسية بمراجع رسمية وإرشادات سريرية ومراجعات علمية كلما أمكن.</p>
+      <h2>كيف نتوسع دون صفحات رقيقة؟</h2>
+      <p>صفحة المدخل لا تحمل آلاف الروابط والبطاقات دفعة واحدة. الفهرس الكامل مقسم إلى صفحات ثابتة الحجم، بينما تبقى خريطة الموقع مسؤولة عن اكتشاف كل صفحة منشورة. المرادفات تُدمج في الصفحة الأساسية نفسها حتى لا تتنافس صفحات متعددة على المعنى السريري نفسه.</p>
       <h2>حدود المحتوى الطبي</h2>
       <p>الموسوعة للتثقيف ولا تستبدل التقييم الفردي. لا تقدم جرعات دوائية أو تشخيصًا ذاتيًا، ولا تعتبر اختبار الإنترنت بديلًا عن المختص. عند وجود خطر مباشر على السلامة أو أعراض شديدة مفاجئة تكون الأولوية لخدمات الطوارئ والرعاية المحلية المناسبة.</p>
     </section>
