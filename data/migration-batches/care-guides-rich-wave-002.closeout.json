@@ -1,0 +1,47 @@
+{
+  "batch_id": "care-guides-rich-wave-002",
+  "verified_date": "2026-08-14",
+  "contract_version": 8,
+  "target_count": 10,
+  "published_count": 10,
+  "indexed_count": 10,
+  "quality_failures": 0,
+  "active_redirects": 0,
+  "versions_recorded": 10,
+  "publish_audits_recorded": 10,
+  "database_closeout_audit": "care-guides-rich-wave-002-closeout",
+  "checks": [
+    "minimum 2500 Arabic words per page",
+    "at least 8 H2 and 4 H3 headings",
+    "at least 6 structured FAQs",
+    "SEO title <= 47 characters",
+    "SEO description 150-160 characters",
+    "at least 5 authoritative references with sufficient primary/guideline coverage",
+    "at least 5 source-mapped claims",
+    "at least 8 explicit search-intent questions",
+    "taxonomy review and classification confidence >= 0.9",
+    "evidence-led rewrite and originality review",
+    "canonical path and indexability",
+    "no active redirect on the canonical path",
+    "no duplicate published canonical",
+    "render parity enforced at publication"
+  ],
+  "pages": [
+    {"slug":"care-guide-accessibility-barrier-reporting-record","words":2549,"h2":33,"h3":4,"faq":8,"seo_description_length":150},
+    {"slug":"care-guide-communication-access-passport","words":2509,"h2":27,"h3":4,"faq":8,"seo_description_length":150},
+    {"slug":"care-guide-community-event-accessibility-plan","words":2528,"h2":34,"h3":4,"faq":8,"seo_description_length":150},
+    {"slug":"care-guide-educational-assessment-family-preparation","words":2518,"h2":28,"h3":4,"faq":8,"seo_description_length":151},
+    {"slug":"care-guide-inclusive-group-work-participation","words":2513,"h2":31,"h3":4,"faq":8,"seo_description_length":154},
+    {"slug":"care-guide-seating-positioning-trial-review","words":2529,"h2":30,"h3":4,"faq":8,"seo_description_length":150},
+    {"slug":"care-guide-strengths-participation-profile","words":2536,"h2":26,"h3":4,"faq":8,"seo_description_length":151},
+    {"slug":"care-guide-stuttering-oral-reading-presentation-plan","words":2670,"h2":32,"h3":5,"faq":8,"seo_description_length":155},
+    {"slug":"care-guide-udl-lesson-review-checklist","words":2518,"h2":30,"h3":4,"faq":8,"seo_description_length":151},
+    {"slug":"care-guide-workplace-accommodation-request-review","words":2500,"h2":31,"h3":4,"faq":8,"seo_description_length":153}
+  ],
+  "notes": [
+    "All ten pages are independent canonical pages selected from measured taxonomy gaps.",
+    "International rights frameworks are used as general frameworks and are not presented as local legal advice.",
+    "No specialist reviewer identity was fabricated.",
+    "Publication was performed only after the database release and render-parity gates accepted each page."
+  ]
+}
