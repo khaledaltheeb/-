@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server';
 
 type JsonRecord = Record<string, unknown>;
 
+export const ENCYCLOPEDIA_INDEX_PAGE_SIZE = 100;
+
 export type EncyclopediaReference = {
   title?: string;
   url?: string;
@@ -19,6 +21,14 @@ export type EncyclopediaItem = {
   canonicalUrl: string;
   primaryKeyword: string | null;
   updatedAt: string | null;
+};
+
+export type EncyclopediaPage = {
+  items: EncyclopediaItem[];
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
 };
 
 export type EncyclopediaRecord = {
@@ -60,12 +70,40 @@ function asString(value: unknown) {
   return typeof value === 'string' ? value.trim() : '';
 }
 
+function normalizeItem(row: Record<string, unknown>): EncyclopediaItem | null {
+  const slug = asString(row.slug);
+  const canonicalUrl = encyclopediaCanonical(slug);
+  if (!canonicalUrl) return null;
+  return {
+    id: String(row.id),
+    slug,
+    title: asString(row.title),
+    excerpt: typeof row.excerpt === 'string' ? row.excerpt : null,
+    canonicalUrl,
+    primaryKeyword: typeof row.primary_keyword === 'string' ? row.primary_keyword : null,
+    updatedAt: typeof row.updated_at === 'string' ? row.updated_at : null,
+  };
+}
+
 export function encyclopediaCanonical(slug: string) {
   const safe = slug.trim().toLowerCase();
   return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(safe) ? `/encyclopedia/${safe}/` : null;
 }
 
-export async function getEncyclopediaItems(limit = 5000): Promise<EncyclopediaItem[]> {
+export async function getEncyclopediaCount(): Promise<number> {
+  const supabase = await createClient();
+  const { count } = await supabase
+    .from('content')
+    .select('id', { count: 'exact', head: true })
+    .eq('content_type', 'condition')
+    .eq('status', 'published')
+    .eq('robots_index', true)
+    .lte('published_at', new Date().toISOString());
+  return Math.max(0, count ?? 0);
+}
+
+export async function getEncyclopediaItems(limit = 60): Promise<EncyclopediaItem[]> {
+  const safeLimit = Math.min(Math.max(Math.trunc(limit), 1), 200);
   const supabase = await createClient();
   const { data } = await supabase
     .from('content')
@@ -75,22 +113,38 @@ export async function getEncyclopediaItems(limit = 5000): Promise<EncyclopediaIt
     .eq('robots_index', true)
     .lte('published_at', new Date().toISOString())
     .order('title', { ascending: true })
-    .limit(Math.min(Math.max(limit, 1), 5000));
+    .limit(safeLimit);
 
   return (Array.isArray(data) ? data : []).flatMap((row) => {
-    const slug = asString(row.slug);
-    const canonicalUrl = encyclopediaCanonical(slug);
-    if (!canonicalUrl) return [];
-    return [{
-      id: String(row.id),
-      slug,
-      title: asString(row.title),
-      excerpt: typeof row.excerpt === 'string' ? row.excerpt : null,
-      canonicalUrl,
-      primaryKeyword: typeof row.primary_keyword === 'string' ? row.primary_keyword : null,
-      updatedAt: typeof row.updated_at === 'string' ? row.updated_at : null,
-    }];
+    const item = normalizeItem(row as Record<string, unknown>);
+    return item ? [item] : [];
   });
+}
+
+export async function getEncyclopediaIndexPage(rawPage: number, pageSize = ENCYCLOPEDIA_INDEX_PAGE_SIZE): Promise<EncyclopediaPage> {
+  const safePageSize = Math.min(Math.max(Math.trunc(pageSize), 20), 200);
+  const total = await getEncyclopediaCount();
+  const totalPages = Math.max(1, Math.ceil(total / safePageSize));
+  const page = Math.min(Math.max(Math.trunc(rawPage) || 1, 1), totalPages);
+  const start = (page - 1) * safePageSize;
+  const end = start + safePageSize - 1;
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from('content')
+    .select('id,slug,title,excerpt,canonical_url,primary_keyword,updated_at')
+    .eq('content_type', 'condition')
+    .eq('status', 'published')
+    .eq('robots_index', true)
+    .lte('published_at', new Date().toISOString())
+    .order('title', { ascending: true })
+    .range(start, end);
+
+  const items = (Array.isArray(data) ? data : []).flatMap((row) => {
+    const item = normalizeItem(row as Record<string, unknown>);
+    return item ? [item] : [];
+  });
+
+  return { items, page, pageSize: safePageSize, total, totalPages };
 }
 
 export async function getEncyclopediaRecord(slug: string): Promise<EncyclopediaRecord | null> {
