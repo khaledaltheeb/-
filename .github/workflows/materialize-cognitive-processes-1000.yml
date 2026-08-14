@@ -43,14 +43,41 @@ jobs:
           tar -tJf /tmp/cognitive-1000.bundle.tar.xz
           tar -xJf /tmp/cognitive-1000.bundle.tar.xz -C .
 
-      - name: Apply strict TypeScript patch
+      - name: Apply strict typing and lint hardening
         run: |
           python3 - <<'PY'
           from pathlib import Path
+
           path = Path("app/content/[slug]/page.tsx")
           source = path.read_text(encoding="utf-8")
+          source = source.replace(
+              "export const dynamic='force-dynamic';type Params=Promise<{slug:string}>;type R={title?:string;url?:string;publisher?:string;year?:string|number};type Rel={id:string;slug:string;title:string;excerpt:string|null;content_type:string;score:number};type Rec=Record<string,any>;",
+              "export const dynamic='force-dynamic';type Params=Promise<{slug:string}>;type R={title?:string;url?:string;publisher?:string;year?:string|number};type Rel={id:string;slug:string;title:string;excerpt:string|null;content_type:string;score:number};type TaxonomyNode={slug:string;name_ar:string};type Rec={id:string;slug:string;title:string;excerpt:string|null;body_json:unknown;body_text:string|null;schema_json:Record<string,unknown>;content_type:string;audience:string[];seo_title:string|null;seo_description:string|null;canonical_url:string|null;robots_index:boolean;robots_follow:boolean;published_at:string|null;updated_at:string|null;featured_image_url:string|null;featured_image_alt:string|null;primary_keyword:string|null;secondary_keywords:string[];semantic_terms:string[];search_intent:string|null;author_display_name:string|null;reviewer_display_name:string|null;reviewer_credentials:string|null;last_reviewed_at:string|null;references_json:unknown;medical_disclaimer:string|null;sector_id:string|null;category_id:string|null;sectors:TaxonomyNode|TaxonomyNode[]|null;categories:TaxonomyNode|TaxonomyNode[]|null;generated_program?:boolean};type UnknownRecord=Record<string,unknown>;"
+          )
+          source = source.replace(
+              "const node=(v:any)=>Array.isArray(v)?v[0]??null:v;const refs=(v:any):R[]=>Array.isArray(v)?v.filter(x=>x&&typeof x==='object'&&typeof x.title==='string').slice(0,50):[];\nfunction faq(v:any){const b=Array.isArray(v?.blocks)?v.blocks:[];return b.flatMap((x:any)=>x?.type==='faq'&&Array.isArray(x.items)?x.items:[]).filter((x:any)=>typeof x?.question==='string'&&typeof x?.answer==='string').slice(0,40)}",
+              "const node=(v:TaxonomyNode|TaxonomyNode[]|null):TaxonomyNode|null=>Array.isArray(v)?v[0]??null:v;const refs=(v:unknown):R[]=>Array.isArray(v)?v.flatMap((item):R[]=>{if(!item||typeof item!=='object'||Array.isArray(item))return[];const x=item as UnknownRecord;const title=typeof x.title==='string'?x.title:undefined;const url=typeof x.url==='string'?x.url:undefined;const publisher=typeof x.publisher==='string'?x.publisher:undefined;const year=typeof x.year==='string'||typeof x.year==='number'?x.year:undefined;return title?[{title,url,publisher,year}]:[];}).slice(0,50):[];\ntype Faq={question:string;answer:string};function faq(v:unknown):Faq[]{if(!v||typeof v!=='object'||Array.isArray(v))return[];const root=v as UnknownRecord;const b=Array.isArray(root.blocks)?root.blocks:[];return b.flatMap((item):Faq[]=>{if(!item||typeof item!=='object'||Array.isArray(item))return[];const x=item as UnknownRecord;if(x.type!=='faq'||!Array.isArray(x.items))return[];return x.items.flatMap((entry):Faq[]=>{if(!entry||typeof entry!=='object'||Array.isArray(entry))return[];const row=entry as UnknownRecord;return typeof row.question==='string'&&typeof row.answer==='string'?[{question:row.question,answer:row.answer}]:[];});}).slice(0,40)}"
+          )
+          source = source.replace("const slugs=Array.isArray(r.schema_json?.curated_related_slugs)?r.schema_json.curated_related_slugs.slice(0,6):[];", "const rawRelated=r.schema_json.curated_related_slugs;const slugs:string[]=Array.isArray(rawRelated)?rawRelated.filter((x):x is string=>typeof x==='string').slice(0,6):[];")
           source = source.replace("const have=new Set(local.map(x=>x.slug));", "const have=new Set(local.map((x:Rel)=>x.slug));")
           source = source.replace("new Map([...local,...remote].map(x=>[x.slug,x]))", "new Map([...local,...remote].map((x:Rel)=>[x.slug,x]))")
+          source = source.replace("remote=(data??[]).map((x:any)=>({...x,score:100}));", "remote=(data??[]).map((x)=>({...x,score:100} as Rel));")
+          source = source.replace("fs.map((x:any)=>", "fs.map((x)=>")
+          path.write_text(source, encoding="utf-8")
+
+          for filename in ["app/sitemaps/content.xml/route.ts", "app/sitemaps/taxonomy.xml/route.ts"]:
+              path = Path(filename)
+              source = path.read_text(encoding="utf-8")
+              source = source.replace("const by=new Map<string,any>();", "type SitemapRow={path:string;lastModified:string|null;changeFrequency:string;priority:number};const by=new Map<string,SitemapRow>();")
+              path.write_text(source, encoding="utf-8")
+
+          path = Path("lib/cognitive-program.ts")
+          source = path.read_text(encoding="utf-8")
+          start = source.find("function uniqueAnalysis(")
+          end = source.find("function questionAnalysis(", start)
+          if start >= 0 and end > start:
+              source = source[:start] + source[end:]
+          source = source.replace("const examples=p.examples.map((ex,i)=>", "const examples=p.examples.map((ex)=>")
           path.write_text(source, encoding="utf-8")
           PY
 
