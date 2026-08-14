@@ -10,8 +10,8 @@ export const metadata: Metadata = buildSeoMetadata({
   title: 'مختبر القدرات والأنشطة المعرفية',
   description: '53 نشاطًا عربيًا للانتباه والذاكرة والاستدلال والمرونة، بخصوصية محلية ونتائج وصفية من دون تشخيص أو مقارنة معيارية.',
   path: '/cognitive-lab',
-  index: false,
-  follow: false,
+  index: true,
+  follow: true,
 });
 
 const facts = [
