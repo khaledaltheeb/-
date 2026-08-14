@@ -19,29 +19,28 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          base='https://rawafid-staging.workers.dev'
+          base='https://rawafid-platform-staging.khaledaltheeb.workers.dev'
           paths=(
             '/sections/cognitive-processes'
             '/content/visuospatial-working-memory-work-study'
             '/content/sustained-attention-classroom-learning'
             '/content/memory-consolidation-mechanisms'
           )
-          ok=0
-          for attempt in $(seq 1 24); do
+          for attempt in $(seq 1 30); do
             ok=1
             rm -rf /tmp/rawafid-smoke && mkdir -p /tmp/rawafid-smoke
             for path in "${paths[@]}"; do
               safe=$(printf '%s' "$path" | tr '/?' '__')
               code=$(curl --connect-timeout 10 --max-time 30 -L -sS -o "/tmp/rawafid-smoke/${safe}.html" -w '%{http_code}' "${base}${path}" || true)
-              echo "${path} => HTTP ${code}"
+              echo "attempt=${attempt} ${path} => HTTP ${code}"
               if [ "$code" != '200' ]; then ok=0; fi
             done
             if [ "$ok" = '1' ]; then
-              grep -q 'cognitive-processes' /tmp/rawafid-smoke/_sections_cognitive-processes.html || true
               grep -q 'المصادر والمراجع' /tmp/rawafid-smoke/_content_visuospatial-working-memory-work-study.html
               grep -q 'المصادر والمراجع' /tmp/rawafid-smoke/_content_sustained-attention-classroom-learning.html
               grep -q 'المصادر والمراجع' /tmp/rawafid-smoke/_content_memory-consolidation-mechanisms.html
               echo 'LIVE_COGNITIVE_SMOKE=PASS'
+              echo "LIVE_BASE=${base}"
               wc -c /tmp/rawafid-smoke/*.html
               exit 0
             fi
