@@ -36,16 +36,25 @@ jobs:
 
           python3 - <<'PY'
           import re
+          from html.parser import HTMLParser
           from pathlib import Path
-          html=Path('/tmp/rawafid-cognitive-live/root.html').read_text(encoding='utf-8')
-          nums=re.findall(r'([0-9٠-٩٬,]+)\s*صفحة',html)
+          class Text(HTMLParser):
+              def __init__(self):
+                  super().__init__(); self.parts=[]
+              def handle_data(self,data): self.parts.append(data)
+          raw=Path('/tmp/rawafid-cognitive-live/root.html').read_text(encoding='utf-8')
+          p=Text(); p.feed(raw)
+          text=' '.join(p.parts)
+          chunks=[x.strip() for x in re.split(r'[\n\r]+',text) if 'صفحة' in x]
+          print('LIVE_PAGE_TEXT_SNIPPETS=' + ' | '.join(chunks[:10])[:1500])
           trans=str.maketrans('٠١٢٣٤٥٦٧٨٩٬','0123456789,')
           values=[]
-          for raw in nums:
-              try: values.append(int(raw.translate(trans).replace(',','')))
-              except ValueError: pass
+          for m in re.finditer(r'([0-9٠-٩][0-9٠-٩٬,\s\u061c\u200e\u200f]*?)\s*صفحة',text):
+              token=re.sub(r'[^0-9٠-٩]','',m.group(1)).translate(str.maketrans('٠١٢٣٤٥٦٧٨٩','0123456789'))
+              if token:
+                  values.append(int(token))
           if not values:
-              raise SystemExit('Could not extract live cognitive page count')
+              raise SystemExit('Could not extract live cognitive page count from rendered text')
           live=max(values)
           print(f'LIVE_COGNITIVE_PAGE_COUNT={live}')
           if live < 1000:
@@ -85,9 +94,6 @@ jobs:
           fetch '/search?q=%D8%A7%D9%84%D8%A7%D9%86%D8%AA%D8%A8%D8%A7%D9%87%20%D8%A7%D9%84%D9%85%D8%B3%D8%AA%D9%85%D8%B1' "$tmp/search.html"
           grep -q '/content/sustained-attention-' "$tmp/search.html"
 
-          # Staging is intentionally non-indexable. Sitemaps must return valid empty XML,
-          # while robots.txt must disallow crawling. Production builds with indexing=true
-          # are separately covered by the repository quality gate.
           fetch '/sitemaps/content.xml' "$tmp/content-sitemap.xml"
           grep -q '<urlset' "$tmp/content-sitemap.xml"
           ! grep -q '<url>' "$tmp/content-sitemap.xml"
