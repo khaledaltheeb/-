@@ -66,16 +66,22 @@ jobs:
           fetch '/search?q=%D8%A7%D9%84%D8%A7%D9%86%D8%AA%D8%A8%D8%A7%D9%87%20%D8%A7%D9%84%D9%85%D8%B3%D8%AA%D9%85%D8%B1' "$tmp/search.html"
           grep -q '/content/sustained-attention-' "$tmp/search.html"
 
+          # Staging is intentionally non-indexable. Sitemaps must return valid empty XML,
+          # while robots.txt must disallow crawling. Production builds with indexing=true
+          # are separately covered by the repository quality gate.
           fetch '/sitemaps/content.xml' "$tmp/content-sitemap.xml"
-          grep -q 'visuospatial-working-memory-work-study' "$tmp/content-sitemap.xml"
-          grep -q 'memory-consolidation-mechanisms' "$tmp/content-sitemap.xml"
-
+          grep -q '<urlset' "$tmp/content-sitemap.xml"
+          ! grep -q '<url>' "$tmp/content-sitemap.xml"
           fetch '/sitemaps/taxonomy.xml' "$tmp/taxonomy-sitemap.xml"
-          for slug in "${clusters[@]}"; do grep -q "/sections/${slug}" "$tmp/taxonomy-sitemap.xml"; done
+          grep -q '<urlset' "$tmp/taxonomy-sitemap.xml"
+          ! grep -q '<url>' "$tmp/taxonomy-sitemap.xml"
+          fetch '/robots.txt' "$tmp/robots.txt"
+          grep -qi 'Disallow: /' "$tmp/robots.txt"
 
           grep -Eq 'page=2|الصفحة التالية' "$tmp/root.html"
           echo 'LIVE_COGNITIVE_COMPREHENSIVE_SMOKE=PASS'
           echo "LIVE_BASE=${base}"
           echo "CLUSTERS_TESTED=${#clusters[@]}"
           echo "CONTENT_SAMPLES_TESTED=${#samples[@]}"
+          echo 'STAGING_NOINDEX_GUARD=PASS'
           echo "TOTAL_RESPONSE_BYTES=$(du -cb "$tmp"/* | tail -1 | cut -f1)"
