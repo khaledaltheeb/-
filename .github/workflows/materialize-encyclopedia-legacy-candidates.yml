@@ -1,0 +1,99 @@
+name: Materialize Encyclopedia Legacy Candidates
+
+on:
+  push:
+    branches:
+      - 'agent/encyclopedia-disability-inclusion-foundation'
+    paths:
+      - 'data/encyclopedia/entity-registry-v1.json'
+      - 'data/encyclopedia/legacy-canonical-overrides-v1.json'
+      - 'scripts/build_encyclopedia_legacy_candidates.py'
+      - 'scripts/validate_encyclopedia_registry.py'
+      - '.github/workflows/materialize-encyclopedia-legacy-candidates.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'data/encyclopedia/entity-registry-v1.json'
+      - 'data/encyclopedia/legacy-canonical-overrides-v1.json'
+      - 'data/encyclopedia/generated/legacy-candidates-v1.json'
+      - 'scripts/build_encyclopedia_legacy_candidates.py'
+      - 'scripts/validate_encyclopedia_registry.py'
+      - '.github/workflows/materialize-encyclopedia-legacy-candidates.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout Rawafid V3
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
+
+      - name: Checkout legacy repository read-only
+        uses: actions/checkout@v7
+        with:
+          repository: khaledaltheeb/healthrenewal.org
+          ref: main
+          path: legacy-source
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Compile encyclopedia materialization scripts
+        run: python -m py_compile scripts/build_encyclopedia_legacy_candidates.py scripts/validate_encyclopedia_registry.py
+
+      - name: Materialize legacy 150-condition corpus
+        run: |
+          python scripts/build_encyclopedia_legacy_candidates.py legacy-source \
+            --curated data/encyclopedia/entity-registry-v1.json \
+            --overrides data/encyclopedia/legacy-canonical-overrides-v1.json \
+            --output data/encyclopedia/generated/legacy-candidates-v1.json
+
+      - name: Validate generated canonical registry
+        run: python scripts/validate_encyclopedia_registry.py data/encyclopedia/generated/legacy-candidates-v1.json
+
+      - name: Assert recovery invariants
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          path=Path('data/encyclopedia/generated/legacy-candidates-v1.json')
+          payload=json.loads(path.read_text(encoding='utf-8'))
+          assert payload['source_entity_count']==150
+          assert payload['legacy_batches']=={'v280':100,'v281':50}
+          assert 145 <= payload['canonical_candidate_count'] <= 150
+          assert payload['canonical_candidate_count'] == len(payload['entities'])
+          assert all(row['status']=='candidate' for row in payload['entities'])
+          assert all(row.get('legacy_sources') for row in payload['entities'])
+          assert all(row.get('evidence_priority') for row in payload['entities'])
+          assert not any(row.get('status') in {'approved','published'} for row in payload['entities'])
+          print(json.dumps({
+            'status':'passed',
+            'source_entities':payload['source_entity_count'],
+            'canonical_candidates':payload['canonical_candidate_count'],
+            'merged_sources':payload['merged_source_count'],
+          },ensure_ascii=False))
+          PY
+
+      - name: Commit deterministic recovered registry
+        if: github.event_name == 'push'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/encyclopedia/generated/legacy-candidates-v1.json
+          if git diff --cached --quiet; then
+            echo "Recovered registry already materialized."
+            exit 0
+          fi
+          git commit -m "Materialize encyclopedia legacy candidate registry"
+          git fetch origin "${{ github.ref_name }}"
+          git rebase "origin/${{ github.ref_name }}"
+          git push origin "HEAD:${{ github.ref_name }}"

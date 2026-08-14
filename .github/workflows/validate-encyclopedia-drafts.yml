@@ -1,0 +1,48 @@
+name: Validate Encyclopedia Drafts
+
+on:
+  push:
+    branches:
+      - 'agent/encyclopedia-disability-inclusion-foundation'
+    paths:
+      - 'data/encyclopedia/drafts/**'
+      - 'data/encyclopedia/research/batch-01-source-plan.json'
+      - 'scripts/validate_encyclopedia_draft.py'
+      - '.github/workflows/validate-encyclopedia-drafts.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'data/encyclopedia/drafts/**'
+      - 'data/encyclopedia/research/batch-01-source-plan.json'
+      - 'scripts/validate_encyclopedia_draft.py'
+      - '.github/workflows/validate-encyclopedia-drafts.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  draft-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - name: Compile draft validator
+        run: python -m py_compile scripts/validate_encyclopedia_draft.py
+      - name: Validate every encyclopedia scientific-review draft
+        run: |
+          set -euo pipefail
+          count=0
+          for draft in data/encyclopedia/drafts/*-v1.json; do
+            test -f "$draft"
+            echo "Validating $draft"
+            python scripts/validate_encyclopedia_draft.py \
+              "$draft" \
+              --plan data/encyclopedia/research/batch-01-source-plan.json
+            count=$((count+1))
+          done
+          test "$count" -gt 0
+          echo "Validated $count encyclopedia draft(s)."

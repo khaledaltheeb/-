@@ -1,0 +1,36 @@
+name: Validate Encyclopedia Foundation
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'data/encyclopedia/**'
+      - 'docs/editorial/ENCYCLOPEDIA_CONDITIONS_5000.md'
+      - 'scripts/validate_encyclopedia_registry.py'
+      - 'lib/encyclopedia.ts'
+      - 'app/encyclopedia/**'
+      - 'components/encyclopedia-*'
+      - '.github/workflows/validate-encyclopedia-foundation.yml'
+  push:
+    branches:
+      - 'agent/encyclopedia-disability-inclusion-foundation'
+    paths:
+      - 'data/encyclopedia/**'
+      - 'scripts/validate_encyclopedia_registry.py'
+      - '.github/workflows/validate-encyclopedia-foundation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  registry-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - name: Validate canonical entity registry
+        run: python scripts/validate_encyclopedia_registry.py data/encyclopedia/entity-registry-v1.json
