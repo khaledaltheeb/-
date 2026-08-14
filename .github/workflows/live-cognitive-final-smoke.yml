@@ -1,0 +1,89 @@
+name: Live Cognitive Final Smoke
+
+on:
+  push:
+    branches:
+      - agent/live-cognitive-final-smoke
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate live cognitive scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE="https://main-rawafid-platform-staging.khaledaltheeb.workers.dev"
+
+          fetch_code() {
+            curl -sS --retry 4 --retry-delay 2 --connect-timeout 15 --max-time 45 -o /tmp/body -w '%{http_code}' "$1"
+          }
+
+          code="$(fetch_code "$BASE/sections/cognitive-processes")"
+          test "$code" = "200"
+          grep -q 'العمليات المعرفية' /tmp/body
+          echo "COGNITIVE_SECTION=PASS"
+
+          code="$(fetch_code "$BASE/cognitive-lab")"
+          test "$code" = "200"
+          grep -q 'مختبر' /tmp/body
+          echo "COGNITIVE_LAB_ROOT=PASS"
+
+          mapfile -t slugs < <(grep -oE "slug: '[a-z0-9-]+'" lib/cognitive-lab/catalog.ts | sed -E "s/slug: '([^']+)'/\1/" | sort -u)
+          test "${#slugs[@]}" -eq 53
+          failed=0
+          for slug in "${slugs[@]}"; do
+            code="$(fetch_code "$BASE/cognitive-lab/$slug")"
+            if [ "$code" != "200" ]; then
+              echo "FAIL_ROUTE $slug HTTP=$code"
+              failed=1
+              continue
+            fi
+            if ! grep -q 'تعليمي غير تشخيصي' /tmp/body; then
+              echo "FAIL_MARKER $slug"
+              failed=1
+            fi
+          done
+          test "$failed" -eq 0
+          echo "COGNITIVE_LAB_ROUTES=${#slugs[@]}/53_PASS"
+
+          h1="$(mktemp)"
+          curl -sS --retry 4 --retry-delay 2 --connect-timeout 15 --max-time 45 -o /dev/null -D "$h1" "$BASE/cognitive-lab/associative-context-binding"
+          grep -Eq '^HTTP/[^ ]+ 308' "$h1"
+          grep -Eiq '^location: .*/cognitive-lab/associative-binding/?\r?$' "$h1"
+
+          h2="$(mktemp)"
+          curl -sS --retry 4 --retry-delay 2 --connect-timeout 15 --max-time 45 -o /dev/null -D "$h2" "$BASE/cognitive-lab/prospective-memory-cues"
+          grep -Eq '^HTTP/[^ ]+ 308' "$h2"
+          grep -Eiq '^location: .*/cognitive-lab/prospective-memory/?\r?$' "$h2"
+          echo "LEGACY_REDIRECTS=2/2_PASS"
+
+          code="$(fetch_code "$BASE/content/visuospatial-working-memory-work-study")"
+          test "$code" = "200"
+          grep -q 'FAQPage' /tmp/body
+          echo "COGNITIVE_ARTICLE_SAMPLE=PASS"
+
+          code="$(fetch_code "$BASE/search?q=%D8%A7%D9%84%D8%A7%D9%86%D8%AA%D8%A8%D8%A7%D9%87%20%D8%A7%D9%84%D9%85%D8%B3%D8%AA%D9%85%D8%B1")"
+          test "$code" = "200"
+          grep -q 'الانتباه المستمر' /tmp/body
+          echo "COGNITIVE_SEARCH=PASS"
+
+          code="$(fetch_code "$BASE/robots.txt")"
+          test "$code" = "200"
+          grep -q 'Disallow: /' /tmp/body
+          echo "STAGING_ROBOTS_NOINDEX=PASS"
+
+          code="$(fetch_code "$BASE/sitemaps/cognitive-lab.xml")"
+          test "$code" = "200"
+          if grep -q '<loc>' /tmp/body; then
+            echo "FAIL_STAGING_SITEMAP_EXPOSED_URLS"
+            exit 1
+          fi
+          echo "STAGING_COGNITIVE_SITEMAP_NOINDEX=PASS"
+
+          echo "LIVE_COGNITIVE_FINAL_SMOKE=PASS"
