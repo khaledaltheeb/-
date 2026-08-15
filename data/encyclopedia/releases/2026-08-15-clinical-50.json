@@ -1,0 +1,12 @@
+{
+  "release_id": "psych-encyclopedia-2026-08-15-clinical-50",
+  "release_date": "2026-08-15",
+  "expected_batch_files": 25,
+  "expected_records": 50,
+  "author_display_name": "فريق روافد التحريري",
+  "minimum_body_words": 1000,
+  "canonical_prefix": "/encyclopedia/",
+  "index_on_publish": true,
+  "human_reviewer_claimed": false,
+  "notes": "Production release manifest for the 50 audited clinical encyclopedia drafts. Source batches remain draft/noindex; production rows are published by the guarded release pipeline only."
+}
