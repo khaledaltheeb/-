@@ -6,11 +6,13 @@ on:
     paths:
       - 'scripts/legacy_content_extract.py'
       - 'scripts/legacy_destination_coverage.py'
+      - 'scripts/apply_legacy_content_adoptions.py'
       - 'scripts/quick_info_legacy_audit.py'
       - 'scripts/merge_legacy_inventories.py'
       - 'scripts/library_migration_audit.py'
       - 'scripts/library_legacy_map_validate.py'
       - 'scripts/library_editorial_batch_validate.py'
+      - 'data/migration-batches/legacy-content-adoptions-v1.json'
       - 'data/migration-batches/library-legacy-canonical-map-v1.json'
       - 'data/migration-batches/library-research-foundations-v1.json'
       - 'docs/LIBRARY-MIGRATION-PLAN.md'
@@ -94,6 +96,16 @@ jobs:
         run: >-
           python scripts/legacy_destination_coverage.py
           artifacts/legacy-content-inventory-complete.json
+
+      - name: Apply verified content adoptions
+        working-directory: rawafid-v3
+        env:
+          RAWAFID_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
+          RAWAFID_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
+        run: >-
+          python scripts/apply_legacy_content_adoptions.py
+          artifacts/legacy-destination-coverage.json
+          data/migration-batches/legacy-content-adoptions-v1.json
 
       - name: Upload migration inventory
         if: always()
