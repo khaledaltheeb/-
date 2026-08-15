@@ -49,10 +49,8 @@ jobs:
       - name: Validate production release plan
         run: node scripts/publish_psych_encyclopedia.mjs
 
-      - name: Publish 50 clinical encyclopedia records to Supabase
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      - name: Verify production Supabase credential is configured
         env:
-          SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
           SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
@@ -60,7 +58,15 @@ jobs:
             echo '::error::A production Supabase secret is not configured in GitHub Actions.'
             exit 1
           fi
-          node scripts/publish_psych_encyclopedia.mjs --apply
+          echo 'Production Supabase credential is configured.'
+
+      - name: Publish 50 clinical encyclopedia records to Supabase
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node scripts/publish_psych_encyclopedia.mjs --apply
 
       - name: Verify production encyclopedia routes
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
