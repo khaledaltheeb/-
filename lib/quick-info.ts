@@ -58,6 +58,16 @@ function asString(value: unknown) {
   return typeof value === 'string' ? value.trim() : '';
 }
 
+function publicationApproved(schema: unknown): boolean {
+  const record = asRecord(schema);
+  return Boolean(
+    record
+    && asString(record.page_role) === 'quick-info'
+    && record.publication_ready === true
+    && record.editorial_review_required === false,
+  );
+}
+
 export function quickInfoContentSlug(routeSlug: string) {
   return `quick-info-${routeSlug}`;
 }
@@ -78,7 +88,7 @@ export async function getQuickInfoRecord(routeSlug: string): Promise<QuickInfoRe
 
   const record = data as QuickInfoRecord | null;
   if (!record) return null;
-  if (asString(asRecord(record.schema_json)?.page_role) !== 'quick-info') return null;
+  if (!publicationApproved(record.schema_json)) return null;
   const expectedCanonical = `/quick-info/${routeSlug}/`;
   if (record.canonical_url && record.canonical_url !== expectedCanonical) return null;
   return record;
@@ -97,8 +107,7 @@ export async function getQuickInfoItems(limit = 500): Promise<QuickInfoItem[]> {
     .limit(limit);
 
   return (Array.isArray(data) ? data : []).flatMap((row): QuickInfoItem[] => {
-    const schema = asRecord(row.schema_json);
-    if (asString(schema?.page_role) !== 'quick-info') return [];
+    if (!publicationApproved(row.schema_json)) return [];
     const routeSlug = quickInfoRouteSlug(asString(row.slug));
     if (!routeSlug || !/^[a-z0-9][a-z0-9-]*$/.test(routeSlug)) return [];
     const canonicalUrl = asString(row.canonical_url) || `/quick-info/${routeSlug}/`;
