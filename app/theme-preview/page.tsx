@@ -5,7 +5,7 @@ import PlatformIcon from '@/components/platform-icon';
 import { buildSeoMetadata } from '@/lib/seo';
 
 // Compatibility marker for the original quality contract: Design System V3.
-// The rendered preview itself now validates the central Design System V5 layer.
+// The rendered preview validates the institutional Design System V5 layer.
 
 export const metadata = buildSeoMetadata({
   title: 'معاينة الثيم',
@@ -16,7 +16,7 @@ export const metadata = buildSeoMetadata({
 });
 
 const swatches = [
-  ['Rawafid', '#087f7b'], ['Deep Teal', '#053f46'], ['Turquoise', '#16c6c7'], ['Gold', '#d8a536'], ['Blue', '#3d78bd'], ['Lilac', '#7564c9'], ['Coral', '#d8604c'], ['Green', '#4f9d69'],
+  ['Rawafid', '#0b7f7c'], ['Deep Teal', '#063f49'], ['Aqua', '#43c8b1'], ['Gold', '#e6b650'], ['Sky', '#67a8d8'], ['Lilac', '#8274c7'], ['Coral', '#df745f'], ['Paper', '#fffefb'],
 ];
 
 export default function ThemePreviewPage() {
@@ -25,7 +25,7 @@ export default function ThemePreviewPage() {
     <main className="site-shell rawafid-home">
       <section className="rawafid-hero" style={{ minHeight: 'auto' }}>
         <div className="rawafid-hero-copy">
-          <span className="rawafid-kicker">Central Design System V5</span>
+          <span className="rawafid-kicker">Institutional Design System V5</span>
           <h1>معاينة ثيم <em>منصة روافد</em></h1>
           <p>هذه الصفحة لا تحتوي محتوى المنصة. وظيفتها اختبار التناسق البصري، التباين، العناصر، الحالات والاستجابة للأجهزة المختلفة قبل تعميم أي تغيير بصري على بقية المنصة.</p>
           <div className="rawafid-directory-actions"><button className="primary-action" type="button">زر أساسي</button><button className="secondary-action" type="button">زر ثانوي</button><a className="button" href="#forms">رابط بإطار</a></div>
@@ -40,6 +40,22 @@ export default function ThemePreviewPage() {
         <div className="rawafid-section-head"><div className="rawafid-section-title"><span>الألوان</span><h2>لوحة منصة روافد المؤسسية</h2><p>التركواز هوية رئيسية ثابتة، والألوان الداعمة تستخدم بإشارات مدروسة للقطاعات والحالات، لا كبدائل لهوية المنصة.</p></div></div>
         <div className="theme-preview-swatches">
           {swatches.map(([name,color]) => <div className="theme-preview-swatch" key={name}><span style={{ background: color }} /><strong>{name}</strong><code>{color}</code></div>)}
+        </div>
+      </section>
+
+      <section className="rawafid-section">
+        <div className="theme-preview-type-specimen">
+          <div>
+            <span className="rawafid-kicker">الخطوط والإيقاع</span>
+            <h2>قراءة عربية مريحة على كل شاشة</h2>
+            <p>يستخدم النظام خط Noto Sans Arabic المحمّل بآلية Next.js، مع مقياس قراءة ثابت وتسلسل عناوين واضح وتباعد يحافظ على التركيز في الصفحات الطويلة والواجهات المهنية.</p>
+          </div>
+          <div className="theme-preview-metrics" aria-label="مقاييس القراءة والوصولية">
+            <div><strong>72 حرفًا</strong><span>مقياس القراءة الأقصى</span></div>
+            <div><strong>44 بكسل</strong><span>الحد الأدنى لهدف اللمس</span></div>
+            <div><strong>RTL</strong><span>اتجاه عربي أصيل</span></div>
+            <div><strong>AA+</strong><span>تباين وفوكس واضحان</span></div>
+          </div>
         </div>
       </section>
 

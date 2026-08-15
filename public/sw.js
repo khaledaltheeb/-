@@ -1,5 +1,5 @@
-const CACHE_NAME = 'rawafid-shell-v2';
-const PRECACHE = ['/', '/offline', '/manifest.webmanifest', '/icons/rawafid-app.svg'];
+const CACHE_NAME = 'rawafid-shell-v6';
+const PRECACHE = ['/offline', '/manifest.webmanifest', '/icons/rawafid-app.svg?v=6'];
 const PRIVATE_PREFIXES = [
   '/account', '/admin', '/specialist', '/center', '/messages', '/appointments', '/notifications',
   '/auth', '/login', '/forgot-password', '/reset-password', '/community/join', '/api'
@@ -39,17 +39,14 @@ self.addEventListener('fetch', (event) => {
   }
 
   if (['style', 'script', 'image', 'font'].includes(request.destination)) {
-    event.respondWith(
-      caches.match(request).then((cached) => {
-        if (cached) return cached;
-        return fetch(request).then((response) => {
-          if (response.ok && response.type === 'basic') {
-            const copy = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
-          }
-          return response;
-        });
-      })
-    );
+    const responsePromise = caches.match(request).then((cached) => cached || fetch(request));
+    const cacheWrite = responsePromise.then(async (response) => {
+      if (!response || !response.ok || response.type !== 'basic') return;
+      if (await caches.match(request)) return;
+      const cache = await caches.open(CACHE_NAME);
+      await cache.put(request, response.clone());
+    });
+    event.respondWith(responsePromise);
+    event.waitUntil(cacheWrite.catch(() => undefined));
   }
 });

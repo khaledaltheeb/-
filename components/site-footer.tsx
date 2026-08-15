@@ -1,34 +1,45 @@
+import RawafidBrand from '@/components/rawafid-brand';
+
 const groups = [
   {
-    title: 'منصة روافد',
+    id: 'knowledge',
+    title: 'المعرفة',
     links: [
-      { href: '/about', label: 'عن المنصة' },
-      { href: '/search', label: 'البحث' },
-      { href: '/cognitive-lab', label: 'مختبر القدرات' },
-      { href: '/specialists', label: 'دليل المختصين' },
-      { href: '/centers', label: 'دليل المراكز' },
+      { href: '/sections', label: 'جميع الأقسام' },
+      { href: '/encyclopedia/', label: 'الموسوعة' },
+      { href: '/evidence-guides/', label: 'الأدلة العلمية' },
+      { href: '/cognitive-lab', label: 'المختبر المعرفي' },
     ],
   },
   {
+    id: 'support',
+    title: 'الخدمات والدعم',
+    links: [
+      { href: '/specialists', label: 'دليل المختصين' },
+      { href: '/centers', label: 'دليل المراكز' },
+      { href: '/search', label: 'البحث المتقدم' },
+      { href: '/experiences/', label: 'شاركنا تجربتك' },
+    ],
+  },
+  {
+    id: 'professional',
     title: 'المشاركة المهنية',
     links: [
       { href: '/join', label: 'الانضمام المهني' },
       { href: '/join/specialist', label: 'التقدم كمختص' },
       { href: '/join/center', label: 'تسجيل مركز' },
       { href: '/community', label: 'المتدربون والمتطوعون' },
-      { href: '/community/join', label: 'الانضمام للمجتمع' },
-      { href: '/specialist', label: 'بوابة المختص' },
-      { href: '/center', label: 'بوابة المركز' },
     ],
   },
   {
-    title: 'الثقة والسياسات',
+    id: 'trust',
+    title: 'الثقة والحقوق',
     links: [
-      { href: '/medical-review-policy', label: 'سياسة المراجعة العلمية' },
+      { href: '/medical-review-policy', label: 'المراجعة العلمية' },
       { href: '/editorial-policy', label: 'السياسة التحريرية' },
-      { href: '/disclaimer', label: 'إخلاء المسؤولية والتنبيهات' },
       { href: '/privacy', label: 'الخصوصية' },
       { href: '/terms', label: 'شروط الاستخدام' },
+      { href: '/disclaimer', label: 'إخلاء المسؤولية' },
     ],
   },
 ];
@@ -38,21 +49,34 @@ export default function SiteFooter() {
     <footer className="site-footer">
       <div className="site-footer-inner">
         <div className="footer-brand-block">
-          <a className="brand footer-brand" href="/"><span className="brand-mark" aria-hidden="true"><RawafidMark /></span><span className="brand-copy"><strong>منصة روافد</strong><small>Rawafid Platform</small></span></a>
-          <p>منصة عربية مؤسسية للمعرفة والخدمات في الصحة النفسية والتعافي والدمج والتمكين، مبنية على الثقة، الوصول الآمن، والمراجعة المنهجية.</p>
-          <span className="footer-trust-note">المحتوى التثقيفي لا يحل محل التقييم أو التشخيص أو العلاج المهني الفردي.</span>
+          <RawafidBrand className="footer-brand" />
+          <p>منصة عربية مؤسسية تربط المعرفة الموثوقة بالأدلة العملية والخدمات المهنية في الصحة النفسية والتعافي والدمج والتمكين.</p>
+          <form className="footer-search" action="/search" method="get" role="search">
+            <label className="sr-only" htmlFor="footer-search-input">البحث في منصة روافد</label>
+            <input id="footer-search-input" name="q" type="search" placeholder="ابحث عن معلومة أو خدمة" maxLength={120} enterKeyHint="search" />
+            <button type="submit">بحث</button>
+          </form>
+          <div className="footer-trust-list" aria-label="معايير الثقة">
+            <span>مراجعة منهجية</span>
+            <span>مصادر قابلة للتتبع</span>
+            <span>خصوصية ووصولية</span>
+          </div>
+          <span className="footer-trust-note">المحتوى للتثقيف العام ولا يحل محل التقييم أو التشخيص أو العلاج المهني الفردي.</span>
         </div>
-        <div className="footer-groups">
+        <nav className="footer-groups" aria-label="روابط تذييل المنصة">
           {groups.map((group) => (
-            <section key={group.title} aria-labelledby={`footer-${group.title}`}>
-              <h2 id={`footer-${group.title}`}>{group.title}</h2>
+            <section key={group.id} aria-labelledby={'footer-' + group.id}>
+              <h2 id={'footer-' + group.id}>{group.title}</h2>
               <div>{group.links.map((link) => <a key={link.href} href={link.href}>{link.label}</a>)}</div>
             </section>
           ))}
-        </div>
+        </nav>
       </div>
-      <div className="footer-bottom"><span>© {new Date().getFullYear()} منصة روافد</span><span>تجربة عربية أصيلة · إتاحة رقمية · خصوصية بالتصميم</span></div>
+      <div className="footer-bottom">
+        <span>© {new Date().getFullYear()} منصة روافد. جميع الحقوق محفوظة.</span>
+        <span>هوية عربية · متوافق مع الهاتف · وصولية وخصوصية منذ التصميم</span>
+        <a className="back-to-top" href="#top">العودة إلى الأعلى ↑</a>
+      </div>
     </footer>
   );
 }
-import RawafidMark from '@/components/rawafid-mark';
