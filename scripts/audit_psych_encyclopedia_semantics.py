@@ -111,21 +111,21 @@ def has_section(headings: list[str], label: str) -> bool:
     if label == "definition":
         return has_phrase(headings, ("ما هو", "ما هي", "التعريف", "ماذا يعني"))
     if label == "symptoms":
-        return has_stem(headings, ("عرض", "اعراض", "علام", "يظهر", "تبدو"))
+        return has_stem(headings, ("عرض", "اعراض", "علام", "مظهر", "يظهر", "يبدو", "تبدو", "صورة الحالة"))
     if label == "causes":
         return has_stem(headings, ("سبب", "اسباب", "خطورة", "عوامل", "لماذا", "يزيد"))
     if label == "assessment":
         return has_stem(headings, ("تقييم", "تشخيص"))
     if label == "differential":
-        return has_stem(headings, ("تشابه", "مشابه", "مصاحب", "فرق", "يختلف", "تمييز", "تفريق", "استبعاد"))
+        return has_stem(headings, ("شبه", "مشابه", "مصاحب", "فرق", "اختلاف", "يختلف", "تمييز", "تفريق", "استبعاد"))
     if label == "treatment":
         return has_stem(headings, ("علاج", "دعم", "تدخل", "رعاية"))
     if label == "help":
         normalized = [normalize(h) for h in headings]
         for heading in normalized:
-            if any(stem in heading for stem in ("طوار", "عاجل", "سلام", "مساعدة")):
+            if any(stem in heading for stem in ("طوار", "عاجل", "سلام", "مساعدة", "خطر", "اسعاف")):
                 return True
-            if "متى" in heading and any(stem in heading for stem in ("راجع", "طلب", "اطلب", "احتاج", "يحتاج", "تحتاج", "يجب", "ينبغي")):
+            if "متى" in heading and any(stem in heading for stem in ("راجع", "مراجع", "طلب", "اطلب", "احتاج", "يحتاج", "تحتاج", "يجب", "ينبغي", "تقييم", "مختص", "طبيب")):
                 return True
         return False
     return False
