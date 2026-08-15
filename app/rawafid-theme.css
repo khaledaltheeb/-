@@ -34,6 +34,3 @@ html{scroll-behavior:smooth;text-rendering:optimizeLegibility;-webkit-text-size-
 @media(max-width:430px){.rawafid-quick-links a{min-height:36px;padding-inline:10px}.rawafid-visual-grid{grid-template-columns:1fr}.rawafid-hero-visual{padding:20px}.rawafid-directory-band{padding:20px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}
 @media print{.site-header,.site-footer,.mobile-bottom-nav,.mobile-menu,.header-search{display:none!important}body{background:#fff!important;color:#000!important}a{color:#000;text-decoration:underline}}
-
-/* V5 is intentionally last so it can refine the stable V4 contract without disturbing legacy module order. */
-@import './institutional-v5.css';
