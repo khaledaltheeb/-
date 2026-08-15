@@ -13,3 +13,5 @@ out/
 .DS_Store
 coverage/
 *.tsbuildinfo
+public/encyclopedia-data/
+bundled/

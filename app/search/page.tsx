@@ -5,7 +5,10 @@ import SiteFooter from '@/components/site-footer';
 import { createClient } from '@/lib/supabase/server';
 import { searchCognitivePages } from '@/lib/cognitive-program';
 import { getQuickInfoItems, quickInfoContentSlug } from '@/lib/quick-info';
-import { PSYCH_ENCYCLOPEDIA_RELEASE_RECORDS } from '@/lib/psych-encyclopedia-release';
+import {
+  getPsychEncyclopediaReleaseIndex,
+  type PsychEncyclopediaReleaseIndexRecord,
+} from '@/lib/psych-encyclopedia-release';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,7 +42,6 @@ const labels: Record<T, string> = {
   community: 'المتدربون والمتطوعون',
 };
 const allowed = new Set(Object.keys(labels));
-const psychReleaseSlugs = new Set(PSYCH_ENCYCLOPEDIA_RELEASE_RECORDS.map((record) => record.slug));
 
 function normalizeSearch(value: string) {
   return value
@@ -52,20 +54,20 @@ function normalizeSearch(value: string) {
     .replace(/\s+/gu, ' ');
 }
 
-function searchPsychEncyclopedia(query: string, limit = 75): R[] {
+function searchPsychEncyclopedia(query: string, records: PsychEncyclopediaReleaseIndexRecord[], limit = 75): R[] {
   const normalizedQuery = normalizeSearch(query);
   const queryTokens = normalizedQuery.split(' ').filter(Boolean);
   if (!normalizedQuery || queryTokens.length === 0) return [];
 
-  return PSYCH_ENCYCLOPEDIA_RELEASE_RECORDS.flatMap((record): R[] => {
+  return records.flatMap((record): R[] => {
     const title = normalizeSearch(record.title);
     const primary = normalizeSearch(record.primary_keyword ?? '');
     const secondary = record.secondary_keywords.map(normalizeSearch);
     const aliases = record.search_aliases.map(normalizeSearch);
     const semantic = record.semantic_terms.map(normalizeSearch);
+    const intentQuestions = record.search_intent_questions.map(normalizeSearch);
     const excerpt = normalizeSearch(record.excerpt ?? '');
-    const body = normalizeSearch(record.body_text ?? '');
-    const searchable = [title, primary, ...secondary, ...aliases, ...semantic, excerpt, body].join(' ');
+    const searchable = [title, primary, ...secondary, ...aliases, ...semantic, ...intentQuestions, excerpt].join(' ');
     if (!queryTokens.every((token) => searchable.includes(token))) return [];
 
     let score = 100;
@@ -76,8 +78,8 @@ function searchPsychEncyclopedia(query: string, limit = 75): R[] {
     else if ([...secondary, ...aliases].some((value) => value === normalizedQuery)) score = 205;
     else if ([...secondary, ...aliases].some((value) => value.includes(normalizedQuery))) score = 185;
     else if (semantic.some((value) => value.includes(normalizedQuery))) score = 165;
+    else if (intentQuestions.some((value) => value.includes(normalizedQuery))) score = 155;
     else if (excerpt.includes(normalizedQuery)) score = 145;
-    else if (body.includes(normalizedQuery)) score = 115;
     score += Math.min(queryTokens.length * 2, 12);
 
     return [{
@@ -104,6 +106,13 @@ export default async function SearchPage({ searchParams }: { searchParams: SP })
     let dbData: R[] = [];
     let dbError = false;
     let approvedQuickInfo: Awaited<ReturnType<typeof getQuickInfoItems>> = [];
+    let psychIndex: PsychEncyclopediaReleaseIndexRecord[] = [];
+
+    try {
+      psychIndex = await getPsychEncyclopediaReleaseIndex();
+    } catch {
+      psychIndex = [];
+    }
 
     try {
       const s = await createClient();
@@ -123,6 +132,7 @@ export default async function SearchPage({ searchParams }: { searchParams: SP })
       }
     }
 
+    const psychReleaseSlugs = new Set(psychIndex.map((record) => record.slug));
     const approvedByStoredSlug = new Map(
       approvedQuickInfo.map((item) => [quickInfoContentSlug(item.routeSlug), item]),
     );
@@ -156,7 +166,7 @@ export default async function SearchPage({ searchParams }: { searchParams: SP })
       score: 150 - i / 100,
     }));
 
-    const psych = searchPsychEncyclopedia(q, 75);
+    const psych = searchPsychEncyclopedia(q, psychIndex, 75);
     const by = new Map<string, R>();
     for (const x of [...db, ...generated, ...psych]) {
       const old = by.get(x.destination);
