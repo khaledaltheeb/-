@@ -1,20 +1,27 @@
 {
   "version": 2,
   "status": "passed",
-  "source_draft_count": 3,
-  "generated_review_count": 3,
-  "unique_canonical_count": 3,
-  "aggregate_source_domain_count": 7,
+  "source_draft_count": 7,
+  "generated_review_count": 7,
+  "unique_canonical_count": 7,
+  "aggregate_source_domain_count": 14,
   "aggregate_source_domains": [
+    "aaidd.org",
+    "asha.org",
     "cdc.gov",
     "medlineplus.gov",
+    "ncbi.nlm.nih.gov",
     "nice.org.uk",
+    "nichd.nih.gov",
+    "nidcd.nih.gov",
+    "orpha.net",
     "publications.aap.org",
     "pubmed.ncbi.nlm.nih.gov",
+    "rarediseases.info.nih.gov",
     "unesco.org",
     "who.int"
   ],
-  "max_pairwise_body_5gram_jaccard": 0.0002,
+  "max_pairwise_body_5gram_jaccard": 0.00185,
   "similarity_threshold": 0.35,
   "publication_ready": false,
   "scientific_review_required": true,
@@ -87,6 +94,100 @@
       "source_domain_count": 5,
       "source_draft_sha256": "c2d482fea015c7ad59b651760c45c21edfcc8ed1299c3671d75611ce67ec9079",
       "generated_records_sha256": "c2f92e1894b4733dc362830cc1c44573f55584c9df01335f52edc7a8ac3899ef"
+    },
+    {
+      "slug": "fragile-x-syndrome",
+      "source_review_slug": "encyclopedia-fragile-x-syndrome",
+      "route_slug": "fragile-x-syndrome",
+      "title": "متلازمة الكروموسوم X الهش",
+      "canonical_url": "/encyclopedia/fragile-x-syndrome/",
+      "primary_keyword": "متلازمة X الهش",
+      "status": "scientific_review",
+      "robots_index": false,
+      "body_words": 2508,
+      "faq_count": 10,
+      "reference_count": 6,
+      "source_domains": [
+        "cdc.gov",
+        "medlineplus.gov",
+        "ncbi.nlm.nih.gov",
+        "nichd.nih.gov",
+        "rarediseases.info.nih.gov",
+        "unesco.org"
+      ],
+      "source_domain_count": 6,
+      "source_draft_sha256": "f1cf8950877b76964bb2059560423246b80ae013ea0f2e025d90d88bfb93525c",
+      "generated_records_sha256": "91234f592275879eaef5d038e14fb271a24f75bd5b572fdbd688353ff3b86e0d"
+    },
+    {
+      "slug": "hearing-loss",
+      "source_review_slug": "encyclopedia-hearing-loss",
+      "route_slug": "hearing-loss",
+      "title": "فقدان السمع وضعفه",
+      "canonical_url": "/encyclopedia/hearing-loss/",
+      "primary_keyword": "فقدان السمع",
+      "status": "scientific_review",
+      "robots_index": false,
+      "body_words": 2445,
+      "faq_count": 10,
+      "reference_count": 6,
+      "source_domains": [
+        "asha.org",
+        "cdc.gov",
+        "nidcd.nih.gov",
+        "unesco.org",
+        "who.int"
+      ],
+      "source_domain_count": 5,
+      "source_draft_sha256": "16b5597c2aa07907d0f616324f0ba987eac87e7095f7e73ac29ba888e925a8a5",
+      "generated_records_sha256": "22f7af83f2c9975e5398af19ccb4d9e7ae217370b13c6a1f4e0ac653bdfcf75b"
+    },
+    {
+      "slug": "intellectual-developmental-disorder",
+      "source_review_slug": "encyclopedia-intellectual-developmental-disorder",
+      "route_slug": "intellectual-developmental-disorder",
+      "title": "اضطراب النمو الذهني (الإعاقة الذهنية)",
+      "canonical_url": "/encyclopedia/intellectual-developmental-disorder/",
+      "primary_keyword": "اضطراب النمو الذهني",
+      "status": "scientific_review",
+      "robots_index": false,
+      "body_words": 2297,
+      "faq_count": 10,
+      "reference_count": 7,
+      "source_domains": [
+        "aaidd.org",
+        "cdc.gov",
+        "publications.aap.org",
+        "unesco.org",
+        "who.int"
+      ],
+      "source_domain_count": 5,
+      "source_draft_sha256": "bc5bec2dae3da6d108aaec4f3da99357e7c09da0166b497cb9c08e067cdb0801",
+      "generated_records_sha256": "bf45cf93148fe7a98a3bfa4fff0d243b301057aa16077f3bc9dfd193892a75a5"
+    },
+    {
+      "slug": "rett-syndrome",
+      "source_review_slug": "encyclopedia-rett-syndrome",
+      "route_slug": "rett-syndrome",
+      "title": "متلازمة ريت",
+      "canonical_url": "/encyclopedia/rett-syndrome/",
+      "primary_keyword": "متلازمة ريت",
+      "status": "scientific_review",
+      "robots_index": false,
+      "body_words": 2387,
+      "faq_count": 10,
+      "reference_count": 6,
+      "source_domains": [
+        "medlineplus.gov",
+        "ncbi.nlm.nih.gov",
+        "nichd.nih.gov",
+        "orpha.net",
+        "rarediseases.info.nih.gov",
+        "unesco.org"
+      ],
+      "source_domain_count": 6,
+      "source_draft_sha256": "a6a548563c7ce102f64e80fbf6cfd39e8411a5c2dbde34dd475f78438b7fdb44",
+      "generated_records_sha256": "32c2e0feed211dc03009650469f79fcaf13d3302f72380edb5d36099889b311a"
     }
   ],
   "pairwise_similarity": [
@@ -101,8 +202,98 @@
       "body_5gram_jaccard": 0.0
     },
     {
+      "left": "autism-spectrum-disorder",
+      "right": "fragile-x-syndrome",
+      "body_5gram_jaccard": 0.0
+    },
+    {
+      "left": "autism-spectrum-disorder",
+      "right": "hearing-loss",
+      "body_5gram_jaccard": 0.0
+    },
+    {
+      "left": "autism-spectrum-disorder",
+      "right": "intellectual-developmental-disorder",
+      "body_5gram_jaccard": 0.00041
+    },
+    {
+      "left": "autism-spectrum-disorder",
+      "right": "rett-syndrome",
+      "body_5gram_jaccard": 0.0006
+    },
+    {
       "left": "cerebral-palsy",
       "right": "down-syndrome",
+      "body_5gram_jaccard": 0.0
+    },
+    {
+      "left": "cerebral-palsy",
+      "right": "fragile-x-syndrome",
+      "body_5gram_jaccard": 0.0
+    },
+    {
+      "left": "cerebral-palsy",
+      "right": "hearing-loss",
+      "body_5gram_jaccard": 0.00042
+    },
+    {
+      "left": "cerebral-palsy",
+      "right": "intellectual-developmental-disorder",
+      "body_5gram_jaccard": 0.00022
+    },
+    {
+      "left": "cerebral-palsy",
+      "right": "rett-syndrome",
+      "body_5gram_jaccard": 0.0
+    },
+    {
+      "left": "down-syndrome",
+      "right": "fragile-x-syndrome",
+      "body_5gram_jaccard": 0.0
+    },
+    {
+      "left": "down-syndrome",
+      "right": "hearing-loss",
+      "body_5gram_jaccard": 0.0
+    },
+    {
+      "left": "down-syndrome",
+      "right": "intellectual-developmental-disorder",
+      "body_5gram_jaccard": 0.00068
+    },
+    {
+      "left": "down-syndrome",
+      "right": "rett-syndrome",
+      "body_5gram_jaccard": 0.0
+    },
+    {
+      "left": "fragile-x-syndrome",
+      "right": "hearing-loss",
+      "body_5gram_jaccard": 0.00061
+    },
+    {
+      "left": "fragile-x-syndrome",
+      "right": "intellectual-developmental-disorder",
+      "body_5gram_jaccard": 0.00084
+    },
+    {
+      "left": "fragile-x-syndrome",
+      "right": "rett-syndrome",
+      "body_5gram_jaccard": 0.00185
+    },
+    {
+      "left": "hearing-loss",
+      "right": "intellectual-developmental-disorder",
+      "body_5gram_jaccard": 0.0
+    },
+    {
+      "left": "hearing-loss",
+      "right": "rett-syndrome",
+      "body_5gram_jaccard": 0.0
+    },
+    {
+      "left": "intellectual-developmental-disorder",
+      "right": "rett-syndrome",
       "body_5gram_jaccard": 0.0
     }
   ],
