@@ -5,7 +5,7 @@ import PlatformIcon from '@/components/platform-icon';
 import { buildSeoMetadata } from '@/lib/seo';
 
 // Compatibility marker for the original quality contract: Design System V3.
-// The rendered preview itself now validates the central Design System V4 layer.
+// The rendered preview validates the institutional Design System V5 layer.
 
 export const metadata = buildSeoMetadata({
   title: 'معاينة الثيم',
@@ -16,7 +16,7 @@ export const metadata = buildSeoMetadata({
 });
 
 const swatches = [
-  ['Rawafid', '#0b8f92'], ['Deep Teal', '#064f50'], ['Turquoise', '#16c6c7'], ['Gold', '#f4b942'], ['Blue', '#3d78bd'], ['Lilac', '#7564c9'], ['Coral', '#d8604c'], ['Green', '#4f9d69'],
+  ['Rawafid', '#0b7f7c'], ['Deep Teal', '#063f49'], ['Aqua', '#43c8b1'], ['Gold', '#e6b650'], ['Sky', '#67a8d8'], ['Lilac', '#8274c7'], ['Coral', '#df745f'], ['Paper', '#fffefb'],
 ];
 
 export default function ThemePreviewPage() {
@@ -25,7 +25,7 @@ export default function ThemePreviewPage() {
     <main className="site-shell rawafid-home">
       <section className="rawafid-hero" style={{ minHeight: 'auto' }}>
         <div className="rawafid-hero-copy">
-          <span className="rawafid-kicker">Central Design System V4</span>
+          <span className="rawafid-kicker">Institutional Design System V5</span>
           <h1>معاينة ثيم <em>منصة روافد</em></h1>
           <p>هذه الصفحة لا تحتوي محتوى المنصة. وظيفتها اختبار التناسق البصري، التباين، العناصر، الحالات والاستجابة للأجهزة المختلفة قبل تعميم أي تغيير بصري على بقية المنصة.</p>
           <div className="rawafid-directory-actions"><button className="primary-action" type="button">زر أساسي</button><button className="secondary-action" type="button">زر ثانوي</button><a className="button" href="#forms">رابط بإطار</a></div>
