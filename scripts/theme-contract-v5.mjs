@@ -9,6 +9,9 @@ const fail = (message) => { console.error(`THEME V5 CONTRACT FAILED: ${message}`
 const layout = read('app/layout.tsx');
 const header = read('components/site-header.tsx');
 const footer = read('components/site-footer.tsx');
+const brand = read('components/rawafid-brand.tsx');
+const manifest = read('public/manifest.webmanifest');
+const serviceWorker = read('public/sw.js');
 const home = read('app/page.tsx');
 const theme = read('app/rawafid-theme.css');
 const adminLayout = read('app/admin/layout.tsx');
@@ -20,7 +23,7 @@ if (!layout.includes("'./rawafid-theme.css'")) fail('root layout must import the
 const directCssImports = [...layout.matchAll(/^import\s+["'](\.\/[^"']+\.css)["'];?\s*$/gm)].map((match) => match[1]);
 if (directCssImports.length !== 1 || directCssImports[0] !== './rawafid-theme.css') fail('root layout must keep one global CSS entry point');
 
-for (const file of ['components/rawafid-mark.tsx', 'lib/public-content.ts', 'lib/content-templates.ts', 'app/admin/verification/page.tsx']) {
+for (const file of ['components/rawafid-mark.tsx', 'components/rawafid-brand.tsx', 'lib/public-content.ts', 'lib/content-templates.ts', 'app/admin/verification/page.tsx']) {
   if (!exists(file)) fail(`missing V5 foundation ${file}`);
 }
 
@@ -28,9 +31,10 @@ for (const marker of ['Rawafid Institutional Theme V5', '.site-assurance-bar', '
   if (!theme.includes(marker)) fail(`central theme missing ${marker}`);
 }
 
-if (!header.includes('RawafidMark') || !footer.includes('RawafidMark')) fail('public chrome must use the unified Rawafid mark');
-for (const label of ['اكتشف', 'القطاعات', 'المختصون والمراكز', 'الأدوات', 'المعرفة']) {
-  if (!header.includes(label)) fail(`institutional navigation missing ${label}`);
+if (!brand.includes('RawafidMark') || !brand.includes('معرفة تقود إلى أثر')) fail('shared brand must use the unified Rawafid mark and slogan');
+if (!header.includes("import RawafidBrand from '@/components/rawafid-brand'") || !footer.includes("import RawafidBrand from '@/components/rawafid-brand'")) fail('public chrome must use the shared Rawafid brand');
+for (const label of ['استكشف روافد', 'الأقسام', 'الموسوعة', 'الأدلة', 'ذوو الاحتياجات الخاصة والدمج', 'حالة، دليل أو خدمة']) {
+  if (!header.includes(label)) fail(`institutional V5.1 navigation missing ${label}`);
 }
 
 for (const internalTerm of ['RBAC', 'RLS', 'Core واحد', 'Mobile + PWA', 'SEO وبحث مترابط']) {
@@ -54,4 +58,14 @@ for (const marker of ['admin_specialist_queue_v2', 'admin_center_queue_v2', 'com
 if (/['\"]R['\"]/.test(pwaIcon)) fail('PWA identity must not fall back to a Latin letter');
 if (!pwaIcon.includes('M13 44c14-1')) fail('PWA icon must use the unified tributary mark');
 
-if (!process.exitCode) console.log('Rawafid institutional theme V5 contract passed.');
+for (const marker of ['Rawafid Institutional V5.1', 'font-family:var(--font-arabic)', '--rf-reading-measure:72ch', '.footer-search', '.theme-preview-type-specimen']) {
+  if (!theme.includes(marker)) fail(`central theme missing V5.1 marker ${marker}`);
+}
+for (const marker of ['footer-search', 'footer-trust-list', 'back-to-top']) {
+  if (!footer.includes(marker)) fail(`institutional footer missing ${marker}`);
+}
+if (!layout.includes('<body id="top">') || !layout.includes('?v=6')) fail('layout must expose the top target and V6 PWA identity');
+if (!manifest.includes('منصة روافد | معرفة تقود إلى أثر') || !manifest.includes('?v=6')) fail('manifest must use the V6 institutional identity');
+if (!serviceWorker.includes('rawafid-shell-v6') || !serviceWorker.includes('event.waitUntil(cacheWrite')) fail('service worker must use V6 cache lifecycle');
+
+if (!process.exitCode) console.log('Rawafid institutional theme V5.1 contract passed.');

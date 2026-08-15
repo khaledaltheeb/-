@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import {
+  getPsychEncyclopediaReleaseIndex,
   getPsychEncyclopediaReleaseRecord,
-  PSYCH_ENCYCLOPEDIA_RELEASE_RECORDS,
 } from '@/lib/psych-encyclopedia-release';
 
 type JsonRecord = Record<string, unknown>;
@@ -91,8 +91,9 @@ function normalizeItem(row: Record<string, unknown>): EncyclopediaItem | null {
   };
 }
 
-function releaseItems(): EncyclopediaItem[] {
-  return PSYCH_ENCYCLOPEDIA_RELEASE_RECORDS.flatMap((row) => {
+async function releaseItems(): Promise<EncyclopediaItem[]> {
+  const rows = await getPsychEncyclopediaReleaseIndex();
+  return rows.flatMap((row) => {
     const item = normalizeItem(row as unknown as Record<string, unknown>);
     return item ? [item] : [];
   });
@@ -131,9 +132,10 @@ async function fetchPublishedDbItems(): Promise<EncyclopediaItem[]> {
 }
 
 async function mergedEncyclopediaItems(): Promise<EncyclopediaItem[]> {
+  const [release, database] = await Promise.all([releaseItems(), fetchPublishedDbItems()]);
   const bySlug = new Map<string, EncyclopediaItem>();
-  for (const item of releaseItems()) bySlug.set(item.slug, item);
-  for (const item of await fetchPublishedDbItems()) bySlug.set(item.slug, item);
+  for (const item of release) bySlug.set(item.slug, item);
+  for (const item of database) bySlug.set(item.slug, item);
   return [...bySlug.values()].sort((left, right) => left.title.localeCompare(right.title, 'ar'));
 }
 
@@ -184,10 +186,10 @@ export async function getEncyclopediaRecord(slug: string): Promise<EncyclopediaR
 
     if (!error && data) return data as EncyclopediaRecord;
   } catch {
-    // The audited code-backed release remains available if Supabase is unavailable.
+    // The audited static-asset release remains available if Supabase is unavailable.
   }
 
-  return getPsychEncyclopediaReleaseRecord(slug) as EncyclopediaRecord | null;
+  return await getPsychEncyclopediaReleaseRecord(slug) as EncyclopediaRecord | null;
 }
 
 export function safeEncyclopediaReferences(value: unknown): EncyclopediaReference[] {
