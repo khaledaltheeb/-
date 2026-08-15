@@ -7,6 +7,6 @@ export async function GET(){
  const supabase=await createClient();
  const {count}=await supabase.from('content').select('id',{count:'exact',head:true}).eq('status','published').lte('published_at',new Date().toISOString()).eq('robots_index',true).not('slug','like','quick-info-%');
  const pages=Math.max(1,Math.ceil((count??0)/PAGE_SIZE));
- const paths=['/sitemaps/static.xml','/sitemaps/taxonomy.xml','/sitemaps/quick-info.xml','/sitemaps/specialists.xml','/sitemaps/centers.xml','/sitemaps/community.xml',...Array.from({length:pages},(_,page)=>`/sitemaps/content.xml?page=${page}`)];
+ const paths=['/sitemaps/static.xml','/sitemaps/taxonomy.xml','/sitemaps/quick-info.xml','/sitemaps/encyclopedia.xml?page=0','/sitemaps/specialists.xml','/sitemaps/centers.xml','/sitemaps/community.xml',...Array.from({length:pages},(_,page)=>`/sitemaps/content.xml?page=${page}`)];
  return sitemapIndexResponse(paths);
 }
