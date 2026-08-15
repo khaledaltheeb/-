@@ -5,6 +5,8 @@ const maxUrls = Math.max(0, Number(process.env.SEO_GATE_MAX_URLS || 0));
 const expectedOrigin = new URL(base).origin;
 const failures = [];
 const linkStatusCache = new Map();
+const internalLinkAttempts = 3;
+const internalLinkRetryDelayMs = 150;
 
 function decodeXml(value) {
   return value.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
@@ -30,6 +32,13 @@ function samePathAndQuery(value, currentUrl) {
     return normalizePath(target.pathname) === normalizePath(current.pathname) && target.search === current.search;
   } catch { return false; }
 }
+function normalizeLinkCacheKey(value) {
+  const url = new URL(value, base);
+  url.hash = '';
+  if (url.pathname !== '/') url.pathname = url.pathname.replace(/\/+$/, '');
+  return url.toString();
+}
+function sleep(ms) { return new Promise((resolve) => setTimeout(resolve, ms)); }
 async function fetchWithTimeout(url, options = {}) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), requestTimeoutMs);
@@ -102,6 +111,8 @@ async function auditPage(pageUrl) {
   if (response.status !== 200) { failures.push(`${pageUrl}: expected 200, got ${response.status}`); return []; }
   const contentType = response.headers.get('content-type') || '';
   if (!contentType.includes('text/html')) { failures.push(`${pageUrl}: expected text/html, got ${contentType || 'missing content-type'}`); return []; }
+  linkStatusCache.set(normalizeLinkCacheKey(pageUrl), Promise.resolve(response.status));
+  if (response.url) linkStatusCache.set(normalizeLinkCacheKey(response.url), Promise.resolve(response.status));
   const title = stripTags((html.match(/<title\b[^>]*>([\s\S]*?)<\/title>/i) || [])[1]);
   const description = metaContent(html, 'name', 'description');
   const canonical = linkHref(html, 'canonical');
@@ -127,15 +138,22 @@ async function auditPage(pageUrl) {
   return collectInternalLinks(html, pageUrl);
 }
 async function auditInternalLink(url) {
-  if (linkStatusCache.has(url)) return linkStatusCache.get(url);
+  const cacheKey = normalizeLinkCacheKey(url);
+  if (linkStatusCache.has(cacheKey)) return linkStatusCache.get(cacheKey);
   const promise = (async () => {
-    try {
-      let response = await fetchWithTimeout(url, { method: 'HEAD', redirect: 'follow' });
-      if (response.status === 405 || response.status === 501) response = await fetchWithTimeout(url, { method: 'GET', redirect: 'follow' });
-      return response.status;
-    } catch { return 0; }
+    for (let attempt = 1; attempt <= internalLinkAttempts; attempt += 1) {
+      try {
+        let response = await fetchWithTimeout(url, { method: 'HEAD', redirect: 'follow' });
+        if (response.status === 405 || response.status === 501) response = await fetchWithTimeout(url, { method: 'GET', redirect: 'follow' });
+        return response.status;
+      } catch {
+        if (attempt === internalLinkAttempts) return 0;
+        await sleep(internalLinkRetryDelayMs * attempt);
+      }
+    }
+    return 0;
   })();
-  linkStatusCache.set(url, promise);
+  linkStatusCache.set(cacheKey, promise);
   return promise;
 }
 async function runPool(items, worker) {

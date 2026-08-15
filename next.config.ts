@@ -29,12 +29,26 @@ const encyclopediaConditionRedirects = [
   permanent: true,
 }));
 
+const cognitiveLabLegacyRedirects = [
+  {
+    source: '/cognitive-lab/associative-context-binding',
+    destination: '/cognitive-lab/associative-binding',
+    permanent: true,
+  },
+  {
+    source: '/cognitive-lab/prospective-memory-cues',
+    destination: '/cognitive-lab/prospective-memory',
+    permanent: true,
+  },
+];
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   async redirects() {
     return [
       ...encyclopediaConditionRedirects,
+      ...cognitiveLabLegacyRedirects,
       {
         source: '/care-guides/caregiver-self-care-boundaries',
         destination: '/content/caregiver-burnout',
@@ -68,6 +82,26 @@ const nextConfig: NextConfig = {
       {
         source: '/evidence-guides/autism-adhd-differences-guide',
         destination: '/comparisons/autism-vs-adhd/',
+        permanent: true,
+      },
+      {
+        source: '/evidence-guides/puberty-body-safety-inclusive-guide',
+        destination: '/care-guides/puberty-personal-safety-special-needs/',
+        permanent: true,
+      },
+      {
+        source: '/evidence-guides/sibling-and-family-balance',
+        destination: '/care-guides/sibling-responsibility-boundaries-plan/',
+        permanent: true,
+      },
+      {
+        source: '/evidence-guides/supported-decision-making-transition-guide',
+        destination: '/evidence-guides/supported-adulthood-transition/',
+        permanent: true,
+      },
+      {
+        source: '/evidence-guides/caregiver-wellbeing',
+        destination: '/content/caregiver-burnout',
         permanent: true,
       },
       {

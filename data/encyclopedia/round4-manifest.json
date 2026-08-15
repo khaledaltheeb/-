@@ -1,0 +1,18 @@
+{
+  "round": 4,
+  "date": "2026-08-14",
+  "status": "editorial-draft",
+  "target_total_new_drafts": 50,
+  "added_slugs": [
+    "developmental-language-disorder",
+    "speech-sound-disorder",
+    "developmental-stuttering",
+    "social-pragmatic-communication-disorder"
+  ],
+  "safety": {
+    "cms_imported": false,
+    "published": false,
+    "robots_index": false,
+    "requires_all_ci_gates_before_merge": true
+  }
+}
