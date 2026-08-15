@@ -1,7 +1,7 @@
 {
   "batch_id": "legacy-special-needs-native-b01",
   "migration_date": "2026-08-15",
-  "expected_record_count": 10,
+  "expected_record_count": 9,
   "defaults": {
     "sector_slug": "special-needs-inclusion",
     "content_type": "guide",
@@ -23,20 +23,6 @@
       "semantic_terms": ["الإعاقة", "الدمج", "الوصول", "المشاركة", "الاستقلال", "الأسرة", "الخدمات", "الحقوق", "التعليم", "التقنيات المساعدة"],
       "audience": ["الأشخاص ذوو الإعاقة", "الأسرة", "المعلمون", "المختصون", "مقدمو الخدمات"],
       "schema_json": {"page_role":"special_needs_hub","migration_priority":"foundation"}
-    },
-    {
-      "source_path": "/special-needs/all-pages/",
-      "target_slug": "special-needs-all-pages",
-      "target_canonical": "/special-needs/all-pages/",
-      "content_type": "guide",
-      "category_slug": "capabilities-strengths-access",
-      "seo_title": "فهرس ذوي الاحتياجات الخاصة | روافد",
-      "seo_description": "فهرس شامل لصفحات ذوي الاحتياجات الخاصة في روافد، ينظم الأدلة والحالات والأدوات العملية والحقوق والتقنيات المساعدة والتعليم الدامج للوصول السريع والمنهجي.",
-      "primary_keyword": "فهرس ذوي الاحتياجات الخاصة",
-      "secondary_keywords": ["صفحات الإعاقة", "أدلة الدمج", "أدوات ذوي الإعاقة", "التقنيات المساعدة", "التربية الخاصة"],
-      "semantic_terms": ["فهرس", "الإعاقة", "الدمج", "الوصول", "الأدلة العملية", "الحالات", "الحقوق", "الخدمات", "التعليم الدامج"],
-      "audience": ["الأشخاص ذوو الإعاقة", "الأسرة", "المعلمون", "المختصون"],
-      "schema_json": {"page_role":"special_needs_index","migration_priority":"foundation"}
     },
     {
       "source_path": "/special-needs/practical/accessible-arabic-documents/",
