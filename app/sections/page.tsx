@@ -2,16 +2,17 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
+import PlatformIcon from '@/components/platform-icon';
 import { createClient } from '@/lib/supabase/server';
 import { buildSeoMetadata, breadcrumbJsonLd } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = buildSeoMetadata({
   title: 'أقسام منصة روافد',
-  description: 'تصفح أقسام منصة روافد مرتبة تحت قطاعاتها الرئيسية، مع موضوعات فرعية واضحة للصحة النفسية والاحتياجات الخاصة والدمج والأسرة والتعافي والمعرفة.',
+  description: 'تصفح أقسام منصة روافد مرتبة تحت قطاعاتها الرئيسية، مع موضوعات فرعية واضحة للصحة النفسية وذوي الاحتياجات الخاصة والدمج والأسرة والتعافي والمعرفة.',
   path: '/sections',
   index: true,
-  keywords: ['أقسام روافد', 'الصحة النفسية', 'الاحتياجات الخاصة', 'التربية الدامجة', 'التعافي', 'المعرفة النفسية'],
+  keywords: ['أقسام روافد', 'الصحة النفسية', 'ذوي الاحتياجات الخاصة والدمج', 'التربية الدامجة', 'التعافي', 'المعرفة النفسية'],
 });
 
 type Sector = { id: string; slug: string; name_ar: string; description: string | null; sort_order: number };
@@ -34,9 +35,9 @@ export default async function SectionsIndex() {
       <nav className="breadcrumbs" aria-label="مسار الصفحة"><Link href="/">الرئيسية</Link><span>/</span><span aria-current="page">الأقسام</span></nav>
 
       <section className="public-index-hero" aria-labelledby="sections-title">
-        <span className="eyebrow">دليل الموضوعات</span>
+        <span className="eyebrow"><PlatformIcon name="knowledge" size={18} /> دليل الموضوعات</span>
         <h1 id="sections-title">أقسام روافد</h1>
-        <p>خريطة موضوعية مرتبة حسب القطاعات الرئيسية. ابدأ بالمجال الأقرب لاحتياجك، ثم انتقل إلى القسم المتخصص أو أحد موضوعاته الفرعية دون الحاجة إلى تصفح قائمة مسطحة طويلة.</p>
+        <p>خريطة موضوعية مرتبة حسب القطاعات الرئيسية، من الصحة النفسية وذوي الاحتياجات الخاصة والدمج إلى الأسرة والتعافي والمعرفة. ابدأ بالمجال الأقرب لاحتياجك، ثم انتقل إلى القسم المتخصص أو أحد موضوعاته الفرعية.</p>
         <div className="public-stat-strip"><span>{sectorRows.length.toLocaleString('ar')} قطاعات</span><span>{categoryRows.length.toLocaleString('ar')} قسمًا وقسمًا فرعيًا</span><span>تنقل هرمي واضح</span></div>
       </section>
 
