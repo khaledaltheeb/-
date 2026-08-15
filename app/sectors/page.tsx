@@ -1,23 +1,62 @@
-import type { Metadata } from 'next';
+import type { CSSProperties, Metadata } from 'react';
 import Link from 'next/link';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
-import PlatformIcon from '@/components/platform-icon';
 import { createClient } from '@/lib/supabase/server';
 import { buildSeoMetadata, breadcrumbJsonLd } from '@/lib/seo';
+import { resolveSectorAccent } from '@/lib/theme';
 
-export const dynamic='force-dynamic';
-export const metadata:Metadata=buildSeoMetadata({title:'قطاعات المنصة',description:'استكشف قطاعات منصة روافد المعرفية والخدمية المنظمة، وانتقل إلى الأقسام والصفحات والخدمات المرتبطة بكل قطاع.',path:'/sectors',index:true,keywords:['قطاعات روافد','الصحة النفسية','التعافي','الدمج','التمكين']});
+export const dynamic = 'force-dynamic';
+export const metadata: Metadata = buildSeoMetadata({
+  title: 'قطاعات منصة روافد',
+  description: 'استكشف قطاعات منصة روافد المنظمة للصحة النفسية والاحتياجات الخاصة والتربية الدامجة والأسرة والتعافي والمعرفة والمشاركة المجتمعية.',
+  path: '/sectors',
+  index: true,
+  keywords: ['قطاعات روافد', 'الصحة النفسية', 'الاحتياجات الخاصة', 'التربية الدامجة', 'الإدمان والتعافي', 'المعرفة النفسية'],
+});
 
-export default async function SectorsIndex(){
-  const supabase=await createClient();
-  const {data:sectors}=await supabase.from('sectors').select('id,slug,name_ar,description,accent,sort_order').eq('is_active',true).eq('visibility','public').order('sort_order').order('name_ar');
-  const rows=sectors??[];
-  const breadcrumbs=breadcrumbJsonLd([{name:'الرئيسية',path:'/'},{name:'القطاعات',path:'/sectors'}]);
-  return <><SiteHeader/><main className="sector-page-shell"><script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(breadcrumbs).replace(/</g,'\\u003c')}}/><nav className="breadcrumbs" aria-label="مسار الصفحة"><Link href="/">الرئيسية</Link><span>/</span><span aria-current="page">القطاعات</span></nav>
-    <section className="sector-hero"><span className="eyebrow">Platform Taxonomy</span><h1>قطاعات روافد</h1><p>طبقة التصنيف العليا في المنصة. أي قطاع يضيفه المدير ويجعله عامًا يظهر هنا تلقائيًا ويصبح جاهزًا لاستقبال الأقسام والمحتوى.</p></section>
-    <section className="rawafid-section"><div className="rawafid-section-head"><div className="rawafid-section-title"><span>استكشف</span><h2>القطاعات النشطة</h2><p>{rows.length?`${rows.length} قطاعًا متاحًا حاليًا.`:'لا توجد قطاعات منشورة بعد لأننا ما زلنا في مرحلة الثيم الفارغ.'}</p></div></div>
-      {rows.length?<div className="rawafid-sector-grid">{rows.map((sector,index)=><Link className="rawafid-sector-card" href={`/sectors/${sector.slug}`} key={sector.id} style={{'--sector-color':sector.accent||'#08716d'} as React.CSSProperties}><div className="rawafid-sector-top"><span className="rawafid-sector-index">{String(index+1).padStart(2,'0')}</span><span className="rawafid-sector-icon"><PlatformIcon name="knowledge" size={26}/></span></div><h3>{sector.name_ar}</h3><p>{sector.description||'قطاع منظم ضمن منصة روافد.'}</p><span className="rawafid-sector-link">فتح القطاع ←</span></Link>)}</div>:<div className="rawafid-empty"><div className="rawafid-empty-icon"><PlatformIcon name="knowledge" size={30}/></div><h3>الثيم جاهز للقطاعات</h3><p>عند إضافة أول قطاع من لوحة الإدارة سيظهر هنا وفي Mega Menu والبحث وخريطة الموقع تلقائيًا.</p></div>}
-    </section>
-  </main><SiteFooter/></>;
+type Sector = { id: string; slug: string; name_ar: string; description: string | null; accent: string | null; sort_order: number };
+type Category = { id: string; sector_id: string | null; parent_id: string | null };
+
+export default async function SectorsIndex() {
+  const supabase = await createClient();
+  const [{ data: sectors }, { data: categories }] = await Promise.all([
+    supabase.from('sectors').select('id,slug,name_ar,description,accent,sort_order').eq('is_active', true).eq('visibility', 'public').order('sort_order').order('name_ar'),
+    supabase.from('categories').select('id,sector_id,parent_id').eq('is_active', true).eq('visibility', 'public'),
+  ]);
+  const rows = (sectors ?? []) as Sector[];
+  const categoryRows = (categories ?? []) as Category[];
+  const breadcrumbs = breadcrumbJsonLd([{ name: 'الرئيسية', path: '/' }, { name: 'القطاعات', path: '/sectors' }]);
+
+  return <>
+    <SiteHeader />
+    <main className="site-shell sector-page-shell">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbs).replace(/</g, '\\u003c') }} />
+      <nav className="breadcrumbs" aria-label="مسار الصفحة"><Link href="/">الرئيسية</Link><span>/</span><span aria-current="page">القطاعات</span></nav>
+
+      <section className="public-index-hero" aria-labelledby="sectors-title">
+        <span className="eyebrow">الخريطة الرئيسية للمنصة</span>
+        <h1 id="sectors-title">قطاعات روافد</h1>
+        <p>بوابات رئيسية تجمع المعرفة والأدلة والخدمات في مجالات واضحة. يبدأ كل قطاع بموضوعاته الأساسية، ثم يتفرع إلى أقسام أكثر تخصصًا لتسهيل الوصول وبناء رحلة تصفح مترابطة.</p>
+        <div className="public-stat-strip"><span>{rows.length.toLocaleString('ar')} قطاعات رئيسية</span><span>{categoryRows.length.toLocaleString('ar')} قسمًا وقسمًا فرعيًا</span><span>تصنيف موحد للمحتوى المنشور</span></div>
+      </section>
+
+      {rows.length > 0 ? <section className="institutional-sector-grid" aria-label="قطاعات منصة روافد">
+        {rows.map((sector, index) => {
+          const sectorCategories = categoryRows.filter((category) => category.sector_id === sector.id);
+          const rootCount = sectorCategories.filter((category) => !category.parent_id).length;
+          const childCount = sectorCategories.length - rootCount;
+          const style = { '--sector-color': resolveSectorAccent(sector.accent) } as CSSProperties;
+          return <Link className="institutional-sector-card" href={`/sectors/${sector.slug}`} key={sector.id} style={style}>
+            <span className="sector-number">{String(index + 1).padStart(2, '0')}</span>
+            <h2>{sector.name_ar}</h2>
+            <p>{sector.description || 'قطاع رئيسي يجمع موضوعات مترابطة ضمن بنية معرفية وخدمية واضحة.'}</p>
+            <div className="sector-metrics"><span>{rootCount.toLocaleString('ar')} أقسام رئيسية</span>{childCount > 0 && <span>{childCount.toLocaleString('ar')} أقسام فرعية</span>}</div>
+            <span className="sector-open">استكشف القطاع ←</span>
+          </Link>;
+        })}
+      </section> : <div className="rawafid-empty"><h2>لا توجد قطاعات عامة متاحة حاليًا.</h2><p>ستظهر القطاعات هنا بعد اعتمادها للنشر العام.</p></div>}
+    </main>
+    <SiteFooter />
+  </>;
 }
