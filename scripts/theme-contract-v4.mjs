@@ -7,6 +7,9 @@ const fail = (message) => { console.error(`THEME V4 CONTRACT FAILED: ${message}`
 
 const layout = read('app/layout.tsx');
 const header = read('components/site-header.tsx');
+const footer = read('components/site-footer.tsx');
+const manifest = read('public/manifest.webmanifest');
+const pwaIcon = read('lib/pwa-icon.ts');
 const theme = read('app/rawafid-theme.css');
 const adminTheme = read('app/theme-admin-v4.css');
 const themeLib = read('lib/theme.ts');
@@ -33,6 +36,17 @@ if (!theme.includes("@import './theme-admin-v4.css'")) fail('central theme must 
 if (!adminTheme.includes('.admin-app-shell') || !adminTheme.includes('.dashboard-card')) fail('admin V4 layer missing core admin selectors');
 
 if (!header.includes('<strong>منصة روافد</strong>')) fail('global header must use the full institutional brand name');
+for (const token of ['--rf-v5-aqua:', '--rf-v5-glass:', '--rf-v5-shadow-hover:']) {
+  if (!theme.includes(token)) fail(`institutional V5 layer missing ${token}`);
+}
+for (const rule of ['.brand-mark .logo-stream', '.rawafid-hero-visual', '.site-footer:before']) {
+  if (!theme.includes(rule)) fail(`institutional V5 layer missing core rule ${rule}`);
+}
+if (!theme.includes('@media(forced-colors:active)')) fail('institutional V5 layer missing forced-colors support');
+if (!header.includes('logo-stream') || !footer.includes('logo-stream')) fail('header and footer must share the original Rawafid mark');
+if (!header.includes('معرفة تقود إلى أثر') || !footer.includes('معرفة تقود إلى أثر')) fail('institutional slogan must be consistent');
+if (!manifest.includes('منصة روافد | معرفة تقود إلى أثر')) fail('PWA name must match institutional identity');
+if (!pwaIcon.includes("#e6b650") || !pwaIcon.includes("#075f61")) fail('generated PWA icons must match institutional identity');
 if (!themeLib.includes("RAWAFID_BRAND_NAME = 'منصة روافد'")) fail('theme library must centralize the institutional brand name');
 if (!themeLib.includes('resolveSectorAccent')) fail('theme library must normalize sector accents without database writes');
 if (!agents.includes('app/rawafid-theme.css')) fail('agent rules must preserve the central theme entry point');
