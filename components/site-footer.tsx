@@ -8,7 +8,7 @@ const groups = [
       { href: '/sections', label: 'جميع الأقسام' },
       { href: '/encyclopedia/', label: 'الموسوعة' },
       { href: '/evidence-guides/', label: 'الأدلة العلمية' },
-      { href: '/tools', label: 'الأدوات والمقاييس' },
+      { href: '/cognitive-lab', label: 'المختبر المعرفي' },
     ],
   },
   {

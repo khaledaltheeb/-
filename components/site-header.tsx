@@ -20,7 +20,7 @@ const intentLinks = [
 const serviceLinks = [
   { href: '/specialists', label: 'العثور على مختص', icon: 'specialist' as const },
   { href: '/centers', label: 'العثور على مركز', icon: 'center' as const },
-  { href: '/tools', label: 'الأدوات والمقاييس', icon: 'tools' as const },
+  { href: '/cognitive-lab', label: 'المختبر المعرفي', icon: 'tools' as const },
   { href: '/community', label: 'مجتمع المتدربين والمتطوعين', icon: 'community' as const },
   { href: '/search', label: 'البحث المتقدم', icon: 'search' as const },
 ];
