@@ -6,14 +6,24 @@ on:
       - 'agent/encyclopedia-disability-inclusion-foundation'
     paths:
       - 'data/encyclopedia/drafts/**'
+      - 'data/encyclopedia/research/*.json'
       - 'data/encyclopedia/generated/review-drafts/**'
+      - 'scripts/resolve_encyclopedia_research_plan.py'
+      - 'scripts/validate_encyclopedia_draft.py'
+      - 'scripts/materialize_encyclopedia_draft.py'
+      - 'scripts/validate_encyclopedia_materialized_payload.py'
       - 'scripts/validate_encyclopedia_draft_portfolio.py'
       - '.github/workflows/validate-encyclopedia-portfolio.yml'
   pull_request:
     branches: [main]
     paths:
       - 'data/encyclopedia/drafts/**'
+      - 'data/encyclopedia/research/*.json'
       - 'data/encyclopedia/generated/review-drafts/**'
+      - 'scripts/resolve_encyclopedia_research_plan.py'
+      - 'scripts/validate_encyclopedia_draft.py'
+      - 'scripts/materialize_encyclopedia_draft.py'
+      - 'scripts/validate_encyclopedia_materialized_payload.py'
       - 'scripts/validate_encyclopedia_draft_portfolio.py'
       - '.github/workflows/validate-encyclopedia-portfolio.yml'
   workflow_dispatch:
@@ -33,8 +43,33 @@ jobs:
         with:
           python-version: '3.13'
 
-      - name: Compile portfolio quality gate
-        run: python -m py_compile scripts/validate_encyclopedia_draft_portfolio.py
+      - name: Compile portfolio and materialization gates
+        run: |
+          python -m py_compile \
+            scripts/resolve_encyclopedia_research_plan.py \
+            scripts/validate_encyclopedia_draft.py \
+            scripts/materialize_encyclopedia_draft.py \
+            scripts/validate_encyclopedia_materialized_payload.py \
+            scripts/validate_encyclopedia_draft_portfolio.py
+
+      - name: Materialize deterministic review payloads locally
+        run: |
+          set -euo pipefail
+          mkdir -p data/encyclopedia/generated/review-drafts
+          rm -f data/encyclopedia/generated/review-drafts/*-v1.json
+          count=0
+          for draft in data/encyclopedia/drafts/*-v1.json; do
+            test -f "$draft"
+            base="$(basename "$draft")"
+            output="data/encyclopedia/generated/review-drafts/$base"
+            plan="$(python scripts/resolve_encyclopedia_research_plan.py "$draft")"
+            python scripts/validate_encyclopedia_draft.py "$draft" --plan "$plan"
+            python scripts/materialize_encyclopedia_draft.py "$draft" --output "$output"
+            python scripts/validate_encyclopedia_materialized_payload.py "$output"
+            count=$((count+1))
+          done
+          test "$count" -gt 0
+          echo "Locally materialized $count review payload(s) before portfolio validation."
 
       - name: Validate uniqueness evidence diversity and source parity
         run: |
