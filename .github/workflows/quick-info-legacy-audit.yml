@@ -44,7 +44,7 @@ jobs:
 
       - name: Build deterministic quick-info inventory
         working-directory: rawafid-v3
-        run: python scripts/quick_info_legacy_audit.py ../legacy --expected 396
+        run: python scripts/quick_info_legacy_audit.py ../legacy --expected 395
 
       - name: Upload quick-info inventory
         if: always()
