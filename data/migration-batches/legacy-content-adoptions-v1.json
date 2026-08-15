@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "batch": "quick-info-adoptions-b01",
+  "verified_on": "2026-08-15",
+  "policy": {
+    "redirects_are_not_coverage": true,
+    "requires_published_target": true,
+    "requires_editorial_topic_coverage": true,
+    "does_not_create_redirects": true
+  },
+  "adoptions": [
+    {
+      "source_path": "/quick-info/child-hidden-school-distress-check/",
+      "target_canonical": "/content/school-attendance-distress",
+      "rationale": "The canonical guide covers hidden school distress through attendance mapping, listening without pressure, school factors, safety, functional assessment and escalation.",
+      "coverage_evidence": ["كيف تظهر المشكلة في الحياة اليومية؟", "الاستماع للطفل دون استجواب أو ضغط", "عوامل مدرسية تستحق الفحص"]
+    },
+    {
+      "source_path": "/quick-info/child-school-refusal-reasons/",
+      "target_canonical": "/content/school-attendance-distress",
+      "rationale": "The canonical guide covers school refusal as multi-factor attendance distress rather than a single-cause label.",
+      "coverage_evidence": ["لماذا يحدث؟ ابحث عن مجموعة العوامل لا عن سبب واحد", "عوامل مدرسية تستحق الفحص", "عوامل منزلية وصحية"]
+    },
+    {
+      "source_path": "/quick-info/five-reasons-school-refusal/",
+      "target_canonical": "/content/school-attendance-distress",
+      "rationale": "The canonical guide already covers anxiety, bullying and safety, learning and neurodevelopmental context, sensory factors, sleep and health, and school accommodations.",
+      "coverage_evidence": ["التنمر والسلامة: لا تجعل الحضور أهم من إزالة الخطر", "الطلاب المتنوعون عصبيًا: راجع السياق قبل تفسير الغياب", "التكييفات وقواعد القرار"]
+    },
+    {
+      "source_path": "/quick-info/child-protection-vs-parental-anxiety/",
+      "target_canonical": "/content/child-safety-vs-overprotection",
+      "rationale": "The canonical guide directly addresses balancing safety with autonomy, parental fear, graded independence and when direct protection is necessary.",
+      "coverage_evidence": ["ما الفرق بين الحماية وفرط الحماية؟", "لا تجعل الخوف وحده يحدد القاعدة", "كيف تتدرج في تقليل المساعدة؟"]
+    },
+    {
+      "source_path": "/quick-info/child-sleep-evaluation/",
+      "target_canonical": "/content/child-sleep",
+      "rationale": "The canonical child-sleep guide contains age-based sleep needs, sleep logs, daytime impact, breathing red flags and explicit criteria for professional evaluation.",
+      "coverage_evidence": ["الاستيقاظ الليلي: ما الذي نسجله؟", "الشخير والتنفس أثناء النوم: إشارة لا ينبغي تجاهلها", "متى يحتاج نوم الطفل إلى تقييم مهني؟"]
+    },
+    {
+      "source_path": "/quick-info/explain-mental-health-to-child/",
+      "target_canonical": "/content/talking-to-child-about-mental-health",
+      "rationale": "The canonical guide expands the same intent by age group and covers language, stigma, privacy, professional help and practical conversation scripts.",
+      "coverage_evidence": ["ما الذي نريد أن يفهمه الطفل؟", "كيف تشرحها لطفل في سن المدرسة؟", "نموذج محادثة من خمس دقائق"]
+    },
+    {
+      "source_path": "/quick-info/five-reasons-children-lie/",
+      "target_canonical": "/content/children-lying",
+      "rationale": "The canonical guide covers all five legacy drivers and adds privacy, task difficulty, school handling, repair and safety around unsafe secrets.",
+      "coverage_evidence": ["لماذا يكذب الطفل؟", "1. تجنب عقوبة أو رد فعل مخيف", "7. محاولة حماية شخص أو سر غير آمن"]
+    },
+    {
+      "source_path": "/quick-info/help-teen-friendship-breakup/",
+      "target_canonical": "/content/teen-friendship-loss",
+      "rationale": "The canonical guide covers listening, school context, digital memories, routine, safety, escalation and a first-week support plan after friendship loss.",
+      "coverage_evidence": ["ابدأ بالاستماع قبل تحليل القصة", "خطة عملية لأول سبعة أيام", "متى يصبح الضيق أكثر من رد فعل اجتماعي متوقع؟"]
+    }
+  ]
+}
