@@ -26,7 +26,7 @@ const META_SUFFIXES = [
 ];
 
 function parseArgs(argv) {
-  const args = { apply: false, batch: null, manifest: DEFAULT_MANIFEST };
+  const args = { apply: false, manifest: DEFAULT_MANIFEST };
   for (let i = 0; i < argv.length; i += 1) {
     const value = argv[i];
     if (value === '--apply') args.apply = true;
@@ -50,6 +50,29 @@ function cleanList(value) {
   return Array.isArray(value) ? value.map(clean).filter(Boolean) : [];
 }
 
+function fitSeoTitle(rawValue, keywordValue, titleValue) {
+  const raw = clean(rawValue);
+  const keyword = clean(keywordValue);
+  const title = clean(titleValue);
+  const candidates = [
+    raw,
+    keyword ? `${keyword}: الأعراض والتشخيص والعلاج` : '',
+    keyword ? `${keyword}: الأعراض والأسباب والعلاج` : '',
+    keyword ? `${keyword}: دليل الأعراض والعلاج` : '',
+    keyword,
+    title,
+  ].filter(Boolean);
+  for (const candidate of candidates) {
+    if (candidate.length <= 47) return candidate;
+  }
+  const source = keyword || raw || title;
+  const window = source.slice(0, 47);
+  const cut = window.lastIndexOf(' ');
+  const fitted = (cut >= 20 ? window.slice(0, cut) : window).replace(/[،؛,:\-]+$/u, '').trim();
+  if (!fitted || fitted.length > 47) throw new Error('Unable to create an SEO title within 47 characters');
+  return fitted;
+}
+
 function clipMeta(text) {
   const normalized = clean(text);
   if (normalized.length <= 160) return normalized;
@@ -66,7 +89,6 @@ function fitSeoDescription(rawValue, excerptValue) {
     const clipped = clipMeta(candidate);
     if (clipped.length >= 150 && clipped.length <= 160) return clipped;
   }
-
   for (const candidate of candidates) {
     if (candidate.length >= 150) continue;
     const stem = candidate.replace(/[.!؟،؛:]+$/u, '').trim();
@@ -75,15 +97,13 @@ function fitSeoDescription(rawValue, excerptValue) {
       if (expanded.length >= 150 && expanded.length <= 160) return expanded;
     }
   }
-
   if (candidates.length >= 2) {
     const stem = candidates[0].replace(/[.!؟،؛:]+$/u, '').trim();
     const merged = `${stem}، ${candidates[1]}`;
     const clipped = clipMeta(merged);
     if (clipped.length >= 150 && clipped.length <= 160) return clipped;
   }
-
-  throw new Error(`Unable to create a 150-160 character SEO description from supplied editorial metadata`);
+  throw new Error('Unable to create a 150-160 character SEO description from supplied editorial metadata');
 }
 
 function extractBodyText(bodyJson) {
@@ -139,9 +159,7 @@ async function loadManifest(filename) {
 
 async function loadSourceRecords(manifest) {
   const names = (await fs.readdir(BATCH_DIR)).filter((name) => name.endsWith('.json')).sort();
-  if (names.length !== manifest.expected_batch_files) {
-    throw new Error(`Expected ${manifest.expected_batch_files} batch files, found ${names.length}`);
-  }
+  if (names.length !== manifest.expected_batch_files) throw new Error(`Expected ${manifest.expected_batch_files} batch files, found ${names.length}`);
   const seen = new Set();
   const rows = [];
   for (const name of names) {
@@ -164,8 +182,10 @@ async function loadSourceRecords(manifest) {
       const references = Array.isArray(raw.references_json) ? raw.references_json : [];
       const author = clean(raw.author_display_name) || clean(manifest.author_display_name);
       let seoDescription;
+      let seoTitle;
       try {
         seoDescription = fitSeoDescription(raw.seo_description, raw.excerpt);
+        seoTitle = fitSeoTitle(raw.seo_title, raw.primary_keyword, raw.title);
       } catch (error) {
         throw new Error(`${slug}: ${error instanceof Error ? error.message : String(error)}`);
       }
@@ -178,7 +198,7 @@ async function loadSourceRecords(manifest) {
         body_text: bodyText || null,
         audience: cleanList(raw.audience),
         search_aliases: cleanList(raw.search_aliases).length ? cleanList(raw.search_aliases) : cleanList(raw.secondary_keywords),
-        seo_title: clean(raw.seo_title) || null,
+        seo_title: seoTitle,
         seo_description: seoDescription,
         canonical_url: canonical,
         robots_follow: raw.robots_follow !== false,
@@ -209,9 +229,7 @@ async function loadSourceRecords(manifest) {
 function validateRow(row, manifest) {
   if (row.title.length < 3) throw new Error(`${row.slug}: title is required`);
   if (!row.seo_title || row.seo_title.length > 47) throw new Error(`${row.slug}: seo_title must be 1-47 characters`);
-  if (!row.seo_description || row.seo_description.length < 150 || row.seo_description.length > 160) {
-    throw new Error(`${row.slug}: seo_description must be 150-160 characters`);
-  }
+  if (!row.seo_description || row.seo_description.length < 150 || row.seo_description.length > 160) throw new Error(`${row.slug}: seo_description must be 150-160 characters`);
   if (!row.primary_keyword) throw new Error(`${row.slug}: primary_keyword is required`);
   if (!row.author_display_name) throw new Error(`${row.slug}: visible institutional author is required`);
   if (!Array.isArray(row.references_json) || row.references_json.length < 1) throw new Error(`${row.slug}: at least one reference is required`);
@@ -255,13 +273,7 @@ async function recordHistory(supabase, releaseId, slugs) {
       console.warn(`${row.slug}: version snapshot warning: ${historyError instanceof Error ? historyError.message : String(historyError)}`);
     }
   }
-  const audits = rows.map((row) => ({
-    actor_id: null,
-    entity_type: 'content',
-    entity_id: String(row.id),
-    action: 'encyclopedia_release_publish',
-    after_data: { release_id: releaseId, slug: row.slug, published_at: row.published_at, source_commit: process.env.GITHUB_SHA || null },
-  }));
+  const audits = rows.map((row) => ({ actor_id: null, entity_type: 'content', entity_id: String(row.id), action: 'encyclopedia_release_publish', after_data: { release_id: releaseId, slug: row.slug, published_at: row.published_at, source_commit: process.env.GITHUB_SHA || null } }));
   const { error: auditError } = await supabase.from('audit_logs').insert(audits);
   if (auditError) console.warn(`Audit-log warning: ${auditError.message}`);
 }
@@ -275,9 +287,7 @@ async function applyRelease(manifest, rows) {
   for (const row of rows) {
     const current = existingBySlug.get(row.slug);
     if (current?.status === 'published') {
-      if (current.content_type !== 'condition' || current.canonical_url !== row.canonical_url || current.robots_index !== true) {
-        throw new Error(`${row.slug}: published collision does not match encyclopedia release contract`);
-      }
+      if (current.content_type !== 'condition' || current.canonical_url !== row.canonical_url || current.robots_index !== true) throw new Error(`${row.slug}: published collision does not match encyclopedia release contract`);
       alreadyPublished.push(row.slug);
     } else {
       candidates.push(row);
@@ -286,14 +296,7 @@ async function applyRelease(manifest, rows) {
 
   const releaseTime = new Date().toISOString();
   const releaseMeta = { id: manifest.release_id, released_at: releaseTime, source_commit: process.env.GITHUB_SHA || null, human_reviewer_claimed: false };
-  const publishedRows = candidates.map((row) => ({
-    ...row,
-    status: 'published',
-    robots_index: true,
-    published_at: releaseTime,
-    schema_json: { ...row.schema_json, rawafid_release: releaseMeta },
-  }));
-
+  const publishedRows = candidates.map((row) => ({ ...row, status: 'published', robots_index: true, published_at: releaseTime, schema_json: { ...row.schema_json, rawafid_release: releaseMeta } }));
   for (const part of chunks(publishedRows)) {
     const { error } = await supabase.from('content').upsert(part, { onConflict: 'slug' });
     if (error) throw new Error(`Production publication failed: ${error.message}`);
@@ -311,7 +314,6 @@ async function applyRelease(manifest, rows) {
     else if (live.canonical_url !== row.canonical_url) failures.push(`${row.slug}: canonical mismatch`);
   }
   if (failures.length) throw new Error(`Post-publication verification failed:\n- ${failures.join('\n- ')}`);
-
   await recordHistory(supabase, manifest.release_id, candidates.map((row) => row.slug));
   console.log(JSON.stringify({ release_id: manifest.release_id, records: rows.length, newly_published: candidates.length, already_published: alreadyPublished.length, verified_published: verified.length }, null, 2));
 }
@@ -326,7 +328,7 @@ async function main() {
   const rows = await loadSourceRecords(manifest);
   console.log(`Release plan ${manifest.release_id}: ${rows.length} validated records from ${manifest.expected_batch_files} batches.`);
   console.log(`Body depth: min=${Math.min(...rows.map((row) => wordCount(row.body_text)))} words, max=${Math.max(...rows.map((row) => wordCount(row.body_text)))} words.`);
-  console.log(`SEO descriptions verified in production range: ${rows.filter((row) => row.seo_description.length >= 150 && row.seo_description.length <= 160).length}/${rows.length}.`);
+  console.log(`SEO metadata verified: titles=${rows.filter((row) => row.seo_title.length > 0 && row.seo_title.length <= 47).length}/${rows.length}, descriptions=${rows.filter((row) => row.seo_description.length >= 150 && row.seo_description.length <= 160).length}/${rows.length}.`);
   if (!args.apply) {
     console.log('Dry-run complete. No production writes were performed.');
     return;
