@@ -1,0 +1,73 @@
+name: Quick Info Legacy Inventory
+
+on:
+  push:
+    branches:
+      - agent/quick-info-migration-v1
+    paths:
+      - 'scripts/quick_info_legacy_audit.py'
+      - 'scripts/materialize_quick_info.py'
+      - 'scripts/materialize_quick_info_v2.py'
+      - '.github/workflows/quick-info-legacy-audit.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'scripts/quick_info_legacy_audit.py'
+      - 'scripts/materialize_quick_info.py'
+      - 'scripts/materialize_quick_info_v2.py'
+      - '.github/workflows/quick-info-legacy-audit.yml'
+      - 'app/quick-info/**'
+      - 'lib/quick-info.ts'
+      - 'data/quick-info/**'
+
+permissions:
+  contents: read
+
+jobs:
+  inventory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout Rawafid V3
+        uses: actions/checkout@v7
+        with:
+          path: rawafid-v3
+
+      - name: Checkout legacy source read-only
+        uses: actions/checkout@v7
+        with:
+          repository: khaledaltheeb/healthrenewal.org
+          ref: main
+          path: legacy
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Build deterministic quick-info inventory
+        working-directory: rawafid-v3
+        run: python scripts/quick_info_legacy_audit.py ../legacy --expected 395
+
+      - name: Build structured migration payload
+        working-directory: rawafid-v3
+        run: python scripts/materialize_quick_info_v2.py ../legacy --expected 395
+
+      - name: Upload quick-info inventory
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: quick-info-legacy-inventory
+          path: rawafid-v3/artifacts/quick-info-legacy-inventory.json
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload structured migration payload
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: quick-info-materialized
+          path: rawafid-v3/artifacts/quick-info-materialized.json
+          if-no-files-found: error
+          retention-days: 14

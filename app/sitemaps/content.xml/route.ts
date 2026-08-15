@@ -26,6 +26,7 @@ export async function GET(request: Request) {
     .select('slug,updated_at,canonical_url')
     .eq('status', 'published')
     .neq('content_type', 'condition')
+    .not('slug', 'like', 'quick-info-%')
     .lte('published_at', new Date().toISOString())
     .eq('robots_index', true)
     .order('updated_at', { ascending: false })
