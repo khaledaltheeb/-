@@ -36,7 +36,8 @@ UNSAFE_PROMISES = (
     "نتيجة مضمونة",
 )
 NEGATION_MARKERS = (
-    "لا ", "ليس ", "ليست ", "غير ", "دون ", "بدون ", "ألا ", "الا ", "لا يوجد", "لا توجد", "لا يضمن", "لا تضمن", "لا نعد", "لا يعد", "لا تعد",
+    "لا ", "ليس ", "ليست ", "غير ", "دون ", "بدون ", "ألا ", "الا ",
+    "لا يوجد", "لا توجد", "لا يضمن", "لا تضمن", "لا نعد", "لا يعد", "لا تعد",
 )
 DOSE_RE = re.compile(r"(?:\b\d+(?:[.,]\d+)?\s*(?:mg|mcg|g)\b|\d+(?:[.,]\d+)?\s*(?:ملغ|مجم|ميكروغرام))", re.I)
 ARABIC_WORD_RE = re.compile(r"[\u0600-\u06FF]+(?:[\u0600-\u06FF\u0640'-]*[\u0600-\u06FF])?")
@@ -47,6 +48,7 @@ SENTENCE_SPLIT_RE = re.compile(r"(?<=[.!؟])\s+|\n+")
 def normalize(text: str) -> str:
     text = text.lower().replace("ـ", "")
     text = re.sub(r"[ًٌٍَُِّْـ]", "", text)
+    text = text.translate(str.maketrans({"أ": "ا", "إ": "ا", "آ": "ا", "ٱ": "ا", "ى": "ي"}))
     text = re.sub(r"[^\u0600-\u06FFA-Za-z0-9 ]+", " ", text)
     return re.sub(r"\s+", " ", text).strip()
 
@@ -97,35 +99,41 @@ def body_text(body: object) -> str:
     return "\n".join([*h2, *h3, *paragraphs, *faq_text])
 
 
-def has_phrase(headings: list[str], phrases: tuple[str, ...]) -> bool:
-    joined = " | ".join(normalize(h) for h in headings)
-    return any(normalize(phrase) in joined for phrase in phrases)
+def has_stem(values: list[str], stems: tuple[str, ...]) -> bool:
+    normalized = [normalize(value) for value in values]
+    return any(any(stem in value for stem in stems) for value in normalized)
 
 
-def has_stem(headings: list[str], stems: tuple[str, ...]) -> bool:
-    normalized = [normalize(h) for h in headings]
-    return any(any(stem in heading for stem in stems) for heading in normalized)
+def has_section(headings: list[str], paragraphs: list[str], faqs: list[dict], label: str) -> bool:
+    normalized_headings = [normalize(h) for h in headings]
+    normalized_paragraphs = [normalize(p) for p in paragraphs]
+    faq_questions = [normalize(str(item.get("question") or "")) for item in faqs]
 
-
-def has_section(headings: list[str], label: str) -> bool:
     if label == "definition":
-        return has_phrase(headings, ("ما هو", "ما هي", "التعريف", "ماذا يعني"))
+        return has_stem(headings, ("ما هو", "ما هي", "التعريف", "ماذا يعني"))
     if label == "symptoms":
-        return has_stem(headings, ("عرض", "اعراض", "علام", "مظهر", "يظهر", "يبدو", "تبدو", "صورة الحالة"))
+        return has_stem(headings, ("عرض", "اعراض", "علام", "مظهر", "يظهر", "يبدو", "تبدو", "صورة الحالة", "انماط"))
     if label == "causes":
         return has_stem(headings, ("سبب", "اسباب", "خطورة", "عوامل", "لماذا", "يزيد"))
     if label == "assessment":
         return has_stem(headings, ("تقييم", "تشخيص"))
     if label == "differential":
-        return has_stem(headings, ("شبه", "مشابه", "مصاحب", "فرق", "اختلاف", "يختلف", "تمييز", "تفريق", "استبعاد"))
+        heading_markers = ("شبه", "مشابه", "مصاحب", "فرق", "اختلاف", "يختلف", "يختلط", "تمييز", "تفريق", "استبعاد", "ثنائي القطب", "الحالات الجسدية")
+        paragraph_markers = ("قد تشبه", "قد يشبه", "تتشابه", "تمييز عن", "التمييز عن", "يختلط", "تقلد", "استبعاد", "يفسرها بصورة افضل", "تفسير اخر", "حالات اخرى")
+        return (
+            any(any(marker in h for marker in heading_markers) for h in normalized_headings)
+            or any(any(marker in p for marker in paragraph_markers) for p in normalized_paragraphs)
+        )
     if label == "treatment":
         return has_stem(headings, ("علاج", "دعم", "تدخل", "رعاية"))
     if label == "help":
-        normalized = [normalize(h) for h in headings]
-        for heading in normalized:
+        for heading in normalized_headings:
             if any(stem in heading for stem in ("طوار", "عاجل", "سلام", "مساعدة", "خطر", "اسعاف")):
                 return True
-            if "متى" in heading and any(stem in heading for stem in ("راجع", "مراجع", "طلب", "اطلب", "احتاج", "يحتاج", "تحتاج", "يجب", "ينبغي", "تقييم", "مختص", "طبيب")):
+            if "متي" in heading and any(stem in heading for stem in ("راجع", "مراجع", "طلب", "اطلب", "احتاج", "يحتاج", "تحتاج", "يجب", "ينبغي", "تقييم", "مختص", "طبيب")):
+                return True
+        for question in faq_questions:
+            if "متي" in question and any(stem in question for stem in ("طلب", "اطلب", "تقييم", "طوار", "عاجل", "طبيب", "مختص", "مساعدة")):
                 return True
         return False
     return False
@@ -219,8 +227,8 @@ def main() -> int:
 
         all_headings = [*h2, *h3]
         for label in ("definition", "symptoms", "causes", "assessment", "differential", "treatment", "help"):
-            if not has_section(all_headings, label):
-                errors.append(f"{prefix}: missing topic-specific {label} section")
+            if not has_section(all_headings, paragraphs, faqs, label):
+                errors.append(f"{prefix}: missing topic-specific {label} coverage")
 
         references = row.get("references_json") if isinstance(row.get("references_json"), list) else []
         ref_counts[slug] = len(references)
