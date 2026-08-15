@@ -6,6 +6,8 @@ on:
       - 'agent/encyclopedia-disability-inclusion-foundation'
     paths:
       - 'data/encyclopedia/drafts/**'
+      - 'data/encyclopedia/research/*.json'
+      - 'scripts/resolve_encyclopedia_research_plan.py'
       - 'scripts/materialize_encyclopedia_draft.py'
       - 'scripts/validate_encyclopedia_draft.py'
       - 'scripts/validate_encyclopedia_materialized_payload.py'
@@ -14,7 +16,9 @@ on:
     branches: [main]
     paths:
       - 'data/encyclopedia/drafts/**'
+      - 'data/encyclopedia/research/*.json'
       - 'data/encyclopedia/generated/review-drafts/**'
+      - 'scripts/resolve_encyclopedia_research_plan.py'
       - 'scripts/materialize_encyclopedia_draft.py'
       - 'scripts/validate_encyclopedia_draft.py'
       - 'scripts/validate_encyclopedia_materialized_payload.py'
@@ -39,6 +43,7 @@ jobs:
       - name: Compile materialization gates
         run: |
           python -m py_compile \
+            scripts/resolve_encyclopedia_research_plan.py \
             scripts/validate_encyclopedia_draft.py \
             scripts/materialize_encyclopedia_draft.py \
             scripts/validate_encyclopedia_materialized_payload.py
@@ -52,13 +57,10 @@ jobs:
             test -f "$draft"
             base="$(basename "$draft")"
             output="data/encyclopedia/generated/review-drafts/$base"
-            echo "Validating and materializing $draft -> $output"
-            python scripts/validate_encyclopedia_draft.py \
-              "$draft" \
-              --plan data/encyclopedia/research/batch-01-source-plan.json
-            python scripts/materialize_encyclopedia_draft.py \
-              "$draft" \
-              --output "$output"
+            plan="$(python scripts/resolve_encyclopedia_research_plan.py "$draft")"
+            echo "Validating $draft against $plan and materializing -> $output"
+            python scripts/validate_encyclopedia_draft.py "$draft" --plan "$plan"
+            python scripts/materialize_encyclopedia_draft.py "$draft" --output "$output"
             python scripts/validate_encyclopedia_materialized_payload.py "$output"
             count=$((count+1))
           done
