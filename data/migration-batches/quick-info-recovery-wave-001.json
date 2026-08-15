@@ -1,0 +1,206 @@
+{
+  "version": 1,
+  "scope": "quick-info legacy recovery wave 001",
+  "source": {
+    "repository": "khaledaltheeb/healthrenewal.org",
+    "collection": "/quick-info/",
+    "inventory_contract": "395 reconciled legacy pages",
+    "generated_padding_removed": true
+  },
+  "policy": {
+    "redirects_allowed_as_migration_solution": false,
+    "duplicate_canonicals_allowed": false,
+    "legacy_padding_is_editorial_content": false,
+    "merge_requires_provenance": true,
+    "standalone_requires_evidence_led_rewrite": true,
+    "standalone_requires_release_gate": true
+  },
+  "decisions": [
+    {
+      "legacy_slug": "five-reasons-emotional-eating",
+      "legacy_title": "5 أسباب للأكل العاطفي وكيف تلاحظها",
+      "legacy_word_count_after_sanitization": 760,
+      "decision": "merge_into_existing",
+      "target_slug": "comparisons-emotional-eating-vs-binge-eating-disorder",
+      "target_canonical": "/comparisons/emotional-eating-vs-binge-eating-disorder/",
+      "reason": "نية الأكل العاطفي مغطاة بصفحة مقارنة أعمق؛ القيمة التاريخية تُستخدم لإثراء عوامل الأكل العاطفي وملاحظتها دون إنشاء منافس."
+    },
+    {
+      "legacy_slug": "five-psychological-factors-appetite",
+      "legacy_title": "5 عوامل نفسية قد تؤثر على الشهية",
+      "legacy_word_count_after_sanitization": 760,
+      "decision": "rebuild_as_distinct",
+      "target_slug": "quick-info-psychological-factors-appetite",
+      "target_canonical": "/quick-info/psychological-factors-appetite/",
+      "reason": "نية تغير الشهية لأسباب نفسية مستقلة عن الأكل العاطفي واضطرابات الأكل وتحتاج حدودًا طبية واضحة وتفريقًا بين الأسباب النفسية والجسدية."
+    },
+    {
+      "legacy_slug": "five-signs-painful-attachment",
+      "legacy_title": "5 علامات على تعلق عاطفي مؤلم",
+      "legacy_word_count_after_sanitization": 729,
+      "decision": "merge_into_existing",
+      "target_slug": "comparisons-emotional-dependence-vs-love",
+      "target_canonical": "/comparisons/emotional-dependence-vs-love/",
+      "reason": "النية تتداخل مباشرة مع الاعتماد العاطفي مقابل الحب؛ تُدمج العلامات المفيدة في Canonical الموجود."
+    },
+    {
+      "legacy_slug": "five-reasons-thinking-of-ex",
+      "legacy_title": "5 أسباب تجعلك تفكر بشخص قديم",
+      "legacy_word_count_after_sanitization": 729,
+      "decision": "rebuild_as_distinct",
+      "target_slug": "quick-info-thinking-about-an-ex",
+      "target_canonical": "/quick-info/thinking-about-an-ex/",
+      "reason": "نية اجترار العلاقة السابقة والفقد العاطفي غير ممثلة مباشرة في المحتوى المنشور الحالي."
+    },
+    {
+      "legacy_slug": "five-factors-weaken-focus",
+      "legacy_title": "5 عوامل تضعف التركيز حتى لدى الأذكياء",
+      "legacy_word_count_after_sanitization": 723,
+      "decision": "rebuild_as_distinct",
+      "target_slug": "quick-info-factors-that-weaken-focus",
+      "target_canonical": "/quick-info/factors-that-weaken-focus/",
+      "reason": "صفحة التركيز الحالية مصطلحية، بينما هذه نية عملية متعددة الأسباب؛ يجب بناؤها دون إيحاء أن ضعف التركيز يعني ADHD."
+    },
+    {
+      "legacy_slug": "five-reasons-waking-tired",
+      "legacy_title": "5 أسباب تجعلك تستيقظ متعبًا رغم النوم",
+      "legacy_word_count_after_sanitization": 719,
+      "decision": "rebuild_as_distinct",
+      "target_slug": "quick-info-waking-tired-despite-sleep",
+      "target_canonical": "/quick-info/waking-tired-despite-sleep/",
+      "reason": "نية الاستيقاظ متعبًا رغم النوم تختلف عن الأرق والحرمان من النوم وتحتاج تنبيهًا لأسباب النوم والصحة الجسدية والنفسية دون تشخيص ذاتي."
+    },
+    {
+      "legacy_slug": "five-psychological-causes-of-fatigue",
+      "legacy_title": "5 أسباب نفسية قد تجعلك متعبًا طوال الوقت",
+      "legacy_word_count_after_sanitization": 719,
+      "decision": "merge_into_existing",
+      "target_slug": "quick-info-fatigue-vs-laziness",
+      "target_canonical": "/quick-info/fatigue-vs-laziness/",
+      "reason": "الأسباب النفسية للإرهاق جزء طبيعي من Canonical الإرهاق مقابل الكسل ولا تستحق صفحة منافسة."
+    },
+    {
+      "legacy_slug": "five-signs-unbalanced-relationship",
+      "legacy_title": "5 علامات أن علاقتك غير متوازنة",
+      "legacy_word_count_after_sanitization": 718,
+      "decision": "merge_into_existing",
+      "target_slug": "healthy-boundaries",
+      "target_canonical": "/content/healthy-boundaries",
+      "reason": "علامات عدم توازن العلاقة تُستخدم كإثراء عملي لصفحة الحدود الصحية بدل بناء قائمة عامة منفصلة."
+    },
+    {
+      "legacy_slug": "five-signs-stress-in-body",
+      "legacy_title": "5 علامات أن الضغط النفسي وصل إلى جسدك",
+      "legacy_word_count_after_sanitization": 718,
+      "decision": "rebuild_as_distinct",
+      "target_slug": "quick-info-stress-signs-in-the-body",
+      "target_canonical": "/quick-info/stress-signs-in-the-body/",
+      "reason": "نية العلامات الجسدية للضغط مستقلة عن مقارنة الضغط والاحتراق، ويجب أن تفصل بين التثقيف النفسي والحاجة للتقييم الطبي."
+    },
+    {
+      "legacy_slug": "five-signs-self-criticism",
+      "legacy_title": "5 علامات أنك تقسو على نفسك",
+      "legacy_word_count_after_sanitization": 718,
+      "decision": "rebuild_as_distinct",
+      "target_slug": "quick-info-signs-of-harsh-self-criticism",
+      "target_canonical": "/quick-info/signs-of-harsh-self-criticism/",
+      "reason": "نية نقد الذات القاسي غير ممثلة مباشرة، ويمكن بناؤها كصفحة مهارية غير تشخيصية مرتبطة بالكمالية وتقدير الذات."
+    },
+    {
+      "legacy_slug": "five-signs-people-pleasing",
+      "legacy_title": "5 علامات أنك ترضي الجميع على حساب نفسك",
+      "legacy_word_count_after_sanitization": 718,
+      "decision": "rebuild_as_distinct",
+      "target_slug": "quick-info-people-pleasing-at-your-expense",
+      "target_canonical": "/quick-info/people-pleasing-at-your-expense/",
+      "reason": "نية إرضاء الآخرين على حساب الذات مستقلة وقابلة للربط بالحدود والحزم دون تحويلها إلى تشخيص."
+    },
+    {
+      "legacy_slug": "five-reasons-work-drains-you",
+      "legacy_title": "5 أسباب تجعل العمل يستنزفك نفسيًا",
+      "legacy_word_count_after_sanitization": 718,
+      "decision": "merge_into_existing",
+      "target_slug": "comparisons-stress-vs-burnout",
+      "target_canonical": "/comparisons/stress-vs-burnout/",
+      "reason": "استنزاف العمل يقع في صميم التفريق بين الضغط والاحتراق؛ تُدمج أسبابه وعلاماته في Canonical الموجود."
+    },
+    {
+      "legacy_slug": "five-reasons-waking-at-night",
+      "legacy_title": "5 أسباب محتملة للاستيقاظ في منتصف الليل",
+      "legacy_word_count_after_sanitization": 718,
+      "decision": "merge_into_existing",
+      "target_slug": "evidence-guides-insomnia-and-sleep",
+      "target_canonical": "/evidence-guides/insomnia-and-sleep/",
+      "reason": "الاستيقاظ الليلي عرض ضمن مشكلات النوم، والأفضل دمج التفريق والأسباب العامة في دليل النوم والأرق بدل صفحة قائمة منفصلة."
+    },
+    {
+      "legacy_slug": "five-reasons-feeling-empty",
+      "legacy_title": "5 أسباب محتملة للشعور بالفراغ",
+      "legacy_word_count_after_sanitization": 718,
+      "decision": "rebuild_as_distinct",
+      "target_slug": "quick-info-feeling-empty-possible-explanations",
+      "target_canonical": "/quick-info/feeling-empty-possible-explanations/",
+      "reason": "الشعور بالفراغ نية مستقلة عالية الحساسية تحتاج تفسيرًا متعدد الاحتمالات وحدودًا واضحة تمنع التشخيص الذاتي."
+    },
+    {
+      "legacy_slug": "five-reasons-breakup-hurts",
+      "legacy_title": "5 أسباب تجعل الانفصال مؤلمًا حتى عندما كان ضروريًا",
+      "legacy_word_count_after_sanitization": 718,
+      "decision": "rebuild_as_distinct",
+      "target_slug": "quick-info-why-breakups-hurt",
+      "target_canonical": "/quick-info/why-breakups-hurt/",
+      "reason": "نية ألم الانفصال بعد علاقة منتهية غير ممثلة مباشرة، ويمكن بناؤها حول الفقد والتعلق والروتين والهوية دون وصفات علاجية."
+    },
+    {
+      "legacy_slug": "five-habits-destroy-calm",
+      "legacy_title": "5 عادات يومية تقتل راحتك النفسية",
+      "legacy_word_count_after_sanitization": 718,
+      "decision": "rebuild_as_distinct",
+      "target_slug": "quick-info-daily-habits-that-erode-calm",
+      "target_canonical": "/quick-info/daily-habits-that-erode-calm/",
+      "reason": "النية واسعة لكنها قابلة للتحويل من عنوان مثير إلى صفحة عملية محددة حول النوم والتنبيهات الرقمية وقلة الحركة والتجنب والإفراط في الالتزام."
+    },
+    {
+      "legacy_slug": "five-signs-burnout",
+      "legacy_title": "5 علامات أن الإرهاق تحول إلى احتراق نفسي",
+      "legacy_word_count_after_sanitization": 707,
+      "decision": "merge_into_existing",
+      "target_slug": "comparisons-stress-vs-burnout",
+      "target_canonical": "/comparisons/stress-vs-burnout/",
+      "reason": "علامات الاحتراق جزء مباشر من Canonical الضغط مقابل الاحتراق، ولا حاجة لصفحة منافسة."
+    },
+    {
+      "legacy_slug": "five-factors-child-mood",
+      "legacy_title": "5 عوامل تؤثر على مزاج الطفل",
+      "legacy_word_count_after_sanitization": 701,
+      "decision": "merge_into_existing",
+      "target_slug": "care-guide-child-emotional-change",
+      "target_canonical": "/care-guides/child-emotional-change/",
+      "reason": "العوامل المؤثرة في مزاج الطفل جزء أساسي من دليل تغير المزاج لدى الطفل والمراهق."
+    },
+    {
+      "legacy_slug": "five-reasons-procrastination",
+      "legacy_title": "5 أسباب للتسويف لا علاقة لها بالكسل",
+      "legacy_word_count_after_sanitization": 696,
+      "decision": "merge_into_existing",
+      "target_slug": "comparisons-procrastination-vs-laziness",
+      "target_canonical": "/comparisons/procrastination-vs-laziness/",
+      "reason": "الأسباب غير المرتبطة بالكسل تدعم مباشرة صفحة التسويف مقابل الكسل القائمة."
+    },
+    {
+      "legacy_slug": "five-reasons-social-withdrawal",
+      "legacy_title": "5 أسباب تجعلك تنسحب من الناس",
+      "legacy_word_count_after_sanitization": 679,
+      "decision": "merge_into_existing",
+      "target_slug": "comparisons-boundaries-vs-withdrawal",
+      "target_canonical": "/comparisons/boundaries-vs-withdrawal/",
+      "reason": "أسباب الانسحاب الاجتماعي تثري التفريق بين الحدود الصحية والانسحاب المؤلم دون إضافة Canonical عام منافس."
+    }
+  ],
+  "summary": {
+    "reviewed": 20,
+    "merge_into_existing": 10,
+    "rebuild_as_distinct": 10,
+    "redirects_created": 0
+  }
+}
