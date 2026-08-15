@@ -1,0 +1,27 @@
+{
+  "release": "aac-wave-01",
+  "published_at": "2026-08-15",
+  "content_type": "care-guides",
+  "category": "التواصل المعزز والبديل AAC",
+  "status": "published",
+  "supabase_release_gate": "v6+ passed",
+  "records": [
+    {
+      "slug": "aac-core-fringe-vocabulary-arabic",
+      "canonical_url": "/care-guides/aac/core-fringe-vocabulary-arabic/"
+    },
+    {
+      "slug": "aac-arabic-grid-design",
+      "canonical_url": "/care-guides/aac/arabic-grid-design/"
+    },
+    {
+      "slug": "aac-autism-guide",
+      "canonical_url": "/care-guides/aac/autism-guide/"
+    },
+    {
+      "slug": "aac-multilingual-arabic-family-languages",
+      "canonical_url": "/care-guides/aac/multilingual-arabic-family-languages/"
+    }
+  ],
+  "notes": "Production content published in Supabase. This release marker records the publication and triggers the main-branch deployment pipeline so the dynamic catch-all care-guide route is available on the live Worker."
+}
