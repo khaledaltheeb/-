@@ -6,22 +6,125 @@ import SiteFooter from '@/components/site-footer';
 import { createClient } from '@/lib/supabase/server';
 import { buildSeoMetadata, breadcrumbJsonLd, SITE_URL } from '@/lib/seo';
 import { COGNITIVE_ROOT_SLUG, getCognitiveCategories, getCognitiveCategory, getCognitivePageIndex } from '@/lib/cognitive-program';
+import { publicContentHref, publicContentTypeLabel } from '@/lib/public-content-routing';
 
-export const dynamic='force-dynamic';
-type Params=Promise<{slug:string}>;type SearchParams=Promise<{page?:string|string[];q?:string|string[]}>;
-type Category={id:string;sector_id:string|null;parent_id:string|null;slug:string;name_ar:string;description:string|null;seo_title:string|null;seo_description:string|null};
-type Item={id:string;slug:string;title:string;excerpt:string|null;content_type:string;published_at:string|null};
-const PAGE_SIZE=24;
-const one=(v:string|string[]|undefined)=>Array.isArray(v)?v[0]??'':v??'';
-const pageNo=(v:string)=>{const n=Number(v);return Number.isInteger(n)&&n>0&&n<10000?n:1};
-const qSafe=(v:string)=>v.trim().replace(/[%_(),]/g,' ').replace(/\s+/g,' ').slice(0,100);
-const href=(slug:string,page:number,q:string)=>{const x=new URLSearchParams();if(page>1)x.set('page',String(page));if(q)x.set('q',q);return `/sections/${slug}${x.size?`?${x}`:''}`};
-async function dbCategory(slug:string){const s=await createClient();const {data}=await s.from('categories').select('id,sector_id,parent_id,slug,name_ar,description,seo_title,seo_description').eq('slug',slug).eq('is_active',true).eq('visibility','public').maybeSingle();return data as Category|null;}
-function virtualCategory(slug:string):Category|null{const c=getCognitiveCategory(slug);return c?{id:`virtual:${slug}`,sector_id:'f9af56ce-734c-4867-9999-957db0933414',parent_id:'369841c2-d33b-43a5-ad04-8dff6f40747e',slug,name_ar:c.name,description:c.description,seo_title:null,seo_description:null}:null;}
-async function resolvedCategory(slug:string){return await dbCategory(slug)??virtualCategory(slug)}
-export async function generateMetadata({params}:{params:Params}):Promise<Metadata>{const {slug}=await params;const c=await resolvedCategory(slug);if(!c)return{};return buildSeoMetadata({title:c.seo_title||c.name_ar,description:c.seo_description||c.description||`${c.name_ar} في منصة روافد: محتوى عربي موثوق ومترابط.`,path:`/sections/${slug}`,index:true,keywords:[c.name_ar,'العمليات المعرفية','علم النفس المعرفي','منصة روافد']});}
-export default async function SectionPage({params,searchParams}:{params:Params;searchParams:SearchParams}){const [{slug},raw]=await Promise.all([params,searchParams]);const category=await resolvedCategory(slug);if(!category)notFound();const page=pageNo(one(raw.page));const query=qSafe(one(raw.q));const supabase=await createClient();const now=new Date().toISOString();const isRoot=slug===COGNITIVE_ROOT_SLUG;const virtual=Boolean(getCognitiveCategory(slug));
-let rows:Item[]=[];let total=0;let childCards:Array<{slug:string;name_ar:string;description:string|null}>=[];let sector:{slug:string;name_ar:string}|null=null;let parent:{slug:string;name_ar:string}|null=null;
-if(isRoot||virtual){const generated=getCognitivePageIndex().filter(i=>isRoot||i.categorySlug===slug).map(i=>({id:`cognitive:${i.slug}`,slug:i.slug,title:i.title,excerpt:i.excerpt,content_type:i.contentType,published_at:'2026-08-14T00:00:00.000Z'}));let existing:Item[]=[];if(isRoot){const {data}=await supabase.from('content').select('id,slug,title,excerpt,content_type,published_at').eq('category_id',category.id).eq('status','published').lte('published_at',now).eq('robots_index',true).order('title');existing=(data??[]) as Item[];childCards=getCognitiveCategories().map(c=>({slug:c.slug,name_ar:c.name,description:c.description}));}else{parent={slug:COGNITIVE_ROOT_SLUG,name_ar:'المصطلحات والعمليات المعرفية'};}sector={slug:'knowledge',name_ar:'المعرفة والموسوعة'};const by=new Map<string,Item>();for(const x of [...existing,...generated])if(!by.has(x.slug))by.set(x.slug,x);let all=[...by.values()];if(query)all=all.filter(x=>`${x.title} ${x.excerpt??''}`.includes(query));all.sort((a,b)=>a.title.localeCompare(b.title,'ar'));total=all.length;rows=all.slice((page-1)*PAGE_SIZE,page*PAGE_SIZE);}else{const [{data:sec},{data:par},{data:children}]=await Promise.all([category.sector_id?supabase.from('sectors').select('slug,name_ar').eq('id',category.sector_id).maybeSingle():Promise.resolve({data:null}),category.parent_id?supabase.from('categories').select('slug,name_ar').eq('id',category.parent_id).maybeSingle():Promise.resolve({data:null}),supabase.from('categories').select('slug,name_ar,description').eq('parent_id',category.id).eq('is_active',true).eq('visibility','public').order('sort_order')]);sector=sec as typeof sector;parent=par as typeof parent;childCards=(children??[]) as typeof childCards;let cq=supabase.from('content').select('id,slug,title,excerpt,content_type,published_at',{count:'exact'}).eq('category_id',category.id).eq('status','published').lte('published_at',now).eq('robots_index',true).order('published_at',{ascending:false}).order('title');if(query)cq=cq.ilike('title',`%${query}%`);const {data,count}=await cq.range((page-1)*PAGE_SIZE,page*PAGE_SIZE-1);rows=(data??[]) as Item[];total=count??0;}
-const pages=Math.max(1,Math.ceil(total/PAGE_SIZE));const canonical=`${SITE_URL}/sections/${slug}`;const schemas=[breadcrumbJsonLd([{name:'الرئيسية',path:'/'},...(sector?[{name:sector.name_ar,path:`/sectors/${sector.slug}`}]:[]),...(parent?[{name:parent.name_ar,path:`/sections/${parent.slug}`}]:[]),{name:category.name_ar,path:`/sections/${slug}`}]),{'@context':'https://schema.org','@type':'CollectionPage','@id':`${canonical}#collection`,url:canonical,name:category.name_ar,description:category.description||undefined,inLanguage:'ar',isPartOf:{'@id':`${SITE_URL}/#website`},mainEntity:{'@type':'ItemList',numberOfItems:total,itemListElement:rows.map((x,i)=>({'@type':'ListItem',position:(page-1)*PAGE_SIZE+i+1,name:x.title,url:`${SITE_URL}/content/${x.slug}`}))}}];
-return <><SiteHeader/><main className="site-shell sector-page"><script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(schemas).replace(/</g,'\\u003c')}}/><nav className="breadcrumbs" aria-label="مسار الصفحة"><Link href="/">الرئيسية</Link>{sector&&<><span>/</span><Link href={`/sectors/${sector.slug}`}>{sector.name_ar}</Link></>}{parent&&<><span>/</span><Link href={`/sections/${parent.slug}`}>{parent.name_ar}</Link></>}<span>/</span><span aria-current="page">{category.name_ar}</span></nav><section className="sector-hero compact-hero"><span className="eyebrow">موسوعة موضوعية مترابطة</span><h1>{category.name_ar}</h1><p>{category.description}</p><div className="tag-list"><span>{total.toLocaleString('ar')} صفحة</span>{childCards.length>0&&<span>{childCards.length.toLocaleString('ar')} مجموعات موضوعية</span>}</div><form className="sector-search" action={`/sections/${slug}`} method="get"><label className="sr-only" htmlFor="section-search">البحث داخل القسم</label><input id="section-search" name="q" defaultValue={query} placeholder={`ابحث داخل ${category.name_ar}`} maxLength={100}/><button type="submit">بحث</button></form></section>{childCards.length>0&&<section className="section"><div className="section-mini-heading"><div><span className="eyebrow">Topic clusters</span><h2>المجموعات الموضوعية</h2></div><span>{childCards.length.toLocaleString('ar')} مجموعات</span></div><div className="category-public-grid">{childCards.map(c=><article className="public-category-card" key={c.slug}><Link href={`/sections/${c.slug}`}><h3>{c.name_ar}</h3></Link><p>{c.description}</p><Link href={`/sections/${c.slug}`}>استعراض الصفحات ←</Link></article>)}</div></section>}<section className="section related-content-section"><div className="section-heading"><span>Topical Authority</span><h2>{query?`نتائج البحث عن «${query}»`:'المحتوى المنشور في هذا القسم'}</h2><p>صفحات مستقلة بنيت على نيات بحث واضحة وروابط مفاهيمية وقياس ودعم ومراجع، مع الحفاظ على الصفحات الأساسية الحالية.</p></div>{rows.length?<><div className="related-content-grid">{rows.map(x=><article key={x.id}><span>{x.content_type}</span><h3><Link href={`/content/${x.slug}`}>{x.title}</Link></h3>{x.excerpt&&<p>{x.excerpt}</p>}<Link href={`/content/${x.slug}`}>قراءة الصفحة ←</Link></article>)}</div>{pages>1&&<nav className="section-pagination" aria-label="صفحات نتائج القسم">{page>1&&<Link href={href(slug,page-1,query)} rel="prev">الصفحة السابقة</Link>}<span>الصفحة {page.toLocaleString('ar')} من {pages.toLocaleString('ar')}</span>{page<pages&&<Link href={href(slug,page+1,query)} rel="next">الصفحة التالية</Link>}</nav>}</>:<div className="empty-state"><strong>لا توجد نتيجة مطابقة.</strong><span>جرّب مصطلحًا أقصر أو انتقل إلى مجموعة موضوعية.</span></div>}</section></main><SiteFooter/></>}
+export const dynamic = 'force-dynamic';
+type Params = Promise<{ slug: string }>;
+type SearchParams = Promise<{ page?: string | string[]; q?: string | string[] }>;
+type Category = { id: string; sector_id: string | null; parent_id: string | null; slug: string; name_ar: string; description: string | null; seo_title: string | null; seo_description: string | null };
+type Item = { id: string; slug: string; title: string; excerpt: string | null; content_type: string; published_at: string | null; canonical_url: string | null };
+const PAGE_SIZE = 24;
+const one = (value: string | string[] | undefined) => Array.isArray(value) ? value[0] ?? '' : value ?? '';
+const pageNo = (value: string) => { const n = Number(value); return Number.isInteger(n) && n > 0 && n < 10000 ? n : 1; };
+const qSafe = (value: string) => value.trim().replace(/[%_(),]/g, ' ').replace(/\s+/g, ' ').slice(0, 100);
+const pageHref = (slug: string, page: number, q: string) => { const params = new URLSearchParams(); if (page > 1) params.set('page', String(page)); if (q) params.set('q', q); return `/sections/${slug}${params.size ? `?${params}` : ''}`; };
+
+async function dbCategory(slug: string) {
+  const supabase = await createClient();
+  const { data } = await supabase.from('categories').select('id,sector_id,parent_id,slug,name_ar,description,seo_title,seo_description').eq('slug', slug).eq('is_active', true).eq('visibility', 'public').maybeSingle();
+  return data as Category | null;
+}
+
+function virtualCategory(slug: string): Category | null {
+  const category = getCognitiveCategory(slug);
+  return category ? { id: `virtual:${slug}`, sector_id: 'f9af56ce-734c-4867-9999-957db0933414', parent_id: '369841c2-d33b-43a5-ad04-8dff6f40747e', slug, name_ar: category.name, description: category.description, seo_title: null, seo_description: null } : null;
+}
+async function resolvedCategory(slug: string) { return await dbCategory(slug) ?? virtualCategory(slug); }
+
+export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
+  const { slug } = await params;
+  const category = await resolvedCategory(slug);
+  if (!category) return {};
+  return buildSeoMetadata({ title: category.seo_title || category.name_ar, description: category.seo_description || category.description || `${category.name_ar} في منصة روافد: محتوى عربي موثوق ومترابط.`, path: `/sections/${slug}`, index: true, keywords: [category.name_ar, 'منصة روافد', 'دليل موضوعي'] });
+}
+
+export default async function SectionPage({ params, searchParams }: { params: Params; searchParams: SearchParams }) {
+  const [{ slug }, raw] = await Promise.all([params, searchParams]);
+  const category = await resolvedCategory(slug);
+  if (!category) notFound();
+  const page = pageNo(one(raw.page));
+  const query = qSafe(one(raw.q));
+  const supabase = await createClient();
+  const now = new Date().toISOString();
+  const isRoot = slug === COGNITIVE_ROOT_SLUG;
+  const virtual = Boolean(getCognitiveCategory(slug));
+
+  let rows: Item[] = [];
+  let total = 0;
+  let childCards: Array<{ slug: string; name_ar: string; description: string | null }> = [];
+  let sector: { slug: string; name_ar: string } | null = null;
+  let parent: { slug: string; name_ar: string } | null = null;
+
+  if (isRoot || virtual) {
+    const generated = getCognitivePageIndex().filter((item) => isRoot || item.categorySlug === slug).map((item) => ({ id: `cognitive:${item.slug}`, slug: item.slug, title: item.title, excerpt: item.excerpt, content_type: item.contentType, published_at: '2026-08-14T00:00:00.000Z', canonical_url: null }));
+    let existing: Item[] = [];
+    if (isRoot) {
+      const { data: mappings } = await supabase.from('content_categories').select('content_id').eq('category_id', category.id).eq('is_primary', true);
+      const ids = [...new Set((mappings ?? []).map((mapping) => mapping.content_id).filter(Boolean))] as string[];
+      if (ids.length > 0) {
+        const { data } = await supabase.from('content').select('id,slug,title,excerpt,content_type,published_at,canonical_url').in('id', ids).eq('status', 'published').lte('published_at', now).eq('robots_index', true).order('title');
+        existing = (data ?? []) as Item[];
+      }
+      childCards = getCognitiveCategories().map((item) => ({ slug: item.slug, name_ar: item.name, description: item.description }));
+    } else {
+      parent = { slug: COGNITIVE_ROOT_SLUG, name_ar: 'المصطلحات والعمليات المعرفية' };
+    }
+    sector = { slug: 'knowledge', name_ar: 'المعرفة والموسوعة' };
+    const bySlug = new Map<string, Item>();
+    for (const item of [...existing, ...generated]) if (!bySlug.has(item.slug)) bySlug.set(item.slug, item);
+    let all = [...bySlug.values()];
+    if (query) all = all.filter((item) => `${item.title} ${item.excerpt ?? ''}`.includes(query));
+    all.sort((a, b) => a.title.localeCompare(b.title, 'ar'));
+    total = all.length;
+    rows = all.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  } else {
+    const [{ data: sec }, { data: par }, { data: children }, { data: mappings }] = await Promise.all([
+      category.sector_id ? supabase.from('sectors').select('slug,name_ar').eq('id', category.sector_id).maybeSingle() : Promise.resolve({ data: null }),
+      category.parent_id ? supabase.from('categories').select('slug,name_ar').eq('id', category.parent_id).maybeSingle() : Promise.resolve({ data: null }),
+      supabase.from('categories').select('slug,name_ar,description').eq('parent_id', category.id).eq('is_active', true).eq('visibility', 'public').order('sort_order'),
+      supabase.from('content_categories').select('content_id').eq('category_id', category.id).eq('is_primary', true),
+    ]);
+    sector = sec as typeof sector;
+    parent = par as typeof parent;
+    childCards = (children ?? []) as typeof childCards;
+    const ids = [...new Set((mappings ?? []).map((mapping) => mapping.content_id).filter(Boolean))] as string[];
+    if (ids.length > 0) {
+      let contentQuery = supabase.from('content').select('id,slug,title,excerpt,content_type,published_at,canonical_url', { count: 'exact' }).in('id', ids).eq('status', 'published').lte('published_at', now).eq('robots_index', true).order('published_at', { ascending: false }).order('title');
+      if (query) contentQuery = contentQuery.ilike('title', `%${query}%`);
+      const { data, count } = await contentQuery.range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
+      rows = (data ?? []) as Item[];
+      total = count ?? 0;
+    }
+  }
+
+  const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const canonical = `${SITE_URL}/sections/${slug}`;
+  const schemas = [
+    breadcrumbJsonLd([{ name: 'الرئيسية', path: '/' }, { name: 'الأقسام', path: '/sections' }, ...(sector ? [{ name: sector.name_ar, path: `/sectors/${sector.slug}` }] : []), ...(parent ? [{ name: parent.name_ar, path: `/sections/${parent.slug}` }] : []), { name: category.name_ar, path: `/sections/${slug}` }]),
+    { '@context': 'https://schema.org', '@type': 'CollectionPage', '@id': `${canonical}#collection`, url: canonical, name: category.name_ar, description: category.description || undefined, inLanguage: 'ar', isPartOf: { '@id': `${SITE_URL}/#website` }, mainEntity: { '@type': 'ItemList', numberOfItems: total, itemListElement: rows.map((item, index) => ({ '@type': 'ListItem', position: (page - 1) * PAGE_SIZE + index + 1, name: item.title, url: `${SITE_URL}${publicContentHref(item)}` })) } },
+  ];
+
+  return <>
+    <SiteHeader />
+    <main className="site-shell sector-page">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schemas).replace(/</g, '\\u003c') }} />
+      <nav className="breadcrumbs" aria-label="مسار الصفحة"><Link href="/">الرئيسية</Link><span>/</span><Link href="/sections">الأقسام</Link>{sector && <><span>/</span><Link href={`/sectors/${sector.slug}`}>{sector.name_ar}</Link></>}{parent && <><span>/</span><Link href={`/sections/${parent.slug}`}>{parent.name_ar}</Link></>}<span>/</span><span aria-current="page">{category.name_ar}</span></nav>
+
+      <section className="sector-hero compact-hero">
+        <span className="eyebrow">قسم معرفي</span>
+        <h1>{category.name_ar}</h1>
+        <p>{category.description || 'محتوى متخصص ومنظم ضمن منصة روافد.'}</p>
+        <div className="public-stat-strip"><span>{total.toLocaleString('ar')} صفحة منشورة</span>{childCards.length > 0 && <span>{childCards.length.toLocaleString('ar')} موضوعات فرعية</span>}</div>
+        <form className="sector-search" action={`/sections/${slug}`} method="get"><label className="sr-only" htmlFor="section-search">البحث داخل القسم</label><input id="section-search" name="q" defaultValue={query} placeholder={`ابحث داخل ${category.name_ar}`} maxLength={100} /><button type="submit">بحث</button></form>
+      </section>
+
+      {childCards.length > 0 && <section className="section"><div className="section-mini-heading"><div><span className="eyebrow">موضوعات فرعية</span><h2>استكشف داخل القسم</h2></div><span>{childCards.length.toLocaleString('ar')} موضوعات</span></div><div className="category-public-grid">{childCards.map((child) => <article className="public-category-card" key={child.slug}><Link href={`/sections/${child.slug}`}><h3>{child.name_ar}</h3></Link><p>{child.description}</p><Link href={`/sections/${child.slug}`}>استعراض الصفحات ←</Link></article>)}</div></section>}
+
+      <section className="section related-content-section">
+        <div className="section-heading"><span>المحتوى المنشور</span><h2>{query ? `نتائج البحث عن «${query}»` : `محتوى ${category.name_ar}`}</h2><p>صفحات مرتبة ضمن هذا القسم وفق التصنيف الأساسي المعتمد، وتفتح على عناوينها العامة الأصلية.</p></div>
+        {rows.length ? <><div className="related-content-grid">{rows.map((item) => { const href = publicContentHref(item); return <article key={item.id}><span className="content-type-pill">{publicContentTypeLabel(item.content_type)}</span><h3><Link href={href}>{item.title}</Link></h3>{item.excerpt && <p>{item.excerpt}</p>}<Link href={href}>قراءة الصفحة ←</Link></article>; })}</div>{pages > 1 && <nav className="section-pagination" aria-label="صفحات نتائج القسم">{page > 1 && <Link href={pageHref(slug, page - 1, query)} rel="prev">الصفحة السابقة</Link>}<span>الصفحة {page.toLocaleString('ar')} من {pages.toLocaleString('ar')}</span>{page < pages && <Link href={pageHref(slug, page + 1, query)} rel="next">الصفحة التالية</Link>}</nav>}</> : <div className="empty-state"><strong>لا توجد نتيجة مطابقة.</strong><span>جرّب مصطلحًا أقصر أو انتقل إلى أحد الموضوعات الفرعية.</span></div>}
+      </section>
+    </main>
+    <SiteFooter />
+  </>;
+}
