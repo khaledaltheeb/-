@@ -6,6 +6,8 @@ on:
     paths:
       - 'scripts/legacy_content_extract.py'
       - 'scripts/legacy_destination_coverage.py'
+      - 'scripts/quick_info_legacy_audit.py'
+      - 'scripts/merge_legacy_inventories.py'
       - 'scripts/library_migration_audit.py'
       - 'scripts/library_legacy_map_validate.py'
       - 'scripts/library_editorial_batch_validate.py'
@@ -21,7 +23,7 @@ permissions:
 jobs:
   inventory:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - name: Checkout Rawafid V3
         uses: actions/checkout@v7
@@ -51,6 +53,18 @@ jobs:
         working-directory: rawafid-v3
         run: python scripts/legacy_content_extract.py ../legacy-library-build
 
+      - name: Reconcile complete legacy quick-info inventory
+        working-directory: rawafid-v3
+        run: python scripts/quick_info_legacy_audit.py ../legacy --expected 395
+
+      - name: Build complete legacy inventory
+        working-directory: rawafid-v3
+        run: >-
+          python scripts/merge_legacy_inventories.py
+          artifacts/legacy-content-inventory.json
+          artifacts/quick-info-legacy-inventory.json
+          --output artifacts/legacy-content-inventory-complete.json
+
       - name: Audit legacy library migration scope
         working-directory: rawafid-v3
         run: >-
@@ -72,12 +86,14 @@ jobs:
           data/migration-batches/library-legacy-canonical-map-v1.json
           data/migration-batches/library-research-foundations-v1.json
 
-      - name: Compare legacy routes with Rawafid V3
+      - name: Compare complete legacy routes with Rawafid V3
         working-directory: rawafid-v3
         env:
           RAWAFID_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
           RAWAFID_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
-        run: python scripts/legacy_destination_coverage.py artifacts/legacy-content-inventory.json
+        run: >-
+          python scripts/legacy_destination_coverage.py
+          artifacts/legacy-content-inventory-complete.json
 
       - name: Upload migration inventory
         if: always()
@@ -87,6 +103,8 @@ jobs:
           path: |
             rawafid-v3/artifacts/legacy-content-summary.json
             rawafid-v3/artifacts/legacy-content-inventory.json
+            rawafid-v3/artifacts/quick-info-legacy-inventory.json
+            rawafid-v3/artifacts/legacy-content-inventory-complete.json
             rawafid-v3/artifacts/legacy-destination-coverage.json
             rawafid-v3/artifacts/library-migration-plan.json
             rawafid-v3/artifacts/library-migration-report.md
