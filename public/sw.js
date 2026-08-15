@@ -1,5 +1,5 @@
-const CACHE_NAME = 'rawafid-shell-v2';
-const PRECACHE = ['/', '/offline', '/manifest.webmanifest', '/icons/rawafid-app.svg'];
+const CACHE_NAME = 'rawafid-shell-v3';
+const PRECACHE = ['/', '/offline', '/manifest.webmanifest', '/icons/rawafid-app.svg?v=5'];
 const PRIVATE_PREFIXES = [
   '/account', '/admin', '/specialist', '/center', '/messages', '/appointments', '/notifications',
   '/auth', '/login', '/forgot-password', '/reset-password', '/community/join', '/api'
