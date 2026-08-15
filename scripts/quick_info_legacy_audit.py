@@ -208,7 +208,7 @@ def main() -> int:
     ap = argparse.ArgumentParser(description="Inventory and reconcile legacy quick-info pages without mutating the source repository.")
     ap.add_argument("legacy_root", type=Path)
     ap.add_argument("--output", type=Path, default=Path("artifacts/quick-info-legacy-inventory.json"))
-    ap.add_argument("--expected", type=int, default=396)
+    ap.add_argument("--expected", type=int, default=395, help="Expected article count; the /quick-info/ hub is counted separately.")
     ap.add_argument("--live-base", default="https://healthrenewal.org")
     args = ap.parse_args()
 
@@ -249,6 +249,7 @@ def main() -> int:
     no_external_sources = [page["slug"] for page in ordered if int(page["external_source_count"]) == 0]
 
     complete_count = len(ordered)
+    family_url_count = complete_count + 1
     passed = (
         len(live_slugs) == args.expected
         and complete_count == args.expected
@@ -259,13 +260,15 @@ def main() -> int:
         and not wrong_canonical
     )
     report = {
-        "version": 2,
+        "version": 3,
         "repository_source": "khaledaltheeb/healthrenewal.org:main/quick-info",
         "live_source": args.live_base.rstrip("/") + "/quick-info/",
-        "expected_pages": args.expected,
+        "expected_articles": args.expected,
+        "expected_family_urls_including_hub": args.expected + 1,
         "repository_page_count": len(source_pages),
-        "live_sitemap_page_count": len(live_slugs),
-        "reconciled_page_count": complete_count,
+        "live_sitemap_article_count": len(live_slugs),
+        "reconciled_article_count": complete_count,
+        "family_url_count_including_hub": family_url_count,
         "status": "passed" if passed else "failed",
         "summary": {
             "live_only_pages": len(live_only),
@@ -302,8 +305,9 @@ def main() -> int:
     print(json.dumps({
         "status": report["status"],
         "repository_page_count": len(source_pages),
-        "live_sitemap_page_count": len(live_slugs),
-        "reconciled_page_count": complete_count,
+        "live_sitemap_article_count": len(live_slugs),
+        "reconciled_article_count": complete_count,
+        "family_url_count_including_hub": family_url_count,
         **report["summary"],
     }, ensure_ascii=False))
     if live_only:
