@@ -1,9 +1,9 @@
 {
   "version": 2,
   "status": "passed",
-  "source_draft_count": 7,
-  "generated_review_count": 7,
-  "unique_canonical_count": 7,
+  "source_draft_count": 8,
+  "generated_review_count": 8,
+  "unique_canonical_count": 8,
   "aggregate_source_domain_count": 14,
   "aggregate_source_domains": [
     "aaidd.org",
@@ -21,12 +21,36 @@
     "unesco.org",
     "who.int"
   ],
-  "max_pairwise_body_5gram_jaccard": 0.00185,
+  "max_pairwise_body_5gram_jaccard": 0.00245,
   "similarity_threshold": 0.35,
   "publication_ready": false,
   "scientific_review_required": true,
   "unified_encyclopedia_route_slugs": true,
   "pages": [
+    {
+      "slug": "angelman-syndrome",
+      "source_review_slug": "encyclopedia-angelman-syndrome",
+      "route_slug": "angelman-syndrome",
+      "title": "متلازمة أنجلمان",
+      "canonical_url": "/encyclopedia/angelman-syndrome/",
+      "primary_keyword": "متلازمة أنجلمان",
+      "status": "scientific_review",
+      "robots_index": false,
+      "body_words": 2405,
+      "faq_count": 10,
+      "reference_count": 6,
+      "source_domains": [
+        "medlineplus.gov",
+        "ncbi.nlm.nih.gov",
+        "orpha.net",
+        "rarediseases.info.nih.gov",
+        "unesco.org",
+        "who.int"
+      ],
+      "source_domain_count": 6,
+      "source_draft_sha256": "7603956e383b401491ddff7cadf0108b09847a5155daec857334b6deee841e0f",
+      "generated_records_sha256": "ea852be34325108590209a8288011a4310f3092e4e0197b24e15d5a0b00699f5"
+    },
     {
       "slug": "autism-spectrum-disorder",
       "source_review_slug": "encyclopedia-autism-spectrum-disorder",
@@ -191,6 +215,41 @@
     }
   ],
   "pairwise_similarity": [
+    {
+      "left": "angelman-syndrome",
+      "right": "autism-spectrum-disorder",
+      "body_5gram_jaccard": 0.0006
+    },
+    {
+      "left": "angelman-syndrome",
+      "right": "cerebral-palsy",
+      "body_5gram_jaccard": 0.0
+    },
+    {
+      "left": "angelman-syndrome",
+      "right": "down-syndrome",
+      "body_5gram_jaccard": 0.00022
+    },
+    {
+      "left": "angelman-syndrome",
+      "right": "fragile-x-syndrome",
+      "body_5gram_jaccard": 0.00245
+    },
+    {
+      "left": "angelman-syndrome",
+      "right": "hearing-loss",
+      "body_5gram_jaccard": 0.0
+    },
+    {
+      "left": "angelman-syndrome",
+      "right": "intellectual-developmental-disorder",
+      "body_5gram_jaccard": 0.00021
+    },
+    {
+      "left": "angelman-syndrome",
+      "right": "rett-syndrome",
+      "body_5gram_jaccard": 0.00084
+    },
     {
       "left": "autism-spectrum-disorder",
       "right": "cerebral-palsy",
