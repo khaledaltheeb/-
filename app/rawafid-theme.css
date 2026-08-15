@@ -641,11 +641,6 @@ body:before{
   .article-references{padding:21px}
   .site-footer-inner{padding-block:50px 38px}
 }
-@media(prefers-reduced-motion:no-preference){
-  .rawafid-hero-visual{animation:rf-v5-rise .72s cubic-bezier(.2,.8,.2,1) both}
-  .rawafid-hero-copy{animation:rf-v5-rise .62s cubic-bezier(.2,.8,.2,1) both}
-  @keyframes rf-v5-rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
-}
 @media(prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
   *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
