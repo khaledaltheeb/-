@@ -7,12 +7,14 @@ on:
     paths:
       - 'scripts/quick_info_legacy_audit.py'
       - 'scripts/materialize_quick_info.py'
+      - 'scripts/materialize_quick_info_v2.py'
       - '.github/workflows/quick-info-legacy-audit.yml'
   pull_request:
     branches: [main]
     paths:
       - 'scripts/quick_info_legacy_audit.py'
       - 'scripts/materialize_quick_info.py'
+      - 'scripts/materialize_quick_info_v2.py'
       - '.github/workflows/quick-info-legacy-audit.yml'
       - 'app/quick-info/**'
       - 'lib/quick-info.ts'
@@ -50,7 +52,7 @@ jobs:
 
       - name: Build structured migration payload
         working-directory: rawafid-v3
-        run: python scripts/materialize_quick_info.py ../legacy --expected 395
+        run: python scripts/materialize_quick_info_v2.py ../legacy --expected 395
 
       - name: Upload quick-info inventory
         if: always()
