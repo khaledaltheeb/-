@@ -1,10 +1,12 @@
+import Link from 'next/link';
+
 type RawafidBrandProps = {
   className?: string;
 };
 
 export default function RawafidBrand({ className = '' }: RawafidBrandProps) {
   return (
-    <a className={['brand', className].filter(Boolean).join(' ')} href="/" aria-label="منصة روافد - الرئيسية">
+    <Link className={['brand', className].filter(Boolean).join(' ')} href="/" aria-label="منصة روافد - الرئيسية">
       <span className="brand-mark" aria-hidden="true">
         <svg viewBox="0 0 48 48" focusable="false">
           <circle className="logo-source" cx="13" cy="12" r="3.2" />
@@ -18,6 +20,6 @@ export default function RawafidBrand({ className = '' }: RawafidBrandProps) {
         <strong>منصة روافد</strong>
         <small>معرفة تقود إلى أثر</small>
       </span>
-    </a>
+    </Link>
   );
 }
