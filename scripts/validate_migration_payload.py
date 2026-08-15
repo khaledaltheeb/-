@@ -14,7 +14,15 @@ SHA256_RE = re.compile(r'^[0-9a-f]{64}$')
 CARE_GUIDE_RE = re.compile(r'^/care-guides/[a-z0-9][a-z0-9/-]*/$')
 FAMILY_GUIDE_RE = re.compile(r'^/family-guide(?:/[a-z0-9][a-z0-9/-]*)?/$')
 ADDICTION_RE = re.compile(r'^/addiction(?:/[a-z0-9][a-z0-9/-]*)?/$')
+SPECIAL_NEEDS_RE = re.compile(r'^/special-needs(?:/[a-z0-9][a-z0-9/-]*)?/$')
 ADDICTION_ROLES = {'hub','safety','recovery','family','sources','methodology','addiction_condition'}
+SPECIAL_NEEDS_ROLES = {
+    'special_needs_hub',
+    'special_needs_practical',
+    'special_needs_reference',
+    'special_needs_condition',
+    'special_needs_index',
+}
 FORBIDDEN_TEXT = ('معاقين', '<script', '<style', 'javascript:')
 
 
@@ -76,7 +84,8 @@ def validate(path: Path) -> dict[str, Any]:
         is_care_guide = bool(CARE_GUIDE_RE.fullmatch(canonical)) and row.get('content_type') == 'guide'
         is_family_guide = bool(FAMILY_GUIDE_RE.fullmatch(canonical)) and row.get('content_type') == 'guide'
         is_addiction = bool(ADDICTION_RE.fullmatch(canonical)) and row.get('content_type') == 'guide'
-        if not (is_content_route or is_care_guide or is_family_guide or is_addiction):
+        is_special_needs = bool(SPECIAL_NEEDS_RE.fullmatch(canonical)) and row.get('content_type') == 'guide'
+        if not (is_content_route or is_care_guide or is_family_guide or is_addiction or is_special_needs):
             fail(f'{prefix}: canonical is not an approved V4 content route', errors)
         if is_care_guide and schema.get('page_role') != 'care-guide':
             fail(f'{prefix}: care-guide canonical requires schema_json.page_role=care-guide', errors)
@@ -84,6 +93,8 @@ def validate(path: Path) -> dict[str, Any]:
             fail(f'{prefix}: family-guide canonical requires an approved family schema_json.page_role', errors)
         if is_addiction and schema.get('page_role') not in ADDICTION_ROLES:
             fail(f'{prefix}: addiction canonical requires an approved addiction schema_json.page_role', errors)
+        if is_special_needs and schema.get('page_role') not in SPECIAL_NEEDS_ROLES:
+            fail(f'{prefix}: special-needs canonical requires an approved special-needs schema_json.page_role', errors)
 
         redirect = row.get('redirect') if isinstance(row.get('redirect'), dict) else None
         if source == canonical:
