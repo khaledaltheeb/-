@@ -1,3 +1,57 @@
-import { createClient } from '@/lib/supabase/server';import { sitemapResponse } from '@/lib/sitemap-xml';import { getCognitivePageIndex } from '@/lib/cognitive-program';
-export const dynamic='force-dynamic';const PAGE_SIZE=50000;const RELEASE='2026-08-14T00:00:00.000Z';
-export async function GET(request:Request){const u=new URL(request.url),raw=Number(u.searchParams.get('page')??'0'),page=Number.isInteger(raw)&&raw>=0&&raw<10000?raw:0;const s=await createClient(),start=page*PAGE_SIZE,end=start+PAGE_SIZE-1;const {data}=await s.from('content').select('slug,updated_at,canonical_url').eq('status','published').not('slug','like','quick-info-%').lte('published_at',new Date().toISOString()).eq('robots_index',true).order('updated_at',{ascending:false}).range(start,end);const db=(data??[]).map(x=>({path:x.canonical_url||`/content/${x.slug}`,lastModified:x.updated_at,changeFrequency:'monthly',priority:.7}));const generated=page===0?getCognitivePageIndex().map(x=>({path:`/content/${x.slug}`,lastModified:RELEASE,changeFrequency:'monthly',priority:.72})):[];type SitemapRow={path:string;lastModified:string|null;changeFrequency:string;priority:number};const by=new Map<string,SitemapRow>();for(const x of [...db,...generated])if(!by.has(x.path))by.set(x.path,x);return sitemapResponse([...by.values()]);}
+import { createClient } from '@/lib/supabase/server';
+import { sitemapResponse } from '@/lib/sitemap-xml';
+import { getCognitivePageIndex } from '@/lib/cognitive-program';
+
+export const dynamic = 'force-dynamic';
+const PAGE_SIZE=50000;
+const RELEASE = '2026-08-14T00:00:00.000Z';
+
+type SitemapRow = {
+  path: string;
+  lastModified: string | null;
+  changeFrequency: string;
+  priority: number;
+};
+
+export async function GET(request: Request) {
+  const url = new URL(request.url);
+  const raw = Number(url.searchParams.get('page') ?? '0');
+  const page = Number.isInteger(raw) && raw >= 0 && raw < 10000 ? raw : 0;
+  const supabase = await createClient();
+  const start = page * PAGE_SIZE;
+  const end = start + PAGE_SIZE - 1;
+
+  const { data } = await supabase
+    .from('content')
+    .select('slug,updated_at,canonical_url')
+    .eq('status', 'published')
+    .neq('content_type', 'condition')
+    .not('slug', 'like', 'quick-info-%')
+    .lte('published_at', new Date().toISOString())
+    .eq('robots_index', true)
+    .order('updated_at', { ascending: false })
+    .range(start,end);
+
+  const databaseRows: SitemapRow[] = (data ?? []).map((item) => ({
+    path: item.canonical_url || `/content/${item.slug}`,
+    lastModified: item.updated_at,
+    changeFrequency: 'monthly',
+    priority: .7,
+  }));
+
+  const generatedRows: SitemapRow[] = page === 0
+    ? getCognitivePageIndex().map((item) => ({
+      path: `/content/${item.slug}`,
+      lastModified: RELEASE,
+      changeFrequency: 'monthly',
+      priority: .72,
+    }))
+    : [];
+
+  const unique = new Map<string, SitemapRow>();
+  for (const item of [...databaseRows, ...generatedRows]) {
+    if (!unique.has(item.path)) unique.set(item.path, item);
+  }
+
+  return sitemapResponse([...unique.values()]);
+}

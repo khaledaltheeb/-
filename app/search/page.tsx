@@ -5,18 +5,19 @@ import SiteFooter from '@/components/site-footer';
 import { createClient } from '@/lib/supabase/server';
 import { searchCognitivePages } from '@/lib/cognitive-program';
 import { getQuickInfoItems, quickInfoContentSlug } from '@/lib/quick-info';
+import { PSYCH_ENCYCLOPEDIA_RELEASE_RECORDS } from '@/lib/psych-encyclopedia-release';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'البحث في منصة روافد',
-  description: 'البحث الموحد في محتوى منصة روافد والقطاعات والأقسام والمختصين والمراكز والموسوعة المعرفية.',
+  description: 'البحث الموحد في محتوى منصة روافد والقطاعات والأقسام والمختصين والمراكز والموسوعات المعرفية والنفسية.',
   alternates: { canonical: '/search' },
   robots: { index: false, follow: true, noarchive: true },
 };
 
 type SP = Promise<{ q?: string; type?: string }>;
-type T = 'content' | 'sector' | 'category' | 'specialist' | 'center' | 'community';
+type T = 'content' | 'condition' | 'sector' | 'category' | 'specialist' | 'center' | 'community';
 type R = {
   entity_type: T;
   entity_id: string;
@@ -30,6 +31,7 @@ type R = {
 
 const labels: Record<T, string> = {
   content: 'المحتوى',
+  condition: 'الموسوعة النفسية',
   sector: 'القطاعات',
   category: 'الأقسام',
   specialist: 'المختصون',
@@ -37,6 +39,59 @@ const labels: Record<T, string> = {
   community: 'المتدربون والمتطوعون',
 };
 const allowed = new Set(Object.keys(labels));
+const psychReleaseSlugs = new Set(PSYCH_ENCYCLOPEDIA_RELEASE_RECORDS.map((record) => record.slug));
+
+function normalizeSearch(value: string) {
+  return value
+    .toLocaleLowerCase('ar')
+    .replace(/[ًٌٍَُِّْـٰ]/gu, '')
+    .replace(/[أإآٱ]/gu, 'ا')
+    .replace(/ى/gu, 'ي')
+    .replace(/[^\p{L}\p{N}]+/gu, ' ')
+    .trim()
+    .replace(/\s+/gu, ' ');
+}
+
+function searchPsychEncyclopedia(query: string, limit = 75): R[] {
+  const normalizedQuery = normalizeSearch(query);
+  const queryTokens = normalizedQuery.split(' ').filter(Boolean);
+  if (!normalizedQuery || queryTokens.length === 0) return [];
+
+  return PSYCH_ENCYCLOPEDIA_RELEASE_RECORDS.flatMap((record): R[] => {
+    const title = normalizeSearch(record.title);
+    const primary = normalizeSearch(record.primary_keyword ?? '');
+    const secondary = record.secondary_keywords.map(normalizeSearch);
+    const aliases = record.search_aliases.map(normalizeSearch);
+    const semantic = record.semantic_terms.map(normalizeSearch);
+    const excerpt = normalizeSearch(record.excerpt ?? '');
+    const body = normalizeSearch(record.body_text ?? '');
+    const searchable = [title, primary, ...secondary, ...aliases, ...semantic, excerpt, body].join(' ');
+    if (!queryTokens.every((token) => searchable.includes(token))) return [];
+
+    let score = 100;
+    if (title === normalizedQuery) score = 260;
+    else if (primary === normalizedQuery) score = 250;
+    else if (title.includes(normalizedQuery)) score = 225;
+    else if (primary.includes(normalizedQuery)) score = 215;
+    else if ([...secondary, ...aliases].some((value) => value === normalizedQuery)) score = 205;
+    else if ([...secondary, ...aliases].some((value) => value.includes(normalizedQuery))) score = 185;
+    else if (semantic.some((value) => value.includes(normalizedQuery))) score = 165;
+    else if (excerpt.includes(normalizedQuery)) score = 145;
+    else if (body.includes(normalizedQuery)) score = 115;
+    score += Math.min(queryTokens.length * 2, 12);
+
+    return [{
+      entity_type: 'condition',
+      entity_id: record.id,
+      slug: record.slug,
+      title: record.title,
+      subtitle: 'الموسوعة النفسية — دليل سريري موثق',
+      excerpt: record.excerpt,
+      destination: record.canonical_url,
+      score,
+    }];
+  }).sort((a, b) => b.score - a.score || a.title.localeCompare(b.title, 'ar')).slice(0, limit);
+}
 
 export default async function SearchPage({ searchParams }: { searchParams: SP }) {
   const p = await searchParams;
@@ -46,25 +101,48 @@ export default async function SearchPage({ searchParams }: { searchParams: SP })
   let error = '';
 
   if (q.length >= 2) {
-    const s = await createClient();
-    const [{ data, error: e }, approvedQuickInfo] = await Promise.all([
-      s.rpc('search_platform', { p_query: q, p_limit: 75 }),
-      getQuickInfoItems(500),
-    ]);
+    let dbData: R[] = [];
+    let dbError = false;
+    let approvedQuickInfo: Awaited<ReturnType<typeof getQuickInfoItems>> = [];
+
+    try {
+      const s = await createClient();
+      const [{ data, error: e }, quickInfo] = await Promise.all([
+        s.rpc('search_platform', { p_query: q, p_limit: 75 }),
+        getQuickInfoItems(500),
+      ]);
+      dbData = (data ?? []) as R[];
+      approvedQuickInfo = quickInfo;
+      dbError = Boolean(e);
+    } catch {
+      dbError = true;
+      try {
+        approvedQuickInfo = await getQuickInfoItems(500);
+      } catch {
+        approvedQuickInfo = [];
+      }
+    }
 
     const approvedByStoredSlug = new Map(
       approvedQuickInfo.map((item) => [quickInfoContentSlug(item.routeSlug), item]),
     );
 
-    const db = ((data ?? []) as R[]).flatMap((item): R[] => {
-      if (!item.slug.startsWith('quick-info-')) return [item];
-      const approved = approvedByStoredSlug.get(item.slug);
-      if (!approved) return [];
-      return [{
-        ...item,
-        subtitle: 'معلومة سريعة — محتوى مراجع',
-        destination: approved.canonicalUrl,
-      }];
+    const db = dbData.flatMap((item): R[] => {
+      if (item.slug.startsWith('quick-info-')) {
+        const approved = approvedByStoredSlug.get(item.slug);
+        if (!approved) return [];
+        return [{
+          ...item,
+          entity_type: 'content',
+          subtitle: 'معلومة سريعة — محتوى مراجع',
+          destination: approved.canonicalUrl,
+        }];
+      }
+
+      if (item.destination.startsWith('/encyclopedia/') || psychReleaseSlugs.has(item.slug)) {
+        return [{ ...item, entity_type: 'condition', subtitle: item.subtitle || 'الموسوعة النفسية' }];
+      }
+      return [item];
     });
 
     const generated = searchCognitivePages(q, 75).map((x, i): R => ({
@@ -78,15 +156,16 @@ export default async function SearchPage({ searchParams }: { searchParams: SP })
       score: 150 - i / 100,
     }));
 
+    const psych = searchPsychEncyclopedia(q, 75);
     const by = new Map<string, R>();
-    for (const x of [...db, ...generated]) {
+    for (const x of [...db, ...generated, ...psych]) {
       const old = by.get(x.destination);
       if (!old || Number(x.score) > Number(old.score)) by.set(x.destination, x);
     }
     results = [...by.values()]
       .sort((a, b) => Number(b.score) - Number(a.score) || a.title.localeCompare(b.title, 'ar'))
       .slice(0, 100);
-    if (e && generated.length === 0) error = 'تعذر تنفيذ البحث الآن.';
+    if (dbError && generated.length === 0 && psych.length === 0) error = 'تعذر تنفيذ البحث الآن.';
   }
 
   const visible = type ? results.filter((x) => x.entity_type === type) : results;
@@ -100,10 +179,10 @@ export default async function SearchPage({ searchParams }: { searchParams: SP })
       <section className="search-hero">
         <span className="eyebrow">بحث موحد ودلالي</span>
         <h1>ابحث في منصة روافد</h1>
-        <p>المحتوى والقطاعات والأقسام والمختصون والمراكز والموسوعة المعرفية ضمن محرك واحد.</p>
+        <p>المحتوى والقطاعات والأقسام والمختصون والمراكز والموسوعات المعرفية والنفسية ضمن محرك واحد.</p>
         <form className="search search-page-form" action="/search" method="get" role="search">
           <label className="sr-only" htmlFor="platform-search">عبارة البحث</label>
-          <input id="platform-search" name="q" type="search" minLength={2} maxLength={160} defaultValue={q} placeholder="مثال: الذاكرة العاملة، الانتباه الانتقائي، مختص في عمّان..." autoComplete="off" />
+          <input id="platform-search" name="q" type="search" minLength={2} maxLength={160} defaultValue={q} placeholder="مثال: القلق الاجتماعي، اضطراب الهلع، الذاكرة العاملة، مختص في عمّان..." autoComplete="off" />
           <button type="submit">بحث</button>
         </form>
       </section>
