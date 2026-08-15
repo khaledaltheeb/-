@@ -136,6 +136,18 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async rewrites() {
+    return [
+      {
+        source: '/resources/:slug',
+        destination: '/content/:slug',
+      },
+      {
+        source: '/resources/:slug/',
+        destination: '/content/:slug',
+      },
+    ];
+  },
   async headers() {
     return [
       {
