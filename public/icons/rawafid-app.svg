@@ -1,15 +1,25 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
-  <title id="title">روافد</title>
-  <desc id="desc">رمز منصة روافد</desc>
+  <title id="title">منصة روافد</title>
+  <desc id="desc">روافد معرفة متصلة تقود إلى أثر</desc>
   <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#0f8f88"/>
-      <stop offset="1" stop-color="#3ec7ad"/>
+    <linearGradient id="bg" x1="72" y1="52" x2="442" y2="468" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0b8580"/>
+      <stop offset=".56" stop-color="#075f61"/>
+      <stop offset="1" stop-color="#063f49"/>
     </linearGradient>
+    <radialGradient id="glow" cx="0" cy="0" r="1" gradientTransform="translate(118 92) rotate(46) scale(270)">
+      <stop stop-color="#fff" stop-opacity=".2"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </radialGradient>
   </defs>
-  <rect width="512" height="512" rx="112" fill="#fffefb"/>
-  <rect x="56" y="56" width="400" height="400" rx="104" fill="url(#g)"/>
-  <path d="M142 316c66-6 108-34 126-84 18-50 54-82 108-96-5 61-28 110-70 145-43 36-97 53-164 51z" fill="#fff" opacity=".96"/>
-  <path d="M156 361c50-2 93-17 128-45 35-27 60-64 75-109-1 66-23 119-66 158-39 35-85 54-137 57z" fill="#e7ac3c" opacity=".95"/>
-  <circle cx="175" cy="184" r="42" fill="#fff" opacity=".96"/>
+  <rect width="512" height="512" rx="116" fill="#f7fbf9"/>
+  <rect x="44" y="44" width="424" height="424" rx="112" fill="url(#bg)"/>
+  <rect x="44" y="44" width="424" height="424" rx="112" fill="url(#glow)"/>
+  <g fill="none" stroke="#fff" stroke-width="27" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M142 166c10 79 52 102 116 123 71 23 103 59 108 122"/>
+    <path d="M82 233c78 0 111 42 176 56 70 16 102 59 108 122"/>
+    <path d="M226 102c-21 78 1 137 32 187 36 58 93 65 108 122"/>
+    <path d="M334 174c-36 39-57 77-76 115"/>
+  </g>
+  <circle cx="142" cy="121" r="35" fill="#e6b650" stroke="#fff" stroke-width="13"/>
 </svg>
