@@ -1,9 +1,9 @@
 {
   "version": 2,
   "status": "passed",
-  "source_draft_count": 8,
-  "generated_review_count": 8,
-  "unique_canonical_count": 8,
+  "source_draft_count": 11,
+  "generated_review_count": 11,
+  "unique_canonical_count": 11,
   "aggregate_source_domain_count": 14,
   "aggregate_source_domains": [
     "aaidd.org",
@@ -190,6 +190,54 @@
       "generated_records_sha256": "bf45cf93148fe7a98a3bfa4fff0d243b301057aa16077f3bc9dfd193892a75a5"
     },
     {
+      "slug": "noonan-syndrome",
+      "source_review_slug": "encyclopedia-noonan-syndrome",
+      "route_slug": "noonan-syndrome",
+      "title": "متلازمة نونان",
+      "canonical_url": "/encyclopedia/noonan-syndrome/",
+      "primary_keyword": "متلازمة نونان",
+      "status": "scientific_review",
+      "robots_index": false,
+      "body_words": 2226,
+      "faq_count": 10,
+      "reference_count": 6,
+      "source_domains": [
+        "medlineplus.gov",
+        "ncbi.nlm.nih.gov",
+        "orpha.net",
+        "rarediseases.info.nih.gov",
+        "unesco.org",
+        "who.int"
+      ],
+      "source_domain_count": 6,
+      "source_draft_sha256": "f0da14da03c28f436c95724e2e9cdebde860b299d81ce2a5660a1c4e70c0735b",
+      "generated_records_sha256": "d696b429265a804ee04925ff1ed6f47dd5577cd87beb4b79ffbc3b8db6555b06"
+    },
+    {
+      "slug": "prader-willi-syndrome",
+      "source_review_slug": "encyclopedia-prader-willi-syndrome",
+      "route_slug": "prader-willi-syndrome",
+      "title": "متلازمة برادر-ويلي",
+      "canonical_url": "/encyclopedia/prader-willi-syndrome/",
+      "primary_keyword": "متلازمة برادر ويلي",
+      "status": "scientific_review",
+      "robots_index": false,
+      "body_words": 2397,
+      "faq_count": 10,
+      "reference_count": 6,
+      "source_domains": [
+        "medlineplus.gov",
+        "ncbi.nlm.nih.gov",
+        "orpha.net",
+        "rarediseases.info.nih.gov",
+        "unesco.org",
+        "who.int"
+      ],
+      "source_domain_count": 6,
+      "source_draft_sha256": "cc641d6fdb0877e8f2ff4cb58ec5139aaae611c85c2d40fdbcef120c97886059",
+      "generated_records_sha256": "563053e4e9d2a2ae8d970b0b21385a79e30e00d7905906f2d1aa1ef82fa62c66"
+    },
+    {
       "slug": "rett-syndrome",
       "source_review_slug": "encyclopedia-rett-syndrome",
       "route_slug": "rett-syndrome",
@@ -212,6 +260,30 @@
       "source_domain_count": 6,
       "source_draft_sha256": "a6a548563c7ce102f64e80fbf6cfd39e8411a5c2dbde34dd475f78438b7fdb44",
       "generated_records_sha256": "32c2e0feed211dc03009650469f79fcaf13d3302f72380edb5d36099889b311a"
+    },
+    {
+      "slug": "williams-syndrome",
+      "source_review_slug": "encyclopedia-williams-syndrome",
+      "route_slug": "williams-syndrome",
+      "title": "متلازمة ويليامز",
+      "canonical_url": "/encyclopedia/williams-syndrome/",
+      "primary_keyword": "متلازمة ويليامز",
+      "status": "scientific_review",
+      "robots_index": false,
+      "body_words": 2178,
+      "faq_count": 10,
+      "reference_count": 6,
+      "source_domains": [
+        "medlineplus.gov",
+        "ncbi.nlm.nih.gov",
+        "orpha.net",
+        "rarediseases.info.nih.gov",
+        "unesco.org",
+        "who.int"
+      ],
+      "source_domain_count": 6,
+      "source_draft_sha256": "8c2d677f8751b2670f8bff7190259bd35c7945afd42a213514e8aac229dd1fcf",
+      "generated_records_sha256": "7f6e8854b0992772c8dbd698ffc6d79626cda658ccc5c48403d323cbd1aa40b9"
     }
   ],
   "pairwise_similarity": [
@@ -247,8 +319,23 @@
     },
     {
       "left": "angelman-syndrome",
+      "right": "noonan-syndrome",
+      "body_5gram_jaccard": 0.00022
+    },
+    {
+      "left": "angelman-syndrome",
+      "right": "prader-willi-syndrome",
+      "body_5gram_jaccard": 0.00126
+    },
+    {
+      "left": "angelman-syndrome",
       "right": "rett-syndrome",
       "body_5gram_jaccard": 0.00084
+    },
+    {
+      "left": "angelman-syndrome",
+      "right": "williams-syndrome",
+      "body_5gram_jaccard": 0.0
     },
     {
       "left": "autism-spectrum-disorder",
@@ -277,8 +364,23 @@
     },
     {
       "left": "autism-spectrum-disorder",
+      "right": "noonan-syndrome",
+      "body_5gram_jaccard": 0.00021
+    },
+    {
+      "left": "autism-spectrum-disorder",
+      "right": "prader-willi-syndrome",
+      "body_5gram_jaccard": 0.0002
+    },
+    {
+      "left": "autism-spectrum-disorder",
       "right": "rett-syndrome",
       "body_5gram_jaccard": 0.0006
+    },
+    {
+      "left": "autism-spectrum-disorder",
+      "right": "williams-syndrome",
+      "body_5gram_jaccard": 0.0
     },
     {
       "left": "cerebral-palsy",
@@ -302,7 +404,22 @@
     },
     {
       "left": "cerebral-palsy",
+      "right": "noonan-syndrome",
+      "body_5gram_jaccard": 0.0
+    },
+    {
+      "left": "cerebral-palsy",
+      "right": "prader-willi-syndrome",
+      "body_5gram_jaccard": 0.00021
+    },
+    {
+      "left": "cerebral-palsy",
       "right": "rett-syndrome",
+      "body_5gram_jaccard": 0.0
+    },
+    {
+      "left": "cerebral-palsy",
+      "right": "williams-syndrome",
       "body_5gram_jaccard": 0.0
     },
     {
@@ -322,7 +439,22 @@
     },
     {
       "left": "down-syndrome",
+      "right": "noonan-syndrome",
+      "body_5gram_jaccard": 0.0
+    },
+    {
+      "left": "down-syndrome",
+      "right": "prader-willi-syndrome",
+      "body_5gram_jaccard": 0.0
+    },
+    {
+      "left": "down-syndrome",
       "right": "rett-syndrome",
+      "body_5gram_jaccard": 0.0
+    },
+    {
+      "left": "down-syndrome",
+      "right": "williams-syndrome",
       "body_5gram_jaccard": 0.0
     },
     {
@@ -337,8 +469,23 @@
     },
     {
       "left": "fragile-x-syndrome",
+      "right": "noonan-syndrome",
+      "body_5gram_jaccard": 0.00042
+    },
+    {
+      "left": "fragile-x-syndrome",
+      "right": "prader-willi-syndrome",
+      "body_5gram_jaccard": 0.00041
+    },
+    {
+      "left": "fragile-x-syndrome",
       "right": "rett-syndrome",
       "body_5gram_jaccard": 0.00185
+    },
+    {
+      "left": "fragile-x-syndrome",
+      "right": "williams-syndrome",
+      "body_5gram_jaccard": 0.0
     },
     {
       "left": "hearing-loss",
@@ -347,12 +494,72 @@
     },
     {
       "left": "hearing-loss",
+      "right": "noonan-syndrome",
+      "body_5gram_jaccard": 0.0
+    },
+    {
+      "left": "hearing-loss",
+      "right": "prader-willi-syndrome",
+      "body_5gram_jaccard": 0.00021
+    },
+    {
+      "left": "hearing-loss",
+      "right": "rett-syndrome",
+      "body_5gram_jaccard": 0.0
+    },
+    {
+      "left": "hearing-loss",
+      "right": "williams-syndrome",
+      "body_5gram_jaccard": 0.0
+    },
+    {
+      "left": "intellectual-developmental-disorder",
+      "right": "noonan-syndrome",
+      "body_5gram_jaccard": 0.0
+    },
+    {
+      "left": "intellectual-developmental-disorder",
+      "right": "prader-willi-syndrome",
+      "body_5gram_jaccard": 0.00021
+    },
+    {
+      "left": "intellectual-developmental-disorder",
       "right": "rett-syndrome",
       "body_5gram_jaccard": 0.0
     },
     {
       "left": "intellectual-developmental-disorder",
+      "right": "williams-syndrome",
+      "body_5gram_jaccard": 0.0
+    },
+    {
+      "left": "noonan-syndrome",
+      "right": "prader-willi-syndrome",
+      "body_5gram_jaccard": 0.00043
+    },
+    {
+      "left": "noonan-syndrome",
       "right": "rett-syndrome",
+      "body_5gram_jaccard": 0.0
+    },
+    {
+      "left": "noonan-syndrome",
+      "right": "williams-syndrome",
+      "body_5gram_jaccard": 0.00206
+    },
+    {
+      "left": "prader-willi-syndrome",
+      "right": "rett-syndrome",
+      "body_5gram_jaccard": 0.00042
+    },
+    {
+      "left": "prader-willi-syndrome",
+      "right": "williams-syndrome",
+      "body_5gram_jaccard": 0.00022
+    },
+    {
+      "left": "rett-syndrome",
+      "right": "williams-syndrome",
       "body_5gram_jaccard": 0.0
     }
   ],
