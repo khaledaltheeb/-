@@ -8,6 +8,7 @@ on:
       - 'scripts/quick_info_legacy_audit.py'
       - 'scripts/materialize_quick_info.py'
       - 'scripts/materialize_quick_info_v2.py'
+      - 'scripts/materialize_quick_info_editorial.py'
       - '.github/workflows/quick-info-legacy-audit.yml'
   pull_request:
     branches: [main]
@@ -15,6 +16,7 @@ on:
       - 'scripts/quick_info_legacy_audit.py'
       - 'scripts/materialize_quick_info.py'
       - 'scripts/materialize_quick_info_v2.py'
+      - 'scripts/materialize_quick_info_editorial.py'
       - '.github/workflows/quick-info-legacy-audit.yml'
       - 'app/quick-info/**'
       - 'lib/quick-info.ts'
@@ -50,9 +52,9 @@ jobs:
         working-directory: rawafid-v3
         run: python scripts/quick_info_legacy_audit.py ../legacy --expected 395
 
-      - name: Build structured migration payload
+      - name: Build structured migration payload with reviewed editorial overlays
         working-directory: rawafid-v3
-        run: python scripts/materialize_quick_info_v2.py ../legacy --expected 395
+        run: python scripts/materialize_quick_info_editorial.py ../legacy --expected 395
 
       - name: Upload quick-info inventory
         if: always()
