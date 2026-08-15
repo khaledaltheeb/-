@@ -2,10 +2,34 @@
 from __future__ import annotations
 
 import collections
+import re
 import xml.etree.ElementTree as ET
 from urllib.parse import urlparse
 
 import materialize_quick_info as base
+
+LEGACY_LONGFORM_START = "<!-- QUICK_INFO_LONGFORM_V1_START -->"
+LEGACY_LONGFORM_END = "<!-- QUICK_INFO_LONGFORM_V1_END -->"
+LEGACY_LONGFORM_RE = re.compile(
+    re.escape(LEGACY_LONGFORM_START) + r".*?" + re.escape(LEGACY_LONGFORM_END),
+    flags=re.DOTALL,
+)
+_original_page_record = base.page_record
+
+
+def strip_legacy_generated_longform(html: str) -> tuple[str, int]:
+    """Remove the old deterministic padding block while preserving the original article."""
+    return LEGACY_LONGFORM_RE.subn("", html)
+
+
+def sanitized_page_record(html: str, slug: str, origin: str, source_path: str) -> dict:
+    cleaned_html, removed_count = strip_legacy_generated_longform(html)
+    record = _original_page_record(cleaned_html, slug, origin, source_path)
+    schema = record.setdefault("schema_json", {})
+    schema["legacy_generated_longform_removed"] = removed_count > 0
+    schema["legacy_generated_longform_removed_count"] = removed_count
+    schema["legacy_sanitizer_version"] = 1
+    return record
 
 
 def full_live_slugs() -> list[str]:
@@ -46,6 +70,7 @@ def full_live_slugs() -> list[str]:
     return sorted(slugs)
 
 
+base.page_record = sanitized_page_record
 base.live_slugs = full_live_slugs
 
 if __name__ == "__main__":
