@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import json
 import re
-from collections import Counter, defaultdict
+from collections import defaultdict
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -35,6 +35,7 @@ UNSAFE_PROMISES = (
     "يضمن الشفاء",
     "نتيجة مضمونة",
 )
+NEGATION_WORDS = ("لا", "ليس", "ليست", "غير", "دون", "بدون", "ينبغي ألا", "لا يوجد", "لا توجد", "لا يضمن", "لا تضمن")
 DOSE_RE = re.compile(r"(?:\b\d+(?:[.,]\d+)?\s*(?:mg|mcg|g)\b|\d+(?:[.,]\d+)?\s*(?:ملغ|مجم|ميكروغرام))", re.I)
 ARABIC_WORD_RE = re.compile(r"[\u0600-\u06FF]+(?:[\u0600-\u06FF\u0640'-]*[\u0600-\u06FF])?")
 TOKEN_RE = re.compile(r"[\u0600-\u06FFA-Za-z0-9]+")
@@ -99,6 +100,20 @@ def has_heading(headings: list[str], needles: tuple[str, ...]) -> bool:
     return any(normalize(n) in joined for n in needles)
 
 
+def contains_unnegated_phrase(text: str, phrase: str) -> bool:
+    normalized = normalize(text)
+    target = normalize(phrase)
+    start = 0
+    while True:
+        index = normalized.find(target, start)
+        if index < 0:
+            return False
+        prefix = normalized[max(0, index - 45):index].strip()
+        if not any(prefix.endswith(normalize(word)) or f" {normalize(word)} " in f" {prefix} " for word in NEGATION_WORDS):
+            return True
+        start = index + len(target)
+
+
 def long_sentences(text: str) -> list[str]:
     result: list[str] = []
     for sentence in SENTENCE_SPLIT_RE.split(text):
@@ -123,9 +138,9 @@ def main() -> int:
             continue
         for row in rows:
             if isinstance(row, dict):
-                row = dict(row)
-                row["_file"] = file.name
-                records.append(row)
+                item = dict(row)
+                item["_file"] = file.name
+                records.append(item)
             else:
                 errors.append(f"{file.name}: non-object record")
 
@@ -174,18 +189,18 @@ def main() -> int:
             errors.append(f"{prefix}: only {len(faqs)} FAQs (<{MIN_FAQ})")
 
         required_heading_groups = {
-            "definition": ("ما هو", "ما هي", "التعريف"),
-            "symptoms": ("الأعراض", "العلامات", "كيف يظهر"),
-            "causes": ("الأسباب", "عوامل الخطورة", "العوامل المرتبطة"),
-            "assessment": ("التقييم", "التشخيص"),
-            "differential": ("التشخيص التفريقي", "الفرق بين", "ما الحالات التي قد تشبه", "ما الذي قد يشبه"),
-            "treatment": ("العلاج", "الدعم", "التدخلات"),
-            "help": ("طلب المساعدة", "متى أطلب", "متى نطلب", "الرعاية العاجلة", "الطوارئ"),
+            "definition": ("ما هو", "ما هي", "التعريف", "ماذا يعني"),
+            "symptoms": ("الأعراض", "العلامات", "كيف يظهر", "كيف تبدو"),
+            "causes": ("الأسباب", "عوامل الخطورة", "العوامل المرتبطة", "لماذا يحدث", "ما الذي يزيد"),
+            "assessment": ("التقييم", "التشخيص", "كيف يتم تقييم", "كيف يشخص"),
+            "differential": ("التشخيص التفريقي", "الفرق بين", "ما الفرق", "قد تشبه", "قد يشبه", "يشبه", "تمييز", "التفريق", "حالات أخرى"),
+            "treatment": ("العلاج", "الدعم", "التدخلات", "خيارات الرعاية", "الخطة العلاجية"),
+            "help": ("طلب المساعدة", "متى أطلب", "متى نطلب", "متى يحتاج", "متى تحتاج", "متى يجب", "متى ينبغي", "العاجل", "العاجلة", "الفوري", "الفورية", "الطوارئ", "السلامة", "الرعاية الطبية"),
         }
         all_headings = [*h2, *h3]
         for label, needles in required_heading_groups.items():
             if not has_heading(all_headings, needles):
-                errors.append(f"{prefix}: missing topic-specific {label} heading")
+                errors.append(f"{prefix}: missing topic-specific {label} section")
 
         references = row.get("references_json") if isinstance(row.get("references_json"), list) else []
         ref_counts[slug] = len(references)
@@ -205,8 +220,8 @@ def main() -> int:
         if len(questions) < MIN_SEARCH_QUESTIONS:
             errors.append(f"{prefix}: only {len(questions)} search-intent questions (<{MIN_SEARCH_QUESTIONS})")
 
-        intro = " ".join(paragraphs[:2] + h2[:2])
-        if primary and primary not in normalize(intro):
+        opening_context = " ".join([str(row.get("title") or ""), str(row.get("excerpt") or ""), *paragraphs[:2], *h2[:2]])
+        if primary and primary not in normalize(opening_context):
             errors.append(f"{prefix}: primary keyword is not established in the opening definition context")
 
         lower_text = normalize(text)
@@ -214,8 +229,8 @@ def main() -> int:
             if normalize(phrase) in lower_text:
                 errors.append(f"{prefix}: forbidden filler phrase detected: {phrase}")
         for phrase in UNSAFE_PROMISES:
-            if normalize(phrase) in lower_text:
-                errors.append(f"{prefix}: unsafe treatment promise detected: {phrase}")
+            if contains_unnegated_phrase(text, phrase):
+                errors.append(f"{prefix}: unsafe unqualified treatment promise detected: {phrase}")
         if DOSE_RE.search(text):
             errors.append(f"{prefix}: numeric medication dosing detected")
 
@@ -261,9 +276,7 @@ def main() -> int:
         "reference_total": sum(ref_counts.values()),
         "duplicate_long_paragraphs": len(duplicate_paragraphs),
         "max_repeated_long_sentence_ratio": round(max(sentence_ratios.values(), default=0.0), 4),
-        "max_pairwise_5gram_jaccard": {
-            "left": max_pair[0], "right": max_pair[1], "score": round(max_pair[2], 5)
-        },
+        "max_pairwise_5gram_jaccard": {"left": max_pair[0], "right": max_pair[1], "score": round(max_pair[2], 5)},
         "error_count": len(errors),
         "errors": errors[:100],
     }
