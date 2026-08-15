@@ -11,9 +11,22 @@ const BATCH_DIR = path.join(ROOT, 'data', 'encyclopedia', 'batches');
 const DEFAULT_MANIFEST = path.join(ROOT, 'data', 'encyclopedia', 'releases', '2026-08-15-clinical-50.json');
 const CHUNK_SIZE = 100;
 const DEFAULT_DISCLAIMER = 'هذا المحتوى للتثقيف العام ولا يقدم تشخيصًا فرديًا أو وصفة علاجية، ولا يغني عن تقييم مختص مؤهل عند الحاجة.';
+const META_SUFFIXES = [
+  ' بدقة.',
+  ' بوضوح.',
+  ' أيضًا.',
+  '، عند الحاجة.',
+  '، ومتى يلزم التقييم.',
+  '، ومتى تطلب المساعدة.',
+  '، مع توضيح متى تطلب المساعدة.',
+  '، مع توضيح متى يلزم التقييم المتخصص.',
+  '، ويعرض متى يلزم طلب المساعدة المتخصصة.',
+  '، مع توضيح متى ينبغي طلب المساعدة المتخصصة.',
+  '، مع شرح التقييم والعلاج والدعم ومتى ينبغي طلب المساعدة المتخصصة.',
+];
 
 function parseArgs(argv) {
-  const args = { apply: false, manifest: DEFAULT_MANIFEST };
+  const args = { apply: false, batch: null, manifest: DEFAULT_MANIFEST };
   for (let i = 0; i < argv.length; i += 1) {
     const value = argv[i];
     if (value === '--apply') args.apply = true;
@@ -30,11 +43,47 @@ function isRecord(value) {
 }
 
 function clean(value) {
-  return typeof value === 'string' ? value.trim() : '';
+  return typeof value === 'string' ? value.trim().replace(/\s+/gu, ' ') : '';
 }
 
 function cleanList(value) {
   return Array.isArray(value) ? value.map(clean).filter(Boolean) : [];
+}
+
+function clipMeta(text) {
+  const normalized = clean(text);
+  if (normalized.length <= 160) return normalized;
+  const window = normalized.slice(0, 160);
+  const cut = window.lastIndexOf(' ');
+  if (cut >= 150) return `${window.slice(0, cut).replace(/[،؛,:\-]+$/u, '').trim()}…`;
+  return '';
+}
+
+function fitSeoDescription(rawValue, excerptValue) {
+  const candidates = [clean(rawValue), clean(excerptValue)].filter(Boolean);
+  for (const candidate of candidates) {
+    if (candidate.length >= 150 && candidate.length <= 160) return candidate;
+    const clipped = clipMeta(candidate);
+    if (clipped.length >= 150 && clipped.length <= 160) return clipped;
+  }
+
+  for (const candidate of candidates) {
+    if (candidate.length >= 150) continue;
+    const stem = candidate.replace(/[.!؟،؛:]+$/u, '').trim();
+    for (const suffix of META_SUFFIXES) {
+      const expanded = `${stem}${suffix}`;
+      if (expanded.length >= 150 && expanded.length <= 160) return expanded;
+    }
+  }
+
+  if (candidates.length >= 2) {
+    const stem = candidates[0].replace(/[.!؟،؛:]+$/u, '').trim();
+    const merged = `${stem}، ${candidates[1]}`;
+    const clipped = clipMeta(merged);
+    if (clipped.length >= 150 && clipped.length <= 160) return clipped;
+  }
+
+  throw new Error(`Unable to create a 150-160 character SEO description from supplied editorial metadata`);
 }
 
 function extractBodyText(bodyJson) {
@@ -114,6 +163,12 @@ async function loadSourceRecords(manifest) {
       const bodyText = extractBodyText(bodyJson);
       const references = Array.isArray(raw.references_json) ? raw.references_json : [];
       const author = clean(raw.author_display_name) || clean(manifest.author_display_name);
+      let seoDescription;
+      try {
+        seoDescription = fitSeoDescription(raw.seo_description, raw.excerpt);
+      } catch (error) {
+        throw new Error(`${slug}: ${error instanceof Error ? error.message : String(error)}`);
+      }
       const row = {
         content_type: 'condition',
         slug,
@@ -124,7 +179,7 @@ async function loadSourceRecords(manifest) {
         audience: cleanList(raw.audience),
         search_aliases: cleanList(raw.search_aliases).length ? cleanList(raw.search_aliases) : cleanList(raw.secondary_keywords),
         seo_title: clean(raw.seo_title) || null,
-        seo_description: clean(raw.seo_description) || null,
+        seo_description: seoDescription,
         canonical_url: canonical,
         robots_follow: raw.robots_follow !== false,
         schema_json: isRecord(raw.schema_json) ? raw.schema_json : {},
@@ -271,6 +326,7 @@ async function main() {
   const rows = await loadSourceRecords(manifest);
   console.log(`Release plan ${manifest.release_id}: ${rows.length} validated records from ${manifest.expected_batch_files} batches.`);
   console.log(`Body depth: min=${Math.min(...rows.map((row) => wordCount(row.body_text)))} words, max=${Math.max(...rows.map((row) => wordCount(row.body_text)))} words.`);
+  console.log(`SEO descriptions verified in production range: ${rows.filter((row) => row.seo_description.length >= 150 && row.seo_description.length <= 160).length}/${rows.length}.`);
   if (!args.apply) {
     console.log('Dry-run complete. No production writes were performed.');
     return;
