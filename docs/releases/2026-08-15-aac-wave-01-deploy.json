@@ -1,0 +1,14 @@
+{
+  "release": "aac-wave-01",
+  "published_at": "2026-08-15",
+  "deployment_branch": "cloudflare-workers-deploy",
+  "content_source": "Supabase public.content",
+  "status": "published",
+  "records": [
+    "/care-guides/aac/core-fringe-vocabulary-arabic/",
+    "/care-guides/aac/arabic-grid-design/",
+    "/care-guides/aac/autism-guide/",
+    "/care-guides/aac/multilingual-arabic-family-languages/"
+  ],
+  "note": "Production deploy marker for AAC Wave 01. The deployment branch already contains the dynamic catch-all care-guides runtime; content is loaded from Supabase at request time."
+}
