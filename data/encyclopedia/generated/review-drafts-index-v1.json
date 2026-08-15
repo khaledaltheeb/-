@@ -1,0 +1,110 @@
+{
+  "version": 2,
+  "status": "passed",
+  "source_draft_count": 3,
+  "generated_review_count": 3,
+  "unique_canonical_count": 3,
+  "aggregate_source_domain_count": 7,
+  "aggregate_source_domains": [
+    "cdc.gov",
+    "medlineplus.gov",
+    "nice.org.uk",
+    "publications.aap.org",
+    "pubmed.ncbi.nlm.nih.gov",
+    "unesco.org",
+    "who.int"
+  ],
+  "max_pairwise_body_5gram_jaccard": 0.0002,
+  "similarity_threshold": 0.35,
+  "publication_ready": false,
+  "scientific_review_required": true,
+  "unified_encyclopedia_route_slugs": true,
+  "pages": [
+    {
+      "slug": "autism-spectrum-disorder",
+      "source_review_slug": "encyclopedia-autism-spectrum-disorder",
+      "route_slug": "autism-spectrum-disorder",
+      "title": "اضطراب طيف التوحد",
+      "canonical_url": "/encyclopedia/autism-spectrum-disorder/",
+      "primary_keyword": "اضطراب طيف التوحد",
+      "status": "scientific_review",
+      "robots_index": false,
+      "body_words": 2615,
+      "faq_count": 10,
+      "reference_count": 7,
+      "source_domains": [
+        "cdc.gov",
+        "nice.org.uk",
+        "unesco.org",
+        "who.int"
+      ],
+      "source_domain_count": 4,
+      "source_draft_sha256": "e52ade9a0e0fba384c06617e3201cd88866d1d659af9267dfb113ba7a7112d45",
+      "generated_records_sha256": "e478ad302f5d4ba732a2aa6f9d6a35b105793312438f281860b8b293df17bdd3"
+    },
+    {
+      "slug": "cerebral-palsy",
+      "source_review_slug": "encyclopedia-cerebral-palsy",
+      "route_slug": "cerebral-palsy",
+      "title": "الشلل الدماغي",
+      "canonical_url": "/encyclopedia/cerebral-palsy/",
+      "primary_keyword": "الشلل الدماغي",
+      "status": "scientific_review",
+      "robots_index": false,
+      "body_words": 2305,
+      "faq_count": 10,
+      "reference_count": 7,
+      "source_domains": [
+        "cdc.gov",
+        "nice.org.uk",
+        "pubmed.ncbi.nlm.nih.gov",
+        "unesco.org",
+        "who.int"
+      ],
+      "source_domain_count": 5,
+      "source_draft_sha256": "f2433e645ce9165655d6aa2c923a366b4d149162b5355c209d83b792536b7d5f",
+      "generated_records_sha256": "d988f9c79e61599f22eb9b1c420c8d6ee9bb5dbc54aa82084c039c5566505ad6"
+    },
+    {
+      "slug": "down-syndrome",
+      "source_review_slug": "encyclopedia-down-syndrome",
+      "route_slug": "down-syndrome",
+      "title": "متلازمة داون",
+      "canonical_url": "/encyclopedia/down-syndrome/",
+      "primary_keyword": "متلازمة داون",
+      "status": "scientific_review",
+      "robots_index": false,
+      "body_words": 2178,
+      "faq_count": 10,
+      "reference_count": 6,
+      "source_domains": [
+        "cdc.gov",
+        "medlineplus.gov",
+        "publications.aap.org",
+        "unesco.org",
+        "who.int"
+      ],
+      "source_domain_count": 5,
+      "source_draft_sha256": "c2d482fea015c7ad59b651760c45c21edfcc8ed1299c3671d75611ce67ec9079",
+      "generated_records_sha256": "c2f92e1894b4733dc362830cc1c44573f55584c9df01335f52edc7a8ac3899ef"
+    }
+  ],
+  "pairwise_similarity": [
+    {
+      "left": "autism-spectrum-disorder",
+      "right": "cerebral-palsy",
+      "body_5gram_jaccard": 0.0002
+    },
+    {
+      "left": "autism-spectrum-disorder",
+      "right": "down-syndrome",
+      "body_5gram_jaccard": 0.0
+    },
+    {
+      "left": "cerebral-palsy",
+      "right": "down-syndrome",
+      "body_5gram_jaccard": 0.0
+    }
+  ],
+  "errors": []
+}
