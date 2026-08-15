@@ -5,6 +5,7 @@ on:
     branches:
       - 'agent/encyclopedia-disability-inclusion-foundation'
     paths:
+      - 'data/encyclopedia/drafts/**'
       - 'data/encyclopedia/generated/review-drafts/**'
       - 'data/encyclopedia/canonical-adoptions-v1.json'
       - 'scripts/import_disability_encyclopedia_review.mjs'
@@ -12,6 +13,7 @@ on:
   pull_request:
     branches: [main]
     paths:
+      - 'data/encyclopedia/drafts/**'
       - 'data/encyclopedia/generated/review-drafts/**'
       - 'data/encyclopedia/canonical-adoptions-v1.json'
       - 'scripts/import_disability_encyclopedia_review.mjs'
@@ -35,12 +37,16 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Validate importer syntax
         run: node --check scripts/import_disability_encyclopedia_review.mjs
-      - name: Offline dry-run for three genuinely new review payloads
+      - name: Offline dry-run for all genuinely new review payloads
         env:
           SUPABASE_URL: ''
           NEXT_PUBLIC_SUPABASE_URL: ''
           SUPABASE_SECRET_KEY: ''
-        run: node scripts/import_disability_encyclopedia_review.mjs --expect-count 3
+        run: |
+          set -euo pipefail
+          expected="$(find data/encyclopedia/drafts -maxdepth 1 -type f -name '*-v1.json' | wc -l | tr -d ' ')"
+          test "$expected" -gt 0
+          node scripts/import_disability_encyclopedia_review.mjs --expect-count "$expected"
       - name: Assert adopted canonicals remain enrichment-only
         run: |
           node - <<'NODE'
@@ -60,8 +66,10 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: ''
           SUPABASE_SECRET_KEY: ''
         run: |
+          set -euo pipefail
+          expected="$(find data/encyclopedia/drafts -maxdepth 1 -type f -name '*-v1.json' | wc -l | tr -d ' ')"
           set +e
-          output="$(node scripts/import_disability_encyclopedia_review.mjs --apply --expect-count 3 2>&1)"
+          output="$(node scripts/import_disability_encyclopedia_review.mjs --apply --expect-count "$expected" 2>&1)"
           code=$?
           set -e
           printf '%s\n' "$output"
