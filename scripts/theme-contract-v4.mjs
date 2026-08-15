@@ -37,7 +37,7 @@ if (!/@media\s*\(prefers-reduced-motion:\s*reduce\)/.test(theme)) fail('central 
 if (!theme.includes("@import './theme-admin-v4.css'")) fail('central theme must load the scoped V4 admin layer');
 if (!adminTheme.includes('.admin-app-shell') || !adminTheme.includes('.dashboard-card')) fail('admin V4 layer missing core admin selectors');
 
-if (!header.includes('<strong>منصة روافد</strong>')) fail('global header must use the full institutional brand name');
+if (!brand.includes('<strong>منصة روافد</strong>')) fail('shared brand component must use the full institutional brand name');
 for (const token of ['--rf-v5-aqua:', '--rf-v5-glass:', '--rf-v5-shadow-hover:']) {
   if (!theme.includes(token)) fail(`institutional V5 layer missing ${token}`);
 }
