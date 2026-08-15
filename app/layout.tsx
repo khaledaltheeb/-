@@ -26,10 +26,10 @@ export const metadata: Metadata = {
   manifest: '/manifest.webmanifest',
   icons: {
     icon: [
-      { url: '/pwa-icon-192', type: 'image/png', sizes: '192x192' },
-      { url: '/icons/rawafid-app.svg', type: 'image/svg+xml', sizes: 'any' },
+      { url: '/pwa-icon-192?v=5', type: 'image/png', sizes: '192x192' },
+      { url: '/icons/rawafid-app.svg?v=5', type: 'image/svg+xml', sizes: 'any' },
     ],
-    apple: [{ url: '/pwa-icon-180', type: 'image/png', sizes: '180x180' }],
+    apple: [{ url: '/pwa-icon-180?v=5', type: 'image/png', sizes: '180x180' }],
   },
   appleWebApp: {
     capable: true,
