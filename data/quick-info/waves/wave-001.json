@@ -1,0 +1,75 @@
+{
+  "wave": "quick-info-wave-001",
+  "released_at": "2026-08-15T12:48:00+03:00",
+  "source_verified_through": "2026-08-15",
+  "content_contract_version": 6,
+  "release_policy": {
+    "status": "published",
+    "publication_ready": true,
+    "editorial_review_required": false,
+    "featured_images": "withheld-until-asset-migration",
+    "legacy_content_policy": "preserve useful long-form material; replace unsafe or templated opening sections with evidence-led review"
+  },
+  "records": [
+    {
+      "slug": "panic-vs-heart-emergency",
+      "content_slug": "quick-info-panic-vs-heart-emergency",
+      "canonical": "/quick-info/panic-vs-heart-emergency/",
+      "category": "somatic-health-anxiety",
+      "arabic_words": 3122,
+      "blocks": 96,
+      "h2": 11,
+      "h3": 14,
+      "faq": 6,
+      "references": 5
+    },
+    {
+      "slug": "sadness-vs-depression",
+      "content_slug": "quick-info-sadness-vs-depression",
+      "canonical": "/quick-info/sadness-vs-depression/",
+      "category": "depression-mood",
+      "arabic_words": 2974,
+      "blocks": 94,
+      "h2": 11,
+      "h3": 14,
+      "faq": 6,
+      "references": 5
+    },
+    {
+      "slug": "sleep-loss-vs-insomnia",
+      "content_slug": "quick-info-sleep-loss-vs-insomnia",
+      "canonical": "/quick-info/sleep-loss-vs-insomnia/",
+      "category": "sleep-mental-health",
+      "arabic_words": 3047,
+      "blocks": 92,
+      "h2": 11,
+      "h3": 13,
+      "faq": 6,
+      "references": 5
+    },
+    {
+      "slug": "stress-vs-anxiety-disorder",
+      "content_slug": "quick-info-stress-vs-anxiety-disorder",
+      "canonical": "/quick-info/stress-vs-anxiety-disorder/",
+      "category": "anxiety-disorders",
+      "arabic_words": 3065,
+      "blocks": 96,
+      "h2": 11,
+      "h3": 14,
+      "faq": 6,
+      "references": 5
+    },
+    {
+      "slug": "fatigue-vs-laziness",
+      "content_slug": "quick-info-fatigue-vs-laziness",
+      "canonical": "/quick-info/fatigue-vs-laziness/",
+      "category": "mental-health-services-care",
+      "arabic_words": 3052,
+      "blocks": 99,
+      "h2": 11,
+      "h3": 16,
+      "faq": 6,
+      "references": 5
+    }
+  ]
+}
