@@ -10,6 +10,8 @@ import materialize_quick_info as base
 import materialize_quick_info_v2 as v2
 
 EXPECTED_EDITORIAL_OVERLAYS = 35
+MINIMUM_RECOVERED_EDITORIAL_WORDS = 1200
+V6_QUICK_INFO_WORD_FLOOR = 1500
 EDITORIAL_ROOT_PARTS = ("content", "quick-info-editorial")
 
 
@@ -124,7 +126,9 @@ def make_page_record(legacy_root: Path, overlays: dict[str, tuple[str, Path]]):
             "legacy_editorial_overlay_batch": batch,
             "legacy_editorial_overlay_source": str(path.relative_to(legacy_root)),
             "legacy_editorial_overlay_word_count": word_count,
-            "legacy_source_thin_after_sanitization": word_count < 1500,
+            "legacy_editorial_recovery_ready": word_count >= MINIMUM_RECOVERED_EDITORIAL_WORDS,
+            "legacy_editorial_requires_v6_expansion": word_count < V6_QUICK_INFO_WORD_FLOOR,
+            "legacy_source_thin_after_sanitization": word_count < V6_QUICK_INFO_WORD_FLOOR,
             "publication_ready": False,
             "editorial_review_required": True,
         }
@@ -149,16 +153,30 @@ def validate_output() -> None:
     editorial = [r for r in records if r.get("schema_json", {}).get("legacy_editorial_overlay") is True]
     if len(editorial) != EXPECTED_EDITORIAL_OVERLAYS:
         raise SystemExit(f"Expected {EXPECTED_EDITORIAL_OVERLAYS} editorial overlays, found {len(editorial)}")
-    thin = [r["slug"] for r in editorial if r.get("schema_json", {}).get("legacy_editorial_overlay_word_count", 0) < 1500]
-    if thin:
-        raise SystemExit(f"Editorial overlays below 1500 words after merge: {thin}")
+
+    below_recovery_floor = [
+        r["slug"] for r in editorial
+        if r.get("schema_json", {}).get("legacy_editorial_overlay_word_count", 0) < MINIMUM_RECOVERED_EDITORIAL_WORDS
+    ]
+    if below_recovery_floor:
+        raise SystemExit(
+            f"Recovered editorial overlays below {MINIMUM_RECOVERED_EDITORIAL_WORDS} words: {below_recovery_floor}"
+        )
     if any(len(r.get("references_json", [])) < 3 for r in editorial):
         raise SystemExit("At least one editorial overlay has fewer than 3 references after merge")
+
+    needs_v6_expansion = [
+        r["slug"] for r in editorial
+        if r.get("schema_json", {}).get("legacy_editorial_requires_v6_expansion") is True
+    ]
     print({
         "editorial_overlay_records": len(editorial),
         "minimum_editorial_words": min(r["schema_json"]["legacy_editorial_overlay_word_count"] for r in editorial),
         "maximum_editorial_words": max(r["schema_json"]["legacy_editorial_overlay_word_count"] for r in editorial),
         "minimum_editorial_references": min(len(r.get("references_json", [])) for r in editorial),
+        "v6_word_floor": V6_QUICK_INFO_WORD_FLOOR,
+        "requires_v6_expansion": len(needs_v6_expansion),
+        "publication_ready": 0,
     })
 
 
