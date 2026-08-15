@@ -8,7 +8,9 @@ const fail = (message) => { console.error(`THEME V4 CONTRACT FAILED: ${message}`
 const layout = read('app/layout.tsx');
 const header = read('components/site-header.tsx');
 const footer = read('components/site-footer.tsx');
+const brand = read('components/rawafid-brand.tsx');
 const manifest = read('public/manifest.webmanifest');
+const serviceWorker = read('public/sw.js');
 const pwaIcon = read('lib/pwa-icon.ts');
 const theme = read('app/rawafid-theme.css');
 const adminTheme = read('app/theme-admin-v4.css');
@@ -43,12 +45,23 @@ for (const rule of ['.brand-mark .logo-stream', '.rawafid-hero-visual', '.site-f
   if (!theme.includes(rule)) fail(`institutional V5 layer missing core rule ${rule}`);
 }
 if (!theme.includes('@media(forced-colors:active)')) fail('institutional V5 layer missing forced-colors support');
-if (!header.includes('logo-stream') || !footer.includes('logo-stream')) fail('header and footer must share the original Rawafid mark');
-if (!header.includes('معرفة تقود إلى أثر') || !footer.includes('معرفة تقود إلى أثر')) fail('institutional slogan must be consistent');
+if (!brand.includes('logo-stream') || !brand.includes('معرفة تقود إلى أثر')) fail('shared brand component must preserve the original Rawafid mark and slogan');
+if (!header.includes("import RawafidBrand from '@/components/rawafid-brand'") || !footer.includes("import RawafidBrand from '@/components/rawafid-brand'")) fail('header and footer must use the shared Rawafid brand component');
 if (!manifest.includes('منصة روافد | معرفة تقود إلى أثر')) fail('PWA name must match institutional identity');
 if (!pwaIcon.includes("#e6b650") || !pwaIcon.includes("#075f61")) fail('generated PWA icons must match institutional identity');
 if (!themeLib.includes("RAWAFID_BRAND_NAME = 'منصة روافد'")) fail('theme library must centralize the institutional brand name');
 if (!themeLib.includes('resolveSectorAccent')) fail('theme library must normalize sector accents without database writes');
 if (!agents.includes('app/rawafid-theme.css')) fail('agent rules must preserve the central theme entry point');
+
+for (const token of ['Rawafid Institutional V5.1', 'font-family:var(--font-arabic)', '--rf-reading-measure:72ch', '.footer-search', '.theme-preview-type-specimen']) {
+  if (!theme.includes(token)) fail(`institutional V5.1 layer missing ${token}`);
+}
+if (!header.includes('data-nav-priority') || !header.includes('حالة، دليل أو خدمة')) fail('V5.1 header must keep intent-led navigation and search');
+for (const token of ['footer-search', 'footer-trust-list', 'back-to-top']) {
+  if (!footer.includes(token)) fail(`V5.1 footer missing ${token}`);
+}
+if (!layout.includes('<body id="top">') || !layout.includes('?v=6')) fail('root layout must expose the top target and V6 PWA identity');
+if (!manifest.includes('?v=6')) fail('PWA manifest must use V6 icon identity');
+if (!serviceWorker.includes('rawafid-shell-v6') || !serviceWorker.includes('event.waitUntil(cacheWrite')) fail('service worker must use the V6 cache and durable asset writes');
 
 if (!process.exitCode) console.log('Rawafid central theme V4 contract passed.');

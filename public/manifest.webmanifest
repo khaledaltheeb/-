@@ -24,19 +24,19 @@
   ],
   "icons": [
     {
-      "src": "/pwa-icon-192?v=5",
+      "src": "/pwa-icon-192?v=6",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/pwa-icon-512?v=5",
+      "src": "/pwa-icon-512?v=6",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/icons/rawafid-app.svg?v=5",
+      "src": "/icons/rawafid-app.svg?v=6",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"

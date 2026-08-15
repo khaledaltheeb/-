@@ -44,6 +44,22 @@ export default function ThemePreviewPage() {
       </section>
 
       <section className="rawafid-section">
+        <div className="theme-preview-type-specimen">
+          <div>
+            <span className="rawafid-kicker">الخطوط والإيقاع</span>
+            <h2>قراءة عربية مريحة على كل شاشة</h2>
+            <p>يستخدم النظام خط Noto Sans Arabic المحمّل بآلية Next.js، مع مقياس قراءة ثابت وتسلسل عناوين واضح وتباعد يحافظ على التركيز في الصفحات الطويلة والواجهات المهنية.</p>
+          </div>
+          <div className="theme-preview-metrics" aria-label="مقاييس القراءة والوصولية">
+            <div><strong>72 حرفًا</strong><span>مقياس القراءة الأقصى</span></div>
+            <div><strong>44 بكسل</strong><span>الحد الأدنى لهدف اللمس</span></div>
+            <div><strong>RTL</strong><span>اتجاه عربي أصيل</span></div>
+            <div><strong>AA+</strong><span>تباين وفوكس واضحان</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section className="rawafid-section">
         <div className="rawafid-section-head"><div className="rawafid-section-title"><span>المكونات</span><h2>مكونات مركزية قابلة لإعادة الاستخدام</h2></div></div>
         <div className="rawafid-platform-grid">
           {[

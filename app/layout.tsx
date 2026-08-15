@@ -26,10 +26,10 @@ export const metadata: Metadata = {
   manifest: '/manifest.webmanifest',
   icons: {
     icon: [
-      { url: '/pwa-icon-192?v=5', type: 'image/png', sizes: '192x192' },
-      { url: '/icons/rawafid-app.svg?v=5', type: 'image/svg+xml', sizes: 'any' },
+      { url: '/pwa-icon-192?v=6', type: 'image/png', sizes: '192x192' },
+      { url: '/icons/rawafid-app.svg?v=6', type: 'image/svg+xml', sizes: 'any' },
     ],
-    apple: [{ url: '/pwa-icon-180?v=5', type: 'image/png', sizes: '180x180' }],
+    apple: [{ url: '/pwa-icon-180?v=6', type: 'image/png', sizes: '180x180' }],
   },
   appleWebApp: {
     capable: true,
@@ -76,7 +76,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
 
   return (
     <html lang="ar" dir="rtl" className={arabicFont.variable}>
-      <body>
+      <body id="top">
         {analyticsEnabled && gtmId ? (
           <>
             <Script id="rawafid-gtm" strategy="afterInteractive">
