@@ -35,7 +35,9 @@ UNSAFE_PROMISES = (
     "يضمن الشفاء",
     "نتيجة مضمونة",
 )
-NEGATION_WORDS = ("لا", "ليس", "ليست", "غير", "دون", "بدون", "ينبغي ألا", "لا يوجد", "لا توجد", "لا يضمن", "لا تضمن")
+NEGATION_MARKERS = (
+    "لا ", "ليس ", "ليست ", "غير ", "دون ", "بدون ", "ألا ", "الا ", "لا يوجد", "لا توجد", "لا يضمن", "لا تضمن", "لا نعد", "لا يعد", "لا تعد",
+)
 DOSE_RE = re.compile(r"(?:\b\d+(?:[.,]\d+)?\s*(?:mg|mcg|g)\b|\d+(?:[.,]\d+)?\s*(?:ملغ|مجم|ميكروغرام))", re.I)
 ARABIC_WORD_RE = re.compile(r"[\u0600-\u06FF]+(?:[\u0600-\u06FF\u0640'-]*[\u0600-\u06FF])?")
 TOKEN_RE = re.compile(r"[\u0600-\u06FFA-Za-z0-9]+")
@@ -95,23 +97,50 @@ def body_text(body: object) -> str:
     return "\n".join([*h2, *h3, *paragraphs, *faq_text])
 
 
-def has_heading(headings: list[str], needles: tuple[str, ...]) -> bool:
+def has_phrase(headings: list[str], phrases: tuple[str, ...]) -> bool:
     joined = " | ".join(normalize(h) for h in headings)
-    return any(normalize(n) in joined for n in needles)
+    return any(normalize(phrase) in joined for phrase in phrases)
 
 
-def contains_unnegated_phrase(text: str, phrase: str) -> bool:
-    normalized = normalize(text)
+def has_stem(headings: list[str], stems: tuple[str, ...]) -> bool:
+    normalized = [normalize(h) for h in headings]
+    return any(any(stem in heading for stem in stems) for heading in normalized)
+
+
+def has_section(headings: list[str], label: str) -> bool:
+    if label == "definition":
+        return has_phrase(headings, ("ما هو", "ما هي", "التعريف", "ماذا يعني"))
+    if label == "symptoms":
+        return has_stem(headings, ("عرض", "اعراض", "علام", "يظهر", "تبدو"))
+    if label == "causes":
+        return has_stem(headings, ("سبب", "اسباب", "خطورة", "عوامل", "لماذا", "يزيد"))
+    if label == "assessment":
+        return has_stem(headings, ("تقييم", "تشخيص"))
+    if label == "differential":
+        return has_stem(headings, ("تشابه", "مشابه", "مصاحب", "فرق", "يختلف", "تمييز", "تفريق", "استبعاد"))
+    if label == "treatment":
+        return has_stem(headings, ("علاج", "دعم", "تدخل", "رعاية"))
+    if label == "help":
+        normalized = [normalize(h) for h in headings]
+        for heading in normalized:
+            if any(stem in heading for stem in ("طوار", "عاجل", "سلام", "مساعدة")):
+                return True
+            if "متى" in heading and any(stem in heading for stem in ("راجع", "طلب", "اطلب", "احتاج", "يحتاج", "تحتاج", "يجب", "ينبغي")):
+                return True
+        return False
+    return False
+
+
+def contains_unnegated_promise(text: str, phrase: str) -> bool:
     target = normalize(phrase)
-    start = 0
-    while True:
-        index = normalized.find(target, start)
-        if index < 0:
-            return False
-        prefix = normalized[max(0, index - 45):index].strip()
-        if not any(prefix.endswith(normalize(word)) or f" {normalize(word)} " in f" {prefix} " for word in NEGATION_WORDS):
-            return True
-        start = index + len(target)
+    for sentence in SENTENCE_SPLIT_RE.split(text):
+        normalized_sentence = normalize(sentence)
+        if target not in normalized_sentence:
+            continue
+        if any(normalize(marker) in normalized_sentence for marker in NEGATION_MARKERS):
+            continue
+        return True
+    return False
 
 
 def long_sentences(text: str) -> list[str]:
@@ -188,18 +217,9 @@ def main() -> int:
         if len(faqs) < MIN_FAQ:
             errors.append(f"{prefix}: only {len(faqs)} FAQs (<{MIN_FAQ})")
 
-        required_heading_groups = {
-            "definition": ("ما هو", "ما هي", "التعريف", "ماذا يعني"),
-            "symptoms": ("الأعراض", "العلامات", "كيف يظهر", "كيف تبدو"),
-            "causes": ("الأسباب", "عوامل الخطورة", "العوامل المرتبطة", "لماذا يحدث", "ما الذي يزيد"),
-            "assessment": ("التقييم", "التشخيص", "كيف يتم تقييم", "كيف يشخص"),
-            "differential": ("التشخيص التفريقي", "الفرق بين", "ما الفرق", "قد تشبه", "قد يشبه", "يشبه", "تمييز", "التفريق", "حالات أخرى"),
-            "treatment": ("العلاج", "الدعم", "التدخلات", "خيارات الرعاية", "الخطة العلاجية"),
-            "help": ("طلب المساعدة", "متى أطلب", "متى نطلب", "متى يحتاج", "متى تحتاج", "متى يجب", "متى ينبغي", "العاجل", "العاجلة", "الفوري", "الفورية", "الطوارئ", "السلامة", "الرعاية الطبية"),
-        }
         all_headings = [*h2, *h3]
-        for label, needles in required_heading_groups.items():
-            if not has_heading(all_headings, needles):
+        for label in ("definition", "symptoms", "causes", "assessment", "differential", "treatment", "help"):
+            if not has_section(all_headings, label):
                 errors.append(f"{prefix}: missing topic-specific {label} section")
 
         references = row.get("references_json") if isinstance(row.get("references_json"), list) else []
@@ -229,7 +249,7 @@ def main() -> int:
             if normalize(phrase) in lower_text:
                 errors.append(f"{prefix}: forbidden filler phrase detected: {phrase}")
         for phrase in UNSAFE_PROMISES:
-            if contains_unnegated_phrase(text, phrase):
+            if contains_unnegated_promise(text, phrase):
                 errors.append(f"{prefix}: unsafe unqualified treatment promise detected: {phrase}")
         if DOSE_RE.search(text):
             errors.append(f"{prefix}: numeric medication dosing detected")
