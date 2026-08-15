@@ -6,98 +6,70 @@ Wave 003 is fixed at **50 distinct search intents** selected from measured low-c
 
 The legacy `khaledaltheeb/healthrenewal.org` repository remains a read-only content/provenance source. No legacy runtime, theme, CSS, layout or deployment code is copied into Rawafid V3.
 
-## Current release state — 2026-08-15
+## Final release state — 2026-08-15
 
-**30 of 50 candidates are published + indexable in Supabase.** The remaining 20 are not counted as published until they independently pass the V8 database release gate.
+**50 of 50 configured candidates are published + indexable + `publication_ready=true` in Supabase.** The Wave 003 configuration file remains the authoritative list of the 50 intended slugs and search intents.
 
-This is not a simple first-30 sequence. The database currently contains the first 25 configured intents plus five later volunteer-governance intents that were completed early: handover continuity, feedback conversation, trainee learning objectives, boundary-breach response, and safeguarding information minimization.
+A final live-database aggregate after the last publication returned:
 
-### Published canonicals
+- **50** Wave 003 records;
+- **50** with `status=published` and `robots_index=true`;
+- **50** with `schema_json.publication_ready=true`;
+- Arabic depth **2,500–3,022 words per page**;
+- **5–7 references per page**;
+- SEO-description length **150–160 characters**;
+- **0 duplicate published/indexable canonicals** across the site;
+- **0 duplicate Wave 003 slugs**.
 
-1. `/care-guides/volunteer-role-boundaries-support/`
-2. `/care-guides/trainee-confidentiality-consent-practice/`
-3. `/care-guides/volunteer-dual-relationship-boundaries/`
-4. `/care-guides/volunteer-ethical-notes-recording/`
-5. `/care-guides/trainee-first-supervision-meeting/`
-6. `/care-guides/supervision-escalation-decision-map/`
-7. `/care-guides/competency-before-independent-task/`
-8. `/care-guides/safeguarding-concern-reporting-volunteer/`
-9. `/care-guides/volunteer-digital-privacy-messaging/`
-10. `/care-guides/photo-story-consent-volunteer/`
-11. `/care-guides/volunteer-onboarding-quality-checklist/`
-12. `/care-guides/volunteer-incident-learning-review/`
-13. `/care-guides/reflective-practice-learning-log-trainee/`
-14. `/care-guides/field-competency-observation-checklist/`
-15. `/care-guides/psychological-first-aid-not-therapy/`
-16. `/care-guides/volunteer-crisis-referral-boundaries/`
-17. `/care-guides/volunteer-suicide-concern-escalation/`
-18. `/care-guides/volunteer-secondary-stress-support/`
-19. `/care-guides/volunteer-post-shift-decompression/`
-20. `/care-guides/volunteer-burnout-workload-boundaries/`
-21. `/care-guides/udl-accessible-assessment-design/`
-22. `/care-guides/udl-digital-learning-materials-access/`
-23. `/care-guides/udl-choice-autonomy-learning-goals/`
-24. `/care-guides/udl-classroom-routine-predictability/`
-25. `/care-guides/udl-multilingual-disability-inclusion/`
-26. `/care-guides/volunteer-handovers-continuity-record/`
-27. `/care-guides/volunteer-feedback-conversation-plan/`
-28. `/care-guides/trainee-learning-objectives-supervision-plan/`
-29. `/care-guides/volunteer-boundary-breach-response/`
-30. `/care-guides/safeguarding-information-minimization-record/`
+Two older Wave 003 rows had already been published but still carried stale `publication_ready=false` metadata. They were reconciled to the same V8-ready state and recorded in the audit log; no content was duplicated or republished under a second canonical.
 
-## Verified quality at the 30-page checkpoint
+## V8 publication control
 
-A live-database aggregate after publication returned exactly **30 `published` + `robots_index=true` Wave 003 records**. Arabic word counts are **2,500–3,022 words per page**. Every page has at least **five references**; current SEO-description lengths are **150–158 characters**. The published-canonical duplicate query returns **zero duplicate indexable canonicals**.
+The V8 database release gate remained authoritative throughout the wave. It blocked promotion when the content contract was incomplete, including failures for:
 
-The V8 release gate is the authoritative publication control. It blocks promotion when the content contract is incomplete, including minimum Arabic depth, heading hierarchy, FAQ/search-intent coverage, semantic terms, claim-to-source mapping, source-version review, evidence-led rewrite/originality metadata, active taxonomy, page mechanism and the central-disclaimer contract. During this wave it rejected pages for insufficient H3 depth, short SEO metadata and forbidden inline disclaimer/warning vocabulary; those pages were repaired before publication rather than bypassing the gate.
+- Arabic depth below 2,500 words;
+- insufficient H3 hierarchy;
+- SEO descriptions outside the 150–160-character contract;
+- classification rationales that were too short;
+- forbidden inline warning/disclaimer vocabulary where the platform requires the central disclaimer contract instead;
+- incomplete publication-ready metadata.
 
-## Editorial coverage now published
+Those pages were repaired and revalidated before publication rather than bypassing the gate.
 
-The released set includes:
+One benzodiazepine-withdrawal draft suffered a transient JSON-shape error during an edit: its 83 content blocks remained intact but `body_json` was temporarily an array and `body_text` became null. The content was recovered by restoring the required `care_guide/blocks` wrapper and regenerating `body_text`; the page then passed a full structural recheck (2,743 words, 37 H2, 4 H3, 8 FAQ, valid sources/SEO) before publication.
 
-- volunteer role boundaries, confidentiality, dual relationships, documentation and first supervision;
-- escalation, competency, safeguarding, digital privacy, consent for photos/stories and programme onboarding;
-- incident learning, reflective practice, field-competency observation, handovers, feedback and learning objectives;
-- boundary-breach response and minimum-data safeguarding records;
-- psychological first aid as support rather than therapy, crisis referral boundaries and suicide-concern escalation;
-- secondary stress, post-shift transition and workload/burnout boundaries;
-- UDL assessment design, digital learning-material accessibility, meaningful choice/autonomy, predictable flexible routines, and multilingual/disability inclusion.
+## Published coverage
 
-The pages are not treated as one template with changed nouns. Each has a distinct search intent, mechanism, artifact or decision workflow, and source map.
+The completed 50-page wave now includes distinct, non-interchangeable intents across:
 
-## Sources
+### Trainees, volunteers, safeguarding and programme quality
 
-The source registry prioritises official policies, guidelines, standards and institutional evidence from IFRC, WHO, IASC, UN Volunteers, CAST, UNICEF, WHO ICF, the UN CRPD, NICE, SAMHSA, NIMH and NHS. The registry was refreshed on **2026-08-15** to include the current WHO/IASC suicide sources and the WHO/IFRC wellbeing sources already used by the newly published volunteer pages.
+Role boundaries; confidentiality/consent; dual relationships; ethical notes; first supervision; escalation decisions; competency before independent work; safeguarding reporting; digital privacy; photo/story consent; onboarding quality; incident learning; reflective practice; field competency observation; handover continuity; feedback conversations; learning objectives; boundary-breach response; minimum-data safeguarding; psychological first aid boundaries; crisis referral; suicide-concern escalation; secondary stress; post-shift transition; and workload/burnout boundaries.
 
-High-stakes withdrawal, suicide and OCD pages are deliberately scoped to education, preparation, safety and care navigation. They do **not** provide individualized diagnosis, medication doses, unsupervised taper schedules, or self-directed specialist treatment protocols.
+### UDL, participation and accessibility
 
-## Remaining 20
+Accessible assessment; accessible digital learning materials; meaningful choice/autonomy; predictable flexible routines; multilingual/disability inclusion; capability–environment fit; ICF-style participation goals; accommodation conversations; small-group instruction; homework accessibility; and accessible meeting participation.
 
-The remaining configured intents are exactly:
+### Addiction, withdrawal-care navigation and evidence governance
 
-1. `care-guide-capability-environment-fit-map`
-2. `care-guide-participation-goal-setting-icf`
-3. `care-guide-reasonable-accommodation-conversation-guide`
-4. `care-guide-alcohol-withdrawal-care-navigation`
-5. `care-guide-opioid-withdrawal-care-navigation`
-6. `care-guide-benzodiazepine-withdrawal-care-navigation`
-7. `care-guide-multiple-substance-withdrawal-risk-navigation`
-8. `care-guide-evaluate-addiction-treatment-claims`
-9. `care-guide-addiction-treatment-outcomes-review`
-10. `care-guide-ocd-first-assessment-preparation`
-11. `care-guide-ocd-erp-therapy-preparation`
-12. `care-guide-ocd-workplace-function-support`
-13. `care-guide-hoarding-family-communication-safety-plan`
-14. `care-guide-trichotillomania-habit-tracking-help-seeking`
-15. `care-guide-skin-picking-habit-tracking-skin-safety`
-16. `care-guide-udl-small-group-instruction-design`
-17. `care-guide-udl-homework-accessibility-review`
-18. `care-guide-accessible-meeting-participation-plan`
-19. `care-guide-body-focused-repetitive-behavior-appointment-prep`
-20. `care-guide-ocd-family-accommodation-clinician-discussion`
+Alcohol-withdrawal care navigation; opioid-withdrawal care navigation; benzodiazepine-withdrawal care navigation; multiple-substance withdrawal-risk navigation; evaluating treatment claims; and reviewing treatment-program outcomes.
 
-No remaining record is promoted merely because it is listed in the configuration. Each must be collision-checked against the current published corpus, written for its own intent, verified against the appropriate current sources, accepted by V8, and receive its own publication/audit decision.
+These pages are deliberately limited to preparation, safety, care navigation and evidence governance. They do **not** provide individualized medication doses, unsupervised taper schedules, detox protocols or a substitute for medical assessment.
+
+### OCD and related disorders
+
+First-assessment preparation; ERP-treatment preparation; workplace-function support; hoarding family communication/safety; trichotillomania tracking/help-seeking; skin-picking tracking/skin safety; BFRB appointment preparation; and clinician-guided discussion of family accommodation/reassurance/ritual participation.
+
+These pages do **not** diagnose the reader or provide a self-directed ERP programme. Family-accommodation material explicitly routes reduction of reassurance/ritual participation through an OCD treatment plan rather than abrupt withdrawal of support.
+
+## Sources and provenance
+
+Each published record retains its own `references_json`, `claim_source_map`, `source_versions_reviewed`, taxonomy review and audit trail. The batch source registry is refreshed on **2026-08-15** and covers the official/institutional source families actually used across the wave, including IFRC, WHO, IASC, UN Volunteers, CAST, UNICEF, WHO ICF, the UN CRPD, NICE, MHRA, SAMHSA, NIAAA, NIMH and NHS/NHS specialist services.
+
+For current high-stakes pages, source versions were rechecked immediately before publication where appropriate—for example WHO/IASC suicide guidance, NICE/MHRA dependence and withdrawal material, NIAAA/SAMHSA treatment-quality resources, and current NHS/NICE/NIMH OCD/hoarding/BFRB guidance.
+
+No specialist reviewer identity or human clinical sign-off is fabricated. The pages are editorially source-backed and passed the platform's automated publication contract; that is distinct from a claim of individualized clinical review.
 
 ## Repository state
 
-Wave 002 was merged only after its current head passed `Rawafid Quality Gate`, `Cloudflare Workers Validate` and `Validate Legacy Migration Payload`. Wave 003 stays on the clean branch `agent/care-guides-rich-wave-003-clean`; the original checkpoint CI was fully green before this 30-page documentation/source refresh.
+Wave 003 is recorded on the clean branch `agent/care-guides-rich-wave-003-clean` in PR #212. The final Supabase publication state is **50/50**. GitHub merge remains contingent on the current head passing all required CI checks; the PR must not be merged while any required gate is red.
