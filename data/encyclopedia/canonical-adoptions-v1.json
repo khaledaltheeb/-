@@ -23,6 +23,17 @@
       "specialty_enrichment_source": "data/encyclopedia/enrichment/specific-learning-disorder-reading-v1.json",
       "import_as_new_record": false,
       "reason": "المسودة التخصصية القديمة استخدمت specific-learning-disorder-reading، لكن main يملك الآن canonical موحدًا باسم dyslexia لنفس نية البحث الأساسية. تُحفظ المادة كاملةً كإثراء ولا يُنشأ URL ثانٍ ينافس صفحة عسر القراءة."
+    },
+    {
+      "slug": "developmental-language-disorder",
+      "canonical_url": "/encyclopedia/developmental-language-disorder/",
+      "decision": "merge-into-existing-canonical",
+      "canonical_owner": "psychological-encyclopedia",
+      "owner_source": "data/encyclopedia/batches/024-developmental-language-speech-sound.json",
+      "specialty_research_source": "data/encyclopedia/research/batch-02-source-plan.json",
+      "specialty_enrichment_source": "data/encyclopedia/enrichment/developmental-language-disorder-v1.json",
+      "import_as_new_record": false,
+      "reason": "main يملك بالفعل صفحة DLD على المسار الموحد. يضيف مسار الإعاقة والدمج طبقة عربية/تعدد لغوي/قراءة وتعليم دامج موثقة إلى الصفحة نفسها بدل إنشاء سجل أو canonical منافس."
     }
   ]
 }
