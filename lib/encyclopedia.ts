@@ -1,8 +1,14 @@
 import { createClient } from '@/lib/supabase/server';
+import {
+  getPsychEncyclopediaReleaseRecord,
+  PSYCH_ENCYCLOPEDIA_RELEASE_RECORDS,
+} from '@/lib/psych-encyclopedia-release';
 
 type JsonRecord = Record<string, unknown>;
 
 export const ENCYCLOPEDIA_INDEX_PAGE_SIZE = 100;
+const DB_PAGE_SIZE = 1000;
+const MAX_ENCYCLOPEDIA_ITEMS = 5000;
 
 export type EncyclopediaReference = {
   title?: string;
@@ -85,83 +91,103 @@ function normalizeItem(row: Record<string, unknown>): EncyclopediaItem | null {
   };
 }
 
+function releaseItems(): EncyclopediaItem[] {
+  return PSYCH_ENCYCLOPEDIA_RELEASE_RECORDS.flatMap((row) => {
+    const item = normalizeItem(row as unknown as Record<string, unknown>);
+    return item ? [item] : [];
+  });
+}
+
+async function fetchPublishedDbItems(): Promise<EncyclopediaItem[]> {
+  try {
+    const supabase = await createClient();
+    const collected: EncyclopediaItem[] = [];
+    const now = new Date().toISOString();
+
+    for (let start = 0; start < MAX_ENCYCLOPEDIA_ITEMS; start += DB_PAGE_SIZE) {
+      const end = Math.min(start + DB_PAGE_SIZE - 1, MAX_ENCYCLOPEDIA_ITEMS - 1);
+      const { data, error } = await supabase
+        .from('content')
+        .select('id,slug,title,excerpt,canonical_url,primary_keyword,updated_at')
+        .eq('content_type', 'condition')
+        .eq('status', 'published')
+        .eq('robots_index', true)
+        .lte('published_at', now)
+        .order('title', { ascending: true })
+        .range(start, end);
+
+      if (error || !Array.isArray(data)) break;
+      for (const row of data) {
+        const item = normalizeItem(row as Record<string, unknown>);
+        if (item) collected.push(item);
+      }
+      if (data.length < DB_PAGE_SIZE) break;
+    }
+
+    return collected;
+  } catch {
+    return [];
+  }
+}
+
+async function mergedEncyclopediaItems(): Promise<EncyclopediaItem[]> {
+  const bySlug = new Map<string, EncyclopediaItem>();
+  for (const item of releaseItems()) bySlug.set(item.slug, item);
+  for (const item of await fetchPublishedDbItems()) bySlug.set(item.slug, item);
+  return [...bySlug.values()].sort((left, right) => left.title.localeCompare(right.title, 'ar'));
+}
+
 export function encyclopediaCanonical(slug: string) {
   const safe = slug.trim().toLowerCase();
   return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(safe) ? `/encyclopedia/${safe}/` : null;
 }
 
+export async function getAllEncyclopediaItems(limit = MAX_ENCYCLOPEDIA_ITEMS): Promise<EncyclopediaItem[]> {
+  const safeLimit = Math.min(Math.max(Math.trunc(limit), 1), MAX_ENCYCLOPEDIA_ITEMS);
+  return (await mergedEncyclopediaItems()).slice(0, safeLimit);
+}
+
 export async function getEncyclopediaCount(): Promise<number> {
-  const supabase = await createClient();
-  const { count } = await supabase
-    .from('content')
-    .select('id', { count: 'exact', head: true })
-    .eq('content_type', 'condition')
-    .eq('status', 'published')
-    .eq('robots_index', true)
-    .lte('published_at', new Date().toISOString());
-  return Math.max(0, count ?? 0);
+  return (await mergedEncyclopediaItems()).length;
 }
 
 export async function getEncyclopediaItems(limit = 60): Promise<EncyclopediaItem[]> {
   const safeLimit = Math.min(Math.max(Math.trunc(limit), 1), 200);
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from('content')
-    .select('id,slug,title,excerpt,canonical_url,primary_keyword,updated_at')
-    .eq('content_type', 'condition')
-    .eq('status', 'published')
-    .eq('robots_index', true)
-    .lte('published_at', new Date().toISOString())
-    .order('title', { ascending: true })
-    .limit(safeLimit);
-
-  return (Array.isArray(data) ? data : []).flatMap((row) => {
-    const item = normalizeItem(row as Record<string, unknown>);
-    return item ? [item] : [];
-  });
+  return (await mergedEncyclopediaItems()).slice(0, safeLimit);
 }
 
 export async function getEncyclopediaIndexPage(rawPage: number, pageSize = ENCYCLOPEDIA_INDEX_PAGE_SIZE): Promise<EncyclopediaPage> {
   const safePageSize = Math.min(Math.max(Math.trunc(pageSize), 20), 200);
-  const total = await getEncyclopediaCount();
+  const items = await mergedEncyclopediaItems();
+  const total = items.length;
   const totalPages = Math.max(1, Math.ceil(total / safePageSize));
   const page = Math.min(Math.max(Math.trunc(rawPage) || 1, 1), totalPages);
   const start = (page - 1) * safePageSize;
-  const end = start + safePageSize - 1;
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from('content')
-    .select('id,slug,title,excerpt,canonical_url,primary_keyword,updated_at')
-    .eq('content_type', 'condition')
-    .eq('status', 'published')
-    .eq('robots_index', true)
-    .lte('published_at', new Date().toISOString())
-    .order('title', { ascending: true })
-    .range(start, end);
-
-  const items = (Array.isArray(data) ? data : []).flatMap((row) => {
-    const item = normalizeItem(row as Record<string, unknown>);
-    return item ? [item] : [];
-  });
-
-  return { items, page, pageSize: safePageSize, total, totalPages };
+  const end = start + safePageSize;
+  return { items: items.slice(start, end), page, pageSize: safePageSize, total, totalPages };
 }
 
 export async function getEncyclopediaRecord(slug: string): Promise<EncyclopediaRecord | null> {
   const canonical = encyclopediaCanonical(slug);
   if (!canonical) return null;
 
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from('content')
-    .select('id,slug,title,excerpt,body_json,body_text,schema_json,content_type,audience,seo_title,seo_description,canonical_url,robots_index,robots_follow,published_at,updated_at,featured_image_url,featured_image_alt,primary_keyword,secondary_keywords,semantic_terms,search_intent,author_display_name,reviewer_display_name,reviewer_credentials,last_reviewed_at,references_json,medical_disclaimer')
-    .eq('slug', slug)
-    .eq('content_type', 'condition')
-    .eq('status', 'published')
-    .lte('published_at', new Date().toISOString())
-    .maybeSingle();
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from('content')
+      .select('id,slug,title,excerpt,body_json,body_text,schema_json,content_type,audience,seo_title,seo_description,canonical_url,robots_index,robots_follow,published_at,updated_at,featured_image_url,featured_image_alt,primary_keyword,secondary_keywords,semantic_terms,search_intent,author_display_name,reviewer_display_name,reviewer_credentials,last_reviewed_at,references_json,medical_disclaimer')
+      .eq('slug', slug)
+      .eq('content_type', 'condition')
+      .eq('status', 'published')
+      .lte('published_at', new Date().toISOString())
+      .maybeSingle();
 
-  return (data as EncyclopediaRecord | null) ?? null;
+    if (!error && data) return data as EncyclopediaRecord;
+  } catch {
+    // The audited code-backed release remains available if Supabase is unavailable.
+  }
+
+  return getPsychEncyclopediaReleaseRecord(slug) as EncyclopediaRecord | null;
 }
 
 export function safeEncyclopediaReferences(value: unknown): EncyclopediaReference[] {
