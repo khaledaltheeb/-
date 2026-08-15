@@ -1,0 +1,92 @@
+name: Publish Psychological Encyclopedia 50
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'scripts/publish_psych_encyclopedia.mjs'
+      - 'data/encyclopedia/releases/2026-08-15-clinical-50.json'
+      - '.github/workflows/publish-psych-encyclopedia-50.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'data/encyclopedia/releases/2026-08-15-clinical-50.json'
+
+concurrency:
+  group: psych-encyclopedia-release-50
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  validate-and-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout release
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+
+      - name: Validate clinical content contract
+        run: |
+          python scripts/validate_psych_encyclopedia.py
+          python scripts/encyclopedia_coverage_report.py --json
+
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Validate production release plan
+        run: node scripts/publish_psych_encyclopedia.mjs
+
+      - name: Publish 50 clinical encyclopedia records to Supabase
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          if [ -z "${SUPABASE_SECRET_KEY}" ] && [ -z "${SUPABASE_SERVICE_ROLE_KEY}" ]; then
+            echo '::error::A production Supabase secret is not configured in GitHub Actions.'
+            exit 1
+          fi
+          node scripts/publish_psych_encyclopedia.mjs --apply
+
+      - name: Verify production encyclopedia routes
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          SITE_URL: https://healthrenewal.org
+        run: |
+          samples=(developmental-stuttering developmental-language-disorder speech-sound-disorder)
+          for attempt in $(seq 1 24); do
+            ok=1
+            for slug in "${samples[@]}"; do
+              code=$(curl -L -sS -o "/tmp/${slug}.html" -w '%{http_code}' "${SITE_URL}/encyclopedia/${slug}/" || true)
+              if [ "$code" != '200' ]; then
+                echo "Attempt ${attempt}: ${slug} returned ${code}"
+                ok=0
+                continue
+              fi
+              if ! grep -q '<h1' "/tmp/${slug}.html"; then
+                echo "Attempt ${attempt}: ${slug} returned 200 without an H1"
+                ok=0
+              fi
+            done
+            if [ "$ok" -eq 1 ]; then
+              echo 'Production encyclopedia route verification passed.'
+              exit 0
+            fi
+            sleep 15
+          done
+          echo '::error::Published database rows did not become reachable on the production encyclopedia routes.'
+          exit 1
