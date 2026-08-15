@@ -46,12 +46,13 @@ jobs:
           node - <<'NODE'
           const fs=require('fs');
           const p=JSON.parse(fs.readFileSync('data/encyclopedia/canonical-adoptions-v1.json','utf8'));
-          const expected=new Set(['attention-deficit-hyperactivity-disorder','dyslexia']);
+          const expected=new Set(['attention-deficit-hyperactivity-disorder','dyslexia','developmental-language-disorder']);
           for(const slug of expected){
             const row=p.adoptions.find((item)=>item.slug===slug);
             if(!row||row.import_as_new_record!==false||row.decision!=='merge-into-existing-canonical') throw new Error(`${slug}: canonical adoption contract failed`);
             if(!fs.existsSync(row.owner_source)||!fs.existsSync(row.specialty_enrichment_source)) throw new Error(`${slug}: canonical adoption source is missing`);
           }
+          if(p.adoptions.length!==expected.size) throw new Error(`Unexpected canonical adoption count: ${p.adoptions.length}`);
           NODE
       - name: Assert apply mode requires credentials and cannot silently write
         env:
