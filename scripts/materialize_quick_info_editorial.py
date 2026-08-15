@@ -10,6 +10,7 @@ import materialize_quick_info as base
 import materialize_quick_info_v2 as v2
 
 EXPECTED_EDITORIAL_OVERLAYS = 35
+MIN_PRESERVED_EDITORIAL_WORDS = 1000
 EDITORIAL_ROOT_PARTS = ("content", "quick-info-editorial")
 
 
@@ -149,16 +150,36 @@ def validate_output() -> None:
     editorial = [r for r in records if r.get("schema_json", {}).get("legacy_editorial_overlay") is True]
     if len(editorial) != EXPECTED_EDITORIAL_OVERLAYS:
         raise SystemExit(f"Expected {EXPECTED_EDITORIAL_OVERLAYS} editorial overlays, found {len(editorial)}")
-    thin = [r["slug"] for r in editorial if r.get("schema_json", {}).get("legacy_editorial_overlay_word_count", 0) < 1500]
-    if thin:
-        raise SystemExit(f"Editorial overlays below 1500 words after merge: {thin}")
+
+    # This materializer is a preservation step, not a publication bypass. The
+    # sanitized historical records remain drafts and must still pass the stricter
+    # Supabase V6 publication gate (1500+ useful Arabic words plus structure,
+    # sources, search intent, claim-source mapping, taxonomy and originality).
+    too_thin_to_preserve = [
+        r["slug"]
+        for r in editorial
+        if r.get("schema_json", {}).get("legacy_editorial_overlay_word_count", 0) < MIN_PRESERVED_EDITORIAL_WORDS
+    ]
+    if too_thin_to_preserve:
+        raise SystemExit(
+            f"Editorial overlays below preservation floor {MIN_PRESERVED_EDITORIAL_WORDS}: {too_thin_to_preserve}"
+        )
     if any(len(r.get("references_json", [])) < 3 for r in editorial):
         raise SystemExit("At least one editorial overlay has fewer than 3 references after merge")
+    if any(r.get("status") != "draft" for r in editorial):
+        raise SystemExit("Editorial preservation records must remain draft")
+    if any(r.get("schema_json", {}).get("publication_ready") is not False for r in editorial):
+        raise SystemExit("Editorial preservation records must not be publication-ready")
+    if any(r.get("schema_json", {}).get("editorial_review_required") is not True for r in editorial):
+        raise SystemExit("Editorial preservation records must require editorial review")
+
     print({
         "editorial_overlay_records": len(editorial),
+        "preservation_floor_words": MIN_PRESERVED_EDITORIAL_WORDS,
         "minimum_editorial_words": min(r["schema_json"]["legacy_editorial_overlay_word_count"] for r in editorial),
         "maximum_editorial_words": max(r["schema_json"]["legacy_editorial_overlay_word_count"] for r in editorial),
         "minimum_editorial_references": min(len(r.get("references_json", [])) for r in editorial),
+        "publication_ready_records": sum(1 for r in editorial if r.get("schema_json", {}).get("publication_ready") is True),
     })
 
 
