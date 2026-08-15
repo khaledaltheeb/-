@@ -50,6 +50,15 @@ export type QuickInfoItem = {
   updatedAt: string | null;
 };
 
+const GENERATED_QUICK_INFO_SECTION_START = 'ما الذي يريد الباحث معرفته فعلًا؟';
+const GENERATED_QUICK_INFO_SECTION_END = 'أسئلة شائعة بعد المراجعة';
+const GENERATED_QUICK_INFO_PARAGRAPH_PREFIXES = [
+  'هذه النقطة مأخوذة من المحتوى الأصلي للصفحة',
+  'في هذا المجال، من المفيد ربطها بعدسة إضافية:',
+  'عند تطبيق هذه النقطة على حياتك',
+  'اربطها كذلك بهذا الاعتبار الخاص بمجال',
+] as const;
+
 function asRecord(value: unknown): JsonRecord | null {
   return value && typeof value === 'object' && !Array.isArray(value) ? value as JsonRecord : null;
 }
@@ -66,6 +75,49 @@ function publicationApproved(schema: unknown): boolean {
     && record.publication_ready === true
     && record.editorial_review_required === false,
   );
+}
+
+function blockText(value: unknown) {
+  return asString(asRecord(value)?.text);
+}
+
+function isHeading(value: unknown, text: string) {
+  const block = asRecord(value);
+  return Boolean(block && block.type === 'heading' && blockText(value) === text);
+}
+
+function isKnownGeneratedParagraph(value: unknown) {
+  const block = asRecord(value);
+  if (!block || block.type !== 'paragraph') return false;
+  const valueText = blockText(value);
+  return GENERATED_QUICK_INFO_PARAGRAPH_PREFIXES.some((prefix) => valueText.startsWith(prefix));
+}
+
+/**
+ * Removes only the legacy generated expansion that was proven to be repetitive.
+ * The database remains the source of record; this is a reader-facing safety net
+ * until the five already-published wave-001 records are replaced editorially.
+ */
+export function sanitizeQuickInfoBodyJson(value: unknown): unknown {
+  const root = asRecord(value);
+  const blocks = Array.isArray(root?.blocks) ? root.blocks : null;
+  if (!root || !blocks?.length) return value;
+
+  const hasGeneratedParagraph = blocks.some(isKnownGeneratedParagraph);
+  if (!hasGeneratedParagraph) return value;
+
+  const startIndex = blocks.findIndex((block) => isHeading(block, GENERATED_QUICK_INFO_SECTION_START));
+  const endIndex = startIndex >= 0
+    ? blocks.findIndex((block, index) => index > startIndex && isHeading(block, GENERATED_QUICK_INFO_SECTION_END))
+    : -1;
+
+  const cleaned = blocks.filter((block, index) => {
+    if (isKnownGeneratedParagraph(block)) return false;
+    if (startIndex >= 0 && endIndex > startIndex && index >= startIndex && index < endIndex) return false;
+    return true;
+  });
+
+  return { ...root, blocks: cleaned };
 }
 
 export function quickInfoContentSlug(routeSlug: string) {
@@ -91,7 +143,7 @@ export async function getQuickInfoRecord(routeSlug: string): Promise<QuickInfoRe
   if (!publicationApproved(record.schema_json)) return null;
   const expectedCanonical = `/quick-info/${routeSlug}/`;
   if (record.canonical_url && record.canonical_url !== expectedCanonical) return null;
-  return record;
+  return { ...record, body_json: sanitizeQuickInfoBodyJson(record.body_json) };
 }
 
 export async function getQuickInfoItems(limit = 500): Promise<QuickInfoItem[]> {
