@@ -12,7 +12,6 @@ const legacyTrailingSlashExact = new Set([
   '/cochrane/',
   '/en/',
   '/encyclopedia/all/',
-  '/encyclopedia/',
   '/es/',
   '/family/',
   '/iris/cited-guides/',
@@ -46,10 +45,19 @@ const legacyTrailingSlashPrefixes = [
   '/daily-tools/',
 ];
 
+function decodedPathname(pathname: string) {
+  try {
+    return decodeURIComponent(pathname);
+  } catch {
+    return pathname;
+  }
+}
+
 function preserveHistoricalTrailingSlash(pathname: string) {
   if (!pathname.endsWith('/')) return false;
-  if (legacyTrailingSlashExact.has(pathname)) return true;
-  return legacyTrailingSlashPrefixes.some((prefix) => pathname.startsWith(prefix));
+  const candidate = decodedPathname(pathname);
+  if (legacyTrailingSlashExact.has(candidate)) return true;
+  return legacyTrailingSlashPrefixes.some((prefix) => candidate.startsWith(prefix));
 }
 
 function normalizeModernTrailingSlash(request: NextRequest) {
