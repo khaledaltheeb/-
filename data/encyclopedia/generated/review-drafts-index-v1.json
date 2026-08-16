@@ -1,0 +1,567 @@
+{
+  "version": 2,
+  "status": "passed",
+  "source_draft_count": 11,
+  "generated_review_count": 11,
+  "unique_canonical_count": 11,
+  "aggregate_source_domain_count": 14,
+  "aggregate_source_domains": [
+    "aaidd.org",
+    "asha.org",
+    "cdc.gov",
+    "medlineplus.gov",
+    "ncbi.nlm.nih.gov",
+    "nice.org.uk",
+    "nichd.nih.gov",
+    "nidcd.nih.gov",
+    "orpha.net",
+    "publications.aap.org",
+    "pubmed.ncbi.nlm.nih.gov",
+    "rarediseases.info.nih.gov",
+    "unesco.org",
+    "who.int"
+  ],
+  "max_pairwise_body_5gram_jaccard": 0.00245,
+  "similarity_threshold": 0.35,
+  "publication_ready": false,
+  "scientific_review_required": true,
+  "unified_encyclopedia_route_slugs": true,
+  "pages": [
+    {
+      "slug": "angelman-syndrome",
+      "source_review_slug": "encyclopedia-angelman-syndrome",
+      "route_slug": "angelman-syndrome",
+      "title": "متلازمة أنجلمان",
+      "canonical_url": "/encyclopedia/angelman-syndrome/",
+      "primary_keyword": "متلازمة أنجلمان",
+      "status": "scientific_review",
+      "robots_index": false,
+      "body_words": 2405,
+      "faq_count": 10,
+      "reference_count": 6,
+      "source_domains": [
+        "medlineplus.gov",
+        "ncbi.nlm.nih.gov",
+        "orpha.net",
+        "rarediseases.info.nih.gov",
+        "unesco.org",
+        "who.int"
+      ],
+      "source_domain_count": 6,
+      "source_draft_sha256": "7603956e383b401491ddff7cadf0108b09847a5155daec857334b6deee841e0f",
+      "generated_records_sha256": "ea852be34325108590209a8288011a4310f3092e4e0197b24e15d5a0b00699f5"
+    },
+    {
+      "slug": "autism-spectrum-disorder",
+      "source_review_slug": "encyclopedia-autism-spectrum-disorder",
+      "route_slug": "autism-spectrum-disorder",
+      "title": "اضطراب طيف التوحد",
+      "canonical_url": "/encyclopedia/autism-spectrum-disorder/",
+      "primary_keyword": "اضطراب طيف التوحد",
+      "status": "scientific_review",
+      "robots_index": false,
+      "body_words": 2615,
+      "faq_count": 10,
+      "reference_count": 7,
+      "source_domains": [
+        "cdc.gov",
+        "nice.org.uk",
+        "unesco.org",
+        "who.int"
+      ],
+      "source_domain_count": 4,
+      "source_draft_sha256": "e52ade9a0e0fba384c06617e3201cd88866d1d659af9267dfb113ba7a7112d45",
+      "generated_records_sha256": "e478ad302f5d4ba732a2aa6f9d6a35b105793312438f281860b8b293df17bdd3"
+    },
+    {
+      "slug": "cerebral-palsy",
+      "source_review_slug": "encyclopedia-cerebral-palsy",
+      "route_slug": "cerebral-palsy",
+      "title": "الشلل الدماغي",
+      "canonical_url": "/encyclopedia/cerebral-palsy/",
+      "primary_keyword": "الشلل الدماغي",
+      "status": "scientific_review",
+      "robots_index": false,
+      "body_words": 2305,
+      "faq_count": 10,
+      "reference_count": 7,
+      "source_domains": [
+        "cdc.gov",
+        "nice.org.uk",
+        "pubmed.ncbi.nlm.nih.gov",
+        "unesco.org",
+        "who.int"
+      ],
+      "source_domain_count": 5,
+      "source_draft_sha256": "f2433e645ce9165655d6aa2c923a366b4d149162b5355c209d83b792536b7d5f",
+      "generated_records_sha256": "d988f9c79e61599f22eb9b1c420c8d6ee9bb5dbc54aa82084c039c5566505ad6"
+    },
+    {
+      "slug": "down-syndrome",
+      "source_review_slug": "encyclopedia-down-syndrome",
+      "route_slug": "down-syndrome",
+      "title": "متلازمة داون",
+      "canonical_url": "/encyclopedia/down-syndrome/",
+      "primary_keyword": "متلازمة داون",
+      "status": "scientific_review",
+      "robots_index": false,
+      "body_words": 2178,
+      "faq_count": 10,
+      "reference_count": 6,
+      "source_domains": [
+        "cdc.gov",
+        "medlineplus.gov",
+        "publications.aap.org",
+        "unesco.org",
+        "who.int"
+      ],
+      "source_domain_count": 5,
+      "source_draft_sha256": "c2d482fea015c7ad59b651760c45c21edfcc8ed1299c3671d75611ce67ec9079",
+      "generated_records_sha256": "c2f92e1894b4733dc362830cc1c44573f55584c9df01335f52edc7a8ac3899ef"
+    },
+    {
+      "slug": "fragile-x-syndrome",
+      "source_review_slug": "encyclopedia-fragile-x-syndrome",
+      "route_slug": "fragile-x-syndrome",
+      "title": "متلازمة الكروموسوم X الهش",
+      "canonical_url": "/encyclopedia/fragile-x-syndrome/",
+      "primary_keyword": "متلازمة X الهش",
+      "status": "scientific_review",
+      "robots_index": false,
+      "body_words": 2508,
+      "faq_count": 10,
+      "reference_count": 6,
+      "source_domains": [
+        "cdc.gov",
+        "medlineplus.gov",
+        "ncbi.nlm.nih.gov",
+        "nichd.nih.gov",
+        "rarediseases.info.nih.gov",
+        "unesco.org"
+      ],
+      "source_domain_count": 6,
+      "source_draft_sha256": "f1cf8950877b76964bb2059560423246b80ae013ea0f2e025d90d88bfb93525c",
+      "generated_records_sha256": "91234f592275879eaef5d038e14fb271a24f75bd5b572fdbd688353ff3b86e0d"
+    },
+    {
+      "slug": "hearing-loss",
+      "source_review_slug": "encyclopedia-hearing-loss",
+      "route_slug": "hearing-loss",
+      "title": "فقدان السمع وضعفه",
+      "canonical_url": "/encyclopedia/hearing-loss/",
+      "primary_keyword": "فقدان السمع",
+      "status": "scientific_review",
+      "robots_index": false,
+      "body_words": 2445,
+      "faq_count": 10,
+      "reference_count": 6,
+      "source_domains": [
+        "asha.org",
+        "cdc.gov",
+        "nidcd.nih.gov",
+        "unesco.org",
+        "who.int"
+      ],
+      "source_domain_count": 5,
+      "source_draft_sha256": "16b5597c2aa07907d0f616324f0ba987eac87e7095f7e73ac29ba888e925a8a5",
+      "generated_records_sha256": "22f7af83f2c9975e5398af19ccb4d9e7ae217370b13c6a1f4e0ac653bdfcf75b"
+    },
+    {
+      "slug": "intellectual-developmental-disorder",
+      "source_review_slug": "encyclopedia-intellectual-developmental-disorder",
+      "route_slug": "intellectual-developmental-disorder",
+      "title": "اضطراب النمو الذهني (الإعاقة الذهنية)",
+      "canonical_url": "/encyclopedia/intellectual-developmental-disorder/",
+      "primary_keyword": "اضطراب النمو الذهني",
+      "status": "scientific_review",
+      "robots_index": false,
+      "body_words": 2297,
+      "faq_count": 10,
+      "reference_count": 7,
+      "source_domains": [
+        "aaidd.org",
+        "cdc.gov",
+        "publications.aap.org",
+        "unesco.org",
+        "who.int"
+      ],
+      "source_domain_count": 5,
+      "source_draft_sha256": "bc5bec2dae3da6d108aaec4f3da99357e7c09da0166b497cb9c08e067cdb0801",
+      "generated_records_sha256": "bf45cf93148fe7a98a3bfa4fff0d243b301057aa16077f3bc9dfd193892a75a5"
+    },
+    {
+      "slug": "noonan-syndrome",
+      "source_review_slug": "encyclopedia-noonan-syndrome",
+      "route_slug": "noonan-syndrome",
+      "title": "متلازمة نونان",
+      "canonical_url": "/encyclopedia/noonan-syndrome/",
+      "primary_keyword": "متلازمة نونان",
+      "status": "scientific_review",
+      "robots_index": false,
+      "body_words": 2226,
+      "faq_count": 10,
+      "reference_count": 6,
+      "source_domains": [
+        "medlineplus.gov",
+        "ncbi.nlm.nih.gov",
+        "orpha.net",
+        "rarediseases.info.nih.gov",
+        "unesco.org",
+        "who.int"
+      ],
+      "source_domain_count": 6,
+      "source_draft_sha256": "f0da14da03c28f436c95724e2e9cdebde860b299d81ce2a5660a1c4e70c0735b",
+      "generated_records_sha256": "d696b429265a804ee04925ff1ed6f47dd5577cd87beb4b79ffbc3b8db6555b06"
+    },
+    {
+      "slug": "prader-willi-syndrome",
+      "source_review_slug": "encyclopedia-prader-willi-syndrome",
+      "route_slug": "prader-willi-syndrome",
+      "title": "متلازمة برادر-ويلي",
+      "canonical_url": "/encyclopedia/prader-willi-syndrome/",
+      "primary_keyword": "متلازمة برادر ويلي",
+      "status": "scientific_review",
+      "robots_index": false,
+      "body_words": 2397,
+      "faq_count": 10,
+      "reference_count": 6,
+      "source_domains": [
+        "medlineplus.gov",
+        "ncbi.nlm.nih.gov",
+        "orpha.net",
+        "rarediseases.info.nih.gov",
+        "unesco.org",
+        "who.int"
+      ],
+      "source_domain_count": 6,
+      "source_draft_sha256": "cc641d6fdb0877e8f2ff4cb58ec5139aaae611c85c2d40fdbcef120c97886059",
+      "generated_records_sha256": "563053e4e9d2a2ae8d970b0b21385a79e30e00d7905906f2d1aa1ef82fa62c66"
+    },
+    {
+      "slug": "rett-syndrome",
+      "source_review_slug": "encyclopedia-rett-syndrome",
+      "route_slug": "rett-syndrome",
+      "title": "متلازمة ريت",
+      "canonical_url": "/encyclopedia/rett-syndrome/",
+      "primary_keyword": "متلازمة ريت",
+      "status": "scientific_review",
+      "robots_index": false,
+      "body_words": 2387,
+      "faq_count": 10,
+      "reference_count": 6,
+      "source_domains": [
+        "medlineplus.gov",
+        "ncbi.nlm.nih.gov",
+        "nichd.nih.gov",
+        "orpha.net",
+        "rarediseases.info.nih.gov",
+        "unesco.org"
+      ],
+      "source_domain_count": 6,
+      "source_draft_sha256": "a6a548563c7ce102f64e80fbf6cfd39e8411a5c2dbde34dd475f78438b7fdb44",
+      "generated_records_sha256": "32c2e0feed211dc03009650469f79fcaf13d3302f72380edb5d36099889b311a"
+    },
+    {
+      "slug": "williams-syndrome",
+      "source_review_slug": "encyclopedia-williams-syndrome",
+      "route_slug": "williams-syndrome",
+      "title": "متلازمة ويليامز",
+      "canonical_url": "/encyclopedia/williams-syndrome/",
+      "primary_keyword": "متلازمة ويليامز",
+      "status": "scientific_review",
+      "robots_index": false,
+      "body_words": 2178,
+      "faq_count": 10,
+      "reference_count": 6,
+      "source_domains": [
+        "medlineplus.gov",
+        "ncbi.nlm.nih.gov",
+        "orpha.net",
+        "rarediseases.info.nih.gov",
+        "unesco.org",
+        "who.int"
+      ],
+      "source_domain_count": 6,
+      "source_draft_sha256": "8c2d677f8751b2670f8bff7190259bd35c7945afd42a213514e8aac229dd1fcf",
+      "generated_records_sha256": "7f6e8854b0992772c8dbd698ffc6d79626cda658ccc5c48403d323cbd1aa40b9"
+    }
+  ],
+  "pairwise_similarity": [
+    {
+      "left": "angelman-syndrome",
+      "right": "autism-spectrum-disorder",
+      "body_5gram_jaccard": 0.0006
+    },
+    {
+      "left": "angelman-syndrome",
+      "right": "cerebral-palsy",
+      "body_5gram_jaccard": 0.0
+    },
+    {
+      "left": "angelman-syndrome",
+      "right": "down-syndrome",
+      "body_5gram_jaccard": 0.00022
+    },
+    {
+      "left": "angelman-syndrome",
+      "right": "fragile-x-syndrome",
+      "body_5gram_jaccard": 0.00245
+    },
+    {
+      "left": "angelman-syndrome",
+      "right": "hearing-loss",
+      "body_5gram_jaccard": 0.0
+    },
+    {
+      "left": "angelman-syndrome",
+      "right": "intellectual-developmental-disorder",
+      "body_5gram_jaccard": 0.00021
+    },
+    {
+      "left": "angelman-syndrome",
+      "right": "noonan-syndrome",
+      "body_5gram_jaccard": 0.00022
+    },
+    {
+      "left": "angelman-syndrome",
+      "right": "prader-willi-syndrome",
+      "body_5gram_jaccard": 0.00126
+    },
+    {
+      "left": "angelman-syndrome",
+      "right": "rett-syndrome",
+      "body_5gram_jaccard": 0.00084
+    },
+    {
+      "left": "angelman-syndrome",
+      "right": "williams-syndrome",
+      "body_5gram_jaccard": 0.0
+    },
+    {
+      "left": "autism-spectrum-disorder",
+      "right": "cerebral-palsy",
+      "body_5gram_jaccard": 0.0002
+    },
+    {
+      "left": "autism-spectrum-disorder",
+      "right": "down-syndrome",
+      "body_5gram_jaccard": 0.0
+    },
+    {
+      "left": "autism-spectrum-disorder",
+      "right": "fragile-x-syndrome",
+      "body_5gram_jaccard": 0.0
+    },
+    {
+      "left": "autism-spectrum-disorder",
+      "right": "hearing-loss",
+      "body_5gram_jaccard": 0.0
+    },
+    {
+      "left": "autism-spectrum-disorder",
+      "right": "intellectual-developmental-disorder",
+      "body_5gram_jaccard": 0.00041
+    },
+    {
+      "left": "autism-spectrum-disorder",
+      "right": "noonan-syndrome",
+      "body_5gram_jaccard": 0.00021
+    },
+    {
+      "left": "autism-spectrum-disorder",
+      "right": "prader-willi-syndrome",
+      "body_5gram_jaccard": 0.0002
+    },
+    {
+      "left": "autism-spectrum-disorder",
+      "right": "rett-syndrome",
+      "body_5gram_jaccard": 0.0006
+    },
+    {
+      "left": "autism-spectrum-disorder",
+      "right": "williams-syndrome",
+      "body_5gram_jaccard": 0.0
+    },
+    {
+      "left": "cerebral-palsy",
+      "right": "down-syndrome",
+      "body_5gram_jaccard": 0.0
+    },
+    {
+      "left": "cerebral-palsy",
+      "right": "fragile-x-syndrome",
+      "body_5gram_jaccard": 0.0
+    },
+    {
+      "left": "cerebral-palsy",
+      "right": "hearing-loss",
+      "body_5gram_jaccard": 0.00042
+    },
+    {
+      "left": "cerebral-palsy",
+      "right": "intellectual-developmental-disorder",
+      "body_5gram_jaccard": 0.00022
+    },
+    {
+      "left": "cerebral-palsy",
+      "right": "noonan-syndrome",
+      "body_5gram_jaccard": 0.0
+    },
+    {
+      "left": "cerebral-palsy",
+      "right": "prader-willi-syndrome",
+      "body_5gram_jaccard": 0.00021
+    },
+    {
+      "left": "cerebral-palsy",
+      "right": "rett-syndrome",
+      "body_5gram_jaccard": 0.0
+    },
+    {
+      "left": "cerebral-palsy",
+      "right": "williams-syndrome",
+      "body_5gram_jaccard": 0.0
+    },
+    {
+      "left": "down-syndrome",
+      "right": "fragile-x-syndrome",
+      "body_5gram_jaccard": 0.0
+    },
+    {
+      "left": "down-syndrome",
+      "right": "hearing-loss",
+      "body_5gram_jaccard": 0.0
+    },
+    {
+      "left": "down-syndrome",
+      "right": "intellectual-developmental-disorder",
+      "body_5gram_jaccard": 0.00068
+    },
+    {
+      "left": "down-syndrome",
+      "right": "noonan-syndrome",
+      "body_5gram_jaccard": 0.0
+    },
+    {
+      "left": "down-syndrome",
+      "right": "prader-willi-syndrome",
+      "body_5gram_jaccard": 0.0
+    },
+    {
+      "left": "down-syndrome",
+      "right": "rett-syndrome",
+      "body_5gram_jaccard": 0.0
+    },
+    {
+      "left": "down-syndrome",
+      "right": "williams-syndrome",
+      "body_5gram_jaccard": 0.0
+    },
+    {
+      "left": "fragile-x-syndrome",
+      "right": "hearing-loss",
+      "body_5gram_jaccard": 0.00061
+    },
+    {
+      "left": "fragile-x-syndrome",
+      "right": "intellectual-developmental-disorder",
+      "body_5gram_jaccard": 0.00084
+    },
+    {
+      "left": "fragile-x-syndrome",
+      "right": "noonan-syndrome",
+      "body_5gram_jaccard": 0.00042
+    },
+    {
+      "left": "fragile-x-syndrome",
+      "right": "prader-willi-syndrome",
+      "body_5gram_jaccard": 0.00041
+    },
+    {
+      "left": "fragile-x-syndrome",
+      "right": "rett-syndrome",
+      "body_5gram_jaccard": 0.00185
+    },
+    {
+      "left": "fragile-x-syndrome",
+      "right": "williams-syndrome",
+      "body_5gram_jaccard": 0.0
+    },
+    {
+      "left": "hearing-loss",
+      "right": "intellectual-developmental-disorder",
+      "body_5gram_jaccard": 0.0
+    },
+    {
+      "left": "hearing-loss",
+      "right": "noonan-syndrome",
+      "body_5gram_jaccard": 0.0
+    },
+    {
+      "left": "hearing-loss",
+      "right": "prader-willi-syndrome",
+      "body_5gram_jaccard": 0.00021
+    },
+    {
+      "left": "hearing-loss",
+      "right": "rett-syndrome",
+      "body_5gram_jaccard": 0.0
+    },
+    {
+      "left": "hearing-loss",
+      "right": "williams-syndrome",
+      "body_5gram_jaccard": 0.0
+    },
+    {
+      "left": "intellectual-developmental-disorder",
+      "right": "noonan-syndrome",
+      "body_5gram_jaccard": 0.0
+    },
+    {
+      "left": "intellectual-developmental-disorder",
+      "right": "prader-willi-syndrome",
+      "body_5gram_jaccard": 0.00021
+    },
+    {
+      "left": "intellectual-developmental-disorder",
+      "right": "rett-syndrome",
+      "body_5gram_jaccard": 0.0
+    },
+    {
+      "left": "intellectual-developmental-disorder",
+      "right": "williams-syndrome",
+      "body_5gram_jaccard": 0.0
+    },
+    {
+      "left": "noonan-syndrome",
+      "right": "prader-willi-syndrome",
+      "body_5gram_jaccard": 0.00043
+    },
+    {
+      "left": "noonan-syndrome",
+      "right": "rett-syndrome",
+      "body_5gram_jaccard": 0.0
+    },
+    {
+      "left": "noonan-syndrome",
+      "right": "williams-syndrome",
+      "body_5gram_jaccard": 0.00206
+    },
+    {
+      "left": "prader-willi-syndrome",
+      "right": "rett-syndrome",
+      "body_5gram_jaccard": 0.00042
+    },
+    {
+      "left": "prader-willi-syndrome",
+      "right": "williams-syndrome",
+      "body_5gram_jaccard": 0.00022
+    },
+    {
+      "left": "rett-syndrome",
+      "right": "williams-syndrome",
+      "body_5gram_jaccard": 0.0
+    }
+  ],
+  "errors": []
+}
