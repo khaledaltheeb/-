@@ -14,15 +14,18 @@ const manifest = read('public/manifest.webmanifest');
 const serviceWorker = read('public/sw.js');
 const home = read('app/page.tsx');
 const theme = read('app/rawafid-theme.css');
+const themeV6 = read('app/rawafid-theme-v6.css');
 const adminLayout = read('app/admin/layout.tsx');
 const adminHome = read('app/admin/page.tsx');
 const contentForm = read('app/admin/content/content-form.tsx');
 const pwaIcon = read('lib/pwa-icon.ts');
 const preview = read('app/theme-preview/page.tsx');
 
-if (!layout.includes("'./rawafid-theme.css'")) fail('root layout must import the central theme entry point');
+if (!layout.includes("'./rawafid-theme-v6.css'")) fail('root layout must import the central V6 theme entry point');
 const directCssImports = [...layout.matchAll(/^import\s+["'](\.\/[^"']+\.css)["'];?\s*$/gm)].map((match) => match[1]);
-if (directCssImports.length !== 1 || directCssImports[0] !== './rawafid-theme.css') fail('root layout must keep one global CSS entry point');
+if (directCssImports.length !== 1 || directCssImports[0] !== './rawafid-theme-v6.css') fail('root layout must keep one global V6 CSS entry point');
+if (!themeV6.startsWith("@import './rawafid-theme.css';")) fail('V6 theme must preserve the proven V5 compatibility theme as its base');
+if (!themeV6.includes('Rawafid Institutional Theme V6')) fail('V6 theme marker missing');
 
 for (const file of ['components/rawafid-mark.tsx', 'components/rawafid-brand.tsx', 'lib/public-content.ts', 'lib/content-templates.ts', 'app/admin/verification/page.tsx']) {
   if (!exists(file)) fail(`missing V5 foundation ${file}`);
@@ -103,4 +106,4 @@ if (!layout.includes('<body id="top">') || !layout.includes('?v=6')) fail('layou
 if (!manifest.includes('منصة روافد | معرفة تقود إلى أثر') || !manifest.includes('?v=6')) fail('manifest must use the V6 institutional identity');
 if (!serviceWorker.includes('rawafid-shell-v6') || !serviceWorker.includes('event.waitUntil(cacheWrite')) fail('service worker must use V6 cache lifecycle');
 
-if (!process.exitCode) console.log('Rawafid institutional theme V5.2 contract passed.');
+if (!process.exitCode) console.log('Rawafid institutional theme V6 contract passed.');
