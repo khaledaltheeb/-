@@ -16,7 +16,7 @@ requireText('app/admin/content/[id]/relations/page.tsx',['category_ids','tag_ids
 requireText('lib/sitemap-xml.ts',['sitemapIndexResponse','sitemapindex']);
 requireText('app/sitemap.xml/route.ts',['PAGE_SIZE=50000','sitemapIndexResponse','content.xml?page=']);
 requireText('app/sitemaps/content.xml/route.ts',['PAGE_SIZE=50000','.range(start,end)']);
-requireText('supabase/migrations/20260816095327_tighten_center_specialists_public_read.sql',['center_specialists_public_read','center_specialists_admin_read',"c.verification = 'verified'::public.verification_status","s.verification = 'verified'::public.verification_status','revoke insert, update, delete, truncate, references, trigger','from anon;']);
+requireText('supabase/migrations/20260816095327_tighten_center_specialists_public_read.sql',['center_specialists_public_read','center_specialists_admin_read',"c.verification = 'verified'::public.verification_status","s.verification = 'verified'::public.verification_status",'revoke insert, update, delete, truncate, references, trigger','from anon;']);
 forbidText('supabase/migrations/20260816095327_tighten_center_specialists_public_read.sql',['using (true)']);
 forbidText('app/sectors/page.tsx',['Platform Taxonomy','مرحلة الثيم الفارغ','الثيم جاهز للقطاعات']);
 forbidText('app/sections/page.tsx',['Dynamic Sections','الثيم جاهز للأقسام','قسم ديناميكي','لوحة الإدارة','Route']);
