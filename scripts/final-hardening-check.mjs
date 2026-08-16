@@ -6,7 +6,7 @@ const forbidText=(file,needles)=>{if(!fs.existsSync(file)){fail(`missing ${file}
 requireText('lib/content-editor-payload.ts',["'image'","'faq'",'alt.length < 3','version:3']);
 requireText('app/admin/content/block-editor.tsx',["image: 'صورة داخل المحتوى'","faq: 'أسئلة شائعة'",'Alt Text إلزامي']);
 requireText('components/content-renderer.tsx',["type === 'image'","type === 'faq'",'content-inline-image','content-faq']);
-requireText('app/content/[slug]/page.tsx',['FAQPage','MedicalCondition','visibleFaq']);
+requireText('app/content/[slug]/page.tsx',['FAQPage','MedicalCondition','visibleFaq','CONTENT_TYPE_LABELS','contentTypeLabel(record.content_type)','contentTypeLabel(item.content_type)']);
 requireText('supabase/migrations/20260807190000_content_scheduling_restore.sql',['schedule_content','publish_due_content','restore_content_version','rawafid-publish-due-content']);
 requireText('app/admin/content/schedule-form.tsx',['datetime-local','toISOString']);
 requireText('app/admin/content/actions.ts',['schedule_content','restore_content_version']);
@@ -30,5 +30,6 @@ forbidText('app/community/join/page.tsx',['Community Application','تُراجع 
 forbidText('app/share/page.tsx',['Share Target','ميزة المشاركة في PWA']);
 forbidText('app/offline/page.tsx',['>Offline<']);
 forbidText('app/experiences/new/page.tsx',['لا تحتاج إلى معرفة SEO']);
+forbidText('app/content/[slug]/page.tsx',['Topical Authority','<span className="eyebrow">{record.content_type}</span>','<span>{item.content_type}</span>','خريطة المفاهيم ونية البحث']);
 if(fs.existsSync('app/sitemap.ts'))fail('monolithic app/sitemap.ts must not coexist with sitemap index');
 if(!process.exitCode)console.log('Rawafid final hardening regression contract passed.');
