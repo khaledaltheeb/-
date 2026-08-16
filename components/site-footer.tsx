@@ -6,6 +6,7 @@ const groups = [
     id: 'knowledge',
     title: 'المعرفة والمحتوى',
     links: [
+      { href: '/sectors', label: 'القطاعات' },
       { href: '/sections', label: 'جميع الأقسام' },
       { href: '/encyclopedia/', label: 'الموسوعة' },
       { href: '/care-guides', label: 'أدلة الرعاية' },

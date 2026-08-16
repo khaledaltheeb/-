@@ -81,6 +81,7 @@ export default async function HomePage() {
         <section className="rawafid-section" id="sectors" aria-labelledby="sectors-title">
           <div className="rawafid-section-head">
             <div className="rawafid-section-title"><span>مجالات روافد</span><h2 id="sectors-title">استكشف المعرفة حسب المجال</h2><p>موضوعات مترابطة في الصحة النفسية والتعافي والدمج والتمكين، منظمة لتصل إلى ما يفيدك بأقل خطوات ممكنة.</p></div>
+            <Link prefetch={false} className="section-text-link" href="/sectors">عرض جميع القطاعات ←</Link>
           </div>
 
           {sectors.length > 0 ? (
@@ -98,9 +99,9 @@ export default async function HomePage() {
           ) : (
             <div className="rawafid-empty">
               <div className="rawafid-empty-icon"><PlatformIcon name="knowledge" size={30} /></div>
-              <h3>الثيم جاهز لاستقبال القطاعات</h3>
-              <p>عند إنشاء أول قطاع وتفعيله من لوحة الإدارة سيظهر هنا تلقائيًا بنفس نظام التصميم، دون إنشاء صفحة برمجية جديدة.</p>
-              <small>لا توجد بيانات تجريبية أو قطاعات وهمية في الثيم.</small>
+              <h3>لا توجد قطاعات منشورة حاليًا</h3>
+              <p>يمكنك استخدام البحث أو تصفح الأقسام للوصول إلى المعرفة المتاحة.</p>
+              <Link prefetch={false} className="section-text-link" href="/sections">تصفح الأقسام ←</Link>
             </div>
           )}
         </section>
