@@ -4,20 +4,23 @@ import Link from 'next/link';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import ContentRenderer from '@/components/content-renderer';
+import LegacyPreservedPageView from '@/components/legacy-preserved-page';
 import { breadcrumbJsonLd, buildSeoMetadata, SITE_URL } from '@/lib/seo';
+import { getLegacyPreservedPage, legacyPreservedMetadata } from '@/lib/legacy-preserved-page';
 import { evidenceGuideCategory, getEvidenceGuideRecord, getRelatedEvidenceGuides, safeEvidenceReferences } from '@/lib/evidence-guides';
 import styles from '@/components/evidence-guides.module.css';
 
 type Params=Promise<{slug:string}>;
 export const dynamic='force-dynamic';
+const legacyRoute=(slug:string)=>`/evidence-guides/${slug}/`;
 
 export async function generateMetadata({params}:{params:Params}):Promise<Metadata>{
- const {slug}=await params; const record=await getEvidenceGuideRecord(slug); if(!record) return {};
+ const {slug}=await params; const record=await getEvidenceGuideRecord(slug); if(!record){const route=legacyRoute(slug);return legacyPreservedMetadata(await getLegacyPreservedPage(route),route)};
  return buildSeoMetadata({title:record.seo_title||record.title,description:record.seo_description||record.excerpt,path:record.canonical_url||`/evidence-guides/${slug}/`,index:record.robots_index,follow:record.robots_follow,type:'article',keywords:[record.primary_keyword,...(record.secondary_keywords??[]),...(record.semantic_terms??[])].filter(Boolean) as string[],publishedTime:record.published_at,modifiedTime:record.updated_at,authors:record.author_display_name?[{name:record.author_display_name}]:undefined,hreflang:{ar:record.canonical_url||`/evidence-guides/${slug}/`,'x-default':record.canonical_url||`/evidence-guides/${slug}/`}});
 }
 
 export default async function EvidenceGuideDetail({params}:{params:Params}){
- const {slug}=await params; const record=await getEvidenceGuideRecord(slug); if(!record) notFound();
+ const {slug}=await params; const record=await getEvidenceGuideRecord(slug); if(!record){const route=legacyRoute(slug);const preserved=await getLegacyPreservedPage(route);if(!preserved)notFound();return <LegacyPreservedPageView page={preserved} route={route}/>}
  const [related]=await Promise.all([getRelatedEvidenceGuides(record)]); const refs=safeEvidenceReferences(record.references_json); const category=evidenceGuideCategory(record); const canonical=record.canonical_url||`/evidence-guides/${slug}/`; const url=`${SITE_URL}${canonical}`;
  const breadcrumbs=breadcrumbJsonLd([{name:'الرئيسية',path:'/'},{name:'الأدلة المبنية على المصادر',path:'/evidence-guides/'},{name:record.title,path:canonical}]);
  const schema={'@context':'https://schema.org','@type':['MedicalWebPage','Article'],'@id':`${url}#article`,url,headline:record.title,name:record.title,description:record.seo_description||record.excerpt||undefined,inLanguage:'ar',datePublished:record.published_at||undefined,dateModified:record.updated_at,lastReviewed:record.last_reviewed_at||undefined,articleSection:category,author:record.author_display_name?{'@type':'Organization',name:record.author_display_name}:{'@id':`${SITE_URL}/#organization`},publisher:{'@id':`${SITE_URL}/#organization`},isPartOf:{'@id':`${SITE_URL}/evidence-guides/#page`},citation:refs.map((r)=>r.url)};
