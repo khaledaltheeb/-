@@ -28,8 +28,12 @@ function cleanText(value: unknown, max = 20000): string {
   return typeof value === 'string' ? value.trim().slice(0, max) : '';
 }
 
+function decodedRoute(value: string) {
+  try { return decodeURIComponent(value).normalize('NFC'); } catch { return value.normalize('NFC'); }
+}
+
 function safeRoute(route: string): string | null {
-  const trimmed = route.trim();
+  const trimmed = decodedRoute(route.trim());
   if (!trimmed || trimmed.length > 500 || trimmed.includes('\\') || trimmed.includes('?') || trimmed.includes('#')) return null;
   const parts = trimmed.split('/').filter(Boolean);
   if (parts.some((part) => part === '..' || part === '.')) return null;
@@ -47,7 +51,7 @@ export function normalizeLegacyInternalHref(value: unknown): string | null {
     const url = new URL(raw, 'https://healthrenewal.org');
     const host = url.hostname.toLowerCase();
     if (host !== 'healthrenewal.org' && host !== 'www.healthrenewal.org') return null;
-    return `${url.pathname}${url.search}${url.hash}` || '/';
+    return `${decodedRoute(url.pathname)}${url.search}${url.hash}` || '/';
   } catch {
     return null;
   }
