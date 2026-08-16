@@ -14,6 +14,7 @@ import {
   type CareGuideRecord,
   type CareGuideRelatedItem,
 } from '@/lib/care-guides';
+import { contentReviewProvenance } from '@/lib/review-provenance';
 import { breadcrumbJsonLd, SITE_URL } from '@/lib/seo';
 
 type Props = {
@@ -62,7 +63,7 @@ export default function CareGuidePage({ record, items = [], related = [], routeS
   const references = safeCareGuideReferences(record.references_json);
   const faqItems = visibleCareGuideFaq(record.body_json);
   const centralDisclaimer = careGuideDisclaimer(record.schema_json);
-  const hasHumanReview = Boolean(record.reviewer_display_name?.trim());
+  const review = contentReviewProvenance(record);
   const canonical = record.canonical_url || (routeSegments.length ? `/care-guides/${routeSegments.join('/')}/` : '/care-guides/');
   const url = canonical.startsWith('https://') ? canonical : `${SITE_URL}${canonical}`;
   const audiences = Array.isArray(record.audience) ? record.audience.map(String) : [];
@@ -83,7 +84,7 @@ export default function CareGuidePage({ record, items = [], related = [], routeS
     inLanguage: 'ar',
     datePublished: record.published_at || undefined,
     dateModified: record.updated_at || undefined,
-    lastReviewed: hasHumanReview ? record.last_reviewed_at || undefined : undefined,
+    lastReviewed: review.lastReviewedAt || undefined,
     publisher: { '@id': `${SITE_URL}/#organization` },
     isPartOf: { '@id': `${SITE_URL}/#website` },
     image: record.featured_image_url ? (record.featured_image_url.startsWith('https://') ? record.featured_image_url : `${SITE_URL}${record.featured_image_url}`) : undefined,
@@ -109,6 +110,7 @@ export default function CareGuidePage({ record, items = [], related = [], routeS
       '@type': 'Article',
       articleSection: category,
       author: record.author_display_name ? { '@type': 'Organization', name: record.author_display_name } : { '@id': `${SITE_URL}/#organization` },
+      reviewedBy: review.reviewedBySchema,
       citation: references.flatMap((reference) => reference.url ? [reference.url] : []),
     };
 
@@ -131,9 +133,9 @@ export default function CareGuidePage({ record, items = [], related = [], routeS
         {record.excerpt ? <p>{record.excerpt}</p> : null}
         <div className="article-meta">
           {record.author_display_name ? <span>إعداد: {record.author_display_name}</span> : null}
-          {hasHumanReview ? <span>مراجعة: {record.reviewer_display_name}{record.reviewer_credentials ? ` — ${record.reviewer_credentials}` : ''}</span> : null}
+          {review.reviewerName ? <span>مراجعة: {review.reviewerName}{review.reviewerCredentials ? ` — ${review.reviewerCredentials}` : ''}</span> : null}
           {record.published_at ? <span>نُشر {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(record.published_at))}</span> : null}
-          {hasHumanReview && record.last_reviewed_at ? <span>آخر مراجعة {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(record.last_reviewed_at))}</span> : !hasHumanReview && record.updated_at ? <span>آخر تحديث {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(record.updated_at))}</span> : null}
+          {review.lastReviewedAt ? <span>آخر مراجعة {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(review.lastReviewedAt))}</span> : null}
         </div>
         {audiences.length ? <div className="tag-list">{audiences.map((audience) => <span key={audience}>{audience}</span>)}</div> : null}
       </header>
