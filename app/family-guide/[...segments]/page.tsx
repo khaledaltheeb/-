@@ -1,16 +1,22 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import FamilyGuideArticlePage from '@/components/family-guide-article-page';
+import LegacyPreservedPageView from '@/components/legacy-preserved-page';
 import { getFamilyGuideRecord } from '@/lib/family-guide';
+import { getLegacyPreservedPage, legacyPreservedMetadata } from '@/lib/legacy-preserved-page';
 import { buildSeoMetadata } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
 type Params = Promise<{ segments: string[] }>;
+const legacyRoute = (segments: string[]) => `/family-guide/${segments.filter(Boolean).join('/')}/`;
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { segments } = await params;
   const record = await getFamilyGuideRecord(segments);
-  if (!record) return {};
+  if (!record) {
+    const route = legacyRoute(segments);
+    return legacyPreservedMetadata(await getLegacyPreservedPage(route), route);
+  }
   const metadata = buildSeoMetadata({
     title: record.seo_title || record.title,
     description: record.seo_description || record.excerpt,
@@ -31,6 +37,9 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 export default async function FamilyGuideDetailPage({ params }: { params: Params }) {
   const { segments } = await params;
   const record = await getFamilyGuideRecord(segments);
-  if (!record) notFound();
-  return <FamilyGuideArticlePage record={record} />;
+  if (record) return <FamilyGuideArticlePage record={record} />;
+  const route = legacyRoute(segments);
+  const preserved = await getLegacyPreservedPage(route);
+  if (!preserved) notFound();
+  return <LegacyPreservedPageView page={preserved} route={route} />;
 }
