@@ -3,7 +3,7 @@ import { sitemapResponse } from '@/lib/sitemap-xml';
 import { getCognitivePageIndex } from '@/lib/cognitive-program';
 
 export const dynamic = 'force-dynamic';
-const PAGE_SIZE = 50000;
+const PAGE_SIZE=50000;
 const RELEASE = '2026-08-14T00:00:00.000Z';
 
 type SitemapRow = {
@@ -30,7 +30,7 @@ export async function GET(request: Request) {
     .lte('published_at', new Date().toISOString())
     .eq('robots_index', true)
     .order('updated_at', { ascending: false })
-    .range(start, end);
+    .range(start,end);
 
   if (error) {
     throw new Error(`content sitemap query failed: ${error.message}`);
