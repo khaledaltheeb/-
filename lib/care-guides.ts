@@ -11,6 +11,8 @@ export type CareGuideReference = {
 
 export type CareGuideFaq = { question: string; answer: string };
 
+export type CareGuideDisclaimer = { url: string; label: string };
+
 export type CareGuideItem = {
   id: string;
   slug: string;
@@ -93,6 +95,14 @@ export function careGuidePageRole(value: unknown) {
 
 export function careGuideCategory(value: unknown) {
   return asString(asRecord(value)?.care_guide_category) || 'أدلة التعامل والرعاية';
+}
+
+export function careGuideDisclaimer(value: unknown): CareGuideDisclaimer | null {
+  const row = asRecord(value);
+  const url = asString(row?.disclaimer_url);
+  const label = asString(row?.disclaimer_label);
+  if (!/^\/[a-z0-9][a-z0-9\/-]*$/i.test(url) || !label) return null;
+  return { url, label };
 }
 
 export async function getCareGuidesHubRecord(): Promise<CareGuideRecord | null> {
