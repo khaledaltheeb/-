@@ -16,22 +16,32 @@ export default function DailyToolWorkspace({ slug, title, spec }: Props) {
   const completed = useMemo(() => checked.filter(Boolean).length, [checked]);
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(storageKey(slug));
-      if (!raw) return;
-      const saved = JSON.parse(raw) as SavedState;
-      if (Array.isArray(saved.checked)) setChecked(spec.steps.map((_, index) => Boolean(saved.checked[index])));
-      if (saved.values && typeof saved.values === 'object') setValues({ ...initialValues(spec.fields), ...saved.values });
-    } catch { setStatus('تعذر قراءة النسخة المحلية السابقة. يمكنك بدء سجل جديد.'); }
+    let active = true;
+    const timer = window.setTimeout(() => {
+      if (!active) return;
+      try {
+        const raw = window.localStorage.getItem(storageKey(slug));
+        if (!raw) return;
+        const saved = JSON.parse(raw) as SavedState;
+        if (Array.isArray(saved.checked)) setChecked(spec.steps.map((_, index) => Boolean(saved.checked[index])));
+        if (saved.values && typeof saved.values === 'object') setValues({ ...initialValues(spec.fields), ...saved.values });
+      } catch {
+        setStatus('تعذر قراءة النسخة المحلية السابقة. يمكنك بدء سجل جديد.');
+      }
+    }, 0);
+    return () => {
+      active = false;
+      window.clearTimeout(timer);
+    };
   }, [slug, spec.fields, spec.steps]);
 
   function snapshot(): SavedState { return { checked, values, savedAt: new Date().toISOString() }; }
   function save() {
-    try { localStorage.setItem(storageKey(slug), JSON.stringify(snapshot())); setStatus('تم الحفظ على هذا الجهاز فقط.'); }
+    try { window.localStorage.setItem(storageKey(slug), JSON.stringify(snapshot())); setStatus('تم الحفظ على هذا الجهاز فقط.'); }
     catch { setStatus('تعذر الحفظ محليًا في هذا المتصفح.'); }
   }
   function clear() {
-    localStorage.removeItem(storageKey(slug));
+    try { window.localStorage.removeItem(storageKey(slug)); } catch { /* Keep in-memory reset available in restricted storage contexts. */ }
     setChecked(spec.steps.map(() => false)); setValues(initialValues(spec.fields)); setStatus('تم مسح السجل المحلي لهذه الأداة.');
   }
   function download() {
