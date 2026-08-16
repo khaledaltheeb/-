@@ -61,6 +61,8 @@ export type CareGuideRecord = {
   schema_json: unknown;
 };
 
+const CARE_GUIDE_DETAIL_FIELDS = 'id,slug,title,excerpt,body_json,body_text,content_type,audience,seo_title,seo_description,canonical_url,robots_index,robots_follow,published_at,updated_at,featured_image_url,featured_image_alt,primary_keyword,secondary_keywords,semantic_terms,author_display_name,reviewer_display_name,reviewer_credentials,last_reviewed_at,references_json,medical_disclaimer,schema_json';
+
 function asRecord(value: unknown): JsonRecord | null {
   return value && typeof value === 'object' && !Array.isArray(value) ? (value as JsonRecord) : null;
 }
@@ -95,14 +97,15 @@ export function careGuideCategory(value: unknown) {
 
 export async function getCareGuidesHubRecord(): Promise<CareGuideRecord | null> {
   const supabase = await createClient();
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('content')
-    .select('id,slug,title,excerpt,body_json,body_text,content_type,audience,seo_title,seo_description,canonical_url,robots_index,robots_follow,published_at,updated_at,featured_image_url,featured_image_alt,primary_keyword,secondary_keywords,semantic_terms,author_display_name,reviewer_display_name,reviewer_credentials,last_reviewed_at,references_json,medical_disclaimer,schema_json')
+    .select(CARE_GUIDE_DETAIL_FIELDS)
     .eq('slug', 'care-guides-hub')
     .eq('status', 'published')
     .lte('published_at', new Date().toISOString())
     .maybeSingle();
 
+  if (error) throw error;
   return (data as CareGuideRecord | null) ?? null;
 }
 
@@ -111,21 +114,22 @@ export async function getCareGuideRecord(segments: string[]): Promise<CareGuideR
   if (!canonical) return null;
 
   const supabase = await createClient();
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('content')
-    .select('id,slug,title,excerpt,body_json,body_text,content_type,audience,seo_title,seo_description,canonical_url,robots_index,robots_follow,published_at,updated_at,featured_image_url,featured_image_alt,primary_keyword,secondary_keywords,semantic_terms,author_display_name,reviewer_display_name,reviewer_credentials,last_reviewed_at,references_json,medical_disclaimer,schema_json')
+    .select(CARE_GUIDE_DETAIL_FIELDS)
     .eq('canonical_url', canonical)
     .eq('content_type', 'guide')
     .eq('status', 'published')
     .lte('published_at', new Date().toISOString())
     .maybeSingle();
 
+  if (error) throw error;
   return (data as CareGuideRecord | null) ?? null;
 }
 
 export async function getCareGuideItems(): Promise<CareGuideItem[]> {
   const supabase = await createClient();
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('content')
     .select('id,slug,title,excerpt,canonical_url,audience,updated_at,schema_json')
     .eq('content_type', 'guide')
@@ -135,6 +139,7 @@ export async function getCareGuideItems(): Promise<CareGuideItem[]> {
     .order('updated_at', { ascending: false })
     .limit(500);
 
+  if (error) throw error;
   const rows = Array.isArray(data) ? data : [];
   return rows.flatMap((row) => {
     const canonicalUrl = asString(row.canonical_url);
@@ -154,18 +159,20 @@ export async function getCareGuideItems(): Promise<CareGuideItem[]> {
 
 export async function getRelatedCareGuideContent(contentId: string): Promise<CareGuideRelatedItem[]> {
   const supabase = await createClient();
-  const { data: relatedData } = await supabase.rpc('related_public_content', { p_content_id: contentId, p_limit: 6 });
+  const { data: relatedData, error: relatedError } = await supabase.rpc('related_public_content', { p_content_id: contentId, p_limit: 6 });
+  if (relatedError) throw relatedError;
   const relatedRows = Array.isArray(relatedData) ? relatedData : [];
   const orderedIds = relatedRows.map((row) => asString(asRecord(row)?.id)).filter(Boolean);
   if (!orderedIds.length) return [];
 
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('content')
     .select('id,slug,title,excerpt,content_type,canonical_url')
     .in('id', orderedIds)
     .eq('status', 'published')
     .lte('published_at', new Date().toISOString());
 
+  if (error) throw error;
   const rows = Array.isArray(data) ? data : [];
   const byId = new Map(rows.map((row) => [String(row.id), row]));
   return orderedIds.flatMap((id) => {
