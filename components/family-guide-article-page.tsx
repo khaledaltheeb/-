@@ -14,6 +14,7 @@ export default function FamilyGuideArticlePage({ record, items = [] }: Props) {
   const role = familyGuidePageRole(record.schema_json);
   const references = safeFamilyGuideReferences(record.references_json);
   const faq = visibleFamilyGuideFaq(record.body_json);
+  const hasHumanReview = Boolean(record.reviewer_display_name?.trim());
   const canonical = record.canonical_url || '/family-guide/';
   const url = canonical.startsWith('https://') ? canonical : `${SITE_URL}${canonical}`;
   const breadcrumbs = breadcrumbJsonLd([
@@ -24,13 +25,13 @@ export default function FamilyGuideArticlePage({ record, items = [] }: Props) {
   const common = {
     '@context': 'https://schema.org', '@id': `${url}#page`, url, name: record.title, headline: record.title,
     description: record.seo_description || record.excerpt || undefined, inLanguage: 'ar', datePublished: record.published_at || undefined,
-    dateModified: record.updated_at || undefined, lastReviewed: record.last_reviewed_at || undefined,
+    dateModified: record.updated_at || undefined, lastReviewed: hasHumanReview ? record.last_reviewed_at || undefined : undefined,
     publisher: { '@id': `${SITE_URL}/#organization` }, isPartOf: { '@id': `${SITE_URL}/#website` },
     image: record.featured_image_url ? (record.featured_image_url.startsWith('https://') ? record.featured_image_url : `${SITE_URL}${record.featured_image_url}`) : undefined,
   };
   const contentSchema: Record<string, unknown> = role === 'hub'
     ? { ...common, '@type': 'CollectionPage', mainEntity: { '@type': 'ItemList', numberOfItems: items.length, itemListElement: items.map((item) => ({ '@type': 'ListItem', position: item.rank, name: item.title, url: `${SITE_URL}${item.href}` })) } }
-    : { ...common, '@type': 'Article', author: record.author_display_name ? { '@type': 'Organization', name: record.author_display_name } : { '@id': `${SITE_URL}/#organization` }, citation: references.flatMap((reference) => reference.url ? [reference.url] : []) };
+    : { ...common, '@type': 'Article', author: record.author_display_name ? { '@type': 'Organization', name: record.author_display_name } : { '@id': `${SITE_URL}/#organization` }, reviewedBy: hasHumanReview ? { '@type': 'Person', name: record.reviewer_display_name, description: record.reviewer_credentials || undefined } : undefined, citation: references.flatMap((reference) => reference.url ? [reference.url] : []) };
   const faqSchema = faq.length ? { '@context': 'https://schema.org', '@type': 'FAQPage', '@id': `${url}#faq`, mainEntity: faq.map((item) => ({ '@type': 'Question', name: item.question, acceptedAnswer: { '@type': 'Answer', text: item.answer } })) } : null;
   const schemas = [breadcrumbs, contentSchema, ...(faqSchema ? [faqSchema] : [])];
   return (
@@ -46,8 +47,8 @@ export default function FamilyGuideArticlePage({ record, items = [] }: Props) {
             {record.excerpt ? <p>{record.excerpt}</p> : null}
             <div className="article-meta">
               {record.author_display_name ? <span>إعداد: {record.author_display_name}</span> : null}
-              {record.reviewer_display_name ? <span>مراجعة: {record.reviewer_display_name}{record.reviewer_credentials ? ` — ${record.reviewer_credentials}` : ''}</span> : null}
-              {record.last_reviewed_at ? <span>آخر مراجعة {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(record.last_reviewed_at))}</span> : null}
+              {hasHumanReview ? <span>مراجعة: {record.reviewer_display_name}{record.reviewer_credentials ? ` — ${record.reviewer_credentials}` : ''}</span> : null}
+              {hasHumanReview && record.last_reviewed_at ? <span>آخر مراجعة {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(record.last_reviewed_at))}</span> : !hasHumanReview && record.updated_at ? <span>آخر تحديث {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(record.updated_at))}</span> : null}
             </div>
           </header>
           <nav className={styles.sectionNav} aria-label="التنقل في دليل الأسرة"><Link href="/family-guide/">الفهرس</Link><Link href="/capabilities/">مرجع القدرات</Link><Link href="/care-guides/">أدلة الرعاية</Link></nav>
