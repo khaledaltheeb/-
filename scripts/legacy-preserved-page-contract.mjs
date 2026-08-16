@@ -22,7 +22,7 @@ for(const marker of [
 ]) if(!migration.toLowerCase().includes(marker.toLowerCase())) fail(`final read-boundary marker missing: ${marker}`);
 
 for(const forbidden of ['service_role','secret_key']) if(helper.toLowerCase().includes(forbidden)||view.toLowerCase().includes(forbidden)) fail(`forbidden preservation secret pattern: ${forbidden}`);
-for(const marker of ['get_legacy_preserved_page','legacyPreservedMetadata','index: false','noarchive: true','healthrenewal.org']) if(!helper.includes(marker)) fail(`helper marker missing: ${marker}`);
+for(const marker of ['get_legacy_preserved_page','legacyPreservedMetadata','index: false','noarchive: true','healthrenewal.org','decodeURIComponent',"normalize('NFC')"]) if(!helper.includes(marker)) fail(`helper marker missing: ${marker}`);
 for(const marker of ['نسخة إنتاجية محفوظة','لم تُمنح هذه النسخة اعتماد دورة المراجعة العلمية الحالية','ContentRenderer','legacyInternalLinks','legacyReferences']) if(!view.includes(marker)) fail(`preserved view marker missing: ${marker}`);
 for(const path of routes){
  if(!fs.existsSync(path)){fail(`preserved route missing: ${path}`);continue;}
@@ -41,4 +41,4 @@ for(const path of [
 ]) if(!fs.existsSync(path)) fail(`deployed migration history not mirrored: ${path}`);
 
 if(failed)process.exit(1);
-console.log('Legacy preservation contract passed: production HTML is available through a read-only noindex boundary without migration redirects or publication-gate bypass.');
+console.log('Legacy preservation contract passed: production HTML is available through a Unicode-safe read-only noindex boundary without migration redirects or publication-gate bypass.');
