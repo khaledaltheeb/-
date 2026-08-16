@@ -4,7 +4,7 @@ import path from 'node:path';
 const root = process.cwd();
 const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
 const exists = (file) => fs.existsSync(path.join(root, file));
-const fail = (message) => { console.error(`THEME V5 CONTRACT FAILED: ${message}`); process.exitCode = 1; };
+const fail = (message) => { console.error(`THEME V6 CONTRACT FAILED: ${message}`); process.exitCode = 1; };
 
 const layout = read('app/layout.tsx');
 const header = read('components/site-header.tsx');
