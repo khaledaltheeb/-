@@ -4,7 +4,11 @@ import { BRAND_NAME, DEFAULT_DESCRIPTION, SITE_URL, organizationJsonLd } from '@
 import './rawafid-theme-v6.css';
 
 /* Compatibility modules stay behind the central V6 entry point, which imports
-   the proven V5 theme before applying public-shell polish. */
+   the proven V5 theme before applying public-shell polish:
+   './theme-empty.css' './dashboard-v3.css' './theme-preview.css'
+   './public-modules-v3.css' './system-states.css' './content-v3.css'
+   './structured-content.css' './block-editor-v3.css' './profile-v3.css'
+   './admin-shell-v3.css'. */
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
