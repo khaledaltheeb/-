@@ -7,7 +7,7 @@
   --rf-page:#fafcfb;
   --rf-ink:#123038;
   --rf-ink-soft:#3d5960;
-  --rf-muted:#657b80;
+  --rf-muted:#60767b;
   --rf-line:#dbe5e3;
   --rf-line-strong:#c5d5d2;
   --rf-brand:#087b78;
@@ -35,6 +35,7 @@ body{background:var(--rf-page);color:var(--rf-ink);font-size:16px;line-height:1.
 .desktop-nav>a,.desktop-nav summary{min-height:44px;padding-inline:9px;border-radius:9px;color:var(--rf-ink-soft);font-size:.82rem;font-weight:720;letter-spacing:0}
 .header-search{width:clamp(190px,17vw,255px);min-height:44px;padding:3px 4px;border-color:var(--rf-line-strong);border-radius:12px;box-shadow:none}
 .header-search input{min-height:36px;padding-inline:10px;font-size:.8rem}
+.header-search input::placeholder,.rawafid-search input::placeholder{color:var(--rf-muted);opacity:1}
 .header-search button{min-width:46px;min-height:36px;padding-inline:10px;border-radius:8px;background:var(--rf-brand-soft);color:var(--rf-brand-deep);font-size:.78rem}
 .header-login{min-height:44px;padding-inline:15px;border-radius:10px;background:var(--rf-brand-deep);box-shadow:none;font-size:.8rem}
 .header-login:hover{background:#05393e;color:#fff}
