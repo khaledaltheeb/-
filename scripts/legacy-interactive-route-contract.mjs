@@ -86,7 +86,35 @@ if (!proxy.includes('const protectedPrefixes') || !proxy.includes('const redirec
   fail('request-boundary protection arrays are missing from Supabase proxy');
 }
 
+const indexableConditionAliases = [
+  'alcohol-use-disorder',
+  'autism',
+  'cannabis-use-disorder',
+  'depression',
+  'gambling-related-harms',
+  'gaming-disorder',
+  'inhalant-use-disorder',
+  'nicotine-tobacco-dependence',
+  'opioid-use-disorder',
+  'polysubstance-use-and-overdose-risk',
+  'sedative-benzodiazepine-use-disorder',
+  'stimulant-use-disorder',
+];
+for (const slug of indexableConditionAliases) {
+  if (!proxy.includes(`'${slug}'`)) fail(`published condition alias is missing from noindex canonical map: ${slug}`);
+}
+for (const required of [
+  'preservedContentAliasCanonical',
+  'applyPreservedAliasSeoHeaders',
+  "response.headers.set('X-Robots-Tag', 'noindex, follow')",
+  'rel="canonical"',
+  "slug.startsWith('capabilities-')",
+  "slug.startsWith('comparisons-')",
+]) {
+  if (!proxy.includes(required)) fail(`preserved alias SEO guard missing: ${required}`);
+}
+
 if (!pkg.scripts?.['legacy-interactive-routes:validate']) fail('package validation script missing');
 if (!process.exitCode) {
-  console.log('Legacy interactive route contract passed: historical routes remain real; private specialist routes are protected at both proxy and page boundaries.');
+  console.log('Legacy interactive route contract passed: historical routes remain real; private specialist routes are protected; duplicate content aliases are noindex with explicit canonical targets.');
 }
