@@ -347,6 +347,123 @@
       "url": "https://pubmed.ncbi.nlm.nih.gov/19652712/",
       "source_type": "experimental-study",
       "authority_tier": "secondary"
+    },
+    {
+      "id": "Cepeda-Optimal-Retention-2008",
+      "title": "Spacing effects in learning: a temporal ridgeline of optimal retention",
+      "publisher": "Psychological Science / PubMed",
+      "year": 2008,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/19076480/",
+      "source_type": "experimental-study",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Rhodes-Tauber-JOL-Meta-2011",
+      "title": "The influence of delaying judgments of learning on metacognitive accuracy: a meta-analytic review",
+      "publisher": "Psychological Bulletin / PubMed",
+      "year": 2011,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/21219059/",
+      "source_type": "meta-analysis",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Koriat-Monitoring-Control-2006",
+      "title": "The intricate relationships between monitoring and control in metacognition: lessons for the cause-and-effect relation between subjective experience and behavior",
+      "publisher": "Journal of Experimental Psychology: General / PubMed",
+      "year": 2006,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/16478315/",
+      "source_type": "review-and-experimental-synthesis",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Pan-Rickard-Retrieval-Transfer-Meta-2018",
+      "title": "Transfer of test-enhanced learning: Meta-analytic review and synthesis",
+      "publisher": "Psychological Bulletin / PubMed",
+      "year": 2018,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/29733621/",
+      "source_type": "meta-analysis",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Mulligan-Transitive-Inference-2023",
+      "title": "Transitive inference and the testing effect: Retrieval practice impairs transitive inference",
+      "publisher": "Quarterly Journal of Experimental Psychology / PubMed",
+      "year": 2023,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/36760059/",
+      "source_type": "experimental-study-with-small-meta-analysis",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Cognitive-Load-Materials-2021",
+      "title": "Five Strategies for Optimizing Instructional Materials: Instructor- and Learner-Managed Cognitive Load",
+      "publisher": "Educational Psychology Review / PubMed",
+      "year": 2021,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/33716467/",
+      "source_type": "review",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Rodriguez-Nieto-EF-Meta-2022",
+      "title": "Inhibition, Shifting and Updating: Inter and intra-domain commonalities and differences from an executive functions activation likelihood estimation meta-analysis",
+      "publisher": "NeuroImage / PubMed",
+      "year": 2022,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/36202157/",
+      "source_type": "meta-analysis",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Visual-Distractor-Suppression-Review-2019",
+      "title": "Getting rid of visual distractors: the why, when, how, and where",
+      "publisher": "Current Opinion in Psychology / PubMed",
+      "year": 2019,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/30856512/",
+      "source_type": "review",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Chen-Prospective-Memory-Meta-2015",
+      "title": "The effect of implementation intention on prospective memory: a systematic and meta-analytic review",
+      "publisher": "Psychiatry Research / PubMed",
+      "year": 2015,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/25639373/",
+      "source_type": "systematic-review-meta-analysis",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Gilbert-Intention-Offloading-2023",
+      "title": "Outsourcing Memory to External Tools: A Review of Intention Offloading",
+      "publisher": "Psychonomic Bulletin & Review / PubMed",
+      "year": 2023,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/35789477/",
+      "source_type": "review",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Heitz-Speed-Accuracy-2014",
+      "title": "The speed-accuracy tradeoff: history, physiology, methodology, and behavior",
+      "publisher": "Frontiers in Neuroscience / PubMed",
+      "year": 2014,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/24966810/",
+      "source_type": "review",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Langner-Eickhoff-Vigilance-Meta-2013",
+      "title": "Sustaining attention to simple tasks: a meta-analytic review of the neural mechanisms of vigilant attention",
+      "publisher": "Psychological Bulletin / PubMed",
+      "year": 2013,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/23163491/",
+      "source_type": "meta-analysis",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Patel-Self-Scheduled-Breaks-2024",
+      "title": "The metacognition of vigilance: Using self-scheduled breaks to improve sustained attention",
+      "publisher": "Journal of Experimental Psychology: Applied / PubMed",
+      "year": 2024,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/39250235/",
+      "source_type": "experimental-study",
+      "authority_tier": "secondary"
     }
   ]
 }
