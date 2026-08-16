@@ -20,6 +20,7 @@ const redirectExcludedPrefixes = [
   '/admin',
   '/auth',
   '/login',
+  '/mfa',
   '/forgot-password',
   '/reset-password',
   '/dashboard',
@@ -183,6 +184,18 @@ export async function updateSession(request: NextRequest) {
     url.search = '';
     url.searchParams.set('next', `${request.nextUrl.pathname}${request.nextUrl.search}`);
     return NextResponse.redirect(url);
+  }
+
+  if (isProtected && data?.claims?.sub) {
+    const assurance = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    if (assurance.error || (assurance.data.nextLevel === 'aal2' && assurance.data.currentLevel !== 'aal2')) {
+      const url = request.nextUrl.clone();
+      url.pathname = '/mfa';
+      url.search = '';
+      url.searchParams.set('next', `${request.nextUrl.pathname}${request.nextUrl.search}`);
+      if (assurance.error) url.searchParams.set('error', 'assurance_check');
+      return NextResponse.redirect(url);
+    }
   }
 
   if (modernTrailingSlashVariant) response.headers.set('X-Robots-Tag', 'noindex, follow');
