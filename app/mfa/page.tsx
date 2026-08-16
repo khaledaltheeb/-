@@ -35,7 +35,7 @@ export default async function MfaPage({ searchParams }: { searchParams: SearchPa
   if (assurance.error) return <AssuranceError />;
   const factors = await supabase.auth.mfa.listFactors();
   if (factors.error) return <AssuranceError />;
-  const hasVerifiedTotp = (factors.data.totp ?? []).some((factor) => factor.status === 'verified');
+  const hasVerifiedTotp = (factors.data?.totp ?? []).some((factor) => factor.status === 'verified');
 
   if (!hasVerifiedTotp || assurance.data.currentLevel === 'aal2') redirect(next);
 
