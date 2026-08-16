@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 
 const config = fs.readFileSync('next.config.ts', 'utf8');
+const proxy = fs.readFileSync('lib/supabase/proxy.ts', 'utf8');
 const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
 const fail = (message) => {
   console.error(`LEGACY INTERACTIVE ROUTE CONTRACT FAILED: ${message}`);
@@ -52,16 +53,22 @@ if (!account.includes("@/app/account/page")) fail('legacy account route must use
 if (!admin.includes("@/app/admin/page")) fail('legacy admin route must use current role-aware admin implementation');
 if (!portal.includes("@/app/messages/page")) fail('legacy portal route must use current message implementation');
 
+const privateLegacyRoutes = [
+  '/specialists-partners/account',
+  '/specialists-partners/admin',
+  '/specialists-partners/portal',
+];
+
 for (const [name, source, nextPath] of [
-  ['account', account, '/specialists-partners/account'],
-  ['admin', admin, '/specialists-partners/admin'],
-  ['portal', portal, '/specialists-partners/portal'],
+  ['account', account, privateLegacyRoutes[0]],
+  ['admin', admin, privateLegacyRoutes[1]],
+  ['portal', portal, privateLegacyRoutes[2]],
 ]) {
   if (!source.includes("@/lib/supabase/server") || !source.includes('getClaims()')) {
-    fail(`legacy ${name} route must authenticate at the route boundary before shared rendering`);
+    fail(`legacy ${name} route must authenticate at the page boundary as defense in depth`);
   }
   if (!source.includes(`redirect('/login?next=${nextPath}')`)) {
-    fail(`legacy ${name} route must emit an explicit unauthenticated login redirect`);
+    fail(`legacy ${name} route must preserve an explicit unauthenticated login redirect`);
   }
 }
 
@@ -69,7 +76,17 @@ if (!admin.includes(".select('role,is_active')") || !admin.includes("['owner', '
   fail('legacy admin route must enforce active owner/admin authorization before rendering the shared admin page');
 }
 
+for (const route of privateLegacyRoutes) {
+  const occurrences = proxy.split(`'${route}'`).length - 1;
+  if (occurrences < 2) {
+    fail(`legacy private route must appear in both protectedPrefixes and redirectExcludedPrefixes: ${route}`);
+  }
+}
+if (!proxy.includes('const protectedPrefixes') || !proxy.includes('const redirectExcludedPrefixes')) {
+  fail('request-boundary protection arrays are missing from Supabase proxy');
+}
+
 if (!pkg.scripts?.['legacy-interactive-routes:validate']) fail('package validation script missing');
 if (!process.exitCode) {
-  console.log('Legacy interactive route contract passed: historical routes remain real, and private specialist routes enforce authentication/authorization before rendering.');
+  console.log('Legacy interactive route contract passed: historical routes remain real; private specialist routes are protected at both proxy and page boundaries.');
 }
