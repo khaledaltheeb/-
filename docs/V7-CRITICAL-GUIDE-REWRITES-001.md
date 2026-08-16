@@ -9,7 +9,7 @@ This batch rewrites two high-sensitivity V7 Care Guides that were held by the fu
 
 The pages remain published and directly accessible, but `noindex,follow`. No redirects or deletions are introduced.
 
-This is a stacked change on top of the Wave 004 hardening branch. Repository quality workflows are configured to run for pull requests targeting `main`, so the stacked PR may temporarily target `main` while its exact head is validated, then return to the Wave 004 base branch after the checks complete. The rewrite branch itself remains `behind=0` relative to both its stacked base and current `main` at the validation checkpoint.
+This is a stacked change on top of the Wave 004 hardening branch. Repository quality workflows are configured to run for pull requests targeting `main`, so the stacked PR may temporarily target `main` while its exact head is validated, then return to the Wave 004 base branch after the checks complete. The rewrite branch itself must be verified as `behind=0` relative to both its stacked base and current `main` at the final validation checkpoint.
 
 ## Editorial method
 
@@ -29,7 +29,7 @@ No self-harm or suicide-method instructions were added. The public copy stays fo
 
 Both source pages previously had `last_reviewed_at = 2026-08-14T10:37:38.687232+00:00`, which under project policy represents a completed review by فريق روافد.
 
-Because this batch materially changes the public text, the new versions must not inherit that review claim. The migration therefore:
+Because this batch materially changes the public text, the new versions must not inherit that review claim. The rewrite migration therefore:
 
 - stores the prior review timestamp in `schema_json.revision_provenance`;
 - sets `last_reviewed_at = null` on the rewritten version;
@@ -37,6 +37,16 @@ Because this batch materially changes the public text, the new versions must not
 - sets the hold state to `rewrite_completed_pending_rawafid_review` after re-audit.
 
 A fresh `lastReviewed` date must only be recorded after فريق روافد reviews the new text.
+
+## Exact migration lineage and reproducibility
+
+The live database history is preserved exactly rather than rewritten after the fact:
+
+1. `20260816150925_rewrite_v7_critical_suicide_self_harm_guides.sql` — material rewrite, review reset and initial safety hold.
+2. `20260816151133_finalize_v7_critical_rewrite_audit.sql` — the exact small finalization SQL that was actually applied under version `20260816151133`.
+3. `20260816152739_reconcile_v7_critical_rewrite_reproducibility.sql` — idempotent reconciliation for the later source-key normalization, pre/post duplicate metrics and originality-report state that had initially been verified through targeted QA SQL.
+
+The third migration exists specifically so a clean replay reaches the same state as live Supabase **without changing the contents of an already-applied historical migration**. It also asserts the release-safety invariants: both pages remain `noindex,follow`, have no current `last_reviewed_at`, carry `post_rewrite_verified`, and preserve the normalized WHO safety-planning evidence key where used.
 
 ## Full-corpus duplication re-audit
 
