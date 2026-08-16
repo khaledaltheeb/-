@@ -64,7 +64,7 @@ export default async function SiteHeader() {
         <div className="site-header-inner">
           <RawafidBrand />
           <nav className="desktop-nav" aria-label="التنقل الرئيسي">
-            <Link href="/">الرئيسية</Link>
+            <Link prefetch={false} href="/">الرئيسية</Link>
             <details className="nav-dropdown mega-nav">
               <summary><span>استكشف روافد</span></summary>
               <div className="nav-dropdown-panel mega-nav-panel">
@@ -73,14 +73,14 @@ export default async function SiteHeader() {
                     <strong>الوصول إلى روافد حسب احتياجك</strong>
                     <span>قطاعات معرفية، مسارات بحث، وأدلة خدمات ضمن تجربة واحدة</span>
                   </div>
-                  <Link href="/search">فتح البحث المتقدم ←</Link>
+                  <Link prefetch={false} href="/search">فتح البحث المتقدم ←</Link>
                 </div>
                 <div className="mega-nav-layout">
                   <section className="mega-nav-column mega-nav-sectors">
                     <h2>القطاعات</h2>
                     <div className="mega-sector-grid">
                       {sectors.map((sector) => (
-                        <Link key={sector.slug} href={'/sectors/' + sector.slug}>
+                        <Link prefetch={false} key={sector.slug} href={'/sectors/' + sector.slug}>
                           <i style={{ background: sector.accent || '#08716d' }} aria-hidden="true" />
                           <span>{sector.name_ar}</span>
                         </Link>
@@ -97,7 +97,7 @@ export default async function SiteHeader() {
                     <h2>ابدأ من احتياجك</h2>
                     <div className="mega-intent-list">
                       {intentLinks.map((link) => (
-                        <Link href={link.href} key={link.href}>
+                        <Link prefetch={false} href={link.href} key={link.href}>
                           <strong>{link.label}</strong>
                           <span>{link.detail}</span>
                         </Link>
@@ -108,7 +108,7 @@ export default async function SiteHeader() {
                     <h2>الدليل والخدمات</h2>
                     <div>
                       {serviceLinks.map((link) => (
-                        <Link href={link.href} key={link.href}>
+                        <Link prefetch={false} href={link.href} key={link.href}>
                           <PlatformIcon name={link.icon} size={19} />
                           <span>{link.label}</span>
                         </Link>
@@ -116,9 +116,9 @@ export default async function SiteHeader() {
                     </div>
                     {signedIn && (
                       <div className="mega-member-links">
-                        <Link href="/messages">الرسائل</Link>
-                        <Link href="/appointments">المواعيد</Link>
-                        <Link href="/notifications">الإشعارات</Link>
+                        <Link prefetch={false} href="/messages">الرسائل</Link>
+                        <Link prefetch={false} href="/appointments">المواعيد</Link>
+                        <Link prefetch={false} href="/notifications">الإشعارات</Link>
                       </div>
                     )}
                   </section>
@@ -126,7 +126,7 @@ export default async function SiteHeader() {
               </div>
             </details>
             {primaryLinks.map((link) => (
-              <Link key={link.href} href={link.href} data-nav-priority={link.secondary ? 'secondary' : 'primary'}>
+              <Link prefetch={false} key={link.href} href={link.href} data-nav-priority={link.secondary ? 'secondary' : 'primary'}>
                 {link.label}
               </Link>
             ))}
@@ -138,8 +138,8 @@ export default async function SiteHeader() {
           </form>
           <div className="header-actions">
             {signedIn
-              ? <Link className="button header-login" href="/account">حسابي</Link>
-              : <Link className="button header-login" href="/login">تسجيل الدخول</Link>}
+              ? <Link prefetch={false} className="button header-login" href="/account">حسابي</Link>
+              : <Link prefetch={false} className="button header-login" href="/login">تسجيل الدخول</Link>}
           </div>
           <details className="mobile-menu">
             <summary aria-label="فتح قائمة التنقل"><NavIcon name="more" /><span>القائمة</span></summary>
@@ -149,26 +149,26 @@ export default async function SiteHeader() {
                 <input id="mobile-search-input" name="q" type="search" placeholder="حالة، دليل أو خدمة" maxLength={120} enterKeyHint="search" />
                 <button type="submit">بحث</button>
               </form>
-              <Link href="/">الرئيسية</Link>
-              <Link href="/sections">جميع الأقسام</Link>
-              <Link href="/encyclopedia/">الموسوعة</Link>
-              <Link href="/evidence-guides/">الأدلة العلمية</Link>
+              <Link prefetch={false} href="/">الرئيسية</Link>
+              <Link prefetch={false} href="/sections">جميع الأقسام</Link>
+              <Link prefetch={false} href="/encyclopedia/">الموسوعة</Link>
+              <Link prefetch={false} href="/evidence-guides/">الأدلة العلمية</Link>
               <span className="mobile-menu-label">ابدأ من احتياجك</span>
-              {intentLinks.map((link) => <Link key={link.href} href={link.href}>{link.label}</Link>)}
+              {intentLinks.map((link) => <Link prefetch={false} key={link.href} href={link.href}>{link.label}</Link>)}
               <span className="mobile-menu-label">القطاعات</span>
-              {sectors.map((sector) => <Link key={sector.slug} href={'/sectors/' + sector.slug}>{sector.name_ar}</Link>)}
+              {sectors.map((sector) => <Link prefetch={false} key={sector.slug} href={'/sectors/' + sector.slug}>{sector.name_ar}</Link>)}
               {sectors.length === 0 && <span className="nav-empty">لا توجد قطاعات عامة متاحة حاليًا.</span>}
               <span className="mobile-menu-label">الدليل والمشاركة</span>
-              {serviceLinks.map((link) => <Link key={link.href} href={link.href}>{link.label}</Link>)}
-              <Link href="/experiences/">شاركنا تجربتك</Link>
+              {serviceLinks.map((link) => <Link prefetch={false} key={link.href} href={link.href}>{link.label}</Link>)}
+              <Link prefetch={false} href="/experiences/">شاركنا تجربتك</Link>
               {signedIn ? (
                 <>
-                  <Link href="/messages">الرسائل</Link>
-                  <Link href="/appointments">المواعيد</Link>
-                  <Link href="/notifications">الإشعارات</Link>
-                  <Link href="/account">حسابي</Link>
+                  <Link prefetch={false} href="/messages">الرسائل</Link>
+                  <Link prefetch={false} href="/appointments">المواعيد</Link>
+                  <Link prefetch={false} href="/notifications">الإشعارات</Link>
+                  <Link prefetch={false} href="/account">حسابي</Link>
                 </>
-              ) : <Link href="/login">تسجيل الدخول</Link>}
+              ) : <Link prefetch={false} href="/login">تسجيل الدخول</Link>}
             </div>
           </details>
         </div>
@@ -176,7 +176,7 @@ export default async function SiteHeader() {
       <span id="main-content" className="skip-target" tabIndex={-1} />
       <nav className="mobile-bottom-nav" aria-label="التنقل السريع للهاتف">
         {mobileItems.map((item) => (
-          <Link href={item.href} key={item.href + item.label}>
+          <Link prefetch={false} href={item.href} key={item.href + item.label}>
             <NavIcon name={item.icon} />
             <span>{item.label}</span>
           </Link>

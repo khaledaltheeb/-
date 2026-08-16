@@ -35,6 +35,7 @@ for (const marker of ['Rawafid Institutional Theme V5', '.site-assurance-bar', '
 if (!brand.includes('RawafidMark') || !brand.includes('معرفة تقود إلى أثر')) fail('shared brand must use the unified Rawafid mark and slogan');
 if (!header.includes("import RawafidBrand from '@/components/rawafid-brand'") || !footer.includes("import RawafidBrand from '@/components/rawafid-brand'")) fail('public chrome must use the shared Rawafid brand');
 if (!header.includes("import Link from 'next/link'") || !footer.includes("import Link from 'next/link'") || !home.includes("import Link from 'next/link'")) fail('public navigation must use Next Link for smooth internal transitions');
+if (!header.includes('prefetch={false}') || !footer.includes('prefetch={false}') || !home.includes('prefetch={false}')) fail('dense public navigation must disable automatic prefetch to protect Worker resources');
 if (!header.includes('className="skip-link"') || !header.includes('id="main-content"') || !header.includes('className="skip-target"')) fail('public chrome must expose a keyboard bypass target');
 for (const label of ['استكشف روافد', 'الأقسام', 'الموسوعة', 'الأدلة', 'ذوو الاحتياجات الخاصة والدمج', 'حالة، دليل أو خدمة']) {
   if (!header.includes(label)) fail(`institutional V5.1 navigation missing ${label}`);
