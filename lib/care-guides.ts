@@ -170,7 +170,15 @@ export async function getCareGuideItems(): Promise<CareGuideItem[]> {
 export async function getRelatedCareGuideContent(contentId: string): Promise<CareGuideRelatedItem[]> {
   const supabase = await createClient();
   const { data: relatedData, error: relatedError } = await supabase.rpc('related_public_content', { p_content_id: contentId, p_limit: 6 });
-  if (relatedError) throw relatedError;
+  if (relatedError) {
+    console.error('Care guide related-content RPC failed; rendering without recommendations.', {
+      contentId,
+      code: relatedError.code,
+      message: relatedError.message,
+    });
+    return [];
+  }
+
   const relatedRows = Array.isArray(relatedData) ? relatedData : [];
   const orderedIds = relatedRows.map((row) => asString(asRecord(row)?.id)).filter(Boolean);
   if (!orderedIds.length) return [];
@@ -182,7 +190,15 @@ export async function getRelatedCareGuideContent(contentId: string): Promise<Car
     .eq('status', 'published')
     .lte('published_at', new Date().toISOString());
 
-  if (error) throw error;
+  if (error) {
+    console.error('Care guide related-content lookup failed; rendering without recommendations.', {
+      contentId,
+      code: error.code,
+      message: error.message,
+    });
+    return [];
+  }
+
   const rows = Array.isArray(data) ? data : [];
   const byId = new Map(rows.map((row) => [String(row.id), row]));
   return orderedIds.flatMap((id) => {
