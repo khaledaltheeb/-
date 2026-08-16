@@ -2,10 +2,12 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import ContentRenderer from '@/components/content-renderer';
+import LegacyPreservedPageView from '@/components/legacy-preserved-page';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import { createClient } from '@/lib/supabase/server';
 import { buildSeoMetadata, breadcrumbJsonLd, SITE_URL } from '@/lib/seo';
+import { getLegacyPreservedPage, legacyPreservedMetadata } from '@/lib/legacy-preserved-page';
 import { COGNITIVE_ROOT_SLUG, getCognitiveCategories, getCognitiveCategory, getCognitivePageIndex } from '@/lib/cognitive-program';
 import { publicContentHref, publicContentTypeLabel } from '@/lib/public-content-routing';
 
@@ -20,6 +22,7 @@ const one = (value: string | string[] | undefined) => Array.isArray(value) ? val
 const pageNo = (value: string) => { const n = Number(value); return Number.isInteger(n) && n > 0 && n < 10000 ? n : 1; };
 const qSafe = (value: string) => value.trim().replace(/[%_(),]/g, ' ').replace(/\s+/g, ' ').slice(0, 100);
 const pageHref = (slug: string, page: number, q: string) => { const params = new URLSearchParams(); if (page > 1) params.set('page', String(page)); if (q) params.set('q', q); return `/sections/${slug}${params.size ? `?${params}` : ''}`; };
+const legacyRoute = (slug: string) => `/sections/${slug}/`;
 
 async function dbCategory(slug: string) {
   const supabase = await createClient();
@@ -36,14 +39,22 @@ async function resolvedCategory(slug: string) { return await dbCategory(slug) ??
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params;
   const category = await resolvedCategory(slug);
-  if (!category) return {};
+  if (!category) {
+    const route = legacyRoute(slug);
+    return legacyPreservedMetadata(await getLegacyPreservedPage(route), route);
+  }
   return buildSeoMetadata({ title: category.seo_title || category.name_ar, description: category.seo_description || category.description || `${category.name_ar} في منصة روافد: محتوى عربي موثوق ومترابط.`, path: `/sections/${slug}`, index: true, keywords: [category.name_ar, 'منصة روافد', 'دليل موضوعي'] });
 }
 
 export default async function SectionPage({ params, searchParams }: { params: Params; searchParams: SearchParams }) {
   const [{ slug }, raw] = await Promise.all([params, searchParams]);
   const category = await resolvedCategory(slug);
-  if (!category) notFound();
+  if (!category) {
+    const route = legacyRoute(slug);
+    const preserved = await getLegacyPreservedPage(route);
+    if (!preserved) notFound();
+    return <LegacyPreservedPageView page={preserved} route={route} />;
+  }
   const page = pageNo(one(raw.page));
   const query = qSafe(one(raw.q));
   const supabase = await createClient();
@@ -59,13 +70,7 @@ export default async function SectionPage({ params, searchParams }: { params: Pa
   let editorialContent: EditorialContent | null = null;
 
   if (!virtual && category.editorial_content_id) {
-    const { data } = await supabase
-      .from('content')
-      .select('id,title,excerpt,body_json,body_text')
-      .eq('id', category.editorial_content_id)
-      .eq('status', 'published')
-      .lte('published_at', now)
-      .maybeSingle();
+    const { data } = await supabase.from('content').select('id,title,excerpt,body_json,body_text').eq('id', category.editorial_content_id).eq('status', 'published').lte('published_at', now).maybeSingle();
     editorialContent = data as EditorialContent | null;
   }
 
@@ -123,23 +128,10 @@ export default async function SectionPage({ params, searchParams }: { params: Pa
     <main className="site-shell sector-page">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schemas).replace(/</g, '\\u003c') }} />
       <nav className="breadcrumbs" aria-label="مسار الصفحة"><Link href="/">الرئيسية</Link><span>/</span><Link href="/sections">الأقسام</Link>{sector && <><span>/</span><Link href={`/sectors/${sector.slug}`}>{sector.name_ar}</Link></>}{parent && <><span>/</span><Link href={`/sections/${parent.slug}`}>{parent.name_ar}</Link></>}<span>/</span><span aria-current="page">{category.name_ar}</span></nav>
-
-      <section className="sector-hero compact-hero">
-        <span className="eyebrow">قسم معرفي</span>
-        <h1>{category.name_ar}</h1>
-        <p>{category.description || 'محتوى متخصص ومنظم ضمن منصة روافد.'}</p>
-        <div className="public-stat-strip"><span>{total.toLocaleString('ar')} صفحة منشورة</span>{childCards.length > 0 && <span>{childCards.length.toLocaleString('ar')} موضوعات فرعية</span>}</div>
-        <form className="sector-search" action={`/sections/${slug}`} method="get"><label className="sr-only" htmlFor="section-search">البحث داخل القسم</label><input id="section-search" name="q" defaultValue={query} placeholder={`ابحث داخل ${category.name_ar}`} maxLength={100} /><button type="submit">بحث</button></form>
-      </section>
-
+      <section className="sector-hero compact-hero"><span className="eyebrow">قسم معرفي</span><h1>{category.name_ar}</h1><p>{category.description || 'محتوى متخصص ومنظم ضمن منصة روافد.'}</p><div className="public-stat-strip"><span>{total.toLocaleString('ar')} صفحة منشورة</span>{childCards.length > 0 && <span>{childCards.length.toLocaleString('ar')} موضوعات فرعية</span>}</div><form className="sector-search" action={`/sections/${slug}`} method="get"><label className="sr-only" htmlFor="section-search">البحث داخل القسم</label><input id="section-search" name="q" defaultValue={query} placeholder={`ابحث داخل ${category.name_ar}`} maxLength={100} /><button type="submit">بحث</button></form></section>
       {editorialContent && <section className="section category-editorial-content" aria-labelledby="category-editorial-title"><div className="section-heading"><span>الدليل التحريري للقسم</span><h2 id="category-editorial-title">{editorialContent.title}</h2>{editorialContent.excerpt && <p>{editorialContent.excerpt}</p>}</div><div className="article-body"><ContentRenderer bodyJson={editorialContent.body_json} bodyText={editorialContent.body_text} recordId={editorialContent.id} /></div></section>}
-
       {childCards.length > 0 && <section className="section"><div className="section-mini-heading"><div><span className="eyebrow">موضوعات فرعية</span><h2>استكشف داخل القسم</h2></div><span>{childCards.length.toLocaleString('ar')} موضوعات</span></div><div className="category-public-grid">{childCards.map((child) => <article className="public-category-card" key={child.slug}><Link href={`/sections/${child.slug}`}><h3>{child.name_ar}</h3></Link><p>{child.description}</p><Link href={`/sections/${child.slug}`}>استعراض الصفحات ←</Link></article>)}</div></section>}
-
-      <section className="section related-content-section">
-        <div className="section-heading"><span>المحتوى المنشور</span><h2>{query ? `نتائج البحث عن «${query}»` : `محتوى ${category.name_ar}`}</h2><p>صفحات مرتبة ضمن هذا القسم وفق التصنيف الأساسي المعتمد، وتفتح على عناوينها العامة الأصلية.</p></div>
-        {rows.length ? <><div className="related-content-grid">{rows.map((item) => { const href = publicContentHref(item); return <article key={item.id}><span className="content-type-pill">{publicContentTypeLabel(item.content_type)}</span><h3><Link href={href}>{item.title}</Link></h3>{item.excerpt && <p>{item.excerpt}</p>}<Link href={href}>قراءة الصفحة ←</Link></article>; })}</div>{pages > 1 && <nav className="section-pagination" aria-label="صفحات نتائج القسم">{page > 1 && <Link href={pageHref(slug, page - 1, query)} rel="prev">الصفحة السابقة</Link>}<span>الصفحة {page.toLocaleString('ar')} من {pages.toLocaleString('ar')}</span>{page < pages && <Link href={pageHref(slug, page + 1, query)} rel="next">الصفحة التالية</Link>}</nav>}</> : <div className="empty-state"><strong>لا توجد نتيجة مطابقة.</strong><span>جرّب مصطلحًا أقصر أو انتقل إلى أحد الموضوعات الفرعية.</span></div>}
-      </section>
+      <section className="section related-content-section"><div className="section-heading"><span>المحتوى المنشور</span><h2>{query ? `نتائج البحث عن «${query}»` : `محتوى ${category.name_ar}`}</h2><p>صفحات مرتبة ضمن هذا القسم وفق التصنيف الأساسي المعتمد، وتفتح على عناوينها العامة الأصلية.</p></div>{rows.length ? <><div className="related-content-grid">{rows.map((item) => { const href = publicContentHref(item); return <article key={item.id}><span className="content-type-pill">{publicContentTypeLabel(item.content_type)}</span><h3><Link href={href}>{item.title}</Link></h3>{item.excerpt && <p>{item.excerpt}</p>}<Link href={href}>قراءة الصفحة ←</Link></article>; })}</div>{pages > 1 && <nav className="section-pagination" aria-label="صفحات نتائج القسم">{page > 1 && <Link href={pageHref(slug, page - 1, query)} rel="prev">الصفحة السابقة</Link>}<span>الصفحة {page.toLocaleString('ar')} من {pages.toLocaleString('ar')}</span>{page < pages && <Link href={pageHref(slug, page + 1, query)} rel="next">الصفحة التالية</Link>}</nav>}</> : <div className="empty-state"><strong>لا توجد نتيجة مطابقة.</strong><span>جرّب مصطلحًا أقصر أو انتقل إلى أحد الموضوعات الفرعية.</span></div>}</section>
     </main>
     <SiteFooter />
   </>;
