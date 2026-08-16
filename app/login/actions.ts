@@ -23,8 +23,10 @@ export async function login(formData: FormData) {
   const { error } = await supabase.auth.signInWithPassword(data);
   if (error) redirect(`/login?error=login_failed&next=${encodeURIComponent(next)}`);
   const assurance = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  const factors = assurance.error ? null : await supabase.auth.mfa.listFactors();
   revalidatePath('/', 'layout');
-  if (assurance.error) redirect(`/mfa?error=assurance_check&next=${encodeURIComponent(next)}`);
-  if (assurance.data.nextLevel === 'aal2' && assurance.data.currentLevel !== 'aal2') redirect(`/mfa?next=${encodeURIComponent(next)}`);
+  if (assurance.error || factors?.error) redirect(`/mfa?error=assurance_check&next=${encodeURIComponent(next)}`);
+  const hasVerifiedTotp = (factors?.data.totp ?? []).some((factor) => factor.status === 'verified');
+  if (hasVerifiedTotp && assurance.data.currentLevel !== 'aal2') redirect(`/mfa?next=${encodeURIComponent(next)}`);
   redirect(next);
 }
