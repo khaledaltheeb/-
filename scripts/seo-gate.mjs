@@ -1,10 +1,12 @@
 const base = (process.env.SEO_GATE_BASE_URL || process.env.SMOKE_BASE_URL || 'http://127.0.0.1:3000').replace(/\/$/, '');
-const concurrency = Math.max(1, Math.min(32, Number(process.env.SEO_GATE_CONCURRENCY || 12)));
-const requestTimeoutMs = Math.max(1000, Number(process.env.SEO_GATE_TIMEOUT_MS || 12000));
+const concurrency = Math.max(1, Math.min(32, Number(process.env.SEO_GATE_CONCURRENCY || 8)));
+const requestTimeoutMs = Math.max(1000, Number(process.env.SEO_GATE_TIMEOUT_MS || 15000));
 const maxUrls = Math.max(0, Number(process.env.SEO_GATE_MAX_URLS || 0));
 const expectedOrigin = new URL(base).origin;
 const failures = [];
 const linkStatusCache = new Map();
+const pageAttempts = Math.max(1, Math.min(5, Number(process.env.SEO_GATE_PAGE_ATTEMPTS || 3)));
+const pageRetryDelayMs = Math.max(0, Number(process.env.SEO_GATE_PAGE_RETRY_DELAY_MS || 300));
 const internalLinkAttempts = 3;
 const internalLinkRetryDelayMs = 150;
 
@@ -47,15 +49,38 @@ async function fetchWithTimeout(url, options = {}) {
   } finally { clearTimeout(timer); }
 }
 async function getText(url) {
-  const response = await fetchWithTimeout(url, { redirect: 'follow' });
-  return { response, text: await response.text() };
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), requestTimeoutMs);
+  try {
+    const response = await fetch(url, {
+      redirect: 'follow',
+      signal: controller.signal,
+      headers: { 'user-agent': 'Rawafid-SEO-Gate/1.0' },
+    });
+    return { response, text: await response.text() };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+async function getTextWithRetry(url, attempts = pageAttempts) {
+  let lastError;
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      return await getText(url);
+    } catch (error) {
+      lastError = error;
+      if (attempt === attempts) break;
+      await sleep(pageRetryDelayMs * attempt);
+    }
+  }
+  throw lastError;
 }
 function sitemapLocs(xml) {
   return [...xml.matchAll(/<loc>([\s\S]*?)<\/loc>/gi)].map((match) => decodeXml(stripTags(match[1]))).filter(Boolean);
 }
 async function discoverIndexableUrls() {
   const sitemapUrl = `${base}/sitemap.xml`;
-  const { response, text } = await getText(sitemapUrl);
+  const { response, text } = await getTextWithRetry(sitemapUrl);
   if (!response.ok) throw new Error(`sitemap index returned ${response.status}`);
   if (!/<sitemapindex\b/i.test(text)) throw new Error('sitemap.xml is not a sitemap index');
   const sitemapUrls = sitemapLocs(text).map((value) => {
@@ -65,7 +90,7 @@ async function discoverIndexableUrls() {
   if (!sitemapUrls.length) throw new Error('sitemap index contains no sitemap URLs');
   const discovered = [];
   for (const sitemap of sitemapUrls) {
-    const { response: mapResponse, text: mapXml } = await getText(sitemap);
+    const { response: mapResponse, text: mapXml } = await getTextWithRetry(sitemap);
     if (!mapResponse.ok) { failures.push(`${sitemap}: sitemap returned ${mapResponse.status}`); continue; }
     if (!/<urlset\b/i.test(mapXml)) { failures.push(`${sitemap}: expected urlset`); continue; }
     for (const loc of sitemapLocs(mapXml)) {
@@ -106,8 +131,8 @@ function validateJsonLd(html, pageUrl) {
 }
 async function auditPage(pageUrl) {
   let response, html;
-  try { ({ response, text: html } = await getText(pageUrl)); }
-  catch (error) { failures.push(`${pageUrl}: request failed (${error.name === 'AbortError' ? 'timeout' : error.message})`); return []; }
+  try { ({ response, text: html } = await getTextWithRetry(pageUrl)); }
+  catch (error) { failures.push(`${pageUrl}: request failed after ${pageAttempts} attempts (${error?.name === 'AbortError' ? 'timeout' : error?.message || 'unknown error'})`); return []; }
   if (response.status !== 200) { failures.push(`${pageUrl}: expected 200, got ${response.status}`); return []; }
   const contentType = response.headers.get('content-type') || '';
   if (!contentType.includes('text/html')) { failures.push(`${pageUrl}: expected text/html, got ${contentType || 'missing content-type'}`); return []; }
@@ -173,7 +198,7 @@ async function main() {
   const started = Date.now();
   const urls = await discoverIndexableUrls();
   if (!urls.length) throw new Error('No indexable URLs discovered from sitemap index');
-  console.log(`SEO gate: auditing ${urls.length} sitemap URLs with concurrency=${concurrency}`);
+  console.log(`SEO gate: auditing ${urls.length} sitemap URLs with concurrency=${concurrency}, pageAttempts=${pageAttempts}`);
   const pageLinks = await runPool(urls, auditPage);
   const allInternalLinks = [...new Set(pageLinks.flat().filter(Boolean))].sort();
   console.log(`SEO gate: checking ${allInternalLinks.length} unique internal links`);
