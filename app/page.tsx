@@ -24,28 +24,10 @@ const quickSearches = [
   ['دعم الأسرة', 'دعم الأسرة'],
 ];
 
-const intentRoutes = [
-  { href: '/search?q=أعراض+نفسية', icon: 'search' as const, title: 'أفهم حالة أو عرضًا', text: 'ابدأ من السؤال أو العرض للوصول إلى المعرفة والمسارات المرتبطة.' },
-  { href: '/search?q=دعم+الأسرة', icon: 'community' as const, title: 'أساعد شخصًا قريبًا', text: 'محتوى ومسارات عملية للأسرة ومقدمي الدعم والرعاية.' },
-  { href: '/search?q=الإدمان+والتعافي', icon: 'review' as const, title: 'أبحث عن مسار تعافٍ', text: 'معرفة وخيارات دعم وعلاج ومراكز مرتبطة بالتعافي.' },
-  { href: '/specialists', icon: 'specialist' as const, title: 'أجد مختصًا', text: 'ابحث في دليل الملفات المهنية الموثقة ونمط الخدمة والموقع.' },
-  { href: '/centers', icon: 'center' as const, title: 'أجد مركزًا', text: 'استكشف المراكز والخدمات والفروع وطرق التواصل المتاحة.' },
-  { href: '/search?q=أداة+تقييم', icon: 'tools' as const, title: 'أستخدم أداة أو دليلًا', text: 'الوصول إلى الأدوات والمسارات والأدلة العملية دون ادعاء التشخيص.' },
-];
-
 const contentTypeLabels: Record<string, string> = {
   article: 'مقال', guide: 'دليل', condition: 'حالة', research: 'بحث', comparison: 'مقارنة',
   tool: 'أداة', assessment: 'تقييم إرشادي', resource: 'مورد', faq: 'أسئلة شائعة', news: 'خبر',
 };
-
-const platformModules = [
-  { href: '/search', icon: 'knowledge' as const, title: 'المعرفة والموسوعة', text: 'محرك معرفة منظم للمقالات والأدلة والحالات والأبحاث.', accent: '#3d78bd' },
-  { href: '/search?q=%D8%B0%D9%88%D9%88+%D8%A7%D9%84%D8%A7%D8%AD%D8%AA%D9%8A%D8%A7%D8%AC%D8%A7%D8%AA+%D8%A7%D9%84%D8%AE%D8%A7%D8%B5%D8%A9+%D8%A7%D9%84%D8%AF%D9%85%D8%AC', icon: 'community' as const, title: 'ذوو الاحتياجات الخاصة والدمج', text: 'أقسام تعليمية وتأهيلية وأسرية ومهنية ومسارات للدمج والتمكين.', accent: '#7564c9' },
-  { href: '/specialists', icon: 'specialist' as const, title: 'دليل المختصين', text: 'ملفات مهنية موثقة مع تخصصات ومؤهلات وخيارات تواصل.', accent: '#0b8f92' },
-  { href: '/centers', icon: 'center' as const, title: 'دليل المراكز', text: 'مراكز وفروع وخدمات ومواقع ضمن دورة تحقق إدارية.', accent: '#f4b942' },
-  { href: '/search', icon: 'tools' as const, title: 'الأدوات والمسارات', text: 'أدوات واختبارات إرشادية ومسارات تعلم واستخدام عملي آمن.', accent: '#d8604c' },
-  { href: '/community', icon: 'community' as const, title: 'المتدربون والمتطوعون', text: 'مساحة مستقلة للانتساب والتدريب والعمل التطوعي المنظم.', accent: '#4f9d69' },
-];
 
 export default async function HomePage() {
   const [sectors, latestContent] = await Promise.all([
@@ -94,32 +76,6 @@ export default async function HomePage() {
           <div className="rawafid-trust-item"><PlatformIcon name="knowledge" /><div><strong>مصادر قابلة للتتبع</strong><span>مراجع وتاريخ مراجعة حيث يلزم</span></div></div>
           <div className="rawafid-trust-item"><PlatformIcon name="secure" /><div><strong>خصوصيتك أولًا</strong><span>بياناتك لا تظهر خارج الغرض المصرح به</span></div></div>
           <div className="rawafid-trust-item"><PlatformIcon name="tools" /><div><strong>إرشاد مسؤول</strong><span>المعرفة لا تستبدل التشخيص الفردي</span></div></div>
-        </section>
-
-        <section className="rawafid-section rawafid-intent-section" aria-labelledby="intent-title">
-          <div className="rawafid-section-head">
-            <div className="rawafid-section-title"><span>مسارات واضحة</span><h2 id="intent-title">ماذا تريد أن تنجز اليوم؟</h2><p>ستة مداخل مباشرة تختصر الطريق من السؤال إلى المعرفة أو الخدمة المناسبة.</p></div>
-          </div>
-          <div className="rawafid-platform-grid rawafid-intent-grid">
-            {intentRoutes.map((intent, index) => <Link prefetch={false} href={intent.href} className={`rawafid-platform-card rawafid-intent-card intent-${index + 1}`} key={intent.title}><span className="icon-shell"><PlatformIcon name={intent.icon} /></span><div><h3>{intent.title}</h3><p>{intent.text}</p></div><span className="intent-arrow" aria-hidden="true">ابدأ من هنا ←</span></Link>)}
-          </div>
-        </section>
-
-        <section className="rawafid-section" aria-labelledby="platform-modules-title">
-          <div className="rawafid-section-head">
-            <div className="rawafid-section-title"><span>منظومة متكاملة</span><h2 id="platform-modules-title">كل ما يساعدك، ضمن رحلة واحدة</h2><p>انتقل بسلاسة بين المعرفة والدليل المهني والأدوات والمجتمع دون أن تضيع بين أنظمة منفصلة.</p></div>
-          </div>
-          <div className="rawafid-platform-grid">
-            {platformModules.map((module) => {
-              const style = { '--card-accent': module.accent } as CSSProperties;
-              return <Link prefetch={false} className="rawafid-platform-card" style={style} href={module.href} key={module.title}>
-                <span className="icon-shell"><PlatformIcon name={module.icon} /></span>
-                <h3>{module.title}</h3>
-                <p>{module.text}</p>
-                <span>فتح المسار ←</span>
-              </Link>;
-            })}
-          </div>
         </section>
 
         <section className="rawafid-section" id="sectors" aria-labelledby="sectors-title">
