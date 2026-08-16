@@ -55,7 +55,7 @@ for(const file of [
  'app/categories/[slug]/page.tsx','app/cochrane/[[...slug]]/page.tsx','app/en/page.tsx','app/encyclopedia/all/page.tsx',
  'app/es/page.tsx','app/family/page.tsx','app/iris/[[...slug]]/page.tsx','app/learning-paths/[[...slug]]/page.tsx',
  'app/library/[[...slug]]/page.tsx','app/outside-the-box/[[...slug]]/page.tsx','app/schools/page.tsx','app/services/page.tsx',
- 'app/source-registry/[[...slug]]/page.tsx','app/tips/[[...slug]]/page.tsx','app/trust/[[...slug]]/page.tsx',
+ 'app/source-registry/[[...slug]]/page.tsx','app/specialists-partners/page.tsx','app/tips/[[...slug]]/page.tsx','app/trust/[[...slug]]/page.tsx',
  'app/verified-resources/page.tsx','app/sectors/all-pages/page.tsx','app/sectors/calendars/page.tsx'
 ]){
  const body=read(file);
