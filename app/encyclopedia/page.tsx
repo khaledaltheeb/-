@@ -49,7 +49,7 @@ export default async function EncyclopediaHubPage() {
 
   return <><SiteHeader /><main className="article-shell">
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify([breadcrumbs, schema]).replace(/</g, '\\u003c') }} />
-    <nav className="breadcrumbs" aria-label="مسار الصفحة"><Link href="/">الرئيسية</Link><span>/</span><span aria-current="page">الموسوعة النفسية</span></nav>
+    <nav className="breadcrumbs" aria-label="مسار الصفحة"><Link prefetch={false} href="/">الرئيسية</Link><span>/</span><span aria-current="page">الموسوعة النفسية</span></nav>
     <section className="article-hero">
       <span className="eyebrow">مرجع علمي عربي</span>
       <h1>الموسوعة النفسية</h1>
@@ -57,14 +57,14 @@ export default async function EncyclopediaHubPage() {
       <div className="tag-list"><span>{total} حالة منشورة</span><span>مراجع موثقة</span><span>مراجعة تحريرية قبل الفهرسة</span></div>
     </section>
     <nav className="article-related" aria-label="أدوات الموسوعة">
-      <Link href="/encyclopedia/index/1/">الفهرس الكامل</Link> · <Link href="/search/?type=condition">البحث في الحالات</Link> · <Link href="/specialists/">دليل المختصين</Link>
+      <Link prefetch={false} href="/encyclopedia/index/1/">الفهرس الكامل</Link> · <Link prefetch={false} href="/search/?type=condition">البحث في الحالات</Link> · <Link prefetch={false} href="/specialists/">دليل المختصين</Link>
     </nav>
     <section className="article-related" aria-labelledby="encyclopedia-index-title">
       <div className="section-mini-heading"><div><span className="eyebrow">مدخل الفهرس</span><h2 id="encyclopedia-index-title">أول الحالات أبجديًا</h2></div><span>نعرض 60 صفحة فقط هنا لحماية سرعة صفحة المدخل</span></div>
       <div className="related-content-grid">
-        {items.map((item) => <article key={item.id}><span>حالة نفسية</span><h3><Link href={item.canonicalUrl}>{item.title}</Link></h3>{item.excerpt ? <p>{item.excerpt}</p> : null}<Link href={item.canonicalUrl}>قراءة الدليل ←</Link></article>)}
+        {items.map((item) => <article key={item.id}><span>حالة نفسية</span><h3><Link prefetch={false} href={item.canonicalUrl}>{item.title}</Link></h3>{item.excerpt ? <p>{item.excerpt}</p> : null}<Link prefetch={false} href={item.canonicalUrl}>قراءة الدليل ←</Link></article>)}
       </div>
-      {total > items.length ? <p><Link href="/encyclopedia/index/1/">استعراض الفهرس الكامل للموسوعة ←</Link></p> : null}
+      {total > items.length ? <p><Link prefetch={false} href="/encyclopedia/index/1/">استعراض الفهرس الكامل للموسوعة ←</Link></p> : null}
     </section>
     <section className="article-body">
       <h2>كيف تُبنى صفحات الموسوعة؟</h2>

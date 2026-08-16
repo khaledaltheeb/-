@@ -200,8 +200,8 @@ export default async function SearchPage({ searchParams }: { searchParams: SP })
       {error && <div className="search-state error"><h2>تعذر البحث</h2><p>{error}</p></div>}
       {q.length >= 2 && !error && <>
         <nav className="search-filters" aria-label="تصفية نتائج البحث">
-          <Link className={!type ? 'active' : ''} href={url('')}>الكل <span>{results.length.toLocaleString('ar')}</span></Link>
-          {(Object.entries(labels) as Array<[T, string]>).map(([k, v]) => <Link className={type === k ? 'active' : ''} href={url(k)} key={k}>{v} <span>{(counts.get(k) ?? 0).toLocaleString('ar')}</span></Link>)}
+          <Link prefetch={false} className={!type ? 'active' : ''} href={url('')}>الكل <span>{results.length.toLocaleString('ar')}</span></Link>
+          {(Object.entries(labels) as Array<[T, string]>).map(([k, v]) => <Link prefetch={false} className={type === k ? 'active' : ''} href={url(k)} key={k}>{v} <span>{(counts.get(k) ?? 0).toLocaleString('ar')}</span></Link>)}
         </nav>
         <section className="search-results" aria-live="polite">
           <div className="search-summary"><strong>{visible.length.toLocaleString('ar')}</strong><span>نتيجة لعبارة «{q}»</span></div>
@@ -210,11 +210,11 @@ export default async function SearchPage({ searchParams }: { searchParams: SP })
             {visible.map((x) => <article className="search-result-card" key={`${x.entity_type}-${x.entity_id}`}>
               <div className="result-type">{labels[x.entity_type]}</div>
               <div className="result-copy">
-                <Link href={x.destination}><h2>{x.title}</h2></Link>
+                <Link prefetch={false} href={x.destination}><h2>{x.title}</h2></Link>
                 {x.subtitle && <div className="result-subtitle">{x.subtitle}</div>}
                 {x.excerpt && <p>{x.excerpt}</p>}
               </div>
-              <Link className="result-open" href={x.destination}>فتح</Link>
+              <Link prefetch={false} className="result-open" href={x.destination}>فتح</Link>
             </article>)}
           </div>
         </section>

@@ -47,7 +47,7 @@ export default async function QuickInfoPage() {
     <main>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify([breadcrumbs, itemList]).replace(/</g, '\\u003c') }} />
       <section className="section-shell">
-        <nav className="breadcrumbs" aria-label="مسار الصفحة"><Link href="/">الرئيسية</Link><span>/</span><span aria-current="page">معلومات سريعة</span></nav>
+        <nav className="breadcrumbs" aria-label="مسار الصفحة"><Link prefetch={false} href="/">الرئيسية</Link><span>/</span><span aria-current="page">معلومات سريعة</span></nav>
         <header className="section-heading">
           <span className="eyebrow">معرفة مختصرة، لا تشخيص سريع</span>
           <h1>معلومات سريعة</h1>
@@ -61,9 +61,9 @@ export default async function QuickInfoPage() {
           {items.map((item) => <article key={item.id}>
             {item.featuredImageUrl && <Image src={item.featuredImageUrl} alt={item.title} width={640} height={360} sizes="(max-width: 760px) 100vw, 33vw" unoptimized />}
             <span>معلومات سريعة</span>
-            <h2><Link href={item.canonicalUrl}>{item.title}</Link></h2>
+            <h2><Link prefetch={false} href={item.canonicalUrl}>{item.title}</Link></h2>
             {item.excerpt && <p>{item.excerpt}</p>}
-            <Link href={item.canonicalUrl}>قراءة الصفحة ←</Link>
+            <Link prefetch={false} href={item.canonicalUrl}>قراءة الصفحة ←</Link>
           </article>)}
         </section>}
       </section>

@@ -51,7 +51,7 @@ export default async function SpecialistsDirectory({ searchParams }: { searchPar
           <label>التخصص<input name="specialty" defaultValue={specialty} placeholder="مثال: العلاج النفسي" maxLength={120} /></label>
           <label>المدينة<input name="city" defaultValue={city} placeholder="المدينة" maxLength={120} /></label>
           <label>نمط الخدمة<select name="mode" defaultValue={mode}><option value="">الكل</option><option value="remote">عن بُعد</option><option value="in_person">حضوري</option></select></label>
-          <button className="primary-action" type="submit">تصفية</button>{(q || specialty || city || mode) && <Link href="/specialists">مسح</Link>}
+          <button className="primary-action" type="submit">تصفية</button>{(q || specialty || city || mode) && <Link prefetch={false} href="/specialists">مسح</Link>}
         </form>
 
         <section className="directory-results" aria-live="polite">
@@ -64,7 +64,7 @@ export default async function SpecialistsDirectory({ searchParams }: { searchPar
               {specialist.bio && <p className="directory-bio">{specialist.bio.slice(0, 220)}{specialist.bio.length > 220 ? '…' : ''}</p>}
               <div className="directory-tags">{(specialist.specialties ?? []).slice(0, 5).map((item) => <span key={item}>{item}</span>)}</div>
               <div className="directory-meta">{(specialist.city || specialist.country) && <span>{[specialist.city, specialist.country].filter(Boolean).join('، ')}</span>}{specialist.years_experience !== null && <span>{specialist.years_experience} سنوات خبرة</span>}{specialist.offers_remote && <span>عن بُعد</span>}{specialist.offers_in_person && <span>حضوري</span>}</div>
-              <Link className="directory-open" href={`/specialists/${specialist.slug}`}>عرض الملف</Link>
+              <Link prefetch={false} className="directory-open" href={`/specialists/${specialist.slug}`}>عرض الملف</Link>
             </article>)}
           </div>
         </section>
