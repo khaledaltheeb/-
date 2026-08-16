@@ -14,6 +14,16 @@ function safeNext(value?: string) {
   return next;
 }
 
+function AssuranceError() {
+  return (
+    <main className="dashboard-shell account-shell"><section className="dashboard-card account-card">
+      <div className="admin-heading"><div><span className="eyebrow">أمان الحساب</span><h1>تعذر التحقق من مستوى الجلسة</h1><p>لم نتمكن من التأكد من حالة التحقق بخطوتين لهذه الجلسة. لم يتم فتح المسار المطلوب حفاظًا على أمان الحساب.</p></div></div>
+      <div className="system-message error" role="alert">أعد تسجيل الدخول ثم حاول مرة أخرى.</div>
+      <div className="dashboard-actions"><Link className="button" href="/auth/signout">تسجيل الخروج</Link></div>
+    </section></main>
+  );
+}
+
 export default async function MfaPage({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams;
   const next = safeNext(params.next);
@@ -22,17 +32,12 @@ export default async function MfaPage({ searchParams }: { searchParams: SearchPa
   if (!claims?.claims?.sub) redirect(`/login?next=${encodeURIComponent(next)}`);
 
   const assurance = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-  if (assurance.error) {
-    return (
-      <main className="dashboard-shell account-shell"><section className="dashboard-card account-card">
-        <div className="admin-heading"><div><span className="eyebrow">أمان الحساب</span><h1>تعذر التحقق من مستوى الجلسة</h1><p>لم نتمكن من التأكد من حالة التحقق بخطوتين لهذه الجلسة. لم يتم فتح المسار المطلوب حفاظًا على أمان الحساب.</p></div></div>
-        <div className="system-message error" role="alert">أعد تسجيل الدخول ثم حاول مرة أخرى.</div>
-        <div className="dashboard-actions"><Link className="button" href="/auth/signout">تسجيل الخروج</Link></div>
-      </section></main>
-    );
-  }
+  if (assurance.error) return <AssuranceError />;
+  const factors = await supabase.auth.mfa.listFactors();
+  if (factors.error) return <AssuranceError />;
+  const hasVerifiedTotp = (factors.data.totp ?? []).some((factor) => factor.status === 'verified');
 
-  if (assurance.data.currentLevel === 'aal2' || assurance.data.nextLevel !== 'aal2') redirect(next);
+  if (!hasVerifiedTotp || assurance.data.currentLevel === 'aal2') redirect(next);
 
   return (
     <main className="dashboard-shell account-shell"><section className="dashboard-card account-card">
