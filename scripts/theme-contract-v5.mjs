@@ -86,7 +86,7 @@ for (const marker of ['Rawafid Institutional V5.1', 'Rawafid Institutional V5.2'
 for (const marker of ['footer-search', 'footer-trust-list', 'back-to-top']) {
   if (!footer.includes(marker)) fail(`institutional footer missing ${marker}`);
 }
-const skipLinkRule = theme.match(/\\.skip-link\\{[^}]+\\}/)?.[0] ?? '';
+const skipLinkRule = theme.match(/\.skip-link\{[^}]+\}/)?.[0] ?? '';
 if (!skipLinkRule.includes('transition:none')) fail('keyboard bypass must not depend on a transition');
 if (!theme.includes('.skip-link:not(:focus):not(:focus-visible){transform:translateY(calc(-100% - 24px))}')) fail('keyboard bypass may hide only while unfocused');
 if (!preview.includes('Institutional Design System V5.2') || preview.includes('<h1>نموذج لوحة التحكم</h1>') || !preview.includes('المستضاف محليًا ضمن حزمة المنصة')) fail('theme preview must expose accurate V5.2 semantics');
