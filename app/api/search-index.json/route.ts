@@ -1,0 +1,1 @@
+import{getDownloadTerms}from'@/lib/downloadable-terms';export const dynamic='force-dynamic';export async function GET(){try{const rows=await getDownloadTerms();return Response.json(rows.map(({slug,title,excerpt,canonical_url})=>({slug,title,excerpt,url:canonical_url})),{headers:{'Cache-Control':'public, max-age=300'}})}catch{return Response.json([],{status:503})}}
