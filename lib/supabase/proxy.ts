@@ -1,8 +1,39 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
-const protectedPrefixes = ['/account', '/admin', '/dashboard', '/specialist', '/center', '/messages', '/appointments', '/notifications'];
-const redirectExcludedPrefixes = ['/account', '/admin', '/auth', '/login', '/forgot-password', '/reset-password', '/dashboard', '/specialist', '/center', '/messages', '/appointments', '/notifications', '/api'];
+const protectedPrefixes = [
+  '/account',
+  '/admin',
+  '/dashboard',
+  '/specialist',
+  '/center',
+  '/messages',
+  '/appointments',
+  '/notifications',
+  '/specialists-partners/account',
+  '/specialists-partners/admin',
+  '/specialists-partners/portal',
+];
+
+const redirectExcludedPrefixes = [
+  '/account',
+  '/admin',
+  '/auth',
+  '/login',
+  '/forgot-password',
+  '/reset-password',
+  '/dashboard',
+  '/specialist',
+  '/center',
+  '/messages',
+  '/appointments',
+  '/notifications',
+  '/specialists-partners/account',
+  '/specialists-partners/admin',
+  '/specialists-partners/portal',
+  '/api',
+];
+
 const REDIRECT_TTL_MS = 60_000;
 const REDIRECT_CACHE_LIMIT = 500;
 
