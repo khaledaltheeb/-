@@ -1,0 +1,78 @@
+name: Staging Shared DB Migration Guard
+
+on:
+  pull_request:
+    branches: [cloudflare-workers-deploy]
+    paths:
+      - 'supabase/migrations/**'
+      - '.github/workflows/staging-shared-db-migration-guard.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: staging-shared-db-migration-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  migration-authority:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: Verify staging only mirrors main migrations
+        shell: bash
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+
+          git fetch --no-tags origin main:refs/remotes/origin/main
+
+          if ! git cat-file -e "$BASE_SHA^{commit}" 2>/dev/null; then
+            git fetch --no-tags origin "$BASE_SHA"
+          fi
+
+          changes="$(git diff --name-status "$BASE_SHA" "$HEAD_SHA" -- supabase/migrations)"
+          if [ -z "$changes" ]; then
+            echo "No Supabase migration changes in this pull request."
+            exit 0
+          fi
+
+          failed=0
+          while IFS=$'\t' read -r status path extra; do
+            [ -n "$status" ] || continue
+
+            case "$status" in
+              A)
+                if ! git cat-file -e "refs/remotes/origin/main:$path" 2>/dev/null; then
+                  echo "::error file=$path::Staging may only mirror migrations that are already merged to main."
+                  failed=1
+                  continue
+                fi
+
+                head_blob="$(git rev-parse "$HEAD_SHA:$path")"
+                main_blob="$(git rev-parse "refs/remotes/origin/main:$path")"
+                if [ "$head_blob" != "$main_blob" ]; then
+                  echo "::error file=$path::Staging migration differs from main. Mirror the exact file contents from main."
+                  failed=1
+                else
+                  echo "Verified main-authoritative migration mirror: $path"
+                fi
+                ;;
+              *)
+                echo "::error file=${path:-supabase/migrations}::Migration history is append-only on staging. Status $status is not allowed; create a new forward migration on main first."
+                failed=1
+                ;;
+            esac
+          done <<< "$changes"
+
+          if [ "$failed" -ne 0 ]; then
+            exit 1
+          fi
+
+          echo "All staging migration changes are exact mirrors of migrations already merged to main."
