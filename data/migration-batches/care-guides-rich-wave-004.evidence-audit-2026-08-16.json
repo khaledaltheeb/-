@@ -1,0 +1,153 @@
+{
+  "batch_id": "care-guides-rich-wave-004",
+  "audit_date": "2026-08-16",
+  "audit_type": "automated-topic-specific-evidence-audit",
+  "publication_authorization": false,
+  "human_review_required": true,
+  "policy": "This artifact records an automated source-layer audit and source strengthening performed while all materialized Wave 004 records remained non-indexable and publication_ready=false. It is not a scientific, clinical, editorial, or publication sign-off.",
+  "pages": [
+    {
+      "slug": "care-guide-cognitive-flexibility-switching-plan",
+      "action": "reviewed-existing-expanded-source-layer",
+      "added_source_ids": []
+    },
+    {
+      "slug": "care-guide-cognitive-load-instruction-audit",
+      "action": "strengthened",
+      "added_source_ids": ["Cognitive-Load-Materials-2021"]
+    },
+    {
+      "slug": "care-guide-dual-task-attention-limit",
+      "action": "reviewed-existing-source-layer-and-normalized-koch-title",
+      "added_source_ids": []
+    },
+    {
+      "slug": "care-guide-inhibitory-control-pause-plan",
+      "action": "strengthened",
+      "added_source_ids": ["Rodriguez-Nieto-EF-Meta-2022"]
+    },
+    {
+      "slug": "care-guide-metacognition-study-review-card",
+      "action": "strengthened",
+      "added_source_ids": ["Rhodes-Tauber-JOL-Meta-2011"]
+    },
+    {
+      "slug": "care-guide-processing-speed-accuracy-balance",
+      "action": "strengthened",
+      "added_source_ids": ["Heitz-Speed-Accuracy-2014"]
+    },
+    {
+      "slug": "care-guide-prospective-memory-external-cues",
+      "action": "strengthened",
+      "added_source_ids": ["Gilbert-Intention-Offloading-2023", "Chen-Prospective-Memory-Meta-2015"]
+    },
+    {
+      "slug": "care-guide-retrieval-practice-study-plan",
+      "action": "reviewed-existing-source-layer",
+      "added_source_ids": []
+    },
+    {
+      "slug": "care-guide-selective-attention-distraction-audit",
+      "action": "strengthened",
+      "added_source_ids": ["Visual-Distractor-Suppression-Review-2019"]
+    },
+    {
+      "slug": "care-guide-spaced-practice-study-calendar",
+      "action": "reviewed-existing-source-layer",
+      "added_source_ids": []
+    },
+    {
+      "slug": "care-guide-sustained-attention-work-interval",
+      "action": "strengthened",
+      "added_source_ids": ["Langner-Eickhoff-Vigilance-Meta-2013", "Patel-Self-Scheduled-Breaks-2024"]
+    },
+    {
+      "slug": "care-guide-working-memory-task-breakdown",
+      "action": "reviewed-existing-expanded-source-layer",
+      "added_source_ids": []
+    }
+  ],
+  "added_sources": [
+    {
+      "id": "Cognitive-Load-Materials-2021",
+      "title": "Five Strategies for Optimizing Instructional Materials: Instructor- and Learner-Managed Cognitive Load",
+      "publisher": "Educational Psychology Review / PubMed",
+      "year": 2021,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/33716467/",
+      "source_type": "review",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Rodriguez-Nieto-EF-Meta-2022",
+      "title": "Inhibition, Shifting and Updating: Inter and intra-domain commonalities and differences from an executive functions activation likelihood estimation meta-analysis",
+      "publisher": "NeuroImage / PubMed",
+      "year": 2022,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/36202157/",
+      "source_type": "meta-analysis",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Rhodes-Tauber-JOL-Meta-2011",
+      "title": "The influence of delaying judgments of learning on metacognitive accuracy: a meta-analytic review",
+      "publisher": "Psychological Bulletin / PubMed",
+      "year": 2011,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/21219059/",
+      "source_type": "meta-analysis",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Heitz-Speed-Accuracy-2014",
+      "title": "The speed-accuracy tradeoff: history, physiology, methodology, and behavior",
+      "publisher": "Frontiers in Neuroscience / PubMed",
+      "year": 2014,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/24966810/",
+      "source_type": "review",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Gilbert-Intention-Offloading-2023",
+      "title": "Outsourcing Memory to External Tools: A Review of Intention Offloading",
+      "publisher": "Psychonomic Bulletin & Review / PubMed",
+      "year": 2023,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/35789477/",
+      "source_type": "review",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Chen-Prospective-Memory-Meta-2015",
+      "title": "The effect of implementation intention on prospective memory: a systematic and meta-analytic review",
+      "publisher": "Psychiatry Research / PubMed",
+      "year": 2015,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/25639373/",
+      "source_type": "systematic-review-meta-analysis",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Visual-Distractor-Suppression-Review-2019",
+      "title": "Getting rid of visual distractors: the why, when, how, and where",
+      "publisher": "Current Opinion in Psychology / PubMed",
+      "year": 2019,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/30856512/",
+      "source_type": "review",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Langner-Eickhoff-Vigilance-Meta-2013",
+      "title": "Sustaining attention to simple tasks: a meta-analytic review of the neural mechanisms of vigilant attention",
+      "publisher": "Psychological Bulletin / PubMed",
+      "year": 2013,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/23163491/",
+      "source_type": "meta-analysis",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Patel-Self-Scheduled-Breaks-2024",
+      "title": "The metacognition of vigilance: Using self-scheduled breaks to improve sustained attention",
+      "publisher": "Journal of Experimental Psychology: Applied / PubMed",
+      "year": 2024,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/39250235/",
+      "source_type": "experimental-study",
+      "authority_tier": "secondary"
+    }
+  ]
+}
