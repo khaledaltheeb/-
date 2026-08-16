@@ -1,0 +1,78 @@
+name: Full Legacy Migration Inventory
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'agent/full-legacy-migration'
+    paths:
+      - 'scripts/full_legacy_migration_inventory.py'
+      - 'scripts/full_legacy_migration_inventory_v2.py'
+      - 'scripts/legacy_content_extract.py'
+      - 'docs/FULL-LEGACY-MIGRATION-QUALITY-POLICY.md'
+      - '.github/workflows/full-legacy-migration-inventory.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'scripts/full_legacy_migration_inventory.py'
+      - 'scripts/full_legacy_migration_inventory_v2.py'
+      - 'scripts/legacy_content_extract.py'
+      - 'docs/FULL-LEGACY-MIGRATION-QUALITY-POLICY.md'
+      - '.github/workflows/full-legacy-migration-inventory.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  inventory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout Rawafid V3 migration branch
+        uses: actions/checkout@v7
+
+      - name: Checkout legacy source read-only
+        uses: actions/checkout@v7
+        with:
+          repository: khaledaltheeb/healthrenewal.org
+          ref: main
+          path: legacy-source
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Compile migration scripts
+        run: python -m py_compile scripts/full_legacy_migration_inventory.py scripts/full_legacy_migration_inventory_v2.py scripts/legacy_content_extract.py
+
+      - name: Build hardened full legacy migration ledger
+        run: >-
+          python scripts/full_legacy_migration_inventory_v2.py legacy-source
+          --output artifacts/full-legacy-migration-ledger.json
+          --summary artifacts/full-legacy-migration-summary.json
+          --review-queue artifacts/full-legacy-review-queue.json
+          --publishable artifacts/full-legacy-publishable.json
+
+      - name: Generate sitemap semantic inventory for compatibility checks
+        run: >-
+          python scripts/legacy_content_extract.py legacy-source
+          --output artifacts/legacy-content-inventory.json
+          --summary artifacts/legacy-content-summary.json
+
+      - name: Upload migration audit artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: full-legacy-migration-inventory
+          if-no-files-found: error
+          retention-days: 30
+          path: |
+            artifacts/full-legacy-migration-ledger.json
+            artifacts/full-legacy-migration-summary.json
+            artifacts/full-legacy-review-queue.json
+            artifacts/full-legacy-publishable.json
+            artifacts/legacy-content-inventory.json
+            artifacts/legacy-content-summary.json

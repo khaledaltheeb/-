@@ -4,6 +4,7 @@ export async function GET() {
   return sitemapResponse([
     { path:'/', changeFrequency:'weekly', priority:1 },
     { path:'/about', changeFrequency:'monthly', priority:.6 },
+    { path:'/guided-assessment', changeFrequency:'monthly', priority:.65 },
     { path:'/join', changeFrequency:'monthly', priority:.55 },
     { path:'/join/specialist', changeFrequency:'monthly', priority:.5 },
     { path:'/join/center', changeFrequency:'monthly', priority:.5 },

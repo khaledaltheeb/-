@@ -93,7 +93,7 @@ export default function CognitiveLabPage() {
             <h2 id="cognitive-boundary-title">المقاييس الصحية منفصلة عن الألعاب المعرفية</h2>
           </div>
           <p>لم نضع WHO-5 أو PHQ-9 أو GAD-7 أو AUDIT داخل هذا المختبر. كل مقياس صحي يحتاج مصدر الإصدار، والترخيص، والترجمة الموثقة، وطريقة الحساب، وسؤال الأثر عند وجوده، ومراجعة بشرية قبل إتاحته. هذه البوابة تمنع ظهور نتيجة تبدو دقيقة وهي مبنية على نموذج ناقص.</p>
-          <a href="/medical-review-policy">قراءة منهجية المراجعة العلمية</a>
+          <Link href="/medical-review-policy">قراءة منهجية المراجعة العلمية</Link>
         </section>
       </main>
       <SiteFooter />

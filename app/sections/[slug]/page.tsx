@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import ContentRenderer from '@/components/content-renderer';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import { createClient } from '@/lib/supabase/server';
@@ -11,8 +12,9 @@ import { publicContentHref, publicContentTypeLabel } from '@/lib/public-content-
 export const dynamic = 'force-dynamic';
 type Params = Promise<{ slug: string }>;
 type SearchParams = Promise<{ page?: string | string[]; q?: string | string[] }>;
-type Category = { id: string; sector_id: string | null; parent_id: string | null; slug: string; name_ar: string; description: string | null; seo_title: string | null; seo_description: string | null };
+type Category = { id: string; sector_id: string | null; parent_id: string | null; slug: string; name_ar: string; description: string | null; seo_title: string | null; seo_description: string | null; editorial_content_id: string | null };
 type Item = { id: string; slug: string; title: string; excerpt: string | null; content_type: string; published_at: string | null; canonical_url: string | null };
+type EditorialContent = { id: string; title: string; excerpt: string | null; body_json: unknown; body_text: string | null };
 const PAGE_SIZE = 24;
 const one = (value: string | string[] | undefined) => Array.isArray(value) ? value[0] ?? '' : value ?? '';
 const pageNo = (value: string) => { const n = Number(value); return Number.isInteger(n) && n > 0 && n < 10000 ? n : 1; };
@@ -21,13 +23,13 @@ const pageHref = (slug: string, page: number, q: string) => { const params = new
 
 async function dbCategory(slug: string) {
   const supabase = await createClient();
-  const { data } = await supabase.from('categories').select('id,sector_id,parent_id,slug,name_ar,description,seo_title,seo_description').eq('slug', slug).eq('is_active', true).eq('visibility', 'public').maybeSingle();
+  const { data } = await supabase.from('categories').select('id,sector_id,parent_id,slug,name_ar,description,seo_title,seo_description,editorial_content_id').eq('slug', slug).eq('is_active', true).eq('visibility', 'public').maybeSingle();
   return data as Category | null;
 }
 
 function virtualCategory(slug: string): Category | null {
   const category = getCognitiveCategory(slug);
-  return category ? { id: `virtual:${slug}`, sector_id: 'f9af56ce-734c-4867-9999-957db0933414', parent_id: '369841c2-d33b-43a5-ad04-8dff6f40747e', slug, name_ar: category.name, description: category.description, seo_title: null, seo_description: null } : null;
+  return category ? { id: `virtual:${slug}`, sector_id: 'f9af56ce-734c-4867-9999-957db0933414', parent_id: '369841c2-d33b-43a5-ad04-8dff6f40747e', slug, name_ar: category.name, description: category.description, seo_title: null, seo_description: null, editorial_content_id: null } : null;
 }
 async function resolvedCategory(slug: string) { return await dbCategory(slug) ?? virtualCategory(slug); }
 
@@ -54,6 +56,18 @@ export default async function SectionPage({ params, searchParams }: { params: Pa
   let childCards: Array<{ slug: string; name_ar: string; description: string | null }> = [];
   let sector: { slug: string; name_ar: string } | null = null;
   let parent: { slug: string; name_ar: string } | null = null;
+  let editorialContent: EditorialContent | null = null;
+
+  if (!virtual && category.editorial_content_id) {
+    const { data } = await supabase
+      .from('content')
+      .select('id,title,excerpt,body_json,body_text')
+      .eq('id', category.editorial_content_id)
+      .eq('status', 'published')
+      .lte('published_at', now)
+      .maybeSingle();
+    editorialContent = data as EditorialContent | null;
+  }
 
   if (isRoot || virtual) {
     const generated = getCognitivePageIndex().filter((item) => isRoot || item.categorySlug === slug).map((item) => ({ id: `cognitive:${item.slug}`, slug: item.slug, title: item.title, excerpt: item.excerpt, content_type: item.contentType, published_at: '2026-08-14T00:00:00.000Z', canonical_url: null }));
@@ -117,6 +131,8 @@ export default async function SectionPage({ params, searchParams }: { params: Pa
         <div className="public-stat-strip"><span>{total.toLocaleString('ar')} صفحة منشورة</span>{childCards.length > 0 && <span>{childCards.length.toLocaleString('ar')} موضوعات فرعية</span>}</div>
         <form className="sector-search" action={`/sections/${slug}`} method="get"><label className="sr-only" htmlFor="section-search">البحث داخل القسم</label><input id="section-search" name="q" defaultValue={query} placeholder={`ابحث داخل ${category.name_ar}`} maxLength={100} /><button type="submit">بحث</button></form>
       </section>
+
+      {editorialContent && <section className="section category-editorial-content" aria-labelledby="category-editorial-title"><div className="section-heading"><span>الدليل التحريري للقسم</span><h2 id="category-editorial-title">{editorialContent.title}</h2>{editorialContent.excerpt && <p>{editorialContent.excerpt}</p>}</div><div className="article-body"><ContentRenderer bodyJson={editorialContent.body_json} bodyText={editorialContent.body_text} recordId={editorialContent.id} /></div></section>}
 
       {childCards.length > 0 && <section className="section"><div className="section-mini-heading"><div><span className="eyebrow">موضوعات فرعية</span><h2>استكشف داخل القسم</h2></div><span>{childCards.length.toLocaleString('ar')} موضوعات</span></div><div className="category-public-grid">{childCards.map((child) => <article className="public-category-card" key={child.slug}><Link href={`/sections/${child.slug}`}><h3>{child.name_ar}</h3></Link><p>{child.description}</p><Link href={`/sections/${child.slug}`}>استعراض الصفحات ←</Link></article>)}</div></section>}
 
