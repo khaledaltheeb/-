@@ -26,16 +26,9 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   async redirects() {
-    return [
-      { source: '/evidence-guides/safe-screening-tools-explainer', destination: '/evidence-guides/safe-screening-tools/', permanent: true },
-      { source: '/evidence-guides/first-mental-health-appointment-guide', destination: '/care-guides/preparing-first-mental-health-appointment/', permanent: true },
-      { source: '/evidence-guides/autism-adhd-differences-guide', destination: '/comparisons/autism-vs-adhd/', permanent: true },
-      { source: '/evidence-guides/puberty-body-safety-inclusive-guide', destination: '/care-guides/puberty-personal-safety-special-needs/', permanent: true },
-      { source: '/evidence-guides/sibling-and-family-balance', destination: '/care-guides/sibling-responsibility-boundaries-plan/', permanent: true },
-      { source: '/evidence-guides/supported-decision-making-transition-guide', destination: '/evidence-guides/supported-adulthood-transition/', permanent: true },
-      { source: '/evidence-guides/caregiver-wellbeing', destination: '/content/caregiver-burnout', permanent: true },
-      { source: '/capabilities/deafness', destination: '/capabilities/hearing-loss/', permanent: true },
-    ];
+    // Legacy content migration policy: historical content routes must render real
+    // content on their original URL. Migration redirects are intentionally empty.
+    return [];
   },
   async rewrites() {
     return [
