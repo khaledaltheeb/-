@@ -62,6 +62,7 @@ export default function CareGuidePage({ record, items = [], related = [], routeS
   const references = safeCareGuideReferences(record.references_json);
   const faqItems = visibleCareGuideFaq(record.body_json);
   const centralDisclaimer = careGuideDisclaimer(record.schema_json);
+  const hasHumanReview = Boolean(record.reviewer_display_name?.trim());
   const canonical = record.canonical_url || (routeSegments.length ? `/care-guides/${routeSegments.join('/')}/` : '/care-guides/');
   const url = canonical.startsWith('https://') ? canonical : `${SITE_URL}${canonical}`;
   const audiences = Array.isArray(record.audience) ? record.audience.map(String) : [];
@@ -82,7 +83,7 @@ export default function CareGuidePage({ record, items = [], related = [], routeS
     inLanguage: 'ar',
     datePublished: record.published_at || undefined,
     dateModified: record.updated_at || undefined,
-    lastReviewed: record.last_reviewed_at || undefined,
+    lastReviewed: hasHumanReview ? record.last_reviewed_at || undefined : undefined,
     publisher: { '@id': `${SITE_URL}/#organization` },
     isPartOf: { '@id': `${SITE_URL}/#website` },
     image: record.featured_image_url ? (record.featured_image_url.startsWith('https://') ? record.featured_image_url : `${SITE_URL}${record.featured_image_url}`) : undefined,
@@ -130,9 +131,9 @@ export default function CareGuidePage({ record, items = [], related = [], routeS
         {record.excerpt ? <p>{record.excerpt}</p> : null}
         <div className="article-meta">
           {record.author_display_name ? <span>إعداد: {record.author_display_name}</span> : null}
-          {record.reviewer_display_name ? <span>مراجعة: {record.reviewer_display_name}{record.reviewer_credentials ? ` — ${record.reviewer_credentials}` : ''}</span> : null}
+          {hasHumanReview ? <span>مراجعة: {record.reviewer_display_name}{record.reviewer_credentials ? ` — ${record.reviewer_credentials}` : ''}</span> : null}
           {record.published_at ? <span>نُشر {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(record.published_at))}</span> : null}
-          {record.last_reviewed_at ? <span>آخر مراجعة {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(record.last_reviewed_at))}</span> : null}
+          {hasHumanReview && record.last_reviewed_at ? <span>آخر مراجعة {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(record.last_reviewed_at))}</span> : !hasHumanReview && record.updated_at ? <span>آخر تحديث {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(record.updated_at))}</span> : null}
         </div>
         {audiences.length ? <div className="tag-list">{audiences.map((audience) => <span key={audience}>{audience}</span>)}</div> : null}
       </header>
