@@ -247,7 +247,7 @@ export default async function PublishedContentPage({ params }: { params: Params 
 
   const breadcrumbs = breadcrumbJsonLd([
     { name: 'الرئيسية', path: '/' },
-    ...(sector ? [{ name: sector.name_ar, path: `/sectors/${sector.slug}` }] : []),
+    ...(sector ? [{ name: 'القطاعات', path: '/sectors' }, { name: sector.name_ar, path: `/sectors/${sector.slug}` }] : []),
     ...(category ? [{ name: category.name_ar, path: `/sections/${category.slug}` }] : []),
     { name: record.title, path: canonical },
   ]);
@@ -348,7 +348,7 @@ export default async function PublishedContentPage({ params }: { params: Params 
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schemas).replace(/</g, '\\u003c') }} />
       <nav className="breadcrumbs" aria-label="مسار الصفحة">
         <Link href="/">الرئيسية</Link>
-        {sector && <><span>/</span><Link href={`/sectors/${sector.slug}`}>{sector.name_ar}</Link></>}
+        {sector && <><span>/</span><Link href="/sectors">القطاعات</Link><span>/</span><Link href={`/sectors/${sector.slug}`}>{sector.name_ar}</Link></>}
         {category && <><span>/</span><Link href={`/sections/${category.slug}`}>{category.name_ar}</Link></>}
         <span>/</span><span aria-current="page">{record.title}</span>
       </nav>
@@ -375,6 +375,15 @@ export default async function PublishedContentPage({ params }: { params: Params 
           <strong>تنبيه طبي</strong><p>{record.medical_disclaimer}</p><Link href="/disclaimer">إخلاء المسؤولية الكامل</Link>
         </aside>}
         <ContentDisclaimerLink />
+        {(sector || category) && <nav className="article-context-nav" aria-label="التنقل ضمن تصنيف الموضوع">
+          <div className="article-context-copy"><span>تابع داخل روافد</span><strong>استكشف هذا الموضوع ضمن بنيته</strong></div>
+          <div className="article-context-links">
+            {category && <Link href={`/sections/${category.slug}`}>{category.name_ar}</Link>}
+            {sector && <Link href={`/sectors/${sector.slug}`}>{sector.name_ar}</Link>}
+            <Link href="/sections">كل الأقسام</Link>
+            <Link href="/sectors">كل القطاعات</Link>
+          </div>
+        </nav>}
         {related.length > 0 && <section className="article-related" aria-labelledby="related-title">
           <div className="section-mini-heading"><div><span className="eyebrow">قراءات مرتبطة</span><h2 id="related-title">محتوى مرتبط</h2></div><span>مواد مرتبطة بالموضوع لتوسيع القراءة والوصول إلى شروحات ذات صلة.</span></div>
           <div className="related-content-grid">{related.map((item) => <article key={item.id}>
