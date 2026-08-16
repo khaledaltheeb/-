@@ -26,6 +26,10 @@ const directCssImports = [...layout.matchAll(/^import\s+["'](\.\/[^"']+\.css)["'
 if (directCssImports.length !== 1 || directCssImports[0] !== './rawafid-theme-v6.css') fail('root layout must keep one global V6 CSS entry point');
 if (!themeV6.startsWith("@import './rawafid-theme.css';")) fail('V6 theme must preserve the proven V5 compatibility theme as its base');
 if (!themeV6.includes('Rawafid Institutional Theme V6')) fail('V6 theme marker missing');
+if (/letter-spacing:-(?:\d|\.)/.test(themeV6)) fail('V6 public Arabic typography must not use negative letter spacing');
+for (const marker of ['font-synthesis:none', '.mobile-bottom-nav a{font-size:11px}', '.footer-groups{grid-template-columns:repeat(2,minmax(0,1fr))}']) {
+  if (!themeV6.includes(marker)) fail(`V6 visual regression marker missing ${marker}`);
+}
 
 for (const file of ['components/rawafid-mark.tsx', 'components/rawafid-brand.tsx', 'lib/public-content.ts', 'lib/content-templates.ts', 'app/admin/verification/page.tsx']) {
   if (!exists(file)) fail(`missing V5 foundation ${file}`);
