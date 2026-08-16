@@ -20,9 +20,25 @@ for(const [route,marker] of preservedRoutes){
   }catch(error){console.error(`LEGACY_PRESERVED ${route}:`,error);failed=true;}
 }
 try{
-  const response=await fetch(`${base}/__legacy_preservation_route_that_never_existed__/`,{redirect:'manual'});
-  if(response.status!==404){console.error(`LEGACY_PRESERVED_UNKNOWN: expected 404, got ${response.status}`);failed=true;}
-  else console.log('LEGACY_PRESERVED_UNKNOWN: 404 verified');
+  const unknownPath='/__legacy_preservation_route_that_never_existed__/';
+  const canonicalPath=unknownPath.replace(/\/+$/,'');
+  const response=await fetch(`${base}${unknownPath}`,{redirect:'manual'});
+  if(response.status===404){
+    console.log('LEGACY_PRESERVED_UNKNOWN: direct 404 verified');
+  }else if(response.status===308){
+    const location=response.headers.get('location')||'';
+    const target=new URL(location,base);
+    const expectedBase=new URL(base);
+    if(target.origin!==expectedBase.origin||target.pathname!==canonicalPath||target.search||target.hash){
+      console.error(`LEGACY_PRESERVED_UNKNOWN: unexpected normalization target ${location}`);failed=true;
+    }else{
+      const canonicalResponse=await fetch(target,{redirect:'manual'});
+      if(canonicalResponse.status!==404){console.error(`LEGACY_PRESERVED_UNKNOWN: normalized target expected 404, got ${canonicalResponse.status}`);failed=true;}
+      else console.log('LEGACY_PRESERVED_UNKNOWN: 308 canonical normalization + final 404 verified');
+    }
+  }else{
+    console.error(`LEGACY_PRESERVED_UNKNOWN: expected 404 or canonical 308, got ${response.status}`);failed=true;
+  }
 }catch(error){console.error('LEGACY_PRESERVED_UNKNOWN:',error);failed=true;}
 if(failed)process.exit(1);
 console.log('Legacy preservation runtime smoke passed.');
