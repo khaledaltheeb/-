@@ -6,7 +6,11 @@ const forbidText=(file,needles)=>{if(!fs.existsSync(file)){fail(`missing ${file}
 requireText('lib/content-editor-payload.ts',["'image'","'faq'",'alt.length < 3','version:3']);
 requireText('app/admin/content/block-editor.tsx',["image: 'صورة داخل المحتوى'","faq: 'أسئلة شائعة'",'Alt Text إلزامي']);
 requireText('components/content-renderer.tsx',["type === 'image'","type === 'faq'",'content-inline-image','content-faq']);
-requireText('app/content/[slug]/page.tsx',['FAQPage','MedicalCondition','visibleFaq','CONTENT_TYPE_LABELS','contentTypeLabel(record.content_type)','contentTypeLabel(item.content_type)']);
+requireText('app/content/[slug]/page.tsx',['FAQPage','MedicalCondition','visibleFaq','CONTENT_TYPE_LABELS','contentTypeLabel(record.content_type)','contentTypeLabel(item.content_type)',"{ name: 'القطاعات', path: '/sectors' }",'href="/sectors">القطاعات</Link>','article-context-nav','href="/sections">كل الأقسام</Link>','href="/sectors">كل القطاعات</Link>']);
+requireText('app/content-v3.css',['.article-context-nav{','.article-context-links a{']);
+requireText('app/search/page.tsx',['search-discovery','resultOpenLabel','visibleFilters','href="/sectors">تصفح القطاعات</Link>','href="/sections">تصفح الأقسام</Link>']);
+requireText('app/search.css',['.search-page-shell{max-width:1180px;margin:auto;padding:0 0 90px}','.search-discovery-grid{','.search-state-actions{']);
+forbidText('app/search/page.tsx',['className="result-open" href={x.destination}>فتح</Link>']);
 requireText('supabase/migrations/20260807190000_content_scheduling_restore.sql',['schedule_content','publish_due_content','restore_content_version','rawafid-publish-due-content']);
 requireText('app/admin/content/schedule-form.tsx',['datetime-local','toISOString']);
 requireText('app/admin/content/actions.ts',['schedule_content','restore_content_version']);
