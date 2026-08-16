@@ -49,7 +49,7 @@ export function buildSeoMetadata(input: SeoMetadataInput): Metadata {
   const description = clampDescription(input.description);
   const canonical = absoluteUrl(input.path);
   const canIndex = INDEXING_ENABLED && input.index !== false;
-  const canFollow = canIndex && input.follow !== false;
+  const canFollow = input.follow !== false;
   const image = input.image ? absoluteUrl(input.image) : undefined;
   const languages = input.hreflang
     ? Object.fromEntries(Object.entries(input.hreflang).map(([key, value]) => [key, absoluteUrl(value)]))
@@ -121,7 +121,7 @@ export function organizationJsonLd() {
         potentialAction: {
           '@type': 'SearchAction',
           target: { '@type': 'EntryPoint', urlTemplate: `${SITE_URL}/search?q={search_term_string}` },
-          'query-input': 'required name=search_term_string',
+          'query-input': 'required name=query-input',
         },
       },
     ],
