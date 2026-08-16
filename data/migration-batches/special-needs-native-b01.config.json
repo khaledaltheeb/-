@@ -1,0 +1,132 @@
+{
+  "batch_id": "legacy-special-needs-native-b01",
+  "migration_date": "2026-08-15",
+  "expected_record_count": 9,
+  "defaults": {
+    "sector_slug": "special-needs-inclusion",
+    "content_type": "guide",
+    "search_intent": "informational",
+    "author_display_name": "فريق تحرير منصة روافد",
+    "medical_disclaimer": "محتوى تثقيفي وتنظيمي لدعم الوصول والمشاركة ولا يقدّم تشخيصًا فرديًا أو وصفة علاجية؛ القرارات الصحية والتعليمية والوظيفية تُراجع مع مختص مؤهل والجهة المعنية وفق حالة الشخص وسياقه وحقوقه المحلية."
+  },
+  "records": [
+    {
+      "source_path": "/special-needs/",
+      "target_slug": "special-needs-hub",
+      "target_canonical": "/special-needs/",
+      "content_type": "guide",
+      "category_slug": "capabilities-strengths-access",
+      "seo_title": "مركز ذوي الاحتياجات الخاصة | روافد",
+      "seo_description": "مركز مؤسسي لذوي الاحتياجات الخاصة يجمع الأدلة العملية والحالات والحقوق والتقنيات المساعدة والتعليم الدامج، مع مسارات واضحة للأسرة والمختصين عبر مراحل الحياة.",
+      "primary_keyword": "ذوي الاحتياجات الخاصة",
+      "secondary_keywords": ["دليل ذوي الاحتياجات الخاصة", "الإعاقة والدمج", "الدعم الوظيفي", "التعليم الدامج", "التقنيات المساعدة"],
+      "semantic_terms": ["الإعاقة", "الدمج", "الوصول", "المشاركة", "الاستقلال", "الأسرة", "الخدمات", "الحقوق", "التعليم", "التقنيات المساعدة"],
+      "audience": ["الأشخاص ذوو الإعاقة", "الأسرة", "المعلمون", "المختصون", "مقدمو الخدمات"],
+      "schema_json": {"page_role":"special_needs_hub","migration_priority":"foundation"}
+    },
+    {
+      "source_path": "/special-needs/practical/accessible-arabic-documents/",
+      "target_slug": "special-needs-accessible-arabic-documents",
+      "target_canonical": "/special-needs/practical/accessible-arabic-documents/",
+      "category_slug": "accessibility-rights",
+      "seo_title": "المستندات العربية القابلة للوصول | روافد",
+      "seo_description": "دليل عملي لإنتاج مستندات عربية رقمية قابلة للوصول، يغطي البنية والعناوين والاتجاه والجداول والروابط والنص البديل والفحص قبل النشر للويب والملفات المكتبية.",
+      "primary_keyword": "مستندات عربية قابلة للوصول",
+      "secondary_keywords": ["إتاحة المستندات", "الوصول الرقمي العربي", "النص البديل", "إتاحة PDF", "إتاحة Word"],
+      "semantic_terms": ["إمكانية الوصول", "العربية", "العناوين", "الجداول", "الروابط", "النص البديل", "قارئات الشاشة", "الاتجاه من اليمين لليسار"],
+      "audience": ["محررو المحتوى", "المعلمون", "المؤسسات", "فرق المنتجات الرقمية"],
+      "schema_json": {"page_role":"special_needs_practical","practical_track":"digital_accessibility"}
+    },
+    {
+      "source_path": "/special-needs/practical/accessible-forms-authentication/",
+      "target_slug": "special-needs-accessible-forms-authentication",
+      "target_canonical": "/special-needs/practical/accessible-forms-authentication/",
+      "category_slug": "accessibility-rights",
+      "seo_title": "النماذج وتسجيل الدخول الميسّر | روافد",
+      "seo_description": "دليل لتصميم نماذج وتسجيل دخول ميسّرين، يشرح الحقول والتسميات والأخطاء ولوحة المفاتيح والتحقق وإدارة الهوية دون حواجز غير ضرورية أمام المستخدمين ذوي الإعاقة.",
+      "primary_keyword": "نماذج تسجيل دخول قابلة للوصول",
+      "secondary_keywords": ["إتاحة النماذج", "تسجيل الدخول الميسر", "إمكانية الوصول للنماذج", "مصادقة قابلة للوصول", "لوحة المفاتيح"],
+      "semantic_terms": ["النماذج", "المصادقة", "التسميات", "رسائل الخطأ", "لوحة المفاتيح", "قارئات الشاشة", "إدارة الهوية", "الوصول الرقمي"],
+      "audience": ["فرق المنتجات الرقمية", "المطورون", "مصممو تجربة المستخدم", "المؤسسات"],
+      "schema_json": {"page_role":"special_needs_practical","practical_track":"digital_accessibility"}
+    },
+    {
+      "source_path": "/special-needs/practical/accessible-homework/",
+      "target_slug": "special-needs-accessible-homework",
+      "target_canonical": "/special-needs/practical/accessible-homework/",
+      "category_slug": "school-accommodations",
+      "seo_title": "واجب منزلي قابل للوصول والاستقلال | روافد",
+      "seo_description": "دليل لبناء واجب منزلي قابل للوصول والاستقلال، يوازن بين هدف التعلم والوقت وطريقة الاستجابة والتقنيات المساندة ودور الأسرة مع متابعة أثر التكييف بوضوح.",
+      "primary_keyword": "واجب منزلي قابل للوصول",
+      "secondary_keywords": ["تكييف الواجب المنزلي", "واجبات ذوي الإعاقة", "استقلال الطالب", "التقنيات المساندة", "دعم الأسرة"],
+      "semantic_terms": ["الواجب المنزلي", "الوصول", "التكييف", "الاستقلال", "التعلم", "الوقت", "طريقة الاستجابة", "الأسرة", "المتابعة"],
+      "audience": ["الطلاب", "الأسرة", "المعلمون", "فرق الدعم المدرسي"],
+      "schema_json": {"page_role":"special_needs_practical","practical_track":"inclusive_education"}
+    },
+    {
+      "source_path": "/special-needs/practical/accessible-instructions/",
+      "target_slug": "special-needs-accessible-instructions",
+      "target_canonical": "/special-needs/practical/accessible-instructions/",
+      "category_slug": "universal-design-learning",
+      "seo_title": "تعليمات صفية قابلة للفهم والتنفيذ | روافد",
+      "seo_description": "دليل لصياغة تعليمات صفية قابلة للفهم والتنفيذ، يوضح تقليل الحمل المعرفي وتقسيم الخطوات ودعم اللغة والصور والتحقق من الفهم دون خفض هدف التعلم أو المشاركة.",
+      "primary_keyword": "تعليمات صفية قابلة للفهم",
+      "secondary_keywords": ["إتاحة التعليمات", "تقسيم خطوات المهمة", "الحمل المعرفي", "UDL", "التعليم الدامج"],
+      "semantic_terms": ["التعليمات", "الحمل المعرفي", "اللغة", "الصور", "الخطوات", "التحقق من الفهم", "التعلم", "المشاركة"],
+      "audience": ["المعلمون", "الطلاب", "اختصاصيو التربية الخاصة", "فرق الدعم المدرسي"],
+      "schema_json": {"page_role":"special_needs_practical","practical_track":"inclusive_education"}
+    },
+    {
+      "source_path": "/special-needs/practical/assessment-accommodations/",
+      "target_slug": "special-needs-assessment-accommodations",
+      "target_canonical": "/special-needs/practical/assessment-accommodations/",
+      "category_slug": "educational-assessment",
+      "seo_title": "تكييفات التقييم وصدق القياس | روافد",
+      "seo_description": "دليل لبناء تكييفات تقييم تقيس المهارة المستهدفة بعدل، مع تحديد العائق وخط البداية وتجربة التكييف ومراجعة أثره ومنع تغيير ما يفترض أن يقيسه التقييم فعليًا.",
+      "primary_keyword": "تكييفات التقييم",
+      "secondary_keywords": ["التقييم الدامج", "تسهيلات الاختبار", "صدق القياس", "تكييفات مدرسية", "تقييم ذوي الإعاقة"],
+      "semantic_terms": ["التقييم", "التكييفات", "صدق القياس", "العائق", "خط البداية", "العدالة", "المهارة المستهدفة", "المراجعة"],
+      "audience": ["المعلمون", "اختصاصيو القياس", "الطلاب", "فرق الدعم المدرسي"],
+      "schema_json": {"page_role":"special_needs_practical","practical_track":"educational_assessment"}
+    },
+    {
+      "source_path": "/special-needs/practical/classroom-participation-baseline/",
+      "target_slug": "special-needs-classroom-participation-baseline",
+      "target_canonical": "/special-needs/practical/classroom-participation-baseline/",
+      "category_slug": "inclusive-schooling",
+      "seo_title": "خط أساس المشاركة في الصف الدامج | روافد",
+      "seo_description": "دليل لقياس خط أساس المشاركة داخل الصف الدامج، يحدد ما يمكن ملاحظته وتسجيله دون وصم، ويربط الحضور والتفاعل والاستقلال بالعوائق والدعم القابل للتجربة والمراجعة.",
+      "primary_keyword": "قياس المشاركة في الصف الدامج",
+      "secondary_keywords": ["خط أساس المشاركة", "الصف الدامج", "مشاركة الطالب", "قياس الدعم", "التعليم الشامل"],
+      "semantic_terms": ["المشاركة", "الصف", "الدمج", "خط الأساس", "الحضور", "التفاعل", "الاستقلال", "العوائق", "الملاحظة"],
+      "audience": ["المعلمون", "الطلاب", "اختصاصيو التربية الخاصة", "فرق الدعم المدرسي"],
+      "schema_json": {"page_role":"special_needs_practical","practical_track":"inclusive_education"}
+    },
+    {
+      "source_path": "/special-needs/practical/sensory-environment-audit/",
+      "target_slug": "special-needs-sensory-environment-audit",
+      "target_canonical": "/special-needs/practical/sensory-environment-audit/",
+      "category_slug": "sensory-processing",
+      "seo_title": "تدقيق البيئة الحسية للمشاركة | روافد",
+      "seo_description": "دليل لتدقيق البيئة الحسية بطريقة تركز على المشاركة، يفحص الضوضاء والضوء والحركة والازدحام والروائح ويحوّل الملاحظات إلى تعديلات قابلة للقياس والمراجعة.",
+      "primary_keyword": "تدقيق البيئة الحسية",
+      "secondary_keywords": ["البيئة الحسية", "الضوضاء والحساسية", "الإضاءة والوصول", "المعالجة الحسية", "تكييف البيئة"],
+      "semantic_terms": ["الحس", "الضوضاء", "الضوء", "الحركة", "الازدحام", "الروائح", "المشاركة", "التكييف", "الملاحظة"],
+      "audience": ["الأشخاص ذوو الإعاقة", "الأسرة", "المعلمون", "المختصون", "مصممو البيئات"],
+      "schema_json": {"page_role":"special_needs_practical","practical_track":"sensory_access"}
+    },
+    {
+      "source_path": "/special-needs/practical/workplace-accommodations/",
+      "target_slug": "special-needs-workplace-accommodations",
+      "target_canonical": "/special-needs/practical/workplace-accommodations/",
+      "category_slug": "employment-community",
+      "seo_title": "تكييفات العمل القابلة للقياس | روافد",
+      "seo_description": "دليل لبناء تكييفات عمل قابلة للقياس، يبدأ من الحاجز الوظيفي ويحدد التعديل والمسؤولية ومدة التجربة ومؤشرات النجاح والخصوصية والاستقلال داخل بيئة العمل.",
+      "primary_keyword": "تكييفات العمل لذوي الإعاقة",
+      "secondary_keywords": ["تسهيلات مكان العمل", "إتاحة العمل", "دعم الموظف ذي الإعاقة", "الوصول الوظيفي", "تكييف بيئة العمل"],
+      "semantic_terms": ["العمل", "التكييفات", "الإتاحة", "الحاجز الوظيفي", "الخصوصية", "الاستقلال", "التجربة", "المراجعة", "المشاركة"],
+      "audience": ["الأشخاص ذوو الإعاقة", "أصحاب العمل", "الموارد البشرية", "المختصون"],
+      "schema_json": {"page_role":"special_needs_practical","practical_track":"employment_access"}
+    }
+  ]
+}
