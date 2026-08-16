@@ -2,6 +2,7 @@ import Link from 'next/link';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import ContentRenderer from '@/components/content-renderer';
+import { enhanceLegacyDailyToolBody } from '@/lib/daily-tools';
 import {
   legacyCanonicalPath,
   legacyInternalLinks,
@@ -21,6 +22,11 @@ export default function LegacyPreservedPageView({ page, route }: Props) {
   const title = page.h1 || page.title || 'محتوى محفوظ';
   const internalLinks = legacyInternalLinks(page.internal_links_json);
   const references = legacyReferences(page.references_json);
+  const dailyTool = enhanceLegacyDailyToolBody({
+    sourceFamily: page.source_family,
+    sourcePath: page.source_path,
+    bodyJson: page.body_json,
+  });
 
   return <><SiteHeader /><main className="article-shell">
     <nav className="breadcrumbs" aria-label="مسار الصفحة">
@@ -41,7 +47,12 @@ export default function LegacyPreservedPageView({ page, route }: Props) {
         <p>هذا هو المحتوى الذي كان منشورًا على المسار التاريخي نفسه. لم تُمنح هذه النسخة اعتماد دورة المراجعة العلمية الحالية بعد، لذلك تبقى غير مفهرسة إلى أن تكتمل مراجعتها.</p>
       </aside>
       <div className="article-body">
-        <ContentRenderer bodyJson={page.body_json} bodyText={page.body_text} recordId={page.source_path} />
+        <ContentRenderer
+          bodyJson={dailyTool.bodyJson}
+          bodyText={page.body_text}
+          recordId={page.source_path}
+          allowDailyToolInteractions={dailyTool.interactive}
+        />
       </div>
       {internalLinks.length ? <section className="article-related" aria-labelledby="legacy-related-title">
         <h2 id="legacy-related-title">روابط المسار الأصلي</h2>
