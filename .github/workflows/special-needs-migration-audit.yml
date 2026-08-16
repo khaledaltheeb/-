@@ -1,0 +1,59 @@
+name: Special Needs Migration Audit
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'data/migration-batches/special-needs-content-adoptions-v1.json'
+      - 'scripts/validate_special_needs_adoptions.py'
+      - '.github/workflows/special-needs-migration-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout Rawafid V3
+        uses: actions/checkout@v7
+        with:
+          path: rawafid-v3
+
+      - name: Checkout legacy source read-only
+        uses: actions/checkout@v7
+        with:
+          repository: khaledaltheeb/healthrenewal.org
+          ref: main
+          path: legacy
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Extract legacy inventory
+        working-directory: rawafid-v3
+        run: python scripts/legacy_content_extract.py ../legacy
+
+      - name: Validate special-needs adoption batch
+        working-directory: rawafid-v3
+        env:
+          RAWAFID_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
+          RAWAFID_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
+        run: >-
+          python scripts/validate_special_needs_adoptions.py
+          artifacts/legacy-content-inventory.json
+          data/migration-batches/special-needs-content-adoptions-v1.json
+
+      - name: Upload validation artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: special-needs-migration-adoptions
+          path: rawafid-v3/artifacts/special-needs-adoptions-validation.json
+          if-no-files-found: error
+          retention-days: 14
