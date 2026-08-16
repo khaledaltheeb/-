@@ -61,6 +61,7 @@ export default function CapabilityArticlePage({ record, routeSlug, registryItems
   const references = safeCapabilityReferences(record.references_json);
   const faqItems = visibleCapabilityFaq(record.body_json);
   const role = pageRole(record.schema_json);
+  const hasHumanReview = Boolean(record.reviewer_display_name?.trim());
   const canonical = record.canonical_url || (routeSlug ? `/capabilities/${routeSlug}/` : '/capabilities/');
   const url = canonical.startsWith('https://') ? canonical : `${SITE_URL}${canonical}`;
   const bodyJson = role === 'registry' ? capabilityBodyWithoutRegistryCards(record.body_json) : record.body_json;
@@ -84,7 +85,7 @@ export default function CapabilityArticlePage({ record, routeSlug, registryItems
     inLanguage: 'ar',
     datePublished: record.published_at || undefined,
     dateModified: record.updated_at || undefined,
-    lastReviewed: record.last_reviewed_at || undefined,
+    lastReviewed: hasHumanReview ? record.last_reviewed_at || undefined : undefined,
     publisher: { '@id': `${SITE_URL}/#organization` },
     isPartOf: { '@id': `${SITE_URL}/#website` },
     image: record.featured_image_url
@@ -135,6 +136,7 @@ export default function CapabilityArticlePage({ record, routeSlug, registryItems
             author: record.author_display_name
               ? { '@type': 'Organization', name: record.author_display_name }
               : { '@id': `${SITE_URL}/#organization` },
+            reviewedBy: hasHumanReview ? { '@type': 'Person', name: record.reviewer_display_name, description: record.reviewer_credentials || undefined } : undefined,
             citation: references.flatMap((reference) => (reference.url ? [reference.url] : [])),
           };
 
@@ -182,11 +184,11 @@ export default function CapabilityArticlePage({ record, routeSlug, registryItems
             {record.excerpt ? <p>{record.excerpt}</p> : null}
             <div className="article-meta">
               {record.author_display_name ? <span>إعداد: {record.author_display_name}</span> : null}
-              {record.reviewer_display_name ? (
+              {hasHumanReview ? (
                 <span>مراجعة: {record.reviewer_display_name}{record.reviewer_credentials ? ` — ${record.reviewer_credentials}` : ''}</span>
               ) : null}
               {record.published_at ? <span>نُشر {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(record.published_at))}</span> : null}
-              {record.last_reviewed_at ? <span>آخر مراجعة {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(record.last_reviewed_at))}</span> : null}
+              {hasHumanReview && record.last_reviewed_at ? <span>آخر مراجعة {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(record.last_reviewed_at))}</span> : !hasHumanReview && record.updated_at ? <span>آخر تحديث {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(record.updated_at))}</span> : null}
             </div>
             {audiences.length > 0 ? <div className="tag-list">{audiences.map((audience) => <span key={audience}>{audience}</span>)}</div> : null}
           </header>
