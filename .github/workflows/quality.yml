@@ -48,8 +48,10 @@ jobs:
           NEXT_PUBLIC_ALLOW_INDEXING: 'true'
           SMOKE_BASE_URL: http://127.0.0.1:3000
           SEO_GATE_BASE_URL: http://127.0.0.1:3000
-          SEO_GATE_CONCURRENCY: '12'
-          SEO_GATE_TIMEOUT_MS: '12000'
+          SEO_GATE_CONCURRENCY: '6'
+          SEO_GATE_TIMEOUT_MS: '15000'
+          SEO_GATE_PAGE_ATTEMPTS: '3'
+          SEO_GATE_PAGE_RETRY_DELAY_MS: '300'
         run: |
           npm run start -- --hostname 127.0.0.1 --port 3000 > /tmp/rawafid-server.log 2>&1 &
           SERVER_PID=$!
