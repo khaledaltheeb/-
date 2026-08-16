@@ -13,7 +13,7 @@ for(const path of [
  'app/admin/verification-documents/[userId]/page.tsx','app/admin/verification-documents/actions.ts','app/account-system-v1.css',
  'supabase/migrations/20260808210545_provider_verification_documents.sql','supabase/migrations/20260808210851_provider_verification_fk_index.sql',
  'supabase/migrations/20260808211225_provider_verification_rpc_wrapper_security.sql','supabase/migrations/20260808211521_provider_verification_private_rpc_grants.sql',
- 'supabase/migrations/20260808214027_harden_provider_verification_storage_boundary.sql','supabase/migrations/20260816113014_mfa_opt_in_enforcement.sql'
+ 'supabase/migrations/20260808214027_harden_provider_verification_storage_boundary.sql','supabase/migrations/20260816130232_mfa_opt_in_enforcement.sql'
 ]) requireFile(path);
 
 requireText('app/register/actions.ts',['full_name','emailRedirectTo','signUp','safeNext']);
@@ -49,7 +49,7 @@ requireText('supabase/migrations/20260808211521_provider_verification_private_rp
 const storageBoundary=read('supabase/migrations/20260808214027_harden_provider_verification_storage_boundary.sql');
 for(const marker of ['provider_verification_upload_allowed','private.provider_application_exists','< 20','array_length(storage.foldername(name),1)','not exists(','provider_verification_documents d']) if(!storageBoundary.includes(marker)) fail(`storage boundary migration missing ${marker}`);
 
-const mfaMigration=read('supabase/migrations/20260816113014_mfa_opt_in_enforcement.sql');
+const mfaMigration=read('supabase/migrations/20260816130232_mfa_opt_in_enforcement.sql');
 for(const marker of [
   'private.mfa_session_allowed','auth.mfa_factors',"f.factor_type = 'totp'","f.status = 'verified'","auth.jwt()->>'aal'","= 'aal2'",
   'private.require_active_user','private."current_role"','as restrictive','profiles_mfa_opt_in_guard','provider_verification_documents_mfa_opt_in_guard',
