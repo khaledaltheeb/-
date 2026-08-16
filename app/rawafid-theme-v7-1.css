@@ -3,56 +3,137 @@
 /*
  * Rawafid Institutional Theme V7.1
  * --------------------------------
- * Rendering polish only. Preserve V7 layout and identity while reducing
- * persistent compositing cost without deferring semantic page content.
+ * Final public rendering polish. Keep this layer intentionally small: V7 owns
+ * layout and component behavior; this file only resolves the last-mile visual
+ * rhythm, brand optics and responsive chrome without touching page content.
  */
 
 :root{
-  /* Loaded by next/font/local in the root layout. The historical Fontsource
-     face remains in the compatibility layer but is no longer selected. */
   --font-arabic:var(--rawafid-font-arabic),Arial,sans-serif;
+  --rf-header-height:76px;
 }
 
-/* A solid institutional header is cheaper to composite and visually calmer. */
+body{
+  background:#f8fbfa;
+}
+
+/* Public header: quieter, denser and optically balanced. */
 .site-header{
   background:#fffefa;
+  border-bottom-color:#d7e4e1;
   box-shadow:0 1px 0 rgba(6,70,75,.035),0 5px 16px rgba(6,70,75,.022);
   backdrop-filter:none;
   -webkit-backdrop-filter:none;
 }
 
-/* Keep depth cues restrained: hierarchy comes primarily from spacing and borders. */
+.site-header-inner{
+  min-height:var(--rf-header-height);
+  gap:clamp(10px,1.25vw,18px);
+}
+
+.brand{
+  flex:0 0 auto;
+  gap:10px;
+}
+
+.brand-mark{
+  width:44px;
+  height:44px;
+  border:1px solid rgba(255,255,255,.24);
+  border-radius:13px;
+  background:linear-gradient(145deg,#0b807a 0%,#086660 48%,#06464b 100%);
+  color:#fff;
+  --rf-mark-accent:#e6b650;
+  box-shadow:0 7px 18px rgba(6,70,75,.13),inset 0 1px 0 rgba(255,255,255,.18);
+}
+
+.brand-mark svg{width:31px;height:31px}
+.brand-copy strong{font-size:1rem;line-height:1.2;font-weight:850}
+.brand-copy small{font-size:.67rem;line-height:1.35;color:#667b80}
+
+.desktop-nav{gap:1px}
+.desktop-nav>a,.desktop-nav summary{
+  min-height:44px;
+  padding-inline:9px;
+  border-radius:9px;
+  font-size:.83rem;
+}
+
+.header-search{
+  width:clamp(205px,17vw,255px);
+  min-height:44px;
+  border-radius:10px;
+}
+.header-search input{font-size:.8rem}
+.header-search button{min-height:36px;border-radius:7px}
+.header-login{min-height:44px;border-radius:9px;padding-inline:14px}
+
+/* Navigation depth without persistent GPU-heavy effects. */
 .mega-nav-panel{box-shadow:0 18px 48px rgba(8,46,51,.105)}
+.nav-dropdown-heading{background:#fcfefd}
+.mega-sector-grid>a,.mega-intent-list>a,.mega-services>div>a{border-radius:8px}
+
+/* Homepage: reduce decorative mass and keep the task/search hierarchy dominant. */
+.rawafid-hero{
+  padding-block:clamp(2.8rem,5vw,4.25rem) clamp(2.5rem,4.2vw,3.7rem);
+  gap:clamp(30px,4.5vw,58px);
+}
+.rawafid-hero h1{max-width:790px}
 .rawafid-search{box-shadow:0 7px 22px rgba(8,46,51,.05)!important}
 .rawafid-search:focus-within{box-shadow:0 0 0 3px rgba(10,119,114,.075),0 7px 22px rgba(8,46,51,.04)!important}
-.rawafid-hero-visual{box-shadow:0 16px 40px rgba(5,56,61,.12)}
-.rawafid-professional-callout{box-shadow:0 12px 32px rgba(5,56,61,.09)}
+.rawafid-hero-visual{box-shadow:0 16px 40px rgba(5,56,61,.12);
+  min-height:405px;
+  border-radius:20px;
+  background:linear-gradient(150deg,#084e52 0%,#075f5d 52%,#063d43 100%);
+}
+.hero-pathway-list>a{background:rgba(255,255,255,.065)}
+.rawafid-trust-bar{background:#fffefa}
 
-/* The final homepage professional CTA is a dark surface, so its headline must
-   never inherit the global dark heading color. Keep the contrast explicit. */
+/* Cards use spacing and borders first; shadows are reserved for interaction. */
+.rawafid-platform-card,.rawafid-sector-card,.rawafid-editorial-grid>article,
+.public-category-card,.related-content-grid>article,.search-result-card{
+  border-radius:14px;
+}
+.rawafid-directory-band{border-radius:17px}
+.rawafid-professional-callout{
+  border-radius:17px;
+  box-shadow:0 12px 32px rgba(5,56,61,.09);
+}
 .rawafid-professional-callout h2{color:#fff}
 
-/* Footer V8 IA: keep discovery, services and governance distinct, while moving
-   legal utility links into the stable meta row instead of another content silo. */
+/* Footer: institutional sitemap first, with legal links isolated in the meta row. */
+.site-footer{
+  margin-top:clamp(64px,7vw,88px);
+  border-top-width:3px;
+  background:#073b40;
+}
+.site-footer-inner{padding-block:50px 38px}
+.site-footer .brand-mark{
+  background:#0a5557;
+  border-color:rgba(255,255,255,.16);
+  box-shadow:none;
+}
+.footer-brand-block>p{margin-top:17px}
+.footer-search{border-radius:9px}
+.footer-groups{gap:clamp(18px,2.6vw,34px)}
+.footer-groups h2{margin-bottom:10px}
+.footer-groups section>div{gap:4px}
 .footer-bottom{
   gap:20px;
   align-items:center;
 }
-
 .footer-bottom-meta{
   display:flex;
   align-items:center;
   gap:12px 18px;
   flex-wrap:wrap;
 }
-
 .footer-legal-links{
   display:flex;
   align-items:center;
   gap:8px 14px;
   flex-wrap:wrap;
 }
-
 .footer-legal-links a{
   min-height:40px;
   display:inline-flex;
@@ -63,17 +144,50 @@
   text-decoration:none;
   text-underline-offset:4px;
 }
-
-.footer-legal-links a:hover,
-.footer-legal-links a:focus-visible{
+.footer-legal-links a:hover,.footer-legal-links a:focus-visible{
   color:#fff;
   text-decoration:underline;
 }
 
+@media(max-width:1160px){
+  .header-search{display:none}
+}
+
+@media(max-width:1000px){
+  :root{--rf-header-height:72px}
+  .site-header-inner{min-height:var(--rf-header-height)}
+}
+
 @media(max-width:760px){
+  :root{--rf-header-height:66px}
   .site-header{box-shadow:0 1px 0 rgba(6,70,75,.04)}
-  .rawafid-hero-visual{box-shadow:0 10px 26px rgba(5,56,61,.09)}
+  .site-header-inner{min-height:var(--rf-header-height)}
+  .brand-mark{width:40px;height:40px;border-radius:11px}
+  .brand-mark svg{width:28px;height:28px}
+  .brand-copy strong{font-size:.92rem}
+  .brand-copy small{display:none}
+  .mobile-menu-panel{top:calc(var(--rf-header-height) + 8px)}
+  .rawafid-hero{padding-top:30px}
+  .rawafid-hero-visual{min-height:auto;border-radius:16px;box-shadow:0 10px 26px rgba(5,56,61,.09)}
+  .rawafid-trust-bar{border-radius:12px}
+  .site-footer-inner{padding-block:44px 32px}
   .footer-bottom{flex-direction:column;gap:8px}
   .footer-bottom-meta,.footer-legal-links{justify-content:center}
   .footer-legal-links a{min-height:44px}
+}
+
+@media(max-width:480px){
+  .site-shell,.site-header-inner,.site-footer-inner,.footer-bottom,
+  .breadcrumbs,.article-shell,.search-page-shell,.profile-shell{
+    width:min(100% - 20px,var(--rf-container));
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .brand-mark,.site-header{transition:none}
+}
+
+@media(forced-colors:active){
+  .brand-mark,.site-footer,.footer-search{forced-color-adjust:auto}
+  :where(a,button,input,select,textarea,summary):focus-visible{outline:3px solid Highlight}
 }
