@@ -189,7 +189,7 @@ export async function updateSession(request: NextRequest) {
   if (isProtected && data?.claims?.sub) {
     const assurance = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
     const factors = assurance.error ? null : await supabase.auth.mfa.listFactors();
-    const hasVerifiedTotp = (factors?.data.totp ?? []).some((factor) => factor.status === 'verified');
+    const hasVerifiedTotp = (factors?.data?.totp ?? []).some((factor) => factor.status === 'verified');
     if (assurance.error || factors?.error || (hasVerifiedTotp && assurance.data.currentLevel !== 'aal2')) {
       const url = request.nextUrl.clone();
       url.pathname = '/mfa';
