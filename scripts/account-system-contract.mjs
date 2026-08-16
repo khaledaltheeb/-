@@ -25,7 +25,7 @@ requireText('app/reset-password/actions.ts',["updateUser({ password",'password_m
 requireText('app/auth/callback/route.ts',['exchangeCodeForSession','safeNext']);
 requireText('app/mfa/page.tsx',['getAuthenticatorAssuranceLevel','currentLevel','nextLevel','MfaChallenge','robots: { index: false']);
 requireText('components/mfa-challenge.tsx',['listFactors','challengeAndVerify','one-time-code','nextPath']);
-requireText('components/mfa-settings.tsx',['mfa.enroll','challengeAndVerify','mfa.unenroll','refreshSession','qr_code','one-time-code']);
+requireText('components/mfa-settings.tsx',['mfa.enroll','challengeAndVerify','mfa.unenroll','refreshSession','qr_code','one-time-code','لا تتوفر رموز استعادة']);
 requireText('app/account/security/actions.ts',['getUser','signInWithPassword','updateUser','current_password']);
 requireText('app/account/security/page.tsx',['current_password','new_password','confirm_password','/forgot-password','MfaSettings','/mfa?next=%2Faccount%2Fsecurity']);
 requireText('app/account/page.tsx',['/account/security','/account/verification-documents']);
