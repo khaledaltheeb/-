@@ -28,6 +28,15 @@ const legacyHubRewrites = [
   { source: '/hubs/:slug/', destination: '/content/legacy-hub-:slug' },
 ];
 
+const legacyAudienceRedirects = [
+  { source: '/audiences', destination: '/start-here', permanent: true },
+  { source: '/audiences/person', destination: '/start-here#person', permanent: true },
+  { source: '/audiences/family', destination: '/start-here#family', permanent: true },
+  { source: '/audiences/teacher', destination: '/start-here#teacher', permanent: true },
+  { source: '/audiences/student', destination: '/start-here#student', permanent: true },
+  { source: '/audiences/professional', destination: '/start-here#professional', permanent: true },
+];
+
 const legacyThinGuideRedirects = [
   { source: '/guides/adhd-guide', destination: '/capabilities/adhd/', permanent: true },
   { source: '/guides/agoraphobia-guide', destination: '/evidence-guides/clinical-anxiety/', permanent: true },
@@ -55,6 +64,7 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       ...encyclopediaConditionRedirects,
+      ...legacyAudienceRedirects,
       ...legacyThinGuideRedirects,
       { source: '/care-guides/caregiver-self-care-boundaries', destination: '/content/caregiver-burnout', permanent: true },
       { source: '/care-guides/fetal-alcohol-spectrum-support', destination: '/care-guides/prenatal-exposure-neurodevelopment-support/', permanent: true },
@@ -83,13 +93,9 @@ const nextConfig: NextConfig = {
       { source: '/resources/:slug/', destination: '/content/:slug' },
     ];
   },
-  async headers() {
-    return [{ source: '/:path*', headers: securityHeaders }];
-  },
+  async headers() { return [{ source: '/:path*', headers: securityHeaders }]; },
 };
 
 export default nextConfig;
 
-if (process.env.NODE_ENV === 'development') {
-  initOpenNextCloudflareForDev();
-}
+if (process.env.NODE_ENV === 'development') initOpenNextCloudflareForDev();
