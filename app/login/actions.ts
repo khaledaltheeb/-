@@ -12,7 +12,7 @@ function credentials(formData: FormData) {
 }
 function safeNext(formData: FormData) {
   const value = String(formData.get('next') ?? '').trim().slice(0, 500);
-  return value.startsWith('/') && !value.startsWith('//') && !value.includes('\\') ? value : '/account';
+  return value.startsWith('/') && !value.startsWith('//') && !value.includes('\\') && value !== '/mfa' && !value.startsWith('/mfa?') ? value : '/account';
 }
 
 export async function login(formData: FormData) {
@@ -22,6 +22,11 @@ export async function login(formData: FormData) {
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword(data);
   if (error) redirect(`/login?error=login_failed&next=${encodeURIComponent(next)}`);
+  const assurance = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  const factors = assurance.error ? null : await supabase.auth.mfa.listFactors();
   revalidatePath('/', 'layout');
+  if (assurance.error || factors?.error) redirect(`/mfa?error=assurance_check&next=${encodeURIComponent(next)}`);
+  const hasVerifiedTotp = (factors?.data?.totp ?? []).some((factor) => factor.status === 'verified');
+  if (hasVerifiedTotp && assurance.data.currentLevel !== 'aal2') redirect(`/mfa?next=${encodeURIComponent(next)}`);
   redirect(next);
 }
