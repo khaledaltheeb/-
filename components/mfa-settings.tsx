@@ -146,6 +146,7 @@ export function MfaSettings() {
         <span>باستخدام تطبيق مصادقة TOTP</span>
       </div>
       <p>يمكنك إضافة تطبيق مصادقة لحماية المسارات والبيانات الحساسة. بعد التفعيل، لا تكفي كلمة المرور وحدها للوصول إلى تلك الموارد.</p>
+      <div className="system-message" role="note"><strong>مهم:</strong> لا تتوفر رموز استعادة لهذا النوع من التحقق. بعد تفعيل العامل الأول، أضف عاملًا احتياطيًا على جهاز أو تطبيق منفصل؛ فقدان جميع عوامل التحقق قد يمنع الوصول إلى الحساب.</div>
       {message && <div className="system-message success" role="status">{message}</div>}
       {error && <div className="system-message error" role="alert">{error}</div>}
       {loading ? <p role="status">جاري تحميل إعدادات التحقق…</p> : <>
