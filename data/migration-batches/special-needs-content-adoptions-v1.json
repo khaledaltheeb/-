@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "scope": "special-needs",
+  "policy": "A legacy route is counted as preserved only when its useful editorial intent is demonstrably covered by a stronger published canonical. Redirects alone never satisfy this policy.",
+  "records": [
+    {
+      "source_path": "/special-needs/practical/communication-breakdown-repair/",
+      "target_canonical": "/care-guides/aac-communication-breakdown-repair/",
+      "reason": "The published AAC repair guide covers communication breakdown analysis, repair steps, partner behavior, environment, escalation prevention, monitoring, and follow-up.",
+      "evidence_headings": ["الخطة العملية للبدء", "التواصل الذي يحفظ الفهم والاختيار", "المتابعة وقراءة النتائج"]
+    },
+    {
+      "source_path": "/special-needs/practical/communication-partner-training/",
+      "target_canonical": "/care-guides/aac-communication-partner-training/",
+      "reason": "The published guide directly covers partner training, AAC availability, modeling, wait time, initiative, breakdown repair, cross-setting consistency, and partner outcome measurement.",
+      "evidence_headings": ["لماذا تدريب الشريك جزء أساسي من نجاح AAC؟", "إصلاح تعطل التواصل دون أخذ الرسالة من صاحبها", "كيف نقيس تحسن الشريك لا المستخدم وحده؟"]
+    },
+    {
+      "source_path": "/special-needs/practical/arabic-multilingual-aac/",
+      "target_canonical": "/care-guides/aac/multilingual-arabic-family-languages/",
+      "reason": "The published multilingual AAC guide covers Arabic, family languages, dialects, code-switching, translation, vocabulary localization, partner training, and multilingual assessment.",
+      "evidence_headings": ["العربية: فصحى ولهجات", "التبديل اللغوي Code-switching بوصفه ممارسة طبيعية", "تقييم رضا المستخدم والأسرة"]
+    },
+    {
+      "source_path": "/special-needs/practical/assistive-technology-trial/",
+      "target_canonical": "/care-guides/assistive-technology-trial-follow-up/",
+      "reason": "The published guide covers goal definition, baseline, real-environment trials, fit, training, maintenance, cost, abandonment risk, review intervals, and continue/modify/replace decisions.",
+      "evidence_headings": ["ابدأ بالنتيجة التي يريدها الشخص لا باسم الجهاز", "جرّب الأداة في البيئة التي ستعيش فيها", "قرار الاستمرار أو التعديل أو الاستبدال"]
+    },
+    {
+      "source_path": "/special-needs/practical/assistive-device-backup-maintenance/",
+      "target_canonical": "/care-guides/assistive-technology-maintenance-plan/",
+      "reason": "The published maintenance guide is the stronger canonical for maintenance, continuity, responsibility, backup planning, monitoring, and escalation when assistive technology fails.",
+      "evidence_headings": ["الخطة العملية للبدء", "تنسيق أدوار الشخص والأسرة والفريق", "متى نستمر ومتى نغيّر؟"]
+    },
+    {
+      "source_path": "/special-needs/practical/school-home-communication/",
+      "target_canonical": "/care-guides/school-home-communication-log/",
+      "reason": "The published school-home guide covers cross-setting communication, responsibilities, privacy-aware information exchange, implementation, monitoring, and periodic review.",
+      "evidence_headings": ["تنسيق أدوار الشخص والأسرة والفريق", "تطبيق الخطة في المواقف اليومية", "المتابعة وقراءة النتائج"]
+    },
+    {
+      "source_path": "/special-needs/practical/supported-decision-making/",
+      "target_canonical": "/care-guides/supported-decision-making-special-needs/",
+      "reason": "The published supported-decision guide comprehensively covers accessible information, preference and will, support networks, coercion risks, documentation, health, money, housing, work, abuse risk, and review.",
+      "evidence_headings": ["ابدأ بإرادة الشخص وتفضيلاته", "التمييز بين الدعم والإقناع والسيطرة", "أداة عملية: ورقة قرار مدعوم"]
+    },
+    {
+      "source_path": "/special-needs/practical/sibling-inclusion-support/",
+      "target_canonical": "/care-guides/disability-sibling-support-plan/",
+      "reason": "The published sibling support guide is the stronger canonical for including siblings without shifting adult care responsibilities onto them, coordinating support, monitoring burden, and reviewing the plan.",
+      "evidence_headings": ["الفكرة المركزية", "تقسيم المسؤوليات", "المتابعة وقراءة النتائج"]
+    },
+    {
+      "source_path": "/special-needs/practical/dental-visit-preparation/",
+      "target_canonical": "/care-guides/sensory-friendly-dental-visit/",
+      "reason": "The published dental access guide covers preparation, pre-visit communication, sensory access, stop signals, communication about pain, positioning, visit rehearsal, emergency differences, and post-visit learning.",
+      "evidence_headings": ["زيارة تمهيدية عندما تكون الغرابة هي العائق", "إدارة البيئة الحسية", "بعد الموعد: سجل ما تعلمناه"]
+    },
+    {
+      "source_path": "/special-needs/practical/assessment-accommodations/",
+      "target_canonical": "/content/classroom-accommodations",
+      "reason": "The published accommodations guide covers preserving the measured skill, identifying the barrier, assessment validity, accommodation categories, trial protocols, impact measurement, and school implementation governance.",
+      "evidence_headings": ["التكييف يحافظ على الهدف", "التكييفات في الاختبارات: سؤال الصلاحية أولًا", "بروتوكول تجربة تكييف جديد بدل اعتماده بالحدس"]
+    }
+  ]
+}
