@@ -5,12 +5,12 @@ export type EvidenceGuideRecord = {
   id: string; slug: string; title: string; excerpt: string | null; body_json: unknown; body_text: string | null;
   seo_title: string | null; seo_description: string | null; canonical_url: string | null; robots_index: boolean; robots_follow: boolean;
   published_at: string | null; updated_at: string; primary_keyword: string | null; secondary_keywords: string[] | null; semantic_terms: string[] | null;
-  author_display_name: string | null; last_reviewed_at: string | null; references_json: EvidenceGuideReference[] | null; medical_disclaimer: string | null;
-  schema_json: Record<string, unknown> | null;
+  author_display_name: string | null; reviewer_display_name: string | null; reviewer_credentials: string | null; last_reviewed_at: string | null;
+  references_json: EvidenceGuideReference[] | null; medical_disclaimer: string | null; schema_json: Record<string, unknown> | null;
 };
 export type EvidenceGuideListItem = Pick<EvidenceGuideRecord, 'id' | 'slug' | 'title' | 'excerpt' | 'canonical_url' | 'published_at' | 'updated_at' | 'references_json' | 'schema_json'>;
 
-const DETAIL_FIELDS='id,slug,title,excerpt,body_json,body_text,seo_title,seo_description,canonical_url,robots_index,robots_follow,published_at,updated_at,primary_keyword,secondary_keywords,semantic_terms,author_display_name,last_reviewed_at,references_json,medical_disclaimer,schema_json';
+const DETAIL_FIELDS='id,slug,title,excerpt,body_json,body_text,seo_title,seo_description,canonical_url,robots_index,robots_follow,published_at,updated_at,primary_keyword,secondary_keywords,semantic_terms,author_display_name,reviewer_display_name,reviewer_credentials,last_reviewed_at,references_json,medical_disclaimer,schema_json';
 const LIST_FIELDS='id,slug,title,excerpt,canonical_url,published_at,updated_at,references_json,schema_json';
 function isPublishedNow(value:string|null){return !value||new Date(value).getTime()<=Date.now();}
 export function evidenceGuideCategory(record:Pick<EvidenceGuideRecord,'schema_json'>){const v=record.schema_json?.category;return typeof v==='string'&&v.trim()?v.trim():'أدلة مبنية على المصادر';}
