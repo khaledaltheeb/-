@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "note": "قرارات Canonical صريحة عند استرداد سجل الحالات من المستودع القديم. الدمج يقتصر على اختلاف تسمية الكيان نفسه، ولا يدمج نوايا بحث مستقلة مثل الصمم وفقدان السمع أو العمى وضعف البصر.",
+  "superseded_curated_slugs": [
+    "hearing-loss-deafness",
+    "blindness-low-vision"
+  ],
+  "canonical_slug_overrides": {
+    "autism": "autism-spectrum-disorder",
+    "adhd": "attention-deficit-hyperactivity-disorder",
+    "dyslexia": "specific-learning-disorder-reading",
+    "tourette-tic-disorders": "tourette-syndrome"
+  },
+  "manual_category_overrides": {
+    "intellectual-developmental-disorder": "intellectual-developmental",
+    "global-developmental-delay": "intellectual-developmental",
+    "developmental-language-disorder": "language-communication",
+    "speech-sound-disorder": "language-communication",
+    "childhood-apraxia-of-speech": "language-communication",
+    "stuttering": "language-communication",
+    "social-pragmatic-communication-disorder": "language-communication",
+    "central-auditory-processing-difficulties": "language-communication",
+    "blindness": "vision-blindness",
+    "low-vision": "vision-blindness",
+    "cerebral-visual-impairment": "vision-blindness",
+    "oculocutaneous-albinism": "vision-blindness",
+    "retinitis-pigmentosa": "vision-blindness",
+    "optic-nerve-hypoplasia": "vision-blindness",
+    "deafness": "hearing-deafness",
+    "hearing-loss": "hearing-deafness",
+    "deafblindness": "multiple-complex",
+    "usher-syndrome": "multiple-complex",
+    "aphasia": "language-communication",
+    "acquired-apraxia-of-speech": "language-communication",
+    "dysarthria": "language-communication",
+    "moebius-syndrome": "language-communication",
+    "cleft-lip-palate-communication": "language-communication",
+    "epilepsy": "neurological-epileptic",
+    "hydrocephalus": "neurological-epileptic",
+    "traumatic-brain-injury": "neurological-epileptic",
+    "stroke": "neurological-epileptic",
+    "multiple-sclerosis": "neurological-epileptic",
+    "parkinson-disease": "neurological-epileptic",
+    "huntington-disease": "neurological-epileptic",
+    "amyotrophic-lateral-sclerosis": "neurological-epileptic",
+    "schizophrenia-functional-support": "mental-behavioral-functional",
+    "bipolar-disorder-functional-support": "mental-behavioral-functional"
+  }
+}

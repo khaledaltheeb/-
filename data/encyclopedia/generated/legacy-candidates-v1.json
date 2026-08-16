@@ -1,0 +1,4311 @@
+{
+  "version": 1,
+  "name": "موسوعة روافد للحالات والإعاقة والدمج",
+  "target_published_pages": 5000,
+  "status": "legacy-materialized-candidate-registry",
+  "note": "مادة استرداد Canonical من المستودع القديم. جميع السجلات مرشحات قبل النشر وتحتاج بحثًا حديثًا ومراجعة علمية وتحريرية وSEO.",
+  "categories": {
+    "neurodevelopmental-learning": 550,
+    "intellectual-developmental": 350,
+    "language-communication": 300,
+    "genetic-chromosomal": 700,
+    "metabolic-rare": 850,
+    "neurological-epileptic": 650,
+    "motor-neuromuscular": 450,
+    "hearing-deafness": 250,
+    "vision-blindness": 250,
+    "mental-behavioral-functional": 300,
+    "chronic-acquired": 250,
+    "multiple-complex": 100
+  },
+  "source_entity_count": 150,
+  "canonical_candidate_count": 150,
+  "merged_source_count": 0,
+  "legacy_batches": {
+    "v280": 100,
+    "v281": 50
+  },
+  "superseded_curated_slugs": [
+    "blindness-low-vision",
+    "hearing-loss-deafness"
+  ],
+  "entities": [
+    {
+      "slug": "autism-spectrum-disorder",
+      "title_ar": "اضطراب طيف التوحد",
+      "title_en": "Autism spectrum disorder",
+      "aliases_ar": [
+        "التوحد",
+        "طيف التوحد"
+      ],
+      "aliases_en": [
+        "autism",
+        "ASD"
+      ],
+      "category": "neurodevelopmental-learning",
+      "entity_type": "disorder",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json",
+        "content/v18/care-guides-autism-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO",
+        "CDC",
+        "NICE"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 1,
+          "slug": "autism",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "context-dependent-emerging"
+        }
+      ],
+      "legacy_rank": 1
+    },
+    {
+      "slug": "attention-deficit-hyperactivity-disorder",
+      "title_ar": "اضطراب نقص الانتباه وفرط النشاط",
+      "title_en": "Attention-deficit/hyperactivity disorder",
+      "aliases_ar": [
+        "اضطراب فرط الحركة وتشتت الانتباه",
+        "فرط الحركة وتشتت الانتباه",
+        "اضطراب نقص الانتباه وفرط الحركة"
+      ],
+      "aliases_en": [
+        "ADHD"
+      ],
+      "category": "neurodevelopmental-learning",
+      "entity_type": "disorder",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json",
+        "data/migration-batches/adhd-v1.config.json"
+      ],
+      "evidence_priority": [
+        "WHO ICD-11",
+        "NICE NG87",
+        "CDC"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 2,
+          "slug": "adhd",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "context-dependent-emerging"
+        }
+      ],
+      "legacy_rank": 2
+    },
+    {
+      "slug": "intellectual-developmental-disorder",
+      "title_ar": "اضطراب النمو الذهني",
+      "title_en": "Disorder of intellectual development",
+      "aliases_ar": [
+        "الإعاقة الذهنية",
+        "الإعاقة الفكرية",
+        "اضطراب النمو الفكري واحتياجات السلوك التكيفي"
+      ],
+      "aliases_en": [
+        "intellectual disability",
+        "intellectual developmental disorder"
+      ],
+      "category": "intellectual-developmental",
+      "entity_type": "disability",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO ICD-11",
+        "WHO ICF",
+        "AAIDD"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 3,
+          "slug": "intellectual-developmental-disorder",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "individual-discovery"
+        }
+      ],
+      "legacy_rank": 3
+    },
+    {
+      "slug": "global-developmental-delay",
+      "title_ar": "التأخر النمائي الشامل",
+      "title_en": "Global Developmental Delay",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "intellectual-developmental",
+      "entity_type": "condition",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO ICD-11",
+        "WHO ICF",
+        "AAIDD or equivalent professional guidance"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 4,
+          "slug": "global-developmental-delay",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "individual-discovery"
+        }
+      ],
+      "legacy_rank": 4
+    },
+    {
+      "slug": "specific-learning-disorder-reading",
+      "title_ar": "اضطراب التعلم النمائي مع ضعف القراءة",
+      "title_en": "Developmental learning disorder with impairment in reading",
+      "aliases_ar": [
+        "عسر القراءة",
+        "الديسلكسيا",
+        "صعوبة التعلم المحددة في القراءة وعسر القراءة"
+      ],
+      "aliases_en": [
+        "dyslexia",
+        "Specific Learning Disorder in Reading / Dyslexia"
+      ],
+      "category": "neurodevelopmental-learning",
+      "entity_type": "disorder",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json",
+        "content/v254/outside-the-box-conditions-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO ICD-11",
+        "education evidence reviews"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 5,
+          "slug": "dyslexia",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "heterogeneous-no-group-gift"
+        }
+      ],
+      "legacy_rank": 5
+    },
+    {
+      "slug": "written-expression-difficulty",
+      "title_ar": "صعوبة التعبير الكتابي وعسر الكتابة",
+      "title_en": "Specific Learning Disorder in Written Expression",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "neurodevelopmental-learning",
+      "entity_type": "disorder",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO ICD-11",
+        "condition-specific guideline",
+        "systematic review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 6,
+          "slug": "written-expression-difficulty",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "individual-discovery"
+        }
+      ],
+      "legacy_rank": 6
+    },
+    {
+      "slug": "dyscalculia",
+      "title_ar": "صعوبة التعلم المحددة في الرياضيات وعسر الحساب",
+      "title_en": "Specific Learning Disorder in Mathematics / Dyscalculia",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "neurodevelopmental-learning",
+      "entity_type": "disorder",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO ICD-11",
+        "condition-specific guideline",
+        "systematic review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 7,
+          "slug": "dyscalculia",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "individual-discovery"
+        }
+      ],
+      "legacy_rank": 7
+    },
+    {
+      "slug": "developmental-coordination-disorder",
+      "title_ar": "اضطراب التناسق الحركي النمائي",
+      "title_en": "Developmental motor coordination disorder",
+      "aliases_ar": [
+        "اضطراب التنسيق النمائي"
+      ],
+      "aliases_en": [
+        "developmental coordination disorder",
+        "DCD"
+      ],
+      "category": "neurodevelopmental-learning",
+      "entity_type": "disorder",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO ICD-11",
+        "international clinical practice guidance"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 8,
+          "slug": "developmental-coordination-disorder",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "preserved-capability-access"
+        }
+      ],
+      "legacy_rank": 8
+    },
+    {
+      "slug": "developmental-language-disorder",
+      "title_ar": "اضطراب اللغة النمائي",
+      "title_en": "Developmental language disorder",
+      "aliases_ar": [
+        "اضطراب نمو اللغة"
+      ],
+      "aliases_en": [
+        "DLD"
+      ],
+      "category": "language-communication",
+      "entity_type": "disorder",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO ICD-11",
+        "ASHA",
+        "RCSLT"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 9,
+          "slug": "developmental-language-disorder",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "preserved-capability-access"
+        }
+      ],
+      "legacy_rank": 9
+    },
+    {
+      "slug": "speech-sound-disorder",
+      "title_ar": "اضطراب أصوات الكلام",
+      "title_en": "Speech Sound Disorder",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "language-communication",
+      "entity_type": "disorder",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO ICD-11",
+        "ASHA/RCSLT or equivalent professional guidance",
+        "systematic review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 10,
+          "slug": "speech-sound-disorder",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "preserved-capability-access"
+        }
+      ],
+      "legacy_rank": 10
+    },
+    {
+      "slug": "childhood-apraxia-of-speech",
+      "title_ar": "تعذر الأداء النطقي في الطفولة",
+      "title_en": "Childhood Apraxia of Speech",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "language-communication",
+      "entity_type": "disease",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO ICD-11",
+        "ASHA/RCSLT or equivalent professional guidance",
+        "systematic review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 11,
+          "slug": "childhood-apraxia-of-speech",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "preserved-capability-access"
+        }
+      ],
+      "legacy_rank": 11
+    },
+    {
+      "slug": "stuttering",
+      "title_ar": "التأتأة",
+      "title_en": "Stuttering",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "language-communication",
+      "entity_type": "condition",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO ICD-11",
+        "ASHA/RCSLT or equivalent professional guidance",
+        "systematic review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 12,
+          "slug": "stuttering",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "preserved-capability-access"
+        }
+      ],
+      "legacy_rank": 12
+    },
+    {
+      "slug": "tourette-syndrome",
+      "title_ar": "متلازمة توريت",
+      "title_en": "Tourette syndrome",
+      "aliases_ar": [
+        "اضطراب توريت",
+        "اضطرابات العرّات ومتلازمة توريت"
+      ],
+      "aliases_en": [
+        "Tourette disorder",
+        "Tic Disorders and Tourette Syndrome"
+      ],
+      "category": "neurological-epileptic",
+      "entity_type": "syndrome",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO ICD-11",
+        "CDC",
+        "AAN"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 13,
+          "slug": "tourette-tic-disorders",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "individual-discovery"
+        }
+      ],
+      "legacy_rank": 13
+    },
+    {
+      "slug": "social-pragmatic-communication-disorder",
+      "title_ar": "اضطراب التواصل الاجتماعي البراغماتي",
+      "title_en": "Social Pragmatic Communication Disorder",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "language-communication",
+      "entity_type": "disorder",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO ICD-11",
+        "ASHA/RCSLT or equivalent professional guidance",
+        "systematic review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 14,
+          "slug": "social-pragmatic-communication-disorder",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "individual-discovery"
+        }
+      ],
+      "legacy_rank": 14
+    },
+    {
+      "slug": "central-auditory-processing-difficulties",
+      "title_ar": "صعوبات المعالجة السمعية المركزية",
+      "title_en": "Central Auditory Processing Difficulties",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "language-communication",
+      "entity_type": "condition",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO ICD-11",
+        "ASHA/RCSLT or equivalent professional guidance",
+        "systematic review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 15,
+          "slug": "central-auditory-processing-difficulties",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "preserved-capability-access"
+        }
+      ],
+      "legacy_rank": 15
+    },
+    {
+      "slug": "sensory-processing-differences",
+      "title_ar": "اختلافات المعالجة الحسية",
+      "title_en": "Sensory Processing Differences",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "neurodevelopmental-learning",
+      "entity_type": "condition",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO ICD-11",
+        "condition-specific guideline",
+        "systematic review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 16,
+          "slug": "sensory-processing-differences",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "individual-discovery"
+        }
+      ],
+      "legacy_rank": 16
+    },
+    {
+      "slug": "fetal-alcohol-spectrum-disorders",
+      "title_ar": "اضطرابات طيف التعرض للكحول قبل الولادة",
+      "title_en": "Fetal Alcohol Spectrum Disorders",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "neurodevelopmental-learning",
+      "entity_type": "disorder",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO ICD-11",
+        "condition-specific guideline",
+        "systematic review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 17,
+          "slug": "fetal-alcohol-spectrum-disorders",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "individual-discovery"
+        }
+      ],
+      "legacy_rank": 17
+    },
+    {
+      "slug": "down-syndrome",
+      "title_ar": "متلازمة داون",
+      "title_en": "Down syndrome",
+      "aliases_ar": [
+        "التثلث الصبغي 21"
+      ],
+      "aliases_en": [
+        "trisomy 21"
+      ],
+      "category": "genetic-chromosomal",
+      "entity_type": "syndrome",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "CDC",
+        "AAP",
+        "MedlinePlus Genetics"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 18,
+          "slug": "down-syndrome",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "relative-profile"
+        }
+      ],
+      "legacy_rank": 18
+    },
+    {
+      "slug": "fragile-x-syndrome",
+      "title_ar": "متلازمة الكروموسوم X الهش",
+      "title_en": "Fragile X syndrome",
+      "aliases_ar": [
+        "متلازمة إكس الهش"
+      ],
+      "aliases_en": [
+        "FXS"
+      ],
+      "category": "genetic-chromosomal",
+      "entity_type": "syndrome",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json",
+        "scripts/build_capabilities_evidence_v280.py"
+      ],
+      "evidence_priority": [
+        "GeneReviews",
+        "CDC"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 19,
+          "slug": "fragile-x-syndrome",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "relative-profile"
+        }
+      ],
+      "legacy_rank": 19
+    },
+    {
+      "slug": "rett-syndrome",
+      "title_ar": "متلازمة ريت",
+      "title_en": "Rett syndrome",
+      "aliases_ar": [
+        "متلازمة رِت"
+      ],
+      "aliases_en": [
+        "MECP2-related Rett syndrome"
+      ],
+      "category": "genetic-chromosomal",
+      "entity_type": "syndrome",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json",
+        "scripts/build_capabilities_evidence_v280.py"
+      ],
+      "evidence_priority": [
+        "GeneReviews",
+        "international consensus guidance"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 20,
+          "slug": "rett-syndrome",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "preserved-capability-access"
+        }
+      ],
+      "legacy_rank": 20
+    },
+    {
+      "slug": "angelman-syndrome",
+      "title_ar": "متلازمة أنجلمان",
+      "title_en": "Angelman syndrome",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "genetic-chromosomal",
+      "entity_type": "syndrome",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json",
+        "scripts/build_capabilities_evidence_v280.py"
+      ],
+      "evidence_priority": [
+        "GeneReviews"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 21,
+          "slug": "angelman-syndrome",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "preserved-capability-access"
+        }
+      ],
+      "legacy_rank": 21
+    },
+    {
+      "slug": "prader-willi-syndrome",
+      "title_ar": "متلازمة برادر–ويلي",
+      "title_en": "Prader-Willi syndrome",
+      "aliases_ar": [
+        "متلازمة برادر ويلي"
+      ],
+      "aliases_en": [
+        "PWS"
+      ],
+      "category": "genetic-chromosomal",
+      "entity_type": "syndrome",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json",
+        "scripts/build_capabilities_evidence_v280.py"
+      ],
+      "evidence_priority": [
+        "GeneReviews",
+        "endocrine guidance"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 22,
+          "slug": "prader-willi-syndrome",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "individual-discovery"
+        }
+      ],
+      "legacy_rank": 22
+    },
+    {
+      "slug": "williams-syndrome",
+      "title_ar": "متلازمة ويليامز",
+      "title_en": "Williams syndrome",
+      "aliases_ar": [
+        "متلازمة ويليامز–بيورن"
+      ],
+      "aliases_en": [
+        "Williams-Beuren syndrome"
+      ],
+      "category": "genetic-chromosomal",
+      "entity_type": "syndrome",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json",
+        "scripts/build_capabilities_evidence_v280.py"
+      ],
+      "evidence_priority": [
+        "GeneReviews"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 23,
+          "slug": "williams-syndrome",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "relative-profile"
+        }
+      ],
+      "legacy_rank": 23
+    },
+    {
+      "slug": "cri-du-chat-syndrome",
+      "title_ar": "متلازمة صرخة القطة",
+      "title_en": "Cri-du-chat Syndrome",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "genetic-chromosomal",
+      "entity_type": "syndrome",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "GeneReviews/NCBI Bookshelf",
+        "condition-specific consensus guideline",
+        "MedlinePlus Genetics or equivalent official source"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 24,
+          "slug": "cri-du-chat-syndrome",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "individual-discovery"
+        }
+      ],
+      "legacy_rank": 24
+    },
+    {
+      "slug": "cornelia-de-lange-syndrome",
+      "title_ar": "متلازمة كورنيليا دي لانج",
+      "title_en": "Cornelia de Lange Syndrome",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "genetic-chromosomal",
+      "entity_type": "syndrome",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "GeneReviews/NCBI Bookshelf",
+        "condition-specific consensus guideline",
+        "MedlinePlus Genetics or equivalent official source"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 25,
+          "slug": "cornelia-de-lange-syndrome",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "individual-discovery"
+        }
+      ],
+      "legacy_rank": 25
+    },
+    {
+      "slug": "noonan-syndrome",
+      "title_ar": "متلازمة نونان",
+      "title_en": "Noonan Syndrome",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "genetic-chromosomal",
+      "entity_type": "syndrome",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "GeneReviews/NCBI Bookshelf",
+        "condition-specific consensus guideline",
+        "MedlinePlus Genetics or equivalent official source"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 26,
+          "slug": "noonan-syndrome",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "individual-discovery"
+        }
+      ],
+      "legacy_rank": 26
+    },
+    {
+      "slug": "turner-syndrome",
+      "title_ar": "متلازمة تيرنر",
+      "title_en": "Turner Syndrome",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "genetic-chromosomal",
+      "entity_type": "syndrome",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "GeneReviews/NCBI Bookshelf",
+        "condition-specific consensus guideline",
+        "MedlinePlus Genetics or equivalent official source"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 27,
+          "slug": "turner-syndrome",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "relative-profile"
+        }
+      ],
+      "legacy_rank": 27
+    },
+    {
+      "slug": "klinefelter-syndrome",
+      "title_ar": "متلازمة كلاينفلتر",
+      "title_en": "Klinefelter Syndrome",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "genetic-chromosomal",
+      "entity_type": "syndrome",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "GeneReviews/NCBI Bookshelf",
+        "condition-specific consensus guideline",
+        "MedlinePlus Genetics or equivalent official source"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 28,
+          "slug": "klinefelter-syndrome",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "individual-discovery"
+        }
+      ],
+      "legacy_rank": 28
+    },
+    {
+      "slug": "22q11-deletion-syndrome",
+      "title_ar": "متلازمة حذف 22q11.2",
+      "title_en": "22q11.2 Deletion Syndrome",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "genetic-chromosomal",
+      "entity_type": "syndrome",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "GeneReviews/NCBI Bookshelf",
+        "condition-specific consensus guideline",
+        "MedlinePlus Genetics or equivalent official source"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 29,
+          "slug": "22q11-deletion-syndrome",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "individual-discovery"
+        }
+      ],
+      "legacy_rank": 29
+    },
+    {
+      "slug": "smith-magenis-syndrome",
+      "title_ar": "متلازمة سميث–ماجينيس",
+      "title_en": "Smith-Magenis Syndrome",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "genetic-chromosomal",
+      "entity_type": "syndrome",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "GeneReviews/NCBI Bookshelf",
+        "condition-specific consensus guideline",
+        "MedlinePlus Genetics or equivalent official source"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 30,
+          "slug": "smith-magenis-syndrome",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "individual-discovery"
+        }
+      ],
+      "legacy_rank": 30
+    },
+    {
+      "slug": "sotos-syndrome",
+      "title_ar": "متلازمة سوتوس",
+      "title_en": "Sotos Syndrome",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "genetic-chromosomal",
+      "entity_type": "syndrome",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "GeneReviews/NCBI Bookshelf",
+        "condition-specific consensus guideline",
+        "MedlinePlus Genetics or equivalent official source"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 31,
+          "slug": "sotos-syndrome",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "individual-discovery"
+        }
+      ],
+      "legacy_rank": 31
+    },
+    {
+      "slug": "charge-syndrome",
+      "title_ar": "متلازمة CHARGE",
+      "title_en": "CHARGE Syndrome",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "genetic-chromosomal",
+      "entity_type": "syndrome",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "GeneReviews/NCBI Bookshelf",
+        "condition-specific consensus guideline",
+        "MedlinePlus Genetics or equivalent official source"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 32,
+          "slug": "charge-syndrome",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "preserved-capability-access"
+        }
+      ],
+      "legacy_rank": 32
+    },
+    {
+      "slug": "kabuki-syndrome",
+      "title_ar": "متلازمة كابوكي",
+      "title_en": "Kabuki Syndrome",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "genetic-chromosomal",
+      "entity_type": "syndrome",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "GeneReviews/NCBI Bookshelf",
+        "condition-specific consensus guideline",
+        "MedlinePlus Genetics or equivalent official source"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 33,
+          "slug": "kabuki-syndrome",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "individual-discovery"
+        }
+      ],
+      "legacy_rank": 33
+    },
+    {
+      "slug": "rubinstein-taybi-syndrome",
+      "title_ar": "متلازمة روبنشتاين–تايبي",
+      "title_en": "Rubinstein-Taybi Syndrome",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "genetic-chromosomal",
+      "entity_type": "syndrome",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "GeneReviews/NCBI Bookshelf",
+        "condition-specific consensus guideline",
+        "MedlinePlus Genetics or equivalent official source"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 34,
+          "slug": "rubinstein-taybi-syndrome",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "individual-discovery"
+        }
+      ],
+      "legacy_rank": 34
+    },
+    {
+      "slug": "smith-lemli-opitz-syndrome",
+      "title_ar": "متلازمة سميث–ليملي–أوبيتز",
+      "title_en": "Smith-Lemli-Opitz Syndrome",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "genetic-chromosomal",
+      "entity_type": "syndrome",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "GeneReviews/NCBI Bookshelf",
+        "condition-specific consensus guideline",
+        "MedlinePlus Genetics or equivalent official source"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 35,
+          "slug": "smith-lemli-opitz-syndrome",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "individual-discovery"
+        }
+      ],
+      "legacy_rank": 35
+    },
+    {
+      "slug": "joubert-syndrome",
+      "title_ar": "متلازمة جوبير",
+      "title_en": "Joubert Syndrome",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "genetic-chromosomal",
+      "entity_type": "syndrome",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "GeneReviews/NCBI Bookshelf",
+        "condition-specific consensus guideline",
+        "MedlinePlus Genetics or equivalent official source"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 36,
+          "slug": "joubert-syndrome",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "preserved-capability-access"
+        }
+      ],
+      "legacy_rank": 36
+    },
+    {
+      "slug": "tuberous-sclerosis-complex",
+      "title_ar": "التصلب الحدبي",
+      "title_en": "Tuberous Sclerosis Complex",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "genetic-chromosomal",
+      "entity_type": "condition",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "GeneReviews/NCBI Bookshelf",
+        "condition-specific consensus guideline",
+        "MedlinePlus Genetics or equivalent official source"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 37,
+          "slug": "tuberous-sclerosis-complex",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "individual-discovery"
+        }
+      ],
+      "legacy_rank": 37
+    },
+    {
+      "slug": "neurofibromatosis-type-1",
+      "title_ar": "الورام الليفي العصبي من النوع الأول",
+      "title_en": "Neurofibromatosis Type 1",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "genetic-chromosomal",
+      "entity_type": "condition",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "GeneReviews/NCBI Bookshelf",
+        "condition-specific consensus guideline",
+        "MedlinePlus Genetics or equivalent official source"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 38,
+          "slug": "neurofibromatosis-type-1",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "individual-discovery"
+        }
+      ],
+      "legacy_rank": 38
+    },
+    {
+      "slug": "phenylketonuria",
+      "title_ar": "بيلة الفينيل كيتون",
+      "title_en": "Phenylketonuria",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "metabolic-rare",
+      "entity_type": "condition",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "GeneReviews/NCBI Bookshelf",
+        "condition-specific guideline or consensus",
+        "current specialist review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 39,
+          "slug": "phenylketonuria",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "stability-first"
+        }
+      ],
+      "legacy_rank": 39
+    },
+    {
+      "slug": "congenital-hypothyroidism",
+      "title_ar": "قصور الغدة الدرقية الخلقي",
+      "title_en": "Congenital Hypothyroidism",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "metabolic-rare",
+      "entity_type": "condition",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "GeneReviews/NCBI Bookshelf",
+        "condition-specific guideline or consensus",
+        "current specialist review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 40,
+          "slug": "congenital-hypothyroidism",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "stability-first"
+        }
+      ],
+      "legacy_rank": 40
+    },
+    {
+      "slug": "mitochondrial-diseases",
+      "title_ar": "أمراض الميتوكوندريا",
+      "title_en": "Mitochondrial Diseases",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "metabolic-rare",
+      "entity_type": "disease",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "GeneReviews/NCBI Bookshelf",
+        "condition-specific guideline or consensus",
+        "current specialist review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 41,
+          "slug": "mitochondrial-diseases",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "stability-first"
+        }
+      ],
+      "legacy_rank": 41
+    },
+    {
+      "slug": "cerebral-palsy",
+      "title_ar": "الشلل الدماغي",
+      "title_en": "Cerebral palsy",
+      "aliases_ar": [],
+      "aliases_en": [
+        "CP"
+      ],
+      "category": "motor-neuromuscular",
+      "entity_type": "disability",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json",
+        "content/v211/special-needs-guides-manifest-ar.json"
+      ],
+      "evidence_priority": [
+        "CDC",
+        "WHO Rehabilitation",
+        "NICE"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 42,
+          "slug": "cerebral-palsy",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "preserved-capability-access"
+        }
+      ],
+      "legacy_rank": 42
+    },
+    {
+      "slug": "spina-bifida",
+      "title_ar": "السنسنة المشقوقة",
+      "title_en": "Spina bifida",
+      "aliases_ar": [
+        "الصلب المشقوق"
+      ],
+      "aliases_en": [],
+      "category": "motor-neuromuscular",
+      "entity_type": "condition",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json",
+        "scripts/build_capabilities_evidence_v280.py"
+      ],
+      "evidence_priority": [
+        "CDC",
+        "Spina Bifida Association clinical guidelines"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 43,
+          "slug": "spina-bifida",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "preserved-capability-access"
+        }
+      ],
+      "legacy_rank": 43
+    },
+    {
+      "slug": "hydrocephalus",
+      "title_ar": "استسقاء الدماغ",
+      "title_en": "Hydrocephalus",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "neurological-epileptic",
+      "entity_type": "condition",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO/NICE or relevant neurological guideline",
+        "ILAE/AAN or equivalent specialist guidance",
+        "systematic review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 44,
+          "slug": "hydrocephalus",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "individual-discovery"
+        }
+      ],
+      "legacy_rank": 44
+    },
+    {
+      "slug": "epilepsy",
+      "title_ar": "الصرع",
+      "title_en": "Epilepsy",
+      "aliases_ar": [
+        "اضطرابات الصرع"
+      ],
+      "aliases_en": [],
+      "category": "neurological-epileptic",
+      "entity_type": "disorder",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO",
+        "NICE NG217",
+        "ILAE"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 45,
+          "slug": "epilepsy",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "stability-first"
+        }
+      ],
+      "legacy_rank": 45
+    },
+    {
+      "slug": "traumatic-brain-injury",
+      "title_ar": "إصابة الدماغ الرضّية",
+      "title_en": "Traumatic Brain Injury",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "neurological-epileptic",
+      "entity_type": "condition",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO/NICE or relevant neurological guideline",
+        "ILAE/AAN or equivalent specialist guidance",
+        "systematic review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 46,
+          "slug": "traumatic-brain-injury",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "preserved-capability-access"
+        }
+      ],
+      "legacy_rank": 46
+    },
+    {
+      "slug": "stroke",
+      "title_ar": "السكتة الدماغية",
+      "title_en": "Stroke",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "neurological-epileptic",
+      "entity_type": "condition",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO/NICE or relevant neurological guideline",
+        "ILAE/AAN or equivalent specialist guidance",
+        "systematic review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 47,
+          "slug": "stroke",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "preserved-capability-access"
+        }
+      ],
+      "legacy_rank": 47
+    },
+    {
+      "slug": "spinal-cord-injury",
+      "title_ar": "إصابة الحبل الشوكي",
+      "title_en": "Spinal Cord Injury",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "motor-neuromuscular",
+      "entity_type": "condition",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO Rehabilitation",
+        "condition-specific guideline",
+        "systematic review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 48,
+          "slug": "spinal-cord-injury",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "preserved-capability-access"
+        }
+      ],
+      "legacy_rank": 48
+    },
+    {
+      "slug": "spinal-muscular-atrophy",
+      "title_ar": "الضمور العضلي الشوكي",
+      "title_en": "Spinal Muscular Atrophy",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "motor-neuromuscular",
+      "entity_type": "condition",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO Rehabilitation",
+        "condition-specific guideline",
+        "systematic review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 49,
+          "slug": "spinal-muscular-atrophy",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "preserved-capability-access"
+        }
+      ],
+      "legacy_rank": 49
+    },
+    {
+      "slug": "duchenne-muscular-dystrophy",
+      "title_ar": "الحثل العضلي الدوشيني",
+      "title_en": "Duchenne muscular dystrophy",
+      "aliases_ar": [
+        "ضمور العضلات الدوشيني",
+        "حثل دوشين العضلي"
+      ],
+      "aliases_en": [
+        "DMD"
+      ],
+      "category": "motor-neuromuscular",
+      "entity_type": "disease",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "CDC",
+        "GeneReviews",
+        "DMD care considerations"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 50,
+          "slug": "duchenne-muscular-dystrophy",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "preserved-capability-access"
+        }
+      ],
+      "legacy_rank": 50
+    },
+    {
+      "slug": "becker-muscular-dystrophy",
+      "title_ar": "حثل بيكر العضلي",
+      "title_en": "Becker Muscular Dystrophy",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "motor-neuromuscular",
+      "entity_type": "condition",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO Rehabilitation",
+        "condition-specific guideline",
+        "systematic review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 51,
+          "slug": "becker-muscular-dystrophy",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "preserved-capability-access"
+        }
+      ],
+      "legacy_rank": 51
+    },
+    {
+      "slug": "charcot-marie-tooth-disease",
+      "title_ar": "مرض شاركو–ماري–توث",
+      "title_en": "Charcot-Marie-Tooth Disease",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "motor-neuromuscular",
+      "entity_type": "disease",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO Rehabilitation",
+        "condition-specific guideline",
+        "systematic review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 52,
+          "slug": "charcot-marie-tooth-disease",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "preserved-capability-access"
+        }
+      ],
+      "legacy_rank": 52
+    },
+    {
+      "slug": "friedreich-ataxia",
+      "title_ar": "رنح فريدرايخ",
+      "title_en": "Friedreich Ataxia",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "neurological-epileptic",
+      "entity_type": "condition",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO/NICE or relevant neurological guideline",
+        "ILAE/AAN or equivalent specialist guidance",
+        "systematic review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 53,
+          "slug": "friedreich-ataxia",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "preserved-capability-access"
+        }
+      ],
+      "legacy_rank": 53
+    },
+    {
+      "slug": "hereditary-spastic-paraplegia",
+      "title_ar": "الشلل التشنجي الوراثي",
+      "title_en": "Hereditary Spastic Paraplegia",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "motor-neuromuscular",
+      "entity_type": "condition",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO Rehabilitation",
+        "condition-specific guideline",
+        "systematic review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 54,
+          "slug": "hereditary-spastic-paraplegia",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "preserved-capability-access"
+        }
+      ],
+      "legacy_rank": 54
+    },
+    {
+      "slug": "myasthenia-gravis",
+      "title_ar": "الوهن العضلي الوبيل",
+      "title_en": "Myasthenia Gravis",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "motor-neuromuscular",
+      "entity_type": "condition",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO Rehabilitation",
+        "condition-specific guideline",
+        "systematic review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 55,
+          "slug": "myasthenia-gravis",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "stability-first"
+        }
+      ],
+      "legacy_rank": 55
+    },
+    {
+      "slug": "dystonia",
+      "title_ar": "خلل التوتر العضلي",
+      "title_en": "Dystonia",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "neurological-epileptic",
+      "entity_type": "condition",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO/NICE or relevant neurological guideline",
+        "ILAE/AAN or equivalent specialist guidance",
+        "systematic review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 56,
+          "slug": "dystonia",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "preserved-capability-access"
+        }
+      ],
+      "legacy_rank": 56
+    },
+    {
+      "slug": "arthrogryposis",
+      "title_ar": "تيبس المفاصل الخلقي المتعدد",
+      "title_en": "Arthrogryposis Multiplex Congenita",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "motor-neuromuscular",
+      "entity_type": "condition",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO Rehabilitation",
+        "condition-specific guideline",
+        "systematic review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 57,
+          "slug": "arthrogryposis",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "preserved-capability-access"
+        }
+      ],
+      "legacy_rank": 57
+    },
+    {
+      "slug": "osteogenesis-imperfecta",
+      "title_ar": "تكوّن العظم الناقص",
+      "title_en": "Osteogenesis Imperfecta",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "motor-neuromuscular",
+      "entity_type": "condition",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO Rehabilitation",
+        "condition-specific guideline",
+        "systematic review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 58,
+          "slug": "osteogenesis-imperfecta",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "preserved-capability-access"
+        }
+      ],
+      "legacy_rank": 58
+    },
+    {
+      "slug": "achondroplasia",
+      "title_ar": "الأكوندروبلازيا",
+      "title_en": "Achondroplasia",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "motor-neuromuscular",
+      "entity_type": "condition",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO Rehabilitation",
+        "condition-specific guideline",
+        "systematic review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 59,
+          "slug": "achondroplasia",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "preserved-capability-access"
+        }
+      ],
+      "legacy_rank": 59
+    },
+    {
+      "slug": "limb-difference-amputation",
+      "title_ar": "اختلاف الأطراف أو فقدان أحدها",
+      "title_en": "Limb Difference or Amputation",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "motor-neuromuscular",
+      "entity_type": "condition",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO Rehabilitation",
+        "condition-specific guideline",
+        "systematic review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 60,
+          "slug": "limb-difference-amputation",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "preserved-capability-access"
+        }
+      ],
+      "legacy_rank": 60
+    },
+    {
+      "slug": "severe-burns-contractures",
+      "title_ar": "آثار الحروق الشديدة والتقلصات",
+      "title_en": "Severe Burn Sequelae and Contractures",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "motor-neuromuscular",
+      "entity_type": "condition",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO Rehabilitation",
+        "condition-specific guideline",
+        "systematic review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 61,
+          "slug": "severe-burns-contractures",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "preserved-capability-access"
+        }
+      ],
+      "legacy_rank": 61
+    },
+    {
+      "slug": "blindness",
+      "title_ar": "العمى",
+      "title_en": "Blindness",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "vision-blindness",
+      "entity_type": "disability",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO vision guidance",
+        "NEI or equivalent official source",
+        "professional ophthalmology/low-vision guidance"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 62,
+          "slug": "blindness",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "preserved-capability-access"
+        }
+      ],
+      "legacy_rank": 62
+    },
+    {
+      "slug": "low-vision",
+      "title_ar": "ضعف البصر",
+      "title_en": "Low Vision",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "vision-blindness",
+      "entity_type": "disability",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO vision guidance",
+        "NEI or equivalent official source",
+        "professional ophthalmology/low-vision guidance"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 63,
+          "slug": "low-vision",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "preserved-capability-access"
+        }
+      ],
+      "legacy_rank": 63
+    },
+    {
+      "slug": "cerebral-visual-impairment",
+      "title_ar": "ضعف الرؤية الدماغي",
+      "title_en": "Cerebral/Cortical Visual Impairment",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "vision-blindness",
+      "entity_type": "condition",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO vision guidance",
+        "NEI or equivalent official source",
+        "professional ophthalmology/low-vision guidance"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 64,
+          "slug": "cerebral-visual-impairment",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "preserved-capability-access"
+        }
+      ],
+      "legacy_rank": 64
+    },
+    {
+      "slug": "deafness",
+      "title_ar": "الصمم",
+      "title_en": "Deafness",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "hearing-deafness",
+      "entity_type": "disability",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO hearing guidance",
+        "NIDCD or equivalent official source",
+        "professional audiology guidance"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 65,
+          "slug": "deafness",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "preserved-capability-access"
+        }
+      ],
+      "legacy_rank": 65
+    },
+    {
+      "slug": "hearing-loss",
+      "title_ar": "فقدان السمع وضعفه",
+      "title_en": "Hearing Loss",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "hearing-deafness",
+      "entity_type": "disability",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO hearing guidance",
+        "NIDCD or equivalent official source",
+        "professional audiology guidance"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 66,
+          "slug": "hearing-loss",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "preserved-capability-access"
+        }
+      ],
+      "legacy_rank": 66
+    },
+    {
+      "slug": "deafblindness",
+      "title_ar": "الصمم الكففي",
+      "title_en": "Deafblindness",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "multiple-complex",
+      "entity_type": "disability",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO ICF",
+        "condition-specific multidisciplinary guidance",
+        "assistive/accessibility evidence"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 67,
+          "slug": "deafblindness",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "preserved-capability-access"
+        }
+      ],
+      "legacy_rank": 67
+    },
+    {
+      "slug": "usher-syndrome",
+      "title_ar": "متلازمة أشر",
+      "title_en": "Usher Syndrome",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "multiple-complex",
+      "entity_type": "syndrome",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO ICF",
+        "condition-specific multidisciplinary guidance",
+        "assistive/accessibility evidence"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 68,
+          "slug": "usher-syndrome",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "preserved-capability-access"
+        }
+      ],
+      "legacy_rank": 68
+    },
+    {
+      "slug": "oculocutaneous-albinism",
+      "title_ar": "المهق العيني الجلدي المصحوب بضعف البصر",
+      "title_en": "Oculocutaneous Albinism with Visual Impairment",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "vision-blindness",
+      "entity_type": "condition",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO vision guidance",
+        "NEI or equivalent official source",
+        "professional ophthalmology/low-vision guidance"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 69,
+          "slug": "oculocutaneous-albinism",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "preserved-capability-access"
+        }
+      ],
+      "legacy_rank": 69
+    },
+    {
+      "slug": "retinitis-pigmentosa",
+      "title_ar": "التهاب الشبكية الصباغي",
+      "title_en": "Retinitis Pigmentosa",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "vision-blindness",
+      "entity_type": "condition",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO vision guidance",
+        "NEI or equivalent official source",
+        "professional ophthalmology/low-vision guidance"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 70,
+          "slug": "retinitis-pigmentosa",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "preserved-capability-access"
+        }
+      ],
+      "legacy_rank": 70
+    },
+    {
+      "slug": "optic-nerve-hypoplasia",
+      "title_ar": "نقص تنسج العصب البصري",
+      "title_en": "Optic Nerve Hypoplasia",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "vision-blindness",
+      "entity_type": "condition",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO vision guidance",
+        "NEI or equivalent official source",
+        "professional ophthalmology/low-vision guidance"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 71,
+          "slug": "optic-nerve-hypoplasia",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "preserved-capability-access"
+        }
+      ],
+      "legacy_rank": 71
+    },
+    {
+      "slug": "aphasia",
+      "title_ar": "الحُبسة الكلامية",
+      "title_en": "Aphasia",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "language-communication",
+      "entity_type": "condition",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO ICD-11",
+        "ASHA/RCSLT or equivalent professional guidance",
+        "systematic review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 72,
+          "slug": "aphasia",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "preserved-capability-access"
+        }
+      ],
+      "legacy_rank": 72
+    },
+    {
+      "slug": "acquired-apraxia-of-speech",
+      "title_ar": "تعذر الأداء النطقي المكتسب",
+      "title_en": "Acquired Apraxia of Speech",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "language-communication",
+      "entity_type": "disease",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO ICD-11",
+        "ASHA/RCSLT or equivalent professional guidance",
+        "systematic review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 73,
+          "slug": "acquired-apraxia-of-speech",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "preserved-capability-access"
+        }
+      ],
+      "legacy_rank": 73
+    },
+    {
+      "slug": "dysarthria",
+      "title_ar": "عسر التلفظ",
+      "title_en": "Dysarthria",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "language-communication",
+      "entity_type": "condition",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO ICD-11",
+        "ASHA/RCSLT or equivalent professional guidance",
+        "systematic review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 74,
+          "slug": "dysarthria",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "preserved-capability-access"
+        }
+      ],
+      "legacy_rank": 74
+    },
+    {
+      "slug": "moebius-syndrome",
+      "title_ar": "متلازمة موبيوس",
+      "title_en": "Moebius Syndrome",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "language-communication",
+      "entity_type": "syndrome",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO ICD-11",
+        "ASHA/RCSLT or equivalent professional guidance",
+        "systematic review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 75,
+          "slug": "moebius-syndrome",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "preserved-capability-access"
+        }
+      ],
+      "legacy_rank": 75
+    },
+    {
+      "slug": "cleft-lip-palate-communication",
+      "title_ar": "شق الشفة والحنك المصحوب باحتياجات نطق أو سمع",
+      "title_en": "Cleft Lip and Palate with Communication or Hearing Needs",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "language-communication",
+      "entity_type": "condition",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO ICD-11",
+        "ASHA/RCSLT or equivalent professional guidance",
+        "systematic review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 76,
+          "slug": "cleft-lip-palate-communication",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "preserved-capability-access"
+        }
+      ],
+      "legacy_rank": 76
+    },
+    {
+      "slug": "cystic-fibrosis",
+      "title_ar": "التليف الكيسي",
+      "title_en": "Cystic Fibrosis",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "chronic-acquired",
+      "entity_type": "condition",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "relevant national/international guideline",
+        "systematic review",
+        "official health authority"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 77,
+          "slug": "cystic-fibrosis",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "stability-first"
+        }
+      ],
+      "legacy_rank": 77
+    },
+    {
+      "slug": "sickle-cell-disease",
+      "title_ar": "فقر الدم المنجلي",
+      "title_en": "Sickle Cell Disease",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "chronic-acquired",
+      "entity_type": "disease",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "relevant national/international guideline",
+        "systematic review",
+        "official health authority"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 78,
+          "slug": "sickle-cell-disease",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "stability-first"
+        }
+      ],
+      "legacy_rank": 78
+    },
+    {
+      "slug": "hemophilia",
+      "title_ar": "الهيموفيليا",
+      "title_en": "Hemophilia",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "chronic-acquired",
+      "entity_type": "condition",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "relevant national/international guideline",
+        "systematic review",
+        "official health authority"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 79,
+          "slug": "hemophilia",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "stability-first"
+        }
+      ],
+      "legacy_rank": 79
+    },
+    {
+      "slug": "type-1-diabetes",
+      "title_ar": "السكري من النوع الأول",
+      "title_en": "Type 1 Diabetes",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "chronic-acquired",
+      "entity_type": "condition",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "relevant national/international guideline",
+        "systematic review",
+        "official health authority"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 80,
+          "slug": "type-1-diabetes",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "stability-first"
+        }
+      ],
+      "legacy_rank": 80
+    },
+    {
+      "slug": "chronic-kidney-disease",
+      "title_ar": "مرض الكلى المزمن",
+      "title_en": "Chronic Kidney Disease",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "chronic-acquired",
+      "entity_type": "disease",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "relevant national/international guideline",
+        "systematic review",
+        "official health authority"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 81,
+          "slug": "chronic-kidney-disease",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "stability-first"
+        }
+      ],
+      "legacy_rank": 81
+    },
+    {
+      "slug": "congenital-heart-disease",
+      "title_ar": "أمراض القلب الخلقية",
+      "title_en": "Congenital Heart Disease",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "chronic-acquired",
+      "entity_type": "disease",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "relevant national/international guideline",
+        "systematic review",
+        "official health authority"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 82,
+          "slug": "congenital-heart-disease",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "stability-first"
+        }
+      ],
+      "legacy_rank": 82
+    },
+    {
+      "slug": "juvenile-idiopathic-arthritis",
+      "title_ar": "التهاب المفاصل اليفعي مجهول السبب",
+      "title_en": "Juvenile Idiopathic Arthritis",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "chronic-acquired",
+      "entity_type": "condition",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "relevant national/international guideline",
+        "systematic review",
+        "official health authority"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 83,
+          "slug": "juvenile-idiopathic-arthritis",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "stability-first"
+        }
+      ],
+      "legacy_rank": 83
+    },
+    {
+      "slug": "systemic-lupus-erythematosus",
+      "title_ar": "الذئبة الحمامية الجهازية",
+      "title_en": "Systemic Lupus Erythematosus",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "chronic-acquired",
+      "entity_type": "condition",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "relevant national/international guideline",
+        "systematic review",
+        "official health authority"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 84,
+          "slug": "systemic-lupus-erythematosus",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "stability-first"
+        }
+      ],
+      "legacy_rank": 84
+    },
+    {
+      "slug": "inflammatory-bowel-disease",
+      "title_ar": "أمراض الأمعاء الالتهابية: داء كرون والتهاب القولون التقرحي",
+      "title_en": "Inflammatory Bowel Disease: Crohn Disease and Ulcerative Colitis",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "chronic-acquired",
+      "entity_type": "disease",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "relevant national/international guideline",
+        "systematic review",
+        "official health authority"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 85,
+          "slug": "inflammatory-bowel-disease",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "stability-first"
+        }
+      ],
+      "legacy_rank": 85
+    },
+    {
+      "slug": "severe-asthma",
+      "title_ar": "الربو الشديد",
+      "title_en": "Severe Asthma",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "chronic-acquired",
+      "entity_type": "condition",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "relevant national/international guideline",
+        "systematic review",
+        "official health authority"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 86,
+          "slug": "severe-asthma",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "stability-first"
+        }
+      ],
+      "legacy_rank": 86
+    },
+    {
+      "slug": "severe-food-allergy",
+      "title_ar": "الحساسية الغذائية الشديدة",
+      "title_en": "Severe Food Allergy",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "chronic-acquired",
+      "entity_type": "condition",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "relevant national/international guideline",
+        "systematic review",
+        "official health authority"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 87,
+          "slug": "severe-food-allergy",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "stability-first"
+        }
+      ],
+      "legacy_rank": 87
+    },
+    {
+      "slug": "childhood-cancer-late-effects",
+      "title_ar": "الآثار المتأخرة لعلاج السرطان في الطفولة",
+      "title_en": "Late Effects of Childhood Cancer Treatment",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "chronic-acquired",
+      "entity_type": "condition",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "relevant national/international guideline",
+        "systematic review",
+        "official health authority"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 88,
+          "slug": "childhood-cancer-late-effects",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "preserved-capability-access"
+        }
+      ],
+      "legacy_rank": 88
+    },
+    {
+      "slug": "me-cfs",
+      "title_ar": "التهاب الدماغ والنخاع العضلي/متلازمة التعب المزمن",
+      "title_en": "ME/CFS",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "chronic-acquired",
+      "entity_type": "syndrome",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "relevant national/international guideline",
+        "systematic review",
+        "official health authority"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 89,
+          "slug": "me-cfs",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "stability-first"
+        }
+      ],
+      "legacy_rank": 89
+    },
+    {
+      "slug": "long-covid",
+      "title_ar": "كوفيد طويل الأمد",
+      "title_en": "Long COVID",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "chronic-acquired",
+      "entity_type": "condition",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "relevant national/international guideline",
+        "systematic review",
+        "official health authority"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 90,
+          "slug": "long-covid",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "stability-first"
+        }
+      ],
+      "legacy_rank": 90
+    },
+    {
+      "slug": "multiple-sclerosis",
+      "title_ar": "التصلب المتعدد",
+      "title_en": "Multiple Sclerosis",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "neurological-epileptic",
+      "entity_type": "condition",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO/NICE or relevant neurological guideline",
+        "ILAE/AAN or equivalent specialist guidance",
+        "systematic review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 91,
+          "slug": "multiple-sclerosis",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "preserved-capability-access"
+        }
+      ],
+      "legacy_rank": 91
+    },
+    {
+      "slug": "parkinson-disease",
+      "title_ar": "مرض باركنسون",
+      "title_en": "Parkinson Disease",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "neurological-epileptic",
+      "entity_type": "disease",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO/NICE or relevant neurological guideline",
+        "ILAE/AAN or equivalent specialist guidance",
+        "systematic review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 92,
+          "slug": "parkinson-disease",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "preserved-capability-access"
+        }
+      ],
+      "legacy_rank": 92
+    },
+    {
+      "slug": "huntington-disease",
+      "title_ar": "مرض هنتنغتون",
+      "title_en": "Huntington Disease",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "neurological-epileptic",
+      "entity_type": "disease",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO/NICE or relevant neurological guideline",
+        "ILAE/AAN or equivalent specialist guidance",
+        "systematic review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 93,
+          "slug": "huntington-disease",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "stability-first"
+        }
+      ],
+      "legacy_rank": 93
+    },
+    {
+      "slug": "amyotrophic-lateral-sclerosis",
+      "title_ar": "التصلب الجانبي الضموري",
+      "title_en": "Amyotrophic Lateral Sclerosis",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "neurological-epileptic",
+      "entity_type": "condition",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO/NICE or relevant neurological guideline",
+        "ILAE/AAN or equivalent specialist guidance",
+        "systematic review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 94,
+          "slug": "amyotrophic-lateral-sclerosis",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "preserved-capability-access"
+        }
+      ],
+      "legacy_rank": 94
+    },
+    {
+      "slug": "ehlers-danlos-syndromes",
+      "title_ar": "متلازمات إهلرز–دانلوس",
+      "title_en": "Ehlers-Danlos Syndromes",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "chronic-acquired",
+      "entity_type": "syndrome",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "relevant national/international guideline",
+        "systematic review",
+        "official health authority"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 95,
+          "slug": "ehlers-danlos-syndromes",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "stability-first"
+        }
+      ],
+      "legacy_rank": 95
+    },
+    {
+      "slug": "marfan-syndrome",
+      "title_ar": "متلازمة مارفان",
+      "title_en": "Marfan Syndrome",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "chronic-acquired",
+      "entity_type": "syndrome",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "relevant national/international guideline",
+        "systematic review",
+        "official health authority"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 96,
+          "slug": "marfan-syndrome",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "preserved-capability-access"
+        }
+      ],
+      "legacy_rank": 96
+    },
+    {
+      "slug": "severe-scoliosis",
+      "title_ar": "الجنف الشديد",
+      "title_en": "Severe Scoliosis",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "chronic-acquired",
+      "entity_type": "condition",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "relevant national/international guideline",
+        "systematic review",
+        "official health authority"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 97,
+          "slug": "severe-scoliosis",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "preserved-capability-access"
+        }
+      ],
+      "legacy_rank": 97
+    },
+    {
+      "slug": "chronic-pain",
+      "title_ar": "الألم المزمن",
+      "title_en": "Chronic Pain",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "chronic-acquired",
+      "entity_type": "condition",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "relevant national/international guideline",
+        "systematic review",
+        "official health authority"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 98,
+          "slug": "chronic-pain",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "stability-first"
+        }
+      ],
+      "legacy_rank": 98
+    },
+    {
+      "slug": "schizophrenia-functional-support",
+      "title_ar": "الفصام عند وجود احتياجات دعم وظيفي",
+      "title_en": "Schizophrenia with Functional Support Needs",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "mental-behavioral-functional",
+      "entity_type": "condition",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO ICD-11",
+        "NICE/APA or equivalent guideline",
+        "systematic review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 99,
+          "slug": "schizophrenia-functional-support",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "stability-first"
+        }
+      ],
+      "legacy_rank": 99
+    },
+    {
+      "slug": "bipolar-disorder-functional-support",
+      "title_ar": "الاضطراب ثنائي القطب عند وجود احتياجات دعم وظيفي",
+      "title_en": "Bipolar Disorder with Functional Support Needs",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "mental-behavioral-functional",
+      "entity_type": "disorder",
+      "legacy_provenance": [
+        "content/v280/capabilities-100-ar.json"
+      ],
+      "evidence_priority": [
+        "WHO ICD-11",
+        "NICE/APA or equivalent guideline",
+        "systematic review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v280",
+          "rank": 100,
+          "slug": "bipolar-disorder-functional-support",
+          "source_path": "content/v280/capabilities-100-ar.json",
+          "evidence_route": "stability-first"
+        }
+      ],
+      "legacy_rank": 100
+    },
+    {
+      "slug": "phelan-mcdermid-syndrome",
+      "title_ar": "متلازمة فيلان–ماكديرميد",
+      "title_en": "Phelan-McDermid syndrome",
+      "aliases_ar": [
+        "متلازمة حذف 22q13"
+      ],
+      "aliases_en": [
+        "22q13 deletion syndrome",
+        "SHANK3-related disorder"
+      ],
+      "category": "genetic-chromosomal",
+      "entity_type": "syndrome",
+      "legacy_provenance": [
+        "content/v281/conditions/chromatin-syndromic.jsonl"
+      ],
+      "evidence_priority": [
+        "GeneReviews",
+        "NCBI Bookshelf",
+        "peer-reviewed consensus"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v281",
+          "rank": 101,
+          "slug": "phelan-mcdermid-syndrome",
+          "source_path": "content/v281/conditions/chromatin-syndromic.jsonl",
+          "legacy_reference_url": "https://www.ncbi.nlm.nih.gov/books/?term=Phelan-McDermid+syndrome"
+        }
+      ],
+      "legacy_rank": 101
+    },
+    {
+      "slug": "pitt-hopkins-syndrome",
+      "title_ar": "متلازمة بيت–هوبكنز",
+      "title_en": "Pitt-Hopkins syndrome",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "genetic-chromosomal",
+      "entity_type": "syndrome",
+      "legacy_provenance": [
+        "content/v281/conditions/chromatin-syndromic.jsonl"
+      ],
+      "evidence_priority": [
+        "GeneReviews/NCBI Bookshelf",
+        "condition-specific consensus guideline",
+        "MedlinePlus Genetics or equivalent official source"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v281",
+          "rank": 102,
+          "slug": "pitt-hopkins-syndrome",
+          "source_path": "content/v281/conditions/chromatin-syndromic.jsonl",
+          "legacy_reference_url": "https://www.ncbi.nlm.nih.gov/books/?term=Pitt-Hopkins+syndrome"
+        }
+      ],
+      "legacy_rank": 102
+    },
+    {
+      "slug": "mowat-wilson-syndrome",
+      "title_ar": "متلازمة موات–ويلسون",
+      "title_en": "Mowat-Wilson syndrome",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "genetic-chromosomal",
+      "entity_type": "syndrome",
+      "legacy_provenance": [
+        "content/v281/conditions/chromatin-syndromic.jsonl"
+      ],
+      "evidence_priority": [
+        "GeneReviews/NCBI Bookshelf",
+        "condition-specific consensus guideline",
+        "MedlinePlus Genetics or equivalent official source"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v281",
+          "rank": 103,
+          "slug": "mowat-wilson-syndrome",
+          "source_path": "content/v281/conditions/chromatin-syndromic.jsonl",
+          "legacy_reference_url": "https://www.ncbi.nlm.nih.gov/books/?term=Mowat-Wilson+syndrome"
+        }
+      ],
+      "legacy_rank": 103
+    },
+    {
+      "slug": "satb2-associated-syndrome",
+      "title_ar": "المتلازمة المرتبطة بجين SATB2",
+      "title_en": "SATB2-associated syndrome",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "genetic-chromosomal",
+      "entity_type": "syndrome",
+      "legacy_provenance": [
+        "content/v281/conditions/chromatin-syndromic.jsonl"
+      ],
+      "evidence_priority": [
+        "GeneReviews/NCBI Bookshelf",
+        "condition-specific consensus guideline",
+        "MedlinePlus Genetics or equivalent official source"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v281",
+          "rank": 104,
+          "slug": "satb2-associated-syndrome",
+          "source_path": "content/v281/conditions/chromatin-syndromic.jsonl",
+          "legacy_reference_url": "https://www.ncbi.nlm.nih.gov/books/?term=SATB2-associated+syndrome"
+        }
+      ],
+      "legacy_rank": 104
+    },
+    {
+      "slug": "kleefstra-syndrome",
+      "title_ar": "متلازمة كليفسترا",
+      "title_en": "Kleefstra syndrome",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "genetic-chromosomal",
+      "entity_type": "syndrome",
+      "legacy_provenance": [
+        "content/v281/conditions/chromatin-syndromic.jsonl"
+      ],
+      "evidence_priority": [
+        "GeneReviews/NCBI Bookshelf",
+        "condition-specific consensus guideline",
+        "MedlinePlus Genetics or equivalent official source"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v281",
+          "rank": 105,
+          "slug": "kleefstra-syndrome",
+          "source_path": "content/v281/conditions/chromatin-syndromic.jsonl",
+          "legacy_reference_url": "https://www.ncbi.nlm.nih.gov/books/?term=Kleefstra+syndrome"
+        }
+      ],
+      "legacy_rank": 105
+    },
+    {
+      "slug": "coffin-siris-syndrome",
+      "title_ar": "متلازمة كوفن–سيريس",
+      "title_en": "Coffin-Siris syndrome",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "genetic-chromosomal",
+      "entity_type": "syndrome",
+      "legacy_provenance": [
+        "content/v281/conditions/chromatin-syndromic.jsonl"
+      ],
+      "evidence_priority": [
+        "GeneReviews/NCBI Bookshelf",
+        "condition-specific consensus guideline",
+        "MedlinePlus Genetics or equivalent official source"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v281",
+          "rank": 106,
+          "slug": "coffin-siris-syndrome",
+          "source_path": "content/v281/conditions/chromatin-syndromic.jsonl",
+          "legacy_reference_url": "https://www.ncbi.nlm.nih.gov/books/?term=Coffin-Siris+syndrome"
+        }
+      ],
+      "legacy_rank": 106
+    },
+    {
+      "slug": "coffin-lowry-syndrome",
+      "title_ar": "متلازمة كوفن–لوري",
+      "title_en": "Coffin-Lowry syndrome",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "genetic-chromosomal",
+      "entity_type": "syndrome",
+      "legacy_provenance": [
+        "content/v281/conditions/chromatin-syndromic.jsonl"
+      ],
+      "evidence_priority": [
+        "GeneReviews/NCBI Bookshelf",
+        "condition-specific consensus guideline",
+        "MedlinePlus Genetics or equivalent official source"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v281",
+          "rank": 107,
+          "slug": "coffin-lowry-syndrome",
+          "source_path": "content/v281/conditions/chromatin-syndromic.jsonl",
+          "legacy_reference_url": "https://www.ncbi.nlm.nih.gov/books/?term=Coffin-Lowry+syndrome"
+        }
+      ],
+      "legacy_rank": 107
+    },
+    {
+      "slug": "nicolaides-baraitser-syndrome",
+      "title_ar": "متلازمة نيكولايدس–بارايتسر",
+      "title_en": "Nicolaides-Baraitser syndrome",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "genetic-chromosomal",
+      "entity_type": "syndrome",
+      "legacy_provenance": [
+        "content/v281/conditions/chromatin-syndromic.jsonl"
+      ],
+      "evidence_priority": [
+        "GeneReviews/NCBI Bookshelf",
+        "condition-specific consensus guideline",
+        "MedlinePlus Genetics or equivalent official source"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v281",
+          "rank": 108,
+          "slug": "nicolaides-baraitser-syndrome",
+          "source_path": "content/v281/conditions/chromatin-syndromic.jsonl",
+          "legacy_reference_url": "https://www.ncbi.nlm.nih.gov/books/?term=Nicolaides-Baraitser+syndrome"
+        }
+      ],
+      "legacy_rank": 108
+    },
+    {
+      "slug": "wiedemann-steiner-syndrome",
+      "title_ar": "متلازمة فيدمان–شتاينر",
+      "title_en": "Wiedemann-Steiner syndrome",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "genetic-chromosomal",
+      "entity_type": "syndrome",
+      "legacy_provenance": [
+        "content/v281/conditions/chromatin-syndromic.jsonl"
+      ],
+      "evidence_priority": [
+        "GeneReviews/NCBI Bookshelf",
+        "condition-specific consensus guideline",
+        "MedlinePlus Genetics or equivalent official source"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v281",
+          "rank": 109,
+          "slug": "wiedemann-steiner-syndrome",
+          "source_path": "content/v281/conditions/chromatin-syndromic.jsonl",
+          "legacy_reference_url": "https://www.ncbi.nlm.nih.gov/books/?term=Wiedemann-Steiner+syndrome"
+        }
+      ],
+      "legacy_rank": 109
+    },
+    {
+      "slug": "adnp-syndrome",
+      "title_ar": "متلازمة ADNP (هلسـمورتل–فان دير آ)",
+      "title_en": "ADNP syndrome",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "genetic-chromosomal",
+      "entity_type": "syndrome",
+      "legacy_provenance": [
+        "content/v281/conditions/chromatin-syndromic.jsonl"
+      ],
+      "evidence_priority": [
+        "GeneReviews/NCBI Bookshelf",
+        "condition-specific consensus guideline",
+        "MedlinePlus Genetics or equivalent official source"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v281",
+          "rank": 110,
+          "slug": "adnp-syndrome",
+          "source_path": "content/v281/conditions/chromatin-syndromic.jsonl",
+          "legacy_reference_url": "https://www.ncbi.nlm.nih.gov/books/?term=ADNP+syndrome"
+        }
+      ],
+      "legacy_rank": 110
+    },
+    {
+      "slug": "dyrk1a-syndrome",
+      "title_ar": "متلازمة DYRK1A",
+      "title_en": "DYRK1A syndrome",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "genetic-chromosomal",
+      "entity_type": "syndrome",
+      "legacy_provenance": [
+        "content/v281/conditions/chromatin-syndromic.jsonl"
+      ],
+      "evidence_priority": [
+        "GeneReviews/NCBI Bookshelf",
+        "condition-specific consensus guideline",
+        "MedlinePlus Genetics or equivalent official source"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v281",
+          "rank": 111,
+          "slug": "dyrk1a-syndrome",
+          "source_path": "content/v281/conditions/chromatin-syndromic.jsonl",
+          "legacy_reference_url": "https://www.ncbi.nlm.nih.gov/books/?term=DYRK1A+syndrome"
+        }
+      ],
+      "legacy_rank": 111
+    },
+    {
+      "slug": "med13l-syndrome",
+      "title_ar": "المتلازمة المرتبطة بجين MED13L",
+      "title_en": "MED13L syndrome",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "genetic-chromosomal",
+      "entity_type": "syndrome",
+      "legacy_provenance": [
+        "content/v281/conditions/chromatin-syndromic.jsonl"
+      ],
+      "evidence_priority": [
+        "GeneReviews/NCBI Bookshelf",
+        "condition-specific consensus guideline",
+        "MedlinePlus Genetics or equivalent official source"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v281",
+          "rank": 112,
+          "slug": "med13l-syndrome",
+          "source_path": "content/v281/conditions/chromatin-syndromic.jsonl",
+          "legacy_reference_url": "https://www.ncbi.nlm.nih.gov/books/?term=MED13L+syndrome"
+        }
+      ],
+      "legacy_rank": 112
+    },
+    {
+      "slug": "kbg-syndrome",
+      "title_ar": "متلازمة KBG",
+      "title_en": "KBG syndrome",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "genetic-chromosomal",
+      "entity_type": "syndrome",
+      "legacy_provenance": [
+        "content/v281/conditions/chromatin-syndromic.jsonl"
+      ],
+      "evidence_priority": [
+        "GeneReviews/NCBI Bookshelf",
+        "condition-specific consensus guideline",
+        "MedlinePlus Genetics or equivalent official source"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v281",
+          "rank": 113,
+          "slug": "kbg-syndrome",
+          "source_path": "content/v281/conditions/chromatin-syndromic.jsonl",
+          "legacy_reference_url": "https://www.ncbi.nlm.nih.gov/books/?term=KBG+syndrome"
+        }
+      ],
+      "legacy_rank": 113
+    },
+    {
+      "slug": "koolen-de-vries-syndrome",
+      "title_ar": "متلازمة كولن–دي فريس",
+      "title_en": "Koolen-de Vries syndrome",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "genetic-chromosomal",
+      "entity_type": "syndrome",
+      "legacy_provenance": [
+        "content/v281/conditions/chromatin-syndromic.jsonl"
+      ],
+      "evidence_priority": [
+        "GeneReviews/NCBI Bookshelf",
+        "condition-specific consensus guideline",
+        "MedlinePlus Genetics or equivalent official source"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v281",
+          "rank": 114,
+          "slug": "koolen-de-vries-syndrome",
+          "source_path": "content/v281/conditions/chromatin-syndromic.jsonl",
+          "legacy_reference_url": "https://www.ncbi.nlm.nih.gov/books/?term=Koolen-de+Vries+syndrome"
+        }
+      ],
+      "legacy_rank": 114
+    },
+    {
+      "slug": "christianson-syndrome",
+      "title_ar": "متلازمة كريستيانسون",
+      "title_en": "Christianson syndrome",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "genetic-chromosomal",
+      "entity_type": "syndrome",
+      "legacy_provenance": [
+        "content/v281/conditions/chromatin-syndromic.jsonl"
+      ],
+      "evidence_priority": [
+        "GeneReviews/NCBI Bookshelf",
+        "condition-specific consensus guideline",
+        "MedlinePlus Genetics or equivalent official source"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v281",
+          "rank": 115,
+          "slug": "christianson-syndrome",
+          "source_path": "content/v281/conditions/chromatin-syndromic.jsonl",
+          "legacy_reference_url": "https://www.ncbi.nlm.nih.gov/books/?term=Christianson+syndrome"
+        }
+      ],
+      "legacy_rank": 115
+    },
+    {
+      "slug": "foxg1-syndrome",
+      "title_ar": "متلازمة FOXG1",
+      "title_en": "FOXG1 syndrome",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "genetic-chromosomal",
+      "entity_type": "syndrome",
+      "legacy_provenance": [
+        "content/v281/conditions/chromatin-syndromic.jsonl"
+      ],
+      "evidence_priority": [
+        "GeneReviews/NCBI Bookshelf",
+        "condition-specific consensus guideline",
+        "MedlinePlus Genetics or equivalent official source"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v281",
+          "rank": 116,
+          "slug": "foxg1-syndrome",
+          "source_path": "content/v281/conditions/chromatin-syndromic.jsonl",
+          "legacy_reference_url": "https://www.ncbi.nlm.nih.gov/books/?term=FOXG1+syndrome"
+        }
+      ],
+      "legacy_rank": 116
+    },
+    {
+      "slug": "ddx3x-related-neurodevelopmental-disorder",
+      "title_ar": "الاضطراب النمائي العصبي المرتبط بجين DDX3X",
+      "title_en": "DDX3X-related neurodevelopmental disorder",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "genetic-chromosomal",
+      "entity_type": "disorder",
+      "legacy_provenance": [
+        "content/v281/conditions/chromatin-syndromic.jsonl"
+      ],
+      "evidence_priority": [
+        "GeneReviews/NCBI Bookshelf",
+        "condition-specific consensus guideline",
+        "MedlinePlus Genetics or equivalent official source"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v281",
+          "rank": 117,
+          "slug": "ddx3x-related-neurodevelopmental-disorder",
+          "source_path": "content/v281/conditions/chromatin-syndromic.jsonl",
+          "legacy_reference_url": "https://www.ncbi.nlm.nih.gov/books/?term=DDX3X-related+neurodevelopmental+disorder"
+        }
+      ],
+      "legacy_rank": 117
+    },
+    {
+      "slug": "setd5-related-neurodevelopmental-disorder",
+      "title_ar": "الاضطراب النمائي العصبي المرتبط بجين SETD5",
+      "title_en": "SETD5-related neurodevelopmental disorder",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "genetic-chromosomal",
+      "entity_type": "disorder",
+      "legacy_provenance": [
+        "content/v281/conditions/chromatin-syndromic.jsonl"
+      ],
+      "evidence_priority": [
+        "GeneReviews/NCBI Bookshelf",
+        "condition-specific consensus guideline",
+        "MedlinePlus Genetics or equivalent official source"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v281",
+          "rank": 118,
+          "slug": "setd5-related-neurodevelopmental-disorder",
+          "source_path": "content/v281/conditions/chromatin-syndromic.jsonl",
+          "legacy_reference_url": "https://www.ncbi.nlm.nih.gov/books/?term=SETD5-related+neurodevelopmental+disorder"
+        }
+      ],
+      "legacy_rank": 118
+    },
+    {
+      "slug": "white-sutton-syndrome",
+      "title_ar": "متلازمة وايت–ساتون",
+      "title_en": "White-Sutton syndrome",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "genetic-chromosomal",
+      "entity_type": "syndrome",
+      "legacy_provenance": [
+        "content/v281/conditions/chromatin-syndromic.jsonl"
+      ],
+      "evidence_priority": [
+        "GeneReviews/NCBI Bookshelf",
+        "condition-specific consensus guideline",
+        "MedlinePlus Genetics or equivalent official source"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v281",
+          "rank": 119,
+          "slug": "white-sutton-syndrome",
+          "source_path": "content/v281/conditions/chromatin-syndromic.jsonl",
+          "legacy_reference_url": "https://www.ncbi.nlm.nih.gov/books/?term=White-Sutton+syndrome"
+        }
+      ],
+      "legacy_rank": 119
+    },
+    {
+      "slug": "xia-gibbs-syndrome",
+      "title_ar": "متلازمة شيا–غيبس",
+      "title_en": "Xia-Gibbs syndrome",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "genetic-chromosomal",
+      "entity_type": "syndrome",
+      "legacy_provenance": [
+        "content/v281/conditions/chromatin-syndromic.jsonl"
+      ],
+      "evidence_priority": [
+        "GeneReviews/NCBI Bookshelf",
+        "condition-specific consensus guideline",
+        "MedlinePlus Genetics or equivalent official source"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v281",
+          "rank": 120,
+          "slug": "xia-gibbs-syndrome",
+          "source_path": "content/v281/conditions/chromatin-syndromic.jsonl",
+          "legacy_reference_url": "https://www.ncbi.nlm.nih.gov/books/?term=Xia-Gibbs+syndrome"
+        }
+      ],
+      "legacy_rank": 120
+    },
+    {
+      "slug": "bainbridge-ropers-syndrome",
+      "title_ar": "متلازمة بينبريدج–روبرز",
+      "title_en": "Bainbridge-Ropers syndrome",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "genetic-chromosomal",
+      "entity_type": "syndrome",
+      "legacy_provenance": [
+        "content/v281/conditions/chromatin-syndromic.jsonl"
+      ],
+      "evidence_priority": [
+        "GeneReviews/NCBI Bookshelf",
+        "condition-specific consensus guideline",
+        "MedlinePlus Genetics or equivalent official source"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v281",
+          "rank": 121,
+          "slug": "bainbridge-ropers-syndrome",
+          "source_path": "content/v281/conditions/chromatin-syndromic.jsonl",
+          "legacy_reference_url": "https://www.ncbi.nlm.nih.gov/books/?term=Bainbridge-Ropers+syndrome"
+        }
+      ],
+      "legacy_rank": 121
+    },
+    {
+      "slug": "cdkl5-deficiency-disorder",
+      "title_ar": "اضطراب نقص CDKL5",
+      "title_en": "CDKL5 deficiency disorder",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "neurological-epileptic",
+      "entity_type": "disorder",
+      "legacy_provenance": [
+        "content/v281/conditions/developmental-epileptic.jsonl"
+      ],
+      "evidence_priority": [
+        "WHO/NICE or relevant neurological guideline",
+        "ILAE/AAN or equivalent specialist guidance",
+        "systematic review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v281",
+          "rank": 122,
+          "slug": "cdkl5-deficiency-disorder",
+          "source_path": "content/v281/conditions/developmental-epileptic.jsonl",
+          "legacy_reference_url": "https://www.ncbi.nlm.nih.gov/books/?term=CDKL5+deficiency+disorder"
+        }
+      ],
+      "legacy_rank": 122
+    },
+    {
+      "slug": "dravet-syndrome",
+      "title_ar": "متلازمة دريفت",
+      "title_en": "Dravet syndrome",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "neurological-epileptic",
+      "entity_type": "syndrome",
+      "legacy_provenance": [
+        "content/v281/conditions/developmental-epileptic.jsonl"
+      ],
+      "evidence_priority": [
+        "WHO/NICE or relevant neurological guideline",
+        "ILAE/AAN or equivalent specialist guidance",
+        "systematic review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v281",
+          "rank": 123,
+          "slug": "dravet-syndrome",
+          "source_path": "content/v281/conditions/developmental-epileptic.jsonl",
+          "legacy_reference_url": "https://www.ncbi.nlm.nih.gov/books/?term=Dravet+syndrome"
+        }
+      ],
+      "legacy_rank": 123
+    },
+    {
+      "slug": "lennox-gastaut-syndrome",
+      "title_ar": "متلازمة لينوكس–غاستو",
+      "title_en": "Lennox-Gastaut syndrome",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "neurological-epileptic",
+      "entity_type": "syndrome",
+      "legacy_provenance": [
+        "content/v281/conditions/developmental-epileptic.jsonl"
+      ],
+      "evidence_priority": [
+        "WHO/NICE or relevant neurological guideline",
+        "ILAE/AAN or equivalent specialist guidance",
+        "systematic review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v281",
+          "rank": 124,
+          "slug": "lennox-gastaut-syndrome",
+          "source_path": "content/v281/conditions/developmental-epileptic.jsonl",
+          "legacy_reference_url": "https://www.ncbi.nlm.nih.gov/books/?term=Lennox-Gastaut+syndrome"
+        }
+      ],
+      "legacy_rank": 124
+    },
+    {
+      "slug": "landau-kleffner-syndrome",
+      "title_ar": "متلازمة لاندو–كليفنر",
+      "title_en": "Landau-Kleffner syndrome",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "neurological-epileptic",
+      "entity_type": "syndrome",
+      "legacy_provenance": [
+        "content/v281/conditions/developmental-epileptic.jsonl"
+      ],
+      "evidence_priority": [
+        "WHO/NICE or relevant neurological guideline",
+        "ILAE/AAN or equivalent specialist guidance",
+        "systematic review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v281",
+          "rank": 125,
+          "slug": "landau-kleffner-syndrome",
+          "source_path": "content/v281/conditions/developmental-epileptic.jsonl",
+          "legacy_reference_url": "https://www.ncbi.nlm.nih.gov/books/?term=Landau-Kleffner+syndrome"
+        }
+      ],
+      "legacy_rank": 125
+    },
+    {
+      "slug": "stxbp1-related-disorder",
+      "title_ar": "الاضطراب المرتبط بجين STXBP1",
+      "title_en": "STXBP1-related disorder",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "neurological-epileptic",
+      "entity_type": "disorder",
+      "legacy_provenance": [
+        "content/v281/conditions/developmental-epileptic.jsonl"
+      ],
+      "evidence_priority": [
+        "WHO/NICE or relevant neurological guideline",
+        "ILAE/AAN or equivalent specialist guidance",
+        "systematic review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v281",
+          "rank": 126,
+          "slug": "stxbp1-related-disorder",
+          "source_path": "content/v281/conditions/developmental-epileptic.jsonl",
+          "legacy_reference_url": "https://www.ncbi.nlm.nih.gov/books/?term=STXBP1-related+disorder"
+        }
+      ],
+      "legacy_rank": 126
+    },
+    {
+      "slug": "syngap1-related-disorder",
+      "title_ar": "الاضطراب المرتبط بجين SYNGAP1",
+      "title_en": "SYNGAP1-related disorder",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "neurological-epileptic",
+      "entity_type": "disorder",
+      "legacy_provenance": [
+        "content/v281/conditions/developmental-epileptic.jsonl"
+      ],
+      "evidence_priority": [
+        "WHO/NICE or relevant neurological guideline",
+        "ILAE/AAN or equivalent specialist guidance",
+        "systematic review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v281",
+          "rank": 127,
+          "slug": "syngap1-related-disorder",
+          "source_path": "content/v281/conditions/developmental-epileptic.jsonl",
+          "legacy_reference_url": "https://www.ncbi.nlm.nih.gov/books/?term=SYNGAP1-related+disorder"
+        }
+      ],
+      "legacy_rank": 127
+    },
+    {
+      "slug": "grin2b-related-neurodevelopmental-disorder",
+      "title_ar": "الاضطراب النمائي العصبي المرتبط بجين GRIN2B",
+      "title_en": "GRIN2B-related neurodevelopmental disorder",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "neurological-epileptic",
+      "entity_type": "disorder",
+      "legacy_provenance": [
+        "content/v281/conditions/developmental-epileptic.jsonl"
+      ],
+      "evidence_priority": [
+        "WHO/NICE or relevant neurological guideline",
+        "ILAE/AAN or equivalent specialist guidance",
+        "systematic review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v281",
+          "rank": 128,
+          "slug": "grin2b-related-neurodevelopmental-disorder",
+          "source_path": "content/v281/conditions/developmental-epileptic.jsonl",
+          "legacy_reference_url": "https://www.ncbi.nlm.nih.gov/books/?term=GRIN2B-related+neurodevelopmental+disorder"
+        }
+      ],
+      "legacy_rank": 128
+    },
+    {
+      "slug": "scn2a-related-disorder",
+      "title_ar": "الاضطرابات المرتبطة بجين SCN2A",
+      "title_en": "SCN2A-related disorders",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "neurological-epileptic",
+      "entity_type": "disorder",
+      "legacy_provenance": [
+        "content/v281/conditions/developmental-epileptic.jsonl"
+      ],
+      "evidence_priority": [
+        "WHO/NICE or relevant neurological guideline",
+        "ILAE/AAN or equivalent specialist guidance",
+        "systematic review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v281",
+          "rank": 129,
+          "slug": "scn2a-related-disorder",
+          "source_path": "content/v281/conditions/developmental-epileptic.jsonl",
+          "legacy_reference_url": "https://www.ncbi.nlm.nih.gov/books/?term=SCN2A-related+disorders"
+        }
+      ],
+      "legacy_rank": 129
+    },
+    {
+      "slug": "scn8a-related-disorder",
+      "title_ar": "الاضطرابات المرتبطة بجين SCN8A",
+      "title_en": "SCN8A-related disorders",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "neurological-epileptic",
+      "entity_type": "disorder",
+      "legacy_provenance": [
+        "content/v281/conditions/developmental-epileptic.jsonl"
+      ],
+      "evidence_priority": [
+        "WHO/NICE or relevant neurological guideline",
+        "ILAE/AAN or equivalent specialist guidance",
+        "systematic review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v281",
+          "rank": 130,
+          "slug": "scn8a-related-disorder",
+          "source_path": "content/v281/conditions/developmental-epileptic.jsonl",
+          "legacy_reference_url": "https://www.ncbi.nlm.nih.gov/books/?term=SCN8A-related+disorders"
+        }
+      ],
+      "legacy_rank": 130
+    },
+    {
+      "slug": "hnrnpu-related-neurodevelopmental-disorder",
+      "title_ar": "الاضطراب النمائي العصبي المرتبط بجين HNRNPU",
+      "title_en": "HNRNPU-related neurodevelopmental disorder",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "neurological-epileptic",
+      "entity_type": "disorder",
+      "legacy_provenance": [
+        "content/v281/conditions/developmental-epileptic.jsonl"
+      ],
+      "evidence_priority": [
+        "WHO/NICE or relevant neurological guideline",
+        "ILAE/AAN or equivalent specialist guidance",
+        "systematic review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v281",
+          "rank": 131,
+          "slug": "hnrnpu-related-neurodevelopmental-disorder",
+          "source_path": "content/v281/conditions/developmental-epileptic.jsonl",
+          "legacy_reference_url": "https://www.ncbi.nlm.nih.gov/books/?term=HNRNPU-related+neurodevelopmental+disorder"
+        }
+      ],
+      "legacy_rank": 131
+    },
+    {
+      "slug": "pura-syndrome",
+      "title_ar": "متلازمة PURA",
+      "title_en": "PURA syndrome",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "neurological-epileptic",
+      "entity_type": "syndrome",
+      "legacy_provenance": [
+        "content/v281/conditions/developmental-epileptic.jsonl"
+      ],
+      "evidence_priority": [
+        "WHO/NICE or relevant neurological guideline",
+        "ILAE/AAN or equivalent specialist guidance",
+        "systematic review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v281",
+          "rank": 132,
+          "slug": "pura-syndrome",
+          "source_path": "content/v281/conditions/developmental-epileptic.jsonl",
+          "legacy_reference_url": "https://www.ncbi.nlm.nih.gov/books/?term=PURA+syndrome"
+        }
+      ],
+      "legacy_rank": 132
+    },
+    {
+      "slug": "cacna1a-related-disorder",
+      "title_ar": "الاضطرابات المرتبطة بجين CACNA1A",
+      "title_en": "CACNA1A-related disorders",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "neurological-epileptic",
+      "entity_type": "disorder",
+      "legacy_provenance": [
+        "content/v281/conditions/developmental-epileptic.jsonl"
+      ],
+      "evidence_priority": [
+        "WHO/NICE or relevant neurological guideline",
+        "ILAE/AAN or equivalent specialist guidance",
+        "systematic review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v281",
+          "rank": 133,
+          "slug": "cacna1a-related-disorder",
+          "source_path": "content/v281/conditions/developmental-epileptic.jsonl",
+          "legacy_reference_url": "https://www.ncbi.nlm.nih.gov/books/?term=CACNA1A-related+disorders"
+        }
+      ],
+      "legacy_rank": 133
+    },
+    {
+      "slug": "bpan-wdr45",
+      "title_ar": "التنكس العصبي المرتبط ببروتين بيتا-بروبلر (WDR45/BPAN)",
+      "title_en": "Beta-propeller protein-associated neurodegeneration",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "neurological-epileptic",
+      "entity_type": "condition",
+      "legacy_provenance": [
+        "content/v281/conditions/developmental-epileptic.jsonl"
+      ],
+      "evidence_priority": [
+        "WHO/NICE or relevant neurological guideline",
+        "ILAE/AAN or equivalent specialist guidance",
+        "systematic review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v281",
+          "rank": 134,
+          "slug": "bpan-wdr45",
+          "source_path": "content/v281/conditions/developmental-epileptic.jsonl",
+          "legacy_reference_url": "https://www.ncbi.nlm.nih.gov/books/?term=BPAN+WDR45"
+        }
+      ],
+      "legacy_rank": 134
+    },
+    {
+      "slug": "kcnt1-related-epilepsy",
+      "title_ar": "الصرع المرتبط بجين KCNT1",
+      "title_en": "KCNT1-related epilepsy",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "neurological-epileptic",
+      "entity_type": "condition",
+      "legacy_provenance": [
+        "content/v281/conditions/developmental-epileptic.jsonl"
+      ],
+      "evidence_priority": [
+        "WHO/NICE or relevant neurological guideline",
+        "ILAE/AAN or equivalent specialist guidance",
+        "systematic review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v281",
+          "rank": 135,
+          "slug": "kcnt1-related-epilepsy",
+          "source_path": "content/v281/conditions/developmental-epileptic.jsonl",
+          "legacy_reference_url": "https://www.ncbi.nlm.nih.gov/books/?term=KCNT1-related+epilepsy"
+        }
+      ],
+      "legacy_rank": 135
+    },
+    {
+      "slug": "kcnq2-developmental-epileptic-encephalopathy",
+      "title_ar": "الاعتلال النمائي الصرعي المرتبط بجين KCNQ2",
+      "title_en": "KCNQ2 developmental and epileptic encephalopathy",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "neurological-epileptic",
+      "entity_type": "condition",
+      "legacy_provenance": [
+        "content/v281/conditions/developmental-epileptic.jsonl"
+      ],
+      "evidence_priority": [
+        "WHO/NICE or relevant neurological guideline",
+        "ILAE/AAN or equivalent specialist guidance",
+        "systematic review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v281",
+          "rank": 136,
+          "slug": "kcnq2-developmental-epileptic-encephalopathy",
+          "source_path": "content/v281/conditions/developmental-epileptic.jsonl",
+          "legacy_reference_url": "https://www.ncbi.nlm.nih.gov/books/?term=KCNQ2-related+developmental+epileptic+encephalopathy"
+        }
+      ],
+      "legacy_rank": 136
+    },
+    {
+      "slug": "menkes-disease",
+      "title_ar": "داء مينكيس",
+      "title_en": "Menkes disease",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "metabolic-rare",
+      "entity_type": "disease",
+      "legacy_provenance": [
+        "content/v281/conditions/metabolic-neurodegenerative.jsonl"
+      ],
+      "evidence_priority": [
+        "GeneReviews/NCBI Bookshelf",
+        "condition-specific guideline or consensus",
+        "current specialist review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v281",
+          "rank": 137,
+          "slug": "menkes-disease",
+          "source_path": "content/v281/conditions/metabolic-neurodegenerative.jsonl",
+          "legacy_reference_url": "https://www.ncbi.nlm.nih.gov/books/?term=ATP7A-related+copper+transport+disorders"
+        }
+      ],
+      "legacy_rank": 137
+    },
+    {
+      "slug": "wilson-disease",
+      "title_ar": "داء ويلسون",
+      "title_en": "Wilson disease",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "metabolic-rare",
+      "entity_type": "disease",
+      "legacy_provenance": [
+        "content/v281/conditions/metabolic-neurodegenerative.jsonl"
+      ],
+      "evidence_priority": [
+        "GeneReviews/NCBI Bookshelf",
+        "condition-specific guideline or consensus",
+        "current specialist review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v281",
+          "rank": 138,
+          "slug": "wilson-disease",
+          "source_path": "content/v281/conditions/metabolic-neurodegenerative.jsonl",
+          "legacy_reference_url": "https://www.ncbi.nlm.nih.gov/books/?term=Wilson+disease"
+        }
+      ],
+      "legacy_rank": 138
+    },
+    {
+      "slug": "maple-syrup-urine-disease",
+      "title_ar": "داء بول شراب القيقب",
+      "title_en": "Maple syrup urine disease",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "metabolic-rare",
+      "entity_type": "disease",
+      "legacy_provenance": [
+        "content/v281/conditions/metabolic-neurodegenerative.jsonl"
+      ],
+      "evidence_priority": [
+        "GeneReviews/NCBI Bookshelf",
+        "condition-specific guideline or consensus",
+        "current specialist review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v281",
+          "rank": 139,
+          "slug": "maple-syrup-urine-disease",
+          "source_path": "content/v281/conditions/metabolic-neurodegenerative.jsonl",
+          "legacy_reference_url": "https://www.ncbi.nlm.nih.gov/books/?term=Maple+syrup+urine+disease"
+        }
+      ],
+      "legacy_rank": 139
+    },
+    {
+      "slug": "homocystinuria-cbs-deficiency",
+      "title_ar": "بيلة الهوموسيستين بسبب نقص CBS",
+      "title_en": "Homocystinuria due to CBS deficiency",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "metabolic-rare",
+      "entity_type": "condition",
+      "legacy_provenance": [
+        "content/v281/conditions/metabolic-neurodegenerative.jsonl"
+      ],
+      "evidence_priority": [
+        "GeneReviews/NCBI Bookshelf",
+        "condition-specific guideline or consensus",
+        "current specialist review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v281",
+          "rank": 140,
+          "slug": "homocystinuria-cbs-deficiency",
+          "source_path": "content/v281/conditions/metabolic-neurodegenerative.jsonl",
+          "legacy_reference_url": "https://www.ncbi.nlm.nih.gov/books/?term=Homocystinuria+CBS+deficiency"
+        }
+      ],
+      "legacy_rank": 140
+    },
+    {
+      "slug": "mucopolysaccharidosis-type-i",
+      "title_ar": "داء عديدات السكاريد المخاطية النوع الأول",
+      "title_en": "Mucopolysaccharidosis type I",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "metabolic-rare",
+      "entity_type": "disease",
+      "legacy_provenance": [
+        "content/v281/conditions/metabolic-neurodegenerative.jsonl"
+      ],
+      "evidence_priority": [
+        "GeneReviews/NCBI Bookshelf",
+        "condition-specific guideline or consensus",
+        "current specialist review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v281",
+          "rank": 141,
+          "slug": "mucopolysaccharidosis-type-i",
+          "source_path": "content/v281/conditions/metabolic-neurodegenerative.jsonl",
+          "legacy_reference_url": "https://www.ncbi.nlm.nih.gov/books/?term=Mucopolysaccharidosis+type+I"
+        }
+      ],
+      "legacy_rank": 141
+    },
+    {
+      "slug": "mucopolysaccharidosis-type-ii",
+      "title_ar": "داء عديدات السكاريد المخاطية النوع الثاني (هانتر)",
+      "title_en": "Mucopolysaccharidosis type II",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "metabolic-rare",
+      "entity_type": "disease",
+      "legacy_provenance": [
+        "content/v281/conditions/metabolic-neurodegenerative.jsonl"
+      ],
+      "evidence_priority": [
+        "GeneReviews/NCBI Bookshelf",
+        "condition-specific guideline or consensus",
+        "current specialist review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v281",
+          "rank": 142,
+          "slug": "mucopolysaccharidosis-type-ii",
+          "source_path": "content/v281/conditions/metabolic-neurodegenerative.jsonl",
+          "legacy_reference_url": "https://www.ncbi.nlm.nih.gov/books/?term=Mucopolysaccharidosis+type+II"
+        }
+      ],
+      "legacy_rank": 142
+    },
+    {
+      "slug": "mucopolysaccharidosis-type-iii",
+      "title_ar": "داء عديدات السكاريد المخاطية النوع الثالث (سانفيليبو)",
+      "title_en": "Mucopolysaccharidosis type III",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "metabolic-rare",
+      "entity_type": "disease",
+      "legacy_provenance": [
+        "content/v281/conditions/metabolic-neurodegenerative.jsonl"
+      ],
+      "evidence_priority": [
+        "GeneReviews/NCBI Bookshelf",
+        "condition-specific guideline or consensus",
+        "current specialist review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v281",
+          "rank": 143,
+          "slug": "mucopolysaccharidosis-type-iii",
+          "source_path": "content/v281/conditions/metabolic-neurodegenerative.jsonl",
+          "legacy_reference_url": "https://www.ncbi.nlm.nih.gov/books/?term=Mucopolysaccharidosis+type+III"
+        }
+      ],
+      "legacy_rank": 143
+    },
+    {
+      "slug": "mucopolysaccharidosis-type-iv",
+      "title_ar": "داء عديدات السكاريد المخاطية النوع الرابع (موركيو)",
+      "title_en": "Mucopolysaccharidosis type IV",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "metabolic-rare",
+      "entity_type": "disease",
+      "legacy_provenance": [
+        "content/v281/conditions/metabolic-neurodegenerative.jsonl"
+      ],
+      "evidence_priority": [
+        "GeneReviews/NCBI Bookshelf",
+        "condition-specific guideline or consensus",
+        "current specialist review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v281",
+          "rank": 144,
+          "slug": "mucopolysaccharidosis-type-iv",
+          "source_path": "content/v281/conditions/metabolic-neurodegenerative.jsonl",
+          "legacy_reference_url": "https://www.ncbi.nlm.nih.gov/books/?term=Mucopolysaccharidosis+type+IV"
+        }
+      ],
+      "legacy_rank": 144
+    },
+    {
+      "slug": "mucopolysaccharidosis-type-vi",
+      "title_ar": "داء عديدات السكاريد المخاطية النوع السادس (ماروتو–لامي)",
+      "title_en": "Mucopolysaccharidosis type VI",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "metabolic-rare",
+      "entity_type": "disease",
+      "legacy_provenance": [
+        "content/v281/conditions/metabolic-neurodegenerative.jsonl"
+      ],
+      "evidence_priority": [
+        "GeneReviews/NCBI Bookshelf",
+        "condition-specific guideline or consensus",
+        "current specialist review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v281",
+          "rank": 145,
+          "slug": "mucopolysaccharidosis-type-vi",
+          "source_path": "content/v281/conditions/metabolic-neurodegenerative.jsonl",
+          "legacy_reference_url": "https://www.ncbi.nlm.nih.gov/books/?term=Mucopolysaccharidosis+type+VI"
+        }
+      ],
+      "legacy_rank": 145
+    },
+    {
+      "slug": "gaucher-disease",
+      "title_ar": "داء غوشيه",
+      "title_en": "Gaucher disease",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "metabolic-rare",
+      "entity_type": "disease",
+      "legacy_provenance": [
+        "content/v281/conditions/metabolic-neurodegenerative.jsonl"
+      ],
+      "evidence_priority": [
+        "GeneReviews/NCBI Bookshelf",
+        "condition-specific guideline or consensus",
+        "current specialist review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v281",
+          "rank": 146,
+          "slug": "gaucher-disease",
+          "source_path": "content/v281/conditions/metabolic-neurodegenerative.jsonl",
+          "legacy_reference_url": "https://www.ncbi.nlm.nih.gov/books/?term=Gaucher+disease"
+        }
+      ],
+      "legacy_rank": 146
+    },
+    {
+      "slug": "fabry-disease",
+      "title_ar": "داء فابري",
+      "title_en": "Fabry disease",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "metabolic-rare",
+      "entity_type": "disease",
+      "legacy_provenance": [
+        "content/v281/conditions/metabolic-neurodegenerative.jsonl"
+      ],
+      "evidence_priority": [
+        "GeneReviews/NCBI Bookshelf",
+        "condition-specific guideline or consensus",
+        "current specialist review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v281",
+          "rank": 147,
+          "slug": "fabry-disease",
+          "source_path": "content/v281/conditions/metabolic-neurodegenerative.jsonl",
+          "legacy_reference_url": "https://www.ncbi.nlm.nih.gov/books/?term=Fabry+disease"
+        }
+      ],
+      "legacy_rank": 147
+    },
+    {
+      "slug": "pompe-disease",
+      "title_ar": "داء بومبي",
+      "title_en": "Pompe disease",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "metabolic-rare",
+      "entity_type": "disease",
+      "legacy_provenance": [
+        "content/v281/conditions/metabolic-neurodegenerative.jsonl"
+      ],
+      "evidence_priority": [
+        "GeneReviews/NCBI Bookshelf",
+        "condition-specific guideline or consensus",
+        "current specialist review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v281",
+          "rank": 148,
+          "slug": "pompe-disease",
+          "source_path": "content/v281/conditions/metabolic-neurodegenerative.jsonl",
+          "legacy_reference_url": "https://www.ncbi.nlm.nih.gov/books/?term=Pompe+disease"
+        }
+      ],
+      "legacy_rank": 148
+    },
+    {
+      "slug": "niemann-pick-disease-type-c",
+      "title_ar": "داء نيمان–بيك النوع C",
+      "title_en": "Niemann-Pick disease type C",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "metabolic-rare",
+      "entity_type": "disease",
+      "legacy_provenance": [
+        "content/v281/conditions/metabolic-neurodegenerative.jsonl"
+      ],
+      "evidence_priority": [
+        "GeneReviews/NCBI Bookshelf",
+        "condition-specific guideline or consensus",
+        "current specialist review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v281",
+          "rank": 149,
+          "slug": "niemann-pick-disease-type-c",
+          "source_path": "content/v281/conditions/metabolic-neurodegenerative.jsonl",
+          "legacy_reference_url": "https://www.ncbi.nlm.nih.gov/books/?term=Niemann-Pick+disease+type+C"
+        }
+      ],
+      "legacy_rank": 149
+    },
+    {
+      "slug": "metachromatic-leukodystrophy",
+      "title_ar": "الحثل الأبيض متبدل اللون",
+      "title_en": "Metachromatic leukodystrophy",
+      "aliases_ar": [],
+      "aliases_en": [],
+      "category": "metabolic-rare",
+      "entity_type": "condition",
+      "legacy_provenance": [
+        "content/v281/conditions/metabolic-neurodegenerative.jsonl"
+      ],
+      "evidence_priority": [
+        "GeneReviews/NCBI Bookshelf",
+        "condition-specific guideline or consensus",
+        "current specialist review"
+      ],
+      "status": "candidate",
+      "legacy_sources": [
+        {
+          "batch": "v281",
+          "rank": 150,
+          "slug": "metachromatic-leukodystrophy",
+          "source_path": "content/v281/conditions/metabolic-neurodegenerative.jsonl",
+          "legacy_reference_url": "https://www.ncbi.nlm.nih.gov/books/?term=Metachromatic+leukodystrophy"
+        }
+      ],
+      "legacy_rank": 150
+    }
+  ]
+}
