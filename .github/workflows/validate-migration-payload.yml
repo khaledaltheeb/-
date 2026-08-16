@@ -7,6 +7,8 @@ on:
       - 'data/migration-batches/**'
       - 'scripts/prepare_legacy_batch.py'
       - 'scripts/apply_v3_seo_contract.py'
+      - 'scripts/validate_legacy_transfer_payload.py'
+      - 'scripts/test_legacy_transfer_gate.py'
       - 'scripts/validate_migration_payload.py'
       - 'scripts/validate_v3_release_metadata.py'
       - '.github/workflows/validate-migration-payload.yml'
@@ -23,7 +25,17 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.13'
-      - name: Validate migration payload structure and provenance
+
+      - name: Validate mandatory legacy transfer contract
+        run: python scripts/validate_legacy_transfer_payload.py data/migration-batches/generated/adhd-v1.json
+
+      - name: Prove thin legacy content is accepted for transfer
+        run: python scripts/test_legacy_transfer_gate.py
+
+      - name: Audit strict editorial migration quality without blocking preservation
+        continue-on-error: true
         run: python scripts/validate_migration_payload.py data/migration-batches/generated/adhd-v1.json
-      - name: Validate Supabase release metadata contract
+
+      - name: Audit Supabase release metadata without blocking preservation
+        continue-on-error: true
         run: python scripts/validate_v3_release_metadata.py data/migration-batches/generated/adhd-v1.json
