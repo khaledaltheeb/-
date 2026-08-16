@@ -1266,10 +1266,10 @@ body{
   font-weight:900;
   text-decoration:none;
   box-shadow:var(--rf-shadow-md);
-  transform:translateY(calc(-100% - 24px));
-  transition:transform .16s ease;
+  transform:translateY(0);
+  transition:none;
 }
-.skip-link:focus-visible{transform:translateY(0)}
+.skip-link:not(:focus):not(:focus-visible){transform:translateY(calc(-100% - 24px))}
 .skip-target{
   display:block;
   width:1px;
