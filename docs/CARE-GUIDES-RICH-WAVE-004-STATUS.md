@@ -17,18 +17,23 @@ The live database audit now reports:
 - **0 indexable Wave 004 records**
 - **0 records marked `publication_ready=true`**
 - **0/12 with a recorded human reviewer, reviewer credentials or review date**
+- **12/12 with an explicit automated evidence-audit record and `human_review_required=true`**
 - content depth across the 12 records: **3,020–3,973 useful Arabic words** using the release-gate counting method
-- references: **5–11 per page**
+- references: **6–11 per page**
 - claim-to-source mappings: **5–11 per page**
-- **0 duplicate paragraph groups** in the current automated normalized-text audit
+- **0 duplicate paragraph groups**
+- **0 duplicate heading groups**
+- **0 duplicate reference IDs**
 - **0 unresolved claim-source identifiers**
+- **0 body-json/body-text heading/paragraph synchronization gaps**
+- **0 exact cross-page duplicate substantive paragraphs** in the current automated audit
 - SEO descriptions: **150–160 characters** across the 12 current records
 - **12/12 use the required central disclaimer route and label**
-- row-level `medical_disclaimer` is now empty/null across the 12 records, as required by the central-disclaimer contract
+- row-level `medical_disclaimer` is empty/null across the 12 records, as required by the central-disclaimer contract
 
 The first 11 records had been grandfathered into an older `published + indexable + publication_ready=true` state before the stricter Wave 004 review policy. The 2026-08-16 quality audit placed those 11 under a conservative hold because they lacked genuine recorded human review and initially sat below the current 3,000-word Wave 004 editorial target.
 
-The hold remains in force even though the current quantitative depth floor has now been crossed. Word count is not a release authorization and does not substitute for source quality, rendered-page QA or human review.
+The hold remains in force even though the current quantitative depth floor has now been crossed. Word count and automated evidence checks are not release authorization and do not substitute for rendered-page QA or genuine independent human review.
 
 The hold preserves direct access and existing links while preventing search indexing:
 
@@ -43,7 +48,7 @@ The hold preserves direct access and existing links while preventing search inde
 
 ### Cognitive flexibility / task switching
 
-`care-guide-cognitive-flexibility-switching-plan` received a focused evidence-led remediation rather than word-count padding. The current record is:
+`care-guide-cognitive-flexibility-switching-plan` received focused evidence-led remediation rather than word-count padding. The current record is:
 
 - **3,973 useful Arabic words**
 - **83 structured blocks**
@@ -56,11 +61,11 @@ The hold preserves direct access and existing links while preventing search inde
 - `publication_ready=false`
 - no reviewer identity, credentials or review date fabricated
 
-The evidence layer was expanded around switch cost, advance preparation, interruption/resumption, contextual flexibility and the limits of treating laboratory switch-cost measures as an individual diagnosis. The source registry now records the relevant PubMed-indexed reviews and studies.
+The evidence layer covers switch cost, advance preparation, interruption/resumption, contextual flexibility and the limits of treating laboratory switch-cost measures as an individual diagnosis. Its automated source-layer audit is recorded as complete while retaining `human_review_required=true`.
 
 ### Working memory / task breakdown
 
-`care-guide-working-memory-task-breakdown` was also strengthened after a concurrent expansion had already pushed it beyond 3,000 words. The source remediation targeted the actual evidence gap—working-memory models, capacity caveats, chunking, external representations and cognitive offloading—rather than adding generic prose. The current record is:
+`care-guide-working-memory-task-breakdown` was strengthened after a concurrent expansion had already pushed it beyond 3,000 words. The source remediation targeted the actual evidence gap—working-memory models, capacity caveats, chunking, external representations and cognitive offloading—rather than adding generic prose. The current record is:
 
 - **3,677 useful Arabic words**
 - **75 structured blocks**
@@ -73,13 +78,25 @@ The evidence layer was expanded around switch cost, advance preparation, interru
 - `publication_ready=false`
 - no reviewer identity, credentials or review date fabricated
 
-The page explicitly avoids turning a laboratory estimate such as an approximate number of chunks into a fixed design rule or an informal diagnosis.
+The page explicitly avoids turning a laboratory estimate such as an approximate number of chunks into a fixed design rule or an informal diagnosis. Its current source layer includes direct working-memory models, chunking evidence, external-representation evidence and a 2026 cognitive-offloading meta-analysis.
 
-### Other held records
+### Remaining materialized records
 
-The other nine published held records currently range from **3,020 to 3,124 useful Arabic words** and pass the present automated checks for duplicate paragraphs, resolved claim-source identifiers, central disclaimer metadata and SEO-description length.
+The previous nine-page evidence-audit queue is now closed at the **automated source-layer** level. It was not closed by accepting generic references: direct topic-specific evidence was added where the audit found a weak match.
 
-Those numeric/structural passes are **not** treated as final editorial approval. Several of these pages were expanded by a concurrent process during this remediation window. They therefore remain in the evidence-audit queue for topic-by-topic verification of whether each new substantive claim is adequately covered by its page-level references and claim-source map before any human-review handoff.
+The following pages received source strengthening in Supabase:
+
+- `care-guide-cognitive-load-instruction-audit` — direct instructional-material/cognitive-load review added
+- `care-guide-inhibitory-control-pause-plan` — inhibition/shifting/updating meta-analysis added
+- `care-guide-metacognition-study-review-card` — metacognitive judgment-of-learning meta-analysis added
+- `care-guide-processing-speed-accuracy-balance` — direct speed-accuracy review added
+- `care-guide-prospective-memory-external-cues` — intention-offloading review and prospective-memory implementation-intention meta-analysis added
+- `care-guide-selective-attention-distraction-audit` — direct distractor-suppression review added
+- `care-guide-sustained-attention-work-interval` — vigilance meta-analysis and self-scheduled-breaks study added
+
+`care-guide-retrieval-practice-study-plan` and `care-guide-spaced-practice-study-calendar` were reviewed against their existing retrieval-practice, spacing, applied-classroom and UDL evidence; no extra source was added merely to increase counts.
+
+Across the complete 12-page materialized set, the live database now has **6–11 references** and **5–11 claim-source mappings** per page, with zero unresolved source IDs. Every page retains `human_review_required=true` in the automated evidence-audit record.
 
 ## Page 12 quality checkpoint
 
@@ -99,11 +116,11 @@ Those numeric/structural passes are **not** treated as final editorial approval.
 - exact central disclaimer URL/label
 - row-level `medical_disclaimer` cleaned to `null`
 
-The previous row-level disclaimer blocker is therefore closed. Publication remains blocked by the independent human scientific/editorial review and final rendered-page QA required by Wave 004.
+The Koch 2018 reference title was normalized to the exact registry/paper title during the final source-layer audit. The previous row-level disclaimer blocker is closed. Publication remains blocked by independent human scientific/editorial review and final rendered-page QA.
 
 ## Database enforcement added and scoped
 
-Three Supabase migrations are applied and mirrored in this branch:
+Three Supabase migrations are applied and mirrored in repository history:
 
 1. `20260816105700_care_guides_indexability_review_guard`
 2. `20260816105934_care_guides_indexability_state_invariants`
@@ -150,21 +167,35 @@ A broader read-only audit found **269 currently indexable Care Guides** outside 
 
 ## Source and originality controls
 
-The Wave 004 source registry includes official/institutional sources where appropriate and peer-reviewed reviews, meta-analyses and experiments for cognitive mechanisms. During this remediation it was expanded with focused sources for task switching/interruption and working memory/chunking/offloading. The Koch 2018 record was also corrected to its actual paper title while retaining the same PMID.
+The Wave 004 source registry contains the shared official/institutional framework and peer-reviewed evidence used by the batch. Focused task-switching/interruption and working-memory sources were already mirrored into that registry during the concurrent remediation pass.
+
+The additional sources applied during the final page-level source audit are recorded separately and reproducibly in:
+
+`data/migration-batches/care-guides-rich-wave-004.evidence-audit-2026-08-16.json`
+
+That audit artifact records nine direct topic-specific sources and the per-page decisions that used them. It is explicitly marked `publication_authorization=false` and `human_review_required=true`.
 
 Automated current-state checks across all 12 materialized Wave 004 records found:
 
-- **0 duplicate paragraph groups** after normalized-text comparison
+- **12/12 at or above 3,000 useful Arabic words**
+- **0 duplicate paragraph groups**
+- **0 duplicate heading groups**
+- **0 duplicate reference IDs**
 - **0 unresolved claim-source identifiers**
+- **0 body-json/body-text text-block synchronization gaps**
+- **0 exact cross-page duplicate substantive paragraphs**
 - exact central disclaimer URL/label on all 12
-- all 12 held or draft with `robots_index=false`
+- row-level disclaimer empty/null on all 12
+- all 12 with `robots_index=false`
 - all 12 with `publication_ready=false`
+- all 12 with an automated evidence-audit record
+- all 12 still requiring human review
 
-These are structural and evidence-mapping checks. They do not replace a scientific/editorial reviewer.
+These are structural, provenance and evidence-mapping checks. They do not replace a scientific/editorial reviewer or rendered-page inspection.
 
 ## Technical validation
 
-The last fully completed technical baseline before the latest evidence-registry/document-only commits was head `c6731729d2c4a0a29d0aa2756af6f3485b8a0dfd`, where all required workflows passed:
+The last fully completed technical baseline before the latest evidence-audit/document commits was head `c6731729d2c4a0a29d0aa2756af6f3485b8a0dfd`, where all required workflows passed:
 
 - Validate Legacy Migration Payload: success
 - Care Guides Legacy Inventory: success
@@ -178,7 +209,7 @@ The last fully completed technical baseline before the latest evidence-registry/
 
 The sitemap count is exactly 11 lower than the pre-hold baseline of 1,961, confirming that the 11 held pages were excluded from the sitemap after `robots_index=false` was applied.
 
-The latest source-registry and checkpoint commits require a fresh CI cycle against the repository's current `main`; the earlier green result must not be treated as validation of a newer merge ref.
+The latest evidence-audit artifact and checkpoint commit require a fresh CI cycle against the repository's current `main`; the earlier green result must not be treated as validation of a newer merge ref.
 
 ## Global collision hold
 
@@ -193,12 +224,11 @@ No automatic redirect or canonical change was applied because each cluster needs
 
 Listing an intent in this configuration never counts as publication. A Wave 004 page may become indexable only after content depth, intent distinctiveness, authoritative references, claim mapping, SEO, accessibility, canonical uniqueness, rendered-page QA and genuine review evidence all pass.
 
-The next editorial sequence is:
+The automated content-depth, structural, provenance and topic-specific evidence-source passes are now complete for the 12 materialized records. The next sequence is:
 
-1. complete topic-by-topic evidence audits for the nine concurrently expanded held records;
-2. run rendered-page QA on the remediated records without changing their indexability;
-3. obtain genuine independent human scientific/editorial review and record real reviewer evidence;
-4. only then make an explicit per-page re-index decision;
-5. keep the remaining 38 intents unmaterialized until the remediation/review queue is controlled.
+1. run rendered-page QA on the 12 materialized records without changing their indexability;
+2. obtain genuine independent human scientific/editorial review and record real reviewer evidence;
+3. only then make an explicit per-page re-index decision;
+4. keep the remaining 38 intents unmaterialized until the current 12-page review queue is controlled.
 
 This pull request remains Draft. Technical CI can validate mechanics, routing, SEO behavior and build integrity, but it cannot authorize Wave 004 YMYL publication or replace the review policy defined for this batch.
