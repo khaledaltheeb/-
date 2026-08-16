@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import localFont from 'next/font/local';
 import Script from 'next/script';
 import { BRAND_NAME, DEFAULT_DESCRIPTION, SITE_URL, organizationJsonLd } from '@/lib/seo';
 import './rawafid-theme-v7-1.css';
@@ -9,6 +10,17 @@ import './rawafid-theme-v7-1.css';
    './public-modules-v3.css' './system-states.css' './content-v3.css'
    './structured-content.css' './block-editor-v3.css' './profile-v3.css'
    './admin-shell-v3.css'. */
+
+const rawafidArabicFont = localFont({
+  src: '../node_modules/@fontsource-variable/noto-sans-arabic/files/noto-sans-arabic-arabic-wght-normal.woff2',
+  weight: '100 900',
+  style: 'normal',
+  display: 'optional',
+  preload: true,
+  fallback: ['Arial', 'sans-serif'],
+  adjustFontFallback: 'Arial',
+  variable: '--rawafid-font-arabic',
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -67,7 +79,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   const gaId = validatedAnalyticsId(process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID, /^G-[A-Z0-9]+$/i);
 
   return (
-    <html lang="ar" dir="rtl">
+    <html lang="ar" dir="rtl" className={rawafidArabicFont.variable}>
       <body id="top">
         {analyticsEnabled && gtmId ? (
           <>
