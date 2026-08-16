@@ -43,6 +43,25 @@ const labels: Record<T, string> = {
 };
 const allowed = new Set(Object.keys(labels));
 
+const discoveryLinks = [
+  { href: '/sectors', kicker: 'حسب المجال', title: 'استعرض القطاعات', description: 'ابدأ من المجال الرئيسي، ثم انتقل إلى الأقسام والمحتوى المرتبط به.' },
+  { href: '/sections', kicker: 'حسب الموضوع', title: 'تصفح جميع الأقسام', description: 'انتقل مباشرة إلى الأقسام والمجموعات الموضوعية المنظمة تحت قطاعات روافد.' },
+  { href: '/encyclopedia', kicker: 'معرفة نفسية', title: 'الموسوعة النفسية', description: 'ابحث ضمن الأدلة والموضوعات النفسية المنظمة في الموسوعة.' },
+  { href: '/specialists', kicker: 'دليل مهني', title: 'دليل المختصين', description: 'انتقل إلى دليل المختصين عندما يكون هدفك الوصول إلى مقدم خدمة.' },
+] as const;
+
+function resultOpenLabel(type: T): string {
+  switch (type) {
+    case 'sector': return 'فتح القطاع';
+    case 'category': return 'فتح القسم';
+    case 'specialist': return 'عرض المختص';
+    case 'center': return 'عرض المركز';
+    case 'community': return 'عرض الملف';
+    case 'condition': return 'فتح الدليل';
+    default: return 'قراءة المحتوى';
+  }
+}
+
 function normalizeSearch(value: string) {
   return value
     .toLocaleLowerCase('ar')
@@ -182,6 +201,7 @@ export default async function SearchPage({ searchParams }: { searchParams: SP })
   const counts = new Map<T, number>();
   for (const x of results) counts.set(x.entity_type, (counts.get(x.entity_type) ?? 0) + 1);
   const url = (t: string) => `/search?q=${encodeURIComponent(q)}${t ? `&type=${encodeURIComponent(t)}` : ''}`;
+  const visibleFilters = (Object.entries(labels) as Array<[T, string]>).filter(([key]) => (counts.get(key) ?? 0) > 0 || type === key);
 
   return <>
     <SiteHeader />
@@ -196,16 +216,22 @@ export default async function SearchPage({ searchParams }: { searchParams: SP })
           <button type="submit">بحث</button>
         </form>
       </section>
-      {q.length > 0 && q.length < 2 && <div className="search-state"><h2>اكتب حرفين على الأقل</h2></div>}
-      {error && <div className="search-state error"><h2>تعذر البحث</h2><p>{error}</p></div>}
+
+      {q.length === 0 && <section className="search-discovery" aria-labelledby="search-discovery-title">
+        <div className="search-discovery-head"><span className="eyebrow">تصفح بدون بحث</span><h2 id="search-discovery-title">ابدأ من بنية روافد</h2><p>إذا لم تكن تعرف المصطلح الدقيق، انتقل من المجال العام إلى القسم أو الدليل المناسب.</p></div>
+        <div className="search-discovery-grid">{discoveryLinks.map((item) => <Link prefetch={false} className="search-discovery-card" href={item.href} key={item.href}><span>{item.kicker}</span><strong>{item.title}</strong><p>{item.description}</p><small>استعراض ←</small></Link>)}</div>
+      </section>}
+
+      {q.length > 0 && q.length < 2 && <div className="search-state"><h2>اكتب حرفين على الأقل</h2><p>أو استخدم مسارات التصفح للوصول إلى القطاع أو القسم المطلوب.</p><div className="search-state-actions"><Link prefetch={false} href="/sectors">تصفح القطاعات</Link><Link prefetch={false} href="/sections">تصفح الأقسام</Link></div></div>}
+      {error && <div className="search-state error"><h2>تعذر البحث</h2><p>{error}</p><div className="search-state-actions"><Link prefetch={false} href="/sectors">تصفح القطاعات</Link><Link prefetch={false} href="/sections">تصفح الأقسام</Link></div></div>}
       {q.length >= 2 && !error && <>
         <nav className="search-filters" aria-label="تصفية نتائج البحث">
           <Link prefetch={false} className={!type ? 'active' : ''} href={url('')}>الكل <span>{results.length.toLocaleString('ar')}</span></Link>
-          {(Object.entries(labels) as Array<[T, string]>).map(([k, v]) => <Link prefetch={false} className={type === k ? 'active' : ''} href={url(k)} key={k}>{v} <span>{(counts.get(k) ?? 0).toLocaleString('ar')}</span></Link>)}
+          {visibleFilters.map(([k, v]) => <Link prefetch={false} className={type === k ? 'active' : ''} href={url(k)} key={k}>{v} <span>{(counts.get(k) ?? 0).toLocaleString('ar')}</span></Link>)}
         </nav>
         <section className="search-results" aria-live="polite">
           <div className="search-summary"><strong>{visible.length.toLocaleString('ar')}</strong><span>نتيجة لعبارة «{q}»</span></div>
-          {visible.length === 0 && <div className="search-state"><h2>لا توجد نتائج مطابقة</h2><p>جرّب مرادفًا أو مصطلحًا أوسع.</p></div>}
+          {visible.length === 0 && <div className="search-state"><h2>لا توجد نتائج مطابقة</h2><p>جرّب مرادفًا أو مصطلحًا أوسع، أو انتقل مباشرة إلى بنية القطاعات والأقسام.</p><div className="search-state-actions"><Link prefetch={false} href="/sectors">تصفح القطاعات</Link><Link prefetch={false} href="/sections">تصفح الأقسام</Link></div></div>}
           <div className="search-result-list">
             {visible.map((x) => <article className="search-result-card" key={`${x.entity_type}-${x.entity_id}`}>
               <div className="result-type">{labels[x.entity_type]}</div>
@@ -214,7 +240,7 @@ export default async function SearchPage({ searchParams }: { searchParams: SP })
                 {x.subtitle && <div className="result-subtitle">{x.subtitle}</div>}
                 {x.excerpt && <p>{x.excerpt}</p>}
               </div>
-              <Link prefetch={false} className="result-open" href={x.destination}>فتح</Link>
+              <Link prefetch={false} className="result-open" href={x.destination}>{resultOpenLabel(x.entity_type)}</Link>
             </article>)}
           </div>
         </section>
