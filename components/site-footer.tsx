@@ -57,12 +57,6 @@ export default function SiteFooter() {
             <input id="footer-search-input" name="q" type="search" placeholder="ابحث عن معلومة أو خدمة" maxLength={120} enterKeyHint="search" />
             <button type="submit">بحث</button>
           </form>
-          <div className="footer-trust-list" aria-label="معايير الثقة">
-            <span>مراجعة منهجية</span>
-            <span>مصادر قابلة للتتبع</span>
-            <span>خصوصية ووصولية</span>
-          </div>
-          <span className="footer-trust-note">المحتوى للتثقيف العام ولا يحل محل التقييم أو التشخيص أو العلاج المهني الفردي.</span>
         </div>
         <nav className="footer-groups" aria-label="روابط تذييل المنصة">
           {groups.map((group) => (
@@ -75,7 +69,6 @@ export default function SiteFooter() {
       </div>
       <div className="footer-bottom">
         <span>© {new Date().getFullYear()} منصة روافد. جميع الحقوق محفوظة.</span>
-        <span>هوية عربية · متوافق مع الهاتف · وصولية وخصوصية منذ التصميم</span>
         <a className="back-to-top" href="#top">العودة إلى الأعلى ↑</a>
       </div>
     </footer>
