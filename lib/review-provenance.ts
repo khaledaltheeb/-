@@ -1,34 +1,32 @@
-export const RAWAFID_REVIEW_TEAM = 'فريق روافد';
-
 type ReviewRecord = {
   last_reviewed_at?: string | null;
   reviewer_display_name?: string | null;
   reviewer_credentials?: string | null;
 };
 
+function nonEmptyString(value: unknown) {
+  return typeof value === 'string' && value.trim() ? value.trim() : null;
+}
+
 export function contentReviewProvenance(record: ReviewRecord) {
-  const lastReviewedAt = typeof record.last_reviewed_at === 'string' && record.last_reviewed_at.trim()
-    ? record.last_reviewed_at.trim()
-    : null;
-  const explicitReviewer = typeof record.reviewer_display_name === 'string' && record.reviewer_display_name.trim()
-    ? record.reviewer_display_name.trim()
-    : null;
-  const reviewerCredentials = explicitReviewer && typeof record.reviewer_credentials === 'string' && record.reviewer_credentials.trim()
-    ? record.reviewer_credentials.trim()
-    : null;
-  const reviewerName = explicitReviewer || (lastReviewedAt ? RAWAFID_REVIEW_TEAM : null);
-  const reviewerType = explicitReviewer ? 'Person' : lastReviewedAt ? 'Organization' : null;
+  const recordedReviewDate = nonEmptyString(record.last_reviewed_at);
+  const explicitReviewer = nonEmptyString(record.reviewer_display_name);
+  const recordedCredentials = nonEmptyString(record.reviewer_credentials);
+  const hasAttributableReview = Boolean(recordedReviewDate && explicitReviewer);
+  const lastReviewedAt = hasAttributableReview ? recordedReviewDate : null;
+  const reviewerName = hasAttributableReview ? explicitReviewer : null;
+  const reviewerCredentials = reviewerName ? recordedCredentials : null;
 
   return {
     lastReviewedAt,
     reviewerName,
     reviewerCredentials,
-    reviewerType,
-    reviewedBySchema: reviewerName && reviewerType
+    reviewerType: reviewerName && reviewerCredentials ? 'Person' : null,
+    reviewedBySchema: reviewerName && reviewerCredentials
       ? {
-          '@type': reviewerType,
+          '@type': 'Person',
           name: reviewerName,
-          ...(reviewerCredentials ? { description: reviewerCredentials } : {}),
+          description: reviewerCredentials,
         }
       : undefined,
   } as const;
