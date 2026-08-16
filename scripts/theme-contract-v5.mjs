@@ -18,6 +18,7 @@ const adminLayout = read('app/admin/layout.tsx');
 const adminHome = read('app/admin/page.tsx');
 const contentForm = read('app/admin/content/content-form.tsx');
 const pwaIcon = read('lib/pwa-icon.ts');
+const preview = read('app/theme-preview/page.tsx');
 
 if (!layout.includes("'./rawafid-theme.css'")) fail('root layout must import the central theme entry point');
 const directCssImports = [...layout.matchAll(/^import\s+["'](\.\/[^"']+\.css)["'];?\s*$/gm)].map((match) => match[1]);
@@ -33,6 +34,8 @@ for (const marker of ['Rawafid Institutional Theme V5', '.site-assurance-bar', '
 
 if (!brand.includes('RawafidMark') || !brand.includes('معرفة تقود إلى أثر')) fail('shared brand must use the unified Rawafid mark and slogan');
 if (!header.includes("import RawafidBrand from '@/components/rawafid-brand'") || !footer.includes("import RawafidBrand from '@/components/rawafid-brand'")) fail('public chrome must use the shared Rawafid brand');
+if (!header.includes("import Link from 'next/link'") || !footer.includes("import Link from 'next/link'") || !home.includes("import Link from 'next/link'")) fail('public navigation must use Next Link for smooth internal transitions');
+if (!header.includes('className="skip-link"') || !header.includes('id="main-content"') || !header.includes('className="skip-target"')) fail('public chrome must expose a keyboard bypass target');
 for (const label of ['استكشف روافد', 'الأقسام', 'الموسوعة', 'الأدلة', 'ذوو الاحتياجات الخاصة والدمج', 'حالة، دليل أو خدمة']) {
   if (!header.includes(label)) fail(`institutional V5.1 navigation missing ${label}`);
 }
@@ -58,14 +61,15 @@ for (const marker of ['admin_specialist_queue_v2', 'admin_center_queue_v2', 'com
 if (/['\"]R['\"]/.test(pwaIcon)) fail('PWA identity must not fall back to a Latin letter');
 if (!pwaIcon.includes('M13 44c14-1')) fail('PWA icon must use the unified tributary mark');
 
-for (const marker of ['Rawafid Institutional V5.1', 'font-family:var(--font-arabic)', '--rf-reading-measure:72ch', '.footer-search', '.theme-preview-type-specimen']) {
+for (const marker of ['Rawafid Institutional V5.1', 'Rawafid Institutional V5.2', 'font-family:var(--font-arabic)', '--rf-reading-measure:72ch', '.footer-search', '.theme-preview-type-specimen', '.skip-link', '.skip-target']) {
   if (!theme.includes(marker)) fail(`central theme missing V5.1 marker ${marker}`);
 }
 for (const marker of ['footer-search', 'footer-trust-list', 'back-to-top']) {
   if (!footer.includes(marker)) fail(`institutional footer missing ${marker}`);
 }
+if (!preview.includes('Institutional Design System V5.2') || preview.includes('<h1>نموذج لوحة التحكم</h1>') || !preview.includes('المستضاف محليًا ضمن حزمة المنصة')) fail('theme preview must expose accurate V5.2 semantics');
 if (!layout.includes('<body id="top">') || !layout.includes('?v=6')) fail('layout must expose the top target and V6 PWA identity');
 if (!manifest.includes('منصة روافد | معرفة تقود إلى أثر') || !manifest.includes('?v=6')) fail('manifest must use the V6 institutional identity');
 if (!serviceWorker.includes('rawafid-shell-v6') || !serviceWorker.includes('event.waitUntil(cacheWrite')) fail('service worker must use V6 cache lifecycle');
 
-if (!process.exitCode) console.log('Rawafid institutional theme V5.1 contract passed.');
+if (!process.exitCode) console.log('Rawafid institutional theme V5.2 contract passed.');

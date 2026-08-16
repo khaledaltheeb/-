@@ -5,7 +5,7 @@ import PlatformIcon from '@/components/platform-icon';
 import { buildSeoMetadata } from '@/lib/seo';
 
 // Compatibility marker for the original quality contract: Design System V3.
-// The rendered preview validates the institutional Design System V5 layer.
+// The rendered preview validates the institutional Design System V5.2 layer.
 
 export const metadata = buildSeoMetadata({
   title: 'معاينة الثيم',
@@ -25,7 +25,7 @@ export default function ThemePreviewPage() {
     <main className="site-shell rawafid-home">
       <section className="rawafid-hero" style={{ minHeight: 'auto' }}>
         <div className="rawafid-hero-copy">
-          <span className="rawafid-kicker">Institutional Design System V5</span>
+          <span className="rawafid-kicker">Institutional Design System V5.2</span>
           <h1>معاينة ثيم <em>منصة روافد</em></h1>
           <p>هذه الصفحة لا تحتوي محتوى المنصة. وظيفتها اختبار التناسق البصري، التباين، العناصر، الحالات والاستجابة للأجهزة المختلفة قبل تعميم أي تغيير بصري على بقية المنصة.</p>
           <div className="rawafid-directory-actions"><button className="primary-action" type="button">زر أساسي</button><button className="secondary-action" type="button">زر ثانوي</button><a className="button" href="#forms">رابط بإطار</a></div>
@@ -48,7 +48,7 @@ export default function ThemePreviewPage() {
           <div>
             <span className="rawafid-kicker">الخطوط والإيقاع</span>
             <h2>قراءة عربية مريحة على كل شاشة</h2>
-            <p>يستخدم النظام خط Noto Sans Arabic المحمّل بآلية Next.js، مع مقياس قراءة ثابت وتسلسل عناوين واضح وتباعد يحافظ على التركيز في الصفحات الطويلة والواجهات المهنية.</p>
+            <p>يستخدم النظام خط Noto Sans Arabic المتغيّر والمستضاف محليًا ضمن حزمة المنصة، مع مقياس قراءة ثابت وتسلسل عناوين واضح وتباعد يحافظ على التركيز في الصفحات الطويلة والواجهات المهنية.</p>
           </div>
           <div className="theme-preview-metrics" aria-label="مقاييس القراءة والوصولية">
             <div><strong>72 حرفًا</strong><span>مقياس القراءة الأقصى</span></div>
@@ -70,7 +70,7 @@ export default function ThemePreviewPage() {
 
       <section className="rawafid-section" id="forms">
         <div className="dashboard-card theme-preview-dashboard">
-          <div className="admin-heading"><div><span className="eyebrow">واجهة إدارية</span><h1>نموذج لوحة التحكم</h1><p>اختبار البطاقات والنماذج وحالات النظام ضمن نفس Design System المركزي.</p></div><div className="dashboard-actions"><button className="button" type="button">إجراء ثانوي</button></div></div>
+          <div className="admin-heading"><div><span className="eyebrow">واجهة إدارية</span><h2>نموذج لوحة التحكم</h2><p>اختبار البطاقات والنماذج وحالات النظام ضمن نفس Design System المركزي.</p></div><div className="dashboard-actions"><button className="button" type="button">إجراء ثانوي</button></div></div>
           <div className="admin-stat-grid"><article><strong>0</strong><span>محتوى</span></article><article><strong>0</strong><span>قطاعات</span></article><article><strong>0</strong><span>مختصون</span></article><article><strong>0</strong><span>مراكز</span></article></div>
           <section className="portal-section"><div className="section-mini-heading"><h2>نموذج إدخال</h2><span>حقول وحالات Focus</span></div><div className="cms-grid"><label>حقل نصي<input placeholder="مثال" /></label><label>قائمة<select defaultValue=""><option value="" disabled>اختر</option><option>خيار نموذجي</option></select></label><label className="cms-wide">وصف<textarea rows={4} placeholder="نص تجريبي لقياس المسافات والتباين فقط" /></label></div><div className="cms-actions"><button className="primary-action" type="button">حفظ</button><span>لا يتم إرسال أي بيانات من صفحة المعاينة.</span></div></section>
           <div className="portal-notice"><strong>حالة معلومات</strong><span>نموذج لحالة محايدة.</span></div><div className="portal-notice warning"><strong>حالة تنبيه</strong><span>نموذج لحالة تحتاج انتباهًا.</span></div><div className="portal-notice danger"><strong>حالة حرجة</strong><span>نموذج لحالة خطأ أو إيقاف.</span></div>

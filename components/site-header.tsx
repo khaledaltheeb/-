@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import PlatformIcon from '@/components/platform-icon';
 import RawafidBrand from '@/components/rawafid-brand';
 import { getPublicSectors } from '@/lib/public-taxonomy';
@@ -58,11 +59,12 @@ export default async function SiteHeader() {
 
   return (
     <>
+      <a className="skip-link" href="#main-content">تجاوز إلى المحتوى الرئيسي</a>
       <header className="site-header">
         <div className="site-header-inner">
           <RawafidBrand />
           <nav className="desktop-nav" aria-label="التنقل الرئيسي">
-            <a href="/">الرئيسية</a>
+            <Link href="/">الرئيسية</Link>
             <details className="nav-dropdown mega-nav">
               <summary><span>استكشف روافد</span></summary>
               <div className="nav-dropdown-panel mega-nav-panel">
@@ -71,17 +73,17 @@ export default async function SiteHeader() {
                     <strong>الوصول إلى روافد حسب احتياجك</strong>
                     <span>قطاعات معرفية، مسارات بحث، وأدلة خدمات ضمن تجربة واحدة</span>
                   </div>
-                  <a href="/search">فتح البحث المتقدم ←</a>
+                  <Link href="/search">فتح البحث المتقدم ←</Link>
                 </div>
                 <div className="mega-nav-layout">
                   <section className="mega-nav-column mega-nav-sectors">
                     <h2>القطاعات</h2>
                     <div className="mega-sector-grid">
                       {sectors.map((sector) => (
-                        <a key={sector.slug} href={'/sectors/' + sector.slug}>
+                        <Link key={sector.slug} href={'/sectors/' + sector.slug}>
                           <i style={{ background: sector.accent || '#08716d' }} aria-hidden="true" />
                           <span>{sector.name_ar}</span>
-                        </a>
+                        </Link>
                       ))}
                       {sectors.length === 0 && (
                         <div className="mega-empty">
@@ -95,10 +97,10 @@ export default async function SiteHeader() {
                     <h2>ابدأ من احتياجك</h2>
                     <div className="mega-intent-list">
                       {intentLinks.map((link) => (
-                        <a href={link.href} key={link.href}>
+                        <Link href={link.href} key={link.href}>
                           <strong>{link.label}</strong>
                           <span>{link.detail}</span>
-                        </a>
+                        </Link>
                       ))}
                     </div>
                   </section>
@@ -106,17 +108,17 @@ export default async function SiteHeader() {
                     <h2>الدليل والخدمات</h2>
                     <div>
                       {serviceLinks.map((link) => (
-                        <a href={link.href} key={link.href}>
+                        <Link href={link.href} key={link.href}>
                           <PlatformIcon name={link.icon} size={19} />
                           <span>{link.label}</span>
-                        </a>
+                        </Link>
                       ))}
                     </div>
                     {signedIn && (
                       <div className="mega-member-links">
-                        <a href="/messages">الرسائل</a>
-                        <a href="/appointments">المواعيد</a>
-                        <a href="/notifications">الإشعارات</a>
+                        <Link href="/messages">الرسائل</Link>
+                        <Link href="/appointments">المواعيد</Link>
+                        <Link href="/notifications">الإشعارات</Link>
                       </div>
                     )}
                   </section>
@@ -124,9 +126,9 @@ export default async function SiteHeader() {
               </div>
             </details>
             {primaryLinks.map((link) => (
-              <a key={link.href} href={link.href} data-nav-priority={link.secondary ? 'secondary' : 'primary'}>
+              <Link key={link.href} href={link.href} data-nav-priority={link.secondary ? 'secondary' : 'primary'}>
                 {link.label}
-              </a>
+              </Link>
             ))}
           </nav>
           <form className="header-search" action="/search" method="get" role="search">
@@ -136,8 +138,8 @@ export default async function SiteHeader() {
           </form>
           <div className="header-actions">
             {signedIn
-              ? <a className="button header-login" href="/account">حسابي</a>
-              : <a className="button header-login" href="/login">تسجيل الدخول</a>}
+              ? <Link className="button header-login" href="/account">حسابي</Link>
+              : <Link className="button header-login" href="/login">تسجيل الدخول</Link>}
           </div>
           <details className="mobile-menu">
             <summary aria-label="فتح قائمة التنقل"><NavIcon name="more" /><span>القائمة</span></summary>
@@ -147,36 +149,37 @@ export default async function SiteHeader() {
                 <input id="mobile-search-input" name="q" type="search" placeholder="حالة، دليل أو خدمة" maxLength={120} enterKeyHint="search" />
                 <button type="submit">بحث</button>
               </form>
-              <a href="/">الرئيسية</a>
-              <a href="/sections">جميع الأقسام</a>
-              <a href="/encyclopedia/">الموسوعة</a>
-              <a href="/evidence-guides/">الأدلة العلمية</a>
+              <Link href="/">الرئيسية</Link>
+              <Link href="/sections">جميع الأقسام</Link>
+              <Link href="/encyclopedia/">الموسوعة</Link>
+              <Link href="/evidence-guides/">الأدلة العلمية</Link>
               <span className="mobile-menu-label">ابدأ من احتياجك</span>
-              {intentLinks.map((link) => <a key={link.href} href={link.href}>{link.label}</a>)}
+              {intentLinks.map((link) => <Link key={link.href} href={link.href}>{link.label}</Link>)}
               <span className="mobile-menu-label">القطاعات</span>
-              {sectors.map((sector) => <a key={sector.slug} href={'/sectors/' + sector.slug}>{sector.name_ar}</a>)}
+              {sectors.map((sector) => <Link key={sector.slug} href={'/sectors/' + sector.slug}>{sector.name_ar}</Link>)}
               {sectors.length === 0 && <span className="nav-empty">لا توجد قطاعات عامة متاحة حاليًا.</span>}
               <span className="mobile-menu-label">الدليل والمشاركة</span>
-              {serviceLinks.map((link) => <a key={link.href} href={link.href}>{link.label}</a>)}
-              <a href="/experiences/">شاركنا تجربتك</a>
+              {serviceLinks.map((link) => <Link key={link.href} href={link.href}>{link.label}</Link>)}
+              <Link href="/experiences/">شاركنا تجربتك</Link>
               {signedIn ? (
                 <>
-                  <a href="/messages">الرسائل</a>
-                  <a href="/appointments">المواعيد</a>
-                  <a href="/notifications">الإشعارات</a>
-                  <a href="/account">حسابي</a>
+                  <Link href="/messages">الرسائل</Link>
+                  <Link href="/appointments">المواعيد</Link>
+                  <Link href="/notifications">الإشعارات</Link>
+                  <Link href="/account">حسابي</Link>
                 </>
-              ) : <a href="/login">تسجيل الدخول</a>}
+              ) : <Link href="/login">تسجيل الدخول</Link>}
             </div>
           </details>
         </div>
       </header>
+      <span id="main-content" className="skip-target" tabIndex={-1} />
       <nav className="mobile-bottom-nav" aria-label="التنقل السريع للهاتف">
         {mobileItems.map((item) => (
-          <a href={item.href} key={item.href + item.label}>
+          <Link href={item.href} key={item.href + item.label}>
             <NavIcon name={item.icon} />
             <span>{item.label}</span>
-          </a>
+          </Link>
         ))}
       </nav>
     </>
