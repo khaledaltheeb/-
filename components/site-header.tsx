@@ -8,7 +8,6 @@ const primaryLinks = [
   { href: '/sections', label: 'الأقسام', secondary: false },
   { href: '/encyclopedia/', label: 'الموسوعة', secondary: false },
   { href: '/evidence-guides/', label: 'الأدلة', secondary: false },
-  { href: '/experiences/', label: 'شاركنا تجربتك', secondary: true },
 ];
 
 const intentLinks = [
@@ -23,10 +22,10 @@ const serviceLinks = [
   { href: '/centers', label: 'العثور على مركز', icon: 'center' as const },
   { href: '/cognitive-lab', label: 'المختبر المعرفي', icon: 'tools' as const },
   { href: '/community', label: 'مجتمع المتدربين والمتطوعين', icon: 'community' as const },
-  { href: '/search', label: 'البحث المتقدم', icon: 'search' as const },
+  { href: '/experiences/', label: 'التجارب والمشاركة', icon: 'community' as const },
 ];
 
-type IconName = 'home' | 'search' | 'discover' | 'messages' | 'account' | 'specialists' | 'more';
+type IconName = 'home' | 'search' | 'discover' | 'messages' | 'appointments' | 'account' | 'specialists' | 'more';
 
 function NavIcon({ name }: { name: IconName }) {
   const common = { width: 20, height: 20, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.9, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const, 'aria-hidden': true };
@@ -34,6 +33,7 @@ function NavIcon({ name }: { name: IconName }) {
   if (name === 'search') return <svg {...common}><circle cx="11" cy="11" r="7" /><path d="m20 20-4-4" /></svg>;
   if (name === 'discover') return <svg {...common}><circle cx="12" cy="12" r="9" /><path d="m15.5 8.5-2.2 4.8-4.8 2.2 2.2-4.8 4.8-2.2Z" /></svg>;
   if (name === 'messages') return <svg {...common}><path d="M4 5h16v11H9l-5 4V5Z" /><path d="M8 9h8M8 12h5" /></svg>;
+  if (name === 'appointments') return <svg {...common}><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M7 3v4M17 3v4M3 10h18" /><path d="m8 15 2 2 5-5" /></svg>;
   if (name === 'account') return <svg {...common}><circle cx="12" cy="8" r="4" /><path d="M4.5 21a7.5 7.5 0 0 1 15 0" /></svg>;
   if (name === 'specialists') return <svg {...common}><circle cx="12" cy="7.5" r="3.5" /><path d="M5.5 20a6.5 6.5 0 0 1 13 0" /><path d="M18.5 7.5h3M20 6v3" /></svg>;
   return <svg {...common}><circle cx="5" cy="12" r="1" fill="currentColor" stroke="none" /><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none" /><circle cx="19" cy="12" r="1" fill="currentColor" stroke="none" /></svg>;
@@ -46,13 +46,13 @@ export default async function SiteHeader() {
   const mobileItems: Array<{ href: string; label: string; icon: IconName }> = signedIn ? [
     { href: '/', label: 'الرئيسية', icon: 'home' },
     { href: '/search', label: 'بحث', icon: 'search' },
-    { href: '/experiences/', label: 'التجارب', icon: 'discover' },
     { href: '/messages', label: 'الرسائل', icon: 'messages' },
+    { href: '/appointments', label: 'المواعيد', icon: 'appointments' },
     { href: '/account', label: 'حسابي', icon: 'account' },
   ] : [
     { href: '/', label: 'الرئيسية', icon: 'home' },
     { href: '/search', label: 'بحث', icon: 'search' },
-    { href: '/experiences/', label: 'التجارب', icon: 'discover' },
+    { href: '/sections', label: 'استكشف', icon: 'discover' },
     { href: '/specialists', label: 'مختصون', icon: 'specialists' },
     { href: '/about', label: 'المزيد', icon: 'more' },
   ];
@@ -105,7 +105,7 @@ export default async function SiteHeader() {
                     </div>
                   </section>
                   <section className="mega-nav-column mega-services">
-                    <h2>الدليل والخدمات</h2>
+                    <h2>الخدمات والمشاركة</h2>
                     <div>
                       {serviceLinks.map((link) => (
                         <Link prefetch={false} href={link.href} key={link.href}>
@@ -158,9 +158,8 @@ export default async function SiteHeader() {
               <span className="mobile-menu-label">القطاعات</span>
               {sectors.map((sector) => <Link prefetch={false} key={sector.slug} href={'/sectors/' + sector.slug}>{sector.name_ar}</Link>)}
               {sectors.length === 0 && <span className="nav-empty">لا توجد قطاعات عامة متاحة حاليًا.</span>}
-              <span className="mobile-menu-label">الدليل والمشاركة</span>
+              <span className="mobile-menu-label">الخدمات والمشاركة</span>
               {serviceLinks.map((link) => <Link prefetch={false} key={link.href} href={link.href}>{link.label}</Link>)}
-              <Link prefetch={false} href="/experiences/">شاركنا تجربتك</Link>
               {signedIn ? (
                 <>
                   <Link prefetch={false} href="/messages">الرسائل</Link>
