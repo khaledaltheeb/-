@@ -7,6 +7,7 @@ on:
       - 'data/legacy-source-preservation/**'
       - 'data/migration-batches/legacy-missing-source-pages-001.config.json'
       - 'scripts/validate_legacy_source_preservation.py'
+      - 'scripts/materialize_preserved_legacy_sources.py'
       - 'scripts/validate_legacy_transfer_payload.py'
       - '.github/workflows/preserve-missing-legacy-source-pages.yml'
   workflow_dispatch:
@@ -17,7 +18,7 @@ permissions:
 jobs:
   preserve-and-materialize:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
     steps:
       - name: Checkout target repository
         uses: actions/checkout@v7
@@ -30,26 +31,11 @@ jobs:
       - name: Verify verbatim repository snapshots
         run: python scripts/validate_legacy_source_preservation.py data/legacy-source-preservation/manifest-v1.json
 
-      - name: Checkout legacy source read-only
-        uses: actions/checkout@v7
-        with:
-          repository: khaledaltheeb/healthrenewal.org
-          ref: main
-          path: legacy-source
-          persist-credentials: false
-
-      - name: Extract legacy inventory
+      - name: Materialize from verified repository snapshots
         run: >-
-          python scripts/legacy_content_extract.py legacy-source
-          --output artifacts/legacy-content-inventory.json
-          --summary artifacts/legacy-content-summary.json
-
-      - name: Materialize missing source pages
-        run: >-
-          python scripts/prepare_legacy_batch.py
-          artifacts/legacy-content-inventory.json
+          python scripts/materialize_preserved_legacy_sources.py
+          data/legacy-source-preservation/manifest-v1.json
           data/migration-batches/legacy-missing-source-pages-001.config.json
-          --legacy-root legacy-source
           --output artifacts/legacy-missing-source-pages-001.json
 
       - name: Validate mandatory transfer
@@ -68,8 +54,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: legacy-missing-source-pages-001
-          path: |
-            artifacts/legacy-missing-source-pages-001.json
-            artifacts/legacy-content-summary.json
+          path: artifacts/legacy-missing-source-pages-001.json
           if-no-files-found: error
           retention-days: 30
