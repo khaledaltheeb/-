@@ -1,0 +1,80 @@
+name: Materialize Encyclopedia Review Drafts
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'data/encyclopedia/drafts/**'
+      - 'data/encyclopedia/research/*.json'
+      - 'data/encyclopedia/generated/review-drafts/**'
+      - 'scripts/resolve_encyclopedia_research_plan.py'
+      - 'scripts/materialize_encyclopedia_draft.py'
+      - 'scripts/validate_encyclopedia_draft.py'
+      - 'scripts/validate_encyclopedia_materialized_payload.py'
+      - '.github/workflows/materialize-encyclopedia-review-drafts.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'data/encyclopedia/drafts/**'
+      - 'data/encyclopedia/research/*.json'
+      - 'data/encyclopedia/generated/review-drafts/**'
+      - 'scripts/resolve_encyclopedia_research_plan.py'
+      - 'scripts/materialize_encyclopedia_draft.py'
+      - 'scripts/validate_encyclopedia_draft.py'
+      - 'scripts/validate_encyclopedia_materialized_payload.py'
+      - '.github/workflows/materialize-encyclopedia-review-drafts.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Compile materialization gates
+        run: |
+          python -m py_compile \
+            scripts/resolve_encyclopedia_research_plan.py \
+            scripts/validate_encyclopedia_draft.py \
+            scripts/materialize_encyclopedia_draft.py \
+            scripts/validate_encyclopedia_materialized_payload.py
+
+      - name: Validate and materialize every scientific-review draft
+        run: |
+          set -euo pipefail
+          mkdir -p data/encyclopedia/generated/review-drafts
+          count=0
+          for draft in data/encyclopedia/drafts/*-v1.json; do
+            test -f "$draft"
+            base="$(basename "$draft")"
+            output="data/encyclopedia/generated/review-drafts/$base"
+            plan="$(python scripts/resolve_encyclopedia_research_plan.py "$draft")"
+            echo "Validating $draft against $plan and materializing -> $output"
+            python scripts/validate_encyclopedia_draft.py "$draft" --plan "$plan"
+            python scripts/materialize_encyclopedia_draft.py "$draft" --output "$output"
+            python scripts/validate_encyclopedia_materialized_payload.py "$output"
+            count=$((count+1))
+          done
+          test "$count" -gt 0
+          echo "Materialized $count encyclopedia review draft(s)."
+
+      - name: Reject orphan generated review payloads
+        run: |
+          set -euo pipefail
+          for payload in data/encyclopedia/generated/review-drafts/*-v1.json; do
+            test -f "$payload"
+            source="data/encyclopedia/drafts/$(basename "$payload")"
+            test -f "$source" || { echo "Orphan generated payload: $payload"; exit 1; }
+          done
+
+      - name: Assert committed review payloads are deterministic
+        run: git diff --exit-code -- data/encyclopedia/generated/review-drafts

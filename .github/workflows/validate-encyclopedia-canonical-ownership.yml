@@ -1,0 +1,40 @@
+name: Validate Encyclopedia Canonical Ownership
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'data/encyclopedia/batches/**'
+      - 'data/encyclopedia/generated/review-drafts/**'
+      - 'data/encyclopedia/canonical-adoptions-v1.json'
+      - 'data/encyclopedia/enrichment/**'
+      - 'scripts/validate_encyclopedia_canonical_ownership.mjs'
+      - '.github/workflows/validate-encyclopedia-canonical-ownership.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'data/encyclopedia/batches/**'
+      - 'data/encyclopedia/generated/review-drafts/**'
+      - 'data/encyclopedia/canonical-adoptions-v1.json'
+      - 'data/encyclopedia/enrichment/**'
+      - 'scripts/validate_encyclopedia_canonical_ownership.mjs'
+      - '.github/workflows/validate-encyclopedia-canonical-ownership.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  canonical-ownership:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Validate script syntax
+        run: node --check scripts/validate_encyclopedia_canonical_ownership.mjs
+      - name: Reject unresolved cross-domain canonical collisions
+        run: node scripts/validate_encyclopedia_canonical_ownership.mjs

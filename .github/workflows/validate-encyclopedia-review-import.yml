@@ -1,0 +1,115 @@
+name: Validate Encyclopedia Review Import
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'data/encyclopedia/drafts/**'
+      - 'data/encyclopedia/research/*.json'
+      - 'data/encyclopedia/generated/review-drafts/**'
+      - 'data/encyclopedia/canonical-adoptions-v1.json'
+      - 'scripts/resolve_encyclopedia_research_plan.py'
+      - 'scripts/validate_encyclopedia_draft.py'
+      - 'scripts/materialize_encyclopedia_draft.py'
+      - 'scripts/validate_encyclopedia_materialized_payload.py'
+      - 'scripts/import_disability_encyclopedia_review.mjs'
+      - '.github/workflows/validate-encyclopedia-review-import.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'data/encyclopedia/drafts/**'
+      - 'data/encyclopedia/research/*.json'
+      - 'data/encyclopedia/generated/review-drafts/**'
+      - 'data/encyclopedia/canonical-adoptions-v1.json'
+      - 'scripts/resolve_encyclopedia_research_plan.py'
+      - 'scripts/validate_encyclopedia_draft.py'
+      - 'scripts/materialize_encyclopedia_draft.py'
+      - 'scripts/validate_encyclopedia_materialized_payload.py'
+      - 'scripts/import_disability_encyclopedia_review.mjs'
+      - '.github/workflows/validate-encyclopedia-review-import.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  dry-run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - name: Install locked dependencies
+        run: npm install --no-audit --no-fund
+      - name: Validate import and materialization tool syntax
+        run: |
+          node --check scripts/import_disability_encyclopedia_review.mjs
+          python -m py_compile \
+            scripts/resolve_encyclopedia_research_plan.py \
+            scripts/validate_encyclopedia_draft.py \
+            scripts/materialize_encyclopedia_draft.py \
+            scripts/validate_encyclopedia_materialized_payload.py
+      - name: Materialize deterministic review payloads locally
+        run: |
+          set -euo pipefail
+          mkdir -p data/encyclopedia/generated/review-drafts
+          rm -f data/encyclopedia/generated/review-drafts/*-v1.json
+          count=0
+          for draft in data/encyclopedia/drafts/*-v1.json; do
+            test -f "$draft"
+            base="$(basename "$draft")"
+            output="data/encyclopedia/generated/review-drafts/$base"
+            plan="$(python scripts/resolve_encyclopedia_research_plan.py "$draft")"
+            python scripts/validate_encyclopedia_draft.py "$draft" --plan "$plan"
+            python scripts/materialize_encyclopedia_draft.py "$draft" --output "$output"
+            python scripts/validate_encyclopedia_materialized_payload.py "$output"
+            count=$((count+1))
+          done
+          test "$count" -gt 0
+          echo "Locally materialized $count review payload(s) before import dry-run."
+      - name: Offline dry-run for all genuinely new review payloads
+        env:
+          SUPABASE_URL: ''
+          NEXT_PUBLIC_SUPABASE_URL: ''
+          SUPABASE_SECRET_KEY: ''
+        run: |
+          set -euo pipefail
+          expected="$(find data/encyclopedia/drafts -maxdepth 1 -type f -name '*-v1.json' | wc -l | tr -d ' ')"
+          generated="$(find data/encyclopedia/generated/review-drafts -maxdepth 1 -type f -name '*-v1.json' | wc -l | tr -d ' ')"
+          test "$expected" -gt 0
+          test "$generated" -eq "$expected"
+          node scripts/import_disability_encyclopedia_review.mjs --expect-count "$expected"
+      - name: Assert adopted canonicals remain enrichment-only
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const p=JSON.parse(fs.readFileSync('data/encyclopedia/canonical-adoptions-v1.json','utf8'));
+          const expected=new Set(['attention-deficit-hyperactivity-disorder','dyslexia','developmental-language-disorder']);
+          for(const slug of expected){
+            const row=p.adoptions.find((item)=>item.slug===slug);
+            if(!row||row.import_as_new_record!==false||row.decision!=='merge-into-existing-canonical') throw new Error(`${slug}: canonical adoption contract failed`);
+            if(!fs.existsSync(row.owner_source)||!fs.existsSync(row.specialty_enrichment_source)) throw new Error(`${slug}: canonical adoption source is missing`);
+          }
+          if(p.adoptions.length!==expected.size) throw new Error(`Unexpected canonical adoption count: ${p.adoptions.length}`);
+          NODE
+      - name: Assert apply mode requires credentials and cannot silently write
+        env:
+          SUPABASE_URL: ''
+          NEXT_PUBLIC_SUPABASE_URL: ''
+          SUPABASE_SECRET_KEY: ''
+        run: |
+          set -euo pipefail
+          expected="$(find data/encyclopedia/drafts -maxdepth 1 -type f -name '*-v1.json' | wc -l | tr -d ' ')"
+          set +e
+          output="$(node scripts/import_disability_encyclopedia_review.mjs --apply --expect-count "$expected" 2>&1)"
+          code=$?
+          set -e
+          printf '%s\n' "$output"
+          test "$code" -ne 0
+          printf '%s' "$output" | grep -q 'required for --apply'

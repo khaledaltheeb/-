@@ -1,0 +1,109 @@
+name: Validate Encyclopedia Draft Portfolio
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'data/encyclopedia/drafts/**'
+      - 'data/encyclopedia/research/*.json'
+      - 'data/encyclopedia/generated/review-drafts/**'
+      - 'scripts/resolve_encyclopedia_research_plan.py'
+      - 'scripts/validate_encyclopedia_draft.py'
+      - 'scripts/materialize_encyclopedia_draft.py'
+      - 'scripts/validate_encyclopedia_materialized_payload.py'
+      - 'scripts/validate_encyclopedia_draft_portfolio.py'
+      - '.github/workflows/validate-encyclopedia-portfolio.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'data/encyclopedia/drafts/**'
+      - 'data/encyclopedia/research/*.json'
+      - 'data/encyclopedia/generated/review-drafts/**'
+      - 'scripts/resolve_encyclopedia_research_plan.py'
+      - 'scripts/validate_encyclopedia_draft.py'
+      - 'scripts/materialize_encyclopedia_draft.py'
+      - 'scripts/validate_encyclopedia_materialized_payload.py'
+      - 'scripts/validate_encyclopedia_draft_portfolio.py'
+      - '.github/workflows/validate-encyclopedia-portfolio.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  portfolio-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Compile portfolio and materialization gates
+        run: |
+          python -m py_compile \
+            scripts/resolve_encyclopedia_research_plan.py \
+            scripts/validate_encyclopedia_draft.py \
+            scripts/materialize_encyclopedia_draft.py \
+            scripts/validate_encyclopedia_materialized_payload.py \
+            scripts/validate_encyclopedia_draft_portfolio.py
+
+      - name: Materialize deterministic review payloads locally
+        run: |
+          set -euo pipefail
+          mkdir -p data/encyclopedia/generated/review-drafts
+          rm -f data/encyclopedia/generated/review-drafts/*-v1.json
+          count=0
+          for draft in data/encyclopedia/drafts/*-v1.json; do
+            test -f "$draft"
+            base="$(basename "$draft")"
+            output="data/encyclopedia/generated/review-drafts/$base"
+            plan="$(python scripts/resolve_encyclopedia_research_plan.py "$draft")"
+            python scripts/validate_encyclopedia_draft.py "$draft" --plan "$plan"
+            python scripts/materialize_encyclopedia_draft.py "$draft" --output "$output"
+            python scripts/validate_encyclopedia_materialized_payload.py "$output"
+            count=$((count+1))
+          done
+          test "$count" -gt 0
+          echo "Locally materialized $count review payload(s) before portfolio validation."
+
+      - name: Validate uniqueness evidence diversity and source parity
+        run: |
+          python scripts/validate_encyclopedia_draft_portfolio.py \
+            --drafts-dir data/encyclopedia/drafts \
+            --generated-dir data/encyclopedia/generated/review-drafts \
+            --manifest "$RUNNER_TEMP/encyclopedia-review-drafts-index-v1.json"
+
+      - name: Validate ephemeral portfolio manifest invariants
+        run: |
+          set -euo pipefail
+          manifest="$RUNNER_TEMP/encyclopedia-review-drafts-index-v1.json"
+          test -s "$manifest"
+          python - "$manifest" <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          payload = json.loads(Path(sys.argv[1]).read_text(encoding='utf-8'))
+          assert payload['status'] == 'passed'
+          assert payload['source_draft_count'] > 0
+          assert payload['source_draft_count'] == payload['generated_review_count']
+          assert payload['source_draft_count'] == payload['unique_canonical_count']
+          assert payload['publication_ready'] is False
+          assert payload['scientific_review_required'] is True
+          assert payload['unified_encyclopedia_route_slugs'] is True
+          assert payload['errors'] == []
+          print(json.dumps({
+              'status': payload['status'],
+              'source_draft_count': payload['source_draft_count'],
+              'generated_review_count': payload['generated_review_count'],
+              'unique_canonical_count': payload['unique_canonical_count'],
+              'max_pairwise_body_5gram_jaccard': payload['max_pairwise_body_5gram_jaccard'],
+          }, ensure_ascii=False))
+          PY
+
+      - name: Assert committed review payloads are deterministic
+        run: git diff --exit-code -- data/encyclopedia/generated/review-drafts

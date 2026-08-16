@@ -1,0 +1,44 @@
+name: Validate Encyclopedia Research Batches
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'data/encyclopedia/research/*.json'
+      - 'data/encyclopedia/generated/legacy-candidates-v1.json'
+      - 'scripts/validate_encyclopedia_research_batch.py'
+      - '.github/workflows/validate-encyclopedia-research-batch.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'data/encyclopedia/research/*.json'
+      - 'data/encyclopedia/generated/legacy-candidates-v1.json'
+      - 'scripts/validate_encyclopedia_research_batch.py'
+      - '.github/workflows/validate-encyclopedia-research-batch.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  research-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - name: Compile research validator
+        run: python -m py_compile scripts/validate_encyclopedia_research_batch.py
+      - name: Validate all encyclopedia research batches
+        run: |
+          set -euo pipefail
+          found=0
+          for batch in data/encyclopedia/research/batch-*-source-plan.json; do
+            test -f "$batch" || continue
+            found=$((found + 1))
+            echo "Validating $batch"
+            python scripts/validate_encyclopedia_research_batch.py "$batch" --registry data/encyclopedia/generated/legacy-candidates-v1.json
+          done
+          test "$found" -gt 0
