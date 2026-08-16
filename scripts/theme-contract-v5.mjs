@@ -33,6 +33,7 @@ if (!themeV71.includes('Rawafid Institutional Theme V7.1')) fail('V7.1 theme mar
 if (!themeV7.includes('Rawafid Institutional Theme V7')) fail('V7 compatibility marker missing');
 if (!themeV6.includes('Rawafid Institutional Theme V6')) fail('V6 compatibility marker missing');
 if (/letter-spacing:-(?:\d|\.)/.test(themeV7) || /letter-spacing:-(?:\d|\.)/.test(themeV71)) fail('public Arabic typography must not use negative letter spacing');
+
 for (const marker of [
   '--rf-container:82rem',
   '--rf-focus:#0b67c2',
@@ -46,15 +47,20 @@ for (const marker of [
 ]) {
   if (!themeV7.includes(marker)) fail(`V7 institutional regression marker missing ${marker}`);
 }
+
 for (const marker of [
   'Rawafid Institutional Theme V7.1',
   'backdrop-filter:none',
-  '@supports (content-visibility:auto)',
-  'content-visibility:auto',
-  'contain-intrinsic-size:auto 720px',
+  '-webkit-backdrop-filter:none',
+  '.mega-nav-panel{box-shadow:',
+  '.rawafid-hero-visual{box-shadow:',
 ]) {
   if (!themeV71.includes(marker)) fail(`V7.1 rendering regression marker missing ${marker}`);
 }
+for (const forbidden of ['content-visibility:auto', 'contain-intrinsic-size:auto 720px']) {
+  if (themeV71.includes(forbidden)) fail(`V7.1 must not reintroduce deferred semantic rendering: ${forbidden}`);
+}
+
 for (const marker of [
   'font-synthesis:none',
   '--rf-muted:#60767b',
