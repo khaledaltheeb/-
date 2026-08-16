@@ -2,60 +2,70 @@
 
 ## Scope
 
-Wave 004 is a 50-intent expansion selected from measured zero- and low-coverage taxonomy gaps in Rawafid. The largest initial gaps were `knowledge/cognitive-processes` and `knowledge/motivation-behavior`, both of which had **zero published guides** before this wave. The remaining intents extend educational assessment, inclusive learning, communication access, mobility/vision access, self-advocacy and transition without repeating existing Wave 003 pages.
+Wave 004 contains exactly **50 distinct evidence-led search intents** selected from measured zero- and low-coverage taxonomy gaps. It covers 12 cognitive-process guides, 12 motivation/behavior guides, 10 assessment/inclusive-learning guides, 8 communication/hearing/mobility/vision access guides, and 8 self-advocacy/transition/participation guides.
 
-The old `healthrenewal.org` repository remains read-only provenance/content input. This wave is implemented only in the new Rawafid V3 repository and Supabase content pipeline.
+The old `healthrenewal.org` repository remains read-only provenance/content input. This wave is implemented only in the Rawafid V3 repository and Supabase content pipeline.
 
-## Current Supabase publication checkpoint — 2026-08-15
+## Current Supabase checkpoint — 2026-08-16
 
-**5 of 50 candidates are published + indexable + `publication_ready=true`.**
+The live database audit reports:
 
-Published canonicals:
+- **12/50 records materialized**
+- **11 published + indexable**
+- **1 draft + noindex**: `/care-guides/care-guide-dual-task-attention-limit/`
+- **38 not yet materialized**
+- **11 records marked `publication_ready=true`**
+- **12/12 without a recorded human review date**
+- content depth across the 12 records: **2,509–3,280 Arabic words**
+- references: **5–7 per page**
+- **0 duplicate published/indexable canonicals site-wide**
+- **2 duplicate published primary-keyword clusters site-wide**, both outside the new page and requiring an editorial merge/canonical decision
 
-1. `/care-guides/working-memory-task-breakdown/`
-2. `/care-guides/cognitive-flexibility-switching-plan/`
-3. `/care-guides/inhibitory-control-pause-plan/`
-4. `/care-guides/sustained-attention-work-interval/`
-5. `/care-guides/selective-attention-distraction-audit/`
+The 11 already-published records are below the project's current strict 3,000-word editorial target (2,509–2,614 words). They are therefore a remediation queue, not claimed as fully compliant with the stricter target. They must be enriched without filler and receive a genuine human scientific review before a final quality sign-off.
 
-The live database audit after publishing the fifth page returned:
+## Page 12 quality checkpoint
 
-- 5/5 Wave 004 records `published`
-- 5/5 `robots_index=true`
-- 5/5 `publication_ready=true`
-- Arabic depth: **2,508–2,606 words per page**
-- references: **5 per page**
-- SEO descriptions: **152–160 characters**
-- **0 duplicate published/indexable canonicals across the site**
+`care-guide-dual-task-attention-limit` was created as **draft + noindex + follow** and is not counted as published. Database verification returned:
 
-## Editorial distinction of the first five
+- 3,280 body words
+- 61 structured blocks
+- 29 substantive paragraphs
+- 8 topic-specific FAQs
+- 7 unique references
+- 5 claim-to-source mappings
+- one primary category link
+- one unique slug, canonical and primary keyword
+- `publication_ready=false`
+- no fabricated reviewer name, credentials or review date
 
-- **Working memory / task breakdown** externalizes multi-step state, decision boundaries, resume points and handoffs rather than diagnosing memory.
-- **Cognitive flexibility / switching** separates planned transitions, rule changes, interruptions and return-to-plan costs.
-- **Inhibitory control / pause plan** models `signal → short pause → alternative response` and audits whether the environment makes the better action usable.
-- **Sustained attention / work interval** calibrates work and rest around task type and observed quality, not a universal timer rule.
-- **Selective attention / distraction audit** separates auditory, visual, digital, social, task-ambiguity and internal competition, then tests one environmental change at a time.
+The content distinguishes simultaneous activity, task switching and interruption; explains bottlenecks, reconfiguration and resumption costs cautiously; and provides education, workplace, family, service, accessibility and safety applications. Publication remains blocked pending an independent human scientific review and final rendered-page QA.
 
-These pages intentionally avoid converting cognitive constructs into individual diagnoses. They describe observable tasks, environments and supports, with specialist assessment left to qualified professionals when broader impairment or clinical concerns exist.
+## Source and originality controls
 
-## Wave 004 plan
+The source registry now includes the integrative multitasking review, a task-switching/dual-tasking meta-analysis, Pashler's dual-task interference review, an academic media-multitasking review, the Sana classroom experiment, CAST UDL 3.0 and WHO ICF.
 
-The configuration contains exactly **50 distinct intents**:
+The local page audit found:
 
-- 12 cognitive-process guides
-- 12 motivation/behavior guides
-- 10 assessment/inclusive-learning guides
-- 8 communication/hearing/mobility/vision access guides
-- 8 self-advocacy/transition/participation guides
+- 1,626 unique normalized tokens
+- lexical diversity 0.496
+- no exact duplicate paragraphs
+- no repeated five-word sequence
+- no unresolved claim-source identifiers
+- no placeholders
 
-A direct collision check against current slugs, canonicals and primary keywords returned zero collisions. Three initially close intents were replaced before the configuration was committed to prevent semantic competition with existing AAC, UDL-autonomy and school-to-university pages.
+These automated measures support originality and structure; they do not replace scientific or editorial review.
 
-## Source policy
+## Global collision hold
 
-The source registry combines official frameworks/standards (CAST UDL 3.0, WHO ICF, UN CRPD, UNICEF, ASHA, WHO hearing/wheelchair guidance, W3C WCAG 2.2) with peer-reviewed reviews/meta-analyses for executive functions, cognitive load, retrieval practice, spacing, self-determination, self-efficacy, implementation intentions and reward effects.
+Two existing published primary-keyword conflicts were found:
 
-Each page must independently pass the V8 database release gate before promotion. Listing an intent in the configuration does not count it as published.
+1. `care-guide-gaming-disorder-family-plan` and `gaming-disorder` target **اضطراب الألعاب الرقمية**.
+2. `comparisons-anxiety-vs-fear` and `evidence-guides-anxiety-fear-differences-guide` target **الفرق بين القلق والخوف**.
 
-## Next
+No automatic redirect or canonical change was applied because each cluster needs content comparison and an explicit merge/intent decision.
 
-Continue cognitive-process pages 6–12, then open the motivation/behavior gap. The pull request remains draft until the entire 50-page wave is complete and the final repository/CI checkpoint is green.
+## Release rule and next work
+
+Listing an intent in this configuration never counts as publication. A page may be promoted only after content depth, intent distinctiveness, authoritative references, claim mapping, SEO, accessibility, canonical uniqueness, rendered-page QA and genuine review evidence all pass.
+
+Next: remediate the first 11 cognitive-process pages to the strict editorial target, obtain human review evidence, then continue the motivation/behavior group. This pull request remains Draft until all 50 pages and the final CI checkpoint pass.

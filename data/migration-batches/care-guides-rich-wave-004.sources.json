@@ -1,31 +1,262 @@
 {
   "batch_id": "care-guides-rich-wave-004",
-  "reviewed_at": "2026-08-15",
+  "reviewed_at": "2026-08-16",
   "source_policy": "Use current authoritative standards and official guidance where available, plus peer-reviewed reviews and meta-analyses for cognitive and motivational mechanisms. Pages are educational and operational; they must not turn constructs such as attention, motivation or executive function into individual diagnoses. Accessibility pages describe barriers, participation and reasonable supports rather than making legal determinations for a specific jurisdiction.",
   "sources": [
-    {"id":"Diamond-Executive-Functions-2013","title":"Executive Functions","publisher":"Annual Review of Psychology / PMC","year":2013,"url":"https://pmc.ncbi.nlm.nih.gov/articles/PMC4084861/","source_type":"review","authority_tier":"secondary"},
-    {"id":"Sweller-CLT-2023","title":"Discussion of the special issue on cognitive load theory","publisher":"British Journal of Educational Psychology / PubMed","year":2023,"url":"https://pubmed.ncbi.nlm.nih.gov/37160659/","source_type":"review","authority_tier":"secondary"},
-    {"id":"Retrieval-Practice-Review-2023","title":"Testing Improves Performance as Well as Assesses Learning: A Review of the Testing Effect","publisher":"PMC","year":2023,"url":"https://pmc.ncbi.nlm.nih.gov/articles/PMC10229024/","source_type":"review","authority_tier":"secondary"},
-    {"id":"Science-Learning-Teaching-2018","title":"Teaching the science of learning","publisher":"Cognitive Research: Principles and Implications / PMC","year":2018,"url":"https://pmc.ncbi.nlm.nih.gov/articles/PMC5780548/","source_type":"review","authority_tier":"secondary"},
-    {"id":"Cepeda-Spacing-2006","title":"Distributed practice in verbal recall tasks: A review and quantitative synthesis","publisher":"Psychological Bulletin / PubMed","year":2006,"url":"https://pubmed.ncbi.nlm.nih.gov/16719566/","source_type":"meta-analysis","authority_tier":"secondary"},
-    {"id":"Classroom-Spacing-Meta-2025","title":"The Distributed Practice Effect on Classroom Learning: A Meta-Analytic Review of Applied Research","publisher":"PubMed","year":2025,"url":"https://pubmed.ncbi.nlm.nih.gov/40564553/","source_type":"meta-analysis","authority_tier":"secondary"},
-    {"id":"Ryan-Deci-Intrinsic-Extrinsic-2000","title":"Intrinsic and Extrinsic Motivations: Classic Definitions and New Directions","publisher":"Contemporary Educational Psychology / PubMed","year":2000,"url":"https://pubmed.ncbi.nlm.nih.gov/10620381/","source_type":"review","authority_tier":"secondary"},
-    {"id":"Ryan-Deci-SDT-2000","title":"Self-determination theory and the facilitation of intrinsic motivation, social development, and well-being","publisher":"American Psychologist / PubMed","year":2000,"url":"https://pubmed.ncbi.nlm.nih.gov/11392867/","source_type":"review","authority_tier":"secondary"},
-    {"id":"Student-Motivation-SDT-Meta-2021","title":"Student Motivation and Associated Outcomes: A Meta-Analysis From Self-Determination Theory","publisher":"Perspectives on Psychological Science / PubMed","year":2021,"url":"https://pubmed.ncbi.nlm.nih.gov/33593153/","source_type":"meta-analysis","authority_tier":"secondary"},
-    {"id":"Self-Efficacy-Sources-Meta-2018","title":"Unique effects and moderators of effects of sources on self-efficacy: A model-based meta-analysis","publisher":"Journal of Applied Psychology / PubMed","year":2018,"url":"https://pubmed.ncbi.nlm.nih.gov/29154576/","source_type":"meta-analysis","authority_tier":"secondary"},
-    {"id":"Implementation-Intentions-2007","title":"Implementation intentions: a look back at fifteen years of progress","publisher":"Psicothema / PubMed","year":2007,"url":"https://pubmed.ncbi.nlm.nih.gov/17295981/","source_type":"review","authority_tier":"secondary"},
-    {"id":"Implementation-Intentions-Children-2026","title":"The effectiveness of implementation intentions in children: A systematic review and meta-analysis","publisher":"British Journal of Psychology / PubMed","year":2026,"url":"https://pubmed.ncbi.nlm.nih.gov/41784001/","source_type":"systematic-review-meta-analysis","authority_tier":"secondary"},
-    {"id":"Extrinsic-Rewards-Meta-1999","title":"A meta-analytic review of experiments examining the effects of extrinsic rewards on intrinsic motivation","publisher":"Psychological Bulletin / PubMed","year":1999,"url":"https://pubmed.ncbi.nlm.nih.gov/10589297/","source_type":"meta-analysis","authority_tier":"secondary"},
-    {"id":"CAST-UDL-3","title":"Universal Design for Learning Guidelines version 3.0","publisher":"CAST","year":2024,"url":"https://udlguidelines.cast.org/","source_type":"guideline","authority_tier":"primary"},
-    {"id":"CAST-UDL-Book-3E","title":"Universal Design for Learning: Principles, Framework, and Practice, Third Edition","publisher":"CAST Professional Publishing","year":2025,"url":"https://publishing.cast.org/catalog/books-products/udl-principles-framework-practice","source_type":"book","authority_tier":"primary"},
-    {"id":"UNICEF-Inclusive-Education","title":"Inclusive education","publisher":"UNICEF","url":"https://www.unicef.org/education/inclusive-education","source_type":"guideline","authority_tier":"primary"},
-    {"id":"UNICEF-Learning-For-Everyone","title":"Learning is For Everyone: Global Report","publisher":"UNICEF Innocenti","url":"https://www.unicef.org/innocenti/reports/learning-everyone-global-report","source_type":"global-report","authority_tier":"primary"},
-    {"id":"WHO-ICF","title":"International Classification of Functioning, Disability and Health (ICF)","publisher":"World Health Organization","url":"https://www.who.int/standards/classifications/international-classification-of-functioning-disability-and-health","source_type":"official-framework","authority_tier":"primary"},
-    {"id":"UN-CRPD-Article24","title":"Convention on the Rights of Persons with Disabilities — Article 24 Education","publisher":"United Nations","url":"https://social.desa.un.org/issues/disability/crpd/article-24-education","source_type":"rights-framework","authority_tier":"primary"},
-    {"id":"UN-CRPD-Articles","title":"Convention on the Rights of Persons with Disabilities — Articles","publisher":"United Nations","url":"https://social.desa.un.org/issues/disability/crpd/convention-on-the-rights-of-persons-with-disabilities-articles","source_type":"rights-framework","authority_tier":"primary"},
-    {"id":"ASHA-AAC-Practice-Portal","title":"Augmentative and Alternative Communication (AAC)","publisher":"American Speech-Language-Hearing Association","url":"https://www.asha.org/practice-portal/professional-issues/augmentative-and-alternative-communication/","source_type":"professional-guidance","authority_tier":"primary"},
-    {"id":"WHO-World-Report-Hearing-2021","title":"World report on hearing","publisher":"World Health Organization","year":2021,"url":"https://www.who.int/publications/i/item/9789240020481","source_type":"global-report","authority_tier":"primary"},
-    {"id":"WHO-Wheelchair-Guidelines-2023","title":"Wheelchair provision guidelines","publisher":"World Health Organization","year":2023,"url":"https://www.who.int/publications/b/63432","source_type":"guideline","authority_tier":"primary"},
-    {"id":"W3C-WCAG-2.2","title":"Web Content Accessibility Guidelines (WCAG) 2.2","publisher":"W3C Web Accessibility Initiative","year":2023,"url":"https://www.w3.org/TR/WCAG22/","source_type":"technical-standard","authority_tier":"primary"}
+    {
+      "id": "Diamond-Executive-Functions-2013",
+      "title": "Executive Functions",
+      "publisher": "Annual Review of Psychology / PMC",
+      "year": 2013,
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4084861/",
+      "source_type": "review",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Sweller-CLT-2023",
+      "title": "Discussion of the special issue on cognitive load theory",
+      "publisher": "British Journal of Educational Psychology / PubMed",
+      "year": 2023,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/37160659/",
+      "source_type": "review",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Retrieval-Practice-Review-2023",
+      "title": "Testing Improves Performance as Well as Assesses Learning: A Review of the Testing Effect",
+      "publisher": "PMC",
+      "year": 2023,
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10229024/",
+      "source_type": "review",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Science-Learning-Teaching-2018",
+      "title": "Teaching the science of learning",
+      "publisher": "Cognitive Research: Principles and Implications / PMC",
+      "year": 2018,
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5780548/",
+      "source_type": "review",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Cepeda-Spacing-2006",
+      "title": "Distributed practice in verbal recall tasks: A review and quantitative synthesis",
+      "publisher": "Psychological Bulletin / PubMed",
+      "year": 2006,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/16719566/",
+      "source_type": "meta-analysis",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Classroom-Spacing-Meta-2025",
+      "title": "The Distributed Practice Effect on Classroom Learning: A Meta-Analytic Review of Applied Research",
+      "publisher": "PubMed",
+      "year": 2025,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/40564553/",
+      "source_type": "meta-analysis",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Ryan-Deci-Intrinsic-Extrinsic-2000",
+      "title": "Intrinsic and Extrinsic Motivations: Classic Definitions and New Directions",
+      "publisher": "Contemporary Educational Psychology / PubMed",
+      "year": 2000,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/10620381/",
+      "source_type": "review",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Ryan-Deci-SDT-2000",
+      "title": "Self-determination theory and the facilitation of intrinsic motivation, social development, and well-being",
+      "publisher": "American Psychologist / PubMed",
+      "year": 2000,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/11392867/",
+      "source_type": "review",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Student-Motivation-SDT-Meta-2021",
+      "title": "Student Motivation and Associated Outcomes: A Meta-Analysis From Self-Determination Theory",
+      "publisher": "Perspectives on Psychological Science / PubMed",
+      "year": 2021,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/33593153/",
+      "source_type": "meta-analysis",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Self-Efficacy-Sources-Meta-2018",
+      "title": "Unique effects and moderators of effects of sources on self-efficacy: A model-based meta-analysis",
+      "publisher": "Journal of Applied Psychology / PubMed",
+      "year": 2018,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/29154576/",
+      "source_type": "meta-analysis",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Implementation-Intentions-2007",
+      "title": "Implementation intentions: a look back at fifteen years of progress",
+      "publisher": "Psicothema / PubMed",
+      "year": 2007,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/17295981/",
+      "source_type": "review",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Implementation-Intentions-Children-2026",
+      "title": "The effectiveness of implementation intentions in children: A systematic review and meta-analysis",
+      "publisher": "British Journal of Psychology / PubMed",
+      "year": 2026,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/41784001/",
+      "source_type": "systematic-review-meta-analysis",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Extrinsic-Rewards-Meta-1999",
+      "title": "A meta-analytic review of experiments examining the effects of extrinsic rewards on intrinsic motivation",
+      "publisher": "Psychological Bulletin / PubMed",
+      "year": 1999,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/10589297/",
+      "source_type": "meta-analysis",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "CAST-UDL-3",
+      "title": "Universal Design for Learning Guidelines version 3.0",
+      "publisher": "CAST",
+      "year": 2024,
+      "url": "https://udlguidelines.cast.org/",
+      "source_type": "guideline",
+      "authority_tier": "primary"
+    },
+    {
+      "id": "CAST-UDL-Book-3E",
+      "title": "Universal Design for Learning: Principles, Framework, and Practice, Third Edition",
+      "publisher": "CAST Professional Publishing",
+      "year": 2025,
+      "url": "https://publishing.cast.org/catalog/books-products/udl-principles-framework-practice",
+      "source_type": "book",
+      "authority_tier": "primary"
+    },
+    {
+      "id": "UNICEF-Inclusive-Education",
+      "title": "Inclusive education",
+      "publisher": "UNICEF",
+      "url": "https://www.unicef.org/education/inclusive-education",
+      "source_type": "guideline",
+      "authority_tier": "primary"
+    },
+    {
+      "id": "UNICEF-Learning-For-Everyone",
+      "title": "Learning is For Everyone: Global Report",
+      "publisher": "UNICEF Innocenti",
+      "url": "https://www.unicef.org/innocenti/reports/learning-everyone-global-report",
+      "source_type": "global-report",
+      "authority_tier": "primary"
+    },
+    {
+      "id": "WHO-ICF",
+      "title": "International Classification of Functioning, Disability and Health (ICF)",
+      "publisher": "World Health Organization",
+      "url": "https://www.who.int/standards/classifications/international-classification-of-functioning-disability-and-health",
+      "source_type": "official-framework",
+      "authority_tier": "primary"
+    },
+    {
+      "id": "UN-CRPD-Article24",
+      "title": "Convention on the Rights of Persons with Disabilities — Article 24 Education",
+      "publisher": "United Nations",
+      "url": "https://social.desa.un.org/issues/disability/crpd/article-24-education",
+      "source_type": "rights-framework",
+      "authority_tier": "primary"
+    },
+    {
+      "id": "UN-CRPD-Articles",
+      "title": "Convention on the Rights of Persons with Disabilities — Articles",
+      "publisher": "United Nations",
+      "url": "https://social.desa.un.org/issues/disability/crpd/convention-on-the-rights-of-persons-with-disabilities-articles",
+      "source_type": "rights-framework",
+      "authority_tier": "primary"
+    },
+    {
+      "id": "ASHA-AAC-Practice-Portal",
+      "title": "Augmentative and Alternative Communication (AAC)",
+      "publisher": "American Speech-Language-Hearing Association",
+      "url": "https://www.asha.org/practice-portal/professional-issues/augmentative-and-alternative-communication/",
+      "source_type": "professional-guidance",
+      "authority_tier": "primary"
+    },
+    {
+      "id": "WHO-World-Report-Hearing-2021",
+      "title": "World report on hearing",
+      "publisher": "World Health Organization",
+      "year": 2021,
+      "url": "https://www.who.int/publications/i/item/9789240020481",
+      "source_type": "global-report",
+      "authority_tier": "primary"
+    },
+    {
+      "id": "WHO-Wheelchair-Guidelines-2023",
+      "title": "Wheelchair provision guidelines",
+      "publisher": "World Health Organization",
+      "year": 2023,
+      "url": "https://www.who.int/publications/b/63432",
+      "source_type": "guideline",
+      "authority_tier": "primary"
+    },
+    {
+      "id": "W3C-WCAG-2.2",
+      "title": "Web Content Accessibility Guidelines (WCAG) 2.2",
+      "publisher": "W3C Web Accessibility Initiative",
+      "year": 2023,
+      "url": "https://www.w3.org/TR/WCAG22/",
+      "source_type": "technical-standard",
+      "authority_tier": "primary"
+    },
+    {
+      "id": "Koch-Multitasking-Review-2018",
+      "title": "Multitasking in the context of task switching and dual tasking",
+      "publisher": "Psychological Bulletin / PubMed",
+      "year": 2018,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/29517261/",
+      "source_type": "integrative-review",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Worringer-Multitasking-Meta-2019",
+      "title": "Common and distinct neural correlates of dual-tasking and task-switching: a meta-analytic review",
+      "publisher": "Brain Structure and Function",
+      "year": 2019,
+      "url": "https://link.springer.com/article/10.1007/s00429-019-01870-4",
+      "source_type": "meta-analysis",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Pashler-Dual-Task-1994",
+      "title": "Dual-task interference in simple tasks: data and theory",
+      "publisher": "Psychological Bulletin / Europe PMC",
+      "year": 1994,
+      "url": "https://europepmc.org/article/MED/7972591",
+      "source_type": "review",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "May-Elder-Media-Multitasking-2018",
+      "title": "Efficient, helpful, or distracting? A literature review of media multitasking in relation to academic performance",
+      "publisher": "International Journal of Educational Technology in Higher Education",
+      "year": 2018,
+      "url": "https://link.springer.com/article/10.1186/s41239-018-0096-z",
+      "source_type": "review",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Sana-Laptop-Multitasking-2013",
+      "title": "Laptop multitasking hinders classroom learning for both users and nearby peers",
+      "publisher": "Computers & Education / ERIC",
+      "year": 2013,
+      "url": "https://eric.ed.gov/?id=EJ1007624",
+      "source_type": "experimental-study",
+      "authority_tier": "secondary"
+    }
   ]
 }
