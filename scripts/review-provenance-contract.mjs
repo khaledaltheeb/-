@@ -6,15 +6,28 @@ const helperPath = 'lib/review-provenance.ts';
 const helper = fs.readFileSync(path.join(root, helperPath), 'utf8');
 
 const requiredHelperFragments = [
-  "RAWAFID_REVIEW_TEAM = 'فريق روافد'",
-  "explicitReviewer || (lastReviewedAt ? RAWAFID_REVIEW_TEAM : null)",
-  "lastReviewedAt ? 'Organization' : null",
+  'const hasAttributableReview = Boolean(recordedReviewDate && explicitReviewer);',
+  'const lastReviewedAt = hasAttributableReview ? recordedReviewDate : null;',
+  'const reviewerName = hasAttributableReview ? explicitReviewer : null;',
+  'reviewerName && reviewerCredentials',
   'reviewedBySchema',
 ];
 
 for (const fragment of requiredHelperFragments) {
   if (!helper.includes(fragment)) {
     throw new Error(`Review provenance helper contract missing: ${fragment}`);
+  }
+}
+
+const forbiddenHelperFragments = [
+  'RAWAFID_REVIEW_TEAM',
+  "explicitReviewer || (lastReviewedAt ?",
+  "lastReviewedAt ? 'Organization' : null",
+];
+
+for (const fragment of forbiddenHelperFragments) {
+  if (helper.includes(fragment)) {
+    throw new Error(`Review provenance helper must not infer review attribution: ${fragment}`);
   }
 }
 
@@ -38,14 +51,11 @@ for (const file of surfaces) {
     throw new Error(`${file}: must resolve review provenance from the content record`);
   }
   if (!source.includes('review.lastReviewedAt')) {
-    throw new Error(`${file}: lastReviewed must remain tied to the recorded review date`);
+    throw new Error(`${file}: lastReviewed must be sourced from attributable review provenance`);
   }
   if (!source.includes('review.reviewerName')) {
-    throw new Error(`${file}: visible review attribution must include the resolved reviewer`);
-  }
-  if (source.includes('hasHumanReview')) {
-    throw new Error(`${file}: must not reinterpret an existing team review as an unreviewed update`);
+    throw new Error(`${file}: visible review attribution must use the resolved reviewer`);
   }
 }
 
-console.log(`Review provenance contract passed: ${surfaces.length} public surfaces preserve lastReviewed as a Rawafid team review when no individual reviewer is recorded.`);
+console.log(`Review provenance contract passed: ${surfaces.length} public surfaces reject inferred team review attribution and expose only attributable review records.`);
