@@ -9,6 +9,8 @@ This batch rewrites two high-sensitivity V7 Care Guides that were held by the fu
 
 The pages remain published and directly accessible, but `noindex,follow`. No redirects or deletions are introduced.
 
+This is a stacked change on top of the Wave 004 hardening branch. Repository quality workflows are configured to run for pull requests targeting `main`, so the stacked PR may temporarily target `main` while its exact head is validated, then return to the Wave 004 base branch after the checks complete. The rewrite branch itself remains `behind=0` relative to both its stacked base and current `main` at the validation checkpoint.
+
 ## Editorial method
 
 The useful topic-specific material that preceded the generic V7 tail was preserved. The repeated tail beginning at `إطار التنفيذ والمتابعة الموسّع` was removed and replaced with topic-specific crisis/safety material only.
