@@ -75,9 +75,35 @@ jobs:
           python scripts/validate_encyclopedia_draft_portfolio.py \
             --drafts-dir data/encyclopedia/drafts \
             --generated-dir data/encyclopedia/generated/review-drafts \
-            --manifest data/encyclopedia/generated/review-drafts-index-v1.json
+            --manifest "$RUNNER_TEMP/encyclopedia-review-drafts-index-v1.json"
 
-      - name: Assert committed portfolio outputs are deterministic
+      - name: Validate ephemeral portfolio manifest invariants
         run: |
-          git diff --exit-code -- data/encyclopedia/generated/review-drafts
-          git diff --exit-code -- data/encyclopedia/generated/review-drafts-index-v1.json
+          set -euo pipefail
+          manifest="$RUNNER_TEMP/encyclopedia-review-drafts-index-v1.json"
+          test -s "$manifest"
+          python - "$manifest" <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          payload = json.loads(Path(sys.argv[1]).read_text(encoding='utf-8'))
+          assert payload['status'] == 'passed'
+          assert payload['source_draft_count'] > 0
+          assert payload['source_draft_count'] == payload['generated_review_count']
+          assert payload['source_draft_count'] == payload['unique_canonical_count']
+          assert payload['publication_ready'] is False
+          assert payload['scientific_review_required'] is True
+          assert payload['unified_encyclopedia_route_slugs'] is True
+          assert payload['errors'] == []
+          print(json.dumps({
+              'status': payload['status'],
+              'source_draft_count': payload['source_draft_count'],
+              'generated_review_count': payload['generated_review_count'],
+              'unique_canonical_count': payload['unique_canonical_count'],
+              'max_pairwise_body_5gram_jaccard': payload['max_pairwise_body_5gram_jaccard'],
+          }, ensure_ascii=False))
+          PY
+
+      - name: Assert committed review payloads are deterministic
+        run: git diff --exit-code -- data/encyclopedia/generated/review-drafts
