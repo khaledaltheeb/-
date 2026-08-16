@@ -5,6 +5,7 @@ import { getPublicSectors } from '@/lib/public-taxonomy';
 import { createClient } from '@/lib/supabase/server';
 
 const primaryLinks = [
+  { href: '/sectors', label: 'القطاعات', secondary: false },
   { href: '/sections', label: 'الأقسام', secondary: false },
   { href: '/encyclopedia/', label: 'الموسوعة', secondary: false },
   { href: '/evidence-guides/', label: 'الأدلة', secondary: false },
@@ -52,7 +53,7 @@ export default async function SiteHeader() {
   ] : [
     { href: '/', label: 'الرئيسية', icon: 'home' },
     { href: '/search', label: 'بحث', icon: 'search' },
-    { href: '/sections', label: 'استكشف', icon: 'discover' },
+    { href: '/sectors', label: 'القطاعات', icon: 'discover' },
     { href: '/specialists', label: 'مختصون', icon: 'specialists' },
     { href: '/about', label: 'المزيد', icon: 'more' },
   ];
@@ -150,6 +151,7 @@ export default async function SiteHeader() {
                 <button type="submit">بحث</button>
               </form>
               <Link prefetch={false} href="/">الرئيسية</Link>
+              <Link prefetch={false} href="/sectors">جميع القطاعات</Link>
               <Link prefetch={false} href="/sections">جميع الأقسام</Link>
               <Link prefetch={false} href="/encyclopedia/">الموسوعة</Link>
               <Link prefetch={false} href="/evidence-guides/">الأدلة العلمية</Link>

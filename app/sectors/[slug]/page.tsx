@@ -13,6 +13,15 @@ type Params = Promise<{ slug: string }>;
 type Sector = { id: string; slug: string; name_ar: string; description: string | null; accent: string | null; seo_title: string | null; seo_description: string | null };
 type PublishedItem = { id: string; slug: string; title: string; excerpt: string | null; content_type: string; published_at: string | null };
 
+const CONTENT_TYPE_LABELS: Record<string, string> = {
+  article: 'مقال', guide: 'دليل', condition: 'حالة', research: 'بحث/دراسة', comparison: 'مقارنة',
+  tool: 'أداة', assessment: 'تقييم', intervention: 'تدخل', protocol: 'بروتوكول', course: 'دورة',
+  learning_path: 'مسار تعلم', resource: 'مورد', calendar: 'تقويم', glossary_term: 'مصطلح',
+  faq: 'أسئلة شائعة', directory_page: 'صفحة دليل', news: 'خبر', sector_page: 'صفحة قطاع', landing_page: 'صفحة تعريفية',
+};
+
+const contentTypeLabel = (value: string) => CONTENT_TYPE_LABELS[value] ?? 'محتوى';
+
 async function getSector(slug: string): Promise<Sector | null> {
   const supabase = await createClient();
   const { data } = await supabase.from('sectors').select('id,slug,name_ar,description,accent,seo_title,seo_description').eq('slug', slug).eq('is_active', true).eq('visibility', 'public').maybeSingle();
@@ -45,7 +54,11 @@ export default async function SectorPage({ params }: { params: Params }) {
   const categoryRows = categories ?? [];
   const roots = categoryRows.filter((category) => !category.parent_id);
   const contentRows = (content ?? []) as PublishedItem[];
-  const breadcrumbs = breadcrumbJsonLd([{ name: 'الرئيسية', path: '/' }, { name: sector.name_ar, path: `/sectors/${sector.slug}` }]);
+  const breadcrumbs = breadcrumbJsonLd([
+    { name: 'الرئيسية', path: '/' },
+    { name: 'القطاعات', path: '/sectors' },
+    { name: sector.name_ar, path: `/sectors/${sector.slug}` },
+  ]);
   const accentStyle = { '--accent': resolveSectorAccent(sector.accent) } as CSSProperties;
 
   return (
@@ -53,24 +66,24 @@ export default async function SectorPage({ params }: { params: Params }) {
       <SiteHeader />
       <main className="site-shell sector-page" style={accentStyle}>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbs).replace(/</g, '\\u003c') }} />
-        <nav className="breadcrumbs" aria-label="مسار الصفحة"><Link href="/">الرئيسية</Link><span>/</span><span aria-current="page">{sector.name_ar}</span></nav>
+        <nav className="breadcrumbs" aria-label="مسار الصفحة"><Link prefetch={false} href="/">الرئيسية</Link><span>/</span><Link prefetch={false} href="/sectors">القطاعات</Link><span>/</span><span aria-current="page">{sector.name_ar}</span></nav>
         <section className="sector-hero">
           <span className="eyebrow">مجال معرفي وخدمي</span><h1>{sector.name_ar}</h1><p>{sector.description || 'قطاع معرفي وخدمي ضمن منصة روافد.'}</p>
           <form className="sector-search" action="/search" method="get"><label className="sr-only" htmlFor="sector-search">ابحث في منصة روافد</label><input id="sector-search" name="q" placeholder={`ابحث عن موضوع مرتبط بـ ${sector.name_ar}`} maxLength={160} /><button type="submit">بحث</button></form>
         </section>
 
         <section className="section">
-          <div className="section-mini-heading"><div><span className="eyebrow">التصفح حسب الموضوع</span><h2>الأقسام</h2></div><span>{categoryRows.length} قسم</span></div>
+          <div className="section-mini-heading"><div><span className="eyebrow">التصفح حسب الموضوع</span><h2>الأقسام</h2></div><Link prefetch={false} className="section-text-link" href="/sections">جميع الأقسام ←</Link></div>
           <div className="category-public-grid">
             {roots.map((category) => {
               const children = categoryRows.filter((candidate) => candidate.parent_id === category.id);
-              return <article className="public-category-card" key={category.id}><Link href={`/sections/${category.slug}`}><h3>{category.name_ar}</h3></Link><p>{category.description || 'قسم متخصص ضمن هذا القطاع.'}</p>{children.length > 0 && <div className="subcategories">{children.map((child) => <Link href={`/sections/${child.slug}`} key={child.id}>{child.name_ar}</Link>)}</div>}</article>;
+              return <article className="public-category-card" key={category.id}><Link prefetch={false} href={`/sections/${category.slug}`}><h3>{category.name_ar}</h3></Link><p>{category.description || 'قسم متخصص ضمن هذا القطاع.'}</p>{children.length > 0 && <div className="subcategories">{children.map((child) => <Link prefetch={false} href={`/sections/${child.slug}`} key={child.id}>{child.name_ar}</Link>)}</div>}<Link prefetch={false} href={`/sections/${category.slug}`}>فتح القسم ←</Link></article>;
             })}
-            {!roots.length && <div className="empty-state"><strong>لا توجد أقسام منشورة ضمن هذا القطاع حاليًا.</strong><span>يمكنك استخدام البحث للوصول إلى المحتوى المرتبط بالمجال.</span></div>}
+            {!roots.length && <div className="empty-state"><strong>لا توجد أقسام منشورة ضمن هذا القطاع حاليًا.</strong><span>يمكنك استخدام البحث أو تصفح جميع الأقسام للوصول إلى المحتوى المتاح.</span><Link prefetch={false} href="/sections">تصفح جميع الأقسام ←</Link></div>}
           </div>
         </section>
 
-        {contentRows.length > 0 && <section className="section related-content-section"><div className="section-heading"><span>معرفة منشورة</span><h2>أحدث المحتوى في القطاع</h2><p>مواد منشورة ومرتبطة بهذا المجال لتسهيل الانتقال إلى المعرفة الأكثر صلة.</p></div><div className="related-content-grid">{contentRows.map((item) => <article key={item.id}><span>{item.content_type}</span><h3><Link href={`/content/${item.slug}`}>{item.title}</Link></h3>{item.excerpt && <p>{item.excerpt}</p>}<Link href={`/content/${item.slug}`}>قراءة الصفحة ←</Link></article>)}</div></section>}
+        {contentRows.length > 0 && <section className="section related-content-section"><div className="section-heading"><span>معرفة منشورة</span><h2>أحدث المحتوى في القطاع</h2><p>مواد منشورة ومرتبطة بهذا المجال لتسهيل الانتقال إلى المعرفة الأكثر صلة.</p></div><div className="related-content-grid">{contentRows.map((item) => <article key={item.id}><span>{contentTypeLabel(item.content_type)}</span><h3><Link prefetch={false} href={`/content/${item.slug}`}>{item.title}</Link></h3>{item.excerpt && <p>{item.excerpt}</p>}<Link prefetch={false} href={`/content/${item.slug}`}>قراءة الصفحة ←</Link></article>)}</div></section>}
       </main>
       <SiteFooter />
     </>
