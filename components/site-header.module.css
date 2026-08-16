@@ -1,0 +1,48 @@
+.assuranceBar{
+  border-bottom:1px solid color-mix(in srgb,var(--rf-line) 86%,transparent);
+  background:color-mix(in srgb,var(--rf-brand-soft) 48%,var(--rf-paper));
+  color:var(--rf-ink-soft);
+}
+
+.assuranceBar>div{
+  width:min(100% - 48px,1320px);
+  min-height:34px;
+  margin-inline:auto;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:18px;
+  font-size:10px;
+}
+
+.assuranceBar>div>span{
+  color:var(--rf-brand-deep);
+  font-weight:850;
+}
+
+.assuranceBar nav{
+  display:flex;
+  align-items:center;
+  gap:16px;
+}
+
+.assuranceBar a{
+  color:var(--rf-ink-soft);
+  text-decoration:none;
+  font-weight:750;
+}
+
+.assuranceBar a:hover{
+  color:var(--rf-brand-deep);
+  text-decoration:underline;
+  text-underline-offset:3px;
+}
+
+@media(max-width:900px){
+  .assuranceBar>div{width:min(100% - 32px,1320px)}
+  .assuranceBar nav{display:none}
+}
+
+@media(max-width:620px){
+  .assuranceBar{display:none}
+}

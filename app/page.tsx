@@ -3,6 +3,7 @@ import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import PlatformIcon from '@/components/platform-icon';
 import { getPublicSectors } from '@/lib/public-taxonomy';
+import { getHomepageContent } from '@/lib/public-content';
 import { buildSeoMetadata } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
@@ -31,6 +32,19 @@ const intentRoutes = [
   { href: '/search?q=أداة+تقييم', icon: 'tools' as const, title: 'أستخدم أداة أو دليلًا', text: 'الوصول إلى الأدوات والمسارات والأدلة العملية دون ادعاء التشخيص.' },
 ];
 
+const contentTypeLabels: Record<string, string> = {
+  article: 'مقال',
+  guide: 'دليل',
+  condition: 'حالة',
+  research: 'بحث',
+  comparison: 'مقارنة',
+  tool: 'أداة',
+  assessment: 'تقييم إرشادي',
+  resource: 'مورد',
+  faq: 'أسئلة شائعة',
+  news: 'خبر',
+};
+
 const platformModules = [
   { href: '/sectors/knowledge', icon: 'knowledge' as const, title: 'المعرفة والموسوعة', text: 'موضوعات ومقالات وأدلة ومصطلحات وأبحاث منظمة ضمن أقسام واضحة.', accent: '#3d78bd' },
   { href: '/sectors/special-needs-inclusion', icon: 'community' as const, title: 'الاحتياجات الخاصة والتربية الدامجة', text: 'التعلم والتواصل والدعم الأسري والتأهيل والحقوق والمشاركة والتمكين.', accent: '#7564c9' },
@@ -41,16 +55,19 @@ const platformModules = [
 ];
 
 export default async function HomePage() {
-  const sectors = await getPublicSectors(12);
+  const [sectors, latestContent] = await Promise.all([
+    getPublicSectors(12),
+    getHomepageContent(6),
+  ]);
 
   return <>
     <SiteHeader />
     <main className="site-shell rawafid-home">
       <section className="rawafid-hero" aria-labelledby="home-title">
         <div className="rawafid-hero-copy">
-          <span className="rawafid-kicker">منصة عربية مؤسسية متكاملة</span>
-          <h1 id="home-title">كيف يمكن لـ<em>منصة روافد</em> مساعدتك اليوم؟</h1>
-          <p>الوصول إلى المعرفة الموثوقة والأدلة العملية والمختصين والمراكز يبدأ من احتياجك. ابحث مباشرة أو اختر المسار الأقرب لما تريد معرفته أو إنجازه.</p>
+          <span className="rawafid-kicker">المعرفة والدعم يبدأان من فهم احتياجك</span>
+          <h1 id="home-title">طريق أوضح إلى <em>المعرفة والدعم</em> المناسبين.</h1>
+          <p>منصة عربية تجمع المعرفة الموثوقة والأدلة العملية والمختصين والمراكز ضمن تجربة تساعدك على فهم الخيارات واتخاذ الخطوة التالية بوضوح.</p>
           <form className="search rawafid-search" action="/search" method="get" role="search">
             <label className="sr-only" htmlFor="home-search">البحث في منصة روافد</label>
             <input id="home-search" name="q" type="search" minLength={2} maxLength={160} autoComplete="off" placeholder="ابحث عن حالة، مصطلح، مختص، مركز، أداة، مقال أو سؤال..." />
@@ -59,53 +76,80 @@ export default async function HomePage() {
           <div className="rawafid-quick-links" aria-label="عمليات بحث مقترحة">{quickSearches.map(([label, query]) => <a key={label} href={`/search?q=${encodeURIComponent(query)}`}>{label}</a>)}</div>
         </div>
 
-        <aside className="rawafid-hero-visual" aria-label="مكونات منصة روافد">
-          <div>
-            <div className="rawafid-visual-top"><span className="rawafid-visual-badge"><i className="rawafid-visual-status" aria-hidden="true" />منصة واحدة · خدمات مترابطة</span></div>
-            <h2>معرفة، دليل مهني وخدمات ضمن رحلة استخدام واحدة.</h2>
-            <p>تجمع روافد القطاعات المعرفية والأدلة والخدمات والحسابات ضمن تجربة موحدة تحافظ على الوضوح والاتساق مع توسع المنصة.</p>
+        <aside className="rawafid-hero-visual" aria-label="مسارات البدء في منصة روافد">
+          <div className="hero-pathway-heading">
+            <span className="rawafid-visual-badge"><i className="rawafid-visual-status" aria-hidden="true" />ابدأ بخطوة بسيطة</span>
+            <h2>ما الأقرب إلى احتياجك الآن؟</h2>
+            <p>اختر مسارًا مباشرًا، ويمكنك الانتقال إلى مسار آخر في أي وقت.</p>
           </div>
-          <div className="rawafid-visual-grid">
-            <div className="rawafid-visual-card"><PlatformIcon name="knowledge" /><div><strong>معرفة منظمة</strong><span>قطاعات وأقسام وموضوعات مترابطة</span></div></div>
-            <div className="rawafid-visual-card"><PlatformIcon name="review" /><div><strong>مراجعة منهجية</strong><span>توثيق وتحديث وضبط جودة المحتوى</span></div></div>
-            <div className="rawafid-visual-card"><PlatformIcon name="specialist" /><div><strong>دليل مهني</strong><span>مختصون ومراكز وملفات موثقة</span></div></div>
-            <div className="rawafid-visual-card"><PlatformIcon name="secure" /><div><strong>خصوصية واضحة</strong><span>وصول آمن وحدود استخدام مفهومة</span></div></div>
+          <div className="hero-pathway-list">
+            <a href="/search"><span><PlatformIcon name="knowledge" /></span><div><strong>أحتاج معلومة موثوقة</strong><small>حالات، أدلة، أسئلة وأدوات عملية</small></div><i aria-hidden="true">←</i></a>
+            <a href="/specialists"><span><PlatformIcon name="specialist" /></span><div><strong>أبحث عن مساعدة مهنية</strong><small>مختصون ومراكز ضمن دليل واضح</small></div><i aria-hidden="true">←</i></a>
+            <a href="/search?q=دعم+الأسرة"><span><PlatformIcon name="community" /></span><div><strong>أساند قريبًا أو أسرة</strong><small>مسارات عملية لمقدمي الدعم والرعاية</small></div><i aria-hidden="true">←</i></a>
           </div>
+          <p className="hero-safety-note"><PlatformIcon name="secure" size={18} />المحتوى للتثقيف والإرشاد العام ولا يستبدل التقييم أو التشخيص المهني الفردي.</p>
         </aside>
       </section>
 
-      <section className="rawafid-trust-bar" aria-label="معايير بناء المنصة">
-        <div className="rawafid-trust-item"><PlatformIcon name="review" /><div><strong>مراجعة منهجية</strong><span>محتوى يمر بمراحل مراجعة وضبط قبل النشر</span></div></div>
+      <section className="rawafid-trust-bar" aria-label="معايير الثقة في منصة روافد">
+        <div className="rawafid-trust-item"><PlatformIcon name="review" /><div><strong>مراجعة واضحة</strong><span>مراحل علمية وتحريرية قبل النشر حيث يلزم</span></div></div>
+        <div className="rawafid-trust-item"><PlatformIcon name="knowledge" /><div><strong>مصادر قابلة للتتبع</strong><span>مراجع وسياق وتاريخ مراجعة للمحتوى الحساس</span></div></div>
         <div className="rawafid-trust-item"><PlatformIcon name="secure" /><div><strong>خصوصية بالتصميم</strong><span>عرض البيانات والخدمات وفق الحاجة والصلاحيات</span></div></div>
-        <div className="rawafid-trust-item"><PlatformIcon name="search" /><div><strong>بحث ووصول مترابط</strong><span>تصنيف واضح وروابط تساعد على اكتشاف المحتوى</span></div></div>
-        <div className="rawafid-trust-item"><PlatformIcon name="tools" /><div><strong>تجربة متجاوبة</strong><span>استخدام مريح على الهاتف والحاسوب والأجهزة اللوحية</span></div></div>
+        <div className="rawafid-trust-item"><PlatformIcon name="tools" /><div><strong>إرشاد مسؤول</strong><span>المعرفة لا تستبدل التشخيص أو الرعاية الفردية</span></div></div>
       </section>
 
       <section className="rawafid-section rawafid-intent-section" aria-labelledby="intent-title">
-        <div className="rawafid-section-head"><div className="rawafid-section-title"><span>ابدأ حسب احتياجك</span><h2 id="intent-title">اختر ما تريد فعله الآن</h2><p>مسارات قصيرة تقود إلى المعرفة أو الخدمة المناسبة بدل إغراق المستخدم في قوائم طويلة.</p></div></div>
-        <div className="rawafid-platform-grid rawafid-intent-grid">{intentRoutes.map((intent) => <a href={intent.href} className="rawafid-platform-card rawafid-intent-card" key={intent.title}><span className="icon-shell"><PlatformIcon name={intent.icon} /></span><div><h3>{intent.title}</h3><p>{intent.text}</p></div><span className="intent-arrow" aria-hidden="true">فتح المسار ←</span></a>)}</div>
+        <div className="rawafid-section-head"><div className="rawafid-section-title"><span>ابدأ حسب احتياجك</span><h2 id="intent-title">ماذا تريد أن تنجز اليوم؟</h2><p>مسارات قصيرة تقود إلى المعرفة أو الخدمة المناسبة بدل إغراقك في قوائم طويلة.</p></div></div>
+        <div className="rawafid-platform-grid rawafid-intent-grid">{intentRoutes.map((intent, index) => <a href={intent.href} className={`rawafid-platform-card rawafid-intent-card intent-${index + 1}`} key={intent.title}><span className="icon-shell"><PlatformIcon name={intent.icon} /></span><div><h3>{intent.title}</h3><p>{intent.text}</p></div><span className="intent-arrow" aria-hidden="true">ابدأ من هنا ←</span></a>)}</div>
       </section>
 
       <section className="rawafid-section" aria-labelledby="platform-modules-title">
-        <div className="rawafid-section-head"><div className="rawafid-section-title"><span>مكونات المنصة</span><h2 id="platform-modules-title">منظومة واحدة، ومسارات مترابطة</h2><p>المعرفة والأدلة والدلائل والخدمات تتشارك هوية واحدة وتجربة استخدام متناسقة، مع انتقال واضح بين كل جزء والآخر.</p></div></div>
+        <div className="rawafid-section-head"><div className="rawafid-section-title"><span>منظومة مترابطة</span><h2 id="platform-modules-title">كل ما يساعدك ضمن رحلة واحدة</h2><p>المعرفة والأدلة والدلائل والخدمات تتشارك هوية واحدة وتجربة استخدام متناسقة، مع انتقال واضح بين كل جزء والآخر.</p></div></div>
         <div className="rawafid-platform-grid">{platformModules.map((module) => { const style = { '--card-accent': module.accent } as CSSProperties; return <a className="rawafid-platform-card" style={style} href={module.href} key={module.title}><span className="icon-shell"><PlatformIcon name={module.icon} /></span><h3>{module.title}</h3><p>{module.text}</p><span>فتح المسار ←</span></a>; })}</div>
       </section>
 
       <section className="rawafid-section" id="sectors" aria-labelledby="sectors-title">
-        <div className="rawafid-section-head"><div className="rawafid-section-title"><span>القطاعات</span><h2 id="sectors-title">قطاعات رئيسية تنظّم المعرفة والخدمات</h2><p>كل قطاع يجمع مجموعة واضحة من الأقسام والموضوعات المتخصصة، لتسهيل الوصول وبناء روابط منطقية بين الصفحات ذات الصلة.</p></div><a href="/sectors">عرض كل القطاعات ←</a></div>
+        <div className="rawafid-section-head"><div className="rawafid-section-title"><span>مجالات روافد</span><h2 id="sectors-title">استكشف المعرفة والخدمات حسب المجال</h2><p>قطاعات رئيسية تجمع الأقسام والموضوعات المتخصصة وتبني روابط منطقية بينها، لتقليل عدد الخطوات من السؤال إلى الصفحة المفيدة.</p></div><a href="/sectors">عرض كل القطاعات ←</a></div>
         {sectors.length > 0 ? <div className="rawafid-sector-grid">{sectors.map((sector) => { const style = { '--sector-accent': sector.accent || '#0b8f92' } as CSSProperties; return <a className="rawafid-sector-card" style={style} href={`/sectors/${sector.slug}`} key={sector.slug}><div className="sector-dot" aria-hidden="true" /><h3>{sector.name_ar}</h3><p>{sector.description || 'قطاع رئيسي ضمن الخريطة الموضوعية لمنصة روافد.'}</p><span>استكشف القطاع ←</span></a>; })}</div> : <div className="rawafid-empty"><div className="rawafid-empty-icon"><PlatformIcon name="knowledge" size={30} /></div><h3>لا توجد قطاعات عامة متاحة حاليًا</h3><p>ستظهر القطاعات هنا بعد اعتمادها للنشر العام.</p></div>}
       </section>
+
+      {latestContent.length > 0 && <section className="rawafid-section rawafid-editorial-section" aria-labelledby="latest-content-title">
+        <div className="rawafid-section-head">
+          <div className="rawafid-section-title"><span>مختارات المعرفة</span><h2 id="latest-content-title">محتوى حديث من مكتبة روافد</h2><p>صفحات منشورة وقابلة للفهرسة تظهر هنا تلقائيًا حسب تاريخ النشر، دون إظهار المسودات أو المحتوى غير الجاهز.</p></div>
+          <a className="section-text-link" href="/search">استكشف كل المعرفة ←</a>
+        </div>
+        <div className="rawafid-editorial-grid">
+          {latestContent.map((item, index) => {
+            const date = item.updated_at ?? item.published_at;
+            return <article className={index === 0 ? 'featured' : ''} key={item.slug}>
+              <div className="editorial-card-meta"><span>{contentTypeLabels[item.content_type] ?? 'معرفة'}</span><time dateTime={date}>{new Intl.DateTimeFormat('ar', { dateStyle: 'medium' }).format(new Date(date))}</time></div>
+              <h3><a href={`/content/${item.slug}`}>{item.title}</a></h3>
+              {item.excerpt && <p>{item.excerpt}</p>}
+              <a className="editorial-card-link" href={`/content/${item.slug}`}>اقرأ الصفحة ←</a>
+            </article>;
+          })}
+        </div>
+      </section>}
 
       <section className="rawafid-section">
         <div className="rawafid-directory-band">
           <div>
             <span className="rawafid-kicker">الدليل المهني</span>
-            <h2>الوصول إلى المختص أو المركز جزء من رحلة واحدة</h2>
+            <h2>اعثر على مختص أو مركز بمعلومات أوضح</h2>
             <p>تساعدك الملفات المهنية ومعلومات الخدمات والموقع ووسائل التواصل المتاحة على الانتقال من المعرفة إلى الجهة المناسبة ضمن تجربة مترابطة وواضحة.</p>
             <div className="rawafid-directory-actions"><a className="primary-link" href="/specialists">دليل المختصين</a><a className="button" href="/centers">دليل المراكز</a></div>
           </div>
           <div className="rawafid-directory-panel" aria-label="خصائص الدليل"><div><PlatformIcon name="review" /><strong>توثيق واعتماد</strong></div><div><PlatformIcon name="secure" /><strong>خصوصية البيانات</strong></div><div><PlatformIcon name="specialist" /><strong>تواصل ومواعيد</strong></div><div><PlatformIcon name="center" /><strong>موقع وفروع</strong></div></div>
         </div>
+      </section>
+
+      <section className="rawafid-section rawafid-professional-callout" aria-labelledby="professional-title">
+        <div>
+          <span className="rawafid-kicker">للمختصين والجهات والمجتمع المهني</span>
+          <h2 id="professional-title">ساهم بمعرفة موثوقة أو انضم إلى دليل روافد.</h2>
+          <p>مسارات واضحة للانضمام والمساهمة المهنية، مع مراجعة وصلاحيات تحافظ على جودة المنصة وخصوصية البيانات.</p>
+        </div>
+        <div><a className="primary-link" href="/join">ابدأ طلب الانضمام</a><a className="button" href="/editorial-policy">تعرف على معايير النشر</a></div>
       </section>
     </main>
     <SiteFooter />

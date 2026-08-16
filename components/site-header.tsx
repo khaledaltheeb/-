@@ -2,6 +2,7 @@ import PlatformIcon from '@/components/platform-icon';
 import RawafidBrand from '@/components/rawafid-brand';
 import { getPublicSectors } from '@/lib/public-taxonomy';
 import { createClient } from '@/lib/supabase/server';
+import styles from './site-header.module.css';
 
 const primaryLinks = [
   { href: '/sections', label: 'الأقسام', secondary: false },
@@ -59,6 +60,16 @@ export default async function SiteHeader() {
   return (
     <>
       <header className="site-header">
+        <div className={`site-assurance-bar ${styles.assuranceBar}`}>
+          <div>
+            <span>معرفة عربية موثوقة وخدمات مهنية أوضح</span>
+            <nav aria-label="روابط الثقة المؤسسية">
+              <a href="/about">عن روافد</a>
+              <a href="/medical-review-policy">منهجية المراجعة</a>
+              <a href="/join">للمختصين والجهات</a>
+            </nav>
+          </div>
+        </div>
         <div className="site-header-inner">
           <RawafidBrand />
           <nav className="desktop-nav" aria-label="التنقل الرئيسي">
