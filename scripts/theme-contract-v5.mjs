@@ -86,6 +86,7 @@ for (const marker of ['Rawafid Institutional V5.1', 'Rawafid Institutional V5.2'
 for (const marker of ['footer-search', 'footer-trust-list', 'back-to-top']) {
   if (!footer.includes(marker)) fail(`institutional footer missing ${marker}`);
 }
+if (!theme.includes('.skip-link:focus,.skip-link:focus-visible{transform:translateY(0)!important}')) fail('keyboard bypass must become visibly positioned on focus');
 if (!preview.includes('Institutional Design System V5.2') || preview.includes('<h1>نموذج لوحة التحكم</h1>') || !preview.includes('المستضاف محليًا ضمن حزمة المنصة')) fail('theme preview must expose accurate V5.2 semantics');
 if (!layout.includes('<body id="top">') || !layout.includes('?v=6')) fail('layout must expose the top target and V6 PWA identity');
 if (!manifest.includes('منصة روافد | معرفة تقود إلى أثر') || !manifest.includes('?v=6')) fail('manifest must use the V6 institutional identity');

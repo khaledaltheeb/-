@@ -1269,7 +1269,7 @@ body{
   transform:translateY(calc(-100% - 24px));
   transition:transform .16s ease;
 }
-.skip-link:focus-visible{transform:translateY(0)}
+.skip-link:focus,.skip-link:focus-visible{transform:translateY(0)!important}
 .skip-target{
   display:block;
   width:1px;
