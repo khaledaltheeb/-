@@ -96,7 +96,7 @@ export default async function NewExperiencePage() {
         <section className={styles.hero}>
           <span className="eyebrow">محرر التجربة الموجّه</span>
           <h1>حوّل تجربتك إلى معرفة قابلة للعثور عليها</h1>
-          <p>لا تحتاج إلى معرفة SEO. اكتب بلغة طبيعية، والحقول القصيرة تساعد النظام على فهم التجربة وتصنيفها وبناء بيانات الصفحة.</p>
+          <p>اكتب بلغة طبيعية وواضحة. تساعد الحقول القصيرة على تنظيم التجربة وتصنيفها حتى يصل إليها من يبحث عن موضوع مشابه.</p>
         </section>
         <form action={publishExperience} className={styles.empty}>
           <label>
