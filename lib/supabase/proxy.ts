@@ -51,9 +51,13 @@ const encyclopediaConditionAliases = new Set([
 
 const REDIRECT_TTL_MS = 60_000;
 const REDIRECT_CACHE_LIMIT = 500;
+const LEGACY_ROUTE_TTL_MS = 300_000;
+const LEGACY_ROUTE_CACHE_LIMIT = 2_000;
 
 type RedirectCacheItem = { destination: string | null; status: 301 | 302 | 307 | 308; expiresAt: number };
+type LegacyRouteCacheItem = { exists: boolean; expiresAt: number };
 const redirectCache = new Map<string, RedirectCacheItem>();
+const legacyRouteCache = new Map<string, LegacyRouteCacheItem>();
 
 function isPrefix(pathname: string, prefix: string) {
   return pathname === prefix || pathname.startsWith(`${prefix}/`);
@@ -66,6 +70,14 @@ function canResolveRedirect(request: NextRequest) {
 
 function validRedirectStatus(value: number): value is 301 | 302 | 307 | 308 {
   return value === 301 || value === 302 || value === 307 || value === 308;
+}
+
+function decodedPathname(pathname: string) {
+  try {
+    return decodeURIComponent(pathname);
+  } catch {
+    return pathname;
+  }
 }
 
 function preservedContentAliasCanonical(pathname: string) {
@@ -83,8 +95,6 @@ function preservedContentAliasCanonical(pathname: string) {
 function applyPreservedAliasSeoHeaders(response: NextResponse, pathname: string) {
   const canonical = preservedContentAliasCanonical(pathname);
   if (!canonical) return response;
-  // Migration policy keeps these historical/content-system URLs as real 200 pages.
-  // They must not compete with the canonical encyclopedia/capability/comparison URL.
   response.headers.set('X-Robots-Tag', 'noindex, follow');
   response.headers.append('Link', `<${canonical}>; rel="canonical"`);
   return response;
@@ -111,9 +121,32 @@ export async function updateSession(request: NextRequest) {
     },
   );
 
+  const pathname = decodedPathname(request.nextUrl.pathname);
+  let legacyExists: boolean | null = null;
+  async function isLegacyProductionRoute() {
+    if (legacyExists !== null) return legacyExists;
+    const cached = legacyRouteCache.get(pathname);
+    if (cached && cached.expiresAt > Date.now()) {
+      legacyExists = cached.exists;
+      return legacyExists;
+    }
+    const { data, error } = await supabase.rpc('legacy_preserved_route_exists', { p_route: pathname });
+    legacyExists = !error && data === true;
+    if (legacyRouteCache.size >= LEGACY_ROUTE_CACHE_LIMIT) legacyRouteCache.clear();
+    legacyRouteCache.set(pathname, { exists: legacyExists, expiresAt: Date.now() + LEGACY_ROUTE_TTL_MS });
+    return legacyExists;
+  }
+
+  if (['GET', 'HEAD'].includes(request.method) && pathname.length > 1 && pathname.endsWith('/')) {
+    if (!(await isLegacyProductionRoute())) {
+      const url = request.nextUrl.clone();
+      url.pathname = request.nextUrl.pathname.replace(/\/+$/, '');
+      return NextResponse.redirect(url, 308);
+    }
+  }
+
   if (canResolveRedirect(request)) {
-    const pathname = request.nextUrl.pathname;
-    const cached = redirectCache.get(pathname);
+    const cached = redirectCache.get(request.nextUrl.pathname);
     let destination = cached && cached.expiresAt > Date.now() ? cached.destination : null;
     let status: 301 | 302 | 307 | 308 = cached && cached.expiresAt > Date.now() ? cached.status : 301;
 
@@ -121,7 +154,7 @@ export async function updateSession(request: NextRequest) {
       const { data, error } = await supabase
         .from('redirects')
         .select('destination_path,status_code')
-        .eq('source_path', pathname)
+        .eq('source_path', request.nextUrl.pathname)
         .eq('is_active', true)
         .maybeSingle();
 
@@ -131,13 +164,15 @@ export async function updateSession(request: NextRequest) {
       }
 
       if (redirectCache.size >= REDIRECT_CACHE_LIMIT) redirectCache.clear();
-      redirectCache.set(pathname, { destination, status, expiresAt: Date.now() + REDIRECT_TTL_MS });
+      redirectCache.set(request.nextUrl.pathname, { destination, status, expiresAt: Date.now() + REDIRECT_TTL_MS });
     }
 
     if (destination && destination.startsWith('/') && !destination.startsWith('//')) {
-      const target = request.nextUrl.clone();
-      target.pathname = destination;
-      return NextResponse.redirect(target, status);
+      if (!(await isLegacyProductionRoute())) {
+        const target = request.nextUrl.clone();
+        target.pathname = destination;
+        return NextResponse.redirect(target, status);
+      }
     }
   }
 
