@@ -27,7 +27,13 @@ if (directCssImports.length !== 1 || directCssImports[0] !== './rawafid-theme-v6
 if (!themeV6.startsWith("@import './rawafid-theme.css';")) fail('V6 theme must preserve the proven V5 compatibility theme as its base');
 if (!themeV6.includes('Rawafid Institutional Theme V6')) fail('V6 theme marker missing');
 if (/letter-spacing:-(?:\d|\.)/.test(themeV6)) fail('V6 public Arabic typography must not use negative letter spacing');
-for (const marker of ['font-synthesis:none', '.mobile-bottom-nav a{font-size:11px}', '.footer-groups{grid-template-columns:repeat(2,minmax(0,1fr))}']) {
+for (const marker of [
+  'font-synthesis:none',
+  '--rf-muted:#60767b',
+  '.mobile-bottom-nav a{font-size:11px}',
+  '.footer-groups{grid-template-columns:repeat(2,minmax(0,1fr))}',
+  '@media(max-width:560px){.footer-groups{grid-template-columns:1fr}',
+]) {
   if (!themeV6.includes(marker)) fail(`V6 visual regression marker missing ${marker}`);
 }
 
@@ -43,7 +49,7 @@ if (!brand.includes('RawafidMark') || !brand.includes('معرفة تقود إل�
 if (!header.includes("import RawafidBrand from '@/components/rawafid-brand'") || !footer.includes("import RawafidBrand from '@/components/rawafid-brand'")) fail('public chrome must use the shared Rawafid brand');
 if (!header.includes("import Link from 'next/link'") || !footer.includes("import Link from 'next/link'") || !home.includes("import Link from 'next/link'")) fail('public navigation must use Next Link for smooth internal transitions');
 const unboundedLink = /<Link\b(?![^>]*\bprefetch=\{false\})[^>]*>/;
-for (const [name, source] of [['header', header], ['footer', footer], ['homepage', home]]) {
+for (const [name, source] of [['brand', brand], ['header', header], ['footer', footer], ['homepage', home]]) {
   if (unboundedLink.test(source)) fail(`${name} contains an automatic Next Link prefetch`);
 }
 for (const file of [
