@@ -9,19 +9,17 @@ const groups = [
       { href: '/sections', label: 'جميع الأقسام' },
       { href: '/encyclopedia/', label: 'الموسوعة' },
       { href: '/care-guides', label: 'أدلة الرعاية' },
-      { href: '/evidence-guides/', label: 'الأدلة العلمية' },
       { href: '/quick-info', label: 'معلومات سريعة' },
     ],
   },
   {
     id: 'pathways',
-    title: 'مسارات وأدوات',
+    title: 'أدلة ومسارات',
     links: [
+      { href: '/evidence-guides/', label: 'الأدلة العلمية' },
       { href: '/family-guide', label: 'دليل الأسرة' },
       { href: '/addiction', label: 'الإدمان والتعافي' },
       { href: '/cognitive-lab', label: 'المختبر المعرفي' },
-      { href: '/comparisons', label: 'المقارنات' },
-      { href: '/magazine', label: 'مجلة روافد' },
     ],
   },
   {
@@ -32,7 +30,6 @@ const groups = [
       { href: '/centers', label: 'دليل المراكز' },
       { href: '/join', label: 'الانضمام إلى روافد' },
       { href: '/community', label: 'المتدربون والمتطوعون' },
-      { href: '/experiences/', label: 'شاركنا تجربتك' },
     ],
   },
   {
