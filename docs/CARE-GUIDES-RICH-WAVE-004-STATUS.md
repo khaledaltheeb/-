@@ -39,7 +39,10 @@ This preserves direct access and existing links while preventing search indexing
 
 ## Database enforcement added
 
-Migration `20260816105700_care_guides_indexability_review_guard` is applied to Supabase and mirrored in this branch.
+Two Supabase migrations are applied and mirrored in this branch:
+
+1. `20260816105700_care_guides_indexability_review_guard`
+2. `20260816105934_care_guides_indexability_state_invariants`
 
 For `/care-guides/` routes, a transition into `publication_ready=true` or back into `robots_index=true` now requires:
 
@@ -52,13 +55,21 @@ For `/care-guides/` routes, a transition into `publication_ready=true` or back i
 - `publication_ready=true` before any page can be indexable
 - `status=published` before any page can be indexable
 
+The second migration makes the last two conditions persistent state invariants, not checks that run only at activation time. An already-indexable Care Guide therefore cannot be changed to a non-published state while remaining indexable, and cannot lose `publication_ready=true` while remaining indexable.
+
 Wave 004 adds stricter re-index/readiness requirements:
 
 - at least **3,000 useful Arabic words**
 - at least **5 references**
 - at least **5 claim-to-source mappings**
 
-The guard also revalidates these Wave 004 minimums if body text, references, or release schema change while a Wave 004 record is ready/indexable. A live negative test attempted to restore one held page to `robots_index=true + publication_ready=true` without a reviewer; the database rejected the update and the record remained held.
+The guard also revalidates these Wave 004 minimums if body text, references, or release schema change while a Wave 004 record is ready/indexable.
+
+Live negative tests verified all three critical denial paths without leaving mutations behind:
+
+- restoring a held Wave 004 page to `robots_index=true + publication_ready=true` without a reviewer was rejected;
+- changing an already-indexable Care Guide from `published` to `draft` while leaving it indexable was rejected;
+- changing an already-indexable Care Guide to `publication_ready=false` while leaving it indexable was rejected.
 
 ## Page 12 quality checkpoint
 
