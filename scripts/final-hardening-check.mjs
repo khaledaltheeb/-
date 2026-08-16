@@ -23,5 +23,8 @@ forbidText('app/sections/[slug]/page.tsx',['Topic clusters','Topical Authority']
 forbidText('app/specialists/page.tsx',['Verified Professional Directory']);
 forbidText('app/centers/page.tsx',['Verified Centers Directory']);
 forbidText('app/community/page.tsx',['Community & Learning Pathways']);
+forbidText('app/join/page.tsx',['Professional Onboarding','Verification Journey','جداول مكررة']);
+forbidText('app/join/specialist/page.tsx',['Specialist Application','>Latitude<','>Longitude<','تتحول صلاحية الحساب تلقائيًا']);
+forbidText('app/join/center/page.tsx',['Center Application','>Latitude<','>Longitude<','تتحول صلاحية الحساب تلقائيًا']);
 if(fs.existsSync('app/sitemap.ts'))fail('monolithic app/sitemap.ts must not coexist with sitemap index');
 if(!process.exitCode)console.log('Rawafid final hardening regression contract passed.');
