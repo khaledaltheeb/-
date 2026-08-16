@@ -1267,7 +1267,7 @@ body{
   text-decoration:none;
   box-shadow:var(--rf-shadow-md);
   transform:translateY(0);
-  transition:transform .16s ease;
+  transition:none;
 }
 .skip-link:not(:focus):not(:focus-visible){transform:translateY(calc(-100% - 24px))}
 .skip-target{
