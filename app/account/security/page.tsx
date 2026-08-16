@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { MfaSettings } from '@/components/mfa-settings';
 import { createClient } from '@/lib/supabase/server';
 import { changePassword } from './actions';
 
@@ -19,10 +20,12 @@ export default async function AccountSecurityPage({ searchParams }: { searchPara
   const supabase = await createClient();
   const { data: claims } = await supabase.auth.getClaims();
   if (!claims?.claims?.sub) redirect('/login?next=/account/security');
+  const assurance = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (!assurance.error && assurance.data.nextLevel === 'aal2' && assurance.data.currentLevel !== 'aal2') redirect('/mfa?next=%2Faccount%2Fsecurity');
   const params = await searchParams;
   return (
     <main className="dashboard-shell account-shell"><section className="dashboard-card account-card">
-      <div className="admin-heading"><div><span className="eyebrow">أمان الحساب</span><h1>كلمة المرور والوصول</h1><p>غيّر كلمة المرور بعد التحقق من كلمة المرور الحالية، أو استخدم رابط الاستعادة الآمن عبر البريد إذا تعذر تسجيل الدخول.</p></div><div className="dashboard-actions"><Link className="button" href="/account">حسابي</Link><Link className="button" href="/forgot-password">استعادة عبر البريد</Link></div></div>
+      <div className="admin-heading"><div><span className="eyebrow">أمان الحساب</span><h1>كلمة المرور والتحقق بخطوتين</h1><p>أدر كلمة المرور وأضف تطبيق مصادقة لحماية الوصول إلى بيانات الحساب والمسارات الحساسة.</p></div><div className="dashboard-actions"><Link className="button" href="/account">حسابي</Link><Link className="button" href="/forgot-password">استعادة عبر البريد</Link></div></div>
       {params.ok === 'password_updated' && <div className="system-message success" role="status">تم تحديث كلمة المرور بنجاح.</div>}
       {params.error && errors[params.error] && <div className="system-message error" role="alert">{errors[params.error]}</div>}
       <section className="account-section"><div className="section-mini-heading"><h2>تغيير كلمة المرور</h2><span>يتطلب التحقق من كلمة المرور الحالية</span></div>
@@ -33,6 +36,7 @@ export default async function AccountSecurityPage({ searchParams }: { searchPara
           <button className="primary-action" type="submit">تحديث كلمة المرور</button>
         </form>
       </section>
+      <MfaSettings />
       <section className="account-section"><div className="section-mini-heading"><h2>فقدان الوصول</h2><span>مسار مستقل لا يكشف وجود الحساب</span></div><p>إذا نسيت كلمة المرور، استخدم صفحة الاستعادة. ترسل منصة روافد رابطًا محدود الصلاحية إلى البريد المرتبط بالحساب.</p><Link className="button" href="/forgot-password">نسيت كلمة المرور؟</Link></section>
     </section></main>
   );
