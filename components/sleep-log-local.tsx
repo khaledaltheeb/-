@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type FormEvent } from 'react';
 
 type Entry={date:string;bedtime:string;wakeTime:string;quality:number;energy:number;note:string;hours:number;savedAt:string};
 const KEY='rawafid:sleep-log:v2';
@@ -10,13 +10,20 @@ function csvCell(value:unknown){const text=String(value??'');return `"${text.rep
 
 export default function SleepLogLocal(){
  const [entries,setEntries]=useState<Entry[]>([]);const [summary,setSummary]=useState('أدخل البيانات لعرض خلاصة تنظيمية.');
- useEffect(()=>{try{const value=JSON.parse(localStorage.getItem(KEY)||'[]');if(Array.isArray(value))setEntries(value.slice(-180));}catch{}},[]);
+ useEffect(()=>{
+  let active=true;
+  const timer=window.setTimeout(()=>{
+   if(!active)return;
+   try{const value=JSON.parse(window.localStorage.getItem(KEY)||'[]');if(Array.isArray(value))setEntries(value.slice(-180));}catch{}
+  },0);
+  return()=>{active=false;window.clearTimeout(timer);};
+ },[]);
  const recent=useMemo(()=>entries.slice(-14),[entries]);
- function persist(next:Entry[]){setEntries(next);localStorage.setItem(KEY,JSON.stringify(next));}
+ function persist(next:Entry[]){setEntries(next);try{window.localStorage.setItem(KEY,JSON.stringify(next));}catch{setSummary('تعذر الحفظ محليًا في هذا المتصفح.');}}
  function submit(event:FormEvent<HTMLFormElement>){event.preventDefault();const form=new FormData(event.currentTarget);const date=String(form.get('date')||''),bedtime=String(form.get('bedtime')||''),wakeTime=String(form.get('wakeTime')||''),note=String(form.get('note')||'').slice(0,500),quality=n(String(form.get('quality'))),energy=n(String(form.get('energy'))),consent=form.get('localConsent')==='yes';if(!date||!bedtime||!wakeTime||!Number.isFinite(quality)||quality<0||quality>10||!Number.isFinite(energy)||energy<0||energy>10){setSummary('تحقق من التاريخ والأوقات، وأدخل الجودة والطاقة بين 0 و10.');return;}const hours=duration(bedtime,wakeTime);setSummary(`الفترة الزمنية بين وقت النوم والاستيقاظ: ${hours.toLocaleString('ar')} ساعة. هذه مدة زمنية مدخلة وليست قياسًا لمراحل النوم أو تشخيصًا.`);if(consent){const entry={date,bedtime,wakeTime,quality,energy,note,hours,savedAt:new Date().toISOString()};persist([...entries.filter(x=>x.date!==date),entry].sort((a,b)=>a.date.localeCompare(b.date)).slice(-180));}}
  function exportJson(){download('sleep-log.json',JSON.stringify(entries,null,2),'application/json;charset=utf-8');}
  function exportCsv(){const rows=[['date','bedtime','wakeTime','hours','quality','energy','note'],...entries.map(e=>[e.date,e.bedtime,e.wakeTime,e.hours,e.quality,e.energy,e.note])];download('sleep-log.csv','\ufeff'+rows.map(row=>row.map(csvCell).join(',')).join('\n'),'text/csv;charset=utf-8');}
- function clear(){localStorage.removeItem(KEY);setEntries([]);setSummary('تم حذف جميع سجلات النوم المحلية من هذا المتصفح.');}
+ function clear(){try{window.localStorage.removeItem(KEY);}catch{}setEntries([]);setSummary('تم حذف جميع سجلات النوم المحلية من هذا المتصفح.');}
  return <section className="section sleep-log-tool" aria-labelledby="sleep-log-title"><div className="section-heading"><span>سجل محلي متخصص</span><h2 id="sleep-log-title">سجل النوم والطاقة</h2><p>الحساب والحفظ داخل المتصفح. لا تُرسل البيانات إلى الخادم. المدة تقدير زمني بين الوقتين وليست قياسًا للنوم الفعلي.</p></div><form onSubmit={submit}><div className="form-grid"><label className="field">التاريخ<input required type="date" name="date" /></label><label className="field">وقت النوم<input required type="time" name="bedtime" /></label><label className="field">وقت الاستيقاظ<input required type="time" name="wakeTime" /></label><label className="field">جودة النوم الذاتية 0–10<input required type="number" min="0" max="10" step="1" name="quality" /></label><label className="field">الطاقة بعد الاستيقاظ 0–10<input required type="number" min="0" max="10" step="1" name="energy" /></label></div><label className="field">ملاحظة غير تعريفية، حتى 500 حرف<textarea maxLength={500} name="note" /></label><label><input type="checkbox" name="localConsent" value="yes" /> أوافق على حفظ هذا السجل محليًا على هذا الجهاز</label><div className="actions"><button className="button" type="submit">احسب واعرض الخلاصة</button></div></form><p aria-live="polite"><strong>{summary}</strong></p><h3>السجلات المحفوظة</h3><div className="actions"><button type="button" className="button" onClick={exportJson}>تصدير JSON</button><button type="button" className="button" onClick={exportCsv}>تصدير CSV</button><button type="button" className="button" onClick={()=>window.print()}>طباعة</button><button type="button" className="button" onClick={clear}>حذف جميع البيانات المحلية</button></div><div className="table-scroll"><table><thead><tr><th>التاريخ</th><th>المدة</th><th>الجودة</th><th>الطاقة</th><th>الملاحظة</th></tr></thead><tbody>{entries.length?entries.map(e=><tr key={e.date}><td>{e.date}</td><td>{e.hours.toLocaleString('ar')} س</td><td>{e.quality.toLocaleString('ar')}</td><td>{e.energy.toLocaleString('ar')}</td><td>{e.note}</td></tr>):<tr><td colSpan={5}>لا توجد سجلات محفوظة على هذا الجهاز.</td></tr>}</tbody></table></div><h3>اتجاه آخر 14 سجلًا</h3><SleepChart entries={recent}/></section>;
 }
 function download(name:string,content:string,type:string){const blob=new Blob([content],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();URL.revokeObjectURL(url);}
