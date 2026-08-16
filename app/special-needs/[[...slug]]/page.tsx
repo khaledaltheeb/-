@@ -34,12 +34,13 @@ function visibleFaq(value: unknown): FaqItem[] {
 }
 
 function routeFor(slug: string[] = []) {
-  return specialNeedsCanonical(slug) || '/special-needs/';
+  return specialNeedsCanonical(slug);
 }
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug = [] } = await params;
   const route = routeFor(slug);
+  if (!route) return {};
   const record = await getSpecialNeedsRecord(slug);
   if (!record) return legacyPreservedMetadata(await getLegacyPreservedPage(route), route);
   return buildSeoMetadata({
@@ -60,6 +61,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 export default async function SpecialNeedsPage({ params }: { params: Params }) {
   const { slug = [] } = await params;
   const route = routeFor(slug);
+  if (!route) notFound();
   const record = await getSpecialNeedsRecord(slug);
   if (!record) {
     const preserved = await getLegacyPreservedPage(route);
