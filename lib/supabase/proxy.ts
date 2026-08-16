@@ -137,13 +137,11 @@ export async function updateSession(request: NextRequest) {
     return legacyExists;
   }
 
-  if (['GET', 'HEAD'].includes(request.method) && pathname.length > 1 && pathname.endsWith('/')) {
-    if (!(await isLegacyProductionRoute())) {
-      const url = request.nextUrl.clone();
-      url.pathname = request.nextUrl.pathname.replace(/\/+$/, '');
-      return NextResponse.redirect(url, 308);
-    }
-  }
+  const modernTrailingSlashVariant =
+    ['GET', 'HEAD'].includes(request.method)
+    && pathname.length > 1
+    && pathname.endsWith('/')
+    && !(await isLegacyProductionRoute());
 
   if (canResolveRedirect(request)) {
     const cached = redirectCache.get(request.nextUrl.pathname);
@@ -187,5 +185,6 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  if (modernTrailingSlashVariant) response.headers.set('X-Robots-Tag', 'noindex, follow');
   return applyPreservedAliasSeoHeaders(response, request.nextUrl.pathname);
 }
