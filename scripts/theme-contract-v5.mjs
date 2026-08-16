@@ -4,7 +4,7 @@ import path from 'node:path';
 const root = process.cwd();
 const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
 const exists = (file) => fs.existsSync(path.join(root, file));
-const fail = (message) => { console.error(`THEME V7 CONTRACT FAILED: ${message}`); process.exitCode = 1; };
+const fail = (message) => { console.error(`THEME V7.1 CONTRACT FAILED: ${message}`); process.exitCode = 1; };
 
 const layout = read('app/layout.tsx');
 const header = read('components/site-header.tsx');
@@ -16,20 +16,23 @@ const home = read('app/page.tsx');
 const theme = read('app/rawafid-theme.css');
 const themeV6 = read('app/rawafid-theme-v6.css');
 const themeV7 = read('app/rawafid-theme-v7.css');
+const themeV71 = read('app/rawafid-theme-v7-1.css');
 const adminLayout = read('app/admin/layout.tsx');
 const adminHome = read('app/admin/page.tsx');
 const contentForm = read('app/admin/content/content-form.tsx');
 const pwaIcon = read('lib/pwa-icon.ts');
 const preview = read('app/theme-preview/page.tsx');
 
-if (!layout.includes("'./rawafid-theme-v7.css'")) fail('root layout must import the central V7 theme entry point');
+if (!layout.includes("'./rawafid-theme-v7-1.css'")) fail('root layout must import the central V7.1 theme entry point');
 const directCssImports = [...layout.matchAll(/^import\s+["'](\.\/[^"']+\.css)["'];?\s*$/gm)].map((match) => match[1]);
-if (directCssImports.length !== 1 || directCssImports[0] !== './rawafid-theme-v7.css') fail('root layout must keep one global V7 CSS entry point');
+if (directCssImports.length !== 1 || directCssImports[0] !== './rawafid-theme-v7-1.css') fail('root layout must keep one global V7.1 CSS entry point');
+if (!themeV71.startsWith("@import './rawafid-theme-v7.css';")) fail('V7.1 must preserve V7 as its visual base');
 if (!themeV7.startsWith("@import './rawafid-theme-v6.css';")) fail('V7 theme must preserve the proven V6.1 public layer');
 if (!themeV6.startsWith("@import './rawafid-theme.css';")) fail('V6 theme must preserve the proven V5 compatibility theme as its base');
-if (!themeV7.includes('Rawafid Institutional Theme V7')) fail('V7 theme marker missing');
+if (!themeV71.includes('Rawafid Institutional Theme V7.1')) fail('V7.1 theme marker missing');
+if (!themeV7.includes('Rawafid Institutional Theme V7')) fail('V7 compatibility marker missing');
 if (!themeV6.includes('Rawafid Institutional Theme V6')) fail('V6 compatibility marker missing');
-if (/letter-spacing:-(?:\d|\.)/.test(themeV7)) fail('V7 public Arabic typography must not use negative letter spacing');
+if (/letter-spacing:-(?:\d|\.)/.test(themeV7) || /letter-spacing:-(?:\d|\.)/.test(themeV71)) fail('public Arabic typography must not use negative letter spacing');
 for (const marker of [
   '--rf-container:82rem',
   '--rf-focus:#0b67c2',
@@ -42,6 +45,15 @@ for (const marker of [
   '@media(prefers-contrast:more)',
 ]) {
   if (!themeV7.includes(marker)) fail(`V7 institutional regression marker missing ${marker}`);
+}
+for (const marker of [
+  'Rawafid Institutional Theme V7.1',
+  'backdrop-filter:none',
+  '@supports (content-visibility:auto)',
+  'content-visibility:auto',
+  'contain-intrinsic-size:auto 720px',
+]) {
+  if (!themeV71.includes(marker)) fail(`V7.1 rendering regression marker missing ${marker}`);
 }
 for (const marker of [
   'font-synthesis:none',
@@ -132,4 +144,4 @@ if (!layout.includes('<body id="top">') || !layout.includes('?v=6')) fail('layou
 if (!manifest.includes('منصة روافد | معرفة تقود إلى أثر') || !manifest.includes('?v=6')) fail('manifest must preserve the current institutional identity');
 if (!serviceWorker.includes('rawafid-shell-v6') || !serviceWorker.includes('event.waitUntil(cacheWrite')) fail('service worker must preserve the current cache lifecycle');
 
-if (!process.exitCode) console.log('Rawafid institutional theme V7 contract passed.');
+if (!process.exitCode) console.log('Rawafid institutional theme V7.1 contract passed.');
