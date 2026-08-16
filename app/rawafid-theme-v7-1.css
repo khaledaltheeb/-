@@ -81,11 +81,10 @@ body{
 .rawafid-hero h1{max-width:790px}
 .rawafid-search{box-shadow:0 7px 22px rgba(8,46,51,.05)!important}
 .rawafid-search:focus-within{box-shadow:0 0 0 3px rgba(10,119,114,.075),0 7px 22px rgba(8,46,51,.04)!important}
-.rawafid-hero-visual{
+.rawafid-hero-visual{box-shadow:0 16px 40px rgba(5,56,61,.12);
   min-height:405px;
   border-radius:20px;
   background:linear-gradient(150deg,#084e52 0%,#075f5d 52%,#063d43 100%);
-  box-shadow:0 16px 40px rgba(5,56,61,.12);
 }
 .hero-pathway-list>a{background:rgba(255,255,255,.065)}
 .rawafid-trust-bar{background:#fffefa}
