@@ -8,7 +8,7 @@ The old `healthrenewal.org` repository remains read-only provenance/content inpu
 
 ## Current Supabase checkpoint — 2026-08-16
 
-The live database audit reports:
+The live database audit now reports:
 
 - **12/50 records materialized**
 - **11 published + noindex + follow under a quality hold**
@@ -16,26 +16,90 @@ The live database audit reports:
 - **38 not yet materialized**
 - **0 indexable Wave 004 records**
 - **0 records marked `publication_ready=true`**
-- **12/12 without a recorded human review date**
-- content depth across the 12 records: **2,508–3,280 useful Arabic words** using the release-gate counting method
-- references: **5–7 per page**
-- claim-to-source mappings: **5–6 per page**
+- **0/12 with a recorded human reviewer, reviewer credentials or review date**
+- content depth across the 12 records: **3,020–3,973 useful Arabic words** using the release-gate counting method
+- references: **5–11 per page**
+- claim-to-source mappings: **5–11 per page**
+- **0 duplicate paragraph groups** in the current automated normalized-text audit
+- **0 unresolved claim-source identifiers**
+- SEO descriptions: **150–160 characters** across the 12 current records
 - **12/12 use the required central disclaimer route and label**
+- row-level `medical_disclaimer` is now empty/null across the 12 records, as required by the central-disclaimer contract
 
-The first 11 records were grandfathered into an older `published + indexable + publication_ready=true` state before the current strict Wave 004 review policy. A 2026-08-16 audit found that all 11 lacked a recorded human reviewer/date and remained below the project's current 3,000-word Wave 004 editorial target at **2,508–2,606 useful Arabic words**.
+The first 11 records had been grandfathered into an older `published + indexable + publication_ready=true` state before the stricter Wave 004 review policy. The 2026-08-16 quality audit placed those 11 under a conservative hold because they lacked genuine recorded human review and initially sat below the current 3,000-word Wave 004 editorial target.
 
-The current V6+/V8 release contract intentionally uses the central `/disclaimer` surface and requires row-level `medical_disclaimer` to remain empty for release. Therefore, an empty `medical_disclaimer` is **not** treated as a defect. All 12 Wave 004 records already carry the exact central disclaimer URL and label; page 12 still contains a legacy row-level disclaimer value that must be cleared during remediation before any release attempt.
+The hold remains in force even though the current quantitative depth floor has now been crossed. Word count is not a release authorization and does not substitute for source quality, rendered-page QA or human review.
 
-A conservative quality hold was applied in Supabase to the 11 grandfathered Wave 004 records:
+The hold preserves direct access and existing links while preventing search indexing:
 
 - `robots_index=false`
 - `robots_follow=true`
 - `schema_json.publication_ready=false`
-- `status=published` retained
+- `status=published` retained for the 11 previously published records
 - canonical URLs retained
 - no page deleted or redirected
 
-This preserves direct access and existing links while preventing search indexing until each page is substantively remediated and receives the genuine human scientific/editorial review required specifically for Wave 004. The hold is a safety correction, not a final quality sign-off and not a substitute for review.
+## Remediation progress
+
+### Cognitive flexibility / task switching
+
+`care-guide-cognitive-flexibility-switching-plan` received a focused evidence-led remediation rather than word-count padding. The current record is:
+
+- **3,973 useful Arabic words**
+- **83 structured blocks**
+- **11 references**
+- **11 claim-to-source mappings**
+- **0 duplicate paragraph groups**
+- **0 unresolved claim-source identifiers**
+- SEO description: **153 characters**
+- `published + noindex + follow`
+- `publication_ready=false`
+- no reviewer identity, credentials or review date fabricated
+
+The evidence layer was expanded around switch cost, advance preparation, interruption/resumption, contextual flexibility and the limits of treating laboratory switch-cost measures as an individual diagnosis. The source registry now records the relevant PubMed-indexed reviews and studies.
+
+### Working memory / task breakdown
+
+`care-guide-working-memory-task-breakdown` was also strengthened after a concurrent expansion had already pushed it beyond 3,000 words. The source remediation targeted the actual evidence gap—working-memory models, capacity caveats, chunking, external representations and cognitive offloading—rather than adding generic prose. The current record is:
+
+- **3,677 useful Arabic words**
+- **75 structured blocks**
+- **10 references**
+- **10 claim-to-source mappings**
+- **0 duplicate paragraph groups**
+- **0 unresolved claim-source identifiers**
+- SEO description: **160 characters**
+- `published + noindex + follow`
+- `publication_ready=false`
+- no reviewer identity, credentials or review date fabricated
+
+The page explicitly avoids turning a laboratory estimate such as an approximate number of chunks into a fixed design rule or an informal diagnosis.
+
+### Other held records
+
+The other nine published held records currently range from **3,020 to 3,124 useful Arabic words** and pass the present automated checks for duplicate paragraphs, resolved claim-source identifiers, central disclaimer metadata and SEO-description length.
+
+Those numeric/structural passes are **not** treated as final editorial approval. Several of these pages were expanded by a concurrent process during this remediation window. They therefore remain in the evidence-audit queue for topic-by-topic verification of whether each new substantive claim is adequately covered by its page-level references and claim-source map before any human-review handoff.
+
+## Page 12 quality checkpoint
+
+`care-guide-dual-task-attention-limit` remains **draft + noindex + follow** and is not counted as published. Current verification returned:
+
+- **3,280 useful Arabic words**
+- **61 structured blocks**
+- **7 references**
+- **5 claim-to-source mappings**
+- **0 duplicate paragraph groups**
+- **0 unresolved claim-source identifiers**
+- SEO description repaired from 128 to **153 characters**
+- one primary category link
+- one unique slug, canonical and primary keyword from the prior collision audit
+- `publication_ready=false`
+- no fabricated reviewer name, credentials or review date
+- exact central disclaimer URL/label
+- row-level `medical_disclaimer` cleaned to `null`
+
+The previous row-level disclaimer blocker is therefore closed. Publication remains blocked by the independent human scientific/editorial review and final rendered-page QA required by Wave 004.
 
 ## Database enforcement added and scoped
 
@@ -58,11 +122,11 @@ For Care Guides using content contract V8 or later:
 
 Older V7 records are not retroactively forced into V8 `publication_ready` metadata by this guard.
 
-The guard **does not invent or retroactively impose a human-reviewer requirement on Wave 001–003**. Wave 003's documented release policy explicitly distinguishes automated/source-backed publication from a claim of specialist human clinical sign-off, and the guard now preserves that contract.
+The guard **does not invent or retroactively impose a human-reviewer requirement on Wave 001–003**. Wave 003's documented release policy explicitly distinguishes automated/source-backed publication from a claim of specialist human clinical sign-off, and the guard preserves that contract.
 
 ### Wave 004 stricter release policy
 
-Wave 004 deliberately adds a stricter re-index/readiness gate. Before any Wave 004 record can become ready/indexable it requires:
+Before any Wave 004 record can become ready/indexable it requires:
 
 - a recorded human reviewer;
 - reviewer credentials;
@@ -82,41 +146,39 @@ Live transaction-scoped/atomic tests verified the intended boundaries:
 - an indexable V7 record without V8 `publication_ready` metadata remains grandfathered rather than being frozen by a retroactive contract;
 - changing an already-indexable V8 Care Guide from `published` to `draft` while leaving it indexable is rejected.
 
-A broader read-only audit found **269 currently indexable Care Guides** outside the held Wave 004 set: 193 are V7, 75 are V8, and one predates those contract markers. The audit was used to prevent Wave 004's stricter human-review rule from being incorrectly generalized to earlier release contracts; no bulk noindex action was taken against those earlier guides.
-
-## Page 12 quality checkpoint
-
-`care-guide-dual-task-attention-limit` remains **draft + noindex + follow** and is not counted as published. Database verification returned:
-
-- 3,280 useful Arabic words
-- 61 structured blocks
-- 29 substantive paragraphs
-- 8 topic-specific FAQs
-- 7 unique references
-- 5 claim-to-source mappings
-- one primary category link
-- one unique slug, canonical and primary keyword
-- `publication_ready=false`
-- no fabricated reviewer name, credentials or review date
-- the correct central disclaimer URL/label
-- one legacy row-level `medical_disclaimer` value that must be cleared before release under the current central-disclaimer contract
-
-The content distinguishes simultaneous activity, task switching and interruption; explains bottlenecks, reconfiguration and resumption costs cautiously; and provides education, workplace, family, service, accessibility and safety applications. Publication remains blocked pending an independent human scientific review, final rendered-page QA, and clearance of the obsolete row-level disclaimer field.
+A broader read-only audit found **269 currently indexable Care Guides** outside the held Wave 004 set: 193 are V7, 75 are V8, and one predates those contract markers. No bulk noindex action was taken against those earlier guides.
 
 ## Source and originality controls
 
-The source registry includes the integrative multitasking review, a task-switching/dual-tasking meta-analysis, Pashler's dual-task interference review, an academic media-multitasking review, the Sana classroom experiment, CAST UDL 3.0 and WHO ICF.
+The Wave 004 source registry includes official/institutional sources where appropriate and peer-reviewed reviews, meta-analyses and experiments for cognitive mechanisms. During this remediation it was expanded with focused sources for task switching/interruption and working memory/chunking/offloading. The Koch 2018 record was also corrected to its actual paper title while retaining the same PMID.
 
-The local page audit for page 12 found:
+Automated current-state checks across all 12 materialized Wave 004 records found:
 
-- 1,626 unique normalized tokens
-- lexical diversity 0.496
-- no exact duplicate paragraphs
-- no repeated five-word sequence
-- no unresolved claim-source identifiers
-- no placeholders
+- **0 duplicate paragraph groups** after normalized-text comparison
+- **0 unresolved claim-source identifiers**
+- exact central disclaimer URL/label on all 12
+- all 12 held or draft with `robots_index=false`
+- all 12 with `publication_ready=false`
 
-These automated measures support originality and structure; they do not replace scientific or editorial review.
+These are structural and evidence-mapping checks. They do not replace a scientific/editorial reviewer.
+
+## Technical validation
+
+The last fully completed technical baseline before the latest evidence-registry/document-only commits was head `c6731729d2c4a0a29d0aa2756af6f3485b8a0dfd`, where all required workflows passed:
+
+- Validate Legacy Migration Payload: success
+- Care Guides Legacy Inventory: success
+- Cloudflare Workers Validate: success
+- Rawafid Quality Gate: success
+- Production HTTP smoke: success
+- Full sitemap SEO audit: **1,950 sitemap URLs / 2,080 unique internal links / 0 failures**
+- Lighthouse performance: **0.89 / 0.88 / 0.89**, median **0.89**
+- Accessibility / Best Practices / SEO: **1.00** on all three Lighthouse runs
+- CLS: **0** on all three runs
+
+The sitemap count is exactly 11 lower than the pre-hold baseline of 1,961, confirming that the 11 held pages were excluded from the sitemap after `robots_index=false` was applied.
+
+The latest source-registry and checkpoint commits require a fresh CI cycle against the repository's current `main`; the earlier green result must not be treated as validation of a newer merge ref.
 
 ## Global collision hold
 
@@ -131,8 +193,12 @@ No automatic redirect or canonical change was applied because each cluster needs
 
 Listing an intent in this configuration never counts as publication. A Wave 004 page may become indexable only after content depth, intent distinctiveness, authoritative references, claim mapping, SEO, accessibility, canonical uniqueness, rendered-page QA and genuine review evidence all pass.
 
-For the 11 held Wave 004 pages, the next sequence is: substantive evidence-led remediation without filler, completion of the current Wave 004 requirements, rendered-page QA, genuine human scientific/editorial review, and only then an explicit re-index decision. Raising word count alone is insufficient.
+The next editorial sequence is:
 
-For page 12, publication remains blocked by the same Wave 004 human-review and rendered-QA requirements plus cleanup of the obsolete row-level disclaimer field. The remaining 38 intents stay unmaterialized until the remediation queue is under control; planning records must not be treated as published content.
+1. complete topic-by-topic evidence audits for the nine concurrently expanded held records;
+2. run rendered-page QA on the remediated records without changing their indexability;
+3. obtain genuine independent human scientific/editorial review and record real reviewer evidence;
+4. only then make an explicit per-page re-index decision;
+5. keep the remaining 38 intents unmaterialized until the remediation/review queue is controlled.
 
-This pull request remains Draft. Technical CI may validate mechanics and SEO behavior, but it cannot authorize Wave 004 YMYL publication or replace the review policy defined for this batch.
+This pull request remains Draft. Technical CI can validate mechanics, routing, SEO behavior and build integrity, but it cannot authorize Wave 004 YMYL publication or replace the review policy defined for this batch.
