@@ -34,6 +34,21 @@ const redirectExcludedPrefixes = [
   '/api',
 ];
 
+const encyclopediaConditionAliases = new Set([
+  'alcohol-use-disorder',
+  'autism',
+  'cannabis-use-disorder',
+  'depression',
+  'gambling-related-harms',
+  'gaming-disorder',
+  'inhalant-use-disorder',
+  'nicotine-tobacco-dependence',
+  'opioid-use-disorder',
+  'polysubstance-use-and-overdose-risk',
+  'sedative-benzodiazepine-use-disorder',
+  'stimulant-use-disorder',
+]);
+
 const REDIRECT_TTL_MS = 60_000;
 const REDIRECT_CACHE_LIMIT = 500;
 
@@ -51,6 +66,28 @@ function canResolveRedirect(request: NextRequest) {
 
 function validRedirectStatus(value: number): value is 301 | 302 | 307 | 308 {
   return value === 301 || value === 302 || value === 307 || value === 308;
+}
+
+function preservedContentAliasCanonical(pathname: string) {
+  const match = pathname.match(/^\/content\/([a-z0-9]+(?:-[a-z0-9]+)*)\/?$/);
+  if (!match) return null;
+  const slug = match[1];
+  if (encyclopediaConditionAliases.has(slug)) return `/encyclopedia/${slug}/`;
+  if (slug === 'capabilities-hub') return '/capabilities/';
+  if (slug.startsWith('capabilities-')) return `/capabilities/${slug.slice('capabilities-'.length)}/`;
+  if (slug === 'comparisons-hub') return '/comparisons/';
+  if (slug.startsWith('comparisons-')) return `/comparisons/${slug.slice('comparisons-'.length)}/`;
+  return null;
+}
+
+function applyPreservedAliasSeoHeaders(response: NextResponse, pathname: string) {
+  const canonical = preservedContentAliasCanonical(pathname);
+  if (!canonical) return response;
+  // Migration policy keeps these historical/content-system URLs as real 200 pages.
+  // They must not compete with the canonical encyclopedia/capability/comparison URL.
+  response.headers.set('X-Robots-Tag', 'noindex, follow');
+  response.headers.append('Link', `<${canonical}>; rel="canonical"`);
+  return response;
 }
 
 export async function updateSession(request: NextRequest) {
@@ -115,5 +152,5 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  return response;
+  return applyPreservedAliasSeoHeaders(response, request.nextUrl.pathname);
 }
