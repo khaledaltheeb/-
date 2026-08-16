@@ -5,6 +5,8 @@ let failed=false;
 const fail=(message)=>{console.error(`LEGACY PRESERVATION CONTRACT FAILED: ${message}`);failed=true;};
 
 const migration=read('supabase/migrations/20260816040102_fix_legacy_preserved_page_source_key.sql');
+const routeExistsMigration=read('supabase/migrations/20260816100619_align_legacy_route_exists_public_filter.sql');
+const grantFix=read('supabase/migrations/20260816102121_restore_legacy_preservation_public_execute_grants.sql');
 const helper=read('lib/legacy-preserved-page.ts');
 const view=read('components/legacy-preserved-page.tsx');
 const routes=[
@@ -20,6 +22,29 @@ for(const marker of [
   'order by l.source_key','revoke all on function public.get_legacy_preserved_page(text) from public',
   'grant execute on function public.get_legacy_preserved_page(text) to anon, authenticated',"v_route ~ '(^|/)\\.\\.(/|$)'"
 ]) if(!migration.toLowerCase().includes(marker.toLowerCase())) fail(`final read-boundary marker missing: ${marker}`);
+
+for(const marker of [
+  'security definer',"source_kind = 'production-baseline'","migration_state, '') <> 'DEVELOPMENT_ONLY'",
+  "migration_decision not like 'EXCLUDE_%'","migration_decision not in ('INTERACTIVE_REVIEW', 'ASSET_REVIEW')"
+]) if(!routeExistsMigration.toLowerCase().includes(marker.toLowerCase())) fail(`route-existence boundary marker missing: ${marker}`);
+
+for(const marker of [
+  'revoke all on function public.get_legacy_preserved_page(text) from public',
+  'revoke all on function public.legacy_preserved_route_exists(text) from public',
+  'grant execute on function public.get_legacy_preserved_page(text) to anon, authenticated',
+  'grant execute on function public.legacy_preserved_route_exists(text) to anon, authenticated'
+]) if(!grantFix.toLowerCase().includes(marker.toLowerCase())) fail(`public preservation grant repair marker missing: ${marker}`);
+
+const migrationDir='supabase/migrations';
+const orderedSql=fs.readdirSync(migrationDir).filter((name)=>name.endsWith('.sql')).sort().map((name)=>read(`${migrationDir}/${name}`)).join('\n').toLowerCase();
+for(const fn of ['get_legacy_preserved_page','legacy_preserved_route_exists']){
+ const grant=`grant execute on function public.${fn}(text) to anon, authenticated`;
+ const revoke=`revoke execute on function public.${fn}(text) from anon, authenticated`;
+ const grantAt=orderedSql.lastIndexOf(grant);
+ const revokeAt=orderedSql.lastIndexOf(revoke);
+ if(grantAt<0) fail(`missing public read grant for ${fn}`);
+ if(revokeAt>grantAt) fail(`latest migration revokes ${fn} from anon/authenticated after the final grant`);
+}
 
 for(const forbidden of ['service_role','secret_key']) if(helper.toLowerCase().includes(forbidden)||view.toLowerCase().includes(forbidden)) fail(`forbidden preservation secret pattern: ${forbidden}`);
 for(const marker of ['get_legacy_preserved_page','legacyPreservedMetadata','index: false','noarchive: true','healthrenewal.org','decodeURIComponent',"normalize('NFC')"]) if(!helper.includes(marker)) fail(`helper marker missing: ${marker}`);
@@ -37,8 +62,11 @@ if(!catchAll.includes('notFound()')) fail('unknown routes must still reach the b
 for(const path of [
  'supabase/migrations/20260816035959_legacy_preserved_page_read_boundary.sql',
  'supabase/migrations/20260816040040_fix_legacy_preserved_page_read_boundary.sql',
- 'supabase/migrations/20260816040102_fix_legacy_preserved_page_source_key.sql'
+ 'supabase/migrations/20260816040102_fix_legacy_preserved_page_source_key.sql',
+ 'supabase/migrations/20260816100619_align_legacy_route_exists_public_filter.sql',
+ 'supabase/migrations/20260816101451_restrict_unused_legacy_rpc_execute.sql',
+ 'supabase/migrations/20260816102121_restore_legacy_preservation_public_execute_grants.sql'
 ]) if(!fs.existsSync(path)) fail(`deployed migration history not mirrored: ${path}`);
 
 if(failed)process.exit(1);
-console.log('Legacy preservation contract passed: production HTML is available through a Unicode-safe read-only noindex boundary without migration redirects or publication-gate bypass.');
+console.log('Legacy preservation contract passed: production HTML remains available through a Unicode-safe public read-only noindex boundary, and the latest migration state preserves the required anon/authenticated RPC grants.');
