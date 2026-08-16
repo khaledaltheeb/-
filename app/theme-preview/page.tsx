@@ -51,7 +51,7 @@ export default function ThemePreviewPage() {
             <p>يستخدم النظام خط Noto Sans Arabic المتغيّر والمستضاف محليًا ضمن حزمة المنصة، مع مقياس قراءة ثابت وتسلسل عناوين واضح وتباعد يحافظ على التركيز في الصفحات الطويلة والواجهات المهنية.</p>
           </div>
           <div className="theme-preview-metrics" aria-label="مقاييس القراءة والوصولية">
-            <div><strong>72 حرفًا</strong><span>مقياس القراءة الأقصى</span></div>
+            <div><strong>68 حرفًا</strong><span>مقياس القراءة الأقصى</span></div>
             <div><strong>44 بكسل</strong><span>الحد الأدنى لهدف اللمس</span></div>
             <div><strong>RTL</strong><span>اتجاه عربي أصيل</span></div>
             <div><strong>AA+</strong><span>تباين وفوكس واضحان</span></div>
