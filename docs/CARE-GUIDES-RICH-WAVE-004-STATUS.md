@@ -17,12 +17,16 @@ The live database audit reports:
 - **0 indexable Wave 004 records**
 - **0 records marked `publication_ready=true`**
 - **12/12 without a recorded human review date**
-- content depth across the 12 records: **2,509–3,280 Arabic words**
+- content depth across the 12 records: **2,508–3,280 useful Arabic words** using the release-gate counting method
 - references: **5–7 per page**
+- claim-to-source mappings: **5–6 per page**
+- **12/12 use the required central disclaimer route and label**
 
-The first 11 records were grandfathered into an older `published + indexable + publication_ready=true` state before the current strict YMYL/editorial gate. A 2026-08-16 audit found that all 11 lacked a recorded human reviewer/date, lacked a medical disclaimer, and remained below the project's current 3,000-word editorial target at **2,509–2,614 words**.
+The first 11 records were grandfathered into an older `published + indexable + publication_ready=true` state before the current strict Wave 004 review policy. A 2026-08-16 audit found that all 11 lacked a recorded human reviewer/date and remained below the project's current 3,000-word Wave 004 editorial target at **2,508–2,606 useful Arabic words**.
 
-A conservative quality hold was therefore applied in Supabase to those 11 records:
+The current V6+ release contract intentionally uses the central `/disclaimer` surface and requires row-level `medical_disclaimer` to remain empty for release. Therefore, an empty `medical_disclaimer` is **not** treated as a defect. All 12 Wave 004 records already carry the exact central disclaimer URL and label; page 12 still contains a legacy row-level disclaimer value that must be cleared during remediation before any release attempt.
+
+A conservative quality hold was applied in Supabase to the 11 grandfathered records:
 
 - `robots_index=false`
 - `robots_follow=true`
@@ -33,11 +37,34 @@ A conservative quality hold was therefore applied in Supabase to those 11 record
 
 This preserves direct access and existing links while preventing search indexing until each page is substantively remediated and receives genuine human scientific/editorial review. The hold is a safety correction, not a final quality sign-off and not a substitute for review.
 
+## Database enforcement added
+
+Migration `20260816105700_care_guides_indexability_review_guard` is applied to Supabase and mirrored in this branch.
+
+For `/care-guides/` routes, a transition into `publication_ready=true` or back into `robots_index=true` now requires:
+
+- a recorded human reviewer
+- reviewer credentials
+- a recorded review date that is not in the future
+- an independent reviewer distinct from the visible author
+- the exact central disclaimer contract
+- an empty row-level `medical_disclaimer`
+- `publication_ready=true` before any page can be indexable
+- `status=published` before any page can be indexable
+
+Wave 004 adds stricter re-index/readiness requirements:
+
+- at least **3,000 useful Arabic words**
+- at least **5 references**
+- at least **5 claim-to-source mappings**
+
+The guard also revalidates these Wave 004 minimums if body text, references, or release schema change while a Wave 004 record is ready/indexable. A live negative test attempted to restore one held page to `robots_index=true + publication_ready=true` without a reviewer; the database rejected the update and the record remained held.
+
 ## Page 12 quality checkpoint
 
 `care-guide-dual-task-attention-limit` remains **draft + noindex + follow** and is not counted as published. Database verification returned:
 
-- 3,280 body words
+- 3,280 useful Arabic words
 - 61 structured blocks
 - 29 substantive paragraphs
 - 8 topic-specific FAQs
@@ -47,8 +74,10 @@ This preserves direct access and existing links while preventing search indexing
 - one unique slug, canonical and primary keyword
 - `publication_ready=false`
 - no fabricated reviewer name, credentials or review date
+- the correct central disclaimer URL/label
+- one legacy row-level `medical_disclaimer` value that must be cleared before release under the current central-disclaimer contract
 
-The content distinguishes simultaneous activity, task switching and interruption; explains bottlenecks, reconfiguration and resumption costs cautiously; and provides education, workplace, family, service, accessibility and safety applications. Publication remains blocked pending an independent human scientific review and final rendered-page QA.
+The content distinguishes simultaneous activity, task switching and interruption; explains bottlenecks, reconfiguration and resumption costs cautiously; and provides education, workplace, family, service, accessibility and safety applications. Publication remains blocked pending an independent human scientific review, final rendered-page QA, and clearance of the obsolete row-level disclaimer field.
 
 ## Source and originality controls
 
@@ -78,8 +107,8 @@ No automatic redirect or canonical change was applied because each cluster needs
 
 Listing an intent in this configuration never counts as publication. A Wave 004 page may become indexable only after content depth, intent distinctiveness, authoritative references, claim mapping, SEO, accessibility, canonical uniqueness, rendered-page QA and genuine review evidence all pass.
 
-For the 11 held pages, the next sequence is: substantive evidence-led remediation without filler, completion of the current YMYL requirements, rendered-page QA, genuine human scientific/editorial review, and only then an explicit re-index decision. Raising word count alone is insufficient.
+For the 11 held pages, the next sequence is: substantive evidence-led remediation without filler, completion of the current Wave 004 YMYL requirements, rendered-page QA, genuine human scientific/editorial review, and only then an explicit re-index decision. Raising word count alone is insufficient.
 
-For page 12, publication remains blocked by the same human-review and rendered-QA requirements. The remaining 38 intents stay unmaterialized until the remediation queue is under control; planning records must not be treated as published content.
+For page 12, publication remains blocked by the same human-review and rendered-QA requirements plus cleanup of the obsolete row-level disclaimer field. The remaining 38 intents stay unmaterialized until the remediation queue is under control; planning records must not be treated as published content.
 
 This pull request remains Draft. Technical CI may validate mechanics and SEO behavior, but it cannot authorize YMYL publication or replace human review.
