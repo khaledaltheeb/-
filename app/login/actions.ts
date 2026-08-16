@@ -26,7 +26,7 @@ export async function login(formData: FormData) {
   const factors = assurance.error ? null : await supabase.auth.mfa.listFactors();
   revalidatePath('/', 'layout');
   if (assurance.error || factors?.error) redirect(`/mfa?error=assurance_check&next=${encodeURIComponent(next)}`);
-  const hasVerifiedTotp = (factors?.data.totp ?? []).some((factor) => factor.status === 'verified');
+  const hasVerifiedTotp = (factors?.data?.totp ?? []).some((factor) => factor.status === 'verified');
   if (hasVerifiedTotp && assurance.data.currentLevel !== 'aal2') redirect(`/mfa?next=${encodeURIComponent(next)}`);
   redirect(next);
 }
