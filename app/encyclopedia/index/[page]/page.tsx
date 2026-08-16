@@ -71,27 +71,27 @@ export default async function EncyclopediaIndexPage({ params }: { params: Params
 
   return <><SiteHeader /><main className="article-shell">
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify([breadcrumbs, schema]).replace(/</g, '\\u003c') }} />
-    <nav className="breadcrumbs" aria-label="مسار الصفحة"><Link href="/">الرئيسية</Link><span>/</span><Link href="/encyclopedia/">الموسوعة النفسية</Link><span>/</span><span aria-current="page">الفهرس {result.page}</span></nav>
+    <nav className="breadcrumbs" aria-label="مسار الصفحة"><Link prefetch={false} href="/">الرئيسية</Link><span>/</span><Link prefetch={false} href="/encyclopedia/">الموسوعة النفسية</Link><span>/</span><span aria-current="page">الفهرس {result.page}</span></nav>
     <section className="article-hero">
       <span className="eyebrow">الفهرس الأبجدي الكامل</span>
       <h1>فهرس الموسوعة النفسية — الصفحة {result.page}</h1>
       <p>يعرض هذا الفهرس {result.pageSize} صفحة في كل جزء للحفاظ على سرعة التحميل وقابلية الزحف. إجمالي الحالات المنشورة حاليًا {result.total} موزعة على {result.totalPages} صفحة فهرس.</p>
     </section>
     <nav className="article-related" aria-label="التنقل بين صفحات الفهرس">
-      {result.page > 1 ? <Link rel="prev" href={`/encyclopedia/index/${result.page - 1}/`}>← الصفحة السابقة</Link> : <Link href="/encyclopedia/">← مدخل الموسوعة</Link>}
+      {result.page > 1 ? <Link prefetch={false} rel="prev" href={`/encyclopedia/index/${result.page - 1}/`}>← الصفحة السابقة</Link> : <Link prefetch={false} href="/encyclopedia/">← مدخل الموسوعة</Link>}
       {' · '}
-      <Link href="/search/?type=condition">البحث في الموسوعة</Link>
+      <Link prefetch={false} href="/search/?type=condition">البحث في الموسوعة</Link>
       {' · '}
-      {result.page < result.totalPages ? <Link rel="next" href={`/encyclopedia/index/${result.page + 1}/`}>الصفحة التالية →</Link> : <Link href="/encyclopedia/">مدخل الموسوعة →</Link>}
+      {result.page < result.totalPages ? <Link prefetch={false} rel="next" href={`/encyclopedia/index/${result.page + 1}/`}>الصفحة التالية →</Link> : <Link prefetch={false} href="/encyclopedia/">مدخل الموسوعة →</Link>}
     </nav>
     <section className="article-related" aria-labelledby="full-index-title">
       <div className="section-mini-heading"><div><span className="eyebrow">{result.total} حالة</span><h2 id="full-index-title">الحالات في هذه الصفحة</h2></div><span>{result.items.length} نتيجة</span></div>
       <div className="related-content-grid">
-        {result.items.map((item) => <article key={item.id}><span>حالة نفسية</span><h3><Link href={item.canonicalUrl}>{item.title}</Link></h3>{item.excerpt ? <p>{item.excerpt}</p> : null}<Link href={item.canonicalUrl}>قراءة الدليل ←</Link></article>)}
+        {result.items.map((item) => <article key={item.id}><span>حالة نفسية</span><h3><Link prefetch={false} href={item.canonicalUrl}>{item.title}</Link></h3>{item.excerpt ? <p>{item.excerpt}</p> : null}<Link prefetch={false} href={item.canonicalUrl}>قراءة الدليل ←</Link></article>)}
       </div>
     </section>
     {result.totalPages > 1 ? <nav className="article-related" aria-label="أرقام صفحات الفهرس">
-      {pageLinks.map((page, index) => <span key={page}>{index > 0 && pageLinks[index - 1] !== page - 1 ? ' … ' : ' '}<Link aria-current={page === result.page ? 'page' : undefined} href={`/encyclopedia/index/${page}/`}>{page}</Link></span>)}
+      {pageLinks.map((page, index) => <span key={page}>{index > 0 && pageLinks[index - 1] !== page - 1 ? ' … ' : ' '}<Link prefetch={false} aria-current={page === result.page ? 'page' : undefined} href={`/encyclopedia/index/${page}/`}>{page}</Link></span>)}
     </nav> : null}
   </main><SiteFooter /></>;
 }

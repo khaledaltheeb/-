@@ -40,8 +40,8 @@ export default async function ExperiencesPage({ searchParams }: { searchParams: 
           <h1>شاركنا تجربتك</h1>
           <p>ما تعلّمته في موقف واحد قد يختصر على أسرة أخرى أسابيع من الحيرة. شارك ما حدث، وما نجح وما لم ينجح، مع حماية الخصوصية والتمييز بين الخبرة الشخصية والمعلومة المهنية.</p>
           <div className={styles.actions}>
-            <Link className={styles.primary} href="/experiences/new/">اكتب تجربتك</Link>
-            <Link className={styles.secondary} href="/login?next=/experiences/">تسجيل الدخول</Link>
+            <Link prefetch={false} className={styles.primary} href="/experiences/new/">اكتب تجربتك</Link>
+            <Link prefetch={false} className={styles.secondary} href="/login?next=/experiences/">تسجيل الدخول</Link>
           </div>
         </section>
         <section className={styles.principles}>
@@ -60,7 +60,7 @@ export default async function ExperiencesPage({ searchParams }: { searchParams: 
                 <span>{room.category}</span>
                 <h3>{room.title}</h3>
                 <p>{room.description}</p>
-                <Link href={`/experiences/rooms/${room.slug}/`}>دخول الغرفة</Link>
+                <Link prefetch={false} href={`/experiences/rooms/${room.slug}/`}>دخول الغرفة</Link>
               </article>
             ))}
           </div>
@@ -75,7 +75,7 @@ export default async function ExperiencesPage({ searchParams }: { searchParams: 
               {posts.map((post) => (
                 <article className={styles.post} key={post.id}>
                   <div>{post.post_type === 'experience' ? 'تجربة' : post.post_type === 'question' ? 'سؤال' : post.post_type === 'tip' ? 'نصيحة' : 'مشاركة'}</div>
-                  <h3><Link href={`/experiences/${post.slug}/`}>{post.title}</Link></h3>
+                  <h3><Link prefetch={false} href={`/experiences/${post.slug}/`}>{post.title}</Link></h3>
                   <p>{post.summary}</p>
                   <footer><span>{post.useful_count} مفيدة</span><span>{post.comments_count} تعليق</span></footer>
                 </article>
@@ -85,7 +85,7 @@ export default async function ExperiencesPage({ searchParams }: { searchParams: 
             <div className={styles.empty}>
               <h3>المجتمع جاهز لأول تجربة</h3>
               <p>تم تجهيز الغرف وقواعد النشر، وستكون المشاركات الأولى أساس المعرفة المجتمعية.</p>
-              <Link href="/experiences/new/">كن من أوائل المشاركين</Link>
+              <Link prefetch={false} href="/experiences/new/">كن من أوائل المشاركين</Link>
             </div>
           )}
         </section>

@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'react';
+import Link from 'next/link';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import PlatformIcon from '@/components/platform-icon';
@@ -69,7 +70,7 @@ export default async function HomePage() {
             </form>
 
             <div className="rawafid-quick-links" aria-label="عمليات بحث مقترحة">
-              {quickSearches.map(([label, query]) => <a key={label} href={`/search?q=${encodeURIComponent(query)}`}>{label}</a>)}
+              {quickSearches.map(([label, query]) => <Link prefetch={false} key={label} href={`/search?q=${encodeURIComponent(query)}`}>{label}</Link>)}
             </div>
           </div>
 
@@ -80,9 +81,9 @@ export default async function HomePage() {
               <p>اختر مسارًا، ويمكنك تغييره في أي وقت.</p>
             </div>
             <div className="hero-pathway-list">
-              <a href="/search"><span><PlatformIcon name="knowledge" /></span><div><strong>أحتاج معلومة موثوقة</strong><small>حالات، أدلة، أسئلة وأدوات عملية</small></div><i aria-hidden="true">←</i></a>
-              <a href="/specialists"><span><PlatformIcon name="specialist" /></span><div><strong>أبحث عن مساعدة مهنية</strong><small>مختصون ومراكز ضمن دليل واضح</small></div><i aria-hidden="true">←</i></a>
-              <a href="/search?q=دعم+الأسرة"><span><PlatformIcon name="community" /></span><div><strong>أساند قريبًا أو أسرة</strong><small>مسارات عملية لمقدمي الدعم والرعاية</small></div><i aria-hidden="true">←</i></a>
+              <Link prefetch={false} href="/search"><span><PlatformIcon name="knowledge" /></span><div><strong>أحتاج معلومة موثوقة</strong><small>حالات، أدلة، أسئلة وأدوات عملية</small></div><i aria-hidden="true">←</i></Link>
+              <Link prefetch={false} href="/specialists"><span><PlatformIcon name="specialist" /></span><div><strong>أبحث عن مساعدة مهنية</strong><small>مختصون ومراكز ضمن دليل واضح</small></div><i aria-hidden="true">←</i></Link>
+              <Link prefetch={false} href="/search?q=دعم+الأسرة"><span><PlatformIcon name="community" /></span><div><strong>أساند قريبًا أو أسرة</strong><small>مسارات عملية لمقدمي الدعم والرعاية</small></div><i aria-hidden="true">←</i></Link>
             </div>
             <p className="hero-safety-note"><PlatformIcon name="secure" size={18} />إذا كان هناك خطر مباشر، تواصل فورًا مع خدمات الطوارئ المحلية في بلدك.</p>
           </aside>
@@ -100,7 +101,7 @@ export default async function HomePage() {
             <div className="rawafid-section-title"><span>مسارات واضحة</span><h2 id="intent-title">ماذا تريد أن تنجز اليوم؟</h2><p>ستة مداخل مباشرة تختصر الطريق من السؤال إلى المعرفة أو الخدمة المناسبة.</p></div>
           </div>
           <div className="rawafid-platform-grid rawafid-intent-grid">
-            {intentRoutes.map((intent, index) => <a href={intent.href} className={`rawafid-platform-card rawafid-intent-card intent-${index + 1}`} key={intent.title}><span className="icon-shell"><PlatformIcon name={intent.icon} /></span><div><h3>{intent.title}</h3><p>{intent.text}</p></div><span className="intent-arrow" aria-hidden="true">ابدأ من هنا ←</span></a>)}
+            {intentRoutes.map((intent, index) => <Link prefetch={false} href={intent.href} className={`rawafid-platform-card rawafid-intent-card intent-${index + 1}`} key={intent.title}><span className="icon-shell"><PlatformIcon name={intent.icon} /></span><div><h3>{intent.title}</h3><p>{intent.text}</p></div><span className="intent-arrow" aria-hidden="true">ابدأ من هنا ←</span></Link>)}
           </div>
         </section>
 
@@ -111,12 +112,12 @@ export default async function HomePage() {
           <div className="rawafid-platform-grid">
             {platformModules.map((module) => {
               const style = { '--card-accent': module.accent } as CSSProperties;
-              return <a className="rawafid-platform-card" style={style} href={module.href} key={module.title}>
+              return <Link prefetch={false} className="rawafid-platform-card" style={style} href={module.href} key={module.title}>
                 <span className="icon-shell"><PlatformIcon name={module.icon} /></span>
                 <h3>{module.title}</h3>
                 <p>{module.text}</p>
                 <span>فتح المسار ←</span>
-              </a>;
+              </Link>;
             })}
           </div>
         </section>
@@ -130,12 +131,12 @@ export default async function HomePage() {
             <div className="rawafid-sector-grid">
               {sectors.map((sector) => {
                 const style = { '--sector-accent': sector.accent || '#0b8f92' } as CSSProperties;
-                return <a className="rawafid-sector-card" style={style} href={`/sectors/${sector.slug}`} key={sector.slug}>
+                return <Link prefetch={false} className="rawafid-sector-card" style={style} href={`/sectors/${sector.slug}`} key={sector.slug}>
                   <div className="sector-dot" aria-hidden="true" />
                   <h3>{sector.name_ar}</h3>
                   <p>{sector.description || 'قطاع ضمن الهيكل المؤسسي لمنصة روافد.'}</p>
                   <span>استكشف القطاع ←</span>
-                </a>;
+                </Link>;
               })}
             </div>
           ) : (
@@ -151,14 +152,14 @@ export default async function HomePage() {
         {latestContent.length > 0 && <section className="rawafid-section rawafid-editorial-section" aria-labelledby="latest-content-title">
           <div className="rawafid-section-head">
             <div className="rawafid-section-title"><span>مختارات المعرفة</span><h2 id="latest-content-title">محتوى حديث من مكتبة روافد</h2><p>صفحات منشورة من قاعدة المعرفة، تظهر هنا تلقائيًا عند تحديثها واعتمادها.</p></div>
-            <a className="section-text-link" href="/search">استكشف كل المعرفة ←</a>
+            <Link prefetch={false} className="section-text-link" href="/search">استكشف كل المعرفة ←</Link>
           </div>
           <div className="rawafid-editorial-grid">
             {latestContent.map((item, index) => <article className={index === 0 ? 'featured' : ''} key={item.slug}>
               <div className="editorial-card-meta"><span>{contentTypeLabels[item.content_type] ?? 'معرفة'}</span><time dateTime={item.published_at ?? item.updated_at}>{new Intl.DateTimeFormat('ar', { dateStyle: 'medium' }).format(new Date(item.published_at ?? item.updated_at))}</time></div>
-              <h3><a href={`/content/${item.slug}`}>{item.title}</a></h3>
+              <h3><Link prefetch={false} href={`/content/${item.slug}`}>{item.title}</Link></h3>
               {item.excerpt && <p>{item.excerpt}</p>}
-              <a className="editorial-card-link" href={`/content/${item.slug}`}>اقرأ الصفحة ←</a>
+              <Link prefetch={false} className="editorial-card-link" href={`/content/${item.slug}`}>اقرأ الصفحة ←</Link>
             </article>)}
           </div>
         </section>}
@@ -169,7 +170,7 @@ export default async function HomePage() {
               <span className="rawafid-kicker">الدليل المهني</span>
               <h2>اعثر على مختص أو مركز بمعلومات أوضح وثقة أكبر</h2>
               <p>ملفات مهنية منظمة، حالة توثيق ظاهرة، تخصصات وخدمات ومواقع وطرق تواصل تساعدك على مقارنة الخيارات قبل اتخاذ القرار.</p>
-              <div className="rawafid-directory-actions"><a className="primary-link" href="/specialists">دليل المختصين</a><a className="button" href="/centers">دليل المراكز</a></div>
+              <div className="rawafid-directory-actions"><Link prefetch={false} className="primary-link" href="/specialists">دليل المختصين</Link><Link prefetch={false} className="button" href="/centers">دليل المراكز</Link></div>
             </div>
             <div className="rawafid-directory-panel" aria-label="خصائص الدليل">
               <div><PlatformIcon name="review" /><strong>توثيق واعتماد</strong></div>
@@ -186,7 +187,7 @@ export default async function HomePage() {
             <h2 id="professional-title">ساهم بمعرفة موثوقة أو انضم إلى دليل روافد.</h2>
             <p>مسار تقديم واضح، مستندات خاصة، مراجعة إدارية، ومحرر منظم يتيح للمختص إنشاء محتواه ومتابعة مراحله.</p>
           </div>
-          <div><a className="primary-link" href="/join">ابدأ طلب الانضمام</a><a className="button" href="/editorial-policy">تعرف على معايير النشر</a></div>
+          <div><Link prefetch={false} className="primary-link" href="/join">ابدأ طلب الانضمام</Link><Link prefetch={false} className="button" href="/editorial-policy">تعرف على معايير النشر</Link></div>
         </section>
       </main>
       <SiteFooter />

@@ -43,7 +43,7 @@ export default async function CentersDirectory({ searchParams }: { searchParams:
           <label>اسم المركز<input name="q" defaultValue={q} placeholder="اسم المركز" maxLength={120} /></label>
           <label>المدينة<input name="city" defaultValue={city} placeholder="المدينة" maxLength={120} /></label>
           <label>الدولة<input name="country" defaultValue={country} placeholder="الدولة" maxLength={120} /></label>
-          <button className="primary-action" type="submit">تصفية</button>{(q || city || country) && <Link href="/centers">مسح</Link>}
+          <button className="primary-action" type="submit">تصفية</button>{(q || city || country) && <Link prefetch={false} href="/centers">مسح</Link>}
         </form>
 
         <section className="directory-results" aria-live="polite">
@@ -55,7 +55,7 @@ export default async function CentersDirectory({ searchParams }: { searchParams:
               <div className="directory-card-top"><div className="profile-placeholder center-placeholder" aria-hidden="true">{center.name.slice(0, 1)}</div><div><span className="verified-label">مركز موثق</span><h2>{center.name}</h2><p className="professional-title">{[center.city, center.country].filter(Boolean).join('، ')}</p></div></div>
               {center.description && <p className="directory-bio">{center.description.slice(0, 240)}{center.description.length > 240 ? '…' : ''}</p>}
               {center.address && <div className="directory-meta"><span>{center.address}</span></div>}
-              <Link className="directory-open" href={`/centers/${center.slug}`}>عرض المركز</Link>
+              <Link prefetch={false} className="directory-open" href={`/centers/${center.slug}`}>عرض المركز</Link>
             </article>)}
           </div>
         </section>

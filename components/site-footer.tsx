@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import RawafidBrand from '@/components/rawafid-brand';
 
 const groups = [
@@ -67,7 +68,7 @@ export default function SiteFooter() {
           {groups.map((group) => (
             <section key={group.id} aria-labelledby={'footer-' + group.id}>
               <h2 id={'footer-' + group.id}>{group.title}</h2>
-              <div>{group.links.map((link) => <a key={link.href} href={link.href}>{link.label}</a>)}</div>
+              <div>{group.links.map((link) => <Link prefetch={false} key={link.href} href={link.href}>{link.label}</Link>)}</div>
             </section>
           ))}
         </nav>

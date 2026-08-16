@@ -60,7 +60,7 @@ export default async function CommunityDirectory({ searchParams }: { searchParam
           <span className="eyebrow">Community & Learning Pathways</span>
           <h1>المتدربون والمتطوعون</h1>
           <p>مساحة مستقلة للمتدربين والمتطوعين المعتمدين داخل روافد. الصفة المعروضة هنا لا تعني ترخيصًا مهنيًا ولا تُعرض كبديل عن المختصين المرخصين.</p>
-          <div className="section-actions"><Link className="primary-link" href="/community/join">طلب الانضمام</Link><Link className="button" href="/specialists">دليل المختصين المرخصين</Link></div>
+          <div className="section-actions"><Link prefetch={false} className="primary-link" href="/community/join">طلب الانضمام</Link><Link prefetch={false} className="button" href="/specialists">دليل المختصين المرخصين</Link></div>
         </section>
 
         <section className="community-role-explainer" aria-label="الفرق بين الصفات">
@@ -73,7 +73,7 @@ export default async function CommunityDirectory({ searchParams }: { searchParam
           <label>الصفة<select name="type" defaultValue={requestedType}><option value="">الكل</option><option value="trainee">متدرب</option><option value="volunteer">متطوع</option></select></label>
           <label>المدينة<input name="city" defaultValue={city} placeholder="المدينة" maxLength={100} /></label>
           <button className="primary-action" type="submit">تصفية</button>
-          {(requestedType || city) && <Link href="/community">مسح</Link>}
+          {(requestedType || city) && <Link prefetch={false} href="/community">مسح</Link>}
         </form>
 
         <section className="directory-results" aria-live="polite">
@@ -86,7 +86,7 @@ export default async function CommunityDirectory({ searchParams }: { searchParam
                 <div className="directory-card-top"><div className="profile-placeholder" aria-hidden="true">{member.full_name.slice(0, 1)}</div><div><span className={`community-badge ${member.member_type}`}>{labels[member.member_type]}</span><h2>{member.full_name}</h2><p className="professional-title">{member.headline || [member.city, member.country].filter(Boolean).join('، ') || 'عضو في مجتمع روافد'}</p></div></div>
                 {member.bio && <p className="directory-bio">{member.bio.slice(0, 220)}{member.bio.length > 220 ? '…' : ''}</p>}
                 <div className="directory-meta">{(member.skills ?? []).slice(0, 4).map((skill) => <span key={skill}>{skill}</span>)}</div>
-                <Link className="directory-open" href={`/community/${member.slug}`}>عرض الملف</Link>
+                <Link prefetch={false} className="directory-open" href={`/community/${member.slug}`}>عرض الملف</Link>
               </article>
             ))}
           </div>

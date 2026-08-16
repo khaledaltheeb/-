@@ -1244,3 +1244,70 @@ body{
   .brand-mark,.site-footer,.footer-search{forced-color-adjust:auto}
   :where(a,button,input,select,textarea,summary):focus-visible{outline:3px solid Highlight}
 }
+
+
+/*
+ * Rawafid Institutional V5.2 — navigation continuity and accessibility hardening.
+ * Adds a reliable bypass target, larger footer targets and balanced Arabic headings.
+ */
+.skip-link{
+  position:fixed;
+  inset-inline-start:max(14px,env(safe-area-inset-left));
+  top:12px;
+  z-index:3000;
+  min-height:44px;
+  display:inline-flex;
+  align-items:center;
+  padding:10px 16px;
+  border:2px solid var(--rf-brand-deep);
+  border-radius:12px;
+  background:#fff;
+  color:var(--rf-brand-deep);
+  font-weight:900;
+  text-decoration:none;
+  box-shadow:var(--rf-shadow-md);
+  transform:translateY(calc(-100% - 24px));
+  transition:transform .16s ease;
+}
+.skip-link:focus-visible{transform:translateY(0)}
+.skip-target{
+  display:block;
+  width:1px;
+  height:0;
+  overflow:hidden;
+  scroll-margin-top:calc(var(--rf-header-height) + 16px);
+}
+:where(h1,h2){text-wrap:balance}
+.theme-preview-dashboard .admin-heading h2{
+  margin:8px 0 18px;
+  font-size:clamp(2rem,3.4vw,3rem);
+  line-height:1.4;
+}
+:where(main [id]){scroll-margin-top:calc(var(--rf-header-height) + 16px)}
+.nav-dropdown-heading>a,
+.footer-groups a,
+.back-to-top{
+  min-height:32px;
+  display:inline-flex;
+  align-items:center;
+}
+.footer-groups a{
+  padding-block:.22rem;
+  font-size:.84rem;
+  line-height:1.6;
+}
+.footer-groups h2{font-size:1rem}
+.footer-trust-list span{font-size:.74rem}
+.footer-bottom{font-size:.78rem}
+@media(max-width:760px){
+  .footer-groups a{min-height:40px}
+}
+@media(prefers-reduced-motion:reduce){
+  .skip-link{transition:none}
+}
+@media print{
+  .skip-link,.skip-target{display:none!important}
+}
+@media(forced-colors:active){
+  .skip-link{border:2px solid ButtonText;background:Canvas;color:CanvasText}
+}
