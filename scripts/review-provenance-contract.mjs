@@ -40,6 +40,7 @@ const surfaces = [
   'components/family-guide-article-page.tsx',
   'app/quick-info/[slug]/page.tsx',
   'app/encyclopedia/[slug]/page.tsx',
+  'app/content/[slug]/page.tsx',
 ];
 
 for (const file of surfaces) {
