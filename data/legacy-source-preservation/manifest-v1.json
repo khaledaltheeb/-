@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "policy": "Repository preservation is mandatory and independent from publication readiness, editorial depth, reference count, or indexability.",
+  "source_repository": "khaledaltheeb/healthrenewal.org",
+  "records": [
+    {
+      "issue_number": 110,
+      "source_path": "psychology/self-control/index.html",
+      "legacy_canonical": "/psychology/self-control/",
+      "title": "ضبط النفس: كيف ندير الاندفاع ونحمي الأهداف طويلة المدى؟",
+      "preserved_path": "data/legacy-source-preservation/psychology/self-control/index.html",
+      "source_blob_sha1": "1091f4a0c6c39655bc6d885765f597c209abc74b",
+      "preservation_status": "source_snapshot_preserved",
+      "release_status": "transfer_pending_materialization",
+      "length_floor": null
+    },
+    {
+      "issue_number": 62,
+      "source_path": "content/sectors-v10/safe-screening-tools.json",
+      "legacy_page_path": "evidence-guides/safe-screening-tools/index.html",
+      "legacy_canonical": "/evidence-guides/safe-screening-tools/",
+      "title": "الاستخدام الآمن للمقاييس والأدوات النفسية",
+      "preserved_path": "data/legacy-source-preservation/evidence-guides/safe-screening-tools/source.json",
+      "source_blob_sha1": "e6957736fee8f87bb99d82b86875d801401eb20e",
+      "preservation_status": "source_snapshot_preserved",
+      "release_status": "transfer_pending_materialization",
+      "length_floor": null
+    }
+  ]
+}

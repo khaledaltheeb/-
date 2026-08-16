@@ -1,0 +1,46 @@
+{
+  "batch_id": "legacy-missing-source-pages-001",
+  "migration_date": "2026-08-16",
+  "expected_record_count": 2,
+  "policy": "Mandatory preservation: source content transfers regardless of word count, SEO depth, or reference count. Release/indexing remain separate.",
+  "defaults": {
+    "search_intent": "informational",
+    "author_display_name": "فريق تحرير منصة روافد"
+  },
+  "records": [
+    {
+      "source_path": "/psychology/self-control/",
+      "target_slug": "psychology-self-control",
+      "target_canonical": "/psychology/self-control/",
+      "content_type": "article",
+      "primary_keyword": "ضبط النفس",
+      "secondary_keywords": ["التحكم الذاتي", "إدارة الاندفاع", "تأخير المكافأة", "قوة الإرادة"],
+      "semantic_terms": ["العادات", "الوظائف التنفيذية", "تنظيم الانفعال", "النوم", "الضغط", "تصميم البيئة"],
+      "audience": ["general"],
+      "schema_json": {
+        "page_role": "legacy_psychology_concept",
+        "migration_claim_issue": 110,
+        "mandatory_transfer": true,
+        "publication_ready": false,
+        "editorial_review_required": true
+      }
+    },
+    {
+      "source_path": "/evidence-guides/safe-screening-tools/",
+      "target_slug": "safe-screening-tools",
+      "target_canonical": "/evidence-guides/safe-screening-tools/",
+      "content_type": "guide",
+      "primary_keyword": "الاستخدام الآمن للمقاييس والأدوات النفسية",
+      "secondary_keywords": ["أدوات الفحص النفسي", "المقاييس النفسية", "الفحص ليس تشخيصًا", "تفسير نتائج المقاييس"],
+      "semantic_terms": ["الخصوصية", "الترخيص", "النسخة العربية", "الصدق", "الثبات", "حدود القطع", "المتابعة"],
+      "audience": ["general", "professionals"],
+      "schema_json": {
+        "page_role": "evidence_guide",
+        "migration_claim_issue": 62,
+        "mandatory_transfer": true,
+        "publication_ready": false,
+        "editorial_review_required": true
+      }
+    }
+  ]
+}

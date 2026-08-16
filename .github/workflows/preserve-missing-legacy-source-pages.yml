@@ -1,0 +1,59 @@
+name: Preserve Missing Legacy Source Pages
+
+on:
+  pull_request:
+    branches: [main, agent/mandatory-legacy-transfer-gate-main-rebase]
+    paths:
+      - 'data/legacy-source-preservation/**'
+      - 'data/migration-batches/legacy-missing-source-pages-001.config.json'
+      - 'scripts/validate_legacy_source_preservation.py'
+      - 'scripts/materialize_preserved_legacy_sources.py'
+      - 'scripts/validate_legacy_transfer_payload.py'
+      - '.github/workflows/preserve-missing-legacy-source-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  preserve-and-materialize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout target repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Verify verbatim repository snapshots
+        run: python scripts/validate_legacy_source_preservation.py data/legacy-source-preservation/manifest-v1.json
+
+      - name: Materialize from verified repository snapshots
+        run: >-
+          python scripts/materialize_preserved_legacy_sources.py
+          data/legacy-source-preservation/manifest-v1.json
+          data/migration-batches/legacy-missing-source-pages-001.config.json
+          --output artifacts/legacy-missing-source-pages-001.json
+
+      - name: Validate mandatory transfer
+        run: python scripts/validate_legacy_transfer_payload.py artifacts/legacy-missing-source-pages-001.json
+
+      - name: Audit strict editorial quality without blocking preservation
+        continue-on-error: true
+        run: python scripts/validate_migration_payload.py artifacts/legacy-missing-source-pages-001.json
+
+      - name: Audit release and SEO metadata without blocking preservation
+        continue-on-error: true
+        run: python scripts/validate_v3_release_metadata.py artifacts/legacy-missing-source-pages-001.json
+
+      - name: Upload preservation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: legacy-missing-source-pages-001
+          path: artifacts/legacy-missing-source-pages-001.json
+          if-no-files-found: error
+          retention-days: 30
