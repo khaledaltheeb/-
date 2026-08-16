@@ -1,0 +1,50 @@
+name: Daily Tools Functional Parity
+
+on:
+  push:
+    branches:
+      - 'agent/daily-tools-functional-parity'
+    paths:
+      - 'components/daily-tool-four-step-checklist.tsx'
+      - 'components/daily-tool-four-step-checklist.module.css'
+      - 'components/content-renderer.tsx'
+      - 'components/legacy-preserved-page.tsx'
+      - 'lib/daily-tools.ts'
+      - 'scripts/daily-tools-functional-parity-contract.mjs'
+      - 'data/legacy-production-batches/daily-tools/**'
+      - 'supabase/migrations/20260816040102_fix_legacy_preserved_page_source_key.sql'
+      - 'package.json'
+      - '.github/workflows/daily-tools-functional-parity.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Validate preserved Daily Tools contract
+        run: npm run daily-tools:validate
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Production build
+        run: npm run build
