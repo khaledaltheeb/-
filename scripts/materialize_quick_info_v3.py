@@ -108,10 +108,21 @@ def make_page_record(legacy_root: Path, overlays: dict[str, tuple[str, Path]]):
         batch, path = match
         fragment = path.read_text(encoding="utf-8")
         overlay_blocks, overlay_refs = editorial_fragment_blocks(fragment)
+
         if not overlay_blocks:
-            raise ValueError(f"empty editorial overlay: {path}")
-        if len(overlay_refs) < 3:
-            raise ValueError(f"editorial overlay has fewer than 3 external references: {path}")
+            record["schema_json"] = {
+                **record["schema_json"],
+                "legacy_editorial_overlay": True,
+                "legacy_editorial_overlay_batch": batch,
+                "legacy_editorial_overlay_source": str(path.relative_to(legacy_root)),
+                "legacy_editorial_overlay_empty": True,
+                "legacy_editorial_reference_count": len(overlay_refs),
+                "legacy_editorial_reference_target_met": len(overlay_refs) >= 3,
+                "legacy_editorial_recovery_ready": False,
+                "publication_ready": False,
+                "editorial_review_required": True,
+            }
+            return record
 
         blocks = insert_before_faq(list(record["body_json"]["blocks"]), overlay_blocks)
         body_text = body_text_from_blocks(blocks)
@@ -125,7 +136,10 @@ def make_page_record(legacy_root: Path, overlays: dict[str, tuple[str, Path]]):
             "legacy_editorial_overlay": True,
             "legacy_editorial_overlay_batch": batch,
             "legacy_editorial_overlay_source": str(path.relative_to(legacy_root)),
+            "legacy_editorial_overlay_empty": False,
             "legacy_editorial_overlay_word_count": word_count,
+            "legacy_editorial_reference_count": len(overlay_refs),
+            "legacy_editorial_reference_target_met": len(overlay_refs) >= 3,
             "legacy_editorial_recovery_ready": word_count >= MINIMUM_RECOVERED_EDITORIAL_WORDS,
             "legacy_editorial_requires_v6_expansion": word_count < V6_QUICK_INFO_WORD_FLOOR,
             "legacy_source_thin_after_sanitization": word_count < V6_QUICK_INFO_WORD_FLOOR,
@@ -151,32 +165,48 @@ def validate_output() -> None:
     payload = json.loads(path.read_text(encoding="utf-8"))
     records = payload.get("records", [])
     editorial = [r for r in records if r.get("schema_json", {}).get("legacy_editorial_overlay") is True]
-    if len(editorial) != EXPECTED_EDITORIAL_OVERLAYS:
-        raise SystemExit(f"Expected {EXPECTED_EDITORIAL_OVERLAYS} editorial overlays, found {len(editorial)}")
 
     below_recovery_floor = [
         r["slug"] for r in editorial
         if r.get("schema_json", {}).get("legacy_editorial_overlay_word_count", 0) < MINIMUM_RECOVERED_EDITORIAL_WORDS
     ]
-    if below_recovery_floor:
-        raise SystemExit(
-            f"Recovered editorial overlays below {MINIMUM_RECOVERED_EDITORIAL_WORDS} words: {below_recovery_floor}"
-        )
-    if any(len(r.get("references_json", [])) < 3 for r in editorial):
-        raise SystemExit("At least one editorial overlay has fewer than 3 references after merge")
-
+    below_reference_target = [
+        r["slug"] for r in editorial
+        if r.get("schema_json", {}).get("legacy_editorial_reference_count", 0) < 3
+    ]
+    empty_overlays = [
+        r["slug"] for r in editorial
+        if r.get("schema_json", {}).get("legacy_editorial_overlay_empty") is True
+    ]
     needs_v6_expansion = [
         r["slug"] for r in editorial
         if r.get("schema_json", {}).get("legacy_editorial_requires_v6_expansion") is True
     ]
+    word_counts = [
+        int(r.get("schema_json", {}).get("legacy_editorial_overlay_word_count", 0))
+        for r in editorial
+        if int(r.get("schema_json", {}).get("legacy_editorial_overlay_word_count", 0)) > 0
+    ]
+    reference_counts = [
+        int(r.get("schema_json", {}).get("legacy_editorial_reference_count", 0))
+        for r in editorial
+    ]
+
     print({
+        "transfer_policy": "mandatory-preservation-no-length-floor",
+        "expected_editorial_overlays": EXPECTED_EDITORIAL_OVERLAYS,
         "editorial_overlay_records": len(editorial),
-        "minimum_editorial_words": min(r["schema_json"]["legacy_editorial_overlay_word_count"] for r in editorial),
-        "maximum_editorial_words": max(r["schema_json"]["legacy_editorial_overlay_word_count"] for r in editorial),
-        "minimum_editorial_references": min(len(r.get("references_json", [])) for r in editorial),
+        "overlay_count_gap": EXPECTED_EDITORIAL_OVERLAYS - len(editorial),
+        "minimum_editorial_words": min(word_counts, default=0),
+        "maximum_editorial_words": max(word_counts, default=0),
+        "minimum_editorial_references": min(reference_counts, default=0),
+        "below_recovery_floor": len(below_recovery_floor),
+        "below_reference_target": len(below_reference_target),
+        "empty_overlays": len(empty_overlays),
         "v6_word_floor": V6_QUICK_INFO_WORD_FLOOR,
         "requires_v6_expansion": len(needs_v6_expansion),
         "publication_ready": 0,
+        "transfer_blocked_by_length": 0,
     })
 
 
@@ -184,7 +214,11 @@ def main() -> int:
     legacy_root = locate_legacy_root(sys.argv)
     overlays = overlay_index(legacy_root)
     if len(overlays) != EXPECTED_EDITORIAL_OVERLAYS:
-        raise SystemExit(f"Expected {EXPECTED_EDITORIAL_OVERLAYS} committed editorial overlays, found {len(overlays)}")
+        print({
+            "warning": "editorial overlay count differs from historical target; transfer remains mandatory",
+            "expected": EXPECTED_EDITORIAL_OVERLAYS,
+            "found": len(overlays),
+        })
 
     base.page_record = make_page_record(legacy_root, overlays)
     base.live_slugs = v2.full_live_slugs
