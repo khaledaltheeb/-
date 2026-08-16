@@ -57,27 +57,47 @@ jobs:
           done
           npm run smoke
           for run in 1 2 3; do
-            npx --yes lighthouse@12.8.2 http://127.0.0.1:3000/ \
-              --quiet --chrome-flags="--headless --no-sandbox" \
-              --only-categories=performance,accessibility,best-practices \
-              --output=json --output-path="/tmp/rawafid-lighthouse-${run}.json"
+            success=0
+            for attempt in 1 2; do
+              if npx --yes lighthouse@12.8.2 http://127.0.0.1:3000/ \
+                --quiet --chrome-flags="--headless --no-sandbox" \
+                --only-categories=performance,accessibility,best-practices \
+                --output=json --output-path="/tmp/rawafid-lighthouse-${run}.json"; then
+                success=1
+                break
+              fi
+              echo "Lighthouse run ${run} attempt ${attempt} failed; retrying once for runner-level trace failures."
+              sleep 2
+            done
+            if [ "$success" -ne 1 ]; then
+              echo "Lighthouse run ${run} failed after one retry."
+              exit 1
+            fi
           done
           node - <<'NODE'
           const fs=require('fs');
           const metricIds=['server-response-time','first-contentful-paint','largest-contentful-paint','total-blocking-time','cumulative-layout-shift','speed-index'];
+          const thresholds={
+            accessibility:0.99,
+            bestPractices:0.99,
+            medianPerformance:0.80,
+            maxCls:0.05,
+          };
           const runs=[1,2,3].map((run)=>{
             const report=JSON.parse(fs.readFileSync(`/tmp/rawafid-lighthouse-${run}.json`,'utf8'));
             const scores=Object.fromEntries(Object.entries(report.categories).map(([key,value])=>[key,value.score]));
             const metrics=Object.fromEntries(metricIds.map((id)=>[id,report.audits[id]?.displayValue??report.audits[id]?.numericValue??null]));
-            return {run,scores,metrics};
+            const numericCls=report.audits['cumulative-layout-shift']?.numericValue??Number.POSITIVE_INFINITY;
+            return {run,scores,metrics,numericCls};
           });
           for(const result of runs){
             console.log(`Lighthouse lab run ${result.run}:`,result.scores,result.metrics);
-            if((result.scores.accessibility??0)<0.90) throw new Error(`Accessibility Lighthouse score below 0.90 on run ${result.run}: ${result.scores.accessibility}`);
-            if((result.scores['best-practices']??0)<0.90) throw new Error(`Best Practices Lighthouse score below 0.90 on run ${result.run}: ${result.scores['best-practices']}`);
+            if((result.scores.accessibility??0)<thresholds.accessibility) throw new Error(`Accessibility Lighthouse score below ${thresholds.accessibility} on run ${result.run}: ${result.scores.accessibility}`);
+            if((result.scores['best-practices']??0)<thresholds.bestPractices) throw new Error(`Best Practices Lighthouse score below ${thresholds.bestPractices} on run ${result.run}: ${result.scores['best-practices']}`);
+            if(result.numericCls>thresholds.maxCls) throw new Error(`CLS above ${thresholds.maxCls} on run ${result.run}: ${result.numericCls}`);
           }
           const performances=runs.map((result)=>result.scores.performance??0).sort((a,b)=>a-b);
           const median=performances[1];
-          console.log('Lighthouse performance scores:',performances,'median:',median);
-          if(median<0.70) throw new Error(`Median Lighthouse performance below 0.70: ${median}`);
+          console.log('Lighthouse performance scores:',performances,'median:',median,'thresholds:',thresholds);
+          if(median<thresholds.medianPerformance) throw new Error(`Median Lighthouse performance below ${thresholds.medianPerformance}: ${median}`);
           NODE

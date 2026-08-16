@@ -35,6 +35,18 @@ if (!themeV6.includes('Rawafid Institutional Theme V6')) fail('V6 compatibility 
 if (/letter-spacing:-(?:\d|\.)/.test(themeV7) || /letter-spacing:-(?:\d|\.)/.test(themeV71)) fail('public Arabic typography must not use negative letter spacing');
 
 for (const marker of [
+  "import localFont from 'next/font/local'",
+  "display: 'optional'",
+  "preload: true",
+  "adjustFontFallback: 'Arial'",
+  "variable: '--rawafid-font-arabic'",
+  'className={rawafidArabicFont.variable}',
+]) {
+  if (!layout.includes(marker)) fail(`stable Arabic font loading marker missing ${marker}`);
+}
+if (!themeV71.includes('--font-arabic:var(--rawafid-font-arabic),Arial,sans-serif')) fail('V7.1 must bind the public Arabic family to the next/font local variable');
+
+for (const marker of [
   '--rf-container:82rem',
   '--rf-focus:#0b67c2',
   '--rf-control-height:46px',
