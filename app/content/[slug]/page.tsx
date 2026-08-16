@@ -55,6 +55,31 @@ type ContentRecord = {
 };
 
 const GENERATED_RELEASE = '2026-08-14T00:00:00.000Z';
+const CONTENT_TYPE_LABELS: Record<string, string> = {
+  article: 'مقال',
+  guide: 'دليل',
+  condition: 'حالة',
+  research: 'بحث/دراسة',
+  comparison: 'مقارنة',
+  tool: 'أداة',
+  assessment: 'تقييم',
+  intervention: 'تدخل',
+  protocol: 'بروتوكول',
+  course: 'دورة',
+  learning_path: 'مسار تعلم',
+  resource: 'مورد',
+  calendar: 'تقويم',
+  glossary_term: 'مصطلح',
+  faq: 'أسئلة شائعة',
+  directory_page: 'صفحة دليل',
+  news: 'خبر',
+  sector_page: 'صفحة قطاع',
+  landing_page: 'صفحة تعريفية',
+};
+
+function contentTypeLabel(value: string): string {
+  return CONTENT_TYPE_LABELS[value] ?? 'محتوى';
+}
 
 async function getDatabaseRecord(slug: string): Promise<ContentRecord | null> {
   const supabase = await createClient();
@@ -329,7 +354,7 @@ export default async function PublishedContentPage({ params }: { params: Params 
       </nav>
       <article>
         <header className="article-hero">
-          <span className="eyebrow">{record.content_type}</span>
+          <span className="eyebrow">{contentTypeLabel(record.content_type)}</span>
           <h1>{record.title}</h1>
           {record.excerpt && <p>{record.excerpt}</p>}
           <div className="article-meta">
@@ -351,9 +376,9 @@ export default async function PublishedContentPage({ params }: { params: Params 
         </aside>}
         <ContentDisclaimerLink />
         {related.length > 0 && <section className="article-related" aria-labelledby="related-title">
-          <div className="section-mini-heading"><div><span className="eyebrow">Topical Authority</span><h2 id="related-title">محتوى مرتبط</h2></div><span>روابط منتقاة من خريطة المفاهيم ونية البحث</span></div>
+          <div className="section-mini-heading"><div><span className="eyebrow">قراءات مرتبطة</span><h2 id="related-title">محتوى مرتبط</h2></div><span>مواد مرتبطة بالموضوع لتوسيع القراءة والوصول إلى شروحات ذات صلة.</span></div>
           <div className="related-content-grid">{related.map((item) => <article key={item.id}>
-            <span>{item.content_type}</span><h3><Link href={`/content/${item.slug}`}>{item.title}</Link></h3>{item.excerpt && <p>{item.excerpt}</p>}<Link href={`/content/${item.slug}`}>متابعة القراءة ←</Link>
+            <span>{contentTypeLabel(item.content_type)}</span><h3><Link href={`/content/${item.slug}`}>{item.title}</Link></h3>{item.excerpt && <p>{item.excerpt}</p>}<Link href={`/content/${item.slug}`}>متابعة القراءة ←</Link>
           </article>)}</div>
         </section>}
         {references.length > 0 && <section className="article-references" aria-labelledby="references-title">
