@@ -1,0 +1,133 @@
+name: Materialize Legacy Production Baseline
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'agent/full-legacy-migration'
+    paths:
+      - 'scripts/materialize_legacy_production_batches.py'
+      - 'scripts/legacy_content_extract.py'
+      - '.github/workflows/fetch-legacy-production-baseline.yml'
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  materialize-baseline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout Rawafid migration branch
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 1
+
+      - name: Resolve latest validated production baseline
+        id: baseline
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          curl -fsSL \
+            -H 'Accept: application/vnd.github+json' \
+            -H 'X-GitHub-Api-Version: 2022-11-28' \
+            'https://api.github.com/repos/khaledaltheeb/healthrenewal.org/actions/artifacts?name=validated-production-site&per_page=100' \
+            -o /tmp/artifacts.json
+          python - <<'PY'
+          import json, os
+          payload = json.load(open('/tmp/artifacts.json', encoding='utf-8'))
+          items = [
+              item for item in payload.get('artifacts', [])
+              if not item.get('expired')
+              and item.get('workflow_run', {}).get('head_branch') == 'main'
+          ]
+          if not items:
+              raise SystemExit('No active validated-production-site artifact from legacy main')
+          item = max(items, key=lambda row: row.get('created_at', ''))
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as out:
+              out.write(f"artifact_id={item['id']}\n")
+              out.write(f"source_sha={item['workflow_run']['head_sha']}\n")
+              out.write(f"artifact_size={item['size_in_bytes']}\n")
+              out.write(f"artifact_digest={item.get('digest', '')}\n")
+          print({
+              'artifact_id': item['id'],
+              'source_sha': item['workflow_run']['head_sha'],
+              'size': item['size_in_bytes'],
+              'digest': item.get('digest'),
+              'created_at': item['created_at'],
+          })
+          PY
+
+      - name: Download legacy production baseline
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ARTIFACT_ID: ${{ steps.baseline.outputs.artifact_id }}
+        run: |
+          set -euo pipefail
+          url="https://api.github.com/repos/khaledaltheeb/healthrenewal.org/actions/artifacts/${ARTIFACT_ID}/zip"
+          curl -fL \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H 'Accept: application/vnd.github+json' \
+            -H 'X-GitHub-Api-Version: 2022-11-28' \
+            "$url" -o /tmp/legacy-production.zip
+          test -s /tmp/legacy-production.zip
+          rm -rf legacy-production
+          mkdir -p legacy-production
+          unzip -q /tmp/legacy-production.zip -d legacy-production
+
+      - name: Compile migration extractors
+        run: >-
+          python -m py_compile
+          scripts/legacy_content_extract.py
+          scripts/materialize_legacy_production_batches.py
+
+      - name: Materialize semantic production batches
+        env:
+          LEGACY_BASELINE_ARTIFACT_ID: ${{ steps.baseline.outputs.artifact_id }}
+          LEGACY_BASELINE_DIGEST: ${{ steps.baseline.outputs.artifact_digest }}
+          LEGACY_BASELINE_HEAD_SHA: ${{ steps.baseline.outputs.source_sha }}
+        run: >-
+          python scripts/materialize_legacy_production_batches.py legacy-production
+          --output-dir data/legacy-production-batches
+          --max-records 200
+          --max-bytes 5000000
+
+      - name: Verify expected production surface
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          manifest = json.load(open('data/legacy-production-batches/manifest.json', encoding='utf-8'))
+          summary = manifest['summary']
+          assert summary['total_html'] >= 5600, summary
+          assert summary['encyclopedia_detail_pages'] == 2000, summary
+          assert summary['quick_info_detail_pages'] >= 390, summary
+          assert summary['batch_count'] > 0, summary
+          print(json.dumps(summary, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Commit deterministic migration payloads
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/legacy-production-batches
+          if git diff --cached --quiet; then
+            echo "Production payloads already match the latest validated baseline."
+            exit 0
+          fi
+          git commit -m "Materialize validated legacy production payloads"
+          git push origin HEAD:${{ github.ref_name }}
+
+      - name: Upload production migration manifest
+        uses: actions/upload-artifact@v6
+        with:
+          name: legacy-production-migration-manifest
+          if-no-files-found: error
+          retention-days: 30
+          path: |
+            data/legacy-production-batches/manifest.json
+            data/legacy-production-batches/summary.json

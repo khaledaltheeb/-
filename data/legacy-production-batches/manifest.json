@@ -1,0 +1,845 @@
+{
+  "summary": {
+    "schema_version": 1,
+    "source": {
+      "kind": "validated-production-site",
+      "artifact_id": "9238517196",
+      "artifact_digest": "sha256:e657d2cde228c281d6fca80f130f15f06fc2791d344724d929d897cf2590158f",
+      "head_sha": "5a48c4bc4abb1b63b05fac64580a3463759b41b5"
+    },
+    "total_html": 5642,
+    "encyclopedia_detail_pages": 2000,
+    "quick_info_detail_pages": 395,
+    "migration_state_counts": {
+      "BASELINE_ONLY": 404,
+      "DEVELOPMENT_ONLY": 29,
+      "PUBLISHABLE": 1459,
+      "PUBLISHABLE_AFTER_REPAIR": 3750
+    },
+    "family_counts": {
+      "encyclopedia": 2002,
+      "sections": 562,
+      "quick-info": 396,
+      "special-needs": 314,
+      "care-guides": 235,
+      "hubs": 201,
+      "terms": 201,
+      "sectors": 175,
+      "capabilities": 155,
+      "daily-tools": 151,
+      "library": 149,
+      "outside-the-box": 109,
+      "comparisons": 108,
+      "guided-assessment": 101,
+      "psychology": 96,
+      "family-guide": 89,
+      "magazine": 86,
+      "addiction": 66,
+      "learning-paths": 55,
+      "cognitive-lab": 54,
+      "assessment-lab": 41,
+      "evidence-guides": 38,
+      "provider-assessment-demo": 26,
+      "guides": 23,
+      "english-index": 22,
+      "letters": 22,
+      "tips": 22,
+      "categories": 18,
+      "iris": 15,
+      "resources": 12,
+      "adhd": 10,
+      "cognitive-tests": 9,
+      "specialists-partners": 9,
+      "cochrane": 7,
+      "audiences": 6,
+      "tools": 5,
+      "assessments": 4,
+      "(root)": 3,
+      "about": 2,
+      "accessibility": 2,
+      "autism": 2,
+      "developers": 2,
+      "source-registry": 2,
+      "trust": 2,
+      "accessibility-statement": 1,
+      "ai-search": 1,
+      "api": 1,
+      "blog": 1,
+      "citation": 1,
+      "contact": 1,
+      "copyright": 1,
+      "courses": 1,
+      "downloads": 1,
+      "editorial-methodology": 1,
+      "en": 1,
+      "es": 1,
+      "evaluate-mental-health-information": 1,
+      "family": 1,
+      "governance": 1,
+      "media-kit": 1,
+      "mental-health": 1,
+      "methodology": 1,
+      "partners": 1,
+      "platform": 1,
+      "privacy": 1,
+      "privacy-policy": 1,
+      "rehabilitation": 1,
+      "research": 1,
+      "rights": 1,
+      "safety": 1,
+      "schools": 1,
+      "services": 1,
+      "sources": 1,
+      "start-here": 1,
+      "stats": 1,
+      "team-and-partners": 1,
+      "verified-resources": 1
+    },
+    "batch_count": 106,
+    "total_batch_bytes": 180579867
+  },
+  "batches": [
+    {
+      "family": "(root)",
+      "path": "legacy-production-batches/root/001.json",
+      "records": 3,
+      "bytes": 50279,
+      "sha256": "048d4af9e395686b2d7934f3f36e5a65b94aca17ccff59fc5bd26f5f8f8e4721"
+    },
+    {
+      "family": "about",
+      "path": "legacy-production-batches/about/001.json",
+      "records": 2,
+      "bytes": 28691,
+      "sha256": "ed4ad114062e5565fd7ba340f4e7aca0242b07845fd9e9c9efe3a57c94c02033"
+    },
+    {
+      "family": "accessibility",
+      "path": "legacy-production-batches/accessibility/001.json",
+      "records": 2,
+      "bytes": 31631,
+      "sha256": "bb8d19ff4d39ce78b44b16243a5418e5c776e196f98de79da8034ca61e1beb75"
+    },
+    {
+      "family": "accessibility-statement",
+      "path": "legacy-production-batches/accessibility-statement/001.json",
+      "records": 1,
+      "bytes": 16644,
+      "sha256": "8a7f5dd8132f196e8860df534024e83762b72db14b866157f98ada20790f31ac"
+    },
+    {
+      "family": "addiction",
+      "path": "legacy-production-batches/addiction/001.json",
+      "records": 66,
+      "bytes": 974771,
+      "sha256": "55aa79551013b3aed6b5a44af560a22a6db82757f508874cddcf22c5c8f96d82"
+    },
+    {
+      "family": "adhd",
+      "path": "legacy-production-batches/adhd/001.json",
+      "records": 10,
+      "bytes": 334334,
+      "sha256": "12a846a4538da209db5fdb1b159012111f84669fd88380dcd6844d649d0b45aa"
+    },
+    {
+      "family": "ai-search",
+      "path": "legacy-production-batches/ai-search/001.json",
+      "records": 1,
+      "bytes": 7208,
+      "sha256": "a5708c6b5f09d74233f6e6cae5320753b8f370e288170dbf9df29358e33e5b2c"
+    },
+    {
+      "family": "api",
+      "path": "legacy-production-batches/api/001.json",
+      "records": 1,
+      "bytes": 13115,
+      "sha256": "d6ed6ff83c1691c4649f8685ab6f7777364a79f90936c9178bced65faffbed64"
+    },
+    {
+      "family": "assessment-lab",
+      "path": "legacy-production-batches/assessment-lab/001.json",
+      "records": 41,
+      "bytes": 322356,
+      "sha256": "d71385a83e67d4a1c5162f6e8146407f72bc91e72e422daf1068aa9ebb96a873"
+    },
+    {
+      "family": "assessments",
+      "path": "legacy-production-batches/assessments/001.json",
+      "records": 4,
+      "bytes": 40769,
+      "sha256": "2f3ebe635b5e5c10f6e4b868b077d902120d976405b1f3b1eacf70a9c3f73e6d"
+    },
+    {
+      "family": "audiences",
+      "path": "legacy-production-batches/audiences/001.json",
+      "records": 6,
+      "bytes": 42112,
+      "sha256": "ae9df8c9375f697af9f548f290dd7f16e0d8316f31d77bf1eae8463a2963268f"
+    },
+    {
+      "family": "autism",
+      "path": "legacy-production-batches/autism/001.json",
+      "records": 2,
+      "bytes": 20710,
+      "sha256": "7deac5ee01bbcdebc828c8f1d477cca1ef83d14ecb39443df50b00d77af20e59"
+    },
+    {
+      "family": "blog",
+      "path": "legacy-production-batches/blog/001.json",
+      "records": 1,
+      "bytes": 1525,
+      "sha256": "eebf7a068bc3f0dec1797a1bb17531ac6d869881e3e2b0e089a2f63b2adf7787"
+    },
+    {
+      "family": "capabilities",
+      "path": "legacy-production-batches/capabilities/001.json",
+      "records": 111,
+      "bytes": 4987518,
+      "sha256": "d06776923c07bba1daa8e5c21ea76bb1c5173a4e58c9a23a2675997e289b012d"
+    },
+    {
+      "family": "capabilities",
+      "path": "legacy-production-batches/capabilities/002.json",
+      "records": 44,
+      "bytes": 2006708,
+      "sha256": "24a3b8bb96a434f695698b842478fa111e46edc98cf337fb72387aacaf47dd65"
+    },
+    {
+      "family": "care-guides",
+      "path": "legacy-production-batches/care-guides/001.json",
+      "records": 99,
+      "bytes": 4991049,
+      "sha256": "9a0f7b9a2047956ffbd5b926349a93cc0d5fce20d2609b9c5f0b9b544beecb9f"
+    },
+    {
+      "family": "care-guides",
+      "path": "legacy-production-batches/care-guides/002.json",
+      "records": 59,
+      "bytes": 4690722,
+      "sha256": "ff26f0ef6da7367d75a71cfb554d4a05a1fb6bb4a3cb89246f3bb82db3a53951"
+    },
+    {
+      "family": "care-guides",
+      "path": "legacy-production-batches/care-guides/003.json",
+      "records": 52,
+      "bytes": 4957039,
+      "sha256": "478c10a8486a626419f3084bcd65a78e221d36e0c380d3b7717ac0efe10371c5"
+    },
+    {
+      "family": "care-guides",
+      "path": "legacy-production-batches/care-guides/004.json",
+      "records": 25,
+      "bytes": 2126739,
+      "sha256": "3482db56073fc1ca31562947dd389b6aab9a84d8155684865ffa2834c43738e4"
+    },
+    {
+      "family": "categories",
+      "path": "legacy-production-batches/categories/001.json",
+      "records": 18,
+      "bytes": 166034,
+      "sha256": "28d78f52af8866c9f0408e54a53039b9afc424ccde0ad69dba5afb9044a0b4b5"
+    },
+    {
+      "family": "citation",
+      "path": "legacy-production-batches/citation/001.json",
+      "records": 1,
+      "bytes": 2474,
+      "sha256": "728cb705d53806d2b338252968c099389da9ddca93af2e667d71222063cb3e76"
+    },
+    {
+      "family": "cochrane",
+      "path": "legacy-production-batches/cochrane/001.json",
+      "records": 7,
+      "bytes": 113456,
+      "sha256": "e5ba92394b20a0ddfb99939bf09d2d10a8b1cc9b33b58d2b1e5802230585bd08"
+    },
+    {
+      "family": "cognitive-lab",
+      "path": "legacy-production-batches/cognitive-lab/001.json",
+      "records": 54,
+      "bytes": 446208,
+      "sha256": "94e3bd20a32860980898f7729343372f557c0dfd757558319402bdfea4192d46"
+    },
+    {
+      "family": "cognitive-tests",
+      "path": "legacy-production-batches/cognitive-tests/001.json",
+      "records": 9,
+      "bytes": 155874,
+      "sha256": "76ed62199cb8133d67a05462d5cbd0b156d22f56f10b3bb93130e239bf47203b"
+    },
+    {
+      "family": "comparisons",
+      "path": "legacy-production-batches/comparisons/001.json",
+      "records": 108,
+      "bytes": 2108134,
+      "sha256": "95d074cfd01dd850c4887a01704b8c217b9e8f5d0a0d9bf8b72ed76a888128d2"
+    },
+    {
+      "family": "contact",
+      "path": "legacy-production-batches/contact/001.json",
+      "records": 1,
+      "bytes": 14368,
+      "sha256": "8cfcfad45d55893a6fe64775745442c88ac13d609518538298ae97896b1dbfd1"
+    },
+    {
+      "family": "copyright",
+      "path": "legacy-production-batches/copyright/001.json",
+      "records": 1,
+      "bytes": 10987,
+      "sha256": "e8750b251f9d5294b372c71c29977ae0aacc53155c9af10667f74b58e7c4d12e"
+    },
+    {
+      "family": "courses",
+      "path": "legacy-production-batches/courses/001.json",
+      "records": 1,
+      "bytes": 1597,
+      "sha256": "2a1662f165186382a3b45633e00870bebbe338d049d6f78fb0027cd88d0a7878"
+    },
+    {
+      "family": "daily-tools",
+      "path": "legacy-production-batches/daily-tools/001.json",
+      "records": 151,
+      "bytes": 3763297,
+      "sha256": "f92d64d19de867b51e1b1c117e5108e1af4d38898727153b0e3a97f6a3e8e9ef"
+    },
+    {
+      "family": "developers",
+      "path": "legacy-production-batches/developers/001.json",
+      "records": 2,
+      "bytes": 74881,
+      "sha256": "cd931d123aef30fd0b066f2129920915790d961145758be416ecd1900270622b"
+    },
+    {
+      "family": "downloads",
+      "path": "legacy-production-batches/downloads/001.json",
+      "records": 1,
+      "bytes": 11941,
+      "sha256": "93ea68676ecebe0c3aaf5d89311c7dcff5e2424c5b18b5df8edc2dcbb0ee3a6d"
+    },
+    {
+      "family": "editorial-methodology",
+      "path": "legacy-production-batches/editorial-methodology/001.json",
+      "records": 1,
+      "bytes": 1858,
+      "sha256": "7c2a6815c060867f05886e89bdc7c66fe77916a4b74007f19c000e4504507963"
+    },
+    {
+      "family": "en",
+      "path": "legacy-production-batches/en/001.json",
+      "records": 1,
+      "bytes": 7355,
+      "sha256": "489e2da5820fe73efb09edfed10c410aa554a6418034231c41464ddb6985927e"
+    },
+    {
+      "family": "encyclopedia",
+      "path": "legacy-production-batches/encyclopedia/001.json",
+      "records": 181,
+      "bytes": 4983326,
+      "sha256": "e6c5e2bd9e14b9d196cd8c7fd08817db141c3d672efcf789fb0a42288b837aca"
+    },
+    {
+      "family": "encyclopedia",
+      "path": "legacy-production-batches/encyclopedia/002.json",
+      "records": 200,
+      "bytes": 4448119,
+      "sha256": "434ba5a8b909936b3c63c795bc44c30423e6c77ccfbaf3f44bc29c7462c738c1"
+    },
+    {
+      "family": "encyclopedia",
+      "path": "legacy-production-batches/encyclopedia/003.json",
+      "records": 200,
+      "bytes": 4540424,
+      "sha256": "bc479291641f5552b58465d8bf580defa44429369e9a41112dac77ff45e55ce8"
+    },
+    {
+      "family": "encyclopedia",
+      "path": "legacy-production-batches/encyclopedia/004.json",
+      "records": 200,
+      "bytes": 4547492,
+      "sha256": "9937cda037093d8bdb706e98b37faac30d3a0e59a8b85c59a41346b35764cd18"
+    },
+    {
+      "family": "encyclopedia",
+      "path": "legacy-production-batches/encyclopedia/005.json",
+      "records": 200,
+      "bytes": 4559450,
+      "sha256": "e96e31c17cf531e84ad0de187312fd107266869e11c7bbb2e0e0153299753671"
+    },
+    {
+      "family": "encyclopedia",
+      "path": "legacy-production-batches/encyclopedia/006.json",
+      "records": 200,
+      "bytes": 4571323,
+      "sha256": "192f9ca1d3ef4f3dcc36deb10147624362c3e5b0f9af431684635335fcfe851e"
+    },
+    {
+      "family": "encyclopedia",
+      "path": "legacy-production-batches/encyclopedia/007.json",
+      "records": 200,
+      "bytes": 4452166,
+      "sha256": "417efc59f1d2a74a9439cbc441f587998145bd7284fdf6d14cdf00a2b8b9c806"
+    },
+    {
+      "family": "encyclopedia",
+      "path": "legacy-production-batches/encyclopedia/008.json",
+      "records": 200,
+      "bytes": 4685777,
+      "sha256": "4a4c79ebee85d9f88e9a10c2ffd6fe5d544f9cecb9a0c798a53e267d5e361472"
+    },
+    {
+      "family": "encyclopedia",
+      "path": "legacy-production-batches/encyclopedia/009.json",
+      "records": 200,
+      "bytes": 4660760,
+      "sha256": "ef8eb8cf726a8ce9b3a05a0b330a3cfd0913996bdd8d660e578042c845d8533f"
+    },
+    {
+      "family": "encyclopedia",
+      "path": "legacy-production-batches/encyclopedia/010.json",
+      "records": 200,
+      "bytes": 4615098,
+      "sha256": "adea509d743c5e6d046f0214456e2f9217d9bc63c656681c4d0b9fabf554242d"
+    },
+    {
+      "family": "encyclopedia",
+      "path": "legacy-production-batches/encyclopedia/011.json",
+      "records": 21,
+      "bytes": 497106,
+      "sha256": "a37392e03a733ce218476270329ef7c2867a45e93e6165bdee527a9d4a155bd7"
+    },
+    {
+      "family": "english-index",
+      "path": "legacy-production-batches/english-index/001.json",
+      "records": 22,
+      "bytes": 176272,
+      "sha256": "7cefe09cd7c483655ce0317181b7dbeabb318b3f875a3f487437c9376d63ffd6"
+    },
+    {
+      "family": "es",
+      "path": "legacy-production-batches/es/001.json",
+      "records": 1,
+      "bytes": 8039,
+      "sha256": "288da2fbef6ef843157a225afe67ae6f4ddb9090211fc1fc6a3880a85ef8234c"
+    },
+    {
+      "family": "evaluate-mental-health-information",
+      "path": "legacy-production-batches/evaluate-mental-health-information/001.json",
+      "records": 1,
+      "bytes": 2006,
+      "sha256": "41862cba94788398945e6f02760e67da1dfe9cf37b1428d3f4c1ee98e52372e5"
+    },
+    {
+      "family": "evidence-guides",
+      "path": "legacy-production-batches/evidence-guides/001.json",
+      "records": 38,
+      "bytes": 968987,
+      "sha256": "8cb45772495ddb4412012e22da9f8646a7d6222613a17a09cf2d05cdbc416f2b"
+    },
+    {
+      "family": "family",
+      "path": "legacy-production-batches/family/001.json",
+      "records": 1,
+      "bytes": 14409,
+      "sha256": "acdf284e11ea4525a13fe516c82e16777715274f20727ad7da5efd6670f1550d"
+    },
+    {
+      "family": "family-guide",
+      "path": "legacy-production-batches/family-guide/001.json",
+      "records": 89,
+      "bytes": 2896804,
+      "sha256": "19b0aa1cf0bd0b68c0d07d7dfe98eb8da47e9445c47442f37f9487bb50b5c61d"
+    },
+    {
+      "family": "governance",
+      "path": "legacy-production-batches/governance/001.json",
+      "records": 1,
+      "bytes": 22235,
+      "sha256": "350457276def0db41c735af27d553f300c059f29c10b1f74356bef55db5192b4"
+    },
+    {
+      "family": "guided-assessment",
+      "path": "legacy-production-batches/guided-assessment/001.json",
+      "records": 101,
+      "bytes": 484679,
+      "sha256": "0ea76285d3fb0dc4687afc3e99d091004f3cfb386e547bc45db74694ea1f5153"
+    },
+    {
+      "family": "guides",
+      "path": "legacy-production-batches/guides/001.json",
+      "records": 23,
+      "bytes": 161349,
+      "sha256": "559625a89e2656b67aac53ac30fdb8c7dcd1bf3b1f049cca953949fabda98375"
+    },
+    {
+      "family": "hubs",
+      "path": "legacy-production-batches/hubs/001.json",
+      "records": 189,
+      "bytes": 4988971,
+      "sha256": "657b13ef18da3ef6b411bee38ca79e368bb74049f8812b5917dde0a57680b83b"
+    },
+    {
+      "family": "hubs",
+      "path": "legacy-production-batches/hubs/002.json",
+      "records": 12,
+      "bytes": 281418,
+      "sha256": "d8774758f5375453b493b15dcafd1a7b7d95db089a9bb631644f3e2e5a10c3de"
+    },
+    {
+      "family": "iris",
+      "path": "legacy-production-batches/iris/001.json",
+      "records": 15,
+      "bytes": 172085,
+      "sha256": "7256694c911aac68775472ecb4412a0c4be2a3ddf2b99fc355cc54a927de6f4a"
+    },
+    {
+      "family": "learning-paths",
+      "path": "legacy-production-batches/learning-paths/001.json",
+      "records": 55,
+      "bytes": 1748152,
+      "sha256": "e154d427daaf638e21037d6a4cd9ad73ff6febf4e2288247706b037a123b7304"
+    },
+    {
+      "family": "letters",
+      "path": "legacy-production-batches/letters/001.json",
+      "records": 22,
+      "bytes": 493401,
+      "sha256": "bebf9f95b94fae91a6a0568b711255ee1387d7e21d475a08473e7c10ac94451d"
+    },
+    {
+      "family": "library",
+      "path": "legacy-production-batches/library/001.json",
+      "records": 149,
+      "bytes": 1921643,
+      "sha256": "18f72f8523e7a710764d823a4bae7f37bcd020933d6f915ba1b38dac32d3b0a8"
+    },
+    {
+      "family": "magazine",
+      "path": "legacy-production-batches/magazine/001.json",
+      "records": 86,
+      "bytes": 1898575,
+      "sha256": "6014a161dce7438ec3bf32f39553eeee446c6e943be9f040bd23029cb1a3ebcd"
+    },
+    {
+      "family": "media-kit",
+      "path": "legacy-production-batches/media-kit/001.json",
+      "records": 1,
+      "bytes": 3207,
+      "sha256": "e6a26dd68cfc81bc87519ea50e9c0a53bf301161bcea51d641cbb0638ee16e21"
+    },
+    {
+      "family": "mental-health",
+      "path": "legacy-production-batches/mental-health/001.json",
+      "records": 1,
+      "bytes": 1331,
+      "sha256": "926d6e60408acec612264129cc3bc65eef6d5c471c2f8a5f14d2533b51ee5fc1"
+    },
+    {
+      "family": "methodology",
+      "path": "legacy-production-batches/methodology/001.json",
+      "records": 1,
+      "bytes": 33146,
+      "sha256": "d8f7b3693e4677b0b572396196aa9497bedd3549bd4e77c623a41842d24b7f39"
+    },
+    {
+      "family": "outside-the-box",
+      "path": "legacy-production-batches/outside-the-box/001.json",
+      "records": 28,
+      "bytes": 4903495,
+      "sha256": "1da4731808610bf439d3f4a9a6302723d7924e70232d1f2056baf46e8c6945dc"
+    },
+    {
+      "family": "outside-the-box",
+      "path": "legacy-production-batches/outside-the-box/002.json",
+      "records": 30,
+      "bytes": 4944454,
+      "sha256": "5c46f5c78d358d82ab71b1cc006dd3779b7412d7f72f8d308bc8f9b52dbc22a6"
+    },
+    {
+      "family": "outside-the-box",
+      "path": "legacy-production-batches/outside-the-box/003.json",
+      "records": 30,
+      "bytes": 4909449,
+      "sha256": "63bd95d186686f03d467a86d22c078202774541f017d2ecfa867944f92e9bcc5"
+    },
+    {
+      "family": "outside-the-box",
+      "path": "legacy-production-batches/outside-the-box/004.json",
+      "records": 21,
+      "bytes": 3650573,
+      "sha256": "94f5198805d1e64131fd427034c282cc1cab885ed96948b372204df7c4dea597"
+    },
+    {
+      "family": "partners",
+      "path": "legacy-production-batches/partners/001.json",
+      "records": 1,
+      "bytes": 29975,
+      "sha256": "240b0cadc9d62957e994f083b33220b2611dfdedb94e65da1d14a4c5781c92b8"
+    },
+    {
+      "family": "platform",
+      "path": "legacy-production-batches/platform/001.json",
+      "records": 1,
+      "bytes": 11060,
+      "sha256": "5eaefa2e204b2e4aa9beaf2a30616f9bb0356c5f692eb26895f7adcfcab5604a"
+    },
+    {
+      "family": "privacy",
+      "path": "legacy-production-batches/privacy/001.json",
+      "records": 1,
+      "bytes": 33211,
+      "sha256": "9298621130f9599db26be132b34c8f6a444ab10be48a9f7aec72880feca52173"
+    },
+    {
+      "family": "privacy-policy",
+      "path": "legacy-production-batches/privacy-policy/001.json",
+      "records": 1,
+      "bytes": 21210,
+      "sha256": "b7f6d5f88fc4c8eb1f826eb29c81d51f7af18c228df4f6c91cd07782d92ad0c3"
+    },
+    {
+      "family": "provider-assessment-demo",
+      "path": "legacy-production-batches/provider-assessment-demo/001.json",
+      "records": 26,
+      "bytes": 481133,
+      "sha256": "a0e133af9eaeae254105f744f00e9d5eba3296247babc072544dae26373ed58c"
+    },
+    {
+      "family": "psychology",
+      "path": "legacy-production-batches/psychology/001.json",
+      "records": 96,
+      "bytes": 1174929,
+      "sha256": "1d0189de1790b8c3d3b0600d1d4c27c7c402db3a41e3fda4fd36351fa5614a72"
+    },
+    {
+      "family": "quick-info",
+      "path": "legacy-production-batches/quick-info/001.json",
+      "records": 89,
+      "bytes": 4936761,
+      "sha256": "880aa19bbdf84584e6a3998e98be78f27950f98b6d7491d4fe622bb967b93cbc"
+    },
+    {
+      "family": "quick-info",
+      "path": "legacy-production-batches/quick-info/002.json",
+      "records": 99,
+      "bytes": 4931558,
+      "sha256": "6763f017770d79df37b8510b9426bfc30ee051750fedb625d0ec799c814134ea"
+    },
+    {
+      "family": "quick-info",
+      "path": "legacy-production-batches/quick-info/003.json",
+      "records": 85,
+      "bytes": 4984288,
+      "sha256": "11015f4d826a00ee218d32e6b6afad642de99bb00296b3a6648e3306a64c4275"
+    },
+    {
+      "family": "quick-info",
+      "path": "legacy-production-batches/quick-info/004.json",
+      "records": 84,
+      "bytes": 4950589,
+      "sha256": "c8a7904c989b189c70f9a66e6dd0a617053f994d44f47d1b4105036b04032761"
+    },
+    {
+      "family": "quick-info",
+      "path": "legacy-production-batches/quick-info/005.json",
+      "records": 39,
+      "bytes": 2058447,
+      "sha256": "d8389126d339fe23e5b1fc0b596b087ecefc9571d4d1e0eacea4e0525730b880"
+    },
+    {
+      "family": "rehabilitation",
+      "path": "legacy-production-batches/rehabilitation/001.json",
+      "records": 1,
+      "bytes": 1326,
+      "sha256": "3ddf3baa5feb274a179378173d9394e10139e368dd7ca9ffad9aed75b3ca1240"
+    },
+    {
+      "family": "research",
+      "path": "legacy-production-batches/research/001.json",
+      "records": 1,
+      "bytes": 1352,
+      "sha256": "ab544666af749323611f8d062b436ad2a454fcf2300a5db5cd85493323da88b3"
+    },
+    {
+      "family": "resources",
+      "path": "legacy-production-batches/resources/001.json",
+      "records": 12,
+      "bytes": 60143,
+      "sha256": "94df51fe53389cb48583fb662674465b9070e8a798e4c81384c64525fc42f612"
+    },
+    {
+      "family": "rights",
+      "path": "legacy-production-batches/rights/001.json",
+      "records": 1,
+      "bytes": 20270,
+      "sha256": "40dbb7c79d8c6c2eb81738327002d0a8c51302d5184718a1ac498e5d40c31dec"
+    },
+    {
+      "family": "safety",
+      "path": "legacy-production-batches/safety/001.json",
+      "records": 1,
+      "bytes": 17542,
+      "sha256": "126c8105394519674ce27afa6eb6680dc19c2c14de99df37025e0100f2dc9f90"
+    },
+    {
+      "family": "schools",
+      "path": "legacy-production-batches/schools/001.json",
+      "records": 1,
+      "bytes": 21088,
+      "sha256": "4f626a085f6d4c0ae0a7da1aba0c16989bb40381e72b7cf0e670f8aa4cc4f36a"
+    },
+    {
+      "family": "sections",
+      "path": "legacy-production-batches/sections/001.json",
+      "records": 145,
+      "bytes": 4968209,
+      "sha256": "0d9beb35f396727bca4a046fc3a3e9ef660a9cb68f4192e1accb850f386143ef"
+    },
+    {
+      "family": "sections",
+      "path": "legacy-production-batches/sections/002.json",
+      "records": 130,
+      "bytes": 4993350,
+      "sha256": "c4f50b85ed5bcf0e964bf3d1e62c4bad13e358a93be31772016fb37ab8b6242a"
+    },
+    {
+      "family": "sections",
+      "path": "legacy-production-batches/sections/003.json",
+      "records": 144,
+      "bytes": 4981616,
+      "sha256": "8420bd5e4c31f99445d0f75d86a671b39f69c38ac0514fa31a96564b2e8ea0c0"
+    },
+    {
+      "family": "sections",
+      "path": "legacy-production-batches/sections/004.json",
+      "records": 143,
+      "bytes": 4911052,
+      "sha256": "fb2170c53d1eeb9c117b944cb43e70094192c363ba5ce878c14cf00f9840428c"
+    },
+    {
+      "family": "sectors",
+      "path": "legacy-production-batches/sectors/001.json",
+      "records": 134,
+      "bytes": 4974457,
+      "sha256": "be7b9bb9b6ae264d1aa8fb787101e47aa5bd64ed99651dfec70660e67fe1c90b"
+    },
+    {
+      "family": "sectors",
+      "path": "legacy-production-batches/sectors/002.json",
+      "records": 41,
+      "bytes": 1676395,
+      "sha256": "33cdabdae347fd2d97a6acc2ae0f69376ec988313cc9da4c7b81d0220e6cf8b1"
+    },
+    {
+      "family": "services",
+      "path": "legacy-production-batches/services/001.json",
+      "records": 1,
+      "bytes": 20470,
+      "sha256": "12a5716f72097b4b6e6012681eb1be6288675277626183c357b569f7cd5fc229"
+    },
+    {
+      "family": "source-registry",
+      "path": "legacy-production-batches/source-registry/001.json",
+      "records": 2,
+      "bytes": 35333,
+      "sha256": "5a306a5f45886cdec1e6a50d4ea8fc736973c2e6dd791f11b04d0357d71032bb"
+    },
+    {
+      "family": "sources",
+      "path": "legacy-production-batches/sources/001.json",
+      "records": 1,
+      "bytes": 4295,
+      "sha256": "b55429188dbbfab64b9a353cc9ff1a281aaf8d06f3336945b49f5c474a7542e9"
+    },
+    {
+      "family": "special-needs",
+      "path": "legacy-production-batches/special-needs/001.json",
+      "records": 126,
+      "bytes": 4963244,
+      "sha256": "411860a6a3f46eeca96ccd6a495a21ea24e185038c1d19a4f12bb6226df909b2"
+    },
+    {
+      "family": "special-needs",
+      "path": "legacy-production-batches/special-needs/002.json",
+      "records": 93,
+      "bytes": 4942257,
+      "sha256": "0d0de23392990f75cfe2bd3df7457972eb33a8d515c8ec73ea637229b705e0c6"
+    },
+    {
+      "family": "special-needs",
+      "path": "legacy-production-batches/special-needs/003.json",
+      "records": 95,
+      "bytes": 4013700,
+      "sha256": "23d31ce5ca2f9d27097f1152c316a2b55371e38a83425ec4b7e403b9629d0ee2"
+    },
+    {
+      "family": "specialists-partners",
+      "path": "legacy-production-batches/specialists-partners/001.json",
+      "records": 9,
+      "bytes": 76990,
+      "sha256": "0971a27e7ede1b402299a62959f289d38ecb94f5e1b6458e3b9aeeee0673a9b5"
+    },
+    {
+      "family": "start-here",
+      "path": "legacy-production-batches/start-here/001.json",
+      "records": 1,
+      "bytes": 33873,
+      "sha256": "7a6cc51d7d58d536bfb9ef0fc78770721546a021085881598a9cc52de3985a53"
+    },
+    {
+      "family": "stats",
+      "path": "legacy-production-batches/stats/001.json",
+      "records": 1,
+      "bytes": 2490,
+      "sha256": "56c330c6101a72a526502ebf3c530741c496f0b45733ae2c1cb8d332e59d07b4"
+    },
+    {
+      "family": "team-and-partners",
+      "path": "legacy-production-batches/team-and-partners/001.json",
+      "records": 1,
+      "bytes": 7145,
+      "sha256": "4d761393941fa01872b5321e62542dc421b57d6af61ac434f7b37634620560a7"
+    },
+    {
+      "family": "terms",
+      "path": "legacy-production-batches/terms/001.json",
+      "records": 200,
+      "bytes": 2071798,
+      "sha256": "11a5769dd366dc857f9850db940be8998e768370c9c138c1d320020a9ec2039b"
+    },
+    {
+      "family": "terms",
+      "path": "legacy-production-batches/terms/002.json",
+      "records": 1,
+      "bytes": 10211,
+      "sha256": "24095aafca815ab1e2021ef5b6489be09bc3c3669da5e045260d7290a30df19e"
+    },
+    {
+      "family": "tips",
+      "path": "legacy-production-batches/tips/001.json",
+      "records": 22,
+      "bytes": 287311,
+      "sha256": "82bd932f2fa4faea459c71a69af25467d7bbef17becb9a3c90bfe2cede6afe38"
+    },
+    {
+      "family": "tools",
+      "path": "legacy-production-batches/tools/001.json",
+      "records": 5,
+      "bytes": 29732,
+      "sha256": "8383927a4bdb8b390d40990ef8dd62940e98d0b98e056f12f99134ff70ef4744"
+    },
+    {
+      "family": "trust",
+      "path": "legacy-production-batches/trust/001.json",
+      "records": 2,
+      "bytes": 50436,
+      "sha256": "f9f70bfd7810cf5c34ea75d3c071f1024014ba5fc8c4967ed5bb6687c3861da8"
+    },
+    {
+      "family": "verified-resources",
+      "path": "legacy-production-batches/verified-resources/001.json",
+      "records": 1,
+      "bytes": 22516,
+      "sha256": "620073fe9363b5f1db26550525ceaa7f05abcab4ff7da97a53e6d119a88a82c6"
+    }
+  ]
+}

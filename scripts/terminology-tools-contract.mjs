@@ -1,0 +1,10 @@
+import fs from 'node:fs';
+const read=(path)=>fs.readFileSync(path,'utf8');let failed=false;const fail=(message)=>{console.error(`TERMINOLOGY TOOLS CONTRACT FAILED: ${message}`);failed=true};
+const source=read('lib/terminology-tools.ts');const hub=read('app/tools/page.tsx');const compare=read('app/tools/compare/page.tsx');const daily=read('app/tools/daily-term/page.tsx');const quiz=read('components/term-quiz.tsx');const favorites=read('components/term-favorites.tsx');
+if(!source.includes(".eq('content_type', 'glossary_term')")||!source.includes(".eq('status', 'published')"))fail('tools must read only published glossary terms');
+if(!hub.includes('/tools/compare')||!hub.includes('/tools/quiz')||!hub.includes('/tools/daily-term')||!hub.includes('/tools/favorites'))fail('tool hub must expose all four historical functions');
+if(!compare.includes('method="get"')||!compare.includes('المقال الكامل'))fail('comparison must be functional and source-linked');
+if(!daily.includes('86400000')||!daily.includes('المصطلحات المنشورة'))fail('daily term must be deterministic and publication-bound');
+if(!quiz.includes('هذه لعبة تعلم')||quiz.includes('localStorage'))fail('quiz must be educational and must not persist answers');
+if(!favorites.includes("const KEY='rawafid:term-favorites:v1'")||!favorites.includes('لا تُرسل قائمة المحفوظات'))fail('favorites must disclose local-only slug storage');
+if(failed)process.exit(1);console.log('Terminology tools contract passed: live published terms power compare, daily term, quiz and local-only favorites.');

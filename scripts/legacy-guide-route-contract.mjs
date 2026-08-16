@@ -1,0 +1,12 @@
+import fs from 'node:fs';
+const catalog = fs.readFileSync('lib/legacy-guides.ts','utf8');
+const page = fs.readFileSync('app/guides/[slug]/page.tsx','utf8');
+const config = fs.readFileSync('next.config.ts','utf8');
+const fail=(m)=>{console.error(`LEGACY GUIDE CONTENT CONTRACT FAILED: ${m}`);process.exitCode=1};
+const slugs=[...catalog.matchAll(/slug:'([^']+-guide)'/g)].map((m)=>m[1]);
+if(slugs.length!==18)fail(`expected 18 transferred guide records; found ${slugs.length}`);
+if(new Set(slugs).size!==18)fail('guide slugs must be unique');
+for(const required of ['المحتوى المحفوظ من النسخة القديمة','هذه ليست صفحة تحويل','مرجع رسمي للتحقق','حدود السلامة'])if(!page.includes(required))fail(`missing transfer contract: ${required}`);
+if(config.includes('legacyThinGuideRedirects'))fail('legacy guide redirects must be removed; content routes now own /guides/*');
+if(!fs.existsSync('app/guides/page.tsx')||!fs.existsSync('app/guides/[slug]/page.tsx'))fail('guide content routes are missing');
+if(!process.exitCode)console.log('Legacy guide content contract passed: 18 historical guide routes render transferred content with no redirects.');

@@ -34,7 +34,7 @@ if (!search.includes('getPsychEncyclopediaReleaseIndex')) fail('search must use 
 if (!String(packageJson.scripts?.build ?? '').startsWith('node scripts/build_psych_encyclopedia_assets.mjs && ')) fail('build must generate static encyclopedia assets first');
 if (!String(packageJson.scripts?.dev ?? '').startsWith('node scripts/build_psych_encyclopedia_assets.mjs && ')) fail('development must generate static encyclopedia assets first');
 if (!wrangler.includes('"binding": "ASSETS"')) fail('Wrangler must expose the Workers Static Assets binding');
-if (!nextConfig.includes("if (process.env.NODE_ENV === 'development')")) fail('OpenNext dev initialization must not run during production builds');
+if (!/if\s*\(\s*process\.env\.NODE_ENV\s*===\s*['"]development['"]\s*\)/u.test(nextConfig)) fail('OpenNext dev initialization must not run during production builds');
 if (!gitignore.includes('public/encyclopedia-data/')) fail('generated encyclopedia assets must remain ignored build output');
 
 try {

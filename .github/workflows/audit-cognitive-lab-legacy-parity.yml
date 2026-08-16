@@ -1,0 +1,117 @@
+name: Audit Cognitive Lab Legacy Parity
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'agent/full-legacy-migration'
+    paths:
+      - '.github/workflows/audit-cognitive-lab-legacy-parity.yml'
+      - 'data/cognitive-lab/tools.v1.json'
+      - 'app/cognitive-lab/[slug]/page.tsx'
+      - 'components/cognitive-lab-runner.tsx'
+      - 'scripts/cognitive-lab-contract.mjs'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  parity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Resolve latest validated production baseline
+        id: baseline
+        run: |
+          set -euo pipefail
+          curl -fsSL -H 'Accept: application/vnd.github+json' -H 'X-GitHub-Api-Version: 2022-11-28' \
+            'https://api.github.com/repos/khaledaltheeb/healthrenewal.org/actions/artifacts?name=validated-production-site&per_page=100' -o /tmp/artifacts.json
+          python - <<'PY'
+          import json, os
+          items=[x for x in json.load(open('/tmp/artifacts.json',encoding='utf-8')).get('artifacts',[]) if not x.get('expired') and x.get('workflow_run',{}).get('head_branch')=='main']
+          if not items: raise SystemExit('No validated production baseline')
+          x=max(items,key=lambda r:r.get('created_at',''))
+          with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as out: out.write(f"artifact_id={x['id']}\n")
+          PY
+
+      - name: Download production baseline
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ARTIFACT_ID: ${{ steps.baseline.outputs.artifact_id }}
+        run: |
+          set -euo pipefail
+          curl -fL -H "Authorization: Bearer ${GH_TOKEN}" -H 'Accept: application/vnd.github+json' -H 'X-GitHub-Api-Version: 2022-11-28' \
+            "https://api.github.com/repos/khaledaltheeb/healthrenewal.org/actions/artifacts/${ARTIFACT_ID}/zip" -o /tmp/legacy-production.zip
+          rm -rf /tmp/legacy-production
+          mkdir -p /tmp/legacy-production
+          unzip -q /tmp/legacy-production.zip -d /tmp/legacy-production
+
+      - name: Compare legacy and V3 cognitive tool slugs
+        run: |
+          python - <<'PY'
+          import json, re
+          from pathlib import Path
+
+          aliases={
+            'associative-context-binding':'associative-binding',
+            'prospective-memory-cues':'prospective-memory',
+          }
+          root=Path('/tmp/legacy-production/cognitive-lab')
+          legacy_paths=sorted(root.glob('*/index.html'))
+          legacy={p.parent.name for p in legacy_paths}
+          current_rows=json.load(open('data/cognitive-lab/tools.v1.json',encoding='utf-8'))
+          current={row['slug'] for row in current_rows}
+          current_by_slug={row['slug']:row for row in current_rows}
+          mapped={aliases.get(slug,slug) for slug in legacy}
+
+          alias_evidence=[]
+          for old_slug,new_slug in aliases.items():
+            page=root/old_slug/'index.html'
+            html=page.read_text(encoding='utf-8',errors='ignore')
+            match=re.search(r'<title>(.*?)</title>',html,re.I|re.S)
+            legacy_title=re.sub(r'\s+',' ',match.group(1)).strip() if match else ''
+            row=current_by_slug.get(new_slug,{})
+            alias_evidence.append({
+              'legacy_slug':old_slug,
+              'legacy_title':legacy_title,
+              'v3_slug':new_slug,
+              'v3_title':row.get('title',''),
+              'v3_category':row.get('category',''),
+            })
+
+          report={
+            'legacy_detail_count':len(legacy),
+            'v3_tool_count':len(current),
+            'raw_missing_in_v3':sorted(legacy-current),
+            'raw_new_only_in_v3':sorted(current-legacy),
+            'approved_aliases':aliases,
+            'alias_evidence':alias_evidence,
+            'mapped_missing_in_v3':sorted(mapped-current),
+            'mapped_new_only_in_v3':sorted(current-mapped),
+            'mapped_slug_set_match':mapped==current,
+            'v3_dynamic_route_exists':Path('app/cognitive-lab/[slug]/page.tsx').is_file(),
+            'v3_runner_exists':Path('components/cognitive-lab-runner.tsx').is_file(),
+          }
+          Path('artifacts').mkdir(exist_ok=True)
+          Path('artifacts/cognitive-lab-legacy-parity.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          print(json.dumps(report,ensure_ascii=False,indent=2))
+          assert len(legacy)==53, report
+          assert len(current)==53, report
+          assert set(report['raw_missing_in_v3'])==set(aliases), report
+          assert set(report['raw_new_only_in_v3'])==set(aliases.values()), report
+          assert mapped==current, report
+          assert report['v3_dynamic_route_exists'] and report['v3_runner_exists'], report
+          PY
+
+      - name: Validate current cognitive lab contract
+        run: node scripts/cognitive-lab-contract.mjs
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: cognitive-lab-legacy-parity
+          if-no-files-found: error
+          retention-days: 30
+          path: artifacts/cognitive-lab-legacy-parity.json

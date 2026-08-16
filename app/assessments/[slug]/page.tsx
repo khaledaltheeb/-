@@ -1,0 +1,7 @@
+import type {Metadata} from 'next';
+import {notFound} from 'next/navigation';
+import SiteHeader from '@/components/site-header';import SiteFooter from '@/components/site-footer';import ContentRenderer from '@/components/content-renderer';import HistoricalAssessmentRunner from '@/components/historical-assessment-runner';
+import {getHistoricalAssessment} from '@/lib/historical-assessments';import {getLegacyPreservedPage,legacyPreservedMetadata} from '@/lib/legacy-preserved-page';
+export const dynamic='force-dynamic';type Params=Promise<{slug:string}>;const routeFor=(slug:string)=>`/assessments/${slug}/`;
+export async function generateMetadata({params}:{params:Params}):Promise<Metadata>{const {slug}=await params,route=routeFor(slug),page=await getLegacyPreservedPage(route);return legacyPreservedMetadata(page,route);}
+export default async function AssessmentPage({params}:{params:Params}){const {slug}=await params;const instrument=getHistoricalAssessment(slug);if(!instrument)notFound();const route=routeFor(slug),page=await getLegacyPreservedPage(route);if(!page)notFound();return <><SiteHeader/><main className="article-shell"><article><header className="article-hero"><span className="eyebrow">أداة فحص ذاتي · noindex</span><h1>{page.h1||instrument.title}</h1>{page.meta_description?<p>{page.meta_description}</p>:null}</header><HistoricalAssessmentRunner instrument={instrument}/><div className="article-body"><ContentRenderer bodyJson={page.body_json} bodyText={page.body_text} recordId={page.source_path}/></div></article></main><SiteFooter/></>;}

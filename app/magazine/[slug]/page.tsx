@@ -1,17 +1,22 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import MagazineArticle from '@/components/magazine-article';
+import LegacyPreservedPageView from '@/components/legacy-preserved-page';
 import { getMagazineRecord, getRelatedMagazine } from '@/lib/magazine';
+import { getLegacyPreservedPage, legacyPreservedMetadata } from '@/lib/legacy-preserved-page';
 import { buildSeoMetadata } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
-
 type Props = { params: Promise<{ slug: string }> };
+const legacyRoute = (slug: string) => `/magazine/${slug}/`;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const record = await getMagazineRecord(slug);
-  if (!record) return buildSeoMetadata({ title: 'صفحة غير موجودة', description: 'تعذر العثور على هذه القراءة في مجلة روافد.', path: `/magazine/${slug}`, index: false, follow: false });
+  if (!record) {
+    const route = legacyRoute(slug);
+    return legacyPreservedMetadata(await getLegacyPreservedPage(route), route);
+  }
   const path = record.canonical_url || `/magazine/${slug}`;
   return buildSeoMetadata({
     title: record.seo_title || record.title,
@@ -31,7 +36,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function MagazineResearchPage({ params }: Props) {
   const { slug } = await params;
   const record = await getMagazineRecord(slug);
-  if (!record) notFound();
+  if (!record) {
+    const route = legacyRoute(slug);
+    const preserved = await getLegacyPreservedPage(route);
+    if (!preserved) notFound();
+    return <LegacyPreservedPageView page={preserved} route={route} />;
+  }
   const related = await getRelatedMagazine(record, 4);
   return <MagazineArticle record={record} related={related} />;
 }

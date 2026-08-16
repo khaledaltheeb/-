@@ -1,16 +1,22 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import CapabilityArticlePage from '@/components/capability-article-page';
+import LegacyPreservedPageView from '@/components/legacy-preserved-page';
 import { getCapabilityRecord, getCapabilityRegistryItems } from '@/lib/capabilities';
+import { getLegacyPreservedPage, legacyPreservedMetadata } from '@/lib/legacy-preserved-page';
 import { buildSeoMetadata } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
 type Params = Promise<{ slug: string }>;
+const legacyRoute = (slug: string) => `/capabilities/${slug}/`;
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params;
   const record = await getCapabilityRecord(slug);
-  if (!record) return {};
+  if (!record) {
+    const route = legacyRoute(slug);
+    return legacyPreservedMetadata(await getLegacyPreservedPage(route), route);
+  }
   const metadata = buildSeoMetadata({
     title: record.seo_title || record.title,
     description: record.seo_description || record.excerpt,
@@ -24,16 +30,19 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     modifiedTime: record.updated_at,
     authors: record.author_display_name ? [{ name: record.author_display_name }] : undefined,
   });
-  if (record.robots_index) {
-    metadata.robots = `index, ${record.robots_follow ? 'follow' : 'nofollow'}, max-image-preview:large, max-snippet:-1, max-video-preview:-1`;
-  }
+  if (record.robots_index) metadata.robots = `index, ${record.robots_follow ? 'follow' : 'nofollow'}, max-image-preview:large, max-snippet:-1, max-video-preview:-1`;
   return metadata;
 }
 
 export default async function CapabilityDetailPage({ params }: { params: Params }) {
   const { slug } = await params;
   const record = await getCapabilityRecord(slug);
-  if (!record) notFound();
+  if (!record) {
+    const route = legacyRoute(slug);
+    const preserved = await getLegacyPreservedPage(route);
+    if (!preserved) notFound();
+    return <LegacyPreservedPageView page={preserved} route={route} />;
+  }
   const registryItems = slug === 'registry' ? await getCapabilityRegistryItems() : [];
   return <CapabilityArticlePage record={record} routeSlug={slug} registryItems={registryItems} />;
 }

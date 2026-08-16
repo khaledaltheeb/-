@@ -11,6 +11,8 @@ import './rawafid-theme.css';
  './admin-shell-v3.css'.
 */
 
+const INDEXING_ENABLED = process.env.NEXT_PUBLIC_ALLOW_INDEXING === 'true';
+
 const arabicFont = Noto_Sans_Arabic({
   subsets: ['arabic'],
   display: 'swap',
@@ -37,7 +39,9 @@ export const metadata: Metadata = {
     statusBarStyle: 'default',
   },
   formatDetection: { telephone: false, email: false, address: false },
-  robots: { index: false, follow: false, noarchive: true },
+  robots: INDEXING_ENABLED
+    ? { index: true, follow: true }
+    : { index: false, follow: false, noarchive: true },
   referrer: 'strict-origin-when-cross-origin',
 };
 

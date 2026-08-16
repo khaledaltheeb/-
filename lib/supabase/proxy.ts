@@ -1,13 +1,63 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
-const protectedPrefixes = ['/account', '/admin', '/dashboard', '/specialist', '/center', '/messages', '/appointments', '/notifications'];
-const redirectExcludedPrefixes = ['/account', '/admin', '/auth', '/login', '/forgot-password', '/reset-password', '/dashboard', '/specialist', '/center', '/messages', '/appointments', '/notifications', '/api'];
+const protectedPrefixes = [
+  '/account',
+  '/admin',
+  '/dashboard',
+  '/specialist',
+  '/center',
+  '/messages',
+  '/appointments',
+  '/notifications',
+  '/specialists-partners/account',
+  '/specialists-partners/admin',
+  '/specialists-partners/portal',
+];
+
+const redirectExcludedPrefixes = [
+  '/account',
+  '/admin',
+  '/auth',
+  '/login',
+  '/forgot-password',
+  '/reset-password',
+  '/dashboard',
+  '/specialist',
+  '/center',
+  '/messages',
+  '/appointments',
+  '/notifications',
+  '/specialists-partners/account',
+  '/specialists-partners/admin',
+  '/specialists-partners/portal',
+  '/api',
+];
+
+const encyclopediaConditionAliases = new Set([
+  'alcohol-use-disorder',
+  'autism',
+  'cannabis-use-disorder',
+  'depression',
+  'gambling-related-harms',
+  'gaming-disorder',
+  'inhalant-use-disorder',
+  'nicotine-tobacco-dependence',
+  'opioid-use-disorder',
+  'polysubstance-use-and-overdose-risk',
+  'sedative-benzodiazepine-use-disorder',
+  'stimulant-use-disorder',
+]);
+
 const REDIRECT_TTL_MS = 60_000;
 const REDIRECT_CACHE_LIMIT = 500;
+const LEGACY_ROUTE_TTL_MS = 300_000;
+const LEGACY_ROUTE_CACHE_LIMIT = 2_000;
 
 type RedirectCacheItem = { destination: string | null; status: 301 | 302 | 307 | 308; expiresAt: number };
+type LegacyRouteCacheItem = { exists: boolean; expiresAt: number };
 const redirectCache = new Map<string, RedirectCacheItem>();
+const legacyRouteCache = new Map<string, LegacyRouteCacheItem>();
 
 function isPrefix(pathname: string, prefix: string) {
   return pathname === prefix || pathname.startsWith(`${prefix}/`);
@@ -20,6 +70,34 @@ function canResolveRedirect(request: NextRequest) {
 
 function validRedirectStatus(value: number): value is 301 | 302 | 307 | 308 {
   return value === 301 || value === 302 || value === 307 || value === 308;
+}
+
+function decodedPathname(pathname: string) {
+  try {
+    return decodeURIComponent(pathname);
+  } catch {
+    return pathname;
+  }
+}
+
+function preservedContentAliasCanonical(pathname: string) {
+  const match = pathname.match(/^\/content\/([a-z0-9]+(?:-[a-z0-9]+)*)\/?$/);
+  if (!match) return null;
+  const slug = match[1];
+  if (encyclopediaConditionAliases.has(slug)) return `/encyclopedia/${slug}/`;
+  if (slug === 'capabilities-hub') return '/capabilities/';
+  if (slug.startsWith('capabilities-')) return `/capabilities/${slug.slice('capabilities-'.length)}/`;
+  if (slug === 'comparisons-hub') return '/comparisons/';
+  if (slug.startsWith('comparisons-')) return `/comparisons/${slug.slice('comparisons-'.length)}/`;
+  return null;
+}
+
+function applyPreservedAliasSeoHeaders(response: NextResponse, pathname: string) {
+  const canonical = preservedContentAliasCanonical(pathname);
+  if (!canonical) return response;
+  response.headers.set('X-Robots-Tag', 'noindex, follow');
+  response.headers.append('Link', `<${canonical}>; rel="canonical"`);
+  return response;
 }
 
 export async function updateSession(request: NextRequest) {
@@ -43,9 +121,30 @@ export async function updateSession(request: NextRequest) {
     },
   );
 
+  const pathname = decodedPathname(request.nextUrl.pathname);
+  let legacyExists: boolean | null = null;
+  async function isLegacyProductionRoute() {
+    if (legacyExists !== null) return legacyExists;
+    const cached = legacyRouteCache.get(pathname);
+    if (cached && cached.expiresAt > Date.now()) {
+      legacyExists = cached.exists;
+      return legacyExists;
+    }
+    const { data, error } = await supabase.rpc('legacy_preserved_route_exists', { p_route: pathname });
+    legacyExists = !error && data === true;
+    if (legacyRouteCache.size >= LEGACY_ROUTE_CACHE_LIMIT) legacyRouteCache.clear();
+    legacyRouteCache.set(pathname, { exists: legacyExists, expiresAt: Date.now() + LEGACY_ROUTE_TTL_MS });
+    return legacyExists;
+  }
+
+  const modernTrailingSlashVariant =
+    ['GET', 'HEAD'].includes(request.method)
+    && pathname.length > 1
+    && pathname.endsWith('/')
+    && !(await isLegacyProductionRoute());
+
   if (canResolveRedirect(request)) {
-    const pathname = request.nextUrl.pathname;
-    const cached = redirectCache.get(pathname);
+    const cached = redirectCache.get(request.nextUrl.pathname);
     let destination = cached && cached.expiresAt > Date.now() ? cached.destination : null;
     let status: 301 | 302 | 307 | 308 = cached && cached.expiresAt > Date.now() ? cached.status : 301;
 
@@ -53,7 +152,7 @@ export async function updateSession(request: NextRequest) {
       const { data, error } = await supabase
         .from('redirects')
         .select('destination_path,status_code')
-        .eq('source_path', pathname)
+        .eq('source_path', request.nextUrl.pathname)
         .eq('is_active', true)
         .maybeSingle();
 
@@ -63,13 +162,15 @@ export async function updateSession(request: NextRequest) {
       }
 
       if (redirectCache.size >= REDIRECT_CACHE_LIMIT) redirectCache.clear();
-      redirectCache.set(pathname, { destination, status, expiresAt: Date.now() + REDIRECT_TTL_MS });
+      redirectCache.set(request.nextUrl.pathname, { destination, status, expiresAt: Date.now() + REDIRECT_TTL_MS });
     }
 
     if (destination && destination.startsWith('/') && !destination.startsWith('//')) {
-      const target = request.nextUrl.clone();
-      target.pathname = destination;
-      return NextResponse.redirect(target, status);
+      if (!(await isLegacyProductionRoute())) {
+        const target = request.nextUrl.clone();
+        target.pathname = destination;
+        return NextResponse.redirect(target, status);
+      }
     }
   }
 
@@ -84,5 +185,6 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  return response;
+  if (modernTrailingSlashVariant) response.headers.set('X-Robots-Tag', 'noindex, follow');
+  return applyPreservedAliasSeoHeaders(response, request.nextUrl.pathname);
 }

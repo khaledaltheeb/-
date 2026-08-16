@@ -4,6 +4,11 @@ export async function GET() {
   return sitemapResponse([
     { path:'/', changeFrequency:'weekly', priority:1 },
     { path:'/about', changeFrequency:'monthly', priority:.6 },
+    { path:'/start-here', changeFrequency:'monthly', priority:.75 },
+    { path:'/guided-assessment', changeFrequency:'monthly', priority:.65 },
+    { path:'/assessment-lab', changeFrequency:'monthly', priority:.65 },
+    { path:'/resources', changeFrequency:'weekly', priority:.6 },
+    { path:'/sources', changeFrequency:'monthly', priority:.5 },
     { path:'/join', changeFrequency:'monthly', priority:.55 },
     { path:'/join/specialist', changeFrequency:'monthly', priority:.5 },
     { path:'/join/center', changeFrequency:'monthly', priority:.5 },

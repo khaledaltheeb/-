@@ -1,0 +1,20 @@
+[
+  {"source":"/guides/adhd-guide","destination":"/capabilities/adhd/","reason":"Legacy page is a thin YMYL pointer; destination is the richer published ADHD guide."},
+  {"source":"/guides/agoraphobia-guide","destination":"/evidence-guides/clinical-anxiety/","reason":"Legacy page is a thin YMYL pointer; destination covers anxiety disorders with assessment and treatment context."},
+  {"source":"/guides/anxiety-guide","destination":"/evidence-guides/clinical-anxiety/","reason":"Legacy page is a thin YMYL pointer; destination is the deeper published anxiety guide."},
+  {"source":"/guides/autism-spectrum-guide","destination":"/content/autism","reason":"Legacy page is a thin YMYL pointer; destination is the published autism condition guide across life stages."},
+  {"source":"/guides/bipolar-disorder-guide","destination":"/evidence-guides/bipolar-disorder-safe-guide/","reason":"Legacy page is a thin YMYL pointer; destination provides evidence-oriented bipolar guidance."},
+  {"source":"/guides/burnout-guide","destination":"/evidence-guides/stress-burnout-depression-differences-guide/","reason":"Legacy page is a thin YMYL pointer; destination distinguishes burnout from stress and depression without oversimplification."},
+  {"source":"/guides/emotion-regulation-guide","destination":"/comparisons/emotional-intelligence-vs-emotion-regulation/","reason":"Legacy page is a thin conceptual pointer; destination explains emotion regulation in a richer comparison context."},
+  {"source":"/guides/emotional-intelligence-guide","destination":"/comparisons/emotional-intelligence-vs-emotion-regulation/","reason":"Legacy page is a thin conceptual pointer; destination explains emotional intelligence and its limits in context."},
+  {"source":"/guides/generalized-anxiety-disorder-guide","destination":"/care-guides/generalized-anxiety-daily-support/","reason":"Legacy page is a thin YMYL pointer; destination is a published generalized-anxiety support guide."},
+  {"source":"/guides/insomnia-guide","destination":"/evidence-guides/insomnia-and-sleep/","reason":"Legacy page is a thin YMYL pointer; destination is a deeper sleep and insomnia evidence guide."},
+  {"source":"/guides/mental-health-guide","destination":"/evidence-guides/mental-health-foundations/","reason":"Legacy page is a thin overview; destination provides broader mental-health foundations and help-seeking context."},
+  {"source":"/guides/obsessive-compulsive-disorder-guide","destination":"/care-guides/ocd-first-assessment-preparation/","reason":"Legacy page is a thin YMYL pointer; destination provides a focused, practical and safer OCD assessment-preparation guide."},
+  {"source":"/guides/panic-disorder-guide","destination":"/evidence-guides/panic-disorder-safe-guide/","reason":"Legacy page is a thin YMYL pointer; destination is the published panic-disorder evidence guide."},
+  {"source":"/guides/post-traumatic-stress-disorder-guide","destination":"/evidence-guides/ptsd-safe-guide/","reason":"Legacy page is a thin YMYL pointer; destination is the published PTSD evidence guide."},
+  {"source":"/guides/resilience-guide","destination":"/content/family-resilience","reason":"Legacy page is a thin concept page; destination contains an applied resilience guide with meaningful reader value."},
+  {"source":"/guides/self-esteem-guide","destination":"/comparisons/self-esteem-vs-self-confidence/","reason":"Legacy page is a thin concept page; destination gives a clearer distinction and practical context."},
+  {"source":"/guides/social-anxiety-guide","destination":"/comparisons/introversion-vs-social-anxiety/","reason":"Legacy page is a thin YMYL pointer; destination gives a safer differential explanation of social anxiety."},
+  {"source":"/guides/stress-guide","destination":"/evidence-guides/stress-burnout-depression-differences-guide/","reason":"Legacy page is a thin YMYL pointer; destination explains stress in relation to burnout and depression."}
+]

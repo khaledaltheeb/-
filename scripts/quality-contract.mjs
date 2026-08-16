@@ -73,7 +73,7 @@ requireText('app/admin/taxonomy/actions.ts',['delete_category_safe','delete_sect
 requireText('app/admin/taxonomy/page.tsx',['deleteCategory','deleteSector','حذف نهائي إذا كان فارغًا']);
 requireText('app/theme-preview/page.tsx',['index: false','follow: false','Design System V3']);
 requireText('app/not-found.tsx',['الصفحة غير موجودة','SiteHeader','SiteFooter']);
-requireText('app/loading.tsx',['system-loading-shell','aria-busy']);
+if(fs.existsSync(path.join(root,'app/loading.tsx'))) fail('global app/loading.tsx must stay absent so awaited notFound() responses retain a real HTTP 404 status');
 requireText('app/error.tsx',["'use client'",'إعادة المحاولة']);
 
 requireText('components/content-renderer.tsx',["type === 'heading'","type === 'list'","type === 'table'","type === 'callout'","type === 'resource'"]);

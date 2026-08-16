@@ -1,16 +1,22 @@
 import type { Metadata } from 'next';
-import { notFound, permanentRedirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import AddictionArticlePage from '@/components/addiction-article-page';
-import { getAddictionRecord, getMigratedAddictionCondition } from '@/lib/addiction';
+import LegacyPreservedPageView from '@/components/legacy-preserved-page';
+import { getAddictionRecord } from '@/lib/addiction';
+import { getLegacyPreservedPage, legacyPreservedMetadata } from '@/lib/legacy-preserved-page';
 import { buildSeoMetadata } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
 type Params = Promise<{ segments: string[] }>;
+const legacyRoute = (segments: string[]) => `/addiction/${segments.filter(Boolean).join('/')}/`;
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { segments } = await params;
   const record = await getAddictionRecord(segments);
-  if (!record) return {};
+  if (!record) {
+    const route = legacyRoute(segments);
+    return legacyPreservedMetadata(await getLegacyPreservedPage(route), route);
+  }
   const metadata = buildSeoMetadata({
     title: record.seo_title || record.title,
     description: record.seo_description || record.excerpt,
@@ -32,10 +38,8 @@ export default async function AddictionDetailPage({ params }: { params: Params }
   const { segments } = await params;
   const record = await getAddictionRecord(segments);
   if (record) return <AddictionArticlePage record={record} />;
-
-  if (segments.length === 1) {
-    const migrated = await getMigratedAddictionCondition(segments[0]);
-    if (migrated?.canonical_url) permanentRedirect(migrated.canonical_url);
-  }
-  notFound();
+  const route = legacyRoute(segments);
+  const preserved = await getLegacyPreservedPage(route);
+  if (!preserved) notFound();
+  return <LegacyPreservedPageView page={preserved} route={route} />;
 }

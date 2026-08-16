@@ -1,18 +1,22 @@
 import type { Metadata } from 'next';
-import { notFound, permanentRedirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import ComparisonArticlePage from '@/components/comparison-article-page';
-import { getComparisonRecord, legacyComparisonTarget } from '@/lib/comparisons';
+import LegacyPreservedPageView from '@/components/legacy-preserved-page';
+import { getComparisonRecord } from '@/lib/comparisons';
+import { getLegacyPreservedPage, legacyPreservedMetadata } from '@/lib/legacy-preserved-page';
 import { buildSeoMetadata } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
 type Params = Promise<{ slug: string }>;
+const legacyRoute = (slug: string) => `/comparisons/${slug}/`;
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params;
-  const legacyTarget = legacyComparisonTarget(slug);
-  if (legacyTarget) return { alternates: { canonical: legacyTarget }, robots: { index: false, follow: true } };
   const record = await getComparisonRecord(slug);
-  if (!record) return {};
+  if (!record) {
+    const route = legacyRoute(slug);
+    return legacyPreservedMetadata(await getLegacyPreservedPage(route), route);
+  }
   const metadata = buildSeoMetadata({
     title: record.seo_title || record.title,
     description: record.seo_description || record.excerpt,
@@ -32,9 +36,12 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 
 export default async function ComparisonDetailPage({ params }: { params: Params }) {
   const { slug } = await params;
-  const legacyTarget = legacyComparisonTarget(slug);
-  if (legacyTarget) permanentRedirect(legacyTarget);
   const record = await getComparisonRecord(slug);
-  if (!record) notFound();
+  if (!record) {
+    const route = legacyRoute(slug);
+    const preserved = await getLegacyPreservedPage(route);
+    if (!preserved) notFound();
+    return <LegacyPreservedPageView page={preserved} route={route} />;
+  }
   return <ComparisonArticlePage record={record} routeSlug={slug} />;
 }

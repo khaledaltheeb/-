@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: true, noarchive: true },
 };
 
-type SP = Promise<{ q?: string; type?: string }>;
+export type PlatformSearchParams = Promise<{ q?: string; type?: string }>;
 type T = 'content' | 'condition' | 'sector' | 'category' | 'specialist' | 'center' | 'community';
 type R = {
   entity_type: T;
@@ -95,7 +95,13 @@ function searchPsychEncyclopedia(query: string, records: PsychEncyclopediaReleas
   }).sort((a, b) => b.score - a.score || a.title.localeCompare(b.title, 'ar')).slice(0, limit);
 }
 
-export default async function SearchPage({ searchParams }: { searchParams: SP }) {
+type SearchExperienceProps = {
+  searchParams: PlatformSearchParams;
+  routeBase?: '/search' | '/ai-search';
+  legacyIntro?: boolean;
+};
+
+export async function PlatformSearchExperience({ searchParams, routeBase = '/search', legacyIntro = false }: SearchExperienceProps) {
   const p = await searchParams;
   const q = String(p.q ?? '').trim().replace(/\s+/g, ' ').slice(0, 160);
   const type = allowed.has(String(p.type ?? '')) ? String(p.type) as T : '';
@@ -181,21 +187,27 @@ export default async function SearchPage({ searchParams }: { searchParams: SP })
   const visible = type ? results.filter((x) => x.entity_type === type) : results;
   const counts = new Map<T, number>();
   for (const x of results) counts.set(x.entity_type, (counts.get(x.entity_type) ?? 0) + 1);
-  const url = (t: string) => `/search?q=${encodeURIComponent(q)}${t ? `&type=${encodeURIComponent(t)}` : ''}`;
+  const url = (t: string) => `${routeBase}?q=${encodeURIComponent(q)}${t ? `&type=${encodeURIComponent(t)}` : ''}`;
 
   return <>
     <SiteHeader />
     <main className="search-page-shell">
       <section className="search-hero">
         <span className="eyebrow">بحث موحد ودلالي</span>
-        <h1>ابحث في منصة روافد</h1>
-        <p>المحتوى والقطاعات والأقسام والمختصون والمراكز والموسوعات المعرفية والنفسية ضمن محرك واحد.</p>
-        <form className="search search-page-form" action="/search" method="get" role="search">
-          <label className="sr-only" htmlFor="platform-search">عبارة البحث</label>
-          <input id="platform-search" name="q" type="search" minLength={2} maxLength={160} defaultValue={q} placeholder="مثال: القلق الاجتماعي، اضطراب الهلع، الذاكرة العاملة، مختص في عمّان..." autoComplete="off" />
+        <h1>{legacyIntro ? 'اكتب سؤالك بلغتك الطبيعية' : 'ابحث في منصة روافد'}</h1>
+        <p>{legacyIntro ? 'هذا هو مسار البحث الذكي التاريخي بعد نقله إلى محرك روافد الحالي. اكتب المصطلح أو السؤال كما تفكر فيه، وسيبحث المحرك في المحتوى والقطاعات والمختصين والمراكز والموسوعات المعرفية والنفسية.' : 'المحتوى والقطاعات والأقسام والمختصون والمراكز والموسوعات المعرفية والنفسية ضمن محرك واحد.'}</p>
+        <form className="search search-page-form" action={routeBase} method="get" role="search">
+          <label className="sr-only" htmlFor={legacyIntro ? 'legacy-platform-search' : 'platform-search'}>عبارة البحث</label>
+          <input id={legacyIntro ? 'legacy-platform-search' : 'platform-search'} name="q" type="search" minLength={2} maxLength={160} defaultValue={q} placeholder="مثال: القلق الاجتماعي، اضطراب الهلع، الذاكرة العاملة، مختص في عمّان..." autoComplete="off" />
           <button type="submit">بحث</button>
         </form>
       </section>
+      {legacyIntro && <section className="search-state" aria-labelledby="legacy-search-method">
+        <h2 id="legacy-search-method">كيف نُقلت وظيفة البحث الذكي؟</h2>
+        <p>احتفظنا بالفكرة المفيدة من الصفحة القديمة بدل تحويل عنوانها: البحث باللغة الطبيعية والمرادفات، وإظهار النتائج من أكثر من نوع محتوى. أفضل استعلام عادةً جملة قصيرة واضحة؛ ويمكن تجربة مرادف أو مصطلح تقني عندما لا تظهر النتيجة المقصودة.</p>
+        <p>المحرك الحالي يجمع نتائج قاعدة المنصة مع فهرس الموسوعة النفسية ومحتوى العمليات المعرفية، ثم يوحّد الوجهات المتكررة ويرتبها بحسب درجة المطابقة. لذلك لا تعتمد النتائج على قائمة المصطلحات القديمة الثابتة.</p>
+        <p><strong>حد مهم:</strong> البحث أداة للوصول إلى المعرفة، وليس محرك تشخيص. في الموضوعات الصحية أو النفسية الحساسة ارجع إلى الصفحة الكاملة ومراجعها وحدودها بدل بناء قرار شخصي على مقتطف نتيجة البحث.</p>
+      </section>}
       {q.length > 0 && q.length < 2 && <div className="search-state"><h2>اكتب حرفين على الأقل</h2></div>}
       {error && <div className="search-state error"><h2>تعذر البحث</h2><p>{error}</p></div>}
       {q.length >= 2 && !error && <>
@@ -222,4 +234,8 @@ export default async function SearchPage({ searchParams }: { searchParams: SP })
     </main>
     <SiteFooter />
   </>;
+}
+
+export default async function SearchPage({ searchParams }: { searchParams: PlatformSearchParams }) {
+  return <PlatformSearchExperience searchParams={searchParams} />;
 }

@@ -1,0 +1,84 @@
+name: Reshard Legacy Production Payloads
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'agent/full-legacy-migration'
+    paths:
+      - '.github/workflows/materialize-legacy-production-small-batches.yml'
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  reshard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 1
+
+      - name: Resolve latest validated production baseline
+        id: baseline
+        run: |
+          set -euo pipefail
+          curl -fsSL -H 'Accept: application/vnd.github+json' -H 'X-GitHub-Api-Version: 2022-11-28' \
+            'https://api.github.com/repos/khaledaltheeb/healthrenewal.org/actions/artifacts?name=validated-production-site&per_page=100' -o /tmp/artifacts.json
+          python - <<'PY'
+          import json, os
+          items=[x for x in json.load(open('/tmp/artifacts.json',encoding='utf-8')).get('artifacts',[]) if not x.get('expired') and x.get('workflow_run',{}).get('head_branch')=='main']
+          if not items: raise SystemExit('No validated production baseline')
+          x=max(items,key=lambda r:r.get('created_at',''))
+          with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as out:
+              out.write(f"artifact_id={x['id']}\n")
+              out.write(f"source_sha={x['workflow_run']['head_sha']}\n")
+              out.write(f"artifact_digest={x.get('digest','')}\n")
+          PY
+
+      - name: Download baseline
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ARTIFACT_ID: ${{ steps.baseline.outputs.artifact_id }}
+        run: |
+          set -euo pipefail
+          curl -fL -H "Authorization: Bearer ${GH_TOKEN}" -H 'Accept: application/vnd.github+json' -H 'X-GitHub-Api-Version: 2022-11-28' \
+            "https://api.github.com/repos/khaledaltheeb/healthrenewal.org/actions/artifacts/${ARTIFACT_ID}/zip" -o /tmp/legacy-production.zip
+          rm -rf legacy-production && mkdir -p legacy-production
+          unzip -q /tmp/legacy-production.zip -d legacy-production
+
+      - name: Rebuild small deterministic batches
+        env:
+          LEGACY_BASELINE_ARTIFACT_ID: ${{ steps.baseline.outputs.artifact_id }}
+          LEGACY_BASELINE_DIGEST: ${{ steps.baseline.outputs.artifact_digest }}
+          LEGACY_BASELINE_HEAD_SHA: ${{ steps.baseline.outputs.source_sha }}
+        run: >-
+          python scripts/materialize_legacy_production_batches.py legacy-production
+          --output-dir data/legacy-production-batches
+          --max-records 50
+          --max-bytes 700000
+
+      - name: Verify complete surface
+        run: |
+          python - <<'PY'
+          import json
+          s=json.load(open('data/legacy-production-batches/manifest.json',encoding='utf-8'))['summary']
+          assert s['total_html']==5642, s
+          assert s['encyclopedia_detail_pages']==2000, s
+          assert s['quick_info_detail_pages']==395, s
+          assert s['total_batch_bytes']>0, s
+          print(json.dumps(s,ensure_ascii=False,indent=2))
+          PY
+
+      - name: Commit reshared payloads
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A data/legacy-production-batches
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Reshard legacy production payloads for staging ingest"
+          git push origin HEAD:${{ github.ref_name }}
