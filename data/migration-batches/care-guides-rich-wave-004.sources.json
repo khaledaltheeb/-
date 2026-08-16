@@ -257,6 +257,51 @@
       "url": "https://eric.ed.gov/?id=EJ1007624",
       "source_type": "experimental-study",
       "authority_tier": "secondary"
+    },
+    {
+      "id": "Monsell-Task-Switching-2003",
+      "title": "Task switching",
+      "publisher": "Trends in Cognitive Sciences / PubMed",
+      "year": 2003,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/12639695/",
+      "source_type": "review",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Longman-Self-Paced-Preparation-2017",
+      "title": "Self-paced preparation for a task switch eliminates attentional inertia but not the performance switch cost",
+      "publisher": "Journal of Experimental Psychology: Learning, Memory, and Cognition / PubMed",
+      "year": 2017,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/27936844/",
+      "source_type": "experimental-study",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Guo-Interruption-Interventions-Meta-2021",
+      "title": "Effects of interventions to reduce the negative consequences of interruptions on task performance: A systematic review, meta-analysis, and narrative synthesis of laboratory studies",
+      "publisher": "Applied Ergonomics / PubMed",
+      "year": 2021,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/34273814/",
+      "source_type": "systematic-review-meta-analysis",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Monk-Interruption-Duration-Demand-2008",
+      "title": "The effect of interruption duration and demand on resuming suspended goals",
+      "publisher": "Journal of Experimental Psychology: Applied / PubMed",
+      "year": 2008,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/19102614/",
+      "source_type": "experimental-study",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Egner-Cognitive-Flexibility-Control-2024",
+      "title": "Insights into control over cognitive flexibility from studies of task-switching",
+      "publisher": "Current Opinion in Behavioral Sciences / PubMed",
+      "year": 2024,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/38186744/",
+      "source_type": "review",
+      "authority_tier": "secondary"
     }
   ]
 }
