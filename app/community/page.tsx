@@ -57,7 +57,7 @@ export default async function CommunityDirectory({ searchParams }: { searchParam
       <SiteHeader />
       <main className="directory-shell community-directory-shell">
         <section className="directory-hero community-hero">
-          <span className="eyebrow">Community & Learning Pathways</span>
+          <span className="eyebrow">مسارات التدريب والتطوع</span>
           <h1>المتدربون والمتطوعون</h1>
           <p>مساحة مستقلة للمتدربين والمتطوعين المعتمدين داخل روافد. الصفة المعروضة هنا لا تعني ترخيصًا مهنيًا ولا تُعرض كبديل عن المختصين المرخصين.</p>
           <div className="section-actions"><Link prefetch={false} className="primary-link" href="/community/join">طلب الانضمام</Link><Link prefetch={false} className="button" href="/specialists">دليل المختصين المرخصين</Link></div>
@@ -79,7 +79,7 @@ export default async function CommunityDirectory({ searchParams }: { searchParam
         <section className="directory-results" aria-live="polite">
           <div className="directory-summary"><strong>{rows.length}</strong><span>ملف معتمد مطابق</span></div>
           {error && <div className="search-state error"><h2>تعذر تحميل الدليل</h2><p>لم يتم عرض بيانات غير مؤكدة.</p></div>}
-          {!error && rows.length === 0 && <div className="search-state"><h2>لا توجد ملفات مطابقة حاليًا</h2><p>تظهر الملفات هنا فقط بعد مراجعتها واعتمادها من الإدارة.</p></div>}
+          {!error && rows.length === 0 && <div className="search-state"><h2>لا توجد ملفات مطابقة حاليًا</h2><p>تظهر الملفات هنا بعد اكتمال المراجعة والتحقق وإتاحتها للنشر.</p></div>}
           <div className="directory-grid">
             {rows.map((member) => (
               <article className="directory-card community-card" key={member.id}>
