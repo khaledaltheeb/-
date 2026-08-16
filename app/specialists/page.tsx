@@ -41,7 +41,7 @@ export default async function SpecialistsDirectory({ searchParams }: { searchPar
       <SiteHeader />
       <main className="directory-shell">
         <section className="directory-hero">
-          <span className="eyebrow">Verified Professional Directory</span>
+          <span className="eyebrow">دليل مهني موثق</span>
           <h1>دليل المختصين</h1>
           <p>ابحث في الملفات المهنية التي اجتازت مسار التوثيق. بيانات الاتصال والموقع لا تظهر إلا ضمن إعدادات الخصوصية المعتمدة لصاحب الملف.</p>
         </section>

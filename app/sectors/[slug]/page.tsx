@@ -55,22 +55,22 @@ export default async function SectorPage({ params }: { params: Params }) {
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbs).replace(/</g, '\\u003c') }} />
         <nav className="breadcrumbs" aria-label="مسار الصفحة"><Link href="/">الرئيسية</Link><span>/</span><span aria-current="page">{sector.name_ar}</span></nav>
         <section className="sector-hero">
-          <span className="eyebrow">قطاع ديناميكي</span><h1>{sector.name_ar}</h1><p>{sector.description || 'قطاع معرفي وخدمي ضمن منصة روافد.'}</p>
+          <span className="eyebrow">مجال معرفي وخدمي</span><h1>{sector.name_ar}</h1><p>{sector.description || 'قطاع معرفي وخدمي ضمن منصة روافد.'}</p>
           <form className="sector-search" action="/search" method="get"><label className="sr-only" htmlFor="sector-search">ابحث في منصة روافد</label><input id="sector-search" name="q" placeholder={`ابحث عن موضوع مرتبط بـ ${sector.name_ar}`} maxLength={160} /><button type="submit">بحث</button></form>
         </section>
 
         <section className="section">
-          <div className="section-mini-heading"><div><span className="eyebrow">Taxonomy</span><h2>الأقسام</h2></div><span>{categoryRows.length} قسم</span></div>
+          <div className="section-mini-heading"><div><span className="eyebrow">التصفح حسب الموضوع</span><h2>الأقسام</h2></div><span>{categoryRows.length} قسم</span></div>
           <div className="category-public-grid">
             {roots.map((category) => {
               const children = categoryRows.filter((candidate) => candidate.parent_id === category.id);
               return <article className="public-category-card" key={category.id}><Link href={`/sections/${category.slug}`}><h3>{category.name_ar}</h3></Link><p>{category.description || 'قسم متخصص ضمن هذا القطاع.'}</p>{children.length > 0 && <div className="subcategories">{children.map((child) => <Link href={`/sections/${child.slug}`} key={child.id}>{child.name_ar}</Link>)}</div>}</article>;
             })}
-            {!roots.length && <div className="empty-state"><strong>لم تُضف أقسام عامة لهذا القطاع بعد.</strong><span>يمكن إضافتها من لوحة الإدارة دون إنشاء صفحة برمجية جديدة.</span></div>}
+            {!roots.length && <div className="empty-state"><strong>لا توجد أقسام منشورة ضمن هذا القطاع حاليًا.</strong><span>يمكنك استخدام البحث للوصول إلى المحتوى المرتبط بالمجال.</span></div>}
           </div>
         </section>
 
-        {contentRows.length > 0 && <section className="section related-content-section"><div className="section-heading"><span>Published Knowledge</span><h2>أحدث المحتوى في القطاع</h2><p>روابط داخلية إلى المواد المنشورة المعتمدة ضمن هذا القطاع.</p></div><div className="related-content-grid">{contentRows.map((item) => <article key={item.id}><span>{item.content_type}</span><h3><Link href={`/content/${item.slug}`}>{item.title}</Link></h3>{item.excerpt && <p>{item.excerpt}</p>}<Link href={`/content/${item.slug}`}>قراءة الصفحة ←</Link></article>)}</div></section>}
+        {contentRows.length > 0 && <section className="section related-content-section"><div className="section-heading"><span>معرفة منشورة</span><h2>أحدث المحتوى في القطاع</h2><p>مواد منشورة ومرتبطة بهذا المجال لتسهيل الانتقال إلى المعرفة الأكثر صلة.</p></div><div className="related-content-grid">{contentRows.map((item) => <article key={item.id}><span>{item.content_type}</span><h3><Link href={`/content/${item.slug}`}>{item.title}</Link></h3>{item.excerpt && <p>{item.excerpt}</p>}<Link href={`/content/${item.slug}`}>قراءة الصفحة ←</Link></article>)}</div></section>}
       </main>
       <SiteFooter />
     </>

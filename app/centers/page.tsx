@@ -34,7 +34,7 @@ export default async function CentersDirectory({ searchParams }: { searchParams:
       <SiteHeader />
       <main className="directory-shell">
         <section className="directory-hero">
-          <span className="eyebrow">Verified Centers Directory</span>
+          <span className="eyebrow">دليل المراكز الموثقة</span>
           <h1>دليل المراكز</h1>
           <p>المراكز الظاهرة هنا نشطة واجتازت حالة التوثيق. تُعرض البيانات العامة فقط، وتظل معلومات الاتصال والموقع المقيدة خلف طبقة الخصوصية.</p>
         </section>
