@@ -13,6 +13,9 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  // Keep exact historical URLs available while middleware continues to normalize
+  // non-legacy trailing-slash requests to the platform's modern no-slash form.
+  skipTrailingSlashRedirect: true,
   async redirects() {
     // Migration policy: historical content renders on its original route.
     return [];
