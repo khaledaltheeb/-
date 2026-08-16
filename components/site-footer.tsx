@@ -4,43 +4,44 @@ import RawafidBrand from '@/components/rawafid-brand';
 const groups = [
   {
     id: 'knowledge',
-    title: 'المعرفة',
+    title: 'المعرفة والمحتوى',
     links: [
       { href: '/sections', label: 'جميع الأقسام' },
       { href: '/encyclopedia/', label: 'الموسوعة' },
+      { href: '/care-guides', label: 'أدلة الرعاية' },
       { href: '/evidence-guides/', label: 'الأدلة العلمية' },
-      { href: '/cognitive-lab', label: 'المختبر المعرفي' },
+      { href: '/quick-info', label: 'معلومات سريعة' },
     ],
   },
   {
-    id: 'support',
-    title: 'الخدمات والدعم',
+    id: 'pathways',
+    title: 'مسارات وأدوات',
+    links: [
+      { href: '/family-guide', label: 'دليل الأسرة' },
+      { href: '/addiction', label: 'الإدمان والتعافي' },
+      { href: '/cognitive-lab', label: 'المختبر المعرفي' },
+      { href: '/comparisons', label: 'المقارنات' },
+      { href: '/magazine', label: 'مجلة روافد' },
+    ],
+  },
+  {
+    id: 'services',
+    title: 'الخدمات والمشاركة',
     links: [
       { href: '/specialists', label: 'دليل المختصين' },
       { href: '/centers', label: 'دليل المراكز' },
-      { href: '/search', label: 'البحث المتقدم' },
+      { href: '/join', label: 'الانضمام إلى روافد' },
+      { href: '/community', label: 'المتدربون والمتطوعون' },
       { href: '/experiences/', label: 'شاركنا تجربتك' },
     ],
   },
   {
-    id: 'professional',
-    title: 'المشاركة المهنية',
+    id: 'about',
+    title: 'عن روافد والثقة',
     links: [
-      { href: '/join', label: 'الانضمام المهني' },
-      { href: '/join/specialist', label: 'التقدم كمختص' },
-      { href: '/join/center', label: 'تسجيل مركز' },
-      { href: '/community', label: 'المتدربون والمتطوعون' },
-    ],
-  },
-  {
-    id: 'trust',
-    title: 'الثقة والحقوق',
-    links: [
+      { href: '/about', label: 'عن روافد' },
       { href: '/medical-review-policy', label: 'المراجعة العلمية' },
       { href: '/editorial-policy', label: 'السياسة التحريرية' },
-      { href: '/privacy', label: 'الخصوصية' },
-      { href: '/terms', label: 'شروط الاستخدام' },
-      { href: '/disclaimer', label: 'إخلاء المسؤولية' },
     ],
   },
 ];
@@ -58,7 +59,7 @@ export default function SiteFooter() {
             <button type="submit">بحث</button>
           </form>
         </div>
-        <nav className="footer-groups" aria-label="روابط تذييل المنصة">
+        <nav className="footer-groups" aria-label="خريطة روابط منصة روافد">
           {groups.map((group) => (
             <section key={group.id} aria-labelledby={'footer-' + group.id}>
               <h2 id={'footer-' + group.id}>{group.title}</h2>
@@ -68,7 +69,14 @@ export default function SiteFooter() {
         </nav>
       </div>
       <div className="footer-bottom">
-        <span>© {new Date().getFullYear()} منصة روافد. جميع الحقوق محفوظة.</span>
+        <div className="footer-bottom-meta">
+          <span>© {new Date().getFullYear()} منصة روافد. جميع الحقوق محفوظة.</span>
+          <nav className="footer-legal-links" aria-label="الخصوصية والشروط">
+            <Link prefetch={false} href="/privacy">الخصوصية</Link>
+            <Link prefetch={false} href="/terms">شروط الاستخدام</Link>
+            <Link prefetch={false} href="/disclaimer">إخلاء المسؤولية</Link>
+          </nav>
+        </div>
         <a className="back-to-top" href="#top">العودة إلى الأعلى ↑</a>
       </div>
     </footer>
