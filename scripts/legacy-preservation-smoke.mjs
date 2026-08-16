@@ -4,6 +4,7 @@ const preservedRoutes=[
   ['/hubs/angle-001/','القلق: التعريف والمفهوم'],
   ['/encyclopedia/concept-0001/','تعريف دقيق وسياق الاستخدام'],
   ['/quick-info/accountability-vs-self-blame/','تحمل مسؤولية أم جلد ذات'],
+  ['/addiction/','منظومة عربية مؤسسية للإدمان: من الطوارئ إلى التعافي الوظيفي'],
   ['/addiction/protocol-atlas/','أطلس البروتوكولات العلاجية للإدمان'],
   ['/family-guide/tools/behavior-log/','سجل السلوك والسياق الوظيفي'],
 ];
@@ -19,26 +20,14 @@ for(const [route,marker] of preservedRoutes){
     console.log(`LEGACY_PRESERVED ${route}: real content 200 + noindex verified`);
   }catch(error){console.error(`LEGACY_PRESERVED ${route}:`,error);failed=true;}
 }
-try{
-  const unknownPath='/__legacy_preservation_route_that_never_existed__/';
-  const canonicalPath=unknownPath.replace(/\/+$/,'');
-  const response=await fetch(`${base}${unknownPath}`,{redirect:'manual'});
-  if(response.status===404){
-    console.log('LEGACY_PRESERVED_UNKNOWN: direct 404 verified');
-  }else if(response.status===308){
-    const location=response.headers.get('location')||'';
-    const target=new URL(location,base);
-    const expectedBase=new URL(base);
-    if(target.origin!==expectedBase.origin||target.pathname!==canonicalPath||target.search||target.hash){
-      console.error(`LEGACY_PRESERVED_UNKNOWN: unexpected normalization target ${location}`);failed=true;
-    }else{
-      const canonicalResponse=await fetch(target,{redirect:'manual'});
-      if(canonicalResponse.status!==404){console.error(`LEGACY_PRESERVED_UNKNOWN: normalized target expected 404, got ${canonicalResponse.status}`);failed=true;}
-      else console.log('LEGACY_PRESERVED_UNKNOWN: 308 canonical normalization + final 404 verified');
-    }
-  }else{
-    console.error(`LEGACY_PRESERVED_UNKNOWN: expected 404 or canonical 308, got ${response.status}`);failed=true;
-  }
-}catch(error){console.error('LEGACY_PRESERVED_UNKNOWN:',error);failed=true;}
+for(const unknownPath of ['/__legacy_preservation_route_that_never_existed__/','/special-needs/__legacy_preservation_route_that_never_existed__/']){
+  try{
+    const response=await fetch(`${base}${unknownPath}`,{redirect:'manual'});
+    const body=await response.text();
+    if(response.status!==404||!body.includes('الصفحة غير موجودة')){
+      console.error(`LEGACY_PRESERVED_UNKNOWN ${unknownPath}: expected direct branded 404, got ${response.status} ${response.headers.get('location')||''}`);failed=true;
+    }else console.log(`LEGACY_PRESERVED_UNKNOWN ${unknownPath}: direct branded 404 verified`);
+  }catch(error){console.error(`LEGACY_PRESERVED_UNKNOWN ${unknownPath}:`,error);failed=true;}
+}
 if(failed)process.exit(1);
-console.log('Legacy preservation runtime smoke passed.');
+console.log('Legacy preservation runtime smoke passed: preserved production routes render directly and invented routes return true 404 responses.');
