@@ -18,13 +18,13 @@ for(const path of [
 
 requireText('app/register/actions.ts',['full_name','emailRedirectTo','signUp','safeNext']);
 requireText('app/register/page.tsx',['confirm_password','/login?next=','robots: { index: false']);
-requireText('app/login/actions.ts',['signInWithPassword','safeNext','getAuthenticatorAssuranceLevel','/mfa?next=','redirect(next)']);
+requireText('app/login/actions.ts',['signInWithPassword','safeNext','getAuthenticatorAssuranceLevel','listFactors',"factor.status === 'verified'",'hasVerifiedTotp','/mfa?next=','redirect(next)']);
 if(read('app/login/actions.ts').includes('signUp('))fail('login action must not contain registration logic');
 requireText('app/forgot-password/actions.ts',['resetPasswordForEmail','/auth/callback','/reset-password','encodeURIComponent']);
 requireText('app/reset-password/actions.ts',["updateUser({ password",'password_mismatch']);
 requireText('app/auth/callback/route.ts',['exchangeCodeForSession','safeNext']);
-requireText('app/mfa/page.tsx',['getAuthenticatorAssuranceLevel','currentLevel','nextLevel','MfaChallenge','robots: { index: false']);
-requireText('components/mfa-challenge.tsx',['listFactors','challengeAndVerify','one-time-code','nextPath']);
+requireText('app/mfa/page.tsx',['getAuthenticatorAssuranceLevel','listFactors',"factor.status === 'verified'",'hasVerifiedTotp','currentLevel','MfaChallenge','robots: { index: false']);
+requireText('components/mfa-challenge.tsx',['listFactors',"factor.status === 'verified'",'challengeAndVerify','one-time-code','nextPath']);
 requireText('components/mfa-settings.tsx',['mfa.enroll','challengeAndVerify','mfa.unenroll','refreshSession','qr_code','one-time-code','لا تتوفر رموز استعادة']);
 requireText('app/account/security/actions.ts',['getUser','signInWithPassword','updateUser','current_password']);
 requireText('app/account/security/page.tsx',['current_password','new_password','confirm_password','/forgot-password','MfaSettings','/mfa?next=%2Faccount%2Fsecurity']);
@@ -51,7 +51,7 @@ for(const marker of ['provider_verification_upload_allowed','private.provider_ap
 
 const mfaMigration=read('supabase/migrations/20260816113014_mfa_opt_in_enforcement.sql');
 for(const marker of [
-  'private.mfa_session_allowed','auth.mfa_factors',"f.status = 'verified'","auth.jwt()->>'aal'","= 'aal2'",
+  'private.mfa_session_allowed','auth.mfa_factors',"f.factor_type = 'totp'","f.status = 'verified'","auth.jwt()->>'aal'","= 'aal2'",
   'private.require_active_user','private."current_role"','as restrictive','profiles_mfa_opt_in_guard','provider_verification_documents_mfa_opt_in_guard',
   'specialists_mfa_private_read_guard','centers_mfa_private_read_guard','community_profiles_mfa_private_read_guard','community_posts_mfa_private_read_guard',
   'content_mfa_private_read_guard','content_versions_mfa_private_read_guard','mfa_opt_in_insert_guard','mfa_opt_in_update_guard','mfa_opt_in_delete_guard',
@@ -60,7 +60,7 @@ for(const marker of [
 ]) if(!mfaMigration.includes(marker)) fail(`MFA migration missing ${marker}`);
 if(!mfaMigration.includes('grant execute on function private.mfa_session_allowed() to authenticated')) fail('MFA helper must be callable by authenticated RLS evaluation');
 
-requireText('lib/supabase/proxy.ts',["'/account'","'/admin'","'/mfa'",'getAuthenticatorAssuranceLevel',"nextLevel === 'aal2'","url.pathname = '/mfa'"]);
+requireText('lib/supabase/proxy.ts',["'/account'","'/admin'","'/mfa'",'getAuthenticatorAssuranceLevel','listFactors',"factor.status === 'verified'",'hasVerifiedTotp',"url.pathname = '/mfa'"]);
 requireText('scripts/smoke.mjs',["'/register'","'/account/security'","'/account/verification-documents'","'/mfa'"]);
 requireText('app/theme-admin-v4.css',["@import './account-system-v1.css';"]);
 
