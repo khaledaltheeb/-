@@ -188,12 +188,14 @@ export async function updateSession(request: NextRequest) {
 
   if (isProtected && data?.claims?.sub) {
     const assurance = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-    if (assurance.error || (assurance.data.nextLevel === 'aal2' && assurance.data.currentLevel !== 'aal2')) {
+    const factors = assurance.error ? null : await supabase.auth.mfa.listFactors();
+    const hasVerifiedTotp = (factors?.data.totp ?? []).some((factor) => factor.status === 'verified');
+    if (assurance.error || factors?.error || (hasVerifiedTotp && assurance.data.currentLevel !== 'aal2')) {
       const url = request.nextUrl.clone();
       url.pathname = '/mfa';
       url.search = '';
       url.searchParams.set('next', `${request.nextUrl.pathname}${request.nextUrl.search}`);
-      if (assurance.error) url.searchParams.set('error', 'assurance_check');
+      if (assurance.error || factors?.error) url.searchParams.set('error', 'assurance_check');
       return NextResponse.redirect(url);
     }
   }
