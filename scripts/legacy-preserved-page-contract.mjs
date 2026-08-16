@@ -9,6 +9,7 @@ const routeExistsMigration=read('supabase/migrations/20260816100619_align_legacy
 const grantFix=read('supabase/migrations/20260816102121_restore_legacy_preservation_public_execute_grants.sql');
 const helper=read('lib/legacy-preserved-page.ts');
 const view=read('components/legacy-preserved-page.tsx');
+const proxy=read('lib/supabase/proxy.ts');
 const routes=[
  'app/[...legacyPath]/page.tsx','app/hubs/page.tsx','app/hubs/[slug]/page.tsx','app/encyclopedia/[slug]/page.tsx',
  'app/quick-info/[slug]/page.tsx','app/sections/[slug]/page.tsx','app/sectors/[slug]/page.tsx','app/capabilities/[slug]/page.tsx',
@@ -46,9 +47,10 @@ for(const fn of ['get_legacy_preserved_page','legacy_preserved_route_exists']){
  if(revokeAt>grantAt) fail(`latest migration revokes ${fn} from anon/authenticated after the final grant`);
 }
 
-for(const forbidden of ['service_role','secret_key']) if(helper.toLowerCase().includes(forbidden)||view.toLowerCase().includes(forbidden)) fail(`forbidden preservation secret pattern: ${forbidden}`);
+for(const forbidden of ['service_role','secret_key']) if(helper.toLowerCase().includes(forbidden)||view.toLowerCase().includes(forbidden)||proxy.toLowerCase().includes(forbidden)) fail(`forbidden preservation secret pattern: ${forbidden}`);
 for(const marker of ['get_legacy_preserved_page','legacyPreservedMetadata','index: false','noarchive: true','healthrenewal.org','decodeURIComponent',"normalize('NFC')"]) if(!helper.includes(marker)) fail(`helper marker missing: ${marker}`);
 for(const marker of ['نسخة إنتاجية محفوظة','لم تُمنح هذه النسخة اعتماد دورة المراجعة العلمية الحالية','ContentRenderer','legacyInternalLinks','legacyReferences']) if(!view.includes(marker)) fail(`preserved view marker missing: ${marker}`);
+for(const marker of ['NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY',"rpc('legacy_preserved_route_exists'",'isLegacyProductionRoute']) if(!proxy.includes(marker)) fail(`proxy must document its public preservation RPC dependency: ${marker}`);
 for(const path of routes){
  if(!fs.existsSync(path)){fail(`preserved route missing: ${path}`);continue;}
  const source=read(path);
@@ -63,10 +65,11 @@ for(const path of [
  'supabase/migrations/20260816035959_legacy_preserved_page_read_boundary.sql',
  'supabase/migrations/20260816040040_fix_legacy_preserved_page_read_boundary.sql',
  'supabase/migrations/20260816040102_fix_legacy_preserved_page_source_key.sql',
+ 'supabase/migrations/20260816095327_tighten_center_specialists_public_read.sql',
  'supabase/migrations/20260816100619_align_legacy_route_exists_public_filter.sql',
  'supabase/migrations/20260816101451_restrict_unused_legacy_rpc_execute.sql',
  'supabase/migrations/20260816102121_restore_legacy_preservation_public_execute_grants.sql'
 ]) if(!fs.existsSync(path)) fail(`deployed migration history not mirrored: ${path}`);
 
 if(failed)process.exit(1);
-console.log('Legacy preservation contract passed: production HTML remains available through a Unicode-safe public read-only noindex boundary, and the latest migration state preserves the required anon/authenticated RPC grants.');
+console.log('Legacy preservation contract passed: production HTML remains available through a Unicode-safe public read-only noindex boundary, the proxy dependency is explicit, and the latest migration state preserves the required anon/authenticated RPC grants.');
