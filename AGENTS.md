@@ -11,5 +11,9 @@
 - Sector colors are accents only; the institutional Platform Rawafid identity remains constant across public modules.
 - Admin and specialist portals are functional systems, not cosmetic dashboards.
 - Database changes must be migrations and all exposed tables must use RLS.
+- The shared Supabase project uses `main` as the database-migration authority. New migrations must be merged to `main` before `cloudflare-workers-deploy` may mirror them, and mirrored migration files must match `main` exactly.
+- Applied migration history is append-only: never modify, delete, or rename an existing migration file; use a new forward migration instead.
+- Staging-only work must never be the first source of a live Supabase migration.
+- Never merge a pull request targeting `cloudflare-workers-deploy` when the `Staging Shared DB Migration Guard` check is failing.
 - Never expose Supabase secret/service keys to the browser.
 - Content migration begins only after the empty platform passes functional, security, SEO, accessibility, and deployment checks.
