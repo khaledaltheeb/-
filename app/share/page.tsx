@@ -16,9 +16,9 @@ export default async function SharePage({ searchParams }: { searchParams: Params
   return (
     <main className="status-shell">
       <section className="status-card share-card">
-        <span className="eyebrow">Share Target</span>
+        <span className="eyebrow">مشاركة إلى روافد</span>
         <h1>تم استلام المشاركة</h1>
-        <p>هذه شاشة وسيطة آمنة لميزة المشاركة في PWA. لن يتم حفظ البيانات قبل إضافة مسار صريح للمستخدم.</p>
+        <p>استلمت روافد المحتوى الذي شاركته مؤقتًا. لن يتم حفظه في حسابك ما لم تضفه لاحقًا عبر مسار واضح داخل المنصة.</p>
         {(sharedTitle || sharedText || sharedUrl) && (
           <div className="shared-preview">
             {sharedTitle && <strong>{sharedTitle}</strong>}
