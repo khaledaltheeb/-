@@ -1,7 +1,13 @@
 import Image from 'next/image';
+import DailyToolFourStepChecklist from '@/components/daily-tool-four-step-checklist';
 
 type UnknownRecord = Record<string, unknown>;
-type ContentRendererProps = { bodyJson: unknown; bodyText?: string | null; recordId: string };
+type ContentRendererProps = {
+  bodyJson: unknown;
+  bodyText?: string | null;
+  recordId: string;
+  allowDailyToolInteractions?: boolean;
+};
 
 function asRecord(value: unknown): UnknownRecord | null { return value !== null && typeof value === 'object' && !Array.isArray(value) ? value as UnknownRecord : null; }
 function text(value: unknown, max = 20000) { return typeof value === 'string' ? value.trim().slice(0, max) : ''; }
@@ -9,9 +15,18 @@ function stringArray(value: unknown, limit = 100, itemMax = 2000) { return Array
 function validHttpsUrl(value: unknown) { const url = text(value, 2000); return /^https:\/\//i.test(url) ? url : ''; }
 function dimension(value: unknown, fallback: number) { const number=Number(value); return Number.isFinite(number)&&number>=100&&number<=4000?Math.round(number):fallback; }
 
-function renderBlock(blockValue: unknown, index: number) {
+function renderBlock(blockValue: unknown, index: number, allowDailyToolInteractions: boolean) {
   const block = asRecord(blockValue); if (!block) return null;
-  const type = text(block.type, 40).toLowerCase(); const key = `${type || 'block'}-${index}`;
+  const type = text(block.type, 60).toLowerCase(); const key = `${type || 'block'}-${index}`;
+  if (type === 'daily_tool_four_step_checklist') {
+    if (!allowDailyToolInteractions) return null;
+    const toolKey = text(block.toolKey, 120);
+    const legend = text(block.legend, 300) || 'خطوات الاستخدام';
+    const rawSteps = stringArray(block.steps, 4, 2000);
+    if (!toolKey || rawSteps.length !== 4) return null;
+    const steps: readonly [string, string, string, string] = [rawSteps[0], rawSteps[1], rawSteps[2], rawSteps[3]];
+    return <DailyToolFourStepChecklist key={key} toolKey={toolKey} steps={steps} legend={legend} />;
+  }
   if (type === 'paragraph') { const value = text(block.text); return value ? <p key={key}>{value}</p> : null; }
   if (type === 'heading') { const value = text(block.text, 500); const level = Number(block.level); if (!value) return null; if (level === 3) return <h3 key={key}>{value}</h3>; if (level === 4) return <h4 key={key}>{value}</h4>; return <h2 key={key}>{value}</h2>; }
   if (type === 'list') { const items = stringArray(block.items, 100, 1000); if (!items.length) return null; return block.ordered === true ? <ol key={key}>{items.map((item, i) => <li key={`${key}-${i}`}>{item}</li>)}</ol> : <ul key={key}>{items.map((item, i) => <li key={`${key}-${i}`}>{item}</li>)}</ul>; }
@@ -32,8 +47,8 @@ function renderBlock(blockValue: unknown, index: number) {
   return null;
 }
 
-export default function ContentRenderer({ bodyJson, bodyText, recordId }: ContentRendererProps) {
-  const root = asRecord(bodyJson); const blocks = Array.isArray(root?.blocks) ? root.blocks.slice(0, 1000) : []; const renderedBlocks = blocks.map(renderBlock).filter(Boolean);
+export default function ContentRenderer({ bodyJson, bodyText, recordId, allowDailyToolInteractions = false }: ContentRendererProps) {
+  const root = asRecord(bodyJson); const blocks = Array.isArray(root?.blocks) ? root.blocks.slice(0, 1000) : []; const renderedBlocks = blocks.map((block, index) => renderBlock(block, index, allowDailyToolInteractions)).filter(Boolean);
   if (renderedBlocks.length > 0) return <>{renderedBlocks}</>;
   const paragraphs = String(bodyText ?? '').split(/\n{2,}/).map((paragraph) => paragraph.trim()).filter(Boolean);
   if (paragraphs.length > 0) return <>{paragraphs.map((paragraph, index) => <p key={`${recordId}-${index}`}>{paragraph}</p>)}</>;
