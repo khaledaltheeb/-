@@ -7,6 +7,12 @@
  * persistent compositing cost without deferring semantic page content.
  */
 
+:root{
+  /* Loaded by next/font/local in the root layout. The historical Fontsource
+     face remains in the compatibility layer but is no longer selected. */
+  --font-arabic:var(--rawafid-font-arabic),Arial,sans-serif;
+}
+
 /* A solid institutional header is cheaper to composite and visually calmer. */
 .site-header{
   background:#fffefa;
