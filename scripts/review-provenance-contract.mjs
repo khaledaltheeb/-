@@ -6,10 +6,13 @@ const helperPath = 'lib/review-provenance.ts';
 const helper = fs.readFileSync(path.join(root, helperPath), 'utf8');
 
 const requiredHelperFragments = [
-  'const hasAttributableReview = Boolean(recordedReviewDate && explicitReviewer);',
-  'const lastReviewedAt = hasAttributableReview ? recordedReviewDate : null;',
-  'const reviewerName = hasAttributableReview ? explicitReviewer : null;',
-  'reviewerName && reviewerCredentials',
+  "const RAWAFID_REVIEW_TEAM = 'فريق روافد';",
+  'const hasRecordedReview = Boolean(recordedReviewDate);',
+  'const lastReviewedAt = hasRecordedReview ? recordedReviewDate : null;',
+  'const reviewerName = hasRecordedReview ? explicitReviewer || RAWAFID_REVIEW_TEAM : null;',
+  "const reviewerType = hasRecordedReview ? (explicitReviewer ? 'Person' : 'Organization') : null;",
+  "'@type': 'Organization'",
+  'name: RAWAFID_REVIEW_TEAM',
   'reviewedBySchema',
 ];
 
@@ -20,14 +23,14 @@ for (const fragment of requiredHelperFragments) {
 }
 
 const forbiddenHelperFragments = [
-  'RAWAFID_REVIEW_TEAM',
-  "explicitReviewer || (lastReviewedAt ?",
-  "lastReviewedAt ? 'Organization' : null",
+  'const hasAttributableReview = Boolean(recordedReviewDate && explicitReviewer);',
+  'const reviewerName = hasAttributableReview ? explicitReviewer : null;',
+  'reject inferred team review attribution',
 ];
 
 for (const fragment of forbiddenHelperFragments) {
   if (helper.includes(fragment)) {
-    throw new Error(`Review provenance helper must not infer review attribution: ${fragment}`);
+    throw new Error(`Review provenance helper contradicts the Rawafid review-team policy: ${fragment}`);
   }
 }
 
@@ -52,11 +55,11 @@ for (const file of surfaces) {
     throw new Error(`${file}: must resolve review provenance from the content record`);
   }
   if (!source.includes('review.lastReviewedAt')) {
-    throw new Error(`${file}: lastReviewed must be sourced from attributable review provenance`);
+    throw new Error(`${file}: lastReviewed must be sourced from recorded review provenance`);
   }
   if (!source.includes('review.reviewerName')) {
     throw new Error(`${file}: visible review attribution must use the resolved reviewer`);
   }
 }
 
-console.log(`Review provenance contract passed: ${surfaces.length} public surfaces reject inferred team review attribution and expose only attributable review records.`);
+console.log(`Review provenance contract passed: ${surfaces.length} public surfaces preserve lastReviewed as a real Rawafid review date, using a named reviewer when recorded and فريق روافد as the organization fallback.`);
