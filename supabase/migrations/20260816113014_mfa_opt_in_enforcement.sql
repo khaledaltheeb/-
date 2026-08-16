@@ -11,6 +11,7 @@ as $function$
       select 1
       from auth.mfa_factors f
       where f.user_id = (select auth.uid())
+        and f.factor_type = 'totp'
         and f.status = 'verified'
     ) then coalesce((select auth.jwt()->>'aal'), 'aal1') = 'aal2'
     else true
