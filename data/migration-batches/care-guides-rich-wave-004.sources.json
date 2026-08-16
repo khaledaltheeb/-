@@ -215,7 +215,7 @@
     },
     {
       "id": "Koch-Multitasking-Review-2018",
-      "title": "Multitasking in the context of task switching and dual tasking",
+      "title": "Cognitive structure, flexibility, and plasticity in human multitasking—An integrative review of dual-task and task-switching research",
       "publisher": "Psychological Bulletin / PubMed",
       "year": 2018,
       "url": "https://pubmed.ncbi.nlm.nih.gov/29517261/",
@@ -301,6 +301,51 @@
       "year": 2024,
       "url": "https://pubmed.ncbi.nlm.nih.gov/38186744/",
       "source_type": "review",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Baddeley-Working-Memory-2012",
+      "title": "Working memory: theories, models, and controversies",
+      "publisher": "Annual Review of Psychology / PubMed",
+      "year": 2012,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/21961947/",
+      "source_type": "review",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Cowan-Magical-Mystery-Four-2010",
+      "title": "The Magical Mystery Four: How is Working Memory Capacity Limited, and Why?",
+      "publisher": "Current Directions in Psychological Science / PubMed",
+      "year": 2010,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/20445769/",
+      "source_type": "review",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Thalmann-Chunking-WM-2019",
+      "title": "How does chunking help working memory?",
+      "publisher": "Journal of Experimental Psychology: Learning, Memory, and Cognition / PubMed",
+      "year": 2019,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/29698045/",
+      "source_type": "experimental-study",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Burnett-Cognitive-Offloading-Meta-2026",
+      "title": "Meta-analytic investigations of the effect of cognitive offloading on memory-based task performance and interindividual variability",
+      "publisher": "Memory & Cognition / PubMed",
+      "year": 2026,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/40500483/",
+      "source_type": "meta-analysis",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Zhang-External-Representations-WM-2009",
+      "title": "An exploration of the relations between external representations and working memory",
+      "publisher": "PLOS ONE / PubMed",
+      "year": 2009,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/19652712/",
+      "source_type": "experimental-study",
       "authority_tier": "secondary"
     }
   ]
