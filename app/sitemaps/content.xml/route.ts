@@ -3,7 +3,7 @@ import { sitemapResponse } from '@/lib/sitemap-xml';
 import { getCognitivePageIndex } from '@/lib/cognitive-program';
 
 export const dynamic = 'force-dynamic';
-const PAGE_SIZE=50000;
+const PAGE_SIZE = 50000;
 const RELEASE = '2026-08-14T00:00:00.000Z';
 
 type SitemapRow = {
@@ -21,7 +21,7 @@ export async function GET(request: Request) {
   const start = page * PAGE_SIZE;
   const end = start + PAGE_SIZE - 1;
 
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('content')
     .select('slug,updated_at,canonical_url')
     .eq('status', 'published')
@@ -30,9 +30,16 @@ export async function GET(request: Request) {
     .lte('published_at', new Date().toISOString())
     .eq('robots_index', true)
     .order('updated_at', { ascending: false })
-    .range(start,end);
+    .range(start, end);
 
-  const databaseRows: SitemapRow[] = (data ?? []).map((item) => ({
+  if (error) {
+    throw new Error(`content sitemap query failed: ${error.message}`);
+  }
+  if (!Array.isArray(data)) {
+    throw new Error('content sitemap query returned no data array');
+  }
+
+  const databaseRows: SitemapRow[] = data.map((item) => ({
     path: item.canonical_url || `/content/${item.slug}`,
     lastModified: item.updated_at,
     changeFrequency: 'monthly',
