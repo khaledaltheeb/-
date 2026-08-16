@@ -6,7 +6,7 @@ const config=read('next.config.ts');
 if(!/async redirects\(\)[\s\S]*?return \[\];/.test(config))fail('redirects() must remain empty for migrated content');
 if(!/async rewrites\(\)[\s\S]*?return \[\];/.test(config))fail('rewrites() must remain empty for migrated content');
 const publicMigrationRoutes=[
- 'app/[...legacyPath]/page.tsx',
+ 'app/[...legacyPath]/page.tsx','app/daily-tools/page.tsx','app/daily-tools/[slug]/page.tsx',
  'app/cognitive-lab/associative-context-binding/page.tsx','app/cognitive-lab/prospective-memory-cues/page.tsx',
  'app/hubs/page.tsx','app/hubs/[slug]/page.tsx','app/resources/[slug]/page.tsx',
  'app/encyclopedia/[slug]/page.tsx','app/quick-info/[slug]/page.tsx','app/sections/[slug]/page.tsx',
