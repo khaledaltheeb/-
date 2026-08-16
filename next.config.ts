@@ -11,23 +11,10 @@ const securityHeaders = [
 ];
 
 const encyclopediaConditionRedirects = [
-  'autism',
-  'depression',
-  'alcohol-use-disorder',
-  'cannabis-use-disorder',
-  'gambling-related-harms',
-  'gaming-disorder',
-  'inhalant-use-disorder',
-  'nicotine-tobacco-dependence',
-  'opioid-use-disorder',
-  'polysubstance-use-and-overdose-risk',
-  'sedative-benzodiazepine-use-disorder',
-  'stimulant-use-disorder',
-].map((slug) => ({
-  source: `/content/${slug}`,
-  destination: `/encyclopedia/${slug}/`,
-  permanent: true,
-}));
+  'autism', 'depression', 'alcohol-use-disorder', 'cannabis-use-disorder', 'gambling-related-harms', 'gaming-disorder',
+  'inhalant-use-disorder', 'nicotine-tobacco-dependence', 'opioid-use-disorder', 'polysubstance-use-and-overdose-risk',
+  'sedative-benzodiazepine-use-disorder', 'stimulant-use-disorder',
+].map((slug) => ({ source: `/content/${slug}`, destination: `/encyclopedia/${slug}/`, permanent: true }));
 
 const cognitiveLabLegacyRewrites = [
   { source: '/cognitive-lab/associative-context-binding', destination: '/cognitive-lab/associative-binding' },
@@ -75,6 +62,17 @@ const legacyTeamPartnerRedirects = [
   { source: '/team-and-partners', destination: '/join', permanent: true },
 ];
 
+const legacyInteractiveRedirects = [
+  { source: '/ai-search', destination: '/search', permanent: true },
+  { source: '/specialists-partners/account', destination: '/account', permanent: true },
+  { source: '/specialists-partners/admin', destination: '/admin', permanent: true },
+  { source: '/specialists-partners/contact', destination: '/specialists', permanent: true },
+  { source: '/specialists-partners/join', destination: '/join', permanent: true },
+  { source: '/specialists-partners/password-reset', destination: '/reset-password', permanent: true },
+  { source: '/specialists-partners/portal', destination: '/messages', permanent: true },
+  { source: '/specialists-partners/recover', destination: '/forgot-password', permanent: true },
+];
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
@@ -84,6 +82,7 @@ const nextConfig: NextConfig = {
       ...legacyAudienceRedirects,
       ...legacyThinGuideRedirects,
       ...legacyTeamPartnerRedirects,
+      ...legacyInteractiveRedirects,
       { source: '/care-guides/caregiver-self-care-boundaries', destination: '/content/caregiver-burnout', permanent: true },
       { source: '/care-guides/fetal-alcohol-spectrum-support', destination: '/care-guides/prenatal-exposure-neurodevelopment-support/', permanent: true },
       { source: '/care-guides/gambling-disorder-family-financial-safety', destination: '/care-guides/compulsive-financial-behavior-family-safety/', permanent: true },
