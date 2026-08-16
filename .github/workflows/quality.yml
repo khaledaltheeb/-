@@ -2,7 +2,7 @@ name: Rawafid Quality Gate
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, cloudflare-workers-deploy]
   push:
     branches: [main, foundation-v3, final-hardening]
 
