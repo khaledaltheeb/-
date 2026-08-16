@@ -6,6 +6,7 @@ import ContentRenderer from '@/components/content-renderer';
 import styles from './care-guide-page.module.css';
 import {
   careGuideCategory,
+  careGuideDisclaimer,
   careGuidePageRole,
   safeCareGuideReferences,
   visibleCareGuideFaq,
@@ -13,6 +14,7 @@ import {
   type CareGuideRecord,
   type CareGuideRelatedItem,
 } from '@/lib/care-guides';
+import { contentReviewProvenance } from '@/lib/review-provenance';
 import { breadcrumbJsonLd, SITE_URL } from '@/lib/seo';
 
 type Props = {
@@ -60,6 +62,8 @@ export default function CareGuidePage({ record, items = [], related = [], routeS
   const role = careGuidePageRole(record.schema_json);
   const references = safeCareGuideReferences(record.references_json);
   const faqItems = visibleCareGuideFaq(record.body_json);
+  const centralDisclaimer = careGuideDisclaimer(record.schema_json);
+  const review = contentReviewProvenance(record);
   const canonical = record.canonical_url || (routeSegments.length ? `/care-guides/${routeSegments.join('/')}/` : '/care-guides/');
   const url = canonical.startsWith('https://') ? canonical : `${SITE_URL}${canonical}`;
   const audiences = Array.isArray(record.audience) ? record.audience.map(String) : [];
@@ -80,7 +84,7 @@ export default function CareGuidePage({ record, items = [], related = [], routeS
     inLanguage: 'ar',
     datePublished: record.published_at || undefined,
     dateModified: record.updated_at || undefined,
-    lastReviewed: record.last_reviewed_at || undefined,
+    lastReviewed: review.lastReviewedAt || undefined,
     publisher: { '@id': `${SITE_URL}/#organization` },
     isPartOf: { '@id': `${SITE_URL}/#website` },
     image: record.featured_image_url ? (record.featured_image_url.startsWith('https://') ? record.featured_image_url : `${SITE_URL}${record.featured_image_url}`) : undefined,
@@ -106,6 +110,7 @@ export default function CareGuidePage({ record, items = [], related = [], routeS
       '@type': 'Article',
       articleSection: category,
       author: record.author_display_name ? { '@type': 'Organization', name: record.author_display_name } : { '@id': `${SITE_URL}/#organization` },
+      reviewedBy: review.reviewedBySchema,
       citation: references.flatMap((reference) => reference.url ? [reference.url] : []),
     };
 
@@ -128,9 +133,9 @@ export default function CareGuidePage({ record, items = [], related = [], routeS
         {record.excerpt ? <p>{record.excerpt}</p> : null}
         <div className="article-meta">
           {record.author_display_name ? <span>إعداد: {record.author_display_name}</span> : null}
-          {record.reviewer_display_name ? <span>مراجعة: {record.reviewer_display_name}{record.reviewer_credentials ? ` — ${record.reviewer_credentials}` : ''}</span> : null}
+          {review.reviewerName ? <span>مراجعة: {review.reviewerName}{review.reviewerCredentials ? ` — ${review.reviewerCredentials}` : ''}</span> : null}
           {record.published_at ? <span>نُشر {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(record.published_at))}</span> : null}
-          {record.last_reviewed_at ? <span>آخر مراجعة {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(record.last_reviewed_at))}</span> : null}
+          {review.lastReviewedAt ? <span>آخر مراجعة {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(review.lastReviewedAt))}</span> : null}
         </div>
         {audiences.length ? <div className="tag-list">{audiences.map((audience) => <span key={audience}>{audience}</span>)}</div> : null}
       </header>
@@ -140,7 +145,7 @@ export default function CareGuidePage({ record, items = [], related = [], routeS
         {record.featured_image_url ? <figure className="article-featured-image"><Image src={record.featured_image_url} alt={record.featured_image_alt || record.title} width={1200} height={675} sizes="(max-width: 900px) 100vw, 900px" priority={role === 'hub'} unoptimized /></figure> : null}
         <ContentRenderer bodyJson={record.body_json} bodyText={record.body_text} recordId={record.id} />
       </div>
-      {record.medical_disclaimer ? <aside className="medical-disclaimer" aria-label="حدود المحتوى"><strong>تنبيه صحي ومنهجي</strong><p>{record.medical_disclaimer}</p><Link href="/disclaimer">إخلاء المسؤولية الكامل</Link></aside> : null}
+      {(record.medical_disclaimer || centralDisclaimer) ? <aside className="medical-disclaimer" aria-label="حدود المحتوى"><strong>تنبيه صحي ومنهجي</strong>{record.medical_disclaimer ? <p>{record.medical_disclaimer}</p> : <p>هذا الدليل للتثقيف والدعم العملي العام، ولا يحل محل التقييم أو التشخيص أو العلاج المهني الفردي.</p>}<Link href={centralDisclaimer?.url || '/disclaimer'}>{centralDisclaimer?.label || 'إخلاء المسؤولية الكامل'}</Link></aside> : null}
       {related.length ? <section className="article-related" aria-labelledby="care-guide-related-title"><div className="section-mini-heading"><div><span className="eyebrow">روابط داخلية دلالية</span><h2 id="care-guide-related-title">محتوى مرتبط</h2></div><span>اختيار من المحتوى المنشور وفق الصلة الموضوعية</span></div><div className="related-content-grid">{related.map((item) => <article key={item.id}><span>{item.contentType}</span><h3><Link href={item.href}>{item.title}</Link></h3>{item.excerpt ? <p>{item.excerpt}</p> : null}<Link href={item.href}>متابعة القراءة ←</Link></article>)}</div></section> : null}
       <CareGuidesNav end />
       {references.length ? <section className="article-references" aria-labelledby="care-guide-references-title"><h2 id="care-guide-references-title">المصادر والمراجع</h2><ol>{references.map((reference, index) => <li key={`${reference.url || reference.title}-${index}`}>{reference.url ? <a href={reference.url} target="_blank" rel="noopener noreferrer">{reference.title || reference.url}</a> : <span>{reference.title}</span>}{reference.publisher ? <small>{reference.publisher}</small> : null}{reference.year ? <small>{String(reference.year)}</small> : null}</li>)}</ol></section> : null}

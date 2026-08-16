@@ -1,0 +1,469 @@
+{
+  "batch_id": "care-guides-rich-wave-004",
+  "reviewed_at": "2026-08-16",
+  "source_policy": "Use current authoritative standards and official guidance where available, plus peer-reviewed reviews and meta-analyses for cognitive and motivational mechanisms. Pages are educational and operational; they must not turn constructs such as attention, motivation or executive function into individual diagnoses. Accessibility pages describe barriers, participation and reasonable supports rather than making legal determinations for a specific jurisdiction.",
+  "sources": [
+    {
+      "id": "Diamond-Executive-Functions-2013",
+      "title": "Executive Functions",
+      "publisher": "Annual Review of Psychology / PMC",
+      "year": 2013,
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4084861/",
+      "source_type": "review",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Sweller-CLT-2023",
+      "title": "Discussion of the special issue on cognitive load theory",
+      "publisher": "British Journal of Educational Psychology / PubMed",
+      "year": 2023,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/37160659/",
+      "source_type": "review",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Retrieval-Practice-Review-2023",
+      "title": "Testing Improves Performance as Well as Assesses Learning: A Review of the Testing Effect",
+      "publisher": "PMC",
+      "year": 2023,
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10229024/",
+      "source_type": "review",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Science-Learning-Teaching-2018",
+      "title": "Teaching the science of learning",
+      "publisher": "Cognitive Research: Principles and Implications / PMC",
+      "year": 2018,
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5780548/",
+      "source_type": "review",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Cepeda-Spacing-2006",
+      "title": "Distributed practice in verbal recall tasks: A review and quantitative synthesis",
+      "publisher": "Psychological Bulletin / PubMed",
+      "year": 2006,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/16719566/",
+      "source_type": "meta-analysis",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Classroom-Spacing-Meta-2025",
+      "title": "The Distributed Practice Effect on Classroom Learning: A Meta-Analytic Review of Applied Research",
+      "publisher": "PubMed",
+      "year": 2025,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/40564553/",
+      "source_type": "meta-analysis",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Ryan-Deci-Intrinsic-Extrinsic-2000",
+      "title": "Intrinsic and Extrinsic Motivations: Classic Definitions and New Directions",
+      "publisher": "Contemporary Educational Psychology / PubMed",
+      "year": 2000,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/10620381/",
+      "source_type": "review",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Ryan-Deci-SDT-2000",
+      "title": "Self-determination theory and the facilitation of intrinsic motivation, social development, and well-being",
+      "publisher": "American Psychologist / PubMed",
+      "year": 2000,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/11392867/",
+      "source_type": "review",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Student-Motivation-SDT-Meta-2021",
+      "title": "Student Motivation and Associated Outcomes: A Meta-Analysis From Self-Determination Theory",
+      "publisher": "Perspectives on Psychological Science / PubMed",
+      "year": 2021,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/33593153/",
+      "source_type": "meta-analysis",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Self-Efficacy-Sources-Meta-2018",
+      "title": "Unique effects and moderators of effects of sources on self-efficacy: A model-based meta-analysis",
+      "publisher": "Journal of Applied Psychology / PubMed",
+      "year": 2018,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/29154576/",
+      "source_type": "meta-analysis",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Implementation-Intentions-2007",
+      "title": "Implementation intentions: a look back at fifteen years of progress",
+      "publisher": "Psicothema / PubMed",
+      "year": 2007,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/17295981/",
+      "source_type": "review",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Implementation-Intentions-Children-2026",
+      "title": "The effectiveness of implementation intentions in children: A systematic review and meta-analysis",
+      "publisher": "British Journal of Psychology / PubMed",
+      "year": 2026,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/41784001/",
+      "source_type": "systematic-review-meta-analysis",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Extrinsic-Rewards-Meta-1999",
+      "title": "A meta-analytic review of experiments examining the effects of extrinsic rewards on intrinsic motivation",
+      "publisher": "Psychological Bulletin / PubMed",
+      "year": 1999,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/10589297/",
+      "source_type": "meta-analysis",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "CAST-UDL-3",
+      "title": "Universal Design for Learning Guidelines version 3.0",
+      "publisher": "CAST",
+      "year": 2024,
+      "url": "https://udlguidelines.cast.org/",
+      "source_type": "guideline",
+      "authority_tier": "primary"
+    },
+    {
+      "id": "CAST-UDL-Book-3E",
+      "title": "Universal Design for Learning: Principles, Framework, and Practice, Third Edition",
+      "publisher": "CAST Professional Publishing",
+      "year": 2025,
+      "url": "https://publishing.cast.org/catalog/books-products/udl-principles-framework-practice",
+      "source_type": "book",
+      "authority_tier": "primary"
+    },
+    {
+      "id": "UNICEF-Inclusive-Education",
+      "title": "Inclusive education",
+      "publisher": "UNICEF",
+      "url": "https://www.unicef.org/education/inclusive-education",
+      "source_type": "guideline",
+      "authority_tier": "primary"
+    },
+    {
+      "id": "UNICEF-Learning-For-Everyone",
+      "title": "Learning is For Everyone: Global Report",
+      "publisher": "UNICEF Innocenti",
+      "url": "https://www.unicef.org/innocenti/reports/learning-everyone-global-report",
+      "source_type": "global-report",
+      "authority_tier": "primary"
+    },
+    {
+      "id": "WHO-ICF",
+      "title": "International Classification of Functioning, Disability and Health (ICF)",
+      "publisher": "World Health Organization",
+      "url": "https://www.who.int/standards/classifications/international-classification-of-functioning-disability-and-health",
+      "source_type": "official-framework",
+      "authority_tier": "primary"
+    },
+    {
+      "id": "UN-CRPD-Article24",
+      "title": "Convention on the Rights of Persons with Disabilities — Article 24 Education",
+      "publisher": "United Nations",
+      "url": "https://social.desa.un.org/issues/disability/crpd/article-24-education",
+      "source_type": "rights-framework",
+      "authority_tier": "primary"
+    },
+    {
+      "id": "UN-CRPD-Articles",
+      "title": "Convention on the Rights of Persons with Disabilities — Articles",
+      "publisher": "United Nations",
+      "url": "https://social.desa.un.org/issues/disability/crpd/convention-on-the-rights-of-persons-with-disabilities-articles",
+      "source_type": "rights-framework",
+      "authority_tier": "primary"
+    },
+    {
+      "id": "ASHA-AAC-Practice-Portal",
+      "title": "Augmentative and Alternative Communication (AAC)",
+      "publisher": "American Speech-Language-Hearing Association",
+      "url": "https://www.asha.org/practice-portal/professional-issues/augmentative-and-alternative-communication/",
+      "source_type": "professional-guidance",
+      "authority_tier": "primary"
+    },
+    {
+      "id": "WHO-World-Report-Hearing-2021",
+      "title": "World report on hearing",
+      "publisher": "World Health Organization",
+      "year": 2021,
+      "url": "https://www.who.int/publications/i/item/9789240020481",
+      "source_type": "global-report",
+      "authority_tier": "primary"
+    },
+    {
+      "id": "WHO-Wheelchair-Guidelines-2023",
+      "title": "Wheelchair provision guidelines",
+      "publisher": "World Health Organization",
+      "year": 2023,
+      "url": "https://www.who.int/publications/b/63432",
+      "source_type": "guideline",
+      "authority_tier": "primary"
+    },
+    {
+      "id": "W3C-WCAG-2.2",
+      "title": "Web Content Accessibility Guidelines (WCAG) 2.2",
+      "publisher": "W3C Web Accessibility Initiative",
+      "year": 2023,
+      "url": "https://www.w3.org/TR/WCAG22/",
+      "source_type": "technical-standard",
+      "authority_tier": "primary"
+    },
+    {
+      "id": "Koch-Multitasking-Review-2018",
+      "title": "Cognitive structure, flexibility, and plasticity in human multitasking—An integrative review of dual-task and task-switching research",
+      "publisher": "Psychological Bulletin / PubMed",
+      "year": 2018,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/29517261/",
+      "source_type": "integrative-review",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Worringer-Multitasking-Meta-2019",
+      "title": "Common and distinct neural correlates of dual-tasking and task-switching: a meta-analytic review",
+      "publisher": "Brain Structure and Function",
+      "year": 2019,
+      "url": "https://link.springer.com/article/10.1007/s00429-019-01870-4",
+      "source_type": "meta-analysis",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Pashler-Dual-Task-1994",
+      "title": "Dual-task interference in simple tasks: data and theory",
+      "publisher": "Psychological Bulletin / Europe PMC",
+      "year": 1994,
+      "url": "https://europepmc.org/article/MED/7972591",
+      "source_type": "review",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "May-Elder-Media-Multitasking-2018",
+      "title": "Efficient, helpful, or distracting? A literature review of media multitasking in relation to academic performance",
+      "publisher": "International Journal of Educational Technology in Higher Education",
+      "year": 2018,
+      "url": "https://link.springer.com/article/10.1186/s41239-018-0096-z",
+      "source_type": "review",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Sana-Laptop-Multitasking-2013",
+      "title": "Laptop multitasking hinders classroom learning for both users and nearby peers",
+      "publisher": "Computers & Education / ERIC",
+      "year": 2013,
+      "url": "https://eric.ed.gov/?id=EJ1007624",
+      "source_type": "experimental-study",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Monsell-Task-Switching-2003",
+      "title": "Task switching",
+      "publisher": "Trends in Cognitive Sciences / PubMed",
+      "year": 2003,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/12639695/",
+      "source_type": "review",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Longman-Self-Paced-Preparation-2017",
+      "title": "Self-paced preparation for a task switch eliminates attentional inertia but not the performance switch cost",
+      "publisher": "Journal of Experimental Psychology: Learning, Memory, and Cognition / PubMed",
+      "year": 2017,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/27936844/",
+      "source_type": "experimental-study",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Guo-Interruption-Interventions-Meta-2021",
+      "title": "Effects of interventions to reduce the negative consequences of interruptions on task performance: A systematic review, meta-analysis, and narrative synthesis of laboratory studies",
+      "publisher": "Applied Ergonomics / PubMed",
+      "year": 2021,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/34273814/",
+      "source_type": "systematic-review-meta-analysis",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Monk-Interruption-Duration-Demand-2008",
+      "title": "The effect of interruption duration and demand on resuming suspended goals",
+      "publisher": "Journal of Experimental Psychology: Applied / PubMed",
+      "year": 2008,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/19102614/",
+      "source_type": "experimental-study",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Egner-Cognitive-Flexibility-Control-2024",
+      "title": "Insights into control over cognitive flexibility from studies of task-switching",
+      "publisher": "Current Opinion in Behavioral Sciences / PubMed",
+      "year": 2024,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/38186744/",
+      "source_type": "review",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Baddeley-Working-Memory-2012",
+      "title": "Working memory: theories, models, and controversies",
+      "publisher": "Annual Review of Psychology / PubMed",
+      "year": 2012,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/21961947/",
+      "source_type": "review",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Cowan-Magical-Mystery-Four-2010",
+      "title": "The Magical Mystery Four: How is Working Memory Capacity Limited, and Why?",
+      "publisher": "Current Directions in Psychological Science / PubMed",
+      "year": 2010,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/20445769/",
+      "source_type": "review",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Thalmann-Chunking-WM-2019",
+      "title": "How does chunking help working memory?",
+      "publisher": "Journal of Experimental Psychology: Learning, Memory, and Cognition / PubMed",
+      "year": 2019,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/29698045/",
+      "source_type": "experimental-study",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Burnett-Cognitive-Offloading-Meta-2026",
+      "title": "Meta-analytic investigations of the effect of cognitive offloading on memory-based task performance and interindividual variability",
+      "publisher": "Memory & Cognition / PubMed",
+      "year": 2026,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/40500483/",
+      "source_type": "meta-analysis",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Zhang-External-Representations-WM-2009",
+      "title": "An exploration of the relations between external representations and working memory",
+      "publisher": "PLOS ONE / PubMed",
+      "year": 2009,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/19652712/",
+      "source_type": "experimental-study",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Cepeda-Optimal-Retention-2008",
+      "title": "Spacing effects in learning: a temporal ridgeline of optimal retention",
+      "publisher": "Psychological Science / PubMed",
+      "year": 2008,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/19076480/",
+      "source_type": "experimental-study",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Rhodes-Tauber-JOL-Meta-2011",
+      "title": "The influence of delaying judgments of learning on metacognitive accuracy: a meta-analytic review",
+      "publisher": "Psychological Bulletin / PubMed",
+      "year": 2011,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/21219059/",
+      "source_type": "meta-analysis",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Koriat-Monitoring-Control-2006",
+      "title": "The intricate relationships between monitoring and control in metacognition: lessons for the cause-and-effect relation between subjective experience and behavior",
+      "publisher": "Journal of Experimental Psychology: General / PubMed",
+      "year": 2006,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/16478315/",
+      "source_type": "review-and-experimental-synthesis",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Pan-Rickard-Retrieval-Transfer-Meta-2018",
+      "title": "Transfer of test-enhanced learning: Meta-analytic review and synthesis",
+      "publisher": "Psychological Bulletin / PubMed",
+      "year": 2018,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/29733621/",
+      "source_type": "meta-analysis",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Mulligan-Transitive-Inference-2023",
+      "title": "Transitive inference and the testing effect: Retrieval practice impairs transitive inference",
+      "publisher": "Quarterly Journal of Experimental Psychology / PubMed",
+      "year": 2023,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/36760059/",
+      "source_type": "experimental-study-with-small-meta-analysis",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Cognitive-Load-Materials-2021",
+      "title": "Five Strategies for Optimizing Instructional Materials: Instructor- and Learner-Managed Cognitive Load",
+      "publisher": "Educational Psychology Review / PubMed",
+      "year": 2021,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/33716467/",
+      "source_type": "review",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Rodriguez-Nieto-EF-Meta-2022",
+      "title": "Inhibition, Shifting and Updating: Inter and intra-domain commonalities and differences from an executive functions activation likelihood estimation meta-analysis",
+      "publisher": "NeuroImage / PubMed",
+      "year": 2022,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/36202157/",
+      "source_type": "meta-analysis",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Visual-Distractor-Suppression-Review-2019",
+      "title": "Getting rid of visual distractors: the why, when, how, and where",
+      "publisher": "Current Opinion in Psychology / PubMed",
+      "year": 2019,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/30856512/",
+      "source_type": "review",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Chen-Prospective-Memory-Meta-2015",
+      "title": "The effect of implementation intention on prospective memory: a systematic and meta-analytic review",
+      "publisher": "Psychiatry Research / PubMed",
+      "year": 2015,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/25639373/",
+      "source_type": "systematic-review-meta-analysis",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Gilbert-Intention-Offloading-2023",
+      "title": "Outsourcing Memory to External Tools: A Review of Intention Offloading",
+      "publisher": "Psychonomic Bulletin & Review / PubMed",
+      "year": 2023,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/35789477/",
+      "source_type": "review",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Heitz-Speed-Accuracy-2014",
+      "title": "The speed-accuracy tradeoff: history, physiology, methodology, and behavior",
+      "publisher": "Frontiers in Neuroscience / PubMed",
+      "year": 2014,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/24966810/",
+      "source_type": "review",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Langner-Eickhoff-Vigilance-Meta-2013",
+      "title": "Sustaining attention to simple tasks: a meta-analytic review of the neural mechanisms of vigilant attention",
+      "publisher": "Psychological Bulletin / PubMed",
+      "year": 2013,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/23163491/",
+      "source_type": "meta-analysis",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Patel-Self-Scheduled-Breaks-2024",
+      "title": "The metacognition of vigilance: Using self-scheduled breaks to improve sustained attention",
+      "publisher": "Journal of Experimental Psychology: Applied / PubMed",
+      "year": 2024,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/39250235/",
+      "source_type": "experimental-study",
+      "authority_tier": "secondary"
+    }
+  ]
+}

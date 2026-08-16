@@ -14,6 +14,7 @@ import {
   safeEncyclopediaReferences,
   visibleEncyclopediaFaq,
 } from '@/lib/encyclopedia';
+import { contentReviewProvenance } from '@/lib/review-provenance';
 
 export const dynamic = 'force-dynamic';
 type Params = Promise<{ slug: string }>;
@@ -57,6 +58,7 @@ export default async function EncyclopediaConditionPage({ params }: { params: Pa
   const references = safeEncyclopediaReferences(record.references_json);
   const faqItems = visibleEncyclopediaFaq(record.body_json);
   const audiences = Array.isArray(record.audience) ? record.audience.map(String) : [];
+  const review = contentReviewProvenance(record);
   const breadcrumbs = breadcrumbJsonLd([
     { name: 'الرئيسية', path: '/' },
     { name: 'الموسوعة النفسية', path: '/encyclopedia/' },
@@ -74,9 +76,9 @@ export default async function EncyclopediaConditionPage({ params }: { params: Pa
     name: record.title, headline: record.title,
     description: record.seo_description || record.excerpt || undefined,
     inLanguage: 'ar', datePublished: record.published_at || undefined, dateModified: record.updated_at || undefined,
-    lastReviewed: record.last_reviewed_at || undefined, about: { '@id': `${url}#condition` },
+    lastReviewed: review.lastReviewedAt || undefined, about: { '@id': `${url}#condition` },
     author: record.author_display_name ? { '@type': 'Person', name: record.author_display_name } : { '@id': `${SITE_URL}/#organization` },
-    reviewedBy: record.reviewer_display_name ? { '@type': 'Person', name: record.reviewer_display_name, description: record.reviewer_credentials || undefined } : undefined,
+    reviewedBy: review.reviewedBySchema,
     publisher: { '@id': `${SITE_URL}/#organization` }, isPartOf: { '@id': `${SITE_URL}/encyclopedia/#page` },
     citation: references.flatMap((reference) => reference.url ? [reference.url] : []),
   };
@@ -92,9 +94,9 @@ export default async function EncyclopediaConditionPage({ params }: { params: Pa
     <article>
       <header className="article-hero"><span className="eyebrow">الموسوعة النفسية</span><h1>{record.title}</h1>{record.excerpt ? <p>{record.excerpt}</p> : null}<div className="article-meta">
         {record.author_display_name ? <span>إعداد: {record.author_display_name}</span> : null}
-        {record.reviewer_display_name ? <span>مراجعة: {record.reviewer_display_name}{record.reviewer_credentials ? ` — ${record.reviewer_credentials}` : ''}</span> : null}
+        {review.reviewerName ? <span>مراجعة: {review.reviewerName}{review.reviewerCredentials ? ` — ${review.reviewerCredentials}` : ''}</span> : null}
         {record.published_at ? <span>نُشر {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(record.published_at))}</span> : null}
-        {record.last_reviewed_at ? <span>آخر مراجعة {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(record.last_reviewed_at))}</span> : null}
+        {review.lastReviewedAt ? <span>آخر مراجعة {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(review.lastReviewedAt))}</span> : null}
       </div>{audiences.length ? <div className="tag-list">{audiences.map((audience) => <span key={audience}>{audience}</span>)}</div> : null}</header>
       <nav className="article-related" aria-label="التنقل في الموسوعة"><Link href="/encyclopedia/">كل حالات الموسوعة</Link> · <Link href="/search/?type=condition">البحث في الحالات</Link> · <Link href="/specialists/">دليل المختصين</Link></nav>
       <div className="article-body">{record.featured_image_url ? <figure className="article-featured-image"><Image src={record.featured_image_url} alt={record.featured_image_alt || record.title} width={1200} height={675} sizes="(max-width: 900px) 100vw, 900px" priority unoptimized /></figure> : null}<ContentRenderer bodyJson={record.body_json} bodyText={record.body_text} recordId={record.id} /></div>

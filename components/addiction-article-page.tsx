@@ -6,6 +6,7 @@ import ContentRenderer from '@/components/content-renderer';
 import AddictionBrowser from '@/components/addiction-browser';
 import { breadcrumbJsonLd, SITE_URL } from '@/lib/seo';
 import { addictionPageRole, safeAddictionReferences, visibleAddictionFaq, type AddictionItem, type AddictionRecord } from '@/lib/addiction';
+import { contentReviewProvenance } from '@/lib/review-provenance';
 import styles from './addiction-article-page.module.css';
 
 type Props = { record: AddictionRecord; items?: AddictionItem[] };
@@ -14,6 +15,7 @@ export default function AddictionArticlePage({ record, items = [] }: Props) {
   const role = addictionPageRole(record.schema_json);
   const references = safeAddictionReferences(record.references_json);
   const faq = visibleAddictionFaq(record.body_json);
+  const review = contentReviewProvenance(record);
   const canonical = record.canonical_url || '/addiction/';
   const url = canonical.startsWith('https://') ? canonical : `${SITE_URL}${canonical}`;
   const breadcrumbs = breadcrumbJsonLd([
@@ -24,13 +26,13 @@ export default function AddictionArticlePage({ record, items = [] }: Props) {
   const common = {
     '@context': 'https://schema.org', '@id': `${url}#page`, url, name: record.title, headline: record.title,
     description: record.seo_description || record.excerpt || undefined, inLanguage: 'ar', datePublished: record.published_at || undefined,
-    dateModified: record.updated_at || undefined, lastReviewed: record.last_reviewed_at || undefined,
+    dateModified: record.updated_at || undefined, lastReviewed: review.lastReviewedAt || undefined,
     publisher: { '@id': `${SITE_URL}/#organization` }, isPartOf: { '@id': `${SITE_URL}/#website` },
     image: record.featured_image_url ? (record.featured_image_url.startsWith('https://') ? record.featured_image_url : `${SITE_URL}${record.featured_image_url}`) : undefined,
   };
   const contentSchema: Record<string, unknown> = role === 'hub'
     ? { ...common, '@type': 'CollectionPage', mainEntity: { '@type': 'ItemList', numberOfItems: items.length, itemListElement: items.map((item) => ({ '@type': 'ListItem', position: item.rank, name: item.title, url: `${SITE_URL}${item.href}` })) } }
-    : { ...common, '@type': 'Article', author: record.author_display_name ? { '@type': 'Organization', name: record.author_display_name } : { '@id': `${SITE_URL}/#organization` }, citation: references.flatMap((reference) => reference.url ? [reference.url] : []) };
+    : { ...common, '@type': 'Article', author: record.author_display_name ? { '@type': 'Organization', name: record.author_display_name } : { '@id': `${SITE_URL}/#organization` }, reviewedBy: review.reviewedBySchema, citation: references.flatMap((reference) => reference.url ? [reference.url] : []) };
   const faqSchema = faq.length ? { '@context': 'https://schema.org', '@type': 'FAQPage', '@id': `${url}#faq`, mainEntity: faq.map((item) => ({ '@type': 'Question', name: item.question, acceptedAnswer: { '@type': 'Answer', text: item.answer } })) } : null;
   const schemas = [breadcrumbs, contentSchema, ...(faqSchema ? [faqSchema] : [])];
 
@@ -46,8 +48,8 @@ export default function AddictionArticlePage({ record, items = [] }: Props) {
           {record.excerpt ? <p>{record.excerpt}</p> : null}
           <div className="article-meta">
             {record.author_display_name ? <span>إعداد: {record.author_display_name}</span> : null}
-            {record.reviewer_display_name ? <span>مراجعة: {record.reviewer_display_name}{record.reviewer_credentials ? ` — ${record.reviewer_credentials}` : ''}</span> : null}
-            {record.last_reviewed_at ? <span>آخر مراجعة {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(record.last_reviewed_at))}</span> : null}
+            {review.reviewerName ? <span>مراجعة: {review.reviewerName}{review.reviewerCredentials ? ` — ${review.reviewerCredentials}` : ''}</span> : null}
+            {review.lastReviewedAt ? <span>آخر مراجعة {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(review.lastReviewedAt))}</span> : null}
           </div>
         </header>
         <aside className={styles.safetyNotice} aria-label="تنبيه سلامة عاجل">

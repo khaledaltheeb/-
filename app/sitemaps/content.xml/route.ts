@@ -21,7 +21,7 @@ export async function GET(request: Request) {
   const start = page * PAGE_SIZE;
   const end = start + PAGE_SIZE - 1;
 
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('content')
     .select('slug,updated_at,canonical_url')
     .eq('status', 'published')
@@ -32,7 +32,14 @@ export async function GET(request: Request) {
     .order('updated_at', { ascending: false })
     .range(start,end);
 
-  const databaseRows: SitemapRow[] = (data ?? []).map((item) => ({
+  if (error) {
+    throw new Error(`content sitemap query failed: ${error.message}`);
+  }
+  if (!Array.isArray(data)) {
+    throw new Error('content sitemap query returned no data array');
+  }
+
+  const databaseRows: SitemapRow[] = data.map((item) => ({
     path: item.canonical_url || `/content/${item.slug}`,
     lastModified: item.updated_at,
     changeFrequency: 'monthly',

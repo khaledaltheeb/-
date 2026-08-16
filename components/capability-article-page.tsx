@@ -12,6 +12,7 @@ import {
   type CapabilityRecord,
   type CapabilityRegistryItem,
 } from '@/lib/capabilities';
+import { contentReviewProvenance } from '@/lib/review-provenance';
 import { breadcrumbJsonLd, SITE_URL } from '@/lib/seo';
 
 type JsonRecord = Record<string, unknown>;
@@ -61,6 +62,7 @@ export default function CapabilityArticlePage({ record, routeSlug, registryItems
   const references = safeCapabilityReferences(record.references_json);
   const faqItems = visibleCapabilityFaq(record.body_json);
   const role = pageRole(record.schema_json);
+  const review = contentReviewProvenance(record);
   const canonical = record.canonical_url || (routeSlug ? `/capabilities/${routeSlug}/` : '/capabilities/');
   const url = canonical.startsWith('https://') ? canonical : `${SITE_URL}${canonical}`;
   const bodyJson = role === 'registry' ? capabilityBodyWithoutRegistryCards(record.body_json) : record.body_json;
@@ -84,7 +86,7 @@ export default function CapabilityArticlePage({ record, routeSlug, registryItems
     inLanguage: 'ar',
     datePublished: record.published_at || undefined,
     dateModified: record.updated_at || undefined,
-    lastReviewed: record.last_reviewed_at || undefined,
+    lastReviewed: review.lastReviewedAt || undefined,
     publisher: { '@id': `${SITE_URL}/#organization` },
     isPartOf: { '@id': `${SITE_URL}/#website` },
     image: record.featured_image_url
@@ -135,6 +137,7 @@ export default function CapabilityArticlePage({ record, routeSlug, registryItems
             author: record.author_display_name
               ? { '@type': 'Organization', name: record.author_display_name }
               : { '@id': `${SITE_URL}/#organization` },
+            reviewedBy: review.reviewedBySchema,
             citation: references.flatMap((reference) => (reference.url ? [reference.url] : [])),
           };
 
@@ -182,11 +185,11 @@ export default function CapabilityArticlePage({ record, routeSlug, registryItems
             {record.excerpt ? <p>{record.excerpt}</p> : null}
             <div className="article-meta">
               {record.author_display_name ? <span>إعداد: {record.author_display_name}</span> : null}
-              {record.reviewer_display_name ? (
-                <span>مراجعة: {record.reviewer_display_name}{record.reviewer_credentials ? ` — ${record.reviewer_credentials}` : ''}</span>
+              {review.reviewerName ? (
+                <span>مراجعة: {review.reviewerName}{review.reviewerCredentials ? ` — ${review.reviewerCredentials}` : ''}</span>
               ) : null}
               {record.published_at ? <span>نُشر {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(record.published_at))}</span> : null}
-              {record.last_reviewed_at ? <span>آخر مراجعة {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(record.last_reviewed_at))}</span> : null}
+              {review.lastReviewedAt ? <span>آخر مراجعة {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(review.lastReviewedAt))}</span> : null}
             </div>
             {audiences.length > 0 ? <div className="tag-list">{audiences.map((audience) => <span key={audience}>{audience}</span>)}</div> : null}
           </header>
