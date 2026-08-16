@@ -25,6 +25,9 @@ const errors: Record<string, string> = {
   invalid_type: 'اختر صفة صحيحة: متدرب أو متطوع.', required: 'الاسم والرابط المختصر حقول مطلوبة.',
   save_failed: 'تعذر حفظ الطلب. تحقق من البيانات والرابط المختصر ثم أعد المحاولة.',
 };
+const verificationLabels: Record<string, string> = {
+  verified: 'موثق', pending: 'قيد المراجعة', rejected: 'يحتاج تصحيحًا', unverified: 'غير مكتمل', suspended: 'موقوف',
+};
 
 export default async function CommunityJoinPage({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams;
@@ -40,10 +43,10 @@ export default async function CommunityJoinPage({ searchParams }: { searchParams
       <SiteHeader />
       <main className="dashboard-shell community-join-shell">
         <section className="dashboard-card community-join-card">
-          <div className="admin-heading"><div><span className="eyebrow">Community Application</span><h1>طلب الانضمام كمتدرب أو متطوع</h1><p>تُراجع الإدارة البيانات قبل الظهور العام. لا يمنح هذا الطلب صفة مختص، ولا يُعرض الملف في دليل المختصين.</p></div><Link className="button" href="/community">الدليل العام</Link></div>
+          <div className="admin-heading"><div><span className="eyebrow">طلب انضمام مجتمعي</span><h1>طلب الانضمام كمتدرب أو متطوع</h1><p>يراجع فريق التوثيق البيانات قبل الظهور العام. لا يمنح هذا الطلب صفة مختص، ولا يُعرض الملف في دليل المختصين.</p></div><Link className="button" href="/community">الدليل العام</Link></div>
           {params.ok === 'submitted' && <div className="system-message success" role="status">تم حفظ الطلب وإرساله للمراجعة.</div>}
           {params.error && <div className="system-message error" role="alert">{errors[params.error] || 'تعذر تنفيذ الطلب.'}</div>}
-          {existing && <div className={`portal-notice ${existing.verification === 'verified' ? '' : 'warning'}`}><strong>حالة الملف: {existing.verification}</strong><span>{existing.verification === 'verified' ? 'الملف معتمد للظهور العام. التعديلات الجوهرية قد تعيده للمراجعة.' : 'الملف غير ظاهر للعامة حتى إكمال المراجعة والاعتماد.'}</span></div>}
+          {existing && <div className={`portal-notice ${existing.verification === 'verified' ? '' : 'warning'}`}><strong>حالة الملف: {verificationLabels[existing.verification] ?? 'قيد المراجعة'}</strong><span>{existing.verification === 'verified' ? 'الملف معتمد للظهور العام. التعديلات الجوهرية قد تعيده للمراجعة.' : 'الملف غير ظاهر للعامة حتى إكمال المراجعة والاعتماد.'}</span></div>}
 
           <form className="admin-form specialist-form" action={saveCommunityApplication}>
             <section className="portal-section"><h2>الهوية والصفة</h2><div className="admin-form-grid">
