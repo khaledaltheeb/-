@@ -18,6 +18,7 @@ requireText('app/sitemap.xml/route.ts',['PAGE_SIZE=50000','sitemapIndexResponse'
 requireText('app/sitemaps/content.xml/route.ts',['PAGE_SIZE=50000','.range(start,end)']);
 requireText('supabase/migrations/20260816095327_tighten_center_specialists_public_read.sql',['center_specialists_public_read','center_specialists_admin_read',"c.verification = 'verified'::public.verification_status","s.verification = 'verified'::public.verification_status",'revoke insert, update, delete, truncate, references, trigger','from anon;']);
 forbidText('supabase/migrations/20260816095327_tighten_center_specialists_public_read.sql',['using (true)']);
+requireText('supabase/migrations/20260816100619_align_legacy_route_exists_public_filter.sql',['legacy_preserved_route_exists','security definer',"set search_path to ''","l.migration_decision not in ('INTERACTIVE_REVIEW', 'ASSET_REVIEW')"]);
 forbidText('app/sectors/page.tsx',['Platform Taxonomy','مرحلة الثيم الفارغ','الثيم جاهز للقطاعات']);
 forbidText('app/sections/page.tsx',['Dynamic Sections','الثيم جاهز للأقسام','قسم ديناميكي','لوحة الإدارة','Route']);
 forbidText('app/sectors/[slug]/page.tsx',['قطاع ديناميكي','Taxonomy','لوحة الإدارة','صفحة برمجية جديدة','Published Knowledge']);
