@@ -8,6 +8,7 @@ import ContentRenderer from '@/components/content-renderer';
 import { createClient } from '@/lib/supabase/server';
 import { buildSeoMetadata, breadcrumbJsonLd, SITE_URL } from '@/lib/seo';
 import { getCognitivePageBySlug, getCognitivePageIndexItem } from '@/lib/cognitive-program';
+import { contentReviewProvenance } from '@/lib/review-provenance';
 
 export const dynamic = 'force-dynamic';
 
@@ -218,6 +219,7 @@ export default async function PublishedContentPage({ params }: { params: Params 
   const canonical = record.canonical_url || `/content/${record.slug}`;
   const url = canonical.startsWith('https://') ? canonical : `${SITE_URL}${canonical}`;
   const faqItems = visibleFaq(record.body_json);
+  const review = contentReviewProvenance(record);
 
   const breadcrumbs = breadcrumbJsonLd([
     { name: 'الرئيسية', path: '/' },
@@ -245,15 +247,13 @@ export default async function PublishedContentPage({ params }: { params: Params 
     inLanguage: 'ar',
     datePublished: record.published_at || undefined,
     dateModified: record.updated_at || undefined,
-    lastReviewed: record.last_reviewed_at || undefined,
+    lastReviewed: review.lastReviewedAt || undefined,
     author: record.generated_program
       ? { '@id': `${SITE_URL}/#organization` }
       : record.author_display_name
         ? { '@type': 'Person', name: record.author_display_name }
         : { '@id': `${SITE_URL}/#organization` },
-    reviewedBy: record.reviewer_display_name
-      ? { '@type': 'Person', name: record.reviewer_display_name, description: record.reviewer_credentials || undefined }
-      : undefined,
+    reviewedBy: review.reviewedBySchema,
     publisher: { '@id': `${SITE_URL}/#organization` },
     image: record.featured_image_url || undefined,
     keywords: [record.primary_keyword, ...record.secondary_keywords, ...record.semantic_terms.slice(0, 8)]
@@ -333,9 +333,9 @@ export default async function PublishedContentPage({ params }: { params: Params 
           {record.excerpt && <p>{record.excerpt}</p>}
           <div className="article-meta">
             {record.author_display_name && <span>إعداد: {record.author_display_name}</span>}
-            {record.reviewer_display_name && <span>مراجعة: {record.reviewer_display_name}{record.reviewer_credentials ? ` — ${record.reviewer_credentials}` : ''}</span>}
+            {review.reviewerName && <span>مراجعة: {review.reviewerName}{review.reviewerCredentials ? ` — ${review.reviewerCredentials}` : ''}</span>}
             {record.published_at && <span>نُشر {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(record.published_at))}</span>}
-            {record.last_reviewed_at && <span>آخر مراجعة {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(record.last_reviewed_at))}</span>}
+            {review.lastReviewedAt && <span>آخر مراجعة {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(review.lastReviewedAt))}</span>}
           </div>
           {audiences.length > 0 && <div className="tag-list">{audiences.map((audience) => <span key={audience}>{audience}</span>)}</div>}
         </header>
