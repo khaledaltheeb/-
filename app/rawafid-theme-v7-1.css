@@ -28,6 +28,10 @@
 .rawafid-hero-visual{box-shadow:0 16px 40px rgba(5,56,61,.12)}
 .rawafid-professional-callout{box-shadow:0 12px 32px rgba(5,56,61,.09)}
 
+/* The final homepage professional CTA is a dark surface, so its headline must
+   never inherit the global dark heading color. Keep the contrast explicit. */
+.rawafid-professional-callout h2{color:#fff}
+
 @media(max-width:760px){
   .site-header{box-shadow:0 1px 0 rgba(6,70,75,.04)}
   .rawafid-hero-visual{box-shadow:0 10px 26px rgba(5,56,61,.09)}
