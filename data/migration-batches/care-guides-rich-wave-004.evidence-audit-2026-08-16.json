@@ -4,70 +4,175 @@
   "audit_type": "automated-topic-specific-evidence-audit",
   "publication_authorization": false,
   "human_review_required": true,
-  "policy": "This artifact records an automated source-layer audit and source strengthening performed while all materialized Wave 004 records remained non-indexable and publication_ready=false. It is not a scientific, clinical, editorial, or publication sign-off.",
+  "policy": "This artifact records automated source-layer review, evidence strengthening and provenance reconciliation while every materialized Wave 004 record remains non-indexable and publication_ready=false. It is not a scientific, clinical, editorial or publication sign-off.",
+  "source_registry_path": "data/migration-batches/care-guides-rich-wave-004.sources.json",
+  "live_checkpoint": {
+    "materialized_records": 12,
+    "published_noindex_follow": 11,
+    "draft_noindex_follow": 1,
+    "indexable_records": 0,
+    "publication_ready_records": 0,
+    "records_with_human_reviewer": 0,
+    "min_useful_arabic_words": 3020,
+    "max_useful_arabic_words": 3973,
+    "min_references_per_page": 6,
+    "max_references_per_page": 11,
+    "min_claim_source_mappings_per_page": 5,
+    "max_claim_source_mappings_per_page": 11,
+    "seo_description_violations": 0,
+    "duplicate_paragraph_groups": 0,
+    "unresolved_claim_source_ids": 0,
+    "bad_disclaimer_contract_records": 0
+  },
+  "registry_reconciliation": {
+    "live_unique_reference_ids": 40,
+    "registry_source_records": 52,
+    "missing_live_reference_ids_in_registry": 0,
+    "live_reference_ids_with_multiple_metadata_variants": 0,
+    "notes": "The registry intentionally retains additional authoritative sources for the 38 planned but not yet materialized Wave 004 intents. Every Reference ID currently used by the 12 materialized records is represented in the registry with one canonical metadata record."
+  },
   "pages": [
     {
       "slug": "care-guide-cognitive-flexibility-switching-plan",
-      "action": "reviewed-existing-expanded-source-layer",
-      "added_source_ids": []
+      "action": "strengthened-and-reconciled",
+      "added_source_ids": [
+        "Koch-Multitasking-Review-2018",
+        "Monsell-Task-Switching-2003",
+        "Longman-Self-Paced-Preparation-2017",
+        "Guo-Interruption-Interventions-Meta-2021",
+        "Monk-Interruption-Duration-Demand-2008",
+        "Egner-Cognitive-Flexibility-Control-2024"
+      ],
+      "human_review_required": true
     },
     {
       "slug": "care-guide-cognitive-load-instruction-audit",
-      "action": "strengthened",
-      "added_source_ids": ["Cognitive-Load-Materials-2021"]
+      "action": "strengthened-and-rechecked",
+      "added_source_ids": ["Cognitive-Load-Materials-2021"],
+      "human_review_required": true
     },
     {
       "slug": "care-guide-dual-task-attention-limit",
-      "action": "reviewed-existing-source-layer-and-normalized-koch-title",
-      "added_source_ids": []
+      "action": "reviewed-existing-source-layer-and-normalized-reference-metadata",
+      "added_source_ids": [],
+      "human_review_required": true
     },
     {
       "slug": "care-guide-inhibitory-control-pause-plan",
-      "action": "strengthened",
-      "added_source_ids": ["Rodriguez-Nieto-EF-Meta-2022"]
+      "action": "strengthened-and-rechecked",
+      "added_source_ids": ["Rodriguez-Nieto-EF-Meta-2022"],
+      "human_review_required": true
     },
     {
       "slug": "care-guide-metacognition-study-review-card",
-      "action": "strengthened",
-      "added_source_ids": ["Rhodes-Tauber-JOL-Meta-2011"]
+      "action": "strengthened-and-reconciled",
+      "added_source_ids": ["Rhodes-Tauber-JOL-Meta-2011", "Koriat-Monitoring-Control-2006"],
+      "human_review_required": true
     },
     {
       "slug": "care-guide-processing-speed-accuracy-balance",
-      "action": "strengthened",
-      "added_source_ids": ["Heitz-Speed-Accuracy-2014"]
+      "action": "strengthened-and-rechecked",
+      "added_source_ids": ["Heitz-Speed-Accuracy-2014"],
+      "human_review_required": true
     },
     {
       "slug": "care-guide-prospective-memory-external-cues",
-      "action": "strengthened",
-      "added_source_ids": ["Gilbert-Intention-Offloading-2023", "Chen-Prospective-Memory-Meta-2015"]
+      "action": "strengthened-and-rechecked",
+      "added_source_ids": ["Gilbert-Intention-Offloading-2023", "Chen-Prospective-Memory-Meta-2015"],
+      "human_review_required": true
     },
     {
       "slug": "care-guide-retrieval-practice-study-plan",
-      "action": "reviewed-existing-source-layer",
-      "added_source_ids": []
+      "action": "strengthened-and-reconciled",
+      "added_source_ids": ["Pan-Rickard-Retrieval-Transfer-Meta-2018", "Mulligan-Transitive-Inference-2023"],
+      "human_review_required": true
     },
     {
       "slug": "care-guide-selective-attention-distraction-audit",
-      "action": "strengthened",
-      "added_source_ids": ["Visual-Distractor-Suppression-Review-2019"]
+      "action": "strengthened-and-reconciled",
+      "added_source_ids": ["Visual-Distractor-Suppression-Review-2019", "Guo-Interruption-Interventions-Meta-2021", "Monk-Interruption-Duration-Demand-2008"],
+      "human_review_required": true
     },
     {
       "slug": "care-guide-spaced-practice-study-calendar",
-      "action": "reviewed-existing-source-layer",
-      "added_source_ids": []
+      "action": "strengthened-and-reconciled",
+      "added_source_ids": ["Cepeda-Optimal-Retention-2008"],
+      "human_review_required": true
     },
     {
       "slug": "care-guide-sustained-attention-work-interval",
-      "action": "strengthened",
-      "added_source_ids": ["Langner-Eickhoff-Vigilance-Meta-2013", "Patel-Self-Scheduled-Breaks-2024"]
+      "action": "strengthened-and-rechecked",
+      "added_source_ids": ["Langner-Eickhoff-Vigilance-Meta-2013", "Patel-Self-Scheduled-Breaks-2024"],
+      "human_review_required": true
     },
     {
       "slug": "care-guide-working-memory-task-breakdown",
-      "action": "reviewed-existing-expanded-source-layer",
-      "added_source_ids": []
+      "action": "strengthened-and-reconciled",
+      "added_source_ids": [
+        "Baddeley-Working-Memory-2012",
+        "Cowan-Magical-Mystery-Four-2010",
+        "Thalmann-Chunking-WM-2019",
+        "Burnett-Cognitive-Offloading-Meta-2026",
+        "Zhang-External-Representations-WM-2009"
+      ],
+      "human_review_required": true
     }
   ],
   "added_sources": [
+    {
+      "id": "Koch-Multitasking-Review-2018",
+      "title": "Cognitive structure, flexibility, and plasticity in human multitasking—An integrative review of dual-task and task-switching research",
+      "publisher": "Psychological Bulletin / PubMed",
+      "year": 2018,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/29517261/",
+      "source_type": "integrative-review",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Monsell-Task-Switching-2003",
+      "title": "Task switching",
+      "publisher": "Trends in Cognitive Sciences / PubMed",
+      "year": 2003,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/12639695/",
+      "source_type": "review",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Longman-Self-Paced-Preparation-2017",
+      "title": "Self-paced preparation for a task switch eliminates attentional inertia but not the performance switch cost",
+      "publisher": "Journal of Experimental Psychology: Learning, Memory, and Cognition / PubMed",
+      "year": 2017,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/27936844/",
+      "source_type": "experimental-study",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Guo-Interruption-Interventions-Meta-2021",
+      "title": "Effects of interventions to reduce the negative consequences of interruptions on task performance: A systematic review, meta-analysis, and narrative synthesis of laboratory studies",
+      "publisher": "Applied Ergonomics / PubMed",
+      "year": 2021,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/34273814/",
+      "source_type": "systematic-review-meta-analysis",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Monk-Interruption-Duration-Demand-2008",
+      "title": "The effect of interruption duration and demand on resuming suspended goals",
+      "publisher": "Journal of Experimental Psychology: Applied / PubMed",
+      "year": 2008,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/19102614/",
+      "source_type": "experimental-study",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Egner-Cognitive-Flexibility-Control-2024",
+      "title": "Insights into control over cognitive flexibility from studies of task-switching",
+      "publisher": "Current Opinion in Behavioral Sciences / PubMed",
+      "year": 2024,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/38186744/",
+      "source_type": "review",
+      "authority_tier": "secondary"
+    },
     {
       "id": "Cognitive-Load-Materials-2021",
       "title": "Five Strategies for Optimizing Instructional Materials: Instructor- and Learner-Managed Cognitive Load",
@@ -93,6 +198,15 @@
       "year": 2011,
       "url": "https://pubmed.ncbi.nlm.nih.gov/21219059/",
       "source_type": "meta-analysis",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Koriat-Monitoring-Control-2006",
+      "title": "The intricate relationships between monitoring and control in metacognition: lessons for the cause-and-effect relation between subjective experience and behavior",
+      "publisher": "Journal of Experimental Psychology: General / PubMed",
+      "year": 2006,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/16478315/",
+      "source_type": "review-and-experimental-synthesis",
       "authority_tier": "secondary"
     },
     {
@@ -123,12 +237,39 @@
       "authority_tier": "secondary"
     },
     {
+      "id": "Pan-Rickard-Retrieval-Transfer-Meta-2018",
+      "title": "Transfer of test-enhanced learning: Meta-analytic review and synthesis",
+      "publisher": "Psychological Bulletin / PubMed",
+      "year": 2018,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/29733621/",
+      "source_type": "meta-analysis",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Mulligan-Transitive-Inference-2023",
+      "title": "Transitive inference and the testing effect: Retrieval practice impairs transitive inference",
+      "publisher": "Quarterly Journal of Experimental Psychology / PubMed",
+      "year": 2023,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/36760059/",
+      "source_type": "experimental-study-with-small-meta-analysis",
+      "authority_tier": "secondary"
+    },
+    {
       "id": "Visual-Distractor-Suppression-Review-2019",
       "title": "Getting rid of visual distractors: the why, when, how, and where",
       "publisher": "Current Opinion in Psychology / PubMed",
       "year": 2019,
       "url": "https://pubmed.ncbi.nlm.nih.gov/30856512/",
       "source_type": "review",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Cepeda-Optimal-Retention-2008",
+      "title": "Spacing effects in learning: a temporal ridgeline of optimal retention",
+      "publisher": "Psychological Science / PubMed",
+      "year": 2008,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/19076480/",
+      "source_type": "experimental-study",
       "authority_tier": "secondary"
     },
     {
@@ -146,6 +287,51 @@
       "publisher": "Journal of Experimental Psychology: Applied / PubMed",
       "year": 2024,
       "url": "https://pubmed.ncbi.nlm.nih.gov/39250235/",
+      "source_type": "experimental-study",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Baddeley-Working-Memory-2012",
+      "title": "Working memory: theories, models, and controversies",
+      "publisher": "Annual Review of Psychology / PubMed",
+      "year": 2012,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/21961947/",
+      "source_type": "review",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Cowan-Magical-Mystery-Four-2010",
+      "title": "The Magical Mystery Four: How is Working Memory Capacity Limited, and Why?",
+      "publisher": "Current Directions in Psychological Science / PubMed",
+      "year": 2010,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/20445769/",
+      "source_type": "review",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Thalmann-Chunking-WM-2019",
+      "title": "How does chunking help working memory?",
+      "publisher": "Journal of Experimental Psychology: Learning, Memory, and Cognition / PubMed",
+      "year": 2019,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/29698045/",
+      "source_type": "experimental-study",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Burnett-Cognitive-Offloading-Meta-2026",
+      "title": "Meta-analytic investigations of the effect of cognitive offloading on memory-based task performance and interindividual variability",
+      "publisher": "Memory & Cognition / PubMed",
+      "year": 2026,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/40500483/",
+      "source_type": "meta-analysis",
+      "authority_tier": "secondary"
+    },
+    {
+      "id": "Zhang-External-Representations-WM-2009",
+      "title": "An exploration of the relations between external representations and working memory",
+      "publisher": "PLOS ONE / PubMed",
+      "year": 2009,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/19652712/",
       "source_type": "experimental-study",
       "authority_tier": "secondary"
     }
