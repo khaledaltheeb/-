@@ -1,22 +1,17 @@
 import fs from 'node:fs';
-
-const config = fs.readFileSync('next.config.ts', 'utf8');
-const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-const fail = (message) => { console.error(`LEGACY INTERACTIVE ROUTE CONTRACT FAILED: ${message}`); process.exitCode = 1; };
-
-const expected = [
-  ['/ai-search', '/search'],
-  ['/specialists-partners/account', '/account'],
-  ['/specialists-partners/admin', '/admin'],
-  ['/specialists-partners/contact', '/specialists'],
-  ['/specialists-partners/join', '/join'],
-  ['/specialists-partners/password-reset', '/reset-password'],
-  ['/specialists-partners/portal', '/messages'],
-  ['/specialists-partners/recover', '/forgot-password'],
-];
-for (const [source, destination] of expected) {
-  if (!config.includes(`source: '${source}'`) || !config.includes(`destination: '${destination}'`)) fail(`missing route ${source} -> ${destination}`);
-}
-if (!config.includes('...legacyInteractiveRedirects')) fail('interactive legacy routes must be registered as one explicit migration group');
-if (!pkg.scripts?.['legacy-interactive-routes:validate']) fail('package validation script missing');
-if (!process.exitCode) console.log('Legacy interactive route contract passed: AI search and 7 specialist/account surfaces resolve to current functional equivalents.');
+const config = fs.readFileSync('next.config.ts','utf8');
+const pkg = JSON.parse(fs.readFileSync('package.json','utf8'));
+const fail=(message)=>{console.error(`LEGACY INTERACTIVE ROUTE CONTRACT FAILED: ${message}`);process.exitCode=1};
+const routes=['app/ai-search/page.tsx','app/specialists-partners/account/page.tsx','app/specialists-partners/admin/page.tsx','app/specialists-partners/contact/page.tsx','app/specialists-partners/join/page.tsx','app/specialists-partners/password-reset/page.tsx','app/specialists-partners/portal/page.tsx','app/specialists-partners/recover/page.tsx'];
+for(const file of routes)if(!fs.existsSync(file))fail(`missing real migrated route: ${file}`);
+for(const source of ['/ai-search','/specialists-partners/account','/specialists-partners/admin','/specialists-partners/contact','/specialists-partners/join','/specialists-partners/password-reset','/specialists-partners/portal','/specialists-partners/recover'])if(config.includes(`source: '${source}'`))fail(`migration redirect still exists for ${source}`);
+const ai=fs.readFileSync('app/ai-search/page.tsx','utf8');
+const search=fs.readFileSync('app/search/page.tsx','utf8');
+const contact=fs.readFileSync('app/specialists-partners/contact/page.tsx','utf8');
+if(!ai.includes('PlatformSearchExperience')||!search.includes('اكتب سؤالك بلغتك الطبيعية')||!search.includes('ليس محرك تشخيص'))fail('historical AI search content/function was not transferred');
+if(!contact.includes('ابدأ رسالة مهنية دون كشف بريد المختص')||!contact.includes('ليست قناة طوارئ'))fail('specialist contact privacy/safety content missing');
+if(!fs.readFileSync('app/specialists-partners/account/page.tsx','utf8').includes("@/app/account/page"))fail('legacy account route must use current secure account implementation');
+if(!fs.readFileSync('app/specialists-partners/admin/page.tsx','utf8').includes("@/app/admin/page"))fail('legacy admin route must use current role-aware admin implementation');
+if(!fs.readFileSync('app/specialists-partners/portal/page.tsx','utf8').includes("@/app/messages/page"))fail('legacy portal route must use current message implementation');
+if(!pkg.scripts?.['legacy-interactive-routes:validate'])fail('package validation script missing');
+if(!process.exitCode)console.log('Legacy interactive route contract passed: search and specialist historical paths are real routes; no migration redirects remain for this group.');
