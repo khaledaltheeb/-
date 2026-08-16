@@ -2,251 +2,183 @@
 
 ## Scope
 
-Wave 004 contains exactly **50 distinct evidence-led search intents** selected from measured zero- and low-coverage taxonomy gaps. It covers 12 cognitive-process guides, 12 motivation/behavior guides, 10 assessment/inclusive-learning guides, 8 communication/hearing/mobility/vision access guides, and 8 self-advocacy/transition/participation guides.
+Wave 004 contains exactly **50 evidence-led search intents**. The current materialized set remains intentionally small while quality, provenance, rendering and review controls are hardened.
 
-The old `healthrenewal.org` repository remains read-only provenance/content input. This wave is implemented only in the Rawafid V3 repository and Supabase content pipeline.
+The legacy repository is provenance/content input only. The active implementation is the Rawafid V3 repository plus Supabase.
 
-## Current Supabase checkpoint — 2026-08-16
+## Current Wave 004 checkpoint — 2026-08-16
 
-The live database audit reports:
+Live Supabase state:
 
 - **12/50 records materialized**
-- **11 published + noindex + follow under a quality hold**
+- **11 published + noindex + follow** under the Wave 004 quality hold
 - **1 draft + noindex + follow**: `/care-guides/care-guide-dual-task-attention-limit/`
-- **38 not yet materialized**
+- **38 intents unmaterialized**
 - **0 indexable Wave 004 records**
-- **0 records marked `publication_ready=true`**
-- **0/12 with a recorded human reviewer, reviewer credentials or review date**
-- **12/12 with an explicit automated evidence-audit record and `human_review_required=true`**
-- content depth across the 12 records: **3,020–3,973 useful Arabic words** using the release-gate counting method
-- references: **6–11 per page**
-- claim-to-source mappings: **5–11 per page**
-- **0 duplicate paragraph groups**
-- **0 duplicate heading groups**
-- **0 duplicate reference IDs within a page**
-- **0 unresolved claim-source identifiers**
-- **0 body-json/body-text heading/paragraph synchronization gaps**
-- **0 exact cross-page duplicate substantive paragraphs** in the current automated audit
-- SEO descriptions: **150–160 characters** across the 12 current records
-- **12/12 use the required central disclaimer route and label**
-- row-level `medical_disclaimer` is empty/null across the 12 records
-
-The first 11 records had been grandfathered into an older `published + indexable + publication_ready=true` state before the stricter Wave 004 review policy. The 2026-08-16 quality audit placed those 11 under a conservative hold because they lacked genuine recorded human review and initially sat below the current 3,000-word Wave 004 editorial target.
-
-The hold remains in force even though the quantitative depth floor has now been crossed. Word count and automated evidence checks are not release authorization and do not substitute for rendered-page QA or genuine independent human review.
-
-The hold preserves direct access and existing links while preventing search indexing:
-
-- `robots_index=false`
-- `robots_follow=true`
-- `schema_json.publication_ready=false`
-- `status=published` retained for the 11 previously published records
-- canonical URLs retained
-- no page deleted or redirected
-
-## Evidence remediation and topic-level audit
-
-The 12 materialized records have now completed the **automated source-layer** audit. This was not a count-inflation exercise: no prose or references were added when the existing evidence already matched the substantive claims. Direct sources were added only where a claim-to-source gap or boundary-condition gap was identified.
-
-### Cognitive flexibility / task switching
-
-`care-guide-cognitive-flexibility-switching-plan` now has:
-
-- **3,973 useful Arabic words**
-- **83 structured blocks**
-- **11 references**
-- **11 claim-to-source mappings**
-- **0 duplicate paragraph groups**
-- **0 unresolved claim-source identifiers**
-- SEO description: **153 characters**
-- `published + noindex + follow`
-- `publication_ready=false`
-
-The source layer was strengthened around task-switch cost, advance preparation, interruption/resumption and context-dependent flexibility. It explicitly avoids interpreting a laboratory switch-cost measure as a fixed individual diagnosis. The automated evidence audit records the added task-switching/interruption sources and retains `human_review_required=true`.
-
-### Working memory / task breakdown
-
-`care-guide-working-memory-task-breakdown` now has:
-
-- **3,677 useful Arabic words**
-- **75 structured blocks**
-- **10 references**
-- **10 claim-to-source mappings**
-- **0 duplicate paragraph groups**
-- **0 unresolved claim-source identifiers**
-- SEO description: **160 characters**
-- `published + noindex + follow`
-- `publication_ready=false`
-
-The source layer covers working-memory models, capacity caveats, chunking, external representations and cognitive offloading. The page explicitly avoids turning a laboratory estimate such as an approximate number of chunks into a fixed task-design rule or an informal diagnosis.
-
-### Learning and metacognition pages
-
-- `care-guide-metacognition-study-review-card` — direct judgment-of-learning accuracy evidence plus monitoring/control evidence are mapped; **8 references / 8 claims**.
-- `care-guide-retrieval-practice-study-plan` — transfer evidence and a direct boundary-condition study/meta-analysis were added so retrieval practice is not framed as universally superior for every reasoning task; **8 references / 7 claims**.
-- `care-guide-spaced-practice-study-calendar` — a direct long-retention study was added to support the point that useful spacing depends on the intended retention interval rather than one universal interval; **7 references / 6 claims**.
-
-No additional prose was required for these evidence-map corrections.
-
-### Attention, executive-function and instruction pages
-
-- `care-guide-cognitive-load-instruction-audit` — direct instructional-material/cognitive-load evidence was rechecked and found adequate; **6 references / 6 claims**.
-- `care-guide-inhibitory-control-pause-plan` — inhibition/shifting/updating evidence was rechecked and practical pause/reversibility guidance remains framed as testable design heuristics rather than treatment; **6 references / 6 claims**.
-- `care-guide-selective-attention-distraction-audit` — distractor-suppression evidence is supplemented by direct interruption/resumption evidence for the page's return-to-task guidance; **8 references / 7 claims**.
-- `care-guide-prospective-memory-external-cues` — prospective-memory implementation-intention and intention-offloading evidence was rechecked and found adequate; **7 references / 7 claims**.
-- `care-guide-processing-speed-accuracy-balance` — the speed-accuracy tradeoff is covered by a direct review and remains separated from access/input-time barriers; **6 references / 6 claims**.
-- `care-guide-sustained-attention-work-interval` — vigilance-decrement and self-scheduled-break evidence directly cover the substantive work-interval claims; **7 references / 7 claims**.
-
-These pages remain non-indexable and not publication-ready. Automated topic-specific source review is complete; human review is not.
-
-## Page 12 quality checkpoint
-
-`care-guide-dual-task-attention-limit` remains **draft + noindex + follow** and is not counted as published. Current verification returned:
-
-- **3,280 useful Arabic words**
-- **61 structured blocks**
-- **7 references**
-- **5 claim-to-source mappings**
-- **0 duplicate paragraph groups**
-- **0 unresolved claim-source identifiers**
-- SEO description: **153 characters**
-- one primary category link
-- one unique slug, canonical and primary keyword from the prior collision audit
-- `publication_ready=false`
-- no fabricated reviewer name, credentials or review date
-- exact central disclaimer URL/label
-- row-level `medical_disclaimer=null`
-
-The Koch 2018 title is normalized to the exact paper/registry title. `WHO-ICF` reference metadata is also normalized to the single canonical registry representation. The previous disclaimer and SEO-description blockers are closed. Publication remains blocked by independent human scientific/editorial review and final rendered-page QA.
-
-## Database enforcement added and scoped
-
-Three Supabase migrations are applied and mirrored in repository history:
-
-1. `20260816105700_care_guides_indexability_review_guard`
-2. `20260816105934_care_guides_indexability_state_invariants`
-3. `20260816110822_scope_care_guides_v8_and_wave004_review_policy`
-
-The third migration is the effective policy refinement. It corrects an over-broad intermediate reviewer requirement after auditing the documented V8 policy for earlier waves.
-
-### Generic V8+ Care Guide invariants
-
-For Care Guides using content contract V8 or later:
-
-- an indexable record must remain `status=published`;
-- an indexable record must remain `publication_ready=true`;
-- activation/readiness and release-schema changes must preserve the exact central disclaimer contract;
-- row-level `medical_disclaimer` must remain empty under that central-disclaimer model.
-
-Older V7 records are not retroactively forced into V8 `publication_ready` metadata by this guard.
-
-The guard **does not invent or retroactively impose a human-reviewer requirement on Wave 001–003**. Wave 003's documented release policy explicitly distinguishes automated/source-backed publication from a claim of specialist human clinical sign-off, and the guard preserves that contract.
-
-### Wave 004 stricter release policy
-
-Before any Wave 004 record can become ready/indexable it requires:
-
-- a recorded human reviewer;
-- reviewer credentials;
-- a recorded review date that is not in the future;
-- an independent reviewer distinct from the visible author;
-- at least **3,000 useful Arabic words**;
-- at least **5 references**;
-- at least **5 claim-to-source mappings**;
-- the V8 central disclaimer contract and empty row-level `medical_disclaimer`.
-
-These Wave 004 minimums are revalidated when body text, references, review metadata or release schema change while a Wave 004 record is ready/indexable.
-
-Live atomic/boundary tests verified the intended scope:
-
-- restoring a held Wave 004 page to `robots_index=true + publication_ready=true` without reviewer evidence is rejected;
-- an indexable Wave 003 V8 record with no named reviewer remains valid under its documented automated V8 policy;
-- an indexable V7 record without V8 `publication_ready` metadata remains grandfathered rather than being frozen by a retroactive contract;
-- changing an already-indexable V8 Care Guide from `published` to `draft` while leaving it indexable is rejected.
-
-A broader read-only audit found **269 currently indexable Care Guides** outside the held Wave 004 set: 193 are V7, 75 are V8, and one predates those contract markers. No bulk noindex action was taken against those earlier guides.
-
-## Source registry and provenance reconciliation
-
-`data/migration-batches/care-guides-rich-wave-004.sources.json` is now the consolidated Wave 004 source registry.
-
-Current reconciliation:
-
-- **40 unique Reference IDs** are used by the 12 materialized records;
-- the registry retains **52 source records** because it also preserves authoritative sources planned for the remaining 38 intents;
-- **0 live Reference IDs are missing from the registry**;
-- **0 live Reference IDs have multiple metadata variants**;
-- `WHO-ICF` was the only detected metadata-variant case and has been normalized;
-- the Koch 2018 record uses the exact paper title with the same PMID.
-
-The dated audit artifact is:
-
-`data/migration-batches/care-guides-rich-wave-004.evidence-audit-2026-08-16.json`
-
-It records the live checkpoint, registry reconciliation and per-page source decisions. It explicitly states:
-
-- `publication_authorization=false`
-- `human_review_required=true`
-
-The artifact and the 12 Supabase `schema_json.evidence_audit` records now agree on the final automated source-layer decisions, including the later retrieval-practice, spacing, metacognition, interruption/resumption, task-switching and working-memory additions.
-
-## Structural/current-state audit
-
-Direct Supabase verification across all 12 materialized records found:
-
-- **12/12 at or above 3,000 useful Arabic words**
+- **0 records with `publication_ready=true`**
+- **0/12 with `last_reviewed_at`, reviewer name or reviewer credentials**
+- **12/12 with `schema_json.evidence_audit` and `human_review_required=true`**
+- useful Arabic depth: **3,020–3,973 words**
+- references: **6–11/page**
+- claim-source mappings: **5–11/page**
 - **0 duplicate paragraph groups**
 - **0 duplicate heading groups**
 - **0 duplicate reference-ID groups within pages**
-- **0 unresolved claim-source identifiers**
-- **0 body-json/body-text heading/paragraph synchronization gaps**
+- **0 unresolved claim-source IDs**
+- **0 `body_json/body_text` heading/paragraph synchronization gaps**
 - **0 exact cross-page duplicate substantive paragraph groups**
-- exact central disclaimer URL/label on all 12
-- row-level disclaimer empty/null on all 12
-- all 12 with `robots_index=false`
-- all 12 with `publication_ready=false`
-- **12/12 with an automated evidence-audit record**
-- **12/12 evidence-audit records with `human_review_required=true`**
-- **0 evidence-audit records with an unexpected status**
+- SEO descriptions: **150–160 characters**
+- exact central disclaimer contract on all 12
+- row-level `medical_disclaimer` empty/null on all 12
 
-These are structural, provenance and evidence-mapping checks. They do not replace a scientific/editorial reviewer or rendered-page inspection.
+The 11 previously published pages remain directly accessible. They are excluded from indexing without deletion or redirects, and their canonicals remain unchanged.
 
-## Technical validation
+## Review provenance policy
 
-The last fully completed runtime baseline before the final registry/audit/checkpoint reconciliation was head `c6731729d2c4a0a29d0aa2756af6f3485b8a0dfd`, where all required workflows passed:
+Project policy is explicit:
 
-- Validate Legacy Migration Payload: success
-- Care Guides Legacy Inventory: success
-- Cloudflare Workers Validate: success
-- Rawafid Quality Gate: success
-- Production HTTP smoke: success
-- Full sitemap SEO audit: **1,950 sitemap URLs / 2,080 unique internal links / 0 failures**
-- Lighthouse performance: **0.89 / 0.88 / 0.89**, median **0.89**
-- Accessibility / Best Practices / SEO: **1.00** on all three Lighthouse runs
-- CLS: **0** on all three runs
+- a non-null **`last_reviewed_at` means a completed review by فريق روافد**;
+- when `reviewer_display_name` is recorded, that named reviewer is displayed and emitted as the reviewer;
+- when no individual reviewer is recorded, the reviewer is emitted as the **Rawafid review team organization (`فريق روافد`)**;
+- `lastReviewed` is not interpreted as a generic automated update timestamp.
 
-The sitemap count is exactly 11 lower than the pre-hold baseline of 1,961, confirming that the 11 held pages were excluded from the sitemap after `robots_index=false` was applied.
+The policy is centralized in `lib/review-provenance.ts` and enforced by `scripts/review-provenance-contract.mjs` across the main public content surfaces.
 
-The newest source-registry, evidence-audit and checkpoint commits require a fresh CI cycle against current `main`; the older green result is not treated as validation of the current merge ref.
+Supabase migration `20260816144830_document_rawafid_team_last_reviewed_policy` documents the same semantic contract directly on `public.content.last_reviewed_at`. It supersedes the temporary contrary assumption recorded in the earlier `20260816141759_remove_inferred_team_review_provenance` migration.
 
-## Global collision hold
+Current estate audit records **613 rows with `last_reviewed_at`**: **542** use the Rawafid-team organization fallback because no individual reviewer is named, and **71** have a named reviewer. Wave 004 remains unaffected because its 12 current records have no review date yet.
 
-Two existing published primary-keyword conflicts were identified during the earlier Wave 004 audit:
+## Wave 004 evidence remediation
 
-1. `care-guide-gaming-disorder-family-plan` and `gaming-disorder` target **اضطراب الألعاب الرقمية**.
-2. `comparisons-anxiety-vs-fear` and `evidence-guides-anxiety-fear-differences-guide` target **الفرق بين القلق والخوف**.
+The complete 12-page materialized set has completed the automated source-layer audit. Sources and claim mappings were strengthened only where a real evidence or boundary-condition gap was found; pages were not padded to meet counts.
 
-No automatic redirect or canonical change was applied because each cluster needs content comparison and an explicit merge/intent decision.
+Key remediations include:
 
-## Release rule and next work
+- cognitive flexibility/task switching: task-switch cost, advance preparation, interruption/resumption and context-dependent flexibility;
+- working memory/task breakdown: working-memory models, capacity caveats, chunking, external representations and cognitive offloading;
+- metacognition: delayed judgment-of-learning accuracy plus monitoring/control evidence;
+- retrieval practice: transfer evidence plus a direct boundary-condition source;
+- spaced practice: evidence that useful spacing depends on intended retention interval rather than one universal gap;
+- selective attention: interruption/resumption evidence added to distractor-suppression sources;
+- cognitive load, inhibitory control, prospective memory, speed/accuracy and sustained attention: direct topic-specific evidence rechecked and retained where adequate.
 
-Listing an intent in the Wave 004 configuration never counts as publication. A Wave 004 page may become indexable only after content depth, intent distinctiveness, authoritative references, claim mapping, SEO, accessibility, canonical uniqueness, rendered-page QA and genuine review evidence all pass.
+`care-guide-dual-task-attention-limit` remains Draft + Noindex. Its prior row-level disclaimer and SEO-description blockers are closed. Human review and final rendered-page inspection still block release.
 
-The automated content-depth, structural, provenance and topic-specific source passes are complete for the 12 materialized records. The next sequence is:
+## Source registry
 
-1. run rendered-page QA on the 12 materialized records without changing indexability;
-2. obtain genuine independent human scientific/editorial review and record real reviewer evidence;
-3. only then make an explicit per-page re-index decision;
-4. keep the remaining 38 intents unmaterialized until the current 12-page review queue is controlled.
+`data/migration-batches/care-guides-rich-wave-004.sources.json` is the consolidated registry:
 
-This pull request remains Draft. Technical CI can validate mechanics, routing, SEO behavior and build integrity, but it cannot authorize Wave 004 YMYL publication or replace the review policy defined for this batch.
+- **40 unique Reference IDs** used by the 12 materialized records
+- **52 source records** retained, including authoritative sources for future intents
+- **0 live Reference IDs missing from the registry**
+- **0 live Reference IDs with multiple metadata variants**
+
+The dated audit artifact is `data/migration-batches/care-guides-rich-wave-004.evidence-audit-2026-08-16.json`. It explicitly records `publication_authorization=false` and `human_review_required=true`.
+
+## Wave 004 release enforcement
+
+For V8+ Care Guides generally:
+
+- `robots_index=true` requires `status=published` and `publication_ready=true`;
+- release/readiness changes must preserve the central disclaimer contract;
+- row-level `medical_disclaimer` remains empty under that model.
+
+For Wave 004 specifically, readiness/re-indexing additionally requires:
+
+- genuine recorded review evidence;
+- reviewer credentials when an individual reviewer is used;
+- a non-future review date;
+- reviewer independence from the visible author for individual-review release decisions;
+- at least **3,000 useful Arabic words**;
+- at least **5 references**;
+- at least **5 claim-source mappings**.
+
+Automated checks cannot authorize YMYL publication. The current 12 records remain `publication_ready=false` and non-indexable.
+
+## V7 template-duplication estate audit
+
+A separate full-corpus audit found a material legacy quality problem in V7 Care/Evidence Guides: large groups reused substantial substantive prose with only topic substitutions.
+
+The repository migration `20260816141217_hold_v7_template_duplicated_guides.sql` measures the **complete published V7 corpus**, not only currently indexable rows. A page is held when any of these high-confidence conditions is met:
+
+- exact duplicate substantive paragraphs >= **40%**;
+- primary-keyword-normalized duplicate substantive paragraphs >= **50%**;
+- primary-keyword-normalized duplicate substantive-paragraph words >= **50%**.
+
+Current live result:
+
+- **150 V7 pages** carry `content_quality_hold.reason = full_v7_corpus_template_duplication`;
+- **150/150 remain `status=published`**;
+- **150/150 are `robots_index=false` + `robots_follow=true`**;
+- **0 redirects** were introduced;
+- content and canonical URLs are preserved in place.
+
+This is a conservative quality hold, not deletion and not a claim that the remaining pages are perfect.
+
+### Indexable Care Guides after the hold
+
+Current indexable `/care-guides/` estate: **156 pages**:
+
+- 75 V8 `care-guide` pages;
+- 78 V7 `care-guide` pages;
+- 1 V7 central childhood-OCD reference page;
+- 1 V7 page without a page-role marker;
+- 1 hub page.
+
+For the remaining indexable V7 `care-guide` cohort, the latest normalized audit has no page at the high-confidence hold thresholds. The previously measured remaining cohort peaked at **28.1% normalized duplicate substantive paragraphs** and **21.9% normalized duplicate substantive-paragraph words**, so bulk noindex stops here and further work is page-level editorial improvement rather than another automatic purge.
+
+### Evidence Guides after the hold
+
+- indexable Evidence Guide detail pages: **0**;
+- `/evidence-guides/` hub remains indexable: **1**.
+
+The held detail pages remain directly accessible with `noindex,follow`.
+
+## Keyword-intent collision audit
+
+The two previously identified conflicts were resolved conservatively:
+
+- the family Gaming Disorder page now targets a distinct family-intent primary keyword without changing its URL;
+- the overlapping anxiety-vs-fear Evidence Guide is held out of the index rather than redirected or deleted.
+
+Current audit across published indexable content reports **0 duplicate primary-keyword groups**.
+
+## Rendered/runtime controls
+
+`npm run smoke` includes `scripts/care-guides-wave-004-smoke.mjs`. Its contract covers the held Wave 004 routes that sitemap auditing cannot see:
+
+- 11 published held Wave 004 routes must return HTTP 200;
+- they must render `noindex,follow`;
+- exact canonicals must remain present;
+- the central `/disclaimer` link and references surface must render;
+- `care-guide-dual-task-attention-limit` must remain unavailable while Draft.
+
+`buildSeoMetadata` now keeps `follow` independent of `index`, preventing a `noindex,follow` database policy from collapsing into `nofollow` at render time.
+
+## Validation rule
+
+Every code or policy checkpoint must pass the fresh PR head, not an earlier green commit. Required checks include:
+
+- Architecture/privacy/theme/content contracts;
+- review-provenance contract;
+- TypeScript;
+- lint;
+- Next/OpenNext build;
+- Wave 004 rendered smoke;
+- full sitemap/internal-link SEO gate;
+- Lighthouse lab audit;
+- Cloudflare Workers validation and branch deployment.
+
+## Required gate / next work
+
+**Keep PR #259 Draft.**
+
+Wave 004 is not authorized for re-indexing. Before a Wave 004 page can be released it still needs:
+
+1. final visual/manual rendered-page QA, including mobile/layout/accessibility inspection beyond automated HTML checks;
+2. genuine recorded review under the Rawafid review policy;
+3. explicit per-page release/re-index decision.
+
+The remaining 38 Wave 004 intents stay unmaterialized until the current 12-page review queue is controlled.
+
+The 150 held V7 template pages form a separate rewrite backlog. They should be rewritten for genuine topic specificity before any re-index decision; no automatic redirects or content deletion should be used as a substitute for that work.
