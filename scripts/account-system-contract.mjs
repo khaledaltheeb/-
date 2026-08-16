@@ -53,8 +53,10 @@ const mfaMigration=read('supabase/migrations/20260816113014_mfa_opt_in_enforceme
 for(const marker of [
   'private.mfa_session_allowed','auth.mfa_factors',"f.status = 'verified'","auth.jwt()->>'aal'","= 'aal2'",
   'private.require_active_user','private."current_role"','as restrictive','profiles_mfa_opt_in_guard','provider_verification_documents_mfa_opt_in_guard',
-  'specialists_mfa_private_read_guard','centers_mfa_private_read_guard','storage_provider_verification_mfa_select_guard','storage_sensitive_mfa_insert_guard',
-  "bucket_id not in ('provider-verification','rawafid-media')"
+  'specialists_mfa_private_read_guard','centers_mfa_private_read_guard','community_profiles_mfa_private_read_guard','community_posts_mfa_private_read_guard',
+  'content_mfa_private_read_guard','content_versions_mfa_private_read_guard','mfa_opt_in_insert_guard','mfa_opt_in_update_guard','mfa_opt_in_delete_guard',
+  'storage_provider_verification_mfa_select_guard','storage_sensitive_mfa_insert_guard',"bucket_id not in ('provider-verification','rawafid-media')",
+  '(select private.mfa_session_allowed())'
 ]) if(!mfaMigration.includes(marker)) fail(`MFA migration missing ${marker}`);
 if(!mfaMigration.includes('grant execute on function private.mfa_session_allowed() to authenticated')) fail('MFA helper must be callable by authenticated RLS evaluation');
 
