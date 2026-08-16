@@ -110,7 +110,7 @@ export function MfaSettings() {
     setBusy(true);
     const assurance = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
     if (assurance.error || assurance.data.currentLevel !== 'aal2') {
-      window.location.assign('/mfa?next=%2Faccount%2Fsecurity');
+      router.push('/mfa?next=%2Faccount%2Fsecurity');
       return;
     }
     const result = await supabase.auth.mfa.unenroll({ factorId });
