@@ -14,15 +14,18 @@ const manifest = read('public/manifest.webmanifest');
 const serviceWorker = read('public/sw.js');
 const home = read('app/page.tsx');
 const theme = read('app/rawafid-theme.css');
+const themeV6 = read('app/rawafid-theme-v6.css');
 const adminLayout = read('app/admin/layout.tsx');
 const adminHome = read('app/admin/page.tsx');
 const contentForm = read('app/admin/content/content-form.tsx');
 const pwaIcon = read('lib/pwa-icon.ts');
 const preview = read('app/theme-preview/page.tsx');
 
-if (!layout.includes("'./rawafid-theme.css'")) fail('root layout must import the central theme entry point');
+if (!layout.includes("'./rawafid-theme-v6.css'")) fail('root layout must import the central V6 theme entry point');
 const directCssImports = [...layout.matchAll(/^import\s+["'](\.\/[^"']+\.css)["'];?\s*$/gm)].map((match) => match[1]);
-if (directCssImports.length !== 1 || directCssImports[0] !== './rawafid-theme.css') fail('root layout must keep one global CSS entry point');
+if (directCssImports.length !== 1 || directCssImports[0] !== './rawafid-theme-v6.css') fail('root layout must keep one global V6 CSS entry point');
+if (!themeV6.startsWith("@import './rawafid-theme.css';")) fail('V6 theme must preserve the proven V5 compatibility theme as its base');
+if (!themeV6.includes('Rawafid Institutional Theme V6')) fail('V6 theme marker missing');
 
 for (const file of ['components/rawafid-mark.tsx', 'components/rawafid-brand.tsx', 'lib/public-content.ts', 'lib/content-templates.ts', 'app/admin/verification/page.tsx']) {
   if (!exists(file)) fail(`missing V5 foundation ${file}`);
@@ -35,7 +38,7 @@ for (const marker of ['Rawafid Institutional Theme V5', '.site-assurance-bar', '
 if (!brand.includes('RawafidMark') || !brand.includes('معرفة تقود إلى أثر')) fail('shared brand must use the unified Rawafid mark and slogan');
 if (!header.includes("import RawafidBrand from '@/components/rawafid-brand'") || !footer.includes("import RawafidBrand from '@/components/rawafid-brand'")) fail('public chrome must use the shared Rawafid brand');
 if (!header.includes("import Link from 'next/link'") || !footer.includes("import Link from 'next/link'") || !home.includes("import Link from 'next/link'")) fail('public navigation must use Next Link for smooth internal transitions');
-const unboundedLink = /<Link\\b(?![^>]*\\bprefetch=\\{false\\})[^>]*>/;
+const unboundedLink = /<Link\b(?![^>]*\bprefetch=\{false\})[^>]*>/;
 for (const [name, source] of [['header', header], ['footer', footer], ['homepage', home]]) {
   if (unboundedLink.test(source)) fail(`${name} contains an automatic Next Link prefetch`);
 }
@@ -83,8 +86,17 @@ if (!pwaIcon.includes('M13 44c14-1')) fail('PWA icon must use the unified tribut
 for (const marker of ['Rawafid Institutional V5.1', 'Rawafid Institutional V5.2', 'font-family:var(--font-arabic)', '--rf-reading-measure:72ch', '.footer-search', '.theme-preview-type-specimen', '.skip-link', '.skip-target']) {
   if (!theme.includes(marker)) fail(`central theme missing V5.1 marker ${marker}`);
 }
-for (const marker of ['footer-search', 'footer-trust-list', 'back-to-top']) {
+for (const marker of ['footer-search', 'back-to-top']) {
   if (!footer.includes(marker)) fail(`institutional footer missing ${marker}`);
+}
+for (const forbidden of [
+  'مراجعة منهجية',
+  'مصادر قابلة للتتبع',
+  'خصوصية ووصولية',
+  'المحتوى للتثقيف العام ولا يحل محل التقييم أو التشخيص أو العلاج المهني الفردي.',
+  'هوية عربية · متوافق مع الهاتف · وصولية وخصوصية منذ التصميم',
+]) {
+  if (footer.includes(forbidden)) fail(`institutional footer must not include removed promotional/disclaimer copy: ${forbidden}`);
 }
 const skipLinkRule = theme.match(/\.skip-link\{[^}]+\}/)?.[0] ?? '';
 if (!skipLinkRule.includes('transition:none')) fail('keyboard bypass must not depend on a transition');
@@ -94,4 +106,4 @@ if (!layout.includes('<body id="top">') || !layout.includes('?v=6')) fail('layou
 if (!manifest.includes('منصة روافد | معرفة تقود إلى أثر') || !manifest.includes('?v=6')) fail('manifest must use the V6 institutional identity');
 if (!serviceWorker.includes('rawafid-shell-v6') || !serviceWorker.includes('event.waitUntil(cacheWrite')) fail('service worker must use V6 cache lifecycle');
 
-if (!process.exitCode) console.log('Rawafid institutional theme V5.2 contract passed.');
+if (!process.exitCode) console.log('Rawafid institutional theme V6 contract passed.');
