@@ -28,6 +28,9 @@ The existing two-phase pediatric-oncology release guard remains authoritative fo
 | Nausea and vomiting | 2770 | 6 | 6 | 5 | 0.5203 | pediatric supportive-care review pending |
 | Oral mucositis | 2973 | 7 | 6 | 5 | 0.5012 | pediatric oncology/oral-care review pending |
 | Nutrition and weight | 2971 | 8 | 6 | 5 | 0.5097 | pediatric oncology nutrition review pending |
+| Hair, skin and nail changes | 2715 | 7 | 6 | 5 | 0.5006 | pediatric oncology/dermatology review pending |
+| Constipation and diarrhea | 2715 | 8 | 6 | 5 | 0.5092 | pediatric oncology/GI supportive-care review pending |
+| Chemotherapy family guide | 3093 | 10 | 6 | 8 | 0.5355 | pediatric oncologist/oncology-pharmacy review pending |
 
 ## What changed
 
@@ -35,7 +38,9 @@ The existing two-phase pediatric-oncology release guard remains authoritative fo
 
 The pain guide had remained a 614-word draft on `/content/`. It was rewritten into a standalone family-facing care guide, moved to the canonical `/care-guides/` route family, expanded with pediatric pain assessment, procedural pain, neuropathic pain, functional impact, opioid safety boundaries, palliative-care context, red flags, and structured claim-source mapping.
 
-Peripheral neuropathy, febrile neutropenia, nausea/vomiting, oral mucositis, and nutrition/weight received the same treatment: substantive topic-specific replacement rather than generic template expansion.
+Peripheral neuropathy, febrile neutropenia, nausea/vomiting, oral mucositis, nutrition/weight, hair/skin/nails, constipation/diarrhea, and the chemotherapy family guide received the same treatment: substantive topic-specific replacement rather than generic template expansion.
+
+The chemotherapy guide is now a treatment-pillar page rather than a side-effect list. It includes protocol/phase framing, laboratory monitoring, central venous access, infusion safety, oral antineoplastic medication management, missed/vomited-dose boundaries, hazardous-drug home-handling boundaries, adherence challenges, supportive-care routing, survivorship transition, and family medication-safety organization without providing patient-specific dosing.
 
 ### 2. Template contamination was removed
 
@@ -45,13 +50,13 @@ Post-rewrite maximum full-body `pg_trgm` similarity values are all approximately
 
 ### 3. Canonical and keyword collisions were checked
 
-The eight repaired guides were tested against the current content table for exact canonical-route and exact primary-keyword collisions.
+All eleven repaired guides were tested against the current content table for exact canonical-route and exact primary-keyword collisions.
 
 Result: `0` exact canonical duplicates and `0` exact primary-keyword duplicates for every repaired guide.
 
 ### 4. Internal-link architecture was strengthened
 
-Each guide now records four or five editorial internal-link targets into nearby pediatric-oncology content, including symptom clusters, school reintegration, scanxiety, family transition, fever/neutropenia, oral mucositis, pain, and nutrition where relevant.
+Each guide now records four to eight editorial internal-link targets into nearby pediatric-oncology content. The treatment pillar routes families into fever/neutropenia, nausea/vomiting, oral mucositis, pain, neuropathy, school re-entry, skin/hair and bowel-support guides rather than duplicating those pages.
 
 ### 5. Search-intent cannibalization was reduced
 
@@ -77,6 +82,7 @@ Each repaired guide now includes:
 - independent human-review packet metadata
 - central disclaimer contract
 - no patient-specific dosing or prescribing
+- medication-specific home-safety boundaries where relevant
 - no unsupported local legal/benefit claims
 - publication and indexing disabled until independent review
 
@@ -86,19 +92,20 @@ The repaired records are attached to the active `pediatric-oncology` sector.
 
 Current category placement includes:
 
-- `pediatric-cancer-symptom-support` — pain, sleep/fatigue, neuropathy, nausea/vomiting, oral mucositis, nutrition/weight
+- `pediatric-cancer-symptom-support` — pain, sleep/fatigue, neuropathy, nausea/vomiting, oral mucositis, nutrition/weight, hair/skin/nails, constipation/diarrhea
 - `pediatric-clinical-care-safety` — fever/neutropenia
 - `school-reentry-childhood-cancer` — school re-entry
+- `pediatric-chemo-targeted-immunotherapy` — chemotherapy family guide
 
 ## Remaining high-priority thin pediatric-oncology drafts
 
-The next repair queue still includes several thin clinical guides, notably:
+The next repair queue is now concentrated in deeper clinical reference material rather than the common supportive-care symptom layer. Priorities include:
 
-- hair/skin changes
-- constipation/diarrhea
-- chemotherapy family guide
-- selected late-effects pages
-- AML/germline-predisposition material
+- selected late-effects pages (hearing/ototoxicity, thyroid, pulmonary, growth/endocrine)
+- AML and APL reference pages
+- AML germline-predisposition content
+- Li-Fraumeni / inherited cancer-predisposition content
+- additional treatment and survivorship pages that remain below the current standalone-depth floor
 
 These should remain unpublished until they receive the same evidence-depth, originality, safety, SEO, internal-link, and independent-review treatment.
 
