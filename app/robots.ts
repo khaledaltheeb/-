@@ -1,10 +1,8 @@
 import type { MetadataRoute } from 'next';
-import { SITE_URL } from '@/lib/seo';
-
-const INDEXING_ENABLED = process.env.NEXT_PUBLIC_ALLOW_INDEXING === 'true';
+import { SITE_URL, isIndexingEnabled } from '@/lib/seo';
 
 export default function robots(): MetadataRoute.Robots {
-  if (!INDEXING_ENABLED) {
+  if (!isIndexingEnabled()) {
     return {
       rules: { userAgent: '*', disallow: '/' },
       host: SITE_URL,
