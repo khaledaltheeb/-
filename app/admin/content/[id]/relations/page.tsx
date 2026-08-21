@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { updateContentRelations } from '../../relations-actions';
 
@@ -7,6 +7,8 @@ export const dynamic='force-dynamic';
 type Params=Promise<{id:string}>;type SearchParams=Promise<{ok?:string;error?:string}>;
 export default async function ContentRelationsPage({params,searchParams}:{params:Params;searchParams:SearchParams}){
  const {id}=await params;const query=await searchParams;const supabase=await createClient();
+ const {data:claims}=await supabase.auth.getClaims();const userId=claims?.claims?.sub;if(!userId)redirect('/login');
+ const {data:profile}=await supabase.from('profiles').select('role,is_active').eq('id',userId).single();if(!profile?.is_active||!['owner','admin'].includes(profile.role))redirect('/account');
  const [{data:record},{data:allTags},{data:selectedCategories},{data:selectedTags}]=await Promise.all([
   supabase.from('content').select('id,title,slug,sector_id,category_id').eq('id',id).maybeSingle(),
   supabase.from('tags').select('id,name_ar,slug').eq('is_active',true).order('name_ar'),
