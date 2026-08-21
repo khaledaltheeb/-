@@ -10,6 +10,7 @@ const grantFix=read('supabase/migrations/20260816102121_restore_legacy_preservat
 const helper=read('lib/legacy-preserved-page.ts');
 const view=read('components/legacy-preserved-page.tsx');
 const proxy=read('lib/supabase/proxy.ts');
+const preservationSmoke=read('scripts/legacy-preservation-smoke.mjs');
 const routes=[
  'app/[...legacyPath]/page.tsx','app/hubs/page.tsx','app/hubs/[slug]/page.tsx','app/encyclopedia/[slug]/page.tsx',
  'app/quick-info/[slug]/page.tsx','app/sections/[slug]/page.tsx','app/sectors/[slug]/page.tsx','app/capabilities/[slug]/page.tsx',
@@ -59,6 +60,15 @@ for(const path of routes){
 }
 const encyclopedia=read('app/encyclopedia/[slug]/page.tsx');
 if(!encyclopedia.includes('getEncyclopediaRecord')||!encyclopedia.includes('if (!record)')) fail('reviewed encyclopedia content must keep priority over preserved fallback');
+const quickInfo=read('app/quick-info/[slug]/page.tsx');
+if(!quickInfo.includes('getQuickInfoRecord')||!quickInfo.includes('if (!record)')) fail('reviewed Quick Info content must keep priority over preserved fallback');
+for(const marker of [
+  "modernTakeoverRoutes=new Set(['/quick-info/accountability-vs-self-blame/'])",
+  "['/quick-info/accountability-vs-self-blame/','تحمل مسؤولية أم جلد ذات',false]",
+  'modern takeover unexpectedly fell back to the preserved-page renderer',
+  'migrated route must remain noindex until its current review permits indexing',
+  "requiresPreservedBanner&&!body.includes('نسخة إنتاجية محفوظة')"
+]) if(!preservationSmoke.includes(marker)) fail(`modern/fallback preservation smoke marker missing: ${marker}`);
 const catchAll=read('app/[...legacyPath]/page.tsx');
 if(!catchAll.includes('notFound()')) fail('unknown routes must still reach the branded 404');
 for(const path of [
@@ -72,4 +82,4 @@ for(const path of [
 ]) if(!fs.existsSync(path)) fail(`deployed migration history not mirrored: ${path}`);
 
 if(failed)process.exit(1);
-console.log('Legacy preservation contract passed: production HTML remains available through a Unicode-safe public read-only noindex boundary, the proxy dependency is explicit, and the latest migration state preserves the required anon/authenticated RPC grants.');
+console.log('Legacy preservation contract passed: production HTML remains available through a Unicode-safe public read-only noindex boundary, reviewed modern takeovers keep priority over fallback rendering, and the latest migration state preserves the required anon/authenticated RPC grants.');
