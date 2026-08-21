@@ -27,6 +27,8 @@ const requiredFiles=[
   'supabase/migrations/20260821160229_guard_referenced_media_deletion.sql',
   'supabase/migrations/20260821160526_published_content_zero_downtime_revisions.sql',
   'supabase/migrations/20260821161620_version_content_relations_and_revision_concurrency.sql',
+  'supabase/migrations/20260821162055_content_revision_fingerprint_concurrency_guard.sql',
+  'supabase/migrations/20260821162411_complete_content_version_relation_snapshots.sql',
 ];
 for(const path of requiredFiles)requireFile(path);
 if(fs.existsSync('supabase/migrations/20260818154000_legacy_release_pipeline_repair.sql'))fail('stale combined legacy migration must not diverge from production migration history');
@@ -125,16 +127,36 @@ for(const marker of [
   "'_relations'",
   'live or scheduled content relations must be changed through an editable revision',
   'content relations can only be changed in an editable workflow state',
-  'update public.content set updated_at=now()',
   'taxonomy_relations_updated',
   "v_relations:=v_snapshot->'_relations'",
   'relations_restored',
   'private.content_snapshot_with_relations(v_target_id)',
 ]) if(!relationMigration.includes(marker))fail(`relation versioning migration missing ${marker}`);
 
+const fingerprintMigration=read('supabase/migrations/20260821162055_content_revision_fingerprint_concurrency_guard.sql');
+for(const marker of [
+  'private.content_revision_fingerprint',
+  'private.content_snapshot_with_relations(p_content_id)',
+  'revision_source_fingerprint',
+  'v_current_fingerprint',
+  'revision_workflow_version',
+  'live content changed after this revision started; start a fresh revision before applying',
+]) if(!fingerprintMigration.includes(marker))fail(`revision fingerprint migration missing ${marker}`);
+
+const completeSnapshots=read('supabase/migrations/20260821162411_complete_content_version_relation_snapshots.sql');
+for(const marker of [
+  'private.sync_content_primary_category_relation',
+  'zz_generic_content_primary_category_sync',
+  'private.enrich_content_version_snapshot_relations',
+  'content_versions_relations_snapshot_guard',
+  "new.snapshot - '_relations'",
+  "'categories'",
+  "'tags'",
+]) if(!completeSnapshots.includes(marker))fail(`complete version snapshot migration missing ${marker}`);
+
 const historicalPromoter=read('supabase/migrations/20260818154018_replace_legacy_promoter_with_release_contract_tag.sql');
 if(!historicalPromoter.includes("'migration_release_contract_version',1"))fail('production-aligned legacy promoter release tag missing');
 const historicalGate=read('supabase/migrations/20260818154221_centralize_legacy_authoritative_reference_domains.sql');
 for(const marker of ['private.is_recognized_authoritative_reference_url','private.content_release_gate_legacy'])if(!historicalGate.includes(marker))fail(`production-aligned legacy gate missing ${marker}`);
 
-if(!process.exitCode)console.log('Rawafid CMS workflow, V6 release contract, zero-downtime revisions, relation versioning, role boundary and integrity contract passed.');
+if(!process.exitCode)console.log('Rawafid CMS workflow, V6 release contract, zero-downtime revisions, fingerprint concurrency, complete relation snapshots, role boundary and integrity contract passed.');
