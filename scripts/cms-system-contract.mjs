@@ -9,6 +9,7 @@ const requiredFiles=[
   'app/admin/content/page.tsx',
   'app/admin/content/new/page.tsx',
   'app/admin/content/[id]/page.tsx',
+  'app/admin/content/[id]/relations/page.tsx',
   'app/admin/content/actions.ts',
   'app/admin/content/seo-actions.ts',
   'app/admin/content/release-actions.ts',
@@ -17,14 +18,18 @@ const requiredFiles=[
   'app/admin/content/content-form.tsx',
   'app/admin/layout.tsx',
   'lib/supabase/proxy.ts',
+  'supabase/migrations/20260818154018_replace_legacy_promoter_with_release_contract_tag.sql',
+  'supabase/migrations/20260818154221_centralize_legacy_authoritative_reference_domains.sql',
   'supabase/migrations/20260821113049_cms_audit_integrity_hardening.sql',
   'supabase/migrations/20260821154825_cms_release_contract_editor_hardening.sql',
   'supabase/migrations/20260821155526_cms_release_contract_rpc_least_privilege.sql',
   'supabase/migrations/20260821160036_reconcile_legacy_promoted_draft_publish_state.sql',
   'supabase/migrations/20260821160229_guard_referenced_media_deletion.sql',
   'supabase/migrations/20260821160526_published_content_zero_downtime_revisions.sql',
+  'supabase/migrations/20260821161620_version_content_relations_and_revision_concurrency.sql',
 ];
 for(const path of requiredFiles)requireFile(path);
+if(fs.existsSync('supabase/migrations/20260818154000_legacy_release_pipeline_repair.sql'))fail('stale combined legacy migration must not diverge from production migration history');
 
 const callback=read('app/auth/callback/route.ts');
 if(!callback.includes("value.includes('\\\\')"))fail('auth callback must reject backslash redirects');
@@ -40,17 +45,20 @@ if(!layout.includes("if(editorial&&!fullAdmin&&!isContentPath(pathname))redirect
 
 requireText('lib/supabase/proxy.ts',["headers.set('x-rawafid-pathname', trustedPathname)",'forwardedHeaders()']);
 requireText('app/admin/content/new/page.tsx',["['owner', 'admin', 'editor']"]);
-requireText('app/admin/content/page.tsx',["new Set(['owner','admin','editor','scientific_reviewer','seo_manager'])",'canCreate','نسخة تحريرية','revisionTarget']);
+requireText('app/admin/content/page.tsx',["new Set(['owner','admin','editor','scientific_reviewer','seo_manager'])",'canCreate','نسخة تحريرية','revisionTarget','RELATION_EDITABLE']);
 
 const actions=requireText('app/admin/content/actions.ts',['requireContentStaff','requireContentEditor','scheduleContent','restoreVersion']);
 if(!actions.includes("const CONTENT_EDITORS = new Set(['owner','admin','editor'])"))fail('body editing role boundary missing');
 
 const editor=read('app/admin/content/[id]/page.tsx');
-for(const marker of ['ReleaseContractForm','updateReleaseContract','schema_json','transitionsFor','EDITOR_BODY_STATES','authorityEditable','canRestore','beginPublishedRevision','applyPublishedRevision','Zero-Downtime Revision','revisionMode={isRevision}','contains(\'schema_json\',{revision_of:record.id})'])if(!editor.includes(marker))fail(`content editor missing ${marker}`);
+for(const marker of ['ReleaseContractForm','updateReleaseContract','schema_json','transitionsFor','EDITOR_BODY_STATES','authorityEditable','canRestore','beginPublishedRevision','applyPublishedRevision','Zero-Downtime Revision','revisionMode={isRevision}','contains(\'schema_json\',{revision_of:record.id})','fullAdmin&&editable'])if(!editor.includes(marker))fail(`content editor missing ${marker}`);
 if(editor.includes('name="medical_disclaimer"'))fail('page-specific medical disclaimer editor must not exist');
 if(!editor.includes('/disclaimer')||!editor.includes('إخلاء المسؤولية والتنبيهات'))fail('central disclaimer notice missing from CMS');
 if(!editor.includes('source_type')||!editor.includes('authority_tier'))fail('reference V6 source metadata missing from editor');
 if(!editor.includes("record.status==='approved'&&!isRevision"))fail('revisions must never use the normal scheduling UI');
+
+const relationsPage=read('app/admin/content/[id]/relations/page.tsx');
+for(const marker of ['const EDITABLE=new Set','relations-require-editable-revision','هذه العلاقات تخص النسخة التحريرية فقط','حفظ العلاقات كنسخة جديدة'])if(!relationsPage.includes(marker))fail(`relation editor missing ${marker}`);
 
 const contentForm=read('app/admin/content/content-form.tsx');
 for(const marker of ['revisionMode=false','readOnly={revisionMode}','نسخة التحرير Noindex دائماً','الـCanonical ثابت أثناء Revision'])if(!contentForm.includes(marker))fail(`revision content form missing ${marker}`);
@@ -111,4 +119,22 @@ for(const marker of [
   'revoke all on function public.apply_published_content_revision(uuid) from public,anon',
 ]) if(!revisionMigration.includes(marker))fail(`zero-downtime revision migration missing ${marker}`);
 
-if(!process.exitCode)console.log('Rawafid CMS workflow, V6 release contract, zero-downtime revisions, role boundary and integrity contract passed.');
+const relationMigration=read('supabase/migrations/20260821161620_version_content_relations_and_revision_concurrency.sql');
+for(const marker of [
+  'private.content_snapshot_with_relations',
+  "'_relations'",
+  'live or scheduled content relations must be changed through an editable revision',
+  'content relations can only be changed in an editable workflow state',
+  'update public.content set updated_at=now()',
+  'taxonomy_relations_updated',
+  "v_relations:=v_snapshot->'_relations'",
+  'relations_restored',
+  'private.content_snapshot_with_relations(v_target_id)',
+]) if(!relationMigration.includes(marker))fail(`relation versioning migration missing ${marker}`);
+
+const historicalPromoter=read('supabase/migrations/20260818154018_replace_legacy_promoter_with_release_contract_tag.sql');
+if(!historicalPromoter.includes("'migration_release_contract_version',1"))fail('production-aligned legacy promoter release tag missing');
+const historicalGate=read('supabase/migrations/20260818154221_centralize_legacy_authoritative_reference_domains.sql');
+for(const marker of ['private.is_recognized_authoritative_reference_url','private.content_release_gate_legacy'])if(!historicalGate.includes(marker))fail(`production-aligned legacy gate missing ${marker}`);
+
+if(!process.exitCode)console.log('Rawafid CMS workflow, V6 release contract, zero-downtime revisions, relation versioning, role boundary and integrity contract passed.');
