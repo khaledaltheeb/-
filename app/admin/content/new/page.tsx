@@ -13,7 +13,7 @@ export default async function NewContentPage({ searchParams }: { searchParams: S
   const userId = claimsData?.claims?.sub;
   if (!userId) redirect('/login');
   const { data: profile } = await supabase.from('profiles').select('role,is_active').eq('id', userId).single();
-  if (!profile?.is_active || !['owner', 'admin'].includes(profile.role)) redirect('/account');
+  if (!profile?.is_active || !['owner', 'admin', 'editor'].includes(profile.role)) redirect('/account');
 
   const [{ data: sectors }, { data: categories }] = await Promise.all([
     supabase.from('sectors').select('id,name_ar').order('sort_order').order('name_ar'),
