@@ -75,6 +75,26 @@ export async function getMagazineRecord(routeSlug: string): Promise<MagazineReco
   return record && isPublishedNow(record.published_at) ? record : null;
 }
 
+export async function getPediatricOncologyEvidenceRecord(
+  kind: 'studies' | 'theses',
+  routeSlug: string,
+): Promise<MagazineRecord | null> {
+  const safeSlug = decodeURIComponent(routeSlug).trim().toLowerCase();
+  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(safeSlug)) return null;
+  const canonical = `/magazine/pediatric-oncology/${kind}/${safeSlug}/`;
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('content')
+    .select(FIELDS)
+    .eq('content_type', 'research')
+    .eq('status', 'published')
+    .eq('canonical_url', canonical)
+    .maybeSingle();
+  if (error) throw error;
+  const record = data as unknown as MagazineRecord | null;
+  return record && isPublishedNow(record.published_at) ? record : null;
+}
+
 export async function getRelatedMagazine(record: MagazineRecord, limit = 4): Promise<MagazineRecord[]> {
   const items = await getMagazineItems();
   const kind = evidenceKind(record);
