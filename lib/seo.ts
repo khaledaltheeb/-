@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { RAWAFID_BRAND_NAME, RAWAFID_BRAND_SHORT } from '@/lib/theme';
 
-export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://rawafid-platform-staging.khaledaltheeb.workers.dev').replace(/\/$/, '');
+export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://healthrenewal.org').replace(/\/$/, '');
 export const BRAND_NAME = RAWAFID_BRAND_NAME;
 export const BRAND_SHORT = RAWAFID_BRAND_SHORT;
 export const DEFAULT_LOCALE = 'ar_AR';
@@ -49,7 +49,7 @@ export function buildSeoMetadata(input: SeoMetadataInput): Metadata {
   const description = clampDescription(input.description);
   const canonical = absoluteUrl(input.path);
   const canIndex = INDEXING_ENABLED && input.index !== false;
-  const canFollow = input.follow !== false;
+  const canFollow = canIndex && input.follow !== false;
   const image = input.image ? absoluteUrl(input.image) : undefined;
   const languages = input.hreflang
     ? Object.fromEntries(Object.entries(input.hreflang).map(([key, value]) => [key, absoluteUrl(value)]))
