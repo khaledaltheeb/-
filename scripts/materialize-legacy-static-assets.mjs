@@ -9,10 +9,13 @@ const expectedBase64Length = 53548;
 const expectedBundleBytes = 40161;
 const expectedBundleSha256 = '52fd3325d0f5df9e8d5c528407e59c61bdeec054b73c5251fc4e27703134a683';
 const partNames = [
-  'legacy-static-assets-v2.part1.b64',
+  'legacy-static-assets-v3.chunk01.b64',
+  'legacy-static-assets-v3.chunk02.b64',
+  'legacy-static-assets-v3.prefix03.b64',
   'legacy-static-assets-v2.part2.b64',
   'legacy-static-assets-v2.part3.b64',
-  'legacy-static-assets-v2.part4a.b64',
+  'legacy-static-assets-v3.tail4a1.b64',
+  'legacy-static-assets-v3.tail4a2.b64',
   'legacy-static-assets-v2.part4b.b64',
 ];
 
