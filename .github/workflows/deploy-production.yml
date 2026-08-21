@@ -48,4 +48,4 @@ jobs:
       - name: Build Cloudflare Worker with OpenNext
         run: npx opennextjs-cloudflare build
       - name: Deploy Cloudflare Worker with OpenNext
-        run: npx opennextjs-cloudflare deploy -- --keep-vars
+        run: npx opennextjs-cloudflare deploy
