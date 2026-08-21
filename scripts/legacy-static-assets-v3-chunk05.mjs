@@ -7,7 +7,9 @@ const fragmentNames = [
   'legacy-static-assets-v3.chunk05a.b64',
   'legacy-static-assets-v3.chunk05b1.b64',
   'legacy-static-assets-v3.chunk05b21a.b64',
-  'legacy-static-assets-v3.chunk05b21b1.b64',
+  'legacy-static-assets-v3.chunk05b21b1a.b64',
+  'legacy-static-assets-v3.chunk05b21b1b1.b64',
+  'legacy-static-assets-v3.chunk05b21b1b2.b64',
   'legacy-static-assets-v3.chunk05b21b2.b64',
   'legacy-static-assets-v3.chunk05b22.b64',
 ];
