@@ -8,10 +8,11 @@ import { buildSeoMetadata } from '@/lib/seo';
 import { submitSpecialistApplication } from '../actions';
 
 export const dynamic='force-dynamic';
-export const metadata:Metadata=buildSeoMetadata({title:'التقدم كمختص',description:'قدّم طلب الانضمام كمختص إلى منصة روافد وأرسل بياناتك المهنية والتخصصات والمؤهلات والترخيص للمراجعة والتوثيق.',path:'/join/specialist',index:true});
+export const metadata:Metadata=buildSeoMetadata({title:'التقدم كمختص',description:'قدّم طلب الانضمام كمختص إلى منصة روافد من خلال نموذج مهني مختصر، ثم أكمل مستندات التوثيق والملف المهني بعد الإرسال.',path:'/join/specialist',index:true});
 type SearchParams=Promise<{status?:string;error?:string}>;
 type Application={slug:string;full_name:string;professional_title:string|null;bio:string|null;email:string|null;phone:string|null;website_url:string|null;country:string|null;region:string|null;city:string|null;latitude:number|null;longitude:number|null;languages:string[];specialties:string[];qualifications:unknown;license_number:string|null;years_experience:number|null;offers_remote:boolean;offers_in_person:boolean;verification:string;verification_note:string|null;updated_at:string};
 const LABELS:Record<string,string>={pending:'قيد المراجعة',rejected:'يحتاج تصحيحًا',unverified:'غير مكتمل',suspended:'موقوف',verified:'موثق'};
+const SPECIALTY_SUGGESTIONS=['علم النفس السريري','الإرشاد النفسي','العلاج النفسي','العلاج السلوكي المعرفي','التربية الخاصة','صعوبات التعلم','اضطراب طيف التوحد','تحليل السلوك التطبيقي','علاج النطق واللغة','العلاج الوظيفي','العلاج الطبيعي','الإرشاد الأسري','الدعم النفسي للأطفال','الإدمان','الصحة النفسية المدرسية'];
 function quals(v:unknown){return Array.isArray(v)?v.map(x=>typeof x==='string'?x:JSON.stringify(x)).join('\n'):''}
 
 export default async function SpecialistJoin({searchParams}:{searchParams:SearchParams}){
@@ -19,11 +20,45 @@ export default async function SpecialistJoin({searchParams}:{searchParams:Search
  if(!uid)return <><SiteHeader/><main className="join-shell join-form-shell"><section className="join-auth-gate"><span className="eyebrow">طلب مختص</span><h1>ابدأ بحساب منصة روافد</h1><p>يلزم حساب شخصي موثق بالبريد لربط الطلب بصاحبه ومتابعة قرار المراجعة دون كشف البيانات المهنية قبل الاعتماد.</p><div><Link className="primary-link" href="/login?next=%2Fjoin%2Fspecialist">تسجيل الدخول</Link><Link className="button" href="/register?next=%2Fjoin%2Fspecialist">إنشاء حساب</Link><Link className="button" href="/join">العودة لخيارات الانضمام</Link></div></section></main><SiteFooter/></>;
  const {data:profile}=await supabase.from('profiles').select('display_name,role,is_active').eq('id',uid).single();if(!profile?.is_active)redirect('/account');if(profile.role==='specialist')redirect('/specialist');if(profile.role==='center_manager')redirect('/center');if(profile.role==='owner'||profile.role==='admin')redirect('/admin');if(profile.role!=='user')redirect('/account');
  const {data}=await supabase.rpc('get_my_specialist_application');const app=Array.isArray(data)&&data[0]?data[0] as Application:null;
- return <><SiteHeader/><main className="join-shell join-form-shell"><nav className="breadcrumbs"><Link href="/">الرئيسية</Link><span>/</span><Link href="/join">الانضمام</Link><span>/</span><span>مختص</span></nav><section className="join-form-head"><div><span className="eyebrow">Specialist Application</span><h1>طلب الانضمام كمختص</h1><p>أدخل البيانات التي يحتاجها فريق التوثيق لاتخاذ قرار واضح. لن يظهر الملف للعامة قبل الاعتماد.</p></div>{app&&<div className={`application-status status-${app.verification}`}><span>حالة الطلب</span><strong>{LABELS[app.verification]??app.verification}</strong><small>آخر تحديث {new Intl.DateTimeFormat('ar',{dateStyle:'medium'}).format(new Date(app.updated_at))}</small></div>}</section>
- {params.status==='submitted'&&<div className="system-message success">تم إرسال الطلب للمراجعة. سيظهر قرار الإدارة وملاحظتها هنا وفي الإشعارات.</div>}{params.error&&<div className="system-message error">تعذر إرسال الطلب. تحقق من الحقول وعدم وجود طلب مهني آخر مرتبط بالحساب.</div>}{app?.verification_note&&<div className="review-note"><strong>ملاحظة فريق التوثيق</strong><p>{app.verification_note}</p></div>}
- {app&&<div className="portal-notice"><strong>مستندات التوثيق الخاصة</strong><span>يمكنك رفع الترخيص والمؤهلات وإثبات الهوية بصورة خاصة. المستندات لا تظهر في الملف العام.</span><Link className="button" href="/account/verification-documents">إدارة مستندات التوثيق</Link></div>}
- <form action={submitSpecialistApplication} className="application-form"><section className="portal-section"><div className="section-mini-heading"><h2>الهوية المهنية</h2><span>حقول أساسية للمراجعة</span></div><div className="cms-grid"><label>الاسم الكامل<input name="full_name" required minLength={3} maxLength={200} defaultValue={app?.full_name??profile.display_name??''}/></label><label>الرابط العام المقترح<input name="slug" required dir="ltr" pattern="[a-z0-9]+(?:-[a-z0-9]+)*" maxLength={140} defaultValue={app?.slug??''} placeholder="dr-example-name"/></label><label>المسمى المهني<input name="professional_title" maxLength={240} defaultValue={app?.professional_title??''}/></label><label>رقم الترخيص / الاعتماد<input name="license_number" maxLength={160} defaultValue={app?.license_number??''}/></label><label>سنوات الخبرة<input name="years_experience" type="number" min="0" max="80" defaultValue={app?.years_experience??''}/></label><label>اللغات<input name="languages" defaultValue={(app?.languages??[]).join(', ')} placeholder="العربية، الإنجليزية"/></label><label className="cms-wide">التخصصات<input name="specialties" required defaultValue={(app?.specialties??[]).join(', ')} placeholder="العلاج النفسي، الإدمان، الأسرة..."/></label><label className="cms-wide">المؤهلات — مؤهل واحد في كل سطر<textarea name="qualifications" required rows={6} defaultValue={quals(app?.qualifications)} placeholder="المؤهل — المؤسسة — السنة"/></label><label className="cms-wide">نبذة مهنية<textarea name="bio" rows={7} maxLength={10000} defaultValue={app?.bio??''}/></label></div></section>
- <section className="portal-section"><div className="section-mini-heading"><h2>الموقع والخدمة</h2><span>لا تُعرض الإحداثيات قبل التوثيق</span></div><div className="cms-grid"><label>الدولة<input name="country" maxLength={120} defaultValue={app?.country??''}/></label><label>المنطقة / المحافظة<input name="region" maxLength={120} defaultValue={app?.region??''}/></label><label>المدينة<input name="city" maxLength={120} defaultValue={app?.city??''}/></label><label>Latitude<input name="latitude" type="number" step="any" min="-90" max="90" dir="ltr" defaultValue={app?.latitude??''}/></label><label>Longitude<input name="longitude" type="number" step="any" min="-180" max="180" dir="ltr" defaultValue={app?.longitude??''}/></label><label className="check-field"><input name="offers_remote" type="checkbox" defaultChecked={app?.offers_remote??false}/> أقدم خدمة عن بُعد</label><label className="check-field"><input name="offers_in_person" type="checkbox" defaultChecked={app?.offers_in_person??true}/> أقدم خدمة حضورية</label></div></section>
- <section className="portal-section"><div className="section-mini-heading"><h2>التواصل</h2><span>للمراجعة الإدارية، وليس للنشر تلقائيًا</span></div><div className="cms-grid"><label>البريد المهني<input name="email" type="email" maxLength={254} defaultValue={app?.email??''}/></label><label>الهاتف<input name="phone" maxLength={80} dir="ltr" defaultValue={app?.phone??''}/></label><label className="cms-wide">الموقع الإلكتروني<input name="website_url" type="url" maxLength={500} dir="ltr" defaultValue={app?.website_url??''} placeholder="https://"/></label></div></section><div className="cms-actions"><button className="primary-action" type="submit">{app?'تحديث وإعادة إرسال الطلب':'إرسال طلب الانضمام'}</button><span>بعد الإرسال يمكنك رفع المستندات الخاصة. عند الاعتماد تتحول صلاحية الحساب تلقائيًا إلى «مختص» وتفتح بوابة المختص.</span></div></form>
+ const specialtyValue=(app?.specialties??[]).join('، ');
+ return <><SiteHeader/><main className="join-shell join-form-shell"><nav className="breadcrumbs"><Link href="/">الرئيسية</Link><span>/</span><Link href="/join">الانضمام</Link><span>/</span><span>مختص</span></nav>
+ <section className="join-form-head"><div><span className="eyebrow">طلب مختص</span><h1>انضم إلى شبكة مختصي روافد</h1><p>نحتاج في هذه المرحلة إلى المعلومات الأساسية فقط. يمكنك إكمال الملف المهني ورفع المستندات بعد إرسال الطلب.</p></div>{app&&<div className={`application-status status-${app.verification}`}><span>حالة الطلب</span><strong>{LABELS[app.verification]??app.verification}</strong><small>آخر تحديث {new Intl.DateTimeFormat('ar',{dateStyle:'medium'}).format(new Date(app.updated_at))}</small></div>}</section>
+ {params.status==='submitted'&&<div className="system-message success"><strong>تم إرسال طلبك بنجاح.</strong> يمكنك الآن رفع مستندات التوثيق، وسيظهر قرار فريق المراجعة هنا وفي حسابك.</div>}
+ {params.error&&<div className="system-message error">تعذر إرسال الطلب. راجع الحقول المطلوبة ثم حاول مرة أخرى.</div>}
+ {app?.verification_note&&<div className="review-note"><strong>ملاحظة فريق التوثيق</strong><p>{app.verification_note}</p></div>}
+ {app&&<div className="portal-notice"><strong>مستندات التوثيق الخاصة</strong><span>ارفع الترخيص والمؤهلات وإثبات الهوية بصورة خاصة. هذه المستندات لا تظهر للعامة.</span><Link className="button" href="/account/verification-documents">إدارة مستندات التوثيق</Link></div>}
+ <form action={submitSpecialistApplication} className="application-form">
+  <input type="hidden" name="slug" value={app?.slug??''}/>
+  <input type="hidden" name="bio" value={app?.bio??''}/>
+  <input type="hidden" name="email" value={app?.email??''}/>
+  <input type="hidden" name="phone" value={app?.phone??''}/>
+  <input type="hidden" name="website_url" value={app?.website_url??''}/>
+  <input type="hidden" name="region" value={app?.region??''}/>
+  <input type="hidden" name="latitude" value={app?.latitude??''}/>
+  <input type="hidden" name="longitude" value={app?.longitude??''}/>
+  <input type="hidden" name="languages" value={(app?.languages??[]).join('، ')}/>
+  <input type="hidden" name="qualifications" value={quals(app?.qualifications)}/>
+  <section className="portal-section">
+   <div className="section-mini-heading"><h2>المعلومات الأساسية</h2><span>خطوة واحدة قصيرة — الحقول المطلوبة فقط</span></div>
+   <div className="cms-grid">
+    <label>الاسم الكامل<input name="full_name" required minLength={3} maxLength={200} autoComplete="name" defaultValue={app?.full_name??profile.display_name??''}/></label>
+    <label>المسمى المهني<input name="professional_title" required maxLength={240} placeholder="مثال: أخصائي نفسي" defaultValue={app?.professional_title??''}/></label>
+    <label className="cms-wide">التخصص الرئيسي<input name="specialties" required maxLength={500} list="specialty-options" placeholder="مثال: علم النفس السريري" defaultValue={specialtyValue}/><small>يمكن إضافة أكثر من تخصص بالفاصلة عند الحاجة.</small></label>
+    <datalist id="specialty-options">{SPECIALTY_SUGGESTIONS.map(item=><option key={item} value={item}/>)}</datalist>
+    <label>الدولة<input name="country" required maxLength={120} autoComplete="country-name" placeholder="مثال: الأردن" defaultValue={app?.country??''}/></label>
+    <label>المدينة<input name="city" required maxLength={120} autoComplete="address-level2" placeholder="مثال: عمّان" defaultValue={app?.city??''}/></label>
+    <label>سنوات الخبرة<input name="years_experience" required type="number" min="0" max="80" inputMode="numeric" placeholder="0" defaultValue={app?.years_experience??''}/></label>
+    <label>رقم الترخيص أو الاعتماد <span className="field-optional">اختياري</span><input name="license_number" maxLength={160} placeholder="اتركه فارغًا إن لم ينطبق" defaultValue={app?.license_number??''}/></label>
+   </div>
+  </section>
+  <section className="portal-section">
+   <div className="section-mini-heading"><h2>طريقة تقديم الخدمة</h2><span>اختر ما ينطبق عليك</span></div>
+   <div className="provider-service-options">
+    <label className="check-field"><input name="offers_in_person" type="checkbox" defaultChecked={app?.offers_in_person??true}/> <span><strong>حضوري</strong><small>أستقبل المستفيدين وجهًا لوجه</small></span></label>
+    <label className="check-field"><input name="offers_remote" type="checkbox" defaultChecked={app?.offers_remote??false}/> <span><strong>عن بُعد</strong><small>أقدم جلسات أو خدمات إلكترونية</small></span></label>
+   </div>
+  </section>
+  <div className="cms-actions"><button className="primary-action" type="submit">{app?'تحديث وإعادة إرسال الطلب':'إرسال طلب الانضمام'}</button><span>بعد الإرسال تستطيع إضافة النبذة، اللغات، المؤهلات، وسائل التواصل والمستندات من حسابك. لن يُنشر ملفك قبل الاعتماد.</span></div>
+ </form>
  </main><SiteFooter/></>;
 }
