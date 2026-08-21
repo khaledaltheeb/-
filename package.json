@@ -4,8 +4,8 @@
   "private": true,
   "engines": { "node": ">=22.0.0" },
   "scripts": {
-    "dev": "node scripts/materialize-legacy-static-assets.mjs && node scripts/build_psych_encyclopedia_assets.mjs && next dev",
-    "build": "node scripts/materialize-legacy-static-assets.mjs && node scripts/build_psych_encyclopedia_assets.mjs && next build",
+    "dev": "node scripts/build_psych_encyclopedia_assets.mjs && node scripts/materialize-legacy-static-assets.mjs && next dev",
+    "build": "node scripts/build_psych_encyclopedia_assets.mjs && node scripts/materialize-legacy-static-assets.mjs && next build",
     "start": "next start",
     "preview": "node scripts/materialize-legacy-static-assets.mjs && opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy": "node scripts/materialize-legacy-static-assets.mjs && opennextjs-cloudflare build && opennextjs-cloudflare deploy",
