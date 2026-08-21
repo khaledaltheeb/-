@@ -1,16 +1,9 @@
 name: Deploy Production
 
-# Production deployment contract: validated main releases deploy to Cloudflare.
+# Manual fallback only. The live Rawafid Worker is deployed from
+# cloudflare-workers-deploy by Cloudflare Workers Builds Git integration.
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/deploy-production.yml'
-  workflow_run:
-    workflows: ["Cloudflare Workers Validate"]
-    types: [completed]
-    branches: [main]
 
 concurrency:
   group: rawafid-production-deploy
@@ -21,7 +14,6 @@ permissions:
 
 jobs:
   deploy:
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'push' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
     env:
