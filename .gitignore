@@ -16,7 +16,7 @@ coverage/
 public/encyclopedia-data/
 bundled/
 
-# Deterministically materialized from data/legacy-static-assets-v1.chunk*.b64
+# Deterministically materialized from the validated v3 legacy static-asset bundle
 public/api/v1/iris-learning-pathways.json
 public/api/v1/openapi.json
 public/api/v1/assistive-technology-resources.json
