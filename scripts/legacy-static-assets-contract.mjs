@@ -44,10 +44,13 @@ const dynamicRoutes = [
 ];
 
 const partNames = [
-  'legacy-static-assets-v2.part1.b64',
+  'legacy-static-assets-v3.chunk01.b64',
+  'legacy-static-assets-v3.chunk02.b64',
+  'legacy-static-assets-v3.prefix03.b64',
   'legacy-static-assets-v2.part2.b64',
   'legacy-static-assets-v2.part3.b64',
-  'legacy-static-assets-v2.part4a.b64',
+  'legacy-static-assets-v3.tail4a1.b64',
+  'legacy-static-assets-v3.tail4a2.b64',
   'legacy-static-assets-v2.part4b.b64',
 ];
 const expectedBase64Length = 53548;
