@@ -1,13 +1,13 @@
 import type { Metadata } from 'next';
 import { RAWAFID_BRAND_NAME, RAWAFID_BRAND_SHORT } from '@/lib/theme';
 
-export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://healthrenewal.org').replace(/\/$/, '');
+export const SITE_URL = (process.env.RAWAFID_SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://healthrenewal.org').replace(/\/$/, '');
 export const BRAND_NAME = RAWAFID_BRAND_NAME;
 export const BRAND_SHORT = RAWAFID_BRAND_SHORT;
 export const DEFAULT_LOCALE = 'ar_AR';
 export const DEFAULT_DESCRIPTION = 'منصة روافد العربية للصحة النفسية والتعافي والدمج والتمكين: معرفة موثوقة، أدلة عملية، مختصون ومراكز وخدمات مترابطة ضمن تجربة مؤسسية آمنة.';
 
-const INDEXING_ENABLED = process.env.NEXT_PUBLIC_ALLOW_INDEXING === 'true';
+export const INDEXING_ENABLED = process.env.RAWAFID_ALLOW_INDEXING === 'true' || process.env.NEXT_PUBLIC_ALLOW_INDEXING === 'true';
 
 function absoluteUrl(pathOrUrl: string) {
   if (/^https?:\/\//i.test(pathOrUrl)) return pathOrUrl;
