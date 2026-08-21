@@ -30,6 +30,7 @@ const requiredFiles=[
   'supabase/migrations/20260821162055_content_revision_fingerprint_concurrency_guard.sql',
   'supabase/migrations/20260821162411_complete_content_version_relation_snapshots.sql',
   'supabase/migrations/20260821162804_reconcile_content_primary_category_relations.sql',
+  'supabase/migrations/20260821163002_enforce_single_primary_content_category.sql',
 ];
 for(const path of requiredFiles)requireFile(path);
 if(fs.existsSync('supabase/migrations/20260818154000_legacy_release_pipeline_repair.sql'))fail('stale combined legacy migration must not diverge from production migration history');
@@ -163,9 +164,12 @@ for(const marker of [
   'cc.category_id=c.category_id and cc.is_primary=true',
 ]) if(!primaryReconcile.includes(marker))fail(`primary category reconciliation migration missing ${marker}`);
 
+const primaryConstraint=read('supabase/migrations/20260821163002_enforce_single_primary_content_category.sql');
+for(const marker of ['create unique index if not exists content_categories_one_primary_per_content_idx','where is_primary=true'])if(!primaryConstraint.includes(marker))fail(`single primary category constraint missing ${marker}`);
+
 const historicalPromoter=read('supabase/migrations/20260818154018_replace_legacy_promoter_with_release_contract_tag.sql');
 if(!historicalPromoter.includes("'migration_release_contract_version',1"))fail('production-aligned legacy promoter release tag missing');
 const historicalGate=read('supabase/migrations/20260818154221_centralize_legacy_authoritative_reference_domains.sql');
 for(const marker of ['private.is_recognized_authoritative_reference_url','private.content_release_gate_legacy'])if(!historicalGate.includes(marker))fail(`production-aligned legacy gate missing ${marker}`);
 
-if(!process.exitCode)console.log('Rawafid CMS workflow, V6 release contract, zero-downtime revisions, fingerprint concurrency, complete relation snapshots, primary category reconciliation, role boundary and integrity contract passed.');
+if(!process.exitCode)console.log('Rawafid CMS workflow, V6 release contract, zero-downtime revisions, fingerprint concurrency, complete relation snapshots, primary category reconciliation/constraint, role boundary and integrity contract passed.');
