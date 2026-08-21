@@ -7,7 +7,7 @@ const requireFile=(path)=>{if(!fs.existsSync(path)){console.error(`PROVIDER SYST
 for(const path of [
   'app/join/page.tsx','app/join/specialist/page.tsx','app/join/center/page.tsx','app/join/actions.ts','app/dashboard/page.tsx',
   'components/location-map.tsx','app/system-portals-v1.css','supabase/migrations/20260808222000_provider_application_workflow.sql',
-  'supabase/migrations/20260808223000_provider_application_read_boundary.sql'
+  'supabase/migrations/20260808223000_provider_application_read_boundary.sql','app/appointments/new/appointment-request-form.tsx'
 ]) requireFile(path);
 
 requireText('app/join/actions.ts',['submit_specialist_application','submit_center_application','requireStandardUser']);
@@ -24,6 +24,11 @@ requireText('app/login/page.tsx',['name="next"','/join','/register?next=']);
 requireText('lib/supabase/proxy.ts',["'/dashboard'","'/center'","'/specialist'","url.searchParams.set('next'"]);
 requireText('app/messages/actions.ts',["rpc('start_conversation'","rpc('send_message'","rpc('report_conversation'"]);
 requireText('app/appointments/actions.ts',["rpc('request_appointment'","rpc('requester_cancel_appointment'","rpc('provider_update_appointment'"]);
+requireText('app/appointments/new/page.tsx',['AppointmentRequestForm']);
+const appointmentForm=requireText('app/appointments/new/appointment-request-form.tsx',["'use client'",'name="starts_at_utc"','toISOString()','type="datetime-local"','disabled={!startsAtUtc','client_timezone']);
+if(appointmentForm.includes('dangerouslySetInnerHTML')){console.error('PROVIDER SYSTEM CONTRACT FAILED: appointment form must not depend on inline script execution');process.exitCode=1;}
+const appointmentPage=read('app/appointments/new/page.tsx');
+if(appointmentPage.includes('appointmentTimeScript')||appointmentPage.includes('dangerouslySetInnerHTML')){console.error('PROVIDER SYSTEM CONTRACT FAILED: appointment page contains legacy inline time script');process.exitCode=1;}
 requireText('app/centers/[slug]/page.tsx',['LocationMap','public_latitude','public_longitude']);
 requireText('app/specialists/[slug]/page.tsx',['LocationMap','public_latitude','public_longitude']);
 requireText('app/theme-admin-v4.css',["@import './system-portals-v1.css';"]);
