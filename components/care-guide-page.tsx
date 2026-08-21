@@ -133,7 +133,7 @@ export default function CareGuidePage({ record, items = [], related = [], routeS
         {record.excerpt ? <p>{record.excerpt}</p> : null}
         <div className="article-meta">
           {record.author_display_name ? <span>إعداد: {record.author_display_name}</span> : null}
-          {review.reviewerName ? <span>مراجعة: {review.reviewerName}{review.reviewerCredentials ? ` — ${review.reviewerCredentials}` : ''}</span> : null}
+          {review.reviewerName ? <span>تمت المراجعة بواسطة {review.reviewerName}{review.reviewerCredentials ? ` — ${review.reviewerCredentials}` : ''}</span> : null}
           {record.published_at ? <span>نُشر {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(record.published_at))}</span> : null}
           {review.lastReviewedAt ? <span>آخر مراجعة {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(review.lastReviewedAt))}</span> : null}
         </div>
