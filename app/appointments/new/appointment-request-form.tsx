@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { requestAppointment } from '../actions';
 
 type Props = {
@@ -20,7 +20,13 @@ export default function AppointmentRequestForm({ specialistId, centerId, convers
   const [localStart, setLocalStart] = useState('');
   const [startsAtUtc, setStartsAtUtc] = useState('');
   const [timeError, setTimeError] = useState('');
-  const minimumLocal = useMemo(() => toLocalInputValue(new Date(Date.now() + 20 * 60_000)), []);
+  const [minimumLocal, setMinimumLocal] = useState('');
+  const [clientTimezone, setClientTimezone] = useState('UTC');
+
+  useEffect(() => {
+    setMinimumLocal(toLocalInputValue(new Date(Date.now() + 20 * 60_000)));
+    setClientTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC');
+  }, []);
 
   function syncTime(value: string) {
     setLocalStart(value);
@@ -50,13 +56,13 @@ export default function AppointmentRequestForm({ specialistId, centerId, convers
       {centerId && <input type="hidden" name="center_id" value={centerId} />}
       {conversationId && <input type="hidden" name="conversation_id" value={conversationId} />}
       <input type="hidden" name="starts_at_utc" value={startsAtUtc} />
-      <input type="hidden" name="client_timezone" value={Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'} />
+      <input type="hidden" name="client_timezone" value={clientTimezone} />
       <label>
         الوقت المقترح حسب توقيت جهازك
         <input
           type="datetime-local"
           required
-          min={minimumLocal}
+          min={minimumLocal || undefined}
           value={localStart}
           onChange={(event) => syncTime(event.currentTarget.value)}
           aria-invalid={Boolean(timeError)}
