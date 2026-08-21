@@ -43,7 +43,9 @@ jobs:
         run: npm run lint
       - name: Architecture contracts
         run: npm run architecture-check
+      - name: Verify Cloudflare credentials and account access
+        run: npx wrangler whoami
       - name: Build Cloudflare Worker with OpenNext
         run: npx opennextjs-cloudflare build
-      - name: Deploy Cloudflare Worker
-        run: npx wrangler deploy --keep-vars
+      - name: Deploy Cloudflare Worker with OpenNext
+        run: npx opennextjs-cloudflare deploy -- --keep-vars
