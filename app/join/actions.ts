@@ -12,6 +12,7 @@ function optionalInteger(fd:FormData,key:string,min:number,max:number){const raw
 function validEmail(raw:string){return !raw||/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(raw)}
 function safeWebsite(raw:string){if(!raw)return null;try{const url=new URL(raw);return ['http:','https:'].includes(url.protocol)?url.toString():null}catch{return null}}
 function parseHours(raw:string){const result:Record<string,string>={};for(const line of raw.split('\n').map(v=>v.trim()).filter(Boolean).slice(0,14)){const split=line.indexOf(':');if(split<1)continue;const day=line.slice(0,split).trim().slice(0,60);const hours=line.slice(split+1).trim().slice(0,120);if(day&&hours)result[day]=hours;}return result;}
+function generatedSpecialistSlug(){return `specialist-${crypto.randomUUID().replace(/-/g,'').slice(0,12)}`;}
 
 async function requireStandardUser(next:string){
  const supabase=await createClient();const {data:claims}=await supabase.auth.getClaims();const uid=claims?.claims?.sub;if(!uid)redirect(`/login?next=${encodeURIComponent(next)}`);
@@ -22,7 +23,9 @@ async function requireStandardUser(next:string){
 
 export async function submitSpecialistApplication(formData:FormData){
  const supabase=await requireStandardUser('/join/specialist');
- const slug=text(formData,'slug',140).toLowerCase(),fullName=text(formData,'full_name',200),email=text(formData,'email',254),websiteRaw=text(formData,'website_url',500);
+ const submittedSlug=text(formData,'slug',140).toLowerCase();
+ const slug=submittedSlug||generatedSpecialistSlug();
+ const fullName=text(formData,'full_name',200),email=text(formData,'email',254),websiteRaw=text(formData,'website_url',500);
  const latitudeRaw=text(formData,'latitude',40),longitudeRaw=text(formData,'longitude',40),experienceRaw=text(formData,'years_experience',20);
  const latitude=optionalNumber(formData,'latitude',-90,90),longitude=optionalNumber(formData,'longitude',-180,180),experience=optionalInteger(formData,'years_experience',0,80),website=safeWebsite(websiteRaw);
  if(!SLUG_RE.test(slug)||fullName.length<3||!validEmail(email)||(websiteRaw&&!website)||(latitudeRaw&&latitude===null)||(longitudeRaw&&longitude===null)||(experienceRaw&&experience===null))redirect('/join/specialist?error=invalid-input');
