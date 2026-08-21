@@ -11,7 +11,9 @@
   "vars": {
     "NEXT_PUBLIC_SITE_URL": "https://rawafid-platform-staging.khaledaltheeb.workers.dev",
     "NEXT_PUBLIC_ALLOW_INDEXING": "true",
-    "NEXT_PUBLIC_ENABLE_ANALYTICS": "false"
+    "NEXT_PUBLIC_ENABLE_ANALYTICS": "false",
+    "RAWAFID_SITE_URL": "https://rawafid-platform-staging.khaledaltheeb.workers.dev",
+    "RAWAFID_ALLOW_INDEXING": "true"
   },
   "assets": {
     "directory": ".open-next/assets",
