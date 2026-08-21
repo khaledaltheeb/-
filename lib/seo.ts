@@ -1,13 +1,20 @@
 import type { Metadata } from 'next';
 import { RAWAFID_BRAND_NAME, RAWAFID_BRAND_SHORT } from '@/lib/theme';
 
-export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://healthrenewal.org').replace(/\/$/, '');
+export const PRODUCTION_SITE_URL = 'https://healthrenewal.org';
+export const STAGING_SITE_URL = 'https://rawafid-platform-staging.khaledaltheeb.workers.dev';
+export const SITE_URL = (process.env.RAWAFID_SITE_URL || STAGING_SITE_URL).replace(/\/$/, '');
 export const BRAND_NAME = RAWAFID_BRAND_NAME;
 export const BRAND_SHORT = RAWAFID_BRAND_SHORT;
 export const DEFAULT_LOCALE = 'ar_AR';
 export const DEFAULT_DESCRIPTION = 'منصة روافد العربية للصحة النفسية والتعافي والدمج والتمكين: معرفة موثوقة، أدلة عملية، مختصون ومراكز وخدمات مترابطة ضمن تجربة مؤسسية آمنة.';
 
-const INDEXING_ENABLED = process.env.NEXT_PUBLIC_ALLOW_INDEXING === 'true';
+export function isIndexingEnabled() {
+  const runtimeOverride = process.env.RAWAFID_ALLOW_INDEXING;
+  if (runtimeOverride === 'true') return true;
+  if (runtimeOverride === 'false') return false;
+  return SITE_URL === STAGING_SITE_URL;
+}
 
 function absoluteUrl(pathOrUrl: string) {
   if (/^https?:\/\//i.test(pathOrUrl)) return pathOrUrl;
@@ -48,7 +55,7 @@ export function buildSeoMetadata(input: SeoMetadataInput): Metadata {
   const title = clampTitle(input.title);
   const description = clampDescription(input.description);
   const canonical = absoluteUrl(input.path);
-  const canIndex = INDEXING_ENABLED && input.index !== false;
+  const canIndex = isIndexingEnabled() && input.index !== false;
   const canFollow = canIndex && input.follow !== false;
   const image = input.image ? absoluteUrl(input.image) : undefined;
   const languages = input.hreflang
