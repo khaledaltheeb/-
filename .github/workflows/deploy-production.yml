@@ -1,12 +1,11 @@
 name: Deploy Production
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
   workflow_run:
     workflows: ["Cloudflare Workers Validate"]
     types: [completed]
+    branches: [main]
 
 concurrency:
   group: rawafid-production-deploy
@@ -17,7 +16,7 @@ permissions:
 
 jobs:
   deploy:
-    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
     env:
