@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { requestAppointment } from '../actions';
 
 type Props = {
@@ -23,12 +23,13 @@ export default function AppointmentRequestForm({ specialistId, centerId, convers
   const [minimumLocal, setMinimumLocal] = useState('');
   const [clientTimezone, setClientTimezone] = useState('UTC');
 
-  useEffect(() => {
+  function refreshBrowserContext() {
     setMinimumLocal(toLocalInputValue(new Date(Date.now() + 20 * 60_000)));
     setClientTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC');
-  }, []);
+  }
 
   function syncTime(value: string) {
+    refreshBrowserContext();
     setLocalStart(value);
     if (!value) {
       setStartsAtUtc('');
@@ -64,6 +65,7 @@ export default function AppointmentRequestForm({ specialistId, centerId, convers
           required
           min={minimumLocal || undefined}
           value={localStart}
+          onFocus={refreshBrowserContext}
           onChange={(event) => syncTime(event.currentTarget.value)}
           aria-invalid={Boolean(timeError)}
           aria-describedby={timeError ? 'appointment-time-error' : undefined}
