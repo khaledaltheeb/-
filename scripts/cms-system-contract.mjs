@@ -17,6 +17,7 @@ const requiredFiles=[
   'lib/supabase/proxy.ts',
   'supabase/migrations/20260821113049_cms_audit_integrity_hardening.sql',
   'supabase/migrations/20260821154825_cms_release_contract_editor_hardening.sql',
+  'supabase/migrations/20260821155526_cms_release_contract_rpc_least_privilege.sql',
 ];
 for(const path of requiredFiles)requireFile(path);
 
@@ -65,6 +66,13 @@ for(const marker of [
   'grant execute on function public.set_content_release_contract_v6(uuid,jsonb) to authenticated, service_role',
   "content_contract_version','') ~ '^[0-9]+$'",
 ]) if(!migration.includes(marker))fail(`V6 migration missing ${marker}`);
+
+const leastPrivilege=read('supabase/migrations/20260821155526_cms_release_contract_rpc_least_privilege.sql');
+for(const marker of [
+  'revoke execute on function public.set_content_release_contract_v6(uuid,jsonb) from anon',
+  'revoke execute on function private.set_content_release_contract_v6(uuid,jsonb) from anon',
+  'grant execute on function public.set_content_release_contract_v6(uuid,jsonb) to authenticated, service_role',
+]) if(!leastPrivilege.includes(marker))fail(`V6 least-privilege migration missing ${marker}`);
 
 const auditMigration=read('supabase/migrations/20260821113049_cms_audit_integrity_hardening.sql');
 for(const marker of ['live or scheduled content must be explicitly withdrawn','content_seo_authority_update','revoke truncate, references, trigger','revoke maintain'])if(!auditMigration.includes(marker))fail(`audit migration sync missing ${marker}`);
