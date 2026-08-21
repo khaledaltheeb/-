@@ -54,3 +54,18 @@ jobs:
         run: npx opennextjs-cloudflare build
       - name: Deploy Cloudflare Worker with OpenNext
         run: npx opennextjs-cloudflare deploy
+      - name: Verify deployed indexability and nested evidence route
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="${NEXT_PUBLIC_SITE_URL}"
+          stamp="${GITHUB_SHA}"
+          sitemap="$(curl -fsS --retry 8 --retry-delay 3 --retry-all-errors "${base}/sitemaps/content.xml?page=0&deploy=${stamp}")"
+          printf '%s' "${sitemap}" | grep -q '<url>'
+          page="$(curl -fsS --retry 8 --retry-delay 3 --retry-all-errors "${base}/magazine/pediatric-oncology/studies/pediatric-neuroblastoma-racotumomab-phase2-42136000/?deploy=${stamp}")"
+          printf '%s' "${page}" | grep -q 'rel="canonical"'
+          printf '%s' "${page}" | grep -q 'name="robots"'
+          if printf '%s' "${page}" | grep -qi 'noindex'; then
+            echo 'Deployed nested evidence route is unexpectedly noindex.' >&2
+            exit 1
+          fi
