@@ -18,7 +18,7 @@ async function siteOrigin() {
   if (origin) return origin.replace(/\/$/, '');
   const host = requestHeaders.get('x-forwarded-host') || requestHeaders.get('host');
   const proto = requestHeaders.get('x-forwarded-proto') || 'https';
-  return host ? `${proto}://${host}` : 'https://healthrenewal.org';
+  return host ? `${proto}://${host}` : 'https://rawafid-platform-staging.khaledaltheeb.workers.dev';
 }
 
 export async function requestPasswordReset(formData: FormData) {

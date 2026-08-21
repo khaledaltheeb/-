@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { SITE_URL } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,7 +21,7 @@ export async function GET(request: Request, { params }: { params: Params }) {
     return new NextResponse('Not found', { status: 404 });
   }
 
-  const canonical = `https://healthrenewal.org${requestedCanonical}`;
+  const canonical = `${SITE_URL}${requestedCanonical}`;
   const html = `<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="robots" content="index,follow"><meta name="rawafid-release-token" content="${token}"><link rel="canonical" href="${canonical}"><title>Rawafid release verification</title></head><body><main data-release-verification="pediatric-oncology">${canonical}</main></body></html>`;
 
   return new NextResponse(html, {

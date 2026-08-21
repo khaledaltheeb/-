@@ -105,7 +105,7 @@ requireText('app/pwa-icon-512/route.ts',['createPwaIcon(512)']);
 if(read('app/opengraph-image.tsx').includes("runtime = 'edge'")||read('app/twitter-image.tsx').includes("runtime = 'edge'")) fail('deprecated Edge runtime must not be used for social image routes');
 requireText('app/layout.tsx',["'./theme-empty.css'","'./dashboard-v3.css'","'./theme-preview.css'","'./public-modules-v3.css'","'./system-states.css'","'./content-v3.css'","'./structured-content.css'","'./block-editor-v3.css'","'./profile-v3.css'","'./admin-shell-v3.css'","/pwa-icon-180"]);
 requireText('app/api/health/route.ts',['supabase: \'ok\'','database: \'ok\'','status: \'ok\'']);
-requireText('.env.example',['NEXT_PUBLIC_SITE_URL=https://healthrenewal.org','NEXT_PUBLIC_ALLOW_INDEXING=false']);
-requireText('lib/seo.ts',["'https://healthrenewal.org'"]);
+requireText('.env.example',['NEXT_PUBLIC_SITE_URL=https://rawafid-platform-staging.khaledaltheeb.workers.dev','NEXT_PUBLIC_ALLOW_INDEXING=false']);
+requireText('lib/seo.ts',["'https://rawafid-platform-staging.khaledaltheeb.workers.dev'"]);
 
 if(!process.exitCode)console.log('Rawafid architecture/privacy/PWA/theme/content-readiness quality contract passed.');
