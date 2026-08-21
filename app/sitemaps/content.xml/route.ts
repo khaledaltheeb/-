@@ -13,6 +13,17 @@ type SitemapRow = {
   priority: number;
 };
 
+type ContentSitemapRecord = {
+  slug: string;
+  updated_at: string | null;
+  canonical_url: string | null;
+  schema_json: Record<string, unknown> | null;
+};
+
+function isLegacyPreserved(item: ContentSitemapRecord) {
+  return Boolean(item.schema_json && typeof item.schema_json === 'object' && 'legacy_migration' in item.schema_json);
+}
+
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const raw = Number(url.searchParams.get('page') ?? '0');
@@ -23,7 +34,7 @@ export async function GET(request: Request) {
 
   const { data, error } = await supabase
     .from('content')
-    .select('slug,updated_at,canonical_url')
+    .select('slug,updated_at,canonical_url,schema_json')
     .eq('status', 'published')
     .neq('content_type', 'condition')
     .not('slug', 'like', 'quick-info-%')
@@ -39,12 +50,14 @@ export async function GET(request: Request) {
     throw new Error('content sitemap query returned no data array');
   }
 
-  const databaseRows: SitemapRow[] = data.map((item) => ({
-    path: item.canonical_url || `/content/${item.slug}`,
-    lastModified: item.updated_at,
-    changeFrequency: 'monthly',
-    priority: .7,
-  }));
+  const databaseRows: SitemapRow[] = (data as ContentSitemapRecord[])
+    .filter((item) => !isLegacyPreserved(item))
+    .map((item) => ({
+      path: item.canonical_url || `/content/${item.slug}`,
+      lastModified: item.updated_at,
+      changeFrequency: 'monthly',
+      priority: .7,
+    }));
 
   const generatedRows: SitemapRow[] = page === 0
     ? getCognitivePageIndex().map((item) => ({
