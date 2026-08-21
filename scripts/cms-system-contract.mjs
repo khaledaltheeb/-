@@ -13,11 +13,16 @@ const requiredFiles=[
   'app/admin/content/seo-actions.ts',
   'app/admin/content/release-actions.ts',
   'app/admin/content/release-contract-form.tsx',
+  'app/admin/content/revision-actions.ts',
+  'app/admin/content/content-form.tsx',
   'app/admin/layout.tsx',
   'lib/supabase/proxy.ts',
   'supabase/migrations/20260821113049_cms_audit_integrity_hardening.sql',
   'supabase/migrations/20260821154825_cms_release_contract_editor_hardening.sql',
   'supabase/migrations/20260821155526_cms_release_contract_rpc_least_privilege.sql',
+  'supabase/migrations/20260821160036_reconcile_legacy_promoted_draft_publish_state.sql',
+  'supabase/migrations/20260821160229_guard_referenced_media_deletion.sql',
+  'supabase/migrations/20260821160526_published_content_zero_downtime_revisions.sql',
 ];
 for(const path of requiredFiles)requireFile(path);
 
@@ -35,16 +40,23 @@ if(!layout.includes("if(editorial&&!fullAdmin&&!isContentPath(pathname))redirect
 
 requireText('lib/supabase/proxy.ts',["headers.set('x-rawafid-pathname', trustedPathname)",'forwardedHeaders()']);
 requireText('app/admin/content/new/page.tsx',["['owner', 'admin', 'editor']"]);
-requireText('app/admin/content/page.tsx',["new Set(['owner','admin','editor','scientific_reviewer','seo_manager'])",'canCreate']);
+requireText('app/admin/content/page.tsx',["new Set(['owner','admin','editor','scientific_reviewer','seo_manager'])",'canCreate','نسخة تحريرية','revisionTarget']);
 
 const actions=requireText('app/admin/content/actions.ts',['requireContentStaff','requireContentEditor','scheduleContent','restoreVersion']);
 if(!actions.includes("const CONTENT_EDITORS = new Set(['owner','admin','editor'])"))fail('body editing role boundary missing');
 
 const editor=read('app/admin/content/[id]/page.tsx');
-for(const marker of ['ReleaseContractForm','updateReleaseContract','schema_json','transitionsFor','EDITOR_BODY_STATES','authorityEditable','canRestore'])if(!editor.includes(marker))fail(`content editor missing ${marker}`);
+for(const marker of ['ReleaseContractForm','updateReleaseContract','schema_json','transitionsFor','EDITOR_BODY_STATES','authorityEditable','canRestore','beginPublishedRevision','applyPublishedRevision','Zero-Downtime Revision','revisionMode={isRevision}','contains(\'schema_json\',{revision_of:record.id})'])if(!editor.includes(marker))fail(`content editor missing ${marker}`);
 if(editor.includes('name="medical_disclaimer"'))fail('page-specific medical disclaimer editor must not exist');
 if(!editor.includes('/disclaimer')||!editor.includes('إخلاء المسؤولية والتنبيهات'))fail('central disclaimer notice missing from CMS');
 if(!editor.includes('source_type')||!editor.includes('authority_tier'))fail('reference V6 source metadata missing from editor');
+if(!editor.includes("record.status==='approved'&&!isRevision"))fail('revisions must never use the normal scheduling UI');
+
+const contentForm=read('app/admin/content/content-form.tsx');
+for(const marker of ['revisionMode=false','readOnly={revisionMode}','نسخة التحرير Noindex دائماً','الـCanonical ثابت أثناء Revision'])if(!contentForm.includes(marker))fail(`revision content form missing ${marker}`);
+
+const revisionActions=read('app/admin/content/revision-actions.ts');
+for(const marker of ['create_published_content_revision','apply_published_content_revision',"new Set(['owner','admin','editor'])",'revision-apply-failed'])if(!revisionActions.includes(marker))fail(`revision server action missing ${marker}`);
 
 const seo=read('app/admin/content/seo-actions.ts');
 for(const marker of ['SOURCE_TYPES','AUTHORITY_TIERS','source_type','authority_tier','p_medical_disclaimer: null'])if(!seo.includes(marker))fail(`SEO V6 source contract missing ${marker}`);
@@ -77,4 +89,26 @@ for(const marker of [
 const auditMigration=read('supabase/migrations/20260821113049_cms_audit_integrity_hardening.sql');
 for(const marker of ['live or scheduled content must be explicitly withdrawn','content_seo_authority_update','revoke truncate, references, trigger','revoke maintain'])if(!auditMigration.includes(marker))fail(`audit migration sync missing ${marker}`);
 
-if(!process.exitCode)console.log('Rawafid CMS workflow, V6 release contract, role boundary and integrity contract passed.');
+const stateReconcile=read('supabase/migrations/20260821160036_reconcile_legacy_promoted_draft_publish_state.sql');
+for(const marker of ['PROMOTED_DRAFT','legacy_promoted_draft_state_reconciled','content_published_requires_published_at',"status <> 'published'::public.content_status or published_at is not null"])if(!stateReconcile.includes(marker))fail(`published-state integrity migration missing ${marker}`);
+
+const mediaGuard=read('supabase/migrations/20260821160229_guard_referenced_media_deletion.sql');
+for(const marker of ['media asset is referenced by content','media asset is referenced by a profile','media asset is referenced by a center','featured_image_url','body_json','schema_json'])if(!mediaGuard.includes(marker))fail(`referenced-media guard missing ${marker}`);
+
+const revisionMigration=read('supabase/migrations/20260821160526_published_content_zero_downtime_revisions.sql');
+for(const marker of [
+  'private.content_revision_state_guard',
+  'private.create_published_content_revision',
+  'private.apply_published_content_revision',
+  'content revisions cannot be scheduled or published directly',
+  'revision_source_updated_at',
+  'live content changed after this revision started; start a fresh revision before applying',
+  'published revision cannot change canonical identity',
+  "status='published'::public.content_status",
+  'published_at=v_live.published_at',
+  'published_revision_applied',
+  'revoke all on function public.create_published_content_revision(uuid) from public,anon',
+  'revoke all on function public.apply_published_content_revision(uuid) from public,anon',
+]) if(!revisionMigration.includes(marker))fail(`zero-downtime revision migration missing ${marker}`);
+
+if(!process.exitCode)console.log('Rawafid CMS workflow, V6 release contract, zero-downtime revisions, role boundary and integrity contract passed.');
