@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next';
-import { SITE_URL } from '@/lib/seo';
+import { INDEXING_ENABLED, SITE_URL } from '@/lib/seo';
 
-const INDEXING_ENABLED = process.env.NEXT_PUBLIC_ALLOW_INDEXING === 'true';
+export const dynamic = 'force-dynamic';
 
 export default function robots(): MetadataRoute.Robots {
   if (!INDEXING_ENABLED) {
