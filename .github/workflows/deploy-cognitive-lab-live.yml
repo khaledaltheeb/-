@@ -92,7 +92,7 @@ jobs:
             exit 1
           fi
           printf '%s\n' "$auth_output"
-          if printf '%s' "$auth_output" | grep -Eqi 'not authenticated|please run [`'"'"']?wrangler login|not logged in'; then
+          if printf '%s' "$auth_output" | grep -Eqi 'not authenticated|wrangler login|not logged in'; then
             echo 'Wrangler did not authenticate with the configured API token.' >&2
             exit 1
           fi
