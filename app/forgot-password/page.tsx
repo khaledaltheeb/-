@@ -19,7 +19,7 @@ export default async function ForgotPasswordPage({ searchParams }: { searchParam
   return (
     <main className="auth-shell">
       <section className="auth-card auth-card-polished" aria-labelledby="forgot-title">
-        <Link href="/" className="brand auth-brand"><span className="brand-mark">ر</span><span><strong>منصة روافد</strong><small>Rawafid Platform</small></span></Link>
+        <Link href="/" className="brand auth-brand"><span className="brand-mark">ر</span><span><strong>منصة روافد</strong><small>معرفة · دعم · خدمات موثقة</small></span></Link>
         <span className="eyebrow">استعادة الحساب</span>
         <h1 id="forgot-title">نسيت كلمة المرور؟</h1>
         <p>أدخل بريد الحساب. إذا كان البريد مسجلًا، سيصلك رابط آمن لتعيين كلمة مرور جديدة.</p>
@@ -34,7 +34,7 @@ export default async function ForgotPasswordPage({ searchParams }: { searchParam
           <button className="auth-primary" type="submit">إرسال رابط الاستعادة</button>
         </form>
 
-        <div className="auth-links"><Link href="/login">العودة إلى تسجيل الدخول</Link><Link href="/">العودة إلى الرئيسية</Link></div>
+        <div className="auth-links"><Link href="/login">العودة إلى تسجيل الدخول</Link><Link href="/privacy">الخصوصية</Link><Link href="/">العودة إلى الرئيسية</Link></div>
       </section>
     </main>
   );
