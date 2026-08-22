@@ -24,7 +24,7 @@ export default async function RegisterPage({ searchParams }: { searchParams: Sea
   return (
     <main className="auth-shell">
       <section className="auth-card auth-card-polished" aria-labelledby="register-title">
-        <Link href="/" className="brand auth-brand"><span className="brand-mark">ر</span><span><strong>منصة روافد</strong><small>Rawafid Platform</small></span></Link>
+        <Link href="/" className="brand auth-brand"><span className="brand-mark">ر</span><span><strong>منصة روافد</strong><small>معرفة · دعم · خدمات موثقة</small></span></Link>
         <span className="eyebrow">حساب جديد</span>
         <h1 id="register-title">إنشاء حساب في منصة روافد</h1>
         <p>أنشئ حسابًا شخصيًا أولًا. الصلاحيات المهنية والإدارية لا تُمنح إلا بعد التوثيق أو قرار الإدارة.</p>
@@ -43,7 +43,8 @@ export default async function RegisterPage({ searchParams }: { searchParams: Sea
           <input id="confirm_password" name="confirm_password" type="password" autoComplete="new-password" required minLength={10} maxLength={128} />
           <button className="auth-primary" type="submit">إنشاء الحساب وإرسال التحقق</button>
         </form>
-        <div className="auth-links"><Link href={`/login?next=${encodeURIComponent(next)}`}>لدي حساب بالفعل</Link><Link href="/join">الانضمام المهني</Link><Link href="/">الرئيسية</Link></div>
+        <small className="auth-note">بإنشاء الحساب أنت تستخدم المنصة وفق <Link href="/terms">شروط الاستخدام</Link> و<Link href="/privacy">سياسة الخصوصية</Link>.</small>
+        <div className="auth-links"><Link href={`/login?next=${encodeURIComponent(next)}`}>لدي حساب بالفعل</Link><Link href="/join">الانضمام المهني</Link><Link href="/privacy">الخصوصية</Link><Link href="/">الرئيسية</Link></div>
       </section>
     </main>
   );
