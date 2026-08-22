@@ -63,9 +63,11 @@ if(!encyclopedia.includes('getEncyclopediaRecord')||!encyclopedia.includes('if (
 const quickInfo=read('app/quick-info/[slug]/page.tsx');
 if(!quickInfo.includes('getQuickInfoRecord')||!quickInfo.includes('if (!record)')) fail('reviewed Quick Info content must keep priority over preserved fallback');
 for(const marker of [
-  "modernTakeoverRoutes=new Set(['/quick-info/accountability-vs-self-blame/'])",
-  "['/quick-info/accountability-vs-self-blame/','تحمل مسؤولية أم جلد ذات',false]",
-  'modern takeover unexpectedly fell back to the preserved-page renderer',
+  'const upgradedRoutes=[',
+  "['/quick-info/accountability-vs-self-blame/','تحمل مسؤولية أم جلد ذات']",
+  'reviewed current-content marker missing',
+  'stale fallback preservation banner rendered after reviewed migration',
+  'reviewed published route unexpectedly remained noindex',
   'migrated route must remain noindex until its current review permits indexing',
   "requiresPreservedBanner&&!body.includes('نسخة إنتاجية محفوظة')"
 ]) if(!preservationSmoke.includes(marker)) fail(`modern/fallback preservation smoke marker missing: ${marker}`);

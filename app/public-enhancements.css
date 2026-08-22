@@ -1,3 +1,5 @@
+@import './discovery-v1.css';
+
 .breadcrumbs{display:flex;align-items:center;gap:8px;flex-wrap:wrap;width:min(100%,1180px);margin:28px auto 4px;color:var(--muted);font-size:12px}.breadcrumbs a{color:var(--teal-dark);font-weight:800;text-decoration:none}.breadcrumbs a:hover{text-decoration:underline}.breadcrumbs span[aria-current="page"]{color:var(--ink-soft)}
 
 .sector-page .sector-hero,.compact-hero{border:1px solid var(--line);border-inline-start:6px solid var(--accent,var(--teal));border-radius:var(--radius-lg);background:linear-gradient(145deg,#f4fbf9,#fffaf2);box-shadow:var(--shadow-sm)}.sector-search{display:flex;max-width:720px;margin-top:24px;border:1px solid var(--line-strong);border-radius:14px;background:#fff;overflow:hidden}.sector-search input{min-width:0;flex:1;min-height:50px;border:0;padding:0 14px;background:transparent;color:var(--ink)}.sector-search button{min-width:92px;border:0;background:var(--teal-dark);color:#fff;font-weight:900;cursor:pointer}.sector-search:focus-within{border-color:var(--focus);box-shadow:0 0 0 3px rgba(23,105,170,.12)}
