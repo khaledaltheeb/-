@@ -8,12 +8,19 @@ function text(value: unknown, max = 20000) { return typeof value === 'string' ? 
 function stringArray(value: unknown, limit = 100, itemMax = 2000) { return Array.isArray(value) ? value.slice(0, limit).map((item) => text(item, itemMax)).filter(Boolean) : []; }
 function validHttpsUrl(value: unknown) { const url = text(value, 2000); return /^https:\/\//i.test(url) ? url : ''; }
 function dimension(value: unknown, fallback: number) { const number=Number(value); return Number.isFinite(number)&&number>=100&&number<=4000?Math.round(number):fallback; }
+function sectionAnchor(index: number) { return `section-${index + 1}`; }
 
 function renderBlock(blockValue: unknown, index: number) {
   const block = asRecord(blockValue); if (!block) return null;
   const type = text(block.type, 40).toLowerCase(); const key = `${type || 'block'}-${index}`;
   if (type === 'paragraph') { const value = text(block.text); return value ? <p key={key}>{value}</p> : null; }
-  if (type === 'heading') { const value = text(block.text, 500); const level = Number(block.level); if (!value) return null; if (level === 3) return <h3 key={key}>{value}</h3>; if (level === 4) return <h4 key={key}>{value}</h4>; return <h2 key={key}>{value}</h2>; }
+  if (type === 'heading') {
+    const value = text(block.text, 500); const level = Number(block.level); const id = sectionAnchor(index);
+    if (!value) return null;
+    if (level === 3) return <h3 id={id} key={key}>{value}</h3>;
+    if (level === 4) return <h4 id={id} key={key}>{value}</h4>;
+    return <h2 id={id} key={key}>{value}</h2>;
+  }
   if (type === 'list') { const items = stringArray(block.items, 100, 1000); if (!items.length) return null; return block.ordered === true ? <ol key={key}>{items.map((item, i) => <li key={`${key}-${i}`}>{item}</li>)}</ol> : <ul key={key}>{items.map((item, i) => <li key={`${key}-${i}`}>{item}</li>)}</ul>; }
   if (type === 'quote') { const value = text(block.text, 5000); const cite = text(block.cite, 500); return value ? <blockquote key={key}><p>{value}</p>{cite && <cite>{cite}</cite>}</blockquote> : null; }
   if (type === 'callout') { const value = text(block.text, 7000); const title = text(block.title, 300); const tone = ['info', 'success', 'warning', 'danger'].includes(text(block.tone, 20)) ? text(block.tone, 20) : 'info'; if (!value && !title) return null; return <aside key={key} className={`content-callout ${tone}`}>{title && <strong>{title}</strong>}{value && <p>{value}</p>}</aside>; }
