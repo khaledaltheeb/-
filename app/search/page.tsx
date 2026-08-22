@@ -43,6 +43,15 @@ const labels: Record<T, string> = {
 };
 const allowed = new Set(Object.keys(labels));
 
+const discoveryLinks = [
+  { href: '/sectors', title: 'القطاعات', detail: 'ابدأ من المجال الرئيسي ثم انتقل إلى الأقسام المتخصصة.' },
+  { href: '/sections', title: 'الأقسام', detail: 'خريطة موضوعية مرتبة للموضوعات والأقسام الفرعية.' },
+  { href: '/care-guides/', title: 'أدلة التعامل والرعاية', detail: 'أدلة عملية للأسرة ومقدمي الرعاية حسب الموقف والحاجة.' },
+  { href: '/evidence-guides/', title: 'الأدلة العلمية', detail: 'مكتبة تربط الأسئلة العملية بالمصادر الأصلية وحدود الدليل.' },
+  { href: '/encyclopedia/', title: 'الموسوعة النفسية', detail: 'الحالات والاضطرابات النفسية ضمن فهرس موثق.' },
+  { href: '/sectors/pediatric-oncology', title: 'سرطان الأطفال', detail: 'مركز موحد للتشخيص والعلاج والدعم والنجاة والمتابعة.' },
+];
+
 function normalizeSearch(value: string) {
   return value
     .toLocaleLowerCase('ar')
@@ -192,15 +201,24 @@ export async function PlatformSearchExperience({ searchParams, routeBase = '/sea
   return <>
     <SiteHeader />
     <main className="search-page-shell">
+      <nav className="breadcrumbs" aria-label="مسار الصفحة"><Link href="/">الرئيسية</Link><span>/</span><span aria-current="page">البحث</span></nav>
       <section className="search-hero">
         <span className="eyebrow">بحث موحد ودلالي</span>
         <h1>{legacyIntro ? 'اكتب سؤالك بلغتك الطبيعية' : 'ابحث في منصة روافد'}</h1>
-        <p>{legacyIntro ? 'هذا هو مسار البحث الذكي التاريخي بعد نقله إلى محرك روافد الحالي. اكتب المصطلح أو السؤال كما تفكر فيه، وسيبحث المحرك في المحتوى والقطاعات والمختصين والمراكز والموسوعات المعرفية والنفسية.' : 'المحتوى والقطاعات والأقسام والمختصون والمراكز والموسوعات المعرفية والنفسية ضمن محرك واحد.'}</p>
+        <p>{legacyIntro ? 'هذا هو مسار البحث الذكي التاريخي بعد نقله إلى محرك روافد الحالي. اكتب المصطلح أو السؤال كما تفكر فيه، وسيبحث المحرك في المحتوى والقطاعات والمختصين والمراكز والموسوعات المعرفية والنفسية.' : 'ابحث في المحتوى والقطاعات والأقسام والمختصين والمراكز والموسوعات من نقطة واحدة، ثم استخدم الفلاتر للوصول إلى النوع الأقرب لاحتياجك.'}</p>
         <form className="search search-page-form" action={routeBase} method="get" role="search">
           <label className="sr-only" htmlFor={legacyIntro ? 'legacy-platform-search' : 'platform-search'}>عبارة البحث</label>
-          <input id={legacyIntro ? 'legacy-platform-search' : 'platform-search'} name="q" type="search" minLength={2} maxLength={160} defaultValue={q} placeholder="مثال: القلق الاجتماعي، اضطراب الهلع، الذاكرة العاملة، مختص في عمّان..." autoComplete="off" />
+          <input id={legacyIntro ? 'legacy-platform-search' : 'platform-search'} name="q" type="search" minLength={2} maxLength={160} defaultValue={q} placeholder="مثال: القلق الاجتماعي، سرطان الأطفال، الذاكرة العاملة، دعم الأسرة، مختص في عمّان..." autoComplete="off" />
           <button type="submit">بحث</button>
         </form>
+        <nav className="search-discovery-links" aria-label="مسارات استكشاف سريعة">
+          <Link href="/sectors">القطاعات</Link>
+          <Link href="/sections">الأقسام</Link>
+          <Link href="/care-guides/">أدلة الرعاية</Link>
+          <Link href="/evidence-guides/">الأدلة العلمية</Link>
+          <Link href="/encyclopedia/">الموسوعة النفسية</Link>
+          <Link href="/sectors/pediatric-oncology">سرطان الأطفال</Link>
+        </nav>
       </section>
       {legacyIntro && <section className="search-state" aria-labelledby="legacy-search-method">
         <h2 id="legacy-search-method">كيف نُقلت وظيفة البحث الذكي؟</h2>
@@ -208,7 +226,11 @@ export async function PlatformSearchExperience({ searchParams, routeBase = '/sea
         <p>المحرك الحالي يجمع نتائج قاعدة المنصة مع فهرس الموسوعة النفسية ومحتوى العمليات المعرفية، ثم يوحّد الوجهات المتكررة ويرتبها بحسب درجة المطابقة. لذلك لا تعتمد النتائج على قائمة المصطلحات القديمة الثابتة.</p>
         <p><strong>حد مهم:</strong> البحث أداة للوصول إلى المعرفة، وليس محرك تشخيص. في الموضوعات الصحية أو النفسية الحساسة ارجع إلى الصفحة الكاملة ومراجعها وحدودها بدل بناء قرار شخصي على مقتطف نتيجة البحث.</p>
       </section>}
-      {q.length > 0 && q.length < 2 && <div className="search-state"><h2>اكتب حرفين على الأقل</h2></div>}
+      {!q && !legacyIntro && <section className="search-start" aria-labelledby="search-start-title">
+        <div className="search-start-head"><span className="eyebrow">ابدأ من الخريطة المناسبة</span><h2 id="search-start-title">لست مضطرًا إلى معرفة المصطلح الدقيق</h2><p>يمكنك الدخول من مجال رئيسي أو مكتبة متخصصة، ثم تضييق المسار من داخلها.</p></div>
+        <div className="search-start-grid">{discoveryLinks.map((item) => <Link href={item.href} key={item.href}><strong>{item.title}</strong><span>{item.detail}</span><small>استكشف ←</small></Link>)}</div>
+      </section>}
+      {q.length > 0 && q.length < 2 && <div className="search-state"><h2>اكتب حرفين على الأقل</h2><p>استخدم كلمة أو عبارة قصيرة تصف الموضوع الذي تبحث عنه.</p></div>}
       {error && <div className="search-state error"><h2>تعذر البحث</h2><p>{error}</p></div>}
       {q.length >= 2 && !error && <>
         <nav className="search-filters" aria-label="تصفية نتائج البحث">
@@ -217,7 +239,7 @@ export async function PlatformSearchExperience({ searchParams, routeBase = '/sea
         </nav>
         <section className="search-results" aria-live="polite">
           <div className="search-summary"><strong>{visible.length.toLocaleString('ar')}</strong><span>نتيجة لعبارة «{q}»</span></div>
-          {visible.length === 0 && <div className="search-state"><h2>لا توجد نتائج مطابقة</h2><p>جرّب مرادفًا أو مصطلحًا أوسع.</p></div>}
+          {visible.length === 0 && <div className="search-state search-empty"><h2>لا توجد نتائج مطابقة</h2><p>جرّب مرادفًا أو مصطلحًا أوسع، أو انتقل مباشرة إلى إحدى المكتبات الرئيسية.</p><div className="search-empty-links"><Link href="/sections">الأقسام</Link><Link href="/care-guides/">أدلة الرعاية</Link><Link href="/evidence-guides/">الأدلة العلمية</Link><Link href="/encyclopedia/">الموسوعة النفسية</Link></div></div>}
           <div className="search-result-list">
             {visible.map((x) => <article className="search-result-card" key={`${x.entity_type}-${x.entity_id}`}>
               <div className="result-type">{labels[x.entity_type]}</div>
@@ -226,7 +248,7 @@ export async function PlatformSearchExperience({ searchParams, routeBase = '/sea
                 {x.subtitle && <div className="result-subtitle">{x.subtitle}</div>}
                 {x.excerpt && <p>{x.excerpt}</p>}
               </div>
-              <Link className="result-open" href={x.destination}>فتح</Link>
+              <Link className="result-open" href={x.destination}>عرض الصفحة ←</Link>
             </article>)}
           </div>
         </section>
