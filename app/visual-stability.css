@@ -87,6 +87,18 @@ body .desktop-nav summary {
   font-size: 12px;
 }
 
+body .mega-nav-panel {
+  max-height: min(76dvh, 680px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+body .mega-sector-grid {
+  align-content: start;
+}
+
 body .rawafid-home::before {
   height: 600px;
   opacity: .72;
