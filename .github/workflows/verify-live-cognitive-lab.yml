@@ -81,9 +81,9 @@ jobs:
             sitemap_ok=false
             samples_ok=false
 
-            if printf '%s' "$page" | grep -Fq '100 نشاط معرفي واضح' \
-              && printf '%s' "$page" | grep -Fq '47' \
-              && printf '%s' "$page" | grep -Fq '14'; then
+            if grep -Fq '100 نشاط معرفي واضح' <<< "$page" \
+              && grep -Fq '47' <<< "$page" \
+              && grep -Fq '14' <<< "$page"; then
               page_ok=true
             fi
 
@@ -91,11 +91,11 @@ jobs:
               sitemap_ok=true
             fi
 
-            if printf '%s' "$simon" | grep -Fq 'تعارض الموقع والاستجابة' \
-              && printf '%s' "$simon" | grep -Fq 'توسعة بحثية 2026' \
-              && printf '%s' "$coding" | grep -Fq 'ترميز الرمز والرقم' \
-              && printf '%s' "$ambiguity" | grep -Fq 'حل الغموض السياقي' \
-              && printf '%s' "$error_detection" | grep -Fq 'اكتشاف الخطأ في الإجراء'; then
+            if grep -Fq 'تعارض الموقع والاستجابة' <<< "$simon" \
+              && grep -Fq 'توسعة بحثية 2026' <<< "$simon" \
+              && grep -Fq 'ترميز الرمز والرقم' <<< "$coding" \
+              && grep -Fq 'حل الغموض السياقي' <<< "$ambiguity" \
+              && grep -Fq 'اكتشاف الخطأ في الإجراء' <<< "$error_detection"; then
               samples_ok=true
             fi
 
