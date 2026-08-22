@@ -39,10 +39,21 @@ function NavIcon({ name }: { name: IconName }) {
   return <svg {...common}><circle cx="5" cy="12" r="1" fill="currentColor" stroke="none" /><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none" /><circle cx="19" cy="12" r="1" fill="currentColor" stroke="none" /></svg>;
 }
 
+async function hasAuthenticatedSession(): Promise<boolean> {
+  try {
+    const supabase = await createClient();
+    if (!supabase?.auth) return false;
+    const { data } = await supabase.auth.getClaims();
+    return Boolean(data?.claims?.sub);
+  } catch {
+    // Public navigation must remain renderable when auth state cannot be read.
+    // Protected routes still enforce authentication independently.
+    return false;
+  }
+}
+
 export default async function SiteHeader() {
-  const supabase = await createClient();
-  const [sectors, { data: claims }] = await Promise.all([getPublicSectors(50), supabase.auth.getClaims()]);
-  const signedIn = Boolean(claims?.claims?.sub);
+  const [sectors, signedIn] = await Promise.all([getPublicSectors(50), hasAuthenticatedSession()]);
   const mobileItems: Array<{ href: string; label: string; icon: IconName }> = signedIn ? [
     { href: '/', label: 'الرئيسية', icon: 'home' },
     { href: '/search', label: 'بحث', icon: 'search' },
