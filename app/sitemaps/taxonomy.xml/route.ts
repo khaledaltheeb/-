@@ -1,9 +1,11 @@
 import { createClient } from '@/lib/supabase/server';
 import { sitemapResponse } from '@/lib/sitemap-xml';
 import { getCognitiveCategories } from '@/lib/cognitive-program';
+import { getExpandedEncyclopediaCategories } from '@/lib/expanded-encyclopedia';
 
 export const dynamic = 'force-dynamic';
 const RELEASE = '2026-08-14T00:00:00.000Z';
+const EXPANDED_RELEASE = '2026-08-22T19:30:00.000Z';
 
 type SitemapRow = {
   path: string;
@@ -52,6 +54,12 @@ export async function GET() {
       lastModified: item.updated_at,
       changeFrequency: 'weekly',
       priority: .7,
+    })),
+    ...getExpandedEncyclopediaCategories().map((item) => ({
+      path: `/sections/${item.slug}`,
+      lastModified: EXPANDED_RELEASE,
+      changeFrequency: 'weekly',
+      priority: .74,
     })),
     ...getCognitiveCategories().map((item) => ({
       path: `/sections/${item.slug}`,
