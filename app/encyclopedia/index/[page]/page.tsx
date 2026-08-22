@@ -22,13 +22,13 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const result = await getEncyclopediaIndexPage(page);
   if (result.page !== page) return {};
   return buildSeoMetadata({
-    title: `فهرس الموسوعة النفسية — الصفحة ${page}`,
-    description: `الصفحة ${page} من الفهرس الأبجدي الكامل للموسوعة النفسية في روافد، مع روابط مباشرة إلى الحالات والاضطرابات النفسية المنشورة والمراجعة.`,
+    title: `فهرس الموسوعة المختصرة — الصفحة ${page}`,
+    description: `الصفحة ${page} من الفهرس الأبجدي للموسوعة المختصرة في منصة روافد، مع روابط مباشرة إلى الحالات والاضطرابات النفسية الحالية دون تغيير مساراتها الأصلية.`,
     path: `/encyclopedia/index/${page}/`,
     index: true,
     follow: true,
     type: 'website',
-    keywords: ['فهرس الموسوعة النفسية', 'الحالات النفسية', 'الاضطرابات النفسية'],
+    keywords: ['فهرس الموسوعة المختصرة', 'الموسوعة النفسية المختصرة', 'الحالات النفسية', 'الاضطرابات النفسية'],
   });
 }
 
@@ -42,7 +42,7 @@ export default async function EncyclopediaIndexPage({ params }: { params: Params
   const canonical = `/encyclopedia/index/${result.page}/`;
   const breadcrumbs = breadcrumbJsonLd([
     { name: 'الرئيسية', path: '/' },
-    { name: 'الموسوعة النفسية', path: '/encyclopedia/' },
+    { name: 'الموسوعة المختصرة', path: '/encyclopedia/' },
     { name: 'الفهرس الكامل', path: '/encyclopedia/index/1/' },
     { name: `الصفحة ${result.page}`, path: canonical },
   ]);
@@ -51,7 +51,7 @@ export default async function EncyclopediaIndexPage({ params }: { params: Params
     '@type': 'CollectionPage',
     '@id': `${SITE_URL}${canonical}#page`,
     url: `${SITE_URL}${canonical}`,
-    name: `فهرس الموسوعة النفسية — الصفحة ${result.page}`,
+    name: `فهرس الموسوعة المختصرة — الصفحة ${result.page}`,
     inLanguage: 'ar',
     isPartOf: { '@id': `${SITE_URL}/encyclopedia/#page` },
     mainEntity: {
@@ -71,12 +71,12 @@ export default async function EncyclopediaIndexPage({ params }: { params: Params
 
   return <><SiteHeader /><main className="article-shell encyclopedia-index-page">
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify([breadcrumbs, schema]).replace(/</g, '\\u003c') }} />
-    <nav className="breadcrumbs" aria-label="مسار الصفحة"><Link href="/">الرئيسية</Link><span>/</span><Link href="/encyclopedia/">الموسوعة النفسية</Link><span>/</span><span aria-current="page">الفهرس {result.page}</span></nav>
+    <nav className="breadcrumbs" aria-label="مسار الصفحة"><Link href="/">الرئيسية</Link><span>/</span><Link href="/sectors/short-encyclopedia">قطاع الموسوعة المختصرة</Link><span>/</span><Link href="/encyclopedia/">الموسوعة المختصرة</Link><span>/</span><span aria-current="page">الفهرس {result.page}</span></nav>
     <section className="article-hero">
       <span className="eyebrow">الفهرس الأبجدي الكامل</span>
-      <h1>فهرس الموسوعة النفسية — الصفحة {result.page}</h1>
-      <p>يعرض هذا الفهرس {result.pageSize} صفحة في كل جزء للحفاظ على سرعة التحميل وقابلية الزحف. إجمالي الحالات المنشورة حاليًا {result.total} موزعة على {result.totalPages} صفحة فهرس.</p>
-      <nav className="encyclopedia-nav" aria-label="أدوات الفهرس"><Link href="/encyclopedia/">مدخل الموسوعة</Link><Link href="/search/?type=condition">البحث في الحالات</Link><Link href="/care-guides/">أدلة الرعاية</Link><Link href="/evidence-guides/">الأدلة العلمية</Link></nav>
+      <h1>فهرس الموسوعة المختصرة — الصفحة {result.page}</h1>
+      <p>يعرض هذا الفهرس {result.pageSize} صفحة في كل جزء للحفاظ على سرعة التحميل وقابلية الزحف. إجمالي الحالات المنشورة حاليًا {result.total} موزعة على {result.totalPages} صفحة فهرس، مع الحفاظ على كل مسار قديم دون حذف أو إعادة تسمية للرابط.</p>
+      <nav className="encyclopedia-nav" aria-label="أدوات الفهرس"><Link href="/sectors/short-encyclopedia">قطاع الموسوعة المختصرة</Link><Link href="/encyclopedia/">مدخل الموسوعة المختصرة</Link><Link href="/search/?type=condition">البحث في الحالات</Link><Link href="/sections/cognitive-processes">الموسوعة الموسعة</Link><Link href="/care-guides/">أدلة الرعاية</Link><Link href="/evidence-guides/">الأدلة العلمية</Link></nav>
     </section>
     <nav className="encyclopedia-pagination" aria-label="التنقل بين صفحات الفهرس">
       {result.page > 1 ? <Link rel="prev" href={`/encyclopedia/index/${result.page - 1}/`}>← الصفحة السابقة</Link> : <span />}
