@@ -1,13 +1,9 @@
 /*
  * Retired visual-stability hotfix.
  *
- * This file intentionally contains no visual overrides. The previous version
- * used high-specificity global selectors (:root:root and body .*) to override
- * the institutional V5/V5.1 design system. That changed the palette, container
- * widths, header proportions, hero sizing, cards and footer layout across the
- * entire public site and caused a site-wide visual regression.
- *
- * Keep global presentation authoritative in app/rawafid-theme.css. Feature
- * styles must remain scoped to their own surfaces instead of overriding global
- * tokens or shell/footer geometry from a compatibility layer.
+ * The previous high-specificity global overrides remain permanently removed.
+ * This file is retained only as the existing compatibility hook in globals.css.
+ * It may load the narrow institutional shell guard below, but must never contain
+ * palette, typography, container, hero, card, or other site-wide overrides.
  */
+@import './institutional-shell-guard.css';
