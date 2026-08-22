@@ -14,6 +14,7 @@ export type CognitiveTool = {
 };
 
 export const cognitiveTools = [...toolsData, ...extensionData] as CognitiveTool[];
+const extensionSlugs = new Set((extensionData as CognitiveTool[]).map((tool) => tool.slug));
 
 export const cognitiveToolCategories = Array.from(
   new Set(cognitiveTools.map((tool) => tool.category)),
@@ -21,6 +22,10 @@ export const cognitiveToolCategories = Array.from(
 
 export function getCognitiveTool(slug: string) {
   return cognitiveTools.find((tool) => tool.slug === slug) ?? null;
+}
+
+export function isExtensionCognitiveTool(tool: CognitiveTool) {
+  return extensionSlugs.has(tool.slug);
 }
 
 export function getRelatedCognitiveTools(tool: CognitiveTool, limit = 3) {
