@@ -4,10 +4,11 @@ import { getPublicSectors } from '@/lib/public-taxonomy';
 import { createClient } from '@/lib/supabase/server';
 
 const primaryLinks = [
+  { href: '/sectors', label: 'القطاعات', secondary: false },
+  { href: '/sections', label: 'الأقسام', secondary: false },
   { href: '/sectors/pediatric-oncology', label: 'سرطان الأطفال', secondary: false },
-  { href: '/care-guides/', label: 'أدلة الرعاية', secondary: false },
-  { href: '/evidence-guides/', label: 'الأدلة العلمية', secondary: false },
-  { href: '/sections', label: 'الأقسام', secondary: true },
+  { href: '/care-guides/', label: 'أدلة الرعاية', secondary: true },
+  { href: '/evidence-guides/', label: 'الأدلة العلمية', secondary: true },
 ];
 
 const intentLinks = [
@@ -40,7 +41,7 @@ function NavIcon({ name }: { name: IconName }) {
 
 export default async function SiteHeader() {
   const supabase = await createClient();
-  const [sectors, { data: claims }] = await Promise.all([getPublicSectors(12), supabase.auth.getClaims()]);
+  const [sectors, { data: claims }] = await Promise.all([getPublicSectors(50), supabase.auth.getClaims()]);
   const signedIn = Boolean(claims?.claims?.sub);
   const mobileItems: Array<{ href: string; label: string; icon: IconName }> = signedIn ? [
     { href: '/', label: 'الرئيسية', icon: 'home' },
@@ -119,10 +120,11 @@ export default async function SiteHeader() {
             <div className="mobile-menu-panel">
               <form className="mobile-search" action="/search" method="get" role="search"><label className="sr-only" htmlFor="mobile-search-input">البحث في منصة روافد</label><input id="mobile-search-input" name="q" type="search" placeholder="ابحث في روافد" maxLength={120} enterKeyHint="search" /><button type="submit">بحث</button></form>
               <a href="/">الرئيسية</a>
+              <a href="/sectors">جميع القطاعات</a>
+              <a href="/sections">جميع الأقسام</a>
               <a href="/sectors/pediatric-oncology">سرطان الأطفال</a>
               <a href="/care-guides/">أدلة التعامل والرعاية</a>
               <a href="/evidence-guides/">الأدلة العلمية</a>
-              <a href="/sections">جميع الأقسام</a>
               <a href="/encyclopedia/">الموسوعة</a>
               <span className="mobile-menu-label">القطاعات</span>
               {sectors.map((sector) => <a key={sector.slug} href={'/sectors/' + sector.slug}>{sector.name_ar}</a>)}
