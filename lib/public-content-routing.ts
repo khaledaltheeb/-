@@ -33,6 +33,7 @@ export function publicContentTypeLabel(type?: string | null) {
     case 'landing_page': return 'صفحة رئيسية';
     case 'tool': return 'أداة';
     case 'assessment': return 'تقييم إرشادي';
+    case 'intervention': return 'تدخل علاجي';
     default: return 'محتوى معرفي';
   }
 }
