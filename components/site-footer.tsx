@@ -7,6 +7,7 @@ const groups = [
     links: [
       { href: '/sectors', label: 'القطاعات' },
       { href: '/sections', label: 'جميع الأقسام' },
+      { href: '/all-pages', label: 'فهرس الصفحات المنشورة' },
       { href: '/care-guides/', label: 'أدلة التعامل والرعاية' },
       { href: '/evidence-guides/', label: 'الأدلة العلمية' },
       { href: '/encyclopedia/', label: 'الموسوعة' },

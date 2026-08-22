@@ -5,6 +5,7 @@ export async function GET() {
     { path:'/', changeFrequency:'weekly', priority:1 },
     { path:'/about', changeFrequency:'monthly', priority:.6 },
     { path:'/start-here', changeFrequency:'monthly', priority:.75 },
+    { path:'/all-pages', changeFrequency:'daily', priority:.8 },
     { path:'/guided-assessment', changeFrequency:'monthly', priority:.65 },
     { path:'/assessment-lab', changeFrequency:'monthly', priority:.65 },
     { path:'/resources', changeFrequency:'weekly', priority:.6 },
