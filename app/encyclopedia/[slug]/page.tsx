@@ -61,7 +61,7 @@ export default async function EncyclopediaConditionPage({ params }: { params: Pa
   const review = contentReviewProvenance(record);
   const breadcrumbs = breadcrumbJsonLd([
     { name: 'الرئيسية', path: '/' },
-    { name: 'الموسوعة النفسية', path: '/encyclopedia/' },
+    { name: 'الموسوعة المختصرة', path: '/encyclopedia/' },
     { name: record.title, path: canonical },
   ]);
 
@@ -90,15 +90,15 @@ export default async function EncyclopediaConditionPage({ params }: { params: Pa
 
   return <><SiteHeader /><main className="article-shell encyclopedia-detail">
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schemas).replace(/</g, '\\u003c') }} />
-    <nav className="breadcrumbs" aria-label="مسار الصفحة"><Link href="/">الرئيسية</Link><span>/</span><Link href="/encyclopedia/">الموسوعة النفسية</Link><span>/</span><span aria-current="page">{record.title}</span></nav>
+    <nav className="breadcrumbs" aria-label="مسار الصفحة"><Link href="/">الرئيسية</Link><span>/</span><Link href="/sectors/short-encyclopedia">قطاع الموسوعة المختصرة</Link><span>/</span><Link href="/encyclopedia/">الموسوعة المختصرة</Link><span>/</span><span aria-current="page">{record.title}</span></nav>
     <article>
-      <header className="article-hero"><span className="eyebrow">الموسوعة النفسية</span><h1>{record.title}</h1>{record.excerpt ? <p>{record.excerpt}</p> : null}<div className="article-meta">
+      <header className="article-hero"><span className="eyebrow">الموسوعة المختصرة</span><h1>{record.title}</h1>{record.excerpt ? <p>{record.excerpt}</p> : null}<div className="article-meta">
         {record.author_display_name ? <span>إعداد: {record.author_display_name}</span> : null}
         {review.reviewerName ? <span>مراجعة: {review.reviewerName}{review.reviewerCredentials ? ` — ${review.reviewerCredentials}` : ''}</span> : null}
         {record.published_at ? <span>نُشر {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(record.published_at))}</span> : null}
         {review.lastReviewedAt ? <span>آخر مراجعة {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(review.lastReviewedAt))}</span> : null}
       </div><div className="tag-list">{audiences.map((audience) => <span key={audience}>{audience}</span>)}<span>{references.length} مراجع</span>{faqItems.length > 0 ? <span>{faqItems.length} أسئلة شائعة</span> : null}</div></header>
-      <nav className="encyclopedia-nav encyclopedia-detail-nav" aria-label="التنقل في الموسوعة"><Link href="/encyclopedia/">كل حالات الموسوعة</Link><Link href="/encyclopedia/index/1/">الفهرس الكامل</Link><Link href="/search/?type=condition">البحث في الحالات</Link><Link href="/care-guides/">أدلة الرعاية</Link><Link href="/evidence-guides/">الأدلة العلمية</Link><Link href="/specialists/">دليل المختصين</Link></nav>
+      <nav className="encyclopedia-nav encyclopedia-detail-nav" aria-label="التنقل في الموسوعة"><Link href="/sectors/short-encyclopedia">قطاع الموسوعة المختصرة</Link><Link href="/encyclopedia/">كل حالات الموسوعة المختصرة</Link><Link href="/encyclopedia/index/1/">الفهرس الكامل</Link><Link href="/search/?type=condition">البحث في الحالات</Link><Link href="/sections/cognitive-processes">الموسوعة الموسعة</Link><Link href="/care-guides/">أدلة الرعاية</Link><Link href="/evidence-guides/">الأدلة العلمية</Link><Link href="/specialists/">دليل المختصين</Link></nav>
       <div className="article-body">{record.featured_image_url ? <figure className="article-featured-image"><Image src={record.featured_image_url} alt={record.featured_image_alt || record.title} width={1200} height={675} sizes="(max-width: 900px) 100vw, 900px" priority unoptimized /></figure> : null}<ContentRenderer bodyJson={record.body_json} bodyText={record.body_text} recordId={record.id} /></div>
       <aside className="medical-disclaimer" aria-label="حدود المحتوى الطبي"><strong>تنبيه طبي</strong><p>{record.medical_disclaimer || 'هذا المحتوى للتثقيف العام ولا يقدم تشخيصًا فرديًا أو وصفة علاجية، ولا يغني عن تقييم مختص مؤهل عند الحاجة.'}</p><Link href="/disclaimer">إخلاء المسؤولية الكامل</Link></aside>
       {references.length ? <section className="article-references" aria-labelledby="encyclopedia-references-title"><h2 id="encyclopedia-references-title">المصادر والمراجع</h2><ol>{references.map((reference, index) => <li key={`${reference.url || reference.title}-${index}`}>{reference.url ? <a href={reference.url} target="_blank" rel="noopener noreferrer">{reference.title || reference.url}</a> : <span>{reference.title}</span>}{reference.publisher ? <small>{reference.publisher}</small> : null}{reference.year ? <small>{String(reference.year)}</small> : null}</li>)}</ol></section> : null}
