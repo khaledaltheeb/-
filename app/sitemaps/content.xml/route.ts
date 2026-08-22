@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { sitemapResponse } from '@/lib/sitemap-xml';
 import { getCognitivePageIndex } from '@/lib/cognitive-program';
+import { getExpandedEncyclopediaIndex } from '@/lib/expanded-encyclopedia';
 
 export const dynamic = 'force-dynamic';
 const PAGE_SIZE = 5000;
@@ -102,14 +103,24 @@ export async function GET(request: Request) {
       priority: .7,
     }));
 
-  const generatedRows: SitemapRow[] = page === 0
-    ? getCognitivePageIndex().map((item) => ({
-      path: `/content/${item.slug}`,
-      lastModified: RELEASE,
-      changeFrequency: 'monthly',
-      priority: .72,
-    }))
-    : [];
+  let generatedRows: SitemapRow[] = [];
+  if (page === 0) {
+    const expandedIndex = await getExpandedEncyclopediaIndex();
+    generatedRows = [
+      ...getCognitivePageIndex().map((item) => ({
+        path: `/content/${item.slug}`,
+        lastModified: RELEASE,
+        changeFrequency: 'monthly',
+        priority: .72,
+      })),
+      ...expandedIndex.map((item) => ({
+        path: item.canonical_url,
+        lastModified: item.updated_at,
+        changeFrequency: 'monthly',
+        priority: .74,
+      })),
+    ];
+  }
 
   const unique = new Map<string, SitemapRow>();
   for (const item of [...databaseRows, ...generatedRows]) {
