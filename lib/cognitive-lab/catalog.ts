@@ -22,6 +22,14 @@ const extensionTools = (extensionData as CognitiveTool[]).map((tool) => {
       instructions: 'ابدأ من الاتجاه المعروض، وطبّق التحولات بالترتيب ثم اختر الاتجاه النهائي.',
     };
   }
+  if (tool.mode === 'numerical_stroop') {
+    return {
+      ...tool,
+      title: 'تعارض القيمة وكثرة الرموز',
+      summary: 'مهمة تعارض عددية تعليمية تفصل بين قيمة الرقم وعدد مرات تكراره؛ تطلب اتباع البعد المحدد وتجاهل البعد المشتت، من دون الادعاء بأنها نسخة معيارية من اختبار ستروب العددي.',
+      instructions: 'اتبع البعد المطلوب في كل محاولة: قيمة الرقم أو عدد مرات ظهوره، وتجاهل البعد الآخر.',
+    };
+  }
   if (tool.mode === 'feedback_rule_learning') {
     return {
       ...tool,
