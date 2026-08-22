@@ -39,7 +39,16 @@ export default async function SectionsIndex() {
         <h1 id="sections-title">أقسام روافد</h1>
         <p>خريطة موضوعية مرتبة حسب القطاعات الرئيسية، من الصحة النفسية وذوي الاحتياجات الخاصة والدمج إلى الأسرة والتعافي والمعرفة. ابدأ بالمجال الأقرب لاحتياجك، ثم انتقل إلى القسم المتخصص أو أحد موضوعاته الفرعية.</p>
         <div className="public-stat-strip"><span>{sectorRows.length.toLocaleString('ar')} قطاعات</span><span>{categoryRows.length.toLocaleString('ar')} قسمًا وقسمًا فرعيًا</span><span>تنقل هرمي واضح</span></div>
+        <form className="sector-search" action="/search" method="get" role="search"><label className="sr-only" htmlFor="sections-search">البحث في روافد</label><input id="sections-search" name="q" placeholder="ابحث عن موضوع أو حالة أو سؤال" maxLength={160} /><button type="submit">بحث</button></form>
       </section>
+
+      <nav className="sector-quick-nav" aria-label="مسارات مباشرة من دليل الأقسام">
+        <Link href="/sectors">كل القطاعات</Link>
+        <Link href="/sectors/pediatric-oncology">سرطان الأطفال</Link>
+        <Link href="/care-guides/">أدلة التعامل والرعاية</Link>
+        <Link href="/evidence-guides/">الأدلة العلمية</Link>
+        <Link href="/encyclopedia/">الموسوعة</Link>
+      </nav>
 
       <section className="taxonomy-sector-stack" aria-label="الأقسام مرتبة حسب القطاع">
         {sectorRows.map((sector) => {
