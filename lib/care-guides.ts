@@ -83,6 +83,22 @@ function normalizePathSegments(segments: string[]) {
     .filter((segment) => /^[a-z0-9][a-z0-9-]*$/.test(segment));
 }
 
+function relatedItemFromRow(row: JsonRecord): CareGuideRelatedItem | null {
+  const id = asString(row.id);
+  const slug = asString(row.slug);
+  const title = asString(row.title);
+  const canonical = asString(row.canonical_url);
+  if (!id || !slug || !title) return null;
+  return {
+    id,
+    slug,
+    title,
+    excerpt: typeof row.excerpt === 'string' ? row.excerpt : null,
+    contentType: asString(row.content_type),
+    href: canonical || `/content/${slug}`,
+  };
+}
+
 export function careGuideCanonical(segments: string[]) {
   const safe = normalizePathSegments(segments);
   if (!safe.length || safe.length !== segments.length) return null;
@@ -169,52 +185,98 @@ export async function getCareGuideItems(): Promise<CareGuideItem[]> {
 
 export async function getRelatedCareGuideContent(contentId: string): Promise<CareGuideRelatedItem[]> {
   const supabase = await createClient();
-  const { data: relatedData, error: relatedError } = await supabase.rpc('related_public_content', { p_content_id: contentId, p_limit: 6 });
+  const now = new Date().toISOString();
+
+  const { data: targetData, error: targetError } = await supabase
+    .from('content')
+    .select('schema_json')
+    .eq('id', contentId)
+    .maybeSingle();
+
+  if (targetError) {
+    console.error('Care guide editorial-link lookup failed; falling back to semantic recommendations.', {
+      contentId,
+      code: targetError.code,
+      message: targetError.message,
+    });
+  }
+
+  const targetSchema = asRecord(targetData?.schema_json);
+  const editorialPaths = asStringArray(targetSchema?.internal_link_plan, 12)
+    .filter((path) => /^\/(care-guides|content)\/[a-z0-9][a-z0-9\/-]*\/?$/.test(path));
+
+  let editorialItems: CareGuideRelatedItem[] = [];
+  if (editorialPaths.length) {
+    const { data: editorialData, error: editorialError } = await supabase
+      .from('content')
+      .select('id,slug,title,excerpt,content_type,canonical_url')
+      .in('canonical_url', editorialPaths)
+      .neq('id', contentId)
+      .eq('status', 'published')
+      .eq('robots_index', true)
+      .lte('published_at', now);
+
+    if (editorialError) {
+      console.error('Care guide planned internal links could not be loaded; falling back to semantic recommendations.', {
+        contentId,
+        code: editorialError.code,
+        message: editorialError.message,
+      });
+    } else {
+      const rows = Array.isArray(editorialData) ? editorialData : [];
+      const byCanonical = new Map(rows.map((row) => [asString(row.canonical_url), row as JsonRecord]));
+      editorialItems = editorialPaths.flatMap((path) => {
+        const item = relatedItemFromRow(byCanonical.get(path) ?? {});
+        return item ? [item] : [];
+      });
+    }
+  }
+
+  const { data: relatedData, error: relatedError } = await supabase.rpc('related_public_content', { p_content_id: contentId, p_limit: 10 });
   if (relatedError) {
-    console.error('Care guide related-content RPC failed; rendering without recommendations.', {
+    console.error('Care guide related-content RPC failed; rendering editorial links only.', {
       contentId,
       code: relatedError.code,
       message: relatedError.message,
     });
-    return [];
+    return editorialItems.slice(0, 6);
   }
 
   const relatedRows = Array.isArray(relatedData) ? relatedData : [];
   const orderedIds = relatedRows.map((row) => asString(asRecord(row)?.id)).filter(Boolean);
-  if (!orderedIds.length) return [];
+  if (!orderedIds.length) return editorialItems.slice(0, 6);
 
   const { data, error } = await supabase
     .from('content')
     .select('id,slug,title,excerpt,content_type,canonical_url')
     .in('id', orderedIds)
     .eq('status', 'published')
-    .lte('published_at', new Date().toISOString());
+    .eq('robots_index', true)
+    .lte('published_at', now);
 
   if (error) {
-    console.error('Care guide related-content lookup failed; rendering without recommendations.', {
+    console.error('Care guide related-content lookup failed; rendering editorial links only.', {
       contentId,
       code: error.code,
       message: error.message,
     });
-    return [];
+    return editorialItems.slice(0, 6);
   }
 
   const rows = Array.isArray(data) ? data : [];
-  const byId = new Map(rows.map((row) => [String(row.id), row]));
-  return orderedIds.flatMap((id) => {
-    const row = byId.get(id);
-    if (!row) return [];
-    const slug = asString(row.slug);
-    const canonical = asString(row.canonical_url);
-    return [{
-      id,
-      slug,
-      title: asString(row.title),
-      excerpt: typeof row.excerpt === 'string' ? row.excerpt : null,
-      contentType: asString(row.content_type),
-      href: canonical || `/content/${slug}`,
-    }];
+  const byId = new Map(rows.map((row) => [String(row.id), row as JsonRecord]));
+  const semanticItems = orderedIds.flatMap((id) => {
+    const item = relatedItemFromRow(byId.get(id) ?? {});
+    return item ? [item] : [];
   });
+
+  const combined = [...editorialItems, ...semanticItems];
+  const seen = new Set<string>();
+  return combined.filter((item) => {
+    if (seen.has(item.id)) return false;
+    seen.add(item.id);
+    return true;
+  }).slice(0, 6);
 }
 
 export function safeCareGuideReferences(value: unknown): CareGuideReference[] {
