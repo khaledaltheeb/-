@@ -15,7 +15,16 @@ const forbidText = (file, needles) => {
 };
 
 for (const file of ['app/specialists/page.tsx', 'app/centers/page.tsx']) {
-  requireText(file, ["{ count: 'exact' }", '.range(', 'PublicPagination', 'const PAGE_SIZE = 24', 'total.toLocaleString']);
+  requireText(file, [
+    "{ count: 'exact' }",
+    '.range(',
+    'PublicPagination',
+    'const PAGE_SIZE = 24',
+    'total.toLocaleString',
+    'generateMetadata',
+    'index: !state.hasFilters',
+    'path: pageHref(state.page, state.filters)',
+  ]);
   forbidText(file, ['.limit(100)']);
 }
 
@@ -37,4 +46,4 @@ requireText('components/site-footer.tsx', ["href: '/all-pages'", "label: 'فهر
 requireText('app/sitemaps/static.xml/route.ts', ["path:'/all-pages'", "changeFrequency:'daily'"]);
 
 if (failed) process.exit(1);
-console.log('Public discoverability contract passed: directories paginate without 100-row truncation and the published-content index is linked, styled, structured, and advertised in sitemap.');
+console.log('Public discoverability contract passed: directories paginate without 100-row truncation, filter states stay noindex, pagination stays canonical, and the published-content index is linked, styled, structured, and advertised in sitemap.');
