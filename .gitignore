@@ -15,3 +15,27 @@ coverage/
 *.tsbuildinfo
 public/encyclopedia-data/
 bundled/
+
+# Deterministically materialized from the validated v3 legacy static-asset bundle
+public/api/v1/iris-learning-pathways.json
+public/api/v1/openapi.json
+public/api/v1/assistive-technology-resources.json
+public/api/v1/resna-ce-providers.json
+public/api/v1/assistive-technology-quality-framework.json
+public/api/v1/cochrane-resources.json
+public/api/v1/courses.schema.json
+public/api/v1/platform.json
+public/accessibility/evaluation.json
+public/api/adhd-world-federation-resources.json
+public/api/family-guide-v1-phase8.json
+public/api/family-guide-v2.json
+public/api/outside-the-box-evidence-standard-v301.json
+public/api/source-registry.json
+public/api/source-rights-registry.json
+public/api/v1/cochrane-evidence-academy.json
+public/api/v1/courses.example.json
+public/api/v1/iris-cited-guides.json
+public/sitemap-adhd.xml
+public/special-needs/conditions/cerebral-palsy/evidence.json
+public/special-needs/conditions/fragile-x-syndrome/evidence.json
+public/specialists-partners/data/provider-import-template-v2.csv
