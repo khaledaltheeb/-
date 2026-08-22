@@ -112,14 +112,14 @@ export default async function SiteHeader() {
           </nav>
           <form className="header-search" action="/search" method="get" role="search">
             <label className="sr-only" htmlFor="header-search-input">البحث في منصة روافد</label>
-            <input id="header-search-input" name="q" type="search" placeholder="ابحث في روافد" maxLength={120} enterKeyHint="search" />
+            <input id="header-search-input" name="q" type="search" placeholder="ابحث عن حالة، دليل أو خدمة" maxLength={120} enterKeyHint="search" />
             <button type="submit">بحث</button>
           </form>
           <div className="header-actions">{signedIn ? <a className="button header-login" href="/account">حسابي</a> : <a className="button header-login" href="/login">دخول</a>}</div>
           <details className="mobile-menu">
             <summary aria-label="فتح قائمة التنقل"><NavIcon name="more" /><span>القائمة</span></summary>
             <div className="mobile-menu-panel">
-              <form className="mobile-search" action="/search" method="get" role="search"><label className="sr-only" htmlFor="mobile-search-input">البحث في منصة روافد</label><input id="mobile-search-input" name="q" type="search" placeholder="ابحث في روافد" maxLength={120} enterKeyHint="search" /><button type="submit">بحث</button></form>
+              <form className="mobile-search" action="/search" method="get" role="search"><label className="sr-only" htmlFor="mobile-search-input">البحث في منصة روافد</label><input id="mobile-search-input" name="q" type="search" placeholder="ابحث عن حالة، دليل أو خدمة" maxLength={120} enterKeyHint="search" /><button type="submit">بحث</button></form>
               <a href="/">الرئيسية</a>
               <a href="/sectors">جميع القطاعات</a>
               <a href="/sections">جميع الأقسام</a>
