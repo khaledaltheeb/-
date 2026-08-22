@@ -10,6 +10,7 @@ const trustLinks = [
   { href: '/sources', label: 'منهج المصادر' },
   { href: '/medical-review-policy', label: 'المراجعة العلمية' },
   { href: '/editorial-policy', label: 'السياسة التحريرية' },
+  { href: '/accessibility-statement', label: 'الإتاحة الرقمية' },
   { href: '/privacy', label: 'الخصوصية' },
   { href: '/terms', label: 'شروط الاستخدام' },
   { href: '/disclaimer', label: 'إخلاء المسؤولية' },

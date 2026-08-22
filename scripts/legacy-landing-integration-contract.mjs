@@ -64,8 +64,8 @@ for(const file of [
 const preserved=read('components/legacy-preserved-page.tsx');
 for(const marker of ['ContentRenderer','legacyInternalLinks','legacyReferences','نسخة إنتاجية محفوظة'])if(!preserved.includes(marker))fail(`preserved landing renderer missing ${marker}`);
 const proxy=read('lib/supabase/proxy.ts');
-for(const marker of ['legacy_preserved_route_exists','isLegacyProductionRoute','pathname.endsWith','redirects'])if(!proxy.includes(marker))fail(`proxy legacy-route boundary missing ${marker}`);
+for(const marker of ['legacy_preserved_route_exists','isLegacyProductionRoute','pathname.endsWith','redirects','headerSafePathname','return encodeURI(pathname)',"headers.set('x-rawafid-pathname', trustedPathname)"])if(!proxy.includes(marker))fail(`proxy legacy-route boundary missing ${marker}`);
 const migration=read('supabase/migrations/20260816092116_legacy_preserved_route_exists.sql');
 for(const marker of ['security definer','production-baseline','DEVELOPMENT_ONLY','EXCLUDE_%','grant execute'])if(!migration.toLowerCase().includes(marker.toLowerCase()))fail(`legacy route existence migration missing ${marker}`);
 if(bad)process.exit(1);
-console.log('Legacy landing integration contract passed: all 39 historical landings render in place with complete preserved content or their current V3 landing.');
+console.log('Legacy landing integration contract passed: all 39 historical landings render in place with complete preserved content or their current V3 landing, and Unicode paths remain byte-safe through the proxy boundary.');

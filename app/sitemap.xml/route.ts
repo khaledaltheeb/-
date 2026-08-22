@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { getPsychEncyclopediaReleaseIndex } from '@/lib/psych-encyclopedia-release';
 import { sitemapIndexResponse } from '@/lib/sitemap-xml';
 
 export const dynamic = 'force-dynamic';
@@ -6,9 +7,28 @@ const PAGE_SIZE = 5000;
 const QUICK_INFO_PAGE_SIZE = 5000;
 const ENCYCLOPEDIA_PAGE_SIZE = 5000;
 
+function inFilter(values: string[]) {
+  return `(${values.join(',')})`;
+}
+
 export async function GET() {
   const supabase = await createClient();
   const now = new Date().toISOString();
+  const encyclopediaRelease = await getPsychEncyclopediaReleaseIndex();
+  const releasedSlugs = encyclopediaRelease.map((item) => item.slug);
+
+  let encyclopediaQuery = supabase
+    .from('content')
+    .select('id', { count: 'exact', head: true })
+    .eq('content_type', 'condition')
+    .eq('status', 'published')
+    .lte('published_at', now)
+    .eq('robots_index', true);
+
+  if (releasedSlugs.length > 0) {
+    encyclopediaQuery = encyclopediaQuery.not('slug', 'in', inFilter(releasedSlugs));
+  }
+
   const [contentResult, quickInfoResult, encyclopediaResult] = await Promise.all([
     supabase
       .from('content')
@@ -25,13 +45,7 @@ export async function GET() {
       .eq('status', 'published')
       .lte('published_at', now)
       .eq('robots_index', true),
-    supabase
-      .from('content')
-      .select('id', { count: 'exact', head: true })
-      .eq('content_type', 'condition')
-      .eq('status', 'published')
-      .lte('published_at', now)
-      .eq('robots_index', true),
+    encyclopediaQuery,
   ]);
 
   if (contentResult.error) {
@@ -46,7 +60,8 @@ export async function GET() {
 
   const contentPages = Math.max(1, Math.ceil((contentResult.count ?? 0) / PAGE_SIZE));
   const quickInfoPages = Math.max(1, Math.ceil((quickInfoResult.count ?? 0) / QUICK_INFO_PAGE_SIZE));
-  const encyclopediaPages = Math.max(1, Math.ceil((encyclopediaResult.count ?? 0) / ENCYCLOPEDIA_PAGE_SIZE));
+  const encyclopediaTotal = (encyclopediaResult.count ?? 0) + releasedSlugs.length;
+  const encyclopediaPages = Math.max(1, Math.ceil(encyclopediaTotal / ENCYCLOPEDIA_PAGE_SIZE));
   const paths = [
     '/sitemaps/static.xml',
     '/sitemaps/taxonomy.xml',

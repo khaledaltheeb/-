@@ -1,34 +1,68 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
+import PublicPagination from '@/components/public-pagination';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import { createClient } from '@/lib/supabase/server';
 import { buildSeoMetadata } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
-export const metadata = buildSeoMetadata({
-  title: 'دليل المراكز النفسية',
-  description: 'دليل المراكز الموثقة في منصة روافد: ابحث حسب اسم المركز والمدينة والدولة، واستعرض الملفات العامة للمراكز والفروع التي اجتازت مسار التحقق.',
-  path: '/centers', index: true,
-  keywords: ['مركز نفسي', 'مركز علاج نفسي', 'مراكز التعافي', 'دليل المراكز', 'منصة روافد'],
-});
 
-type SearchParams = Promise<{ q?: string; city?: string; country?: string }>;
+type SearchParams = Promise<{ q?: string | string[]; city?: string | string[]; country?: string | string[]; page?: string | string[] }>;
 type CenterRow = { id: string; slug: string; name: string; description: string | null; logo_url: string | null; country: string | null; region: string | null; city: string | null; address: string | null };
+type DirectoryFilters = { q: string; city: string; country: string };
+const PAGE_SIZE = 24;
+const one = (value: string | string[] | undefined) => Array.isArray(value) ? value[0] ?? '' : value ?? '';
+const pageNo = (value: string) => { const parsed = Number(value); return Number.isInteger(parsed) && parsed > 0 && parsed < 10000 ? parsed : 1; };
+const safeFilter = (value: string) => value.trim().replace(/[%_(),]/g, ' ').replace(/\s+/g, ' ').slice(0, 120);
+const pageHref = (page: number, filters: DirectoryFilters) => {
+  const params = new URLSearchParams();
+  if (filters.q) params.set('q', filters.q);
+  if (filters.city) params.set('city', filters.city);
+  if (filters.country) params.set('country', filters.country);
+  if (page > 1) params.set('page', String(page));
+  return `/centers${params.size ? `?${params}` : ''}`;
+};
+const directoryState = (params: Awaited<SearchParams>) => {
+  const q = safeFilter(one(params.q));
+  const city = safeFilter(one(params.city));
+  const country = safeFilter(one(params.country));
+  const page = pageNo(one(params.page));
+  const filters = { q, city, country };
+  return { q, city, country, page, filters, hasFilters: Boolean(q || city || country) };
+};
+
+export async function generateMetadata({ searchParams }: { searchParams: SearchParams }): Promise<Metadata> {
+  const state = directoryState(await searchParams);
+  return buildSeoMetadata({
+    title: state.hasFilters ? 'نتائج دليل المراكز النفسية' : state.page > 1 ? `دليل المراكز النفسية — الصفحة ${state.page}` : 'دليل المراكز النفسية',
+    description: 'دليل المراكز الموثقة في منصة روافد: ابحث حسب اسم المركز والمدينة والدولة، واستعرض الملفات العامة للمراكز والفروع التي اجتازت مسار التحقق.',
+    path: pageHref(state.page, state.filters),
+    index: !state.hasFilters,
+    keywords: ['مركز نفسي', 'مركز علاج نفسي', 'مراكز التعافي', 'دليل المراكز', 'منصة روافد'],
+  });
+}
 
 export default async function CentersDirectory({ searchParams }: { searchParams: SearchParams }) {
-  const params = await searchParams;
-  const q = String(params.q ?? '').trim().slice(0, 120);
-  const city = String(params.city ?? '').trim().slice(0, 120);
-  const country = String(params.country ?? '').trim().slice(0, 120);
-  const hasFilters = Boolean(q || city || country);
+  const { q, city, country, page, filters, hasFilters } = directoryState(await searchParams);
   const supabase = await createClient();
 
-  let query = supabase.from('centers').select('id,slug,name,description,logo_url,country,region,city,address').eq('verification', 'verified').eq('is_active', true).order('name').limit(100);
-  if (q) query = query.ilike('name', `%${q.replace(/[%_]/g, '')}%`);
-  if (city) query = query.ilike('city', `%${city.replace(/[%_]/g, '')}%`);
-  if (country) query = query.ilike('country', `%${country.replace(/[%_]/g, '')}%`);
-  const { data, error } = await query;
+  let query = supabase
+    .from('centers')
+    .select('id,slug,name,description,logo_url,country,region,city,address', { count: 'exact' })
+    .eq('verification', 'verified')
+    .eq('is_active', true)
+    .order('name')
+    .order('id')
+    .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
+  if (q) query = query.ilike('name', `%${q}%`);
+  if (city) query = query.ilike('city', `%${city}%`);
+  if (country) query = query.ilike('country', `%${country}%`);
+  const { data, count, error } = await query;
   const rows = (Array.isArray(data) ? data : []) as CenterRow[];
+  const total = count ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const paginationPage = Math.min(page, totalPages);
 
   return (
     <>
@@ -56,9 +90,9 @@ export default async function CentersDirectory({ searchParams }: { searchParams:
         </form>
 
         <section className="directory-results" aria-live="polite">
-          <div className="directory-summary"><strong>{rows.length.toLocaleString('ar')}</strong><span>{hasFilters ? 'مركز موثق مطابق للفلاتر' : 'مركز موثق متاح في الدليل'}</span></div>
+          <div className="directory-summary"><strong>{total.toLocaleString('ar')}</strong><span>{hasFilters ? 'مركز موثق مطابق للفلاتر' : 'مركز موثق متاح في الدليل'}</span></div>
           {error && <div className="search-state error"><h2>تعذر تحميل الدليل</h2><p>لم يتم عرض بيانات غير مؤكدة. حاول مرة أخرى لاحقًا.</p></div>}
-          {!error && rows.length === 0 && <div className="search-state directory-empty"><h2>لا توجد مراكز مطابقة حاليًا</h2><p>{hasFilters ? 'جرّب توسيع الفلاتر أو مسحها لعرض جميع المراكز الموثقة.' : 'ستظهر المراكز بعد اكتمال التوثيق وتفعيل الملف.'}</p>{hasFilters && <Link className="button" href="/centers">عرض جميع المراكز</Link>}</div>}
+          {!error && rows.length === 0 && <div className="search-state directory-empty"><h2>{total > 0 ? 'هذه الصفحة خارج نطاق النتائج' : 'لا توجد مراكز مطابقة حاليًا'}</h2><p>{total > 0 ? 'استخدم أرقام الصفحات للعودة إلى المراكز المتاحة.' : hasFilters ? 'جرّب توسيع الفلاتر أو مسحها لعرض جميع المراكز الموثقة.' : 'ستظهر المراكز بعد اكتمال التوثيق وتفعيل الملف.'}</p>{hasFilters && total === 0 && <Link className="button" href="/centers">عرض جميع المراكز</Link>}</div>}
           <div className="directory-grid center-grid">
             {rows.map((center) => <article className="directory-card" key={center.id}>
               <div className="directory-card-top"><div className="profile-placeholder center-placeholder" aria-hidden="true">{center.name.slice(0, 1)}</div><div><span className="verified-label">مركز موثق</span><h2><Link href={`/centers/${center.slug}`}>{center.name}</Link></h2><p className="professional-title">{[center.city, center.country].filter(Boolean).join('، ') || 'الموقع غير محدد'}</p></div></div>
@@ -67,6 +101,7 @@ export default async function CentersDirectory({ searchParams }: { searchParams:
               <Link className="directory-open" href={`/centers/${center.slug}`}>عرض ملف المركز ←</Link>
             </article>)}
           </div>
+          {!error && total > PAGE_SIZE && <PublicPagination currentPage={paginationPage} totalPages={totalPages} hrefForPage={(targetPage) => pageHref(targetPage, filters)} ariaLabel="صفحات دليل المراكز" />}
         </section>
       </main>
       <SiteFooter />
