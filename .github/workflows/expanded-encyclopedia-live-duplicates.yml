@@ -1,0 +1,42 @@
+name: Expanded Encyclopedia Live Duplicate Gate
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'data/expanded-encyclopedia/batches/**'
+      - 'data/expanded-encyclopedia/categories.json'
+      - 'scripts/build_expanded_encyclopedia_assets.mjs'
+      - 'scripts/check_expanded_encyclopedia_live_duplicates.mjs'
+      - '.github/workflows/expanded-encyclopedia-live-duplicates.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'data/expanded-encyclopedia/batches/**'
+      - 'data/expanded-encyclopedia/categories.json'
+      - 'scripts/build_expanded_encyclopedia_assets.mjs'
+      - 'scripts/check_expanded_encyclopedia_live_duplicates.mjs'
+      - '.github/workflows/expanded-encyclopedia-live-duplicates.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  live-duplicate-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Install locked dependencies
+        run: npm install --no-audit --no-fund
+      - name: Validate static encyclopedia identities
+        run: npm run expanded-encyclopedia:validate
+      - name: Check live published-content duplicates
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
+        run: npm run expanded-encyclopedia:live-duplicates
