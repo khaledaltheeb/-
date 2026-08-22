@@ -1,10 +1,13 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { isCognitiveAnswerCorrect, makeCognitiveTrial } from '../lib/cognitive-lab/engine.mjs';
+import { isCognitiveAnswerCorrect, makeCognitiveTrial } from '../lib/cognitive-lab/engine-v2.mjs';
 
 const root = process.cwd();
 const catalogPath = path.join(root, 'data/cognitive-lab/tools.v1.json');
-const catalog = JSON.parse(fs.readFileSync(catalogPath, 'utf8'));
+const extensionPath = path.join(root, 'data/cognitive-lab/tools.v2-extension.json');
+const legacyCatalog = JSON.parse(fs.readFileSync(catalogPath, 'utf8'));
+const extensionCatalog = JSON.parse(fs.readFileSync(extensionPath, 'utf8'));
+const catalog = [...legacyCatalog, ...extensionCatalog];
 const expectedVerifiedModes = new Set([
   'choice_reaction',
   'visual_reaction',
@@ -25,10 +28,13 @@ const forbiddenClinicalModes = new Set(['phq_9', 'gad_7', 'who_5', 'audit_10']);
 const errors = [];
 const fail = (message) => errors.push(message);
 
-if (catalog.length !== 53) fail(`expected 53 tools, found ${catalog.length}`);
+if (legacyCatalog.length !== 53) fail(`expected 53 legacy tools, found ${legacyCatalog.length}`);
+if (extensionCatalog.length !== 47) fail(`expected 47 extension tools, found ${extensionCatalog.length}`);
+if (catalog.length !== 100) fail(`expected 100 tools, found ${catalog.length}`);
 if (new Set(catalog.map((tool) => tool.slug)).size !== catalog.length) fail('tool slugs must be unique');
 if (new Set(catalog.map((tool) => tool.mode)).size !== catalog.length) fail('tool modes must be unique');
 if (catalog.filter((tool) => tool.difficultyStatus === 'verified').length !== 14) fail('exactly 14 tools must have verified difficulty');
+if (extensionCatalog.some((tool) => tool.difficultyStatus !== 'review')) fail('all extension tools must remain review until human/psychometric validation');
 
 for (const tool of catalog) {
   for (const field of ['slug', 'title', 'category', 'mode', 'summary', 'instructions', 'difficultyStatus']) {
@@ -96,9 +102,11 @@ for (const tool of catalog) {
 }
 
 const report = {
-  version: 1,
+  version: 2,
   status: errors.length ? 'failed' : 'passed',
   tools: catalog.length,
+  legacyTools: legacyCatalog.length,
+  extensionTools: extensionCatalog.length,
   verifiedDifficultyTools: catalog.filter((tool) => tool.difficultyStatus === 'verified').length,
   generatedTrials,
   acceptedCorrectAnswers,

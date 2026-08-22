@@ -1,0 +1,52 @@
+name: Cognitive Lab 100 Validate
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'app/cognitive-lab/**'
+      - 'app/sitemaps/cognitive-lab.xml/**'
+      - 'components/cognitive-lab-*.tsx'
+      - 'data/cognitive-lab/**'
+      - 'lib/cognitive-lab/**'
+      - 'scripts/cognitive-lab-contract.mjs'
+      - 'scripts/cognitive-lab-extension-audit-contract.mjs'
+      - '.github/workflows/cognitive-lab-100-validate.yml'
+
+concurrency:
+  group: cognitive-lab-100-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
+      NEXT_PUBLIC_SITE_URL: https://rawafid-platform-staging.khaledaltheeb.workers.dev
+      NEXT_PUBLIC_ALLOW_INDEXING: 'false'
+      NEXT_PUBLIC_ENABLE_ANALYTICS: 'false'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Validate cognitive trial contracts
+        run: npm run cognitive-lab:validate
+      - name: Audit extension semantics and balance
+        run: node scripts/cognitive-lab-extension-audit-contract.mjs
+      - name: Type check
+        run: npm run typecheck
+      - name: Lint cognitive implementation
+        run: npx eslint app/cognitive-lab app/sitemaps/cognitive-lab.xml/route.ts components/cognitive-lab-browser.tsx components/cognitive-lab-runner.tsx components/cognitive-lab-extension-runner.tsx lib/cognitive-lab scripts/cognitive-lab-contract.mjs scripts/cognitive-lab-extension-audit-contract.mjs
+      - name: Build Cloudflare Worker with OpenNext
+        run: npx opennextjs-cloudflare build
+      - name: Validate Wrangler package
+        run: npx wrangler deploy --dry-run

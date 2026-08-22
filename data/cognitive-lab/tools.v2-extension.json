@@ -1,0 +1,425 @@
+[
+  {
+    "slug": "simon-conflict",
+    "title": "تعارض الموقع والاستجابة",
+    "category": "التحكم المعرفي",
+    "mode": "simon_conflict",
+    "summary": "مهمة توافق/تعارض تربط هوية المثير باستجابة محددة مع تجاهل موقع ظهوره؛ تفيد في تدريب مقاومة التداخل بين البعد ذي الصلة والبعد المشتت.",
+    "instructions": "اتبع قاعدة الرمز فقط وتجاهل موضع ظهوره.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "context-maintenance",
+    "title": "صيانة قاعدة السياق",
+    "category": "التحكم المعرفي",
+    "mode": "context_maintenance",
+    "summary": "نشاط يحافظ على إشارة سياقية قصيرة ثم يقرر الاستجابة للمثير اللاحق وفقها، بما يركز على حفظ قاعدة المهمة أثناء التداخل.",
+    "instructions": "احفظ قاعدة السياق الظاهرة أولًا، ثم طبّقها على المثير التالي.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "conflict-monitoring",
+    "title": "مراقبة التعارض",
+    "category": "التحكم المعرفي",
+    "mode": "conflict_monitoring",
+    "summary": "نشاط يطلب اكتشاف ما إذا كانت أبعاد المثير متوافقة أم متعارضة قبل اتخاذ القرار، لتدريب مراقبة مصادر التداخل.",
+    "instructions": "حدد أولًا هل المعلومات متوافقة أم متعارضة وفق القاعدة.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "rule-maintenance",
+    "title": "تثبيت مجموعة القواعد",
+    "category": "الوظائف التنفيذية",
+    "mode": "rule_maintenance",
+    "summary": "تدريب على الاحتفاظ بقاعدتين أو أكثر واختيار القاعدة الصحيحة بحسب إشارة السياق دون خلط بينها.",
+    "instructions": "استخدم إشارة السياق لاختيار القاعدة المناسبة ثم أجب.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "set-shifting-cued",
+    "title": "التحول الموجّه بين القواعد",
+    "category": "المرونة المعرفية",
+    "mode": "set_shifting_cued",
+    "summary": "نشاط تبديل صريح بين قواعد تصنيف مختلفة مع زيادة عدد السمات والتداخل بينها عبر المستويات.",
+    "instructions": "راقب إشارة القاعدة في كل محاولة ولا تستمر تلقائيًا على قاعدة المحاولة السابقة.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "dual-rule-inference",
+    "title": "الاستدلال بقاعدتين",
+    "category": "الوظائف التنفيذية",
+    "mode": "dual_rule_inference",
+    "summary": "يجمع بين حفظ قاعدتين وتطبيقهما بالتتابع للوصول إلى استجابة نهائية واحدة، بما يزيد عبء التحكم التنفيذي.",
+    "instructions": "طبّق القاعدتين بالترتيب المحدد ثم اختر الناتج النهائي.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "pattern-comparison",
+    "title": "مقارنة الأنماط السريعة",
+    "category": "سرعة المعالجة",
+    "mode": "pattern_comparison",
+    "summary": "مهمة مقارنة بصرية قصيرة لتحديد التطابق أو الاختلاف بين نمطين مع زيادة الطول والتشابه تدريجيًا.",
+    "instructions": "قارن النمطين بدقة وحدد هل هما متماثلان أم مختلفان.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "symbol-coding",
+    "title": "ترميز الرمز والرقم",
+    "category": "سرعة المعالجة",
+    "mode": "symbol_coding",
+    "summary": "نشاط ترميز رمزي يعتمد على مفتاح قصير ثابت داخل المحاولة ثم يطلب تحويل رمز إلى رقم أو العكس.",
+    "instructions": "استخدم مفتاح الترميز الظاهر وأجب بأسرع ما يمكن مع الحفاظ على الدقة.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "letter-comparison",
+    "title": "مقارنة سلاسل الحروف",
+    "category": "سرعة المعالجة",
+    "mode": "letter_comparison",
+    "summary": "مهمة تمييز سريع لسلاسل حروف قصيرة تتقارب تدريجيًا، مع التركيز على الدقة قبل السرعة.",
+    "instructions": "قارن السلسلتين وحدد هل هما متطابقتان تمامًا.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "numeric-comparison-speed",
+    "title": "المقارنة العددية السريعة",
+    "category": "سرعة المعالجة",
+    "mode": "numeric_comparison_speed",
+    "summary": "نشاط اختيار الأكبر أو الأصغر بين أعداد متقاربة مع زيادة طول الأرقام وتقاربها.",
+    "instructions": "اتبع قاعدة المقارنة وحدد العدد المطلوب دون إجراء عمليات غير لازمة.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "feature-binding",
+    "title": "ربط السمات البصرية",
+    "category": "الإدراك البصري",
+    "mode": "feature_binding",
+    "summary": "نشاط يختبر الاحتفاظ بترابط اللون والشكل أو الرمز والموقع بدل تذكر كل سمة منفردة فقط.",
+    "instructions": "احفظ كل عنصر مع صفته المرتبطة ثم اختر الزوج الصحيح.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "visual-closure",
+    "title": "الإغلاق البصري",
+    "category": "الإدراك البصري",
+    "mode": "visual_closure",
+    "summary": "نشاط استدلال بصري يطلب التعرف إلى النمط أو الشكل الكامل من تمثيل ناقص أو مجزأ بطريقة غير سريرية.",
+    "instructions": "استنتج الشكل أو النمط الكامل من الأجزاء المعروضة.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "symmetry-detection",
+    "title": "اكتشاف التناظر",
+    "category": "الإدراك البصري",
+    "mode": "symmetry_detection",
+    "summary": "تدريب على التحقق من التناظر حول محور محدد مع زيادة طول النمط وعدد العناصر.",
+    "instructions": "افحص جانبي المحور وحدد هل النمط متناظر.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "embedded-pattern",
+    "title": "استخراج النمط المضمّن",
+    "category": "الإدراك البصري",
+    "mode": "embedded_pattern",
+    "summary": "نشاط بحث إدراكي يطلب تحديد النمط الصغير الموجود داخل تركيب أكبر دون الاعتماد على تسمية شكل بعينه.",
+    "instructions": "قارن البنية المستهدفة بالبدائل وحدد أين ظهرت العلاقات نفسها.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "spatial-folding",
+    "title": "الطي المكاني الذهني",
+    "category": "المعالجة المكانية",
+    "mode": "spatial_folding",
+    "summary": "تدريب تخيلي مبسط على تتبع أثر طي/فتح ترتيب مكاني باستخدام تمثيلات رمزية قابلة للحل داخل المتصفح.",
+    "instructions": "تتبع التحويلات المكانية بالترتيب ثم اختر الحالة النهائية.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "route-memory",
+    "title": "ذاكرة المسار",
+    "category": "الذاكرة المكانية",
+    "mode": "route_memory",
+    "summary": "نشاط تعلم مسار مكوّن من اتجاهات أو محطات ثم استعادته بعد إخفائه، مع زيادة طول المسار.",
+    "instructions": "ادرس المسار ثم أعد اختياره بالترتيب نفسه.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "landmark-route-binding",
+    "title": "ربط المعالم بالمسار",
+    "category": "الذاكرة المكانية",
+    "mode": "landmark_route_binding",
+    "summary": "يجمع بين تذكر ترتيب المسار وتذكر المعلم المرتبط بكل محطة، لرفع دقة التمثيل السياقي.",
+    "instructions": "احفظ المعلم المرتبط بكل خطوة ثم أجب عن العلاقة المطلوبة.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "source-memory",
+    "title": "ذاكرة المصدر",
+    "category": "الذاكرة العرضية",
+    "mode": "source_memory",
+    "summary": "نشاط يميز بين تذكر العنصر وتذكر مصدر ظهوره، مثل اللون أو المجموعة أو السياق الذي قدم فيه.",
+    "instructions": "لا تكتف بتذكر العنصر؛ استرجع السياق الذي ظهر فيه.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "item-context-memory",
+    "title": "ذاكرة العنصر والسياق",
+    "category": "الذاكرة العرضية",
+    "mode": "item_context_memory",
+    "summary": "تدريب على استعادة اقتران عنصر بسياق محدد بعد مرحلة دراسة قصيرة، مع مشتتات من عناصر وسياقات مألوفة.",
+    "instructions": "احفظ كل عنصر مع سياقه ثم اختر الارتباط الأصلي.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "lure-discrimination",
+    "title": "تمييز المشابهات في الذاكرة",
+    "category": "الذاكرة العرضية",
+    "mode": "lure_discrimination",
+    "summary": "نشاط تعرف يفرق بين العنصر المدروس وعنصر جديد شديد الشبه به، لتقليل الاعتماد على الألفة العامة.",
+    "instructions": "اختر العنصر الذي ظهر فعلًا لا العنصر الأكثر شبهًا فقط.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "serial-position-memory",
+    "title": "ذاكرة الموضع التسلسلي",
+    "category": "الذاكرة",
+    "mode": "serial_position_memory",
+    "summary": "نشاط يسترجع موقع عنصر داخل سلسلة بدل استرجاع العناصر فقط، مع زيادة طول السلسلة.",
+    "instructions": "ادرس الترتيب ثم حدد موضع العنصر المطلوب.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "relational-memory",
+    "title": "ذاكرة العلاقات",
+    "category": "الذاكرة",
+    "mode": "relational_memory",
+    "summary": "نشاط يركز على العلاقة بين عنصرين أو أكثر وكيفية ارتباطهما، بدل التذكر المنفصل للعناصر.",
+    "instructions": "احفظ العلاقة بين العناصر ثم استرجع الطرف أو العلاقة المطلوبة.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "category-learning",
+    "title": "تعلم الفئات من الأمثلة",
+    "category": "التعلم",
+    "mode": "category_learning",
+    "summary": "نشاط استقراء تدريجي لقاعدة فئة من أمثلة موجبة وسالبة ثم تطبيقها على مثال جديد.",
+    "instructions": "استخرج القاعدة المشتركة من الأمثلة ثم صنف المثال الجديد.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "sequence-learning",
+    "title": "تعلم النمط التسلسلي",
+    "category": "التعلم",
+    "mode": "sequence_learning",
+    "summary": "تدريب على اكتشاف انتظام متكرر داخل تسلسل رمزي والتنبؤ بالعنصر التالي دون ادعاء قياس تعلم ضمني مخبري.",
+    "instructions": "ابحث عن الانتظام في السلسلة واختر العنصر المتوقع التالي.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "feedback-rule-learning",
+    "title": "تعلم القاعدة من التغذية الراجعة",
+    "category": "التعلم",
+    "mode": "feedback_rule_learning",
+    "summary": "محاكاة تعليمية لاكتشاف قاعدة تصنيف من أمثلة موضحة ثم تطبيق القاعدة على مثال غير مشروح.",
+    "instructions": "استخلص القاعدة من الأمثلة المعلّمة ثم طبقها على المثال الجديد.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "transitive-inference",
+    "title": "الاستدلال الانتقالي",
+    "category": "الاستدلال",
+    "mode": "transitive_inference",
+    "summary": "نشاط يستنتج علاقة غير معروضة مباشرة من سلسلة علاقات مرتبة مثل أ>B وب>ج.",
+    "instructions": "ادمج العلاقات المعطاة واستنتج العلاقة غير المباشرة.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "syllogistic-reasoning",
+    "title": "الاستدلال القياسي",
+    "category": "الاستدلال",
+    "mode": "syllogistic_reasoning",
+    "summary": "نشاط منطقي يختبر ما إذا كانت نتيجة محددة تتبع من مقدمات عامة دون الاعتماد على معرفة خارجية.",
+    "instructions": "احكم على النتيجة من المقدمات فقط حتى لو خالفت المعرفة اليومية.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "causal-chain",
+    "title": "تتبع السلسلة السببية",
+    "category": "الاستدلال السببي",
+    "mode": "causal_chain",
+    "summary": "تدريب على تتبع سلسلة أسباب ونتائج قصيرة واختيار الأثر المتوقع عند تغيير حلقة محددة.",
+    "instructions": "تتبع العلاقات السببية بالترتيب ثم اختر النتيجة الأكثر اتساقًا.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "counterfactual-reasoning",
+    "title": "الاستدلال الافتراضي المضاد",
+    "category": "الاستدلال",
+    "mode": "counterfactual_reasoning",
+    "summary": "نشاط يطلب تحديث النتيجة عند تغيير شرط واحد في سيناريو منطقي مبسط.",
+    "instructions": "غيّر الشرط المحدد فقط ثم أعد حساب النتيجة المتوقعة.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "probability-judgment",
+    "title": "الحكم الاحتمالي",
+    "category": "الاستدلال الكمي",
+    "mode": "probability_judgment",
+    "summary": "نشاط يقارن احتمالات بسيطة معروضة بأعداد واضحة، ويركز على فهم النسب لا الحدس اللفظي وحده.",
+    "instructions": "حوّل المعلومات إلى نسب قابلة للمقارنة ثم اختر الاحتمال الصحيح.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "evidence-updating",
+    "title": "تحديث الاعتقاد بالأدلة",
+    "category": "الاستدلال الكمي",
+    "mode": "evidence_updating",
+    "summary": "نشاط تعليمي على تعديل ترجيح فرضية عند ظهور دليل جديد باستخدام نسب مبسطة ومحددة.",
+    "instructions": "قارن قوة الدليل قبل وبعد المعلومة الجديدة ثم اختر التحديث الصحيح.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "numerical-stroop",
+    "title": "تعارض القيمة والحجم العددي",
+    "category": "التحكم المعرفي",
+    "mode": "numerical_stroop",
+    "summary": "نسخة عددية تعليمية من مهام التعارض تفصل بين القيمة العددية وسمة بصرية مشتتة.",
+    "instructions": "اتبع البعد المطلوب في التعليمات وتجاهل البعد الآخر.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "approximate-number",
+    "title": "تقدير الكمية التقريبية",
+    "category": "المعالجة العددية",
+    "mode": "approximate_number",
+    "summary": "نشاط مقارنة كميات تقريبية ممثلة بنقاط أو رموز دون عد مباشر عندما تكون الكميات كبيرة نسبيًا.",
+    "instructions": "قدّر أي مجموعة أكبر دون محاولة عد كل عنصر واحدًا واحدًا.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "number-line",
+    "title": "الخط العددي الذهني",
+    "category": "المعالجة العددية",
+    "mode": "number_line",
+    "summary": "نشاط تحديد موضع قيمة داخل مدى عددي أو اختيار القيمة الأقرب لموضع نسبي معلوم.",
+    "instructions": "حوّل الموضع النسبي إلى قيمة ضمن المدى المعروض.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "fraction-magnitude",
+    "title": "مقارنة الكسور",
+    "category": "المعالجة العددية",
+    "mode": "fraction_magnitude",
+    "summary": "نشاط مقارنة كسور بسيطة مع زيادة الحاجة إلى توحيد المقامات أو التفكير النسبي.",
+    "instructions": "قارن القيمة الفعلية للكسور ولا تعتمد على حجم البسط أو المقام منفردًا.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "ratio-reasoning",
+    "title": "الاستدلال بالنسب",
+    "category": "المعالجة العددية",
+    "mode": "ratio_reasoning",
+    "summary": "نشاط حل علاقات تناسب مباشرة ضمن سياقات محايدة وبأعداد مضبوطة.",
+    "instructions": "حدد العلاقة النسبية أولًا ثم طبقها على الكمية الجديدة.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "phoneme-discrimination",
+    "title": "تمييز الوحدات الصوتية",
+    "category": "المعالجة اللغوية",
+    "mode": "phoneme_discrimination",
+    "summary": "نشاط لغوي نصي يركز على التمييز بين وحدات صوتية متقاربة ممثلة كتابيًا، دون اعتباره اختبار سمع سريري.",
+    "instructions": "قارن البنية الصوتية المقصودة في الكلمات وحدد الاختلاف المطلوب.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "syllable-segmentation",
+    "title": "تقسيم المقاطع",
+    "category": "المعالجة اللغوية",
+    "mode": "syllable_segmentation",
+    "summary": "نشاط وعي صوتي يطلب تحليل كلمات مألوفة إلى مقاطع بطريقة تعليمية مبسطة.",
+    "instructions": "اختر التقسيم المقطعي الأقرب للنطق المقصود.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "rhyme-judgment",
+    "title": "الحكم على القافية",
+    "category": "المعالجة اللغوية",
+    "mode": "rhyme_judgment",
+    "summary": "نشاط يحدد ما إذا كانت كلمتان تتشاركان نهاية صوتية متقاربة، مع تجنب الاعتماد على الرسم الإملائي وحده قدر الإمكان.",
+    "instructions": "ركز على النهاية الصوتية لا شكل الكلمة فقط.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "lexical-decision",
+    "title": "قرار الكلمة",
+    "category": "اللغة",
+    "mode": "lexical_decision",
+    "summary": "نشاط يميز بين كلمة عربية مألوفة وبنية حرفية غير معجمية مصممة للمهمة، مع قياس الدقة والزمن وصفيًا.",
+    "instructions": "حدد هل السلسلة كلمة مألوفة في العربية أم تركيب غير معجمي.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "semantic-association",
+    "title": "الترابط الدلالي",
+    "category": "اللغة",
+    "mode": "semantic_association",
+    "summary": "نشاط اختيار الكلمة الأكثر ارتباطًا بمعنى كلمة هدف من بين بدائل متقاربة.",
+    "instructions": "اختر الارتباط الدلالي الأقوى، لا مجرد التشابه الشكلي.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "verbal-inference",
+    "title": "الاستدلال اللفظي من نص قصير",
+    "category": "اللغة",
+    "mode": "verbal_inference",
+    "summary": "نشاط قراءة قصيرة يطلب استنتاج معلومة مدعومة ضمنيًا دون إضافة افتراضات من خارج النص.",
+    "instructions": "استند إلى النص فقط واختر الاستنتاج الذي تدعمه المعلومات.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "ambiguity-resolution",
+    "title": "حل الغموض السياقي",
+    "category": "اللغة",
+    "mode": "ambiguity_resolution",
+    "summary": "نشاط يستخدم السياق لاختيار المعنى المناسب لكلمة متعددة الدلالة أو جملة قابلة لأكثر من تفسير.",
+    "instructions": "استخدم قرائن الجملة لتحديد المعنى المقصود.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "morphological-reasoning",
+    "title": "الاستدلال الصرفي",
+    "category": "اللغة",
+    "mode": "morphological_reasoning",
+    "summary": "نشاط يكتشف علاقة اشتقاق أو نمط صرفي بسيط ثم يطبقه على مثال جديد.",
+    "instructions": "حدد نمط التحول بين الكلمات ثم طبقه على المثال الجديد.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "constraint-planning",
+    "title": "التخطيط تحت القيود",
+    "category": "التخطيط",
+    "mode": "constraint_planning",
+    "summary": "نشاط يرتب خطوات أو عناصر مع الالتزام بعدة قيود صريحة، بما يختبر جودة التخطيط المنطقي داخل المهمة.",
+    "instructions": "رتب الحل بحيث تتحقق جميع القيود لا بعضها فقط.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "means-end-planning",
+    "title": "التخطيط من الهدف إلى الوسيلة",
+    "category": "التخطيط",
+    "mode": "means_end_planning",
+    "summary": "نشاط يحدد الخطوة الوسيطة الأنسب للوصول من حالة بداية إلى هدف مع عوائق محددة.",
+    "instructions": "قارن الحالة الحالية بالهدف واختر الخطوة التي تقلل الفجوة دون خرق القيود.",
+    "difficultyStatus": "review"
+  },
+  {
+    "slug": "error-detection",
+    "title": "اكتشاف الخطأ في الإجراء",
+    "category": "مراقبة الأداء",
+    "mode": "error_detection",
+    "summary": "نشاط يعرض قاعدة وحلًا منفذًا ثم يطلب اكتشاف أول موضع خالف القاعدة، لدعم مراقبة الأداء.",
+    "instructions": "راجع الخطوات بالتسلسل وحدد أول خطأ فعلي.",
+    "difficultyStatus": "review"
+  }
+]

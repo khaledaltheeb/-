@@ -2,9 +2,10 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import CognitiveLabRunner from '@/components/cognitive-lab-runner';
+import CognitiveLabExtensionRunner from '@/components/cognitive-lab-extension-runner';
 import SiteFooter from '@/components/site-footer';
 import SiteHeader from '@/components/site-header';
-import { cognitiveTools, getCognitiveTool, getRelatedCognitiveTools } from '@/lib/cognitive-lab/catalog';
+import { cognitiveTools, getCognitiveTool, getRelatedCognitiveTools, isExtensionCognitiveTool } from '@/lib/cognitive-lab/catalog';
 import { breadcrumbJsonLd, buildSeoMetadata, SITE_URL } from '@/lib/seo';
 
 type Params = Promise<{ slug: string }>;
@@ -39,6 +40,7 @@ export default async function CognitiveToolPage({ params }: { params: Params }) 
   const tool = getCognitiveTool(slug);
   if (!tool) notFound();
   const related = getRelatedCognitiveTools(tool);
+  const extensionTool = isExtensionCognitiveTool(tool);
   const description = toolDescription(tool.summary);
   const breadcrumbSchema = breadcrumbJsonLd([
     { name: 'الرئيسية', path: '/' },
@@ -79,6 +81,7 @@ export default async function CognitiveToolPage({ params }: { params: Params }) 
                   <span>تعليمي غير تشخيصي</span>
                   <span>5 مستويات</span>
                   <span>10 محاولات لكل جلسة</span>
+                  {extensionTool ? <span>توسعة بحثية 2026</span> : null}
                   <span className={`cognitive-status cognitive-status--${tool.difficultyStatus}`}>{tool.difficultyStatus === 'verified' ? 'تدرج مختبر' : 'التدرج قيد المراجعة'}</span>
                 </div>
               </div>
@@ -92,7 +95,7 @@ export default async function CognitiveToolPage({ params }: { params: Params }) 
         </section>
 
         <div className="cognitive-shell cognitive-runner-wrap">
-          <CognitiveLabRunner tool={tool} />
+          {extensionTool ? <CognitiveLabExtensionRunner tool={tool} /> : <CognitiveLabRunner tool={tool} />}
         </div>
 
         <section className="cognitive-shell cognitive-reading" aria-labelledby="cognitive-reading-title">
@@ -101,6 +104,7 @@ export default async function CognitiveToolPage({ params }: { params: Params }) 
             <h2 id="cognitive-reading-title">ماذا يقدم هذا النشاط، وماذا لا يقدم؟</h2>
             <p>يقدم {tool.title} تدريبًا قصيرًا على اتباع قاعدة محددة داخل بيئة رقمية مضبوطة. النتيجة تلخص ما حدث في عشر محاولات فقط: عدد الإجابات الصحيحة، نسبة الدقة، والزمن الوسيط بعد ظهور السؤال أو الإشارة. هذه الأرقام وصف للجلسة وليست سمة ثابتة للشخص.</p>
             <p>قد تتغير النتيجة مع فهم التعليمات، حجم الشاشة، لوحة المفاتيح أو اللمس، جودة الصوت، الانشغال، النوم، الألم، اللغة، أو التعود على المهمة. لهذا لا يحول المحرك الزمن والدقة إلى «عمر معرفي» أو «معدل ذكاء» أو تشخيص، ولا يقارن نتيجتك بعينة سكانية غير موثقة.</p>
+            {extensionTool ? <p><strong>ملاحظة منهجية:</strong> هذا النشاط من توسعة المختبر البحثية. بُني على مبدأ معرفي معروف لكن صياغة المهمة وبنكها من روافد، ولم يخضع لمعايرة معيارية على عينة سكانية؛ لذلك تبقى النتيجة تعليمية ووصفية.</p> : null}
 
             <h2>كيف تستفيد منه بطريقة منهجية؟</h2>
             <ol>
