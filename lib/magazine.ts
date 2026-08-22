@@ -27,7 +27,13 @@ export type MagazineRecord = {
   schema_json: Record<string, unknown> | null;
 };
 
+export type MagazineListingRecord = Pick<
+  MagazineRecord,
+  'id' | 'slug' | 'title' | 'excerpt' | 'canonical_url' | 'published_at' | 'updated_at' | 'schema_json'
+>;
+
 const FIELDS = 'id,slug,title,excerpt,body_json,body_text,seo_title,seo_description,canonical_url,robots_index,robots_follow,published_at,updated_at,primary_keyword,secondary_keywords,semantic_terms,author_display_name,reviewer_display_name,reviewer_credentials,last_reviewed_at,references_json,medical_disclaimer,schema_json';
+const LISTING_FIELDS = 'id,slug,title,excerpt,canonical_url,published_at,updated_at,schema_json';
 
 function isPublishedNow(value: string | null) {
   return !value || new Date(value).getTime() <= Date.now();
@@ -45,18 +51,18 @@ export function sourceUrl(item: Pick<MagazineRecord, 'references_json' | 'schema
   return typeof value === 'string' && /^https:\/\//i.test(value) ? value : null;
 }
 
-export async function getMagazineItems(): Promise<MagazineRecord[]> {
+export async function getMagazineItems(): Promise<MagazineListingRecord[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from('content')
-    .select(FIELDS)
+    .select(LISTING_FIELDS)
     .eq('content_type', 'research')
     .eq('status', 'published')
     .like('canonical_url', '/magazine/%')
     .order('published_at', { ascending: false })
     .limit(500);
   if (error) throw error;
-  return ((data ?? []) as unknown as MagazineRecord[]).filter((item) => isPublishedNow(item.published_at));
+  return ((data ?? []) as unknown as MagazineListingRecord[]).filter((item) => isPublishedNow(item.published_at));
 }
 
 export async function getMagazineRecord(routeSlug: string): Promise<MagazineRecord | null> {
@@ -95,11 +101,23 @@ export async function getPediatricOncologyEvidenceRecord(
   return record && isPublishedNow(record.published_at) ? record : null;
 }
 
-export async function getRelatedMagazine(record: MagazineRecord, limit = 4): Promise<MagazineRecord[]> {
-  const items = await getMagazineItems();
+export async function getRelatedMagazine(record: MagazineRecord, limit = 4): Promise<MagazineListingRecord[]> {
+  const boundedLimit = Math.max(1, Math.min(limit, 12));
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('content')
+    .select(LISTING_FIELDS)
+    .eq('content_type', 'research')
+    .eq('status', 'published')
+    .like('canonical_url', '/magazine/%')
+    .neq('id', record.id)
+    .order('published_at', { ascending: false })
+    .limit(Math.max(24, boundedLimit * 8));
+  if (error) throw error;
+
   const kind = evidenceKind(record);
-  return items
-    .filter((item) => item.id !== record.id)
+  return ((data ?? []) as unknown as MagazineListingRecord[])
+    .filter((item) => isPublishedNow(item.published_at))
     .sort((a, b) => Number(evidenceKind(b) === kind) - Number(evidenceKind(a) === kind))
-    .slice(0, limit);
+    .slice(0, boundedLimit);
 }
