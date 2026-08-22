@@ -9,7 +9,8 @@ const groups = [
       { href: '/sections', label: 'جميع الأقسام' },
       { href: '/care-guides/', label: 'أدلة التعامل والرعاية' },
       { href: '/evidence-guides/', label: 'الأدلة العلمية' },
-      { href: '/encyclopedia/', label: 'الموسوعة' },
+      { href: '/sectors/short-encyclopedia', label: 'قطاع الموسوعة المختصرة' },
+      { href: '/encyclopedia/', label: 'الموسوعة المختصرة' },
     ],
   },
   {
