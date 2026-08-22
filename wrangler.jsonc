@@ -3,14 +3,14 @@
   "name": "rawafid-platform-staging",
   "account_id": "1910e1ad3c793fd568ba1caafe34f964",
   "main": ".open-next/worker.js",
-  "compatibility_date": "2026-08-09",
+  "compatibility_date": "2026-08-22",
   "compatibility_flags": ["nodejs_compat"],
   "workers_dev": true,
   "preview_urls": true,
   "minify": true,
   "vars": {
     "NEXT_PUBLIC_SITE_URL": "https://rawafid-platform-staging.khaledaltheeb.workers.dev",
-    "NEXT_PUBLIC_ALLOW_INDEXING": "true",
+    "NEXT_PUBLIC_ALLOW_INDEXING": "false",
     "NEXT_PUBLIC_ENABLE_ANALYTICS": "false"
   },
   "assets": {
