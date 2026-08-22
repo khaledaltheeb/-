@@ -9,6 +9,7 @@ on:
       - 'data/cognitive-lab/**'
       - 'lib/cognitive-lab/**'
       - 'scripts/cognitive-lab-contract.mjs'
+      - 'scripts/cognitive-lab-extension-audit-contract.mjs'
       - '.github/workflows/cognitive-lab-100-validate.yml'
 
 concurrency:
@@ -32,7 +33,9 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Validate cognitive trial contracts
         run: npm run cognitive-lab:validate
+      - name: Audit extension semantics and balance
+        run: node scripts/cognitive-lab-extension-audit-contract.mjs
       - name: Type check
         run: npm run typecheck
       - name: Lint cognitive implementation
-        run: npx eslint app/cognitive-lab components/cognitive-lab-browser.tsx components/cognitive-lab-runner.tsx components/cognitive-lab-extension-runner.tsx lib/cognitive-lab
+        run: npx eslint app/cognitive-lab components/cognitive-lab-browser.tsx components/cognitive-lab-runner.tsx components/cognitive-lab-extension-runner.tsx lib/cognitive-lab scripts/cognitive-lab-contract.mjs scripts/cognitive-lab-extension-audit-contract.mjs
