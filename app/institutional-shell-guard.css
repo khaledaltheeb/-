@@ -1,0 +1,15 @@
+/*
+ * Institutional shell guard
+ * -------------------------
+ * Neutralizes legacy element-level footer geometry without changing Rawafid
+ * palette, typography, cards, content, routes, or feature-specific styling.
+ *
+ * `app/globals.css` still contains an old prototype `footer { display:flex; ... }`
+ * rule used by legacy surfaces. The production SiteFooter uses `.site-footer`
+ * and must remain a block shell so its inner grid and bottom bar stack normally.
+ */
+.site-footer {
+  display: block;
+  padding: 0;
+  justify-content: normal;
+}
