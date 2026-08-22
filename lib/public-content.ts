@@ -15,6 +15,8 @@ export async function getHomepageContent(limit = 6): Promise<HomepageContent[]> 
   const params = new URLSearchParams({
     select: 'slug,title,excerpt,content_type,published_at,updated_at',
     status: 'eq.published',
+    robots_index: 'eq.true',
+    published_at: `lte.${new Date().toISOString()}`,
     order: 'published_at.desc.nullslast,updated_at.desc',
     limit: String(Math.max(1, Math.min(limit, 12))),
   });
