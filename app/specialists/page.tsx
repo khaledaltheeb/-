@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import PublicPagination from '@/components/public-pagination';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import { createClient } from '@/lib/supabase/server';
@@ -12,30 +13,58 @@ export const metadata = buildSeoMetadata({
   keywords: ['مختص نفسي', 'أخصائي نفسي', 'طبيب نفسي', 'معالج نفسي', 'دليل المختصين', 'منصة روافد'],
 });
 
-type SearchParams = Promise<{ q?: string; specialty?: string; city?: string; mode?: string }>;
+type SearchParams = Promise<{ q?: string | string[]; specialty?: string | string[]; city?: string | string[]; mode?: string | string[]; page?: string | string[] }>;
 type SpecialistRow = {
   id: string; slug: string; full_name: string; professional_title: string | null; bio: string | null;
   country: string | null; region: string | null; city: string | null; specialties: string[]; languages: string[];
   years_experience: number | null; offers_remote: boolean; offers_in_person: boolean;
 };
 
+type DirectoryFilters = { q: string; specialty: string; city: string; mode: string };
+const PAGE_SIZE = 24;
+const one = (value: string | string[] | undefined) => Array.isArray(value) ? value[0] ?? '' : value ?? '';
+const pageNo = (value: string) => { const parsed = Number(value); return Number.isInteger(parsed) && parsed > 0 && parsed < 10000 ? parsed : 1; };
+const safeFilter = (value: string) => value.trim().replace(/[%_(),]/g, ' ').replace(/\s+/g, ' ').slice(0, 120);
+const pageHref = (page: number, filters: DirectoryFilters) => {
+  const params = new URLSearchParams();
+  if (filters.q) params.set('q', filters.q);
+  if (filters.specialty) params.set('specialty', filters.specialty);
+  if (filters.city) params.set('city', filters.city);
+  if (filters.mode) params.set('mode', filters.mode);
+  if (page > 1) params.set('page', String(page));
+  return `/specialists${params.size ? `?${params}` : ''}`;
+};
+
 export default async function SpecialistsDirectory({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams;
-  const q = String(params.q ?? '').trim().slice(0, 120);
-  const specialty = String(params.specialty ?? '').trim().slice(0, 120);
-  const city = String(params.city ?? '').trim().slice(0, 120);
-  const mode = ['remote', 'in_person'].includes(String(params.mode ?? '')) ? String(params.mode) : '';
+  const q = safeFilter(one(params.q));
+  const specialty = safeFilter(one(params.specialty));
+  const city = safeFilter(one(params.city));
+  const modeValue = one(params.mode);
+  const mode = ['remote', 'in_person'].includes(modeValue) ? modeValue : '';
+  const page = pageNo(one(params.page));
+  const filters = { q, specialty, city, mode };
   const hasFilters = Boolean(q || specialty || city || mode);
 
   const supabase = await createClient();
-  let query = supabase.from('specialists').select('id,slug,full_name,professional_title,bio,country,region,city,specialties,languages,years_experience,offers_remote,offers_in_person').eq('verification', 'verified').eq('is_active', true).order('full_name').limit(100);
-  if (q) query = query.or(`full_name.ilike.%${q.replace(/[%,]/g, '')}%,professional_title.ilike.%${q.replace(/[%,]/g, '')}%`);
+  let query = supabase
+    .from('specialists')
+    .select('id,slug,full_name,professional_title,bio,country,region,city,specialties,languages,years_experience,offers_remote,offers_in_person', { count: 'exact' })
+    .eq('verification', 'verified')
+    .eq('is_active', true)
+    .order('full_name')
+    .order('id')
+    .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
+  if (q) query = query.or(`full_name.ilike.%${q}%,professional_title.ilike.%${q}%`);
   if (specialty) query = query.contains('specialties', [specialty]);
-  if (city) query = query.ilike('city', `%${city.replace(/[%_]/g, '')}%`);
+  if (city) query = query.ilike('city', `%${city}%`);
   if (mode === 'remote') query = query.eq('offers_remote', true);
   if (mode === 'in_person') query = query.eq('offers_in_person', true);
-  const { data, error } = await query;
+  const { data, count, error } = await query;
   const rows = (Array.isArray(data) ? data : []) as SpecialistRow[];
+  const total = count ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const paginationPage = Math.min(page, totalPages);
 
   return (
     <>
@@ -64,9 +93,9 @@ export default async function SpecialistsDirectory({ searchParams }: { searchPar
         </form>
 
         <section className="directory-results" aria-live="polite">
-          <div className="directory-summary"><strong>{rows.length.toLocaleString('ar')}</strong><span>{hasFilters ? 'مختص موثق مطابق للفلاتر' : 'مختص موثق متاح في الدليل'}</span></div>
+          <div className="directory-summary"><strong>{total.toLocaleString('ar')}</strong><span>{hasFilters ? 'مختص موثق مطابق للفلاتر' : 'مختص موثق متاح في الدليل'}</span></div>
           {error && <div className="search-state error"><h2>تعذر تحميل الدليل</h2><p>لم يتم عرض بيانات غير مؤكدة. حاول مرة أخرى لاحقًا.</p></div>}
-          {!error && rows.length === 0 && <div className="search-state directory-empty"><h2>لا توجد ملفات مطابقة حاليًا</h2><p>{hasFilters ? 'جرّب توسيع الفلاتر أو مسحها لعرض جميع الملفات الموثقة.' : 'سيظهر المختصون هنا بعد اكتمال التوثيق وإتاحة الملف للنشر.'}</p>{hasFilters && <Link className="button" href="/specialists">عرض جميع المختصين</Link>}</div>}
+          {!error && rows.length === 0 && <div className="search-state directory-empty"><h2>{total > 0 ? 'هذه الصفحة خارج نطاق النتائج' : 'لا توجد ملفات مطابقة حاليًا'}</h2><p>{total > 0 ? 'استخدم أرقام الصفحات للعودة إلى الملفات المتاحة.' : hasFilters ? 'جرّب توسيع الفلاتر أو مسحها لعرض جميع الملفات الموثقة.' : 'سيظهر المختصون هنا بعد اكتمال التوثيق وإتاحة الملف للنشر.'}</p>{hasFilters && total === 0 && <Link className="button" href="/specialists">عرض جميع المختصين</Link>}</div>}
           <div className="directory-grid">
             {rows.map((specialist) => <article className="directory-card" key={specialist.id}>
               <div className="directory-card-top"><div className="profile-placeholder" aria-hidden="true">{specialist.full_name.slice(0, 1)}</div><div><span className="verified-label">موثق</span><h2><Link href={`/specialists/${specialist.slug}`}>{specialist.full_name}</Link></h2>{specialist.professional_title && <p className="professional-title">{specialist.professional_title}</p>}</div></div>
@@ -76,6 +105,7 @@ export default async function SpecialistsDirectory({ searchParams }: { searchPar
               <Link className="directory-open" href={`/specialists/${specialist.slug}`}>عرض الملف المهني ←</Link>
             </article>)}
           </div>
+          {!error && total > PAGE_SIZE && <PublicPagination currentPage={paginationPage} totalPages={totalPages} hrefForPage={(targetPage) => pageHref(targetPage, filters)} ariaLabel="صفحات دليل المختصين" />}
         </section>
       </main>
       <SiteFooter />
