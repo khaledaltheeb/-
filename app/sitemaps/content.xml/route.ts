@@ -3,7 +3,8 @@ import { sitemapResponse } from '@/lib/sitemap-xml';
 import { getCognitivePageIndex } from '@/lib/cognitive-program';
 
 export const dynamic = 'force-dynamic';
-const PAGE_SIZE=50000;
+const PAGE_SIZE = 5000;
+const DB_BATCH_SIZE = 1000;
 const RELEASE = '2026-08-14T00:00:00.000Z';
 
 type SitemapRow = {
@@ -16,6 +17,7 @@ type SitemapRow = {
 type JsonRecord = Record<string, unknown>;
 
 type ContentSitemapRecord = {
+  id: string;
   slug: string;
   updated_at: string | null;
   canonical_url: string | null;
@@ -60,28 +62,38 @@ export async function GET(request: Request) {
   const raw = Number(url.searchParams.get('page') ?? '0');
   const page = Number.isInteger(raw) && raw >= 0 && raw < 10000 ? raw : 0;
   const supabase = await createClient();
-  const start = page * PAGE_SIZE;
-  const end = start + PAGE_SIZE - 1;
+  const pageStart = page * PAGE_SIZE;
+  const pageEndExclusive = pageStart + PAGE_SIZE;
+  const now = new Date().toISOString();
+  const data: ContentSitemapRecord[] = [];
 
-  const { data, error } = await supabase
-    .from('content')
-    .select('slug,updated_at,canonical_url,schema_json')
-    .eq('status', 'published')
-    .neq('content_type', 'condition')
-    .not('slug', 'like', 'quick-info-%')
-    .lte('published_at', new Date().toISOString())
-    .eq('robots_index', true)
-    .order('updated_at', { ascending: false })
-    .range(start,end);
+  for (let batchStart = pageStart; batchStart < pageEndExclusive; batchStart += DB_BATCH_SIZE) {
+    const batchEnd = Math.min(batchStart + DB_BATCH_SIZE - 1, pageEndExclusive - 1);
+    const requestedRows = batchEnd - batchStart + 1;
+    const { data: batch, error } = await supabase
+      .from('content')
+      .select('id,slug,updated_at,canonical_url,schema_json')
+      .eq('status', 'published')
+      .neq('content_type', 'condition')
+      .not('slug', 'like', 'quick-info-%')
+      .lte('published_at', now)
+      .eq('robots_index', true)
+      .order('updated_at', { ascending: false })
+      .order('id', { ascending: false })
+      .range(batchStart, batchEnd);
 
-  if (error) {
-    throw new Error(`content sitemap query failed: ${error.message}`);
+    if (error) {
+      throw new Error(`content sitemap query failed at rows ${batchStart}-${batchEnd}: ${error.message}`);
+    }
+    if (!Array.isArray(batch)) {
+      throw new Error('content sitemap query returned no data array');
+    }
+
+    data.push(...(batch as ContentSitemapRecord[]));
+    if (batch.length < requestedRows) break;
   }
-  if (!Array.isArray(data)) {
-    throw new Error('content sitemap query returned no data array');
-  }
 
-  const databaseRows: SitemapRow[] = (data as ContentSitemapRecord[])
+  const databaseRows: SitemapRow[] = data
     .filter(sitemapEligible)
     .map((item) => ({
       path: item.canonical_url || `/content/${item.slug}`,
