@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import SiteHeader from '@/components/site-header';
+import SiteFooter from '@/components/site-footer';
 import { MfaSettings } from '@/components/mfa-settings';
 import { createClient } from '@/lib/supabase/server';
 import { changePassword } from './actions';
@@ -24,7 +26,7 @@ export default async function AccountSecurityPage({ searchParams }: { searchPara
   if (!assurance.error && assurance.data.nextLevel === 'aal2' && assurance.data.currentLevel !== 'aal2') redirect('/mfa?next=%2Faccount%2Fsecurity');
   const params = await searchParams;
   return (
-    <main className="dashboard-shell account-shell"><section className="dashboard-card account-card">
+    <><SiteHeader/><main className="dashboard-shell account-shell"><nav className="breadcrumbs" aria-label="مسار الصفحة"><Link href="/">الرئيسية</Link><span>/</span><Link href="/account">حسابي</Link><span>/</span><span aria-current="page">أمان الحساب</span></nav><nav className="account-local-nav" aria-label="خدمات الحساب"><Link href="/account">حسابي</Link><Link href="/messages">الرسائل</Link><Link href="/appointments">المواعيد</Link><Link href="/notifications">الإشعارات</Link><Link className="active" href="/account/security" aria-current="page">أمان الحساب</Link></nav><section className="dashboard-card account-card">
       <div className="admin-heading"><div><span className="eyebrow">أمان الحساب</span><h1>كلمة المرور والتحقق بخطوتين</h1><p>أدر كلمة المرور وأضف تطبيق مصادقة لحماية الوصول إلى بيانات الحساب والمسارات الحساسة.</p></div><div className="dashboard-actions"><Link className="button" href="/account">حسابي</Link><Link className="button" href="/forgot-password">استعادة عبر البريد</Link></div></div>
       {params.ok === 'password_updated' && <div className="system-message success" role="status">تم تحديث كلمة المرور بنجاح.</div>}
       {params.error && errors[params.error] && <div className="system-message error" role="alert">{errors[params.error]}</div>}
@@ -38,6 +40,6 @@ export default async function AccountSecurityPage({ searchParams }: { searchPara
       </section>
       <MfaSettings />
       <section className="account-section"><div className="section-mini-heading"><h2>فقدان الوصول</h2><span>مسار مستقل لا يكشف وجود الحساب</span></div><p>إذا نسيت كلمة المرور، استخدم صفحة الاستعادة. ترسل منصة روافد رابطًا محدود الصلاحية إلى البريد المرتبط بالحساب.</p><Link className="button" href="/forgot-password">نسيت كلمة المرور؟</Link></section>
-    </section></main>
+    </section></main><SiteFooter/></>
   );
 }
