@@ -13,15 +13,46 @@ type SitemapRow = {
   priority: number;
 };
 
+type JsonRecord = Record<string, unknown>;
+
 type ContentSitemapRecord = {
   slug: string;
   updated_at: string | null;
   canonical_url: string | null;
-  schema_json: Record<string, unknown> | null;
+  schema_json: JsonRecord | null;
 };
 
-function isLegacyPreserved(item: ContentSitemapRecord) {
-  return Boolean(item.schema_json && typeof item.schema_json === 'object' && 'legacy_migration' in item.schema_json);
+function asRecord(value: unknown): JsonRecord | null {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value as JsonRecord : null;
+}
+
+function asNumber(value: unknown) {
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
+  if (typeof value === 'string' && value.trim() !== '') {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+  return 0;
+}
+
+function sitemapEligible(item: ContentSitemapRecord) {
+  const schema = asRecord(item.schema_json);
+  if (!schema || !('legacy_migration' in schema)) return true;
+
+  const legacy = asRecord(schema.legacy_migration);
+  const originality = asRecord(schema.originality_report);
+  return Boolean(
+    legacy
+    && asNumber(schema.migration_release_contract_version) >= 1
+    && schema.publication_ready === true
+    && schema.editorial_review_required === false
+    && schema.migration_route_verified === true
+    && schema.taxonomy_reviewed === true
+    && asNumber(schema.classification_confidence) >= .9
+    && originality?.passed === true
+    && typeof item.canonical_url === 'string'
+    && item.canonical_url.startsWith('/'),
+  );
 }
 
 export async function GET(request: Request) {
@@ -51,7 +82,7 @@ export async function GET(request: Request) {
   }
 
   const databaseRows: SitemapRow[] = (data as ContentSitemapRecord[])
-    .filter((item) => !isLegacyPreserved(item))
+    .filter(sitemapEligible)
     .map((item) => ({
       path: item.canonical_url || `/content/${item.slug}`,
       lastModified: item.updated_at,
