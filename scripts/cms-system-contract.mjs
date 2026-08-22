@@ -47,7 +47,11 @@ const layout=requireText('app/admin/layout.tsx',[
 ]);
 if(!layout.includes("if(editorial&&!fullAdmin&&!isContentPath(pathname))redirect('/account')"))fail('editorial roles must stay scoped to /admin/content');
 
-requireText('lib/supabase/proxy.ts',["headers.set('x-rawafid-pathname', trustedPathname)",'forwardedHeaders()']);
+requireText('lib/supabase/proxy.ts',[
+  'const forwardedPathname = encodeURI(trustedPathname)',
+  "headers.set('x-rawafid-pathname', forwardedPathname)",
+  'forwardedHeaders()',
+]);
 requireText('app/admin/content/new/page.tsx',["['owner', 'admin', 'editor']"]);
 requireText('app/admin/content/page.tsx',["new Set(['owner','admin','editor','scientific_reviewer','seo_manager'])",'canCreate','نسخة تحريرية','revisionTarget','RELATION_EDITABLE']);
 
