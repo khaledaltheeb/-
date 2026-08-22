@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: read
+  statuses: write
 
 concurrency:
   group: verify-live-cognitive-lab
@@ -19,9 +20,25 @@ jobs:
     steps:
       - name: Verify deployed Cognitive Lab 100
         shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           BASE='https://rawafid-platform-staging.khaledaltheeb.workers.dev'
+          STATUS_API="https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}"
+
+          post_status() {
+            local state="$1"
+            local description="$2"
+            curl --fail --silent --show-error \
+              -X POST \
+              -H "Authorization: Bearer ${GH_TOKEN}" \
+              -H 'Accept: application/vnd.github+json' \
+              -H 'X-GitHub-Api-Version: 2022-11-28' \
+              "${STATUS_API}" \
+              -d "{\"state\":\"${state}\",\"context\":\"live/cognitive-lab-100\",\"description\":\"${description}\"}" \
+              >/dev/null
+          }
 
           fetch() {
             local path="$1"
@@ -32,6 +49,8 @@ jobs:
               -H 'Pragma: no-cache' \
               "${BASE}${path}?live_verify=${stamp}"
           }
+
+          post_status pending 'Checking live Cognitive Lab 100 deployment'
 
           for attempt in $(seq 1 60); do
             stamp="${GITHUB_SHA}-${attempt}-$(date +%s)"
@@ -60,6 +79,7 @@ jobs:
               echo "LIVE_COGNITIVE_LAB_EXTENSION_TOOLS=47"
               echo "LIVE_COGNITIVE_LAB_VERIFIED_DIFFICULTY=14"
               echo "Verified sample routes: simon-conflict, symbol-coding, ambiguity-resolution, error-detection"
+              post_status success 'Live: 100 tools and 101 sitemap URLs verified'
               exit 0
             fi
 
@@ -67,5 +87,6 @@ jobs:
             sleep 10
           done
 
+          post_status failure 'Live Cognitive Lab 100 verification failed'
           echo 'Live Cognitive Lab did not converge to the verified 100-tool snapshot.' >&2
           exit 1
