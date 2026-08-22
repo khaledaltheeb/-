@@ -45,5 +45,21 @@ requireText('app/all-pages/all-pages.css', ['content-index-grid', 'content-index
 requireText('components/site-footer.tsx', ["href: '/all-pages'", "label: 'فهرس المحتوى المنشور'"]);
 requireText('app/sitemaps/static.xml/route.ts', ["path:'/all-pages'", "changeFrequency:'daily'"]);
 
+for (const file of ['app/sectors/[slug]/page.tsx', 'app/sections/[slug]/page.tsx']) {
+  requireText(file, [
+    'content_categories!inner(category_id)',
+    ".eq('status', 'published')",
+    'PublicPagination',
+    "href=\"/all-pages\"",
+  ]);
+  forbidText(file, [".eq('robots_index', true)"]);
+}
+requireText('app/sectors/[slug]/page.tsx', ['buildPublicCategoryForest', 'PublicCategoryTree', 'countPublicCategoryNodes', "path: metadataPath(sector.slug, page)"]);
+requireText('app/sections/[slug]/page.tsx', ['const FETCH_BATCH = 500', 'index: !query', 'path: pageHref(slug, page, query)', '.order(\'id\')']);
+requireText('app/sections/page.tsx', ['buildPublicCategoryForest', 'unassignedCategories', 'PublicCategoryTree', 'taxonomy-sector-group--fallback', "href=\"/all-pages\""]);
+requireText('lib/public-category-tree.ts', ['pure cycle', 'missing', 'visited', 'forest.push', 'countPublicCategoryNodes']);
+requireText('components/public-category-tree.tsx', ['public-category-tree', 'data-depth', 'ariaLabel', 'PublicCategoryTree nodes={node.children}']);
+requireText('app/institutional-public-v1.css', ['taxonomy-sector-group--fallback', 'public-category-tree', 'category-descendant-count', ':focus-visible']);
+
 if (failed) process.exit(1);
-console.log('Public discoverability contract passed: directories paginate without 100-row truncation, filter states stay noindex, pagination stays canonical, and the published-content index is linked, styled, structured, and advertised in sitemap.');
+console.log('Public discoverability contract passed: directories paginate without truncation, filter states stay noindex, published content remains internally reachable independent of robots policy, taxonomy trees are lossless at arbitrary depth, and the complete content index is linked and advertised.');
