@@ -13,6 +13,7 @@ const manifest = read('public/manifest.webmanifest');
 const serviceWorker = read('public/sw.js');
 const pwaIcon = read('lib/pwa-icon.ts');
 const theme = read('app/rawafid-theme.css');
+const visualStability = read('app/visual-stability.css');
 const adminTheme = read('app/theme-admin-v4.css');
 const themeLib = read('lib/theme.ts');
 const agents = read('AGENTS.md');
@@ -22,6 +23,11 @@ if (!layout.includes("'./rawafid-theme.css'")) fail('root layout must import the
 const directCssImports = [...layout.matchAll(/^import\s+["'](\.\/[^"']+\.css)["'];?\s*$/gm)].map((match) => match[1]);
 if (directCssImports.length !== 1 || directCssImports[0] !== './rawafid-theme.css') {
   fail(`root layout must have exactly one direct global CSS import; found: ${directCssImports.join(', ')}`);
+}
+
+const visualStabilityExecutable = visualStability.replace(/\/\*[\s\S]*?\*\//g, '').trim();
+if (visualStabilityExecutable) {
+  fail('visual-stability.css is retired and must not contain executable global overrides');
 }
 
 for (const token of ['--rf-brand:', '--rf-page:', '--rf-ink:', '--rf-radius-lg:', '--rf-shadow-md:', '--rf-font-display:']) {
