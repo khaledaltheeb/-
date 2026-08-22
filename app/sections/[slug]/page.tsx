@@ -19,6 +19,8 @@ type Category = { id: string; sector_id: string | null; parent_id: string | null
 type Item = { id: string; slug: string; title: string; excerpt: string | null; content_type: string; published_at: string | null; canonical_url: string | null };
 type EditorialContent = { id: string; title: string; excerpt: string | null; body_json: unknown; body_text: string | null };
 const PAGE_SIZE = 24;
+const FETCH_BATCH = 500;
+const CONTENT_SELECT = 'id,slug,title,excerpt,content_type,published_at,canonical_url,content_categories!inner(category_id)';
 const one = (value: string | string[] | undefined) => Array.isArray(value) ? value[0] ?? '' : value ?? '';
 const pageNo = (value: string) => { const n = Number(value); return Number.isInteger(n) && n > 0 && n < 10000 ? n : 1; };
 const qSafe = (value: string) => value.trim().replace(/[%_(),]/g, ' ').replace(/\s+/g, ' ').slice(0, 100);
@@ -77,13 +79,27 @@ export default async function SectionPage({ params, searchParams }: { params: Pa
 
   if (isRoot || virtual) {
     const generated = getCognitivePageIndex().filter((item) => isRoot || item.categorySlug === slug).map((item) => ({ id: `cognitive:${item.slug}`, slug: item.slug, title: item.title, excerpt: item.excerpt, content_type: item.contentType, published_at: '2026-08-14T00:00:00.000Z', canonical_url: null }));
-    let existing: Item[] = [];
+    const existing: Item[] = [];
     if (isRoot) {
-      const { data: mappings } = await supabase.from('content_categories').select('content_id').eq('category_id', category.id).eq('is_primary', true);
-      const ids = [...new Set((mappings ?? []).map((mapping) => mapping.content_id).filter(Boolean))] as string[];
-      if (ids.length > 0) {
-        const { data } = await supabase.from('content').select('id,slug,title,excerpt,content_type,published_at,canonical_url').in('id', ids).eq('status', 'published').lte('published_at', now).eq('robots_index', true).order('title');
-        existing = (data ?? []) as Item[];
+      let offset = 0;
+      while (true) {
+        const { data, error } = await supabase.from('content')
+          .select(CONTENT_SELECT)
+          .eq('content_categories.category_id', category.id)
+          .eq('content_categories.is_primary', true)
+          .eq('status', 'published')
+          .lte('published_at', now)
+          .eq('robots_index', true)
+          .order('title')
+          .range(offset, offset + FETCH_BATCH - 1);
+        if (error) {
+          console.error('section primary-content read failed', { slug, code: error.code });
+          break;
+        }
+        const batch = (data ?? []) as unknown as Item[];
+        existing.push(...batch);
+        if (batch.length < FETCH_BATCH) break;
+        offset += FETCH_BATCH;
       }
       childCards = getCognitiveCategories().map((item) => ({ slug: item.slug, name_ar: item.name, description: item.description }));
     } else {
@@ -98,23 +114,29 @@ export default async function SectionPage({ params, searchParams }: { params: Pa
     total = all.length;
     rows = all.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
   } else {
-    const [{ data: sec }, { data: par }, { data: children }, { data: mappings }] = await Promise.all([
+    const [{ data: sec }, { data: par }, { data: children }] = await Promise.all([
       category.sector_id ? supabase.from('sectors').select('slug,name_ar').eq('id', category.sector_id).maybeSingle() : Promise.resolve({ data: null }),
       category.parent_id ? supabase.from('categories').select('slug,name_ar').eq('id', category.parent_id).maybeSingle() : Promise.resolve({ data: null }),
       supabase.from('categories').select('slug,name_ar,description').eq('parent_id', category.id).eq('is_active', true).eq('visibility', 'public').order('sort_order'),
-      supabase.from('content_categories').select('content_id').eq('category_id', category.id).eq('is_primary', true),
     ]);
     sector = sec as typeof sector;
     parent = par as typeof parent;
     childCards = (children ?? []) as typeof childCards;
-    const ids = [...new Set((mappings ?? []).map((mapping) => mapping.content_id).filter(Boolean))] as string[];
-    if (ids.length > 0) {
-      let contentQuery = supabase.from('content').select('id,slug,title,excerpt,content_type,published_at,canonical_url', { count: 'exact' }).in('id', ids).eq('status', 'published').lte('published_at', now).eq('robots_index', true).order('published_at', { ascending: false }).order('title');
-      if (query) contentQuery = contentQuery.ilike('title', `%${query}%`);
-      const { data, count } = await contentQuery.range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
-      rows = (data ?? []) as Item[];
-      total = count ?? 0;
-    }
+
+    let contentQuery = supabase.from('content')
+      .select(CONTENT_SELECT, { count: 'exact' })
+      .eq('content_categories.category_id', category.id)
+      .eq('content_categories.is_primary', true)
+      .eq('status', 'published')
+      .lte('published_at', now)
+      .eq('robots_index', true)
+      .order('published_at', { ascending: false })
+      .order('title');
+    if (query) contentQuery = contentQuery.or(`title.ilike.%${query}%,excerpt.ilike.%${query}%`);
+    const { data, count, error } = await contentQuery.range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
+    if (error) console.error('section paginated content read failed', { slug, code: error.code });
+    rows = (data ?? []) as unknown as Item[];
+    total = count ?? 0;
   }
 
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
@@ -135,6 +157,7 @@ export default async function SectionPage({ params, searchParams }: { params: Pa
         <a href="#section-content">المحتوى المنشور</a>
         {sector && <Link href={`/sectors/${sector.slug}`}>العودة إلى {sector.name_ar}</Link>}
         {parent && <Link href={`/sections/${parent.slug}`}>القسم الأب: {parent.name_ar}</Link>}
+        <Link href="/all-pages">كل صفحات المنصة</Link>
         <Link href="/care-guides/">أدلة التعامل والرعاية</Link>
         <Link href="/evidence-guides/">الأدلة العلمية</Link>
       </nav>
