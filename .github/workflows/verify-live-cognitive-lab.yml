@@ -17,6 +17,8 @@ jobs:
   verify-live:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
     steps:
       - name: Verify deployed Cognitive Lab 100
         shell: bash
@@ -29,14 +31,17 @@ jobs:
 
           post_status() {
             local state="$1"
-            local description="$2"
+            local context="$2"
+            local description="$3"
+            local payload
+            payload="$(printf '{\"state\":\"%s\",\"context\":\"%s\",\"description\":\"%s\",\"target_url\":\"%s\"}' "$state" "$context" "$description" "$RUN_URL")"
             curl --fail --silent --show-error \
               -X POST \
               -H "Authorization: Bearer ${GH_TOKEN}" \
               -H 'Accept: application/vnd.github+json' \
               -H 'X-GitHub-Api-Version: 2022-11-28' \
               "${STATUS_API}" \
-              -d "{\"state\":\"${state}\",\"context\":\"live/cognitive-lab-100\",\"description\":\"${description}\"}" \
+              -d "$payload" \
               >/dev/null
           }
 
@@ -50,7 +55,15 @@ jobs:
               "${BASE}${path}?live_verify=${stamp}"
           }
 
-          post_status pending 'Checking live Cognitive Lab 100 deployment'
+          post_status pending 'live/cognitive-lab-100' 'Checking live Cognitive Lab 100 deployment'
+          post_status pending 'live/cognitive/page' 'Waiting for the 100-tool Cognitive Lab page'
+          post_status pending 'live/cognitive/sitemap' 'Waiting for 101 Cognitive Lab sitemap URLs'
+          post_status pending 'live/cognitive/samples' 'Waiting for verified extension sample routes'
+
+          last_page_ok=false
+          last_sitemap_ok=false
+          last_samples_ok=false
+          last_url_count=0
 
           for attempt in $(seq 1 60); do
             stamp="${GITHUB_SHA}-${attempt}-$(date +%s)"
@@ -64,29 +77,90 @@ jobs:
             url_count="$(printf '%s' "$sitemap" | grep -o '<loc>' | wc -l | tr -d ' ' || true)"
             url_count="${url_count:-0}"
 
+            page_ok=false
+            sitemap_ok=false
+            samples_ok=false
+
             if printf '%s' "$page" | grep -Fq '100 نشاط معرفي واضح' \
               && printf '%s' "$page" | grep -Fq '47' \
-              && printf '%s' "$page" | grep -Fq '14' \
-              && [ "$url_count" = '101' ] \
-              && printf '%s' "$simon" | grep -Fq 'تعارض الموقع والاستجابة' \
+              && printf '%s' "$page" | grep -Fq '14'; then
+              page_ok=true
+            fi
+
+            if [ "$url_count" = '101' ]; then
+              sitemap_ok=true
+            fi
+
+            if printf '%s' "$simon" | grep -Fq 'تعارض الموقع والاستجابة' \
               && printf '%s' "$simon" | grep -Fq 'توسعة بحثية 2026' \
               && printf '%s' "$coding" | grep -Fq 'ترميز الرمز والرقم' \
               && printf '%s' "$ambiguity" | grep -Fq 'حل الغموض السياقي' \
               && printf '%s' "$error_detection" | grep -Fq 'اكتشاف الخطأ في الإجراء'; then
+              samples_ok=true
+            fi
+
+            last_page_ok="$page_ok"
+            last_sitemap_ok="$sitemap_ok"
+            last_samples_ok="$samples_ok"
+            last_url_count="$url_count"
+
+            echo "Attempt ${attempt}: page_ok=${page_ok}; sitemap_ok=${sitemap_ok}; samples_ok=${samples_ok}; sitemap_urls=${url_count}; page_bytes=${#page}; sitemap_bytes=${#sitemap}; simon_bytes=${#simon}; coding_bytes=${#coding}; ambiguity_bytes=${#ambiguity}; error_detection_bytes=${#error_detection}."
+
+            if [ "$attempt" = '1' ] || [ $((attempt % 6)) -eq 0 ]; then
+              if $page_ok; then
+                post_status success 'live/cognitive/page' 'Live Cognitive Lab page exposes 100 tools, 47 extensions and level 14'
+              else
+                post_status pending 'live/cognitive/page' 'Live Cognitive Lab page has not reached the verified snapshot'
+              fi
+
+              if $sitemap_ok; then
+                post_status success 'live/cognitive/sitemap' 'Live Cognitive Lab sitemap exposes exactly 101 URLs'
+              else
+                post_status pending 'live/cognitive/sitemap' "Live Cognitive Lab sitemap currently exposes ${url_count} URLs"
+              fi
+
+              if $samples_ok; then
+                post_status success 'live/cognitive/samples' 'Verified extension sample routes are live'
+              else
+                post_status pending 'live/cognitive/samples' 'One or more verified extension sample routes are not live yet'
+              fi
+            fi
+
+            if $page_ok && $sitemap_ok && $samples_ok; then
               echo "LIVE_COGNITIVE_LAB_STATUS=passed"
               echo "LIVE_COGNITIVE_LAB_URL_COUNT=${url_count}"
               echo "LIVE_COGNITIVE_LAB_TOTAL_TOOLS=100"
               echo "LIVE_COGNITIVE_LAB_EXTENSION_TOOLS=47"
               echo "LIVE_COGNITIVE_LAB_VERIFIED_DIFFICULTY=14"
               echo "Verified sample routes: simon-conflict, symbol-coding, ambiguity-resolution, error-detection"
-              post_status success 'Live: 100 tools and 101 sitemap URLs verified'
+              post_status success 'live/cognitive/page' 'Live Cognitive Lab page exposes 100 tools, 47 extensions and level 14'
+              post_status success 'live/cognitive/sitemap' 'Live Cognitive Lab sitemap exposes exactly 101 URLs'
+              post_status success 'live/cognitive/samples' 'Verified extension sample routes are live'
+              post_status success 'live/cognitive-lab-100' 'Live: 100 tools and 101 sitemap URLs verified'
               exit 0
             fi
 
-            echo "Attempt ${attempt}: deployment not yet matching the verified Cognitive Lab 100 snapshot (sitemap URLs: ${url_count})."
             sleep 10
           done
 
-          post_status failure 'Live Cognitive Lab 100 verification failed'
+          if $last_page_ok; then
+            post_status success 'live/cognitive/page' 'Live Cognitive Lab page matches the verified 100-tool snapshot'
+          else
+            post_status failure 'live/cognitive/page' 'Live Cognitive Lab page never reached the verified 100-tool snapshot'
+          fi
+
+          if $last_sitemap_ok; then
+            post_status success 'live/cognitive/sitemap' 'Live Cognitive Lab sitemap exposes exactly 101 URLs'
+          else
+            post_status failure 'live/cognitive/sitemap' "Live Cognitive Lab sitemap ended at ${last_url_count} URLs instead of 101"
+          fi
+
+          if $last_samples_ok; then
+            post_status success 'live/cognitive/samples' 'Verified extension sample routes are live'
+          else
+            post_status failure 'live/cognitive/samples' 'Verified extension sample routes never converged'
+          fi
+
+          post_status failure 'live/cognitive-lab-100' 'Live Cognitive Lab 100 verification failed'
           echo 'Live Cognitive Lab did not converge to the verified 100-tool snapshot.' >&2
           exit 1
