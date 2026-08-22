@@ -99,6 +99,8 @@ try {
             display: style.display,
             textDecorationLine: style.textDecorationLine,
             backgroundColor: style.backgroundColor,
+            backgroundImage: style.backgroundImage,
+            borderTopWidth: style.borderTopWidth,
           };
         };
 
@@ -135,6 +137,8 @@ try {
             heroPathwayStrong: styleSnapshot('.hero-pathway-list > a strong'),
             editorialGrid: styleSnapshot('.rawafid-editorial-grid'),
             editorialTitleLink: styleSnapshot('.rawafid-editorial-grid h3 a'),
+            sectionTextLink: styleSnapshot('.section-text-link'),
+            professionalCallout: styleSnapshot('.rawafid-professional-callout'),
           },
         };
       }, Object.keys(expectedTokens));
@@ -203,6 +207,17 @@ try {
         else {
           if (homeSurface.editorialTitleLink.color !== 'rgb(18, 52, 59)') fail(scope, `editorial title color ${homeSurface.editorialTitleLink.color} does not match --rf-ink`);
           if (homeSurface.editorialTitleLink.textDecorationLine !== 'none') fail(scope, `editorial title decoration leaked: ${homeSurface.editorialTitleLink.textDecorationLine}`);
+        }
+        if (!homeSurface.sectionTextLink) fail(scope, 'homepage section text link is missing');
+        else {
+          if (homeSurface.sectionTextLink.color !== 'rgb(7, 95, 97)') fail(scope, `section text link color ${homeSurface.sectionTextLink.color} does not match --rf-brand-strong`);
+          if (homeSurface.sectionTextLink.textDecorationLine !== 'none') fail(scope, `section text link decoration leaked: ${homeSurface.sectionTextLink.textDecorationLine}`);
+        }
+        if (!homeSurface.professionalCallout) fail(scope, 'homepage professional callout surface is missing');
+        else {
+          if (homeSurface.professionalCallout.display !== 'grid') fail(scope, `professional callout display is ${homeSurface.professionalCallout.display}; expected grid`);
+          if (!homeSurface.professionalCallout.backgroundImage.includes('linear-gradient')) fail(scope, 'professional callout gradient surface is missing');
+          if (homeSurface.professionalCallout.borderTopWidth === '0px') fail(scope, 'professional callout border surface is missing');
         }
       }
 
