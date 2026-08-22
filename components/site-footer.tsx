@@ -50,7 +50,7 @@ const groups = [
 
 export default function SiteFooter() {
   return (
-    <footer className="site-footer">
+    <footer className="site-footer" style={{ display: 'block', padding: 0 }}>
       <div className="site-footer-inner">
         <div className="footer-brand-block">
           <RawafidBrand className="footer-brand" />

@@ -13,7 +13,9 @@ const manifest = read('public/manifest.webmanifest');
 const serviceWorker = read('public/sw.js');
 const pwaIcon = read('lib/pwa-icon.ts');
 const theme = read('app/rawafid-theme.css');
+const publicEnhancements = read('app/public-enhancements.css');
 const visualStability = read('app/visual-stability.css');
+const megaNav = read('app/mega-nav-v3.css');
 const adminTheme = read('app/theme-admin-v4.css');
 const themeLib = read('lib/theme.ts');
 const agents = read('AGENTS.md');
@@ -57,14 +59,29 @@ if (!manifest.includes('منصة روافد | معرفة تقود إلى أثر'
 if (!pwaIcon.includes("#e6b650") || !pwaIcon.includes("#075f61")) fail('generated PWA icons must match institutional identity');
 if (!themeLib.includes("RAWAFID_BRAND_NAME = 'منصة روافد'")) fail('theme library must centralize the institutional brand name');
 if (!themeLib.includes('resolveSectorAccent')) fail('theme library must normalize sector accents without database writes');
+if (!themeLib.includes("teal: '#0b7f7c'") || !themeLib.includes("fallback = '#0b7f7c'")) fail('legacy teal aliases and fallbacks must resolve to the V5 brand color');
 if (!agents.includes('app/rawafid-theme.css')) fail('agent rules must preserve the central theme entry point');
 
 for (const token of ['Rawafid Institutional V5.1', 'font-family:var(--font-arabic)', '--rf-reading-measure:72ch', '.footer-search', '.theme-preview-type-specimen']) {
   if (!theme.includes(token)) fail(`institutional V5.1 layer missing ${token}`);
 }
+for (const token of [
+  '.rawafid-home .hero-pathway-list>a',
+  '.rawafid-home .rawafid-editorial-grid',
+  '.rawafid-home .rawafid-editorial-grid h3 a',
+  '.rawafid-home .section-text-link',
+  '.rawafid-home .rawafid-professional-callout',
+]) {
+  if (!publicEnhancements.includes(token)) fail(`homepage V5 surface completion missing ${token}`);
+}
+if (!layout.includes("themeColor: '#075f61'")) fail('browser theme color must match the V5/PWA institutional chrome color');
 if (!header.includes('data-nav-priority') || !header.includes('حالة، دليل أو خدمة')) fail('V5.1 header must keep intent-led navigation and search');
 for (const token of ['footer-search', 'footer-trust-list', 'back-to-top']) {
   if (!footer.includes(token)) fail(`V5.1 footer missing ${token}`);
+}
+if (!footer.includes("style={{ display: 'block', padding: 0 }}")) fail('institutional footer must stay isolated from the legacy generic footer flex/padding rule');
+for (const token of ['position:fixed!important', 'max-height:min(76dvh,680px)!important', 'overflow-y:auto!important']) {
+  if (!megaNav.includes(token)) fail(`mega navigation viewport guard missing ${token}`);
 }
 if (!layout.includes('<body id="top">') || !layout.includes('?v=6')) fail('root layout must expose the top target and V6 PWA identity');
 if (!manifest.includes('?v=6')) fail('PWA manifest must use V6 icon identity');

@@ -37,7 +37,7 @@ export async function getPublicSectors(limit = 12): Promise<PublicSector[]> {
       if (!row || typeof row !== 'object') return [];
       const item = row as Record<string, unknown>;
       if (typeof item.slug !== 'string' || typeof item.name_ar !== 'string') return [];
-      const accent = typeof item.accent === 'string' ? resolveSectorAccent(item.accent) : null;
+      const accent = resolveSectorAccent(typeof item.accent === 'string' ? item.accent : null);
       return [{
         slug: item.slug,
         name_ar: item.name_ar,

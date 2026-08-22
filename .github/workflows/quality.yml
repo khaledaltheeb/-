@@ -16,7 +16,20 @@ permissions:
 jobs:
   quality:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 50
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
+      NEXT_PUBLIC_SITE_URL: https://rawafid-platform-staging.khaledaltheeb.workers.dev
+      NEXT_PUBLIC_ALLOW_INDEXING: 'true'
+      VISUAL_BASE_URL: http://127.0.0.1:3000
+      VISUAL_OUTPUT_DIR: visual-artifacts
+      SMOKE_BASE_URL: http://127.0.0.1:3000
+      SEO_GATE_BASE_URL: http://127.0.0.1:3000
+      SEO_GATE_CONCURRENCY: '6'
+      SEO_GATE_TIMEOUT_MS: '15000'
+      SEO_GATE_PAGE_ATTEMPTS: '3'
+      SEO_GATE_PAGE_RETRY_DELAY_MS: '300'
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -34,34 +47,45 @@ jobs:
       - name: Lint
         run: npm run lint
       - name: Build
-        env:
-          NEXT_PUBLIC_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
-          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
-          NEXT_PUBLIC_SITE_URL: https://rawafid-platform-staging.khaledaltheeb.workers.dev
-          NEXT_PUBLIC_ALLOW_INDEXING: 'true'
         run: npm run build
-      - name: Production HTTP smoke, full sitemap SEO gate, and Lighthouse lab audit
-        env:
-          NEXT_PUBLIC_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
-          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
-          NEXT_PUBLIC_SITE_URL: https://rawafid-platform-staging.khaledaltheeb.workers.dev
-          NEXT_PUBLIC_ALLOW_INDEXING: 'true'
-          SMOKE_BASE_URL: http://127.0.0.1:3000
-          SEO_GATE_BASE_URL: http://127.0.0.1:3000
-          SEO_GATE_CONCURRENCY: '6'
-          SEO_GATE_TIMEOUT_MS: '15000'
-          SEO_GATE_PAGE_ATTEMPTS: '3'
-          SEO_GATE_PAGE_RETRY_DELAY_MS: '300'
+      - name: Install visual browser driver
+        run: npm install --no-save --package-lock=false --ignore-scripts playwright-core@1.62.1
+      - name: Start production server
+        shell: bash
         run: |
-          npm run start -- --hostname 127.0.0.1 --port 3000 > /tmp/rawafid-server.log 2>&1 &
-          SERVER_PID=$!
-          trap 'kill $SERVER_PID 2>/dev/null || true' EXIT
+          set -euo pipefail
+          nohup npm run start -- --hostname 127.0.0.1 --port 3000 > /tmp/rawafid-server.log 2>&1 &
+          echo $! > /tmp/rawafid-server.pid
+          ready=0
           for i in $(seq 1 40); do
-            if curl -fsS http://127.0.0.1:3000/ >/dev/null; then break; fi
+            if curl -fsS http://127.0.0.1:3000/ >/dev/null; then
+              ready=1
+              break
+            fi
             sleep 1
           done
-          npm run smoke
-          node scripts/seo-gate.mjs
+          if [ "$ready" -ne 1 ]; then
+            cat /tmp/rawafid-server.log >&2 || true
+            exit 1
+          fi
+      - name: Visual layout regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME_BIN="$(command -v google-chrome-stable || command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          if [ -z "$CHROME_BIN" ]; then
+            echo 'No Chrome/Chromium executable found for visual regression checks.' >&2
+            exit 1
+          fi
+          VISUAL_CHROME_PATH="$CHROME_BIN" node scripts/visual-regression.mjs
+      - name: Production HTTP smoke
+        run: npm run smoke
+      - name: Full sitemap SEO gate
+        run: node scripts/seo-gate.mjs
+      - name: Lighthouse lab audit
+        shell: bash
+        run: |
+          set -euo pipefail
           for run in 1 2 3; do
             ok=0
             for attempt in 1 2 3; do
@@ -98,3 +122,28 @@ jobs:
           console.log('Lighthouse performance scores:',performances,'median:',median);
           if(median<0.70) throw new Error(`Median Lighthouse performance below 0.70: ${median}`);
           NODE
+      - name: Upload visual regression artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rawafid-visual-regression-${{ github.run_id }}
+          path: visual-artifacts/
+          if-no-files-found: ignore
+          retention-days: 14
+      - name: Upload quality diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rawafid-quality-diagnostics-${{ github.run_id }}
+          path: |
+            /tmp/rawafid-server.log
+            /tmp/rawafid-lighthouse-*.json
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Stop production server
+        if: always()
+        shell: bash
+        run: |
+          if [ -f /tmp/rawafid-server.pid ]; then
+            kill "$(cat /tmp/rawafid-server.pid)" 2>/dev/null || true
+          fi

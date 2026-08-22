@@ -2,7 +2,7 @@ export const RAWAFID_BRAND_NAME = 'منصة روافد';
 export const RAWAFID_BRAND_SHORT = 'روافد';
 
 const sectorAccentAliases: Record<string, string> = {
-  teal: '#0b8f92',
+  teal: '#0b7f7c',
   turquoise: '#16c6c7',
   blue: '#3d78bd',
   lilac: '#7564c9',
@@ -11,7 +11,7 @@ const sectorAccentAliases: Record<string, string> = {
   gold: '#f4b942',
 };
 
-export function resolveSectorAccent(value?: string | null, fallback = '#0b8f92') {
+export function resolveSectorAccent(value?: string | null, fallback = '#0b7f7c') {
   if (!value) return fallback;
   const normalized = value.trim().toLowerCase();
   if (sectorAccentAliases[normalized]) return sectorAccentAliases[normalized];
