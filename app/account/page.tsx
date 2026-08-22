@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import SiteHeader from '@/components/site-header';
+import SiteFooter from '@/components/site-footer';
 import { createClient } from '@/lib/supabase/server';
 import { updateMyProfile } from './actions';
 
@@ -23,7 +25,7 @@ export default async function AccountPage({ searchParams }: { searchParams: Sear
   }
   const params = await searchParams;
 
-  return <main className="dashboard-shell account-shell"><section className="dashboard-card account-card">
+  return <><SiteHeader/><main className="dashboard-shell account-shell"><nav className="breadcrumbs" aria-label="مسار الصفحة"><Link href="/">الرئيسية</Link><span>/</span><span aria-current="page">حسابي</span></nav><nav className="account-local-nav" aria-label="خدمات الحساب"><Link className="active" href="/account" aria-current="page">حسابي</Link><Link href="/messages">الرسائل</Link><Link href="/appointments">المواعيد</Link><Link href="/notifications">الإشعارات</Link><Link href="/join">الانضمام المهني</Link><Link href="/account/security">أمان الحساب</Link></nav><section className="dashboard-card account-card">
     <div className="admin-heading"><div><span className="eyebrow">حسابي · لوحة المستخدم</span><h1>{profile.display_name || 'حساب منصة روافد'}</h1><p>إدارة البيانات الأساسية وأمان الحساب والوصول إلى الرسائل والمواعيد والإشعارات والطلبات المهنية المرتبطة بالحساب.</p></div><div className="dashboard-actions"><Link className="button" href="/">عرض الموقع</Link><Link className="button" href="/account/security">أمان الحساب</Link><form action="/auth/signout" method="post"><button className="button" type="submit">تسجيل الخروج</button></form></div></div>
     {params.ok && <p className="system-message success">تم حفظ بيانات الحساب.</p>}{params.error && <p className="system-message error">تعذر حفظ البيانات. لم يتم تغيير الصلاحيات.</p>}
     <div className="account-overview"><article><span>الدور</span><strong>{ROLE_LABELS[profile.role] ?? profile.role}</strong></article><article><span>الحالة</span><strong>{profile.is_active ? 'نشط' : 'غير نشط'}</strong></article><article><span>اللغة</span><strong>{profile.locale === 'en' ? 'English' : 'العربية'}</strong></article><article><span>معرّف الحساب</span><strong dir="ltr" className="account-id">{userId}</strong></article></div>
@@ -39,5 +41,5 @@ export default async function AccountPage({ searchParams }: { searchParams: Sear
       {(profile.role === 'specialist' || profile.role === 'center_manager') && <Link href="/account/verification-documents"><strong>سجل مستندات التوثيق</strong><span>عرض المستندات الخاصة التي استُخدمت في مراجعة الملف المهني.</span></Link>}
       <Link href="/messages"><strong>الرسائل</strong><span>المحادثات الخاصة داخل منصة روافد.</span></Link><Link href="/appointments"><strong>المواعيد</strong><span>طلبات المواعيد وحالاتها المرتبطة بحسابك.</span></Link><Link href="/notifications"><strong>الإشعارات</strong><span>تنبيهات الحساب والمراجعات والتواصل.</span></Link><Link href="/account/security"><strong>أمان الحساب</strong><span>تغيير كلمة المرور أو الانتقال إلى مسار الاستعادة الآمن.</span></Link><Link href="/search"><strong>البحث</strong><span>البحث في المحتوى والقطاعات والمختصين والمراكز.</span></Link>
     </div></section>
-  </section></main>;
+  </section></main><SiteFooter/></>;
 }
