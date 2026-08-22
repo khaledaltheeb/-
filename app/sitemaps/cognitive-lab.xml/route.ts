@@ -1,7 +1,7 @@
 import { cognitiveTools } from '@/lib/cognitive-lab/catalog';
 import { sitemapResponse } from '@/lib/sitemap-xml';
 
-const RELEASE = '2026-08-14T00:00:00.000Z';
+const RELEASE = '2026-08-22T00:00:00.000Z';
 
 export async function GET() {
   return sitemapResponse([
