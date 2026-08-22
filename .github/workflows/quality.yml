@@ -55,7 +55,7 @@ jobs:
         run: |
           npm run start -- --hostname 127.0.0.1 --port 3000 > /tmp/rawafid-server.log 2>&1 &
           SERVER_PID=$!
-          trap 'kill $SERVER_PID 2>/dev/null || true' EXIT
+          trap 'status=$?; if [ "$status" -ne 0 ]; then echo "--- Next server log after quality failure ---"; cat /tmp/rawafid-server.log || true; fi; kill $SERVER_PID 2>/dev/null || true; exit $status' EXIT
           for i in $(seq 1 40); do
             if curl -fsS http://127.0.0.1:3000/ >/dev/null; then break; fi
             sleep 1
