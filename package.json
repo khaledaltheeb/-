@@ -4,12 +4,12 @@
   "private": true,
   "engines": { "node": ">=22.0.0" },
   "scripts": {
-    "dev": "node scripts/build_psych_encyclopedia_assets.mjs && node scripts/materialize-legacy-static-assets.mjs && next dev",
-    "build": "node scripts/build_psych_encyclopedia_assets.mjs && node scripts/materialize-legacy-static-assets.mjs && next build",
+    "dev": "node scripts/build_psych_encyclopedia_assets.mjs && node scripts/build_expanded_encyclopedia_assets.mjs && node scripts/materialize-legacy-static-assets.mjs && next dev",
+    "build": "node scripts/build_psych_encyclopedia_assets.mjs && node scripts/build_expanded_encyclopedia_assets.mjs && node scripts/materialize-legacy-static-assets.mjs && next build",
     "start": "next start",
-    "preview": "node scripts/materialize-legacy-static-assets.mjs && opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "deploy": "node scripts/materialize-legacy-static-assets.mjs && opennextjs-cloudflare build && opennextjs-cloudflare deploy",
-    "upload": "node scripts/materialize-legacy-static-assets.mjs && opennextjs-cloudflare build && opennextjs-cloudflare upload",
+    "preview": "node scripts/build_psych_encyclopedia_assets.mjs && node scripts/build_expanded_encyclopedia_assets.mjs && node scripts/materialize-legacy-static-assets.mjs && opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "deploy": "node scripts/build_psych_encyclopedia_assets.mjs && node scripts/build_expanded_encyclopedia_assets.mjs && node scripts/materialize-legacy-static-assets.mjs && opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "upload": "node scripts/build_psych_encyclopedia_assets.mjs && node scripts/build_expanded_encyclopedia_assets.mjs && node scripts/materialize-legacy-static-assets.mjs && opennextjs-cloudflare build && opennextjs-cloudflare upload",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit",
@@ -33,7 +33,7 @@
     "legacy-static-assets:materialize": "node scripts/materialize-legacy-static-assets.mjs",
     "legacy-static-assets:validate": "node scripts/legacy-static-assets-contract.mjs",
     "cms-system-check": "node scripts/cms-system-contract.mjs",
-    "architecture-check": "node scripts/quality-contract.mjs && node scripts/psych-encyclopedia-assets-contract.mjs && node scripts/theme-contract-v4.mjs && node scripts/theme-dead-code-check.mjs && node scripts/provider-system-contract.mjs && node scripts/account-system-contract.mjs && npm run cms-system-check && npm run review-provenance:validate && npm run no-migration-routing:validate && npm run legacy-preservation:validate && npm run cognitive-lab:validate && npm run guided-assessment:validate && npm run assessment-lab:validate && npm run daily-tools:validate && npm run historical-parity:validate && npm run legacy-landings:validate && npm run terminology-tools:validate && npm run calendar-tools:validate && npm run practical-resources:validate && npm run download-assets:validate && npm run legacy-guides:validate && npm run start-here:validate && npm run legacy-public-surfaces:validate && npm run legacy-interactive-routes:validate && npm run legacy-static-assets:validate",
+    "architecture-check": "node scripts/build_expanded_encyclopedia_assets.mjs --check && node scripts/quality-contract.mjs && node scripts/psych-encyclopedia-assets-contract.mjs && node scripts/theme-contract-v4.mjs && node scripts/theme-dead-code-check.mjs && node scripts/provider-system-contract.mjs && node scripts/account-system-contract.mjs && npm run cms-system-check && npm run review-provenance:validate && npm run no-migration-routing:validate && npm run legacy-preservation:validate && npm run cognitive-lab:validate && npm run guided-assessment:validate && npm run assessment-lab:validate && npm run daily-tools:validate && npm run historical-parity:validate && npm run legacy-landings:validate && npm run terminology-tools:validate && npm run calendar-tools:validate && npm run practical-resources:validate && npm run download-assets:validate && npm run legacy-guides:validate && npm run start-here:validate && npm run legacy-public-surfaces:validate && npm run legacy-interactive-routes:validate && npm run legacy-static-assets:validate",
     "theme-check": "node scripts/theme-contract-v4.mjs && node scripts/theme-dead-code-check.mjs",
     "provider-system-check": "node scripts/provider-system-contract.mjs && node scripts/account-system-contract.mjs",
     "encyclopedia:validate": "python scripts/validate_psych_encyclopedia.py",
@@ -42,7 +42,9 @@
     "encyclopedia:import": "node scripts/import_psych_encyclopedia.mjs --apply",
     "smoke": "node scripts/smoke.mjs && node scripts/legacy-preservation-smoke.mjs && node scripts/legacy-landing-integration-smoke.mjs && node scripts/historical-functional-parity-smoke.mjs && node scripts/care-guides-wave-004-smoke.mjs && node scripts/v7-critical-guide-rewrites-001-smoke.mjs",
     "encyclopedia:assets": "node scripts/build_psych_encyclopedia_assets.mjs",
-    "encyclopedia:assets:check": "node scripts/psych-encyclopedia-assets-contract.mjs"
+    "encyclopedia:assets:check": "node scripts/psych-encyclopedia-assets-contract.mjs",
+    "expanded-encyclopedia:assets": "node scripts/build_expanded_encyclopedia_assets.mjs",
+    "expanded-encyclopedia:validate": "node scripts/build_expanded_encyclopedia_assets.mjs --check"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",

@@ -8,6 +8,7 @@ import ContentRenderer from '@/components/content-renderer';
 import { createClient } from '@/lib/supabase/server';
 import { buildSeoMetadata, breadcrumbJsonLd, SITE_URL } from '@/lib/seo';
 import { getCognitivePageBySlug, getCognitivePageIndexItem } from '@/lib/cognitive-program';
+import { getExpandedEncyclopediaIndex, getExpandedEncyclopediaRecord } from '@/lib/expanded-encyclopedia';
 import { contentReviewProvenance } from '@/lib/review-provenance';
 
 export const dynamic = 'force-dynamic';
@@ -68,7 +69,7 @@ async function getDatabaseRecord(slug: string): Promise<ContentRecord | null> {
   return data as ContentRecord | null;
 }
 
-function getGeneratedRecord(slug: string): ContentRecord | null {
+function getCognitiveGeneratedRecord(slug: string): ContentRecord | null {
   const page = getCognitivePageBySlug(slug);
   if (!page) return null;
   return {
@@ -108,8 +109,52 @@ function getGeneratedRecord(slug: string): ContentRecord | null {
   };
 }
 
+async function getExpandedGeneratedRecord(slug: string): Promise<ContentRecord | null> {
+  const page = await getExpandedEncyclopediaRecord(slug);
+  if (!page) return null;
+  return {
+    id: page.id,
+    slug: page.slug,
+    title: page.title,
+    excerpt: page.excerpt,
+    body_json: page.body_json,
+    body_text: page.body_text,
+    schema_json: page.schema_json,
+    content_type: page.content_type,
+    audience: page.audience,
+    seo_title: page.seo_title,
+    seo_description: page.seo_description,
+    canonical_url: page.canonical_url,
+    robots_index: page.robots_index,
+    robots_follow: page.robots_follow,
+    published_at: page.published_at,
+    updated_at: page.updated_at,
+    featured_image_url: page.featured_image_url,
+    featured_image_alt: page.featured_image_alt,
+    primary_keyword: page.primary_keyword,
+    secondary_keywords: page.secondary_keywords,
+    semantic_terms: page.semantic_terms,
+    search_intent: page.search_intent,
+    author_display_name: page.author_display_name,
+    reviewer_display_name: page.reviewer_display_name,
+    reviewer_credentials: page.reviewer_credentials,
+    last_reviewed_at: page.last_reviewed_at,
+    references_json: page.references_json,
+    medical_disclaimer: page.medical_disclaimer,
+    sector_id: 'f9af56ce-734c-4867-9999-957db0933414',
+    category_id: `expanded:${page.category_slug}`,
+    sectors: { slug: 'knowledge', name_ar: 'المعرفة والموسوعة' },
+    categories: { slug: page.category_slug, name_ar: page.category_name },
+    generated_program: true,
+  };
+}
+
+async function getGeneratedRecord(slug: string): Promise<ContentRecord | null> {
+  return getCognitiveGeneratedRecord(slug) ?? await getExpandedGeneratedRecord(slug);
+}
+
 async function getPublishedRecord(slug: string): Promise<ContentRecord | null> {
-  return (await getDatabaseRecord(slug)) ?? getGeneratedRecord(slug);
+  return (await getDatabaseRecord(slug)) ?? await getGeneratedRecord(slug);
 }
 
 function taxonomyNode(value: TaxonomyNode | TaxonomyNode[] | null): TaxonomyNode | null {
@@ -155,9 +200,13 @@ function curatedRelatedSlugs(schema: Record<string, unknown>): string[] {
 
 async function relatedContent(record: ContentRecord): Promise<RelatedItem[]> {
   const slugs = curatedRelatedSlugs(record.schema_json);
+  const expandedIndex = slugs.length ? await getExpandedEncyclopediaIndex() : [];
+  const expandedBySlug = new Map(expandedIndex.map((item) => [item.slug, item]));
   const local = slugs.flatMap((slug): RelatedItem[] => {
-    const item = getCognitivePageIndexItem(slug);
-    return item ? [{ id: `cognitive:${slug}`, slug, title: item.title, excerpt: item.excerpt, content_type: item.contentType, score: 100 }] : [];
+    const cognitive = getCognitivePageIndexItem(slug);
+    if (cognitive) return [{ id: `cognitive:${slug}`, slug, title: cognitive.title, excerpt: cognitive.excerpt, content_type: cognitive.contentType, score: 100 }];
+    const expanded = expandedBySlug.get(slug);
+    return expanded ? [{ id: expanded.id, slug, title: expanded.title, excerpt: expanded.excerpt, content_type: expanded.content_type, score: 100 }] : [];
   });
   const localSlugs = new Set(local.map((item) => item.slug));
   const missing = slugs.filter((slug) => !localSlugs.has(slug));
