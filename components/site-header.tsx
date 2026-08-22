@@ -4,16 +4,16 @@ import { getPublicSectors } from '@/lib/public-taxonomy';
 import { createClient } from '@/lib/supabase/server';
 
 const primaryLinks = [
-  { href: '/sections', label: 'الأقسام', secondary: false },
-  { href: '/encyclopedia/', label: 'الموسوعة', secondary: false },
-  { href: '/evidence-guides/', label: 'الأدلة', secondary: false },
-  { href: '/experiences/', label: 'شاركنا تجربتك', secondary: true },
+  { href: '/sectors/pediatric-oncology', label: 'سرطان الأطفال', secondary: false },
+  { href: '/care-guides/', label: 'أدلة الرعاية', secondary: false },
+  { href: '/evidence-guides/', label: 'الأدلة العلمية', secondary: false },
+  { href: '/sections', label: 'الأقسام', secondary: true },
 ];
 
 const intentLinks = [
   { href: '/search?q=أعراض+نفسية', label: 'أفهم عرضًا أو حالة', detail: 'ابدأ من سؤالك واحصل على مسار معرفي واضح' },
-  { href: '/search?q=دعم+الأسرة', label: 'أساند شخصًا قريبًا', detail: 'أدلة عملية للأسرة ومقدمي الدعم' },
-  { href: '/search?q=الإدمان+والتعافي', label: 'أبحث عن مسار تعافٍ', detail: 'معرفة موثوقة وخدمات مترابطة' },
+  { href: '/care-guides/', label: 'أحتاج دليل رعاية عمليًا', detail: 'أدلة للأسرة والتعامل اليومي والمواقف المتكررة' },
+  { href: '/sectors/pediatric-oncology', label: 'سرطان الأطفال', detail: 'التشخيص والعلاج والأبحاث والدعم والنجاة' },
   { href: '/search?q=ذوو+الاحتياجات+الخاصة+الدمج', label: 'ذوو الاحتياجات الخاصة والدمج', detail: 'تعليم وتأهيل وتمكين عبر مراحل الحياة' },
 ];
 
@@ -45,13 +45,13 @@ export default async function SiteHeader() {
   const mobileItems: Array<{ href: string; label: string; icon: IconName }> = signedIn ? [
     { href: '/', label: 'الرئيسية', icon: 'home' },
     { href: '/search', label: 'بحث', icon: 'search' },
-    { href: '/experiences/', label: 'التجارب', icon: 'discover' },
+    { href: '/care-guides/', label: 'الأدلة', icon: 'discover' },
     { href: '/messages', label: 'الرسائل', icon: 'messages' },
     { href: '/account', label: 'حسابي', icon: 'account' },
   ] : [
     { href: '/', label: 'الرئيسية', icon: 'home' },
     { href: '/search', label: 'بحث', icon: 'search' },
-    { href: '/experiences/', label: 'التجارب', icon: 'discover' },
+    { href: '/care-guides/', label: 'الأدلة', icon: 'discover' },
     { href: '/specialists', label: 'مختصون', icon: 'specialists' },
     { href: '/about', label: 'المزيد', icon: 'more' },
   ];
@@ -63,13 +63,18 @@ export default async function SiteHeader() {
           <RawafidBrand />
           <nav className="desktop-nav" aria-label="التنقل الرئيسي">
             <a href="/">الرئيسية</a>
+            {primaryLinks.map((link) => (
+              <a key={link.href} href={link.href} data-nav-priority={link.secondary ? 'secondary' : 'primary'}>
+                {link.label}
+              </a>
+            ))}
             <details className="nav-dropdown mega-nav">
-              <summary><span>استكشف روافد</span></summary>
+              <summary><span>استكشف المزيد</span></summary>
               <div className="nav-dropdown-panel mega-nav-panel">
                 <div className="nav-dropdown-heading">
                   <div>
                     <strong>الوصول إلى روافد حسب احتياجك</strong>
-                    <span>قطاعات معرفية، مسارات بحث، وأدلة خدمات ضمن تجربة واحدة</span>
+                    <span>قطاعات معرفية، مسارات رعاية، وأدلة خدمات ضمن تجربة واحدة</span>
                   </div>
                   <a href="/search">فتح البحث المتقدم ←</a>
                 </div>
@@ -84,100 +89,52 @@ export default async function SiteHeader() {
                         </a>
                       ))}
                       {sectors.length === 0 && (
-                        <div className="mega-empty">
-                          <strong>لا توجد قطاعات عامة متاحة حاليًا</strong>
-                          <span>ستظهر القطاعات هنا بعد اكتمال مراجعتها واعتمادها.</span>
-                        </div>
+                        <div className="mega-empty"><strong>لا توجد قطاعات عامة متاحة حاليًا</strong><span>ستظهر القطاعات هنا بعد اعتمادها.</span></div>
                       )}
                     </div>
                   </section>
                   <section className="mega-nav-column">
                     <h2>ابدأ من احتياجك</h2>
                     <div className="mega-intent-list">
-                      {intentLinks.map((link) => (
-                        <a href={link.href} key={link.href}>
-                          <strong>{link.label}</strong>
-                          <span>{link.detail}</span>
-                        </a>
-                      ))}
+                      {intentLinks.map((link) => <a href={link.href} key={link.href}><strong>{link.label}</strong><span>{link.detail}</span></a>)}
                     </div>
                   </section>
                   <section className="mega-nav-column mega-services">
                     <h2>الدليل والخدمات</h2>
-                    <div>
-                      {serviceLinks.map((link) => (
-                        <a href={link.href} key={link.href}>
-                          <PlatformIcon name={link.icon} size={19} />
-                          <span>{link.label}</span>
-                        </a>
-                      ))}
-                    </div>
-                    {signedIn && (
-                      <div className="mega-member-links">
-                        <a href="/messages">الرسائل</a>
-                        <a href="/appointments">المواعيد</a>
-                        <a href="/notifications">الإشعارات</a>
-                      </div>
-                    )}
+                    <div>{serviceLinks.map((link) => <a href={link.href} key={link.href}><PlatformIcon name={link.icon} size={19} /><span>{link.label}</span></a>)}</div>
+                    {signedIn && <div className="mega-member-links"><a href="/messages">الرسائل</a><a href="/appointments">المواعيد</a><a href="/notifications">الإشعارات</a></div>}
                   </section>
                 </div>
               </div>
             </details>
-            {primaryLinks.map((link) => (
-              <a key={link.href} href={link.href} data-nav-priority={link.secondary ? 'secondary' : 'primary'}>
-                {link.label}
-              </a>
-            ))}
           </nav>
           <form className="header-search" action="/search" method="get" role="search">
             <label className="sr-only" htmlFor="header-search-input">البحث في منصة روافد</label>
-            <input id="header-search-input" name="q" type="search" placeholder="حالة، دليل أو خدمة" maxLength={120} enterKeyHint="search" />
+            <input id="header-search-input" name="q" type="search" placeholder="ابحث في روافد" maxLength={120} enterKeyHint="search" />
             <button type="submit">بحث</button>
           </form>
-          <div className="header-actions">
-            {signedIn
-              ? <a className="button header-login" href="/account">حسابي</a>
-              : <a className="button header-login" href="/login">تسجيل الدخول</a>}
-          </div>
+          <div className="header-actions">{signedIn ? <a className="button header-login" href="/account">حسابي</a> : <a className="button header-login" href="/login">دخول</a>}</div>
           <details className="mobile-menu">
             <summary aria-label="فتح قائمة التنقل"><NavIcon name="more" /><span>القائمة</span></summary>
             <div className="mobile-menu-panel">
-              <form className="mobile-search" action="/search" method="get" role="search">
-                <label className="sr-only" htmlFor="mobile-search-input">البحث في منصة روافد</label>
-                <input id="mobile-search-input" name="q" type="search" placeholder="حالة، دليل أو خدمة" maxLength={120} enterKeyHint="search" />
-                <button type="submit">بحث</button>
-              </form>
+              <form className="mobile-search" action="/search" method="get" role="search"><label className="sr-only" htmlFor="mobile-search-input">البحث في منصة روافد</label><input id="mobile-search-input" name="q" type="search" placeholder="ابحث في روافد" maxLength={120} enterKeyHint="search" /><button type="submit">بحث</button></form>
               <a href="/">الرئيسية</a>
+              <a href="/sectors/pediatric-oncology">سرطان الأطفال</a>
+              <a href="/care-guides/">أدلة التعامل والرعاية</a>
+              <a href="/evidence-guides/">الأدلة العلمية</a>
               <a href="/sections">جميع الأقسام</a>
               <a href="/encyclopedia/">الموسوعة</a>
-              <a href="/evidence-guides/">الأدلة العلمية</a>
-              <span className="mobile-menu-label">ابدأ من احتياجك</span>
-              {intentLinks.map((link) => <a key={link.href} href={link.href}>{link.label}</a>)}
               <span className="mobile-menu-label">القطاعات</span>
               {sectors.map((sector) => <a key={sector.slug} href={'/sectors/' + sector.slug}>{sector.name_ar}</a>)}
-              {sectors.length === 0 && <span className="nav-empty">لا توجد قطاعات عامة متاحة حاليًا.</span>}
-              <span className="mobile-menu-label">الدليل والمشاركة</span>
+              <span className="mobile-menu-label">الدليل والخدمات</span>
               {serviceLinks.map((link) => <a key={link.href} href={link.href}>{link.label}</a>)}
-              <a href="/experiences/">شاركنا تجربتك</a>
-              {signedIn ? (
-                <>
-                  <a href="/messages">الرسائل</a>
-                  <a href="/appointments">المواعيد</a>
-                  <a href="/notifications">الإشعارات</a>
-                  <a href="/account">حسابي</a>
-                </>
-              ) : <a href="/login">تسجيل الدخول</a>}
+              {signedIn ? <><a href="/messages">الرسائل</a><a href="/appointments">المواعيد</a><a href="/notifications">الإشعارات</a><a href="/account">حسابي</a></> : <a href="/login">تسجيل الدخول</a>}
             </div>
           </details>
         </div>
       </header>
       <nav className="mobile-bottom-nav" aria-label="التنقل السريع للهاتف">
-        {mobileItems.map((item) => (
-          <a href={item.href} key={item.href + item.label}>
-            <NavIcon name={item.icon} />
-            <span>{item.label}</span>
-          </a>
-        ))}
+        {mobileItems.map((item) => <a href={item.href} key={item.href + item.label}><NavIcon name={item.icon} /><span>{item.label}</span></a>)}
       </nav>
     </>
   );
