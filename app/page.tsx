@@ -8,36 +8,37 @@ import { buildSeoMetadata } from '@/lib/seo';
 export const dynamic = 'force-dynamic';
 
 export const metadata = buildSeoMetadata({
-  title: 'الصحة النفسية وذوو الاحتياجات الخاصة والتعافي',
-  description: 'منصة روافد للصحة النفسية وذوي الاحتياجات الخاصة والدمج والتعافي والتمكين: معرفة موثوقة، أدلة عملية، مختصون ومراكز وخدمات مترابطة للأفراد والأسر ومقدمي الخدمة.',
+  title: 'روافد: الصحة النفسية وذوو الاحتياجات الخاصة وسرطان الأطفال والتعافي',
+  description: 'منصة روافد للمعرفة الصحية والاجتماعية العربية: الصحة النفسية، ذوو الاحتياجات الخاصة والتربية الدامجة، سرطان الأطفال، الإدمان والتعافي، الأدلة العملية، المختصون والمراكز ضمن مسارات مترابطة.',
   path: '/',
   index: true,
-  keywords: ['الصحة النفسية', 'ذوو الاحتياجات الخاصة', 'الدمج', 'التمكين', 'الإدمان والتعافي', 'مختص نفسي', 'مراكز نفسية', 'منصة روافد'],
+  keywords: ['الصحة النفسية', 'ذوو الاحتياجات الخاصة', 'سرطان الأطفال', 'أورام الأطفال', 'التربية الدامجة', 'الإدمان والتعافي', 'دعم الأسرة', 'مختص نفسي', 'مراكز نفسية', 'منصة روافد'],
 });
 
 const quickSearches = [
+  ['سرطان الأطفال', 'سرطان الأطفال'],
   ['الصحة النفسية', 'الصحة النفسية'],
-  ['الإدمان والتعافي', 'الإدمان والتعافي'],
   ['ذوو الاحتياجات الخاصة', 'ذوو الاحتياجات الخاصة'],
+  ['الإدمان والتعافي', 'الإدمان والتعافي'],
   ['دعم الأسرة', 'دعم الأسرة'],
 ];
 
 const intentRoutes = [
+  { href: '/sectors/pediatric-oncology', icon: 'review' as const, title: 'أفهم سرطان الأطفال', text: 'مركز متكامل للأنواع والتشخيص والعلاج والأبحاث والدعم النفسي والأسري والرعاية الداعمة والنجاة.' },
   { href: '/search?q=أعراض+نفسية', icon: 'search' as const, title: 'أفهم حالة أو عرضًا', text: 'ابدأ من السؤال أو العرض للوصول إلى المعرفة والمسارات المرتبطة.' },
   { href: '/search?q=دعم+الأسرة', icon: 'community' as const, title: 'أساعد شخصًا قريبًا', text: 'محتوى ومسارات عملية للأسرة ومقدمي الدعم والرعاية.' },
   { href: '/search?q=الإدمان+والتعافي', icon: 'review' as const, title: 'أبحث عن مسار تعافٍ', text: 'معرفة وخيارات دعم وعلاج ومراكز مرتبطة بالتعافي.' },
   { href: '/specialists', icon: 'specialist' as const, title: 'أجد مختصًا', text: 'ابحث في دليل الملفات المهنية الموثقة ونمط الخدمة والموقع.' },
   { href: '/centers', icon: 'center' as const, title: 'أجد مركزًا', text: 'استكشف المراكز والخدمات والفروع وطرق التواصل المتاحة.' },
-  { href: '/search?q=أداة+تقييم', icon: 'tools' as const, title: 'أستخدم أداة أو دليلًا', text: 'الوصول إلى الأدوات والمسارات والأدلة العملية دون ادعاء التشخيص.' },
 ];
 
 const platformModules = [
+  { href: '/sectors/pediatric-oncology', icon: 'review' as const, title: 'مركز سرطان الأطفال', text: 'التشخيص والعلاج والأبحاث والدراسات والدعم النفسي والأسري والرعاية الداعمة والمدرسة والنجاة ضمن قطاع واحد متكامل.', accent: '#b85c5c' },
   { href: '/sectors/knowledge', icon: 'knowledge' as const, title: 'المعرفة والموسوعة', text: 'موضوعات ومقالات وأدلة ومصطلحات وأبحاث منظمة ضمن أقسام واضحة.', accent: '#3d78bd' },
   { href: '/sectors/special-needs-inclusion', icon: 'community' as const, title: 'الاحتياجات الخاصة والتربية الدامجة', text: 'التعلم والتواصل والدعم الأسري والتأهيل والحقوق والمشاركة والتمكين.', accent: '#7564c9' },
   { href: '/specialists', icon: 'specialist' as const, title: 'دليل المختصين', text: 'ملفات مهنية موثقة مع تخصصات ومؤهلات وخيارات تواصل واضحة.', accent: '#0b8f92' },
   { href: '/centers', icon: 'center' as const, title: 'دليل المراكز', text: 'مراكز وخدمات وفروع ومعلومات تساعد على الوصول إلى الجهة المناسبة.', accent: '#f4b942' },
   { href: '/evidence-guides/', icon: 'tools' as const, title: 'الأدلة العملية', text: 'أدلة مبنية على المصادر ومسارات عملية للاستخدام الآمن والواعي.', accent: '#d8604c' },
-  { href: '/community', icon: 'community' as const, title: 'المتدربون والمتطوعون', text: 'مساحة للانتساب والتدريب والعمل التطوعي المنظم والمسؤول.', accent: '#4f9d69' },
 ];
 
 export default async function HomePage() {
@@ -50,10 +51,10 @@ export default async function HomePage() {
         <div className="rawafid-hero-copy">
           <span className="rawafid-kicker">منصة عربية مؤسسية متكاملة</span>
           <h1 id="home-title">كيف يمكن لـ<em>منصة روافد</em> مساعدتك اليوم؟</h1>
-          <p>الوصول إلى المعرفة الموثوقة والأدلة العملية والمختصين والمراكز يبدأ من احتياجك. ابحث مباشرة أو اختر المسار الأقرب لما تريد معرفته أو إنجازه.</p>
+          <p>الوصول إلى المعرفة الموثوقة يبدأ من احتياجك: الصحة النفسية، ذوو الاحتياجات الخاصة، مركز سرطان الأطفال، التعافي، الأدلة العملية أو الوصول إلى مختص ومركز مناسب.</p>
           <form className="search rawafid-search" action="/search" method="get" role="search">
             <label className="sr-only" htmlFor="home-search">البحث في منصة روافد</label>
-            <input id="home-search" name="q" type="search" minLength={2} maxLength={160} autoComplete="off" placeholder="ابحث عن حالة، مصطلح، مختص، مركز، أداة، مقال أو سؤال..." />
+            <input id="home-search" name="q" type="search" minLength={2} maxLength={160} autoComplete="off" placeholder="ابحث عن حالة، سرطان أطفال، مصطلح، مختص، مركز، أداة، مقال أو سؤال..." />
             <button type="submit">ابحث الآن</button>
           </form>
           <div className="rawafid-quick-links" aria-label="عمليات بحث مقترحة">{quickSearches.map(([label, query]) => <a key={label} href={`/search?q=${encodeURIComponent(query)}`}>{label}</a>)}</div>
@@ -61,9 +62,9 @@ export default async function HomePage() {
 
         <aside className="rawafid-hero-visual" aria-label="مكونات منصة روافد">
           <div>
-            <div className="rawafid-visual-top"><span className="rawafid-visual-badge"><i className="rawafid-visual-status" aria-hidden="true" />منصة واحدة · خدمات مترابطة</span></div>
-            <h2>معرفة، دليل مهني وخدمات ضمن رحلة استخدام واحدة.</h2>
-            <p>تجمع روافد القطاعات المعرفية والأدلة والخدمات والحسابات ضمن تجربة موحدة تحافظ على الوضوح والاتساق مع توسع المنصة.</p>
+            <div className="rawafid-visual-top"><span className="rawafid-visual-badge"><i className="rawafid-visual-status" aria-hidden="true" />منصة واحدة · معرفة وخدمات مترابطة</span></div>
+            <h2>من السؤال الأول إلى المعرفة المتخصصة والدعم المناسب.</h2>
+            <p>تجمع روافد القطاعات المعرفية والأدلة والخدمات في تجربة موحدة، ويضم مركز سرطان الأطفال مسارات سريرية وعلمية ونفسية وأسرية مترابطة داخل قطاع واحد.</p>
           </div>
           <div className="rawafid-visual-grid">
             <div className="rawafid-visual-card"><PlatformIcon name="knowledge" /><div><strong>معرفة منظمة</strong><span>قطاعات وأقسام وموضوعات مترابطة</span></div></div>
@@ -92,7 +93,7 @@ export default async function HomePage() {
       </section>
 
       <section className="rawafid-section" id="sectors" aria-labelledby="sectors-title">
-        <div className="rawafid-section-head"><div className="rawafid-section-title"><span>القطاعات</span><h2 id="sectors-title">قطاعات رئيسية تنظّم المعرفة والخدمات</h2><p>كل قطاع يجمع مجموعة واضحة من الأقسام والموضوعات المتخصصة، لتسهيل الوصول وبناء روابط منطقية بين الصفحات ذات الصلة.</p></div><a href="/sectors">عرض كل القطاعات ←</a></div>
+        <div className="rawafid-section-head"><div className="rawafid-section-title"><span>القطاعات</span><h2 id="sectors-title">قطاعات رئيسية تنظّم المعرفة والخدمات</h2><p>كل قطاع يجمع مجموعة واضحة من الأقسام والموضوعات المتخصصة. ويظهر سرطان الأطفال هنا كقطاع موحد واحد يغطي المسار السريري والعلمي والنفسي والأسري كاملًا.</p></div><a href="/sectors">عرض كل القطاعات ←</a></div>
         {sectors.length > 0 ? <div className="rawafid-sector-grid">{sectors.map((sector) => { const style = { '--sector-accent': sector.accent || '#0b8f92' } as CSSProperties; return <a className="rawafid-sector-card" style={style} href={`/sectors/${sector.slug}`} key={sector.slug}><div className="sector-dot" aria-hidden="true" /><h3>{sector.name_ar}</h3><p>{sector.description || 'قطاع رئيسي ضمن الخريطة الموضوعية لمنصة روافد.'}</p><span>استكشف القطاع ←</span></a>; })}</div> : <div className="rawafid-empty"><div className="rawafid-empty-icon"><PlatformIcon name="knowledge" size={30} /></div><h3>لا توجد قطاعات عامة متاحة حاليًا</h3><p>ستظهر القطاعات هنا بعد اعتمادها للنشر العام.</p></div>}
       </section>
 
