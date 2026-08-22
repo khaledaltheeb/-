@@ -40,9 +40,7 @@ jobs:
         shell: bash
         run: |
           curl --fail --silent --show-error -X POST \
-            -H "Authorization: Bearer ${GH_TOKEN}" \
-            -H 'Accept: application/vnd.github+json' \
-            -H 'X-GitHub-Api-Version: 2022-11-28' \
+            -H "Authorization: Bearer ${GH_TOKEN}" -H 'Accept: application/vnd.github+json' -H 'X-GitHub-Api-Version: 2022-11-28' \
             "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" \
             -d '{"state":"pending","context":"deploy/cognitive-lab-live","description":"Validating and deploying Cognitive Lab 100"}' >/dev/null
 
@@ -55,25 +53,59 @@ jobs:
       - name: Install locked dependencies
         run: npm ci --no-audit --no-fund
 
+      - name: Verify Cloudflare credentials and account access
+        run: npx wrangler whoami
+
+      - name: Mark credentials verified
+        shell: bash
+        run: |
+          curl --fail --silent --show-error -X POST -H "Authorization: Bearer ${GH_TOKEN}" -H 'Accept: application/vnd.github+json' -H 'X-GitHub-Api-Version: 2022-11-28' \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" \
+            -d '{"state":"success","context":"deploy/cognitive/credentials","description":"Cloudflare credentials verified"}' >/dev/null
+
       - name: Validate Cognitive Lab 100
         run: |
           npm run cognitive-lab:validate
           node scripts/cognitive-lab-extension-audit-contract.mjs
 
-      - name: Type check
-        run: npm run typecheck
+      - name: Mark Cognitive Lab validation passed
+        shell: bash
+        run: |
+          curl --fail --silent --show-error -X POST -H "Authorization: Bearer ${GH_TOKEN}" -H 'Accept: application/vnd.github+json' -H 'X-GitHub-Api-Version: 2022-11-28' \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" \
+            -d '{"state":"success","context":"deploy/cognitive/validated","description":"Cognitive Lab contracts and semantic audit passed"}' >/dev/null
 
-      - name: Lint
-        run: npm run lint
+      - name: Type check and lint
+        run: |
+          npm run typecheck
+          npm run lint
 
-      - name: Verify Cloudflare credentials and account access
-        run: npx wrangler whoami
+      - name: Mark code quality passed
+        shell: bash
+        run: |
+          curl --fail --silent --show-error -X POST -H "Authorization: Bearer ${GH_TOKEN}" -H 'Accept: application/vnd.github+json' -H 'X-GitHub-Api-Version: 2022-11-28' \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" \
+            -d '{"state":"success","context":"deploy/cognitive/code-quality","description":"TypeScript and ESLint passed"}' >/dev/null
 
       - name: Build Cloudflare Worker with OpenNext
         run: npx opennextjs-cloudflare build
 
+      - name: Mark Worker build passed
+        shell: bash
+        run: |
+          curl --fail --silent --show-error -X POST -H "Authorization: Bearer ${GH_TOKEN}" -H 'Accept: application/vnd.github+json' -H 'X-GitHub-Api-Version: 2022-11-28' \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" \
+            -d '{"state":"success","context":"deploy/cognitive/built","description":"OpenNext Cloudflare Worker build passed"}' >/dev/null
+
       - name: Deploy Cloudflare Worker with OpenNext
         run: npx opennextjs-cloudflare deploy
+
+      - name: Mark Worker published
+        shell: bash
+        run: |
+          curl --fail --silent --show-error -X POST -H "Authorization: Bearer ${GH_TOKEN}" -H 'Accept: application/vnd.github+json' -H 'X-GitHub-Api-Version: 2022-11-28' \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" \
+            -d '{"state":"success","context":"deploy/cognitive/published","description":"OpenNext deployment command succeeded"}' >/dev/null
 
       - name: Verify live Cognitive Lab 100
         shell: bash
@@ -90,7 +122,6 @@ jobs:
             error_detection="$(curl -fsSL --compressed --max-time 25 -H 'Cache-Control: no-cache, no-store, max-age=0' "${base}/cognitive-lab/error-detection?deploy=${stamp}" 2>/dev/null || true)"
             url_count="$(printf '%s' "$sitemap" | grep -o '<loc>' | wc -l | tr -d ' ' || true)"
             url_count="${url_count:-0}"
-
             if printf '%s' "$page" | grep -Fq '100 نشاط معرفي واضح' \
               && [ "$url_count" = '101' ] \
               && printf '%s' "$simon" | grep -Fq 'تعارض الموقع والاستجابة' \
@@ -107,14 +138,18 @@ jobs:
           echo 'Live Cognitive Lab verification failed after direct deployment.' >&2
           exit 1
 
+      - name: Mark live verification passed
+        shell: bash
+        run: |
+          curl --fail --silent --show-error -X POST -H "Authorization: Bearer ${GH_TOKEN}" -H 'Accept: application/vnd.github+json' -H 'X-GitHub-Api-Version: 2022-11-28' \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" \
+            -d '{"state":"success","context":"deploy/cognitive/live","description":"Live Cognitive Lab 100 and 101 sitemap URLs verified"}' >/dev/null
+
       - name: Mark deployment success
         if: success()
         shell: bash
         run: |
-          curl --fail --silent --show-error -X POST \
-            -H "Authorization: Bearer ${GH_TOKEN}" \
-            -H 'Accept: application/vnd.github+json' \
-            -H 'X-GitHub-Api-Version: 2022-11-28' \
+          curl --fail --silent --show-error -X POST -H "Authorization: Bearer ${GH_TOKEN}" -H 'Accept: application/vnd.github+json' -H 'X-GitHub-Api-Version: 2022-11-28' \
             "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" \
             -d '{"state":"success","context":"deploy/cognitive-lab-live","description":"Cognitive Lab 100 deployed and verified live"}' >/dev/null
 
@@ -122,9 +157,6 @@ jobs:
         if: failure()
         shell: bash
         run: |
-          curl --silent --show-error -X POST \
-            -H "Authorization: Bearer ${GH_TOKEN}" \
-            -H 'Accept: application/vnd.github+json' \
-            -H 'X-GitHub-Api-Version: 2022-11-28' \
+          curl --silent --show-error -X POST -H "Authorization: Bearer ${GH_TOKEN}" -H 'Accept: application/vnd.github+json' -H 'X-GitHub-Api-Version: 2022-11-28' \
             "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" \
             -d '{"state":"failure","context":"deploy/cognitive-lab-live","description":"Cognitive Lab direct deploy or live verification failed"}' >/dev/null || true
