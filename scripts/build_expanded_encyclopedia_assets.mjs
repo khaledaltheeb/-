@@ -22,10 +22,14 @@ const clean = (value) => typeof value === 'string' ? value.trim().replace(/\s+/g
 const cleanList = (value) => Array.isArray(value) ? value.map(clean).filter(Boolean) : [];
 const isRecord = (value) => value !== null && typeof value === 'object' && !Array.isArray(value);
 
+function preserveMeaningfulNotation(value) {
+  return value
+    .replace(/([\p{L}\p{N}])\+/gu, '$1 plus ')
+    .replace(/([\p{L}\p{N}])[-−–](?=$|\s)/gu, '$1 minus ');
+}
+
 export function normalizeTermIdentity(value) {
-  return clean(value)
-    .normalize('NFKC')
-    .toLocaleLowerCase('ar')
+  return preserveMeaningfulNotation(clean(value).normalize('NFKC').toLocaleLowerCase('ar'))
     .replace(/[\u064B-\u065F\u0670\u0640]/gu, '')
     .replace(/[أإآٱ]/gu, 'ا')
     .replace(/ى/gu, 'ي')
@@ -76,21 +80,30 @@ function reserveIdentity(map, rawValue, source) {
   const key = normalizeTermIdentity(rawValue);
   if (!key) return;
   const previous = map.get(key);
-  if (previous && previous !== source) throw new Error(`Duplicate term identity «${rawValue}»: ${source} conflicts with ${previous}`);
+  if (previous && previous !== source) {
+    throw new Error(`Duplicate term identity «${rawValue}»: ${source} conflicts with ${previous}`);
+  }
   map.set(key, source);
 }
 
 async function loadReservedIdentities() {
   const reserved = new Map();
   const legacyFiles = (await fs.readdir(LEGACY_BATCH_DIR)).filter((name) => name.endsWith('.json')).sort();
+
   for (const file of legacyFiles) {
     const payload = JSON.parse(await fs.readFile(path.join(LEGACY_BATCH_DIR, file), 'utf8'));
     if (!isRecord(payload) || !Array.isArray(payload.records)) continue;
+
     for (const raw of payload.records) {
       if (!isRecord(raw)) continue;
       const source = `short-encyclopedia:${clean(raw.slug) || file}`;
       const titleHead = clean(raw.title).split(/[:：]/u)[0];
-      for (const value of [raw.primary_keyword, titleHead, ...(Array.isArray(raw.search_aliases) ? raw.search_aliases : [])]) {
+      const values = [
+        raw.primary_keyword,
+        titleHead,
+        ...(Array.isArray(raw.search_aliases) ? raw.search_aliases : []),
+      ];
+      for (const value of values) {
         if (clean(value)) reserveIdentity(reserved, value, source);
       }
       const slug = clean(raw.slug).replace(/-/g, ' ');
@@ -105,6 +118,7 @@ async function loadReservedIdentities() {
     reserveIdentity(reserved, name, `cognitive-profile:${key}`);
     reserveIdentity(reserved, slug.replace(/-/g, ' '), `cognitive-profile:${key}`);
   }
+
   return reserved;
 }
 
@@ -119,8 +133,18 @@ function pageSections(raw) {
   const type = clean(raw.content_type);
   const isIntervention = type === 'intervention';
   const isAssessment = type === 'assessment';
-  const contextHeading = isIntervention ? 'كيف يعمل وما حدود الدليل؟' : isAssessment ? 'كيف يُستخدم في التقييم؟' : `كيف يظهر ${term} أو يُستخدم سريريًا؟`;
-  const mechanismHeading = isIntervention ? 'الاستخدام والممارسة المسؤولة' : isAssessment ? 'ما الذي يؤثر في التفسير؟' : 'الأسباب والآليات والسياق';
+
+  const contextHeading = isIntervention
+    ? 'كيف يعمل وما حدود الدليل؟'
+    : isAssessment
+      ? 'كيف يُستخدم في التقييم؟'
+      : `كيف يظهر ${term} أو يُستخدم سريريًا؟`;
+  const mechanismHeading = isIntervention
+    ? 'الاستخدام والممارسة المسؤولة'
+    : isAssessment
+      ? 'ما الذي يؤثر في التفسير؟'
+      : 'الأسباب والآليات والسياق';
+
   return [
     { type: 'paragraph', text: `${term}${english ? ` (${english})` : ''} مصطلح يحتاج إلى فهم دقيق للسياق وعدم تحويله تلقائيًا إلى تشخيص. ${intro}` },
     { type: 'heading', level: 2, text: `ما هو ${term}؟` },
@@ -142,35 +166,44 @@ function bodyText(blocks) {
   const parts = [];
   for (const block of blocks) {
     if (block.type === 'paragraph' || block.type === 'heading') parts.push(clean(block.text));
-    if (block.type === 'faq') for (const item of block.items) parts.push(clean(item.question), clean(item.answer));
+    if (block.type === 'faq') {
+      for (const item of block.items) parts.push(clean(item.question), clean(item.answer));
+    }
   }
   return parts.filter(Boolean).join('\n\n');
 }
 
 function toReleaseRecord(raw, sourceFile, categoryMap) {
   if (!isRecord(raw)) throw new Error(`${sourceFile}: invalid record`);
+
   const slug = clean(raw.slug).toLowerCase();
   const canonicalTerm = clean(raw.canonical_term);
   const categorySlug = clean(raw.category_slug);
   const contentType = clean(raw.content_type);
   const category = categoryMap.get(categorySlug);
+
   if (!validSlug(slug)) throw new Error(`${sourceFile}: invalid slug ${slug}`);
   if (!canonicalTerm) throw new Error(`${slug}: canonical_term is required`);
   if (!category) throw new Error(`${slug}: unknown category ${categorySlug}`);
   if (!ALLOWED_TYPES.has(contentType)) throw new Error(`${slug}: unsupported content_type ${contentType}`);
-  if (contentType === 'condition' && raw.classification_status !== 'official-diagnosis') throw new Error(`${slug}: condition pages require classification_status=official-diagnosis`);
+  if (contentType === 'condition' && raw.classification_status !== 'official-diagnosis') {
+    throw new Error(`${slug}: condition pages require classification_status=official-diagnosis`);
+  }
 
   const references = refs(raw.references);
   const faqItems = faq(raw.faq);
   if (references.length < 2) throw new Error(`${slug}: at least 2 references are required`);
   if (faqItems.length < 2) throw new Error(`${slug}: at least 2 FAQ items are required`);
+
   for (const field of ['definition', 'presentation_or_use', 'mechanisms_or_context', 'assessment_or_practice', 'boundary']) {
     if (words(raw[field]) < 12) throw new Error(`${slug}: ${field} must contain at least 12 words`);
   }
 
   const blocks = pageSections(raw);
   const text = bodyText(blocks);
-  if (words(text) < MIN_WORDS) throw new Error(`${slug}: ${words(text)} words is below the ${MIN_WORDS}-word floor`);
+  if (words(text) < MIN_WORDS) {
+    throw new Error(`${slug}: ${words(text)} words is below the ${MIN_WORDS}-word floor`);
+  }
 
   const aliases = cleanList(raw.aliases);
   const englishName = clean(raw.english_name);
@@ -178,7 +211,9 @@ function toReleaseRecord(raw, sourceFile, categoryMap) {
   const secondaryKeywords = [...new Set([englishName, ...aliases, ...cleanList(raw.secondary_keywords)].filter(Boolean))];
   const semanticTerms = [...new Set(cleanList(raw.semantic_terms))];
   const excerpt = clean(raw.excerpt);
-  if (excerpt.length < 80 || excerpt.length > 220) throw new Error(`${slug}: excerpt must be 80-220 characters`);
+  if (excerpt.length < 80 || excerpt.length > 220) {
+    throw new Error(`${slug}: excerpt must be 80-220 characters`);
+  }
 
   const canonicalUrl = `/content/${slug}`;
   return {
@@ -251,9 +286,14 @@ function toIndexRecord(record) {
 async function main() {
   const checkOnly = process.argv.includes('--check');
   const categories = JSON.parse(await fs.readFile(CATEGORY_FILE, 'utf8'));
-  if (!Array.isArray(categories) || categories.length < 10) throw new Error('Expanded encyclopedia categories are missing or incomplete');
+  if (!Array.isArray(categories) || categories.length < 10) {
+    throw new Error('Expanded encyclopedia categories are missing or incomplete');
+  }
+
   const categoryMap = new Map(categories.map((item) => [clean(item.slug), item]));
-  if (categoryMap.size !== categories.length) throw new Error('Duplicate expanded encyclopedia category slug');
+  if (categoryMap.size !== categories.length) {
+    throw new Error('Duplicate expanded encyclopedia category slug');
+  }
 
   const sourceFiles = (await fs.readdir(BATCH_DIR)).filter((name) => name.endsWith('.json')).sort();
   if (!sourceFiles.length) throw new Error('No expanded encyclopedia batch files found');
@@ -265,21 +305,30 @@ async function main() {
 
   for (const file of sourceFiles) {
     const payload = JSON.parse(await fs.readFile(path.join(BATCH_DIR, file), 'utf8'));
-    if (!isRecord(payload) || !Array.isArray(payload.records)) throw new Error(`${file}: missing records[]`);
+    if (!isRecord(payload) || !Array.isArray(payload.records)) {
+      throw new Error(`${file}: missing records[]`);
+    }
+
     for (const raw of payload.records) {
       if (!isRecord(raw)) throw new Error(`${file}: invalid record`);
       const slug = clean(raw.slug).toLowerCase();
       if (slugs.has(slug)) throw new Error(`Duplicate expanded encyclopedia slug: ${slug}`);
       slugs.add(slug);
+
       const source = `expanded:${slug}`;
       for (const identity of identityCandidates(raw)) {
         const key = normalizeTermIdentity(identity);
         const reservedSource = reserved.get(key);
-        if (reservedSource) throw new Error(`Expanded term «${identity}» (${slug}) conflicts with ${reservedSource}`);
+        if (reservedSource) {
+          throw new Error(`Expanded term «${identity}» (${slug}) conflicts with ${reservedSource}`);
+        }
         const ownSource = ownIdentities.get(key);
-        if (ownSource && ownSource !== source) throw new Error(`Expanded term «${identity}» (${slug}) conflicts with ${ownSource}`);
+        if (ownSource && ownSource !== source) {
+          throw new Error(`Expanded term «${identity}» (${slug}) conflicts with ${ownSource}`);
+        }
         ownIdentities.set(key, source);
       }
+
       records.push(toReleaseRecord(raw, file, categoryMap));
     }
   }
@@ -291,7 +340,12 @@ async function main() {
 
   await fs.rm(OUTPUT_DIR, { recursive: true, force: true });
   await fs.mkdir(RECORD_DIR, { recursive: true });
-  await Promise.all(records.map((record) => fs.writeFile(path.join(RECORD_DIR, `${record.slug}.json`), JSON.stringify(record), 'utf8')));
+  await Promise.all(records.map((record) => fs.writeFile(
+    path.join(RECORD_DIR, `${record.slug}.json`),
+    JSON.stringify(record),
+    'utf8',
+  )));
+
   const index = records.map(toIndexRecord).sort((a, b) => a.title.localeCompare(b.title, 'ar'));
   await fs.writeFile(path.join(OUTPUT_DIR, 'index.json'), JSON.stringify(index), 'utf8');
   await fs.writeFile(path.join(OUTPUT_DIR, 'manifest.json'), JSON.stringify({
@@ -301,9 +355,18 @@ async function main() {
     categories: categories.length,
     batches: sourceFiles.length,
     min_words: MIN_WORDS,
-    duplicate_guard: ['canonical_term', 'english_name', 'primary_keyword', 'aliases', 'legacy-short-encyclopedia', 'cognitive-profiles'],
+    duplicate_guard: [
+      'canonical_term',
+      'english_name',
+      'primary_keyword',
+      'aliases',
+      'legacy-short-encyclopedia',
+      'cognitive-profiles',
+      'symbol-aware-notation',
+    ],
     storage: 'workers-static-assets',
   }), 'utf8');
+
   console.log(`Expanded encyclopedia static assets built: ${records.length} unique terms.`);
 }
 
