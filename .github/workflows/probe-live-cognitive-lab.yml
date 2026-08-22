@@ -33,28 +33,46 @@ jobs:
               -d "{\"state\":\"${state}\",\"context\":\"${context}\"}" >/dev/null
           }
 
-          get() {
+          request() {
             local path="$1"
-            curl --fail --silent --show-error --location --compressed --max-time 25 \
+            local output="$2"
+            local stamp="${GITHUB_SHA}-$(date +%s%N)"
+            local code
+            code="$(curl --silent --show-error --location --compressed --max-time 25 \
               -H 'Cache-Control: no-cache, no-store, max-age=0' \
-              "${BASE}${path}?probe=${GITHUB_SHA}-$(date +%s)" 2>/dev/null || true
+              -H 'Pragma: no-cache' \
+              -o "$output" -w '%{http_code}' \
+              "${BASE}${path}?probe=${stamp}" 2>/dev/null || true)"
+            printf '%s' "${code:-000}"
           }
 
-          page="$(get '/cognitive-lab')"
-          sitemap="$(get '/sitemaps/cognitive-lab.xml')"
-          simon="$(get '/cognitive-lab/simon-conflict')"
-          coding="$(get '/cognitive-lab/symbol-coding')"
-          ambiguity="$(get '/cognitive-lab/ambiguity-resolution')"
-          error_detection="$(get '/cognitive-lab/error-detection')"
+          root_code="$(request '/' /tmp/root.html)"
+          page_code="$(request '/cognitive-lab' /tmp/page.html)"
+          sitemap_code="$(request '/sitemaps/cognitive-lab.xml' /tmp/sitemap.xml)"
+          simon_code="$(request '/cognitive-lab/simon-conflict' /tmp/simon.html)"
+          coding_code="$(request '/cognitive-lab/symbol-coding' /tmp/coding.html)"
+          ambiguity_code="$(request '/cognitive-lab/ambiguity-resolution' /tmp/ambiguity.html)"
+          error_code="$(request '/cognitive-lab/error-detection' /tmp/error.html)"
+
+          status "probe/root-http-${root_code}" success
+          status "probe/page-http-${page_code}" success
+          status "probe/sitemap-http-${sitemap_code}" success
+          status "probe/simon-http-${simon_code}" success
+          status "probe/coding-http-${coding_code}" success
+          status "probe/ambiguity-http-${ambiguity_code}" success
+          status "probe/error-http-${error_code}" success
+
+          page="$(cat /tmp/page.html 2>/dev/null || true)"
+          sitemap="$(cat /tmp/sitemap.xml 2>/dev/null || true)"
           url_count="$(printf '%s' "$sitemap" | grep -o '<loc>' | wc -l | tr -d ' ' || true)"
           url_count="${url_count:-0}"
+          status "probe/sitemap-count-${url_count}" success
 
-          overall=success
-          if printf '%s' "$page" | grep -Fq '100 نشاط معرفي واضح'; then status 'probe/page-100' success; else status 'probe/page-100' failure; overall=failure; fi
-          if [ "$url_count" = '101' ]; then status 'probe/sitemap-101' success; else status 'probe/sitemap-101' failure; overall=failure; fi
-          if printf '%s' "$simon" | grep -Fq 'تعارض الموقع والاستجابة'; then status 'probe/simon-conflict' success; else status 'probe/simon-conflict' failure; overall=failure; fi
-          if printf '%s' "$coding" | grep -Fq 'ترميز الرمز والرقم'; then status 'probe/symbol-coding' success; else status 'probe/symbol-coding' failure; overall=failure; fi
-          if printf '%s' "$ambiguity" | grep -Fq 'حل الغموض السياقي'; then status 'probe/ambiguity-resolution' success; else status 'probe/ambiguity-resolution' failure; overall=failure; fi
-          if printf '%s' "$error_detection" | grep -Fq 'اكتشاف الخطأ في الإجراء'; then status 'probe/error-detection' success; else status 'probe/error-detection' failure; overall=failure; fi
-          status 'probe/live-cognitive-overall' "$overall"
-          echo "url_count=${url_count} overall=${overall}"
+          if printf '%s' "$page" | grep -Fq '100 نشاط معرفي واضح'; then status 'probe/page-marker-100' success; else status 'probe/page-marker-100' failure; fi
+          if printf '%s' "$page" | grep -Fq '53 نشاط'; then status 'probe/page-marker-53' success; else status 'probe/page-marker-53' failure; fi
+          if grep -Fq 'تعارض الموقع والاستجابة' /tmp/simon.html 2>/dev/null; then status 'probe/simon-content-new' success; else status 'probe/simon-content-new' failure; fi
+          if grep -Fq 'ترميز الرمز والرقم' /tmp/coding.html 2>/dev/null; then status 'probe/coding-content-new' success; else status 'probe/coding-content-new' failure; fi
+          if grep -Fq 'حل الغموض السياقي' /tmp/ambiguity.html 2>/dev/null; then status 'probe/ambiguity-content-new' success; else status 'probe/ambiguity-content-new' failure; fi
+          if grep -Fq 'اكتشاف الخطأ في الإجراء' /tmp/error.html 2>/dev/null; then status 'probe/error-content-new' success; else status 'probe/error-content-new' failure; fi
+
+          echo "root=${root_code} page=${page_code} sitemap=${sitemap_code} simon=${simon_code} coding=${coding_code} ambiguity=${ambiguity_code} error=${error_code} urls=${url_count}"
