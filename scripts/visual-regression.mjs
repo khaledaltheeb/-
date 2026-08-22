@@ -17,9 +17,9 @@ const routes = [
 ];
 
 const viewports = [
-  { name: 'desktop', width: 1440, height: 1000, footerColumns: 4 },
-  { name: 'tablet', width: 1024, height: 900, footerColumns: 4 },
-  { name: 'mobile', width: 390, height: 844, footerColumns: 1 },
+  { name: 'desktop', width: 1440, height: 1000, footerColumns: 4, maxFooterHeight: 620 },
+  { name: 'tablet', width: 1024, height: 900, footerColumns: 4, maxFooterHeight: 800 },
+  { name: 'mobile', width: 390, height: 844, footerColumns: 2, maxFooterHeight: 1120 },
 ];
 
 const failures = [];
@@ -143,6 +143,9 @@ try {
         }
         if (!approx(metrics.footer.width, viewport.width, 2)) {
           fail(scope, `footer width ${metrics.footer.width}px does not span viewport ${viewport.width}px`);
+        }
+        if (metrics.footer.height > viewport.maxFooterHeight) {
+          fail(scope, `footer height ${metrics.footer.height}px exceeds ${viewport.maxFooterHeight}px responsive guard`);
         }
         if (metrics.footer.paddingTop > 1 || metrics.footer.paddingBottom > 1) {
           fail(scope, `legacy root footer padding leaked through (${metrics.footer.paddingTop}px/${metrics.footer.paddingBottom}px)`);
