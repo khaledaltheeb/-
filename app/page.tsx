@@ -5,6 +5,7 @@ import SiteFooter from '@/components/site-footer';
 import PlatformIcon from '@/components/platform-icon';
 import { getPublicSectors } from '@/lib/public-taxonomy';
 import { getHomepageContent } from '@/lib/public-content';
+import { publicContentHref, publicContentTypeLabel } from '@/lib/public-content-routing';
 import { buildSeoMetadata } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
@@ -24,11 +25,6 @@ const quickSearches = [
   ['ذوو الاحتياجات الخاصة', 'ذوو الاحتياجات الخاصة'],
   ['دعم الأسرة', 'دعم الأسرة'],
 ];
-
-const contentTypeLabels: Record<string, string> = {
-  article: 'مقال', guide: 'دليل', condition: 'حالة', research: 'بحث', comparison: 'مقارنة',
-  tool: 'أداة', assessment: 'تقييم إرشادي', resource: 'مورد', faq: 'أسئلة شائعة', news: 'خبر',
-};
 
 export default async function HomePage() {
   const [sectors, latestContent] = await Promise.all([
@@ -65,7 +61,7 @@ export default async function HomePage() {
             </div>
             <div className="hero-pathway-list">
               <Link prefetch={false} href="/sectors/pediatric-oncology"><span><PlatformIcon name="review" /></span><div><strong>أبحث عن معلومات عن سرطان الأطفال</strong><small>التشخيص والعلاج والأبحاث والدعم النفسي والأسري والنجاة</small></div><i aria-hidden="true">←</i></Link>
-              <Link prefetch={false} href="/search"><span><PlatformIcon name="knowledge" /></span><div><strong>أحتاج معلومة موثوقة</strong><small>حالات، أدلة، أسئلة وأدوات عملية</small></div><i aria-hidden="true">←</i></Link>
+              <Link prefetch={false} href="/care-guides/"><span><PlatformIcon name="knowledge" /></span><div><strong>أحتاج دليلًا عمليًا للرعاية</strong><small>أدلة للأسرة والتعامل اليومي والخطوات العملية</small></div><i aria-hidden="true">←</i></Link>
               <Link prefetch={false} href="/specialists"><span><PlatformIcon name="specialist" /></span><div><strong>أبحث عن مساعدة مهنية</strong><small>مختصون ومراكز ضمن دليل واضح</small></div><i aria-hidden="true">←</i></Link>
               <Link prefetch={false} href="/search?q=دعم+الأسرة"><span><PlatformIcon name="community" /></span><div><strong>أساند قريبًا أو أسرة</strong><small>مسارات عملية لمقدمي الدعم والرعاية</small></div><i aria-hidden="true">←</i></Link>
             </div>
@@ -108,18 +104,32 @@ export default async function HomePage() {
           )}
         </section>
 
+        <section className="rawafid-section rawafid-pathways" aria-labelledby="pathways-title">
+          <div className="rawafid-section-head">
+            <div className="rawafid-section-title"><span>مسارات مباشرة</span><h2 id="pathways-title">ابدأ من نوع المحتوى الذي تحتاجه</h2><p>روابط واضحة إلى أكثر المسارات استخدامًا بدل الاعتماد على البحث فقط.</p></div>
+          </div>
+          <div className="rawafid-platform-grid">
+            <Link prefetch={false} className="rawafid-platform-card" href="/care-guides/"><div className="icon-shell"><PlatformIcon name="knowledge" /></div><h3>أدلة التعامل والرعاية</h3><p>أدلة عملية للأسرة والمريض ومقدم الرعاية، منظمة حسب الحاجة والموقف.</p><span>استكشف الأدلة ←</span></Link>
+            <Link prefetch={false} className="rawafid-platform-card" href="/evidence-guides/"><div className="icon-shell"><PlatformIcon name="review" /></div><h3>الأدلة العلمية</h3><p>صفحات تلخص الأدلة والدراسات والمصادر مع سياق منهجي واضح.</p><span>استكشف الأدلة العلمية ←</span></Link>
+            <Link prefetch={false} className="rawafid-platform-card" href="/sectors/pediatric-oncology"><div className="icon-shell"><PlatformIcon name="community" /></div><h3>مركز سرطان الأطفال</h3><p>مسار موحد للتشخيص والعلاج والدعم النفسي والأسري والنجاة والمتابعة.</p><span>فتح المركز ←</span></Link>
+          </div>
+        </section>
+
         {latestContent.length > 0 && <section className="rawafid-section rawafid-editorial-section" aria-labelledby="latest-content-title">
           <div className="rawafid-section-head">
             <div className="rawafid-section-title"><span>مختارات المعرفة</span><h2 id="latest-content-title">محتوى حديث من مكتبة روافد</h2><p>صفحات منشورة من قاعدة المعرفة، تظهر هنا تلقائيًا عند تحديثها واعتمادها.</p></div>
             <Link prefetch={false} className="section-text-link" href="/search">استكشف كل المعرفة ←</Link>
           </div>
           <div className="rawafid-editorial-grid">
-            {latestContent.map((item, index) => <article className={index === 0 ? 'featured' : ''} key={item.slug}>
-              <div className="editorial-card-meta"><span>{contentTypeLabels[item.content_type] ?? 'معرفة'}</span><time dateTime={item.published_at ?? item.updated_at}>{new Intl.DateTimeFormat('ar', { dateStyle: 'medium' }).format(new Date(item.published_at ?? item.updated_at))}</time></div>
-              <h3><Link prefetch={false} href={`/content/${item.slug}`}>{item.title}</Link></h3>
-              {item.excerpt && <p>{item.excerpt}</p>}
-              <Link prefetch={false} className="editorial-card-link" href={`/content/${item.slug}`}>اقرأ الصفحة ←</Link>
-            </article>)}
+            {latestContent.map((item, index) => {
+              const href = publicContentHref(item);
+              return <article className={index === 0 ? 'featured' : ''} key={item.slug}>
+                <div className="editorial-card-meta"><span>{publicContentTypeLabel(item.content_type)}</span><time dateTime={item.published_at ?? item.updated_at}>{new Intl.DateTimeFormat('ar', { dateStyle: 'medium' }).format(new Date(item.published_at ?? item.updated_at))}</time></div>
+                <h3><Link prefetch={false} href={href}>{item.title}</Link></h3>
+                {item.excerpt && <p>{item.excerpt}</p>}
+                <Link prefetch={false} className="editorial-card-link" href={href}>اقرأ الصفحة ←</Link>
+              </article>;
+            })}
           </div>
         </section>}
 
