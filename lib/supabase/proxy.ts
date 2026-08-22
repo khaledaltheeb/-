@@ -103,9 +103,10 @@ function applyPreservedAliasSeoHeaders(response: NextResponse, pathname: string)
 
 export async function updateSession(request: NextRequest) {
   const trustedPathname = decodedPathname(request.nextUrl.pathname);
+  const forwardedPathname = encodeURI(trustedPathname);
   const forwardedHeaders = () => {
     const headers = new Headers(request.headers);
-    headers.set('x-rawafid-pathname', trustedPathname);
+    headers.set('x-rawafid-pathname', forwardedPathname);
     return headers;
   };
   let response = NextResponse.next({ request: { headers: forwardedHeaders() } });
