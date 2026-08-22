@@ -341,7 +341,7 @@ body .footer-bottom {
   }
 }
 
-@media (max-width: 430px) {
+@media (max-width: 340px) {
   body .footer-groups {
     grid-template-columns: 1fr;
     gap: 22px;
