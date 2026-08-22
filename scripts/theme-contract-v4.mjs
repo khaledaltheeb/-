@@ -65,7 +65,13 @@ if (!agents.includes('app/rawafid-theme.css')) fail('agent rules must preserve t
 for (const token of ['Rawafid Institutional V5.1', 'font-family:var(--font-arabic)', '--rf-reading-measure:72ch', '.footer-search', '.theme-preview-type-specimen']) {
   if (!theme.includes(token)) fail(`institutional V5.1 layer missing ${token}`);
 }
-for (const token of ['.rawafid-home .hero-pathway-list>a', '.rawafid-home .rawafid-editorial-grid', '.rawafid-home .rawafid-editorial-grid h3 a']) {
+for (const token of [
+  '.rawafid-home .hero-pathway-list>a',
+  '.rawafid-home .rawafid-editorial-grid',
+  '.rawafid-home .rawafid-editorial-grid h3 a',
+  '.rawafid-home .section-text-link',
+  '.rawafid-home .rawafid-professional-callout',
+]) {
   if (!publicEnhancements.includes(token)) fail(`homepage V5 surface completion missing ${token}`);
 }
 if (!layout.includes("themeColor: '#075f61'")) fail('browser theme color must match the V5/PWA institutional chrome color');
