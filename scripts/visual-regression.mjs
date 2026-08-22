@@ -90,6 +90,17 @@ try {
             overflowY: style.overflowY,
           };
         };
+        const styleSnapshot = (selector) => {
+          const element = document.querySelector(selector);
+          if (!element) return null;
+          const style = getComputedStyle(element);
+          return {
+            color: style.color,
+            display: style.display,
+            textDecorationLine: style.textDecorationLine,
+            backgroundColor: style.backgroundColor,
+          };
+        };
 
         const groupSections = [...document.querySelectorAll('.footer-groups > section')];
         const sectionBoxes = groupSections.map((element) => {
@@ -101,12 +112,14 @@ try {
         const rootStyle = getComputedStyle(document.documentElement);
         const tokens = Object.fromEntries(tokenNames.map((name) => [name, rootStyle.getPropertyValue(name).trim().toLowerCase()]));
         const heroTitle = document.querySelector('.rawafid-hero h1');
+        const themeColor = document.querySelector('meta[name="theme-color"]')?.getAttribute('content')?.toLowerCase() || '';
 
         return {
           viewportWidth: innerWidth,
           scrollWidth: document.documentElement.scrollWidth,
           scrollHeight: document.documentElement.scrollHeight,
           tokens,
+          themeColor,
           header: box('.site-header'),
           headerInner: box('.site-header-inner'),
           footer: box('.site-footer'),
@@ -116,6 +129,13 @@ try {
           footerBottom: box('.footer-bottom'),
           firstRowColumns,
           heroFontSize: heroTitle ? parseFloat(getComputedStyle(heroTitle).fontSize) : null,
+          homeSurface: {
+            heroPathwayList: styleSnapshot('.hero-pathway-list'),
+            heroPathwayLink: styleSnapshot('.hero-pathway-list > a'),
+            heroPathwayStrong: styleSnapshot('.hero-pathway-list > a strong'),
+            editorialGrid: styleSnapshot('.rawafid-editorial-grid'),
+            editorialTitleLink: styleSnapshot('.rawafid-editorial-grid h3 a'),
+          },
         };
       }, Object.keys(expectedTokens));
 
@@ -124,6 +144,8 @@ try {
       for (const [token, expected] of Object.entries(expectedTokens)) {
         if (metrics.tokens[token] !== expected) fail(scope, `${token}=${metrics.tokens[token] || 'empty'}; expected ${expected}`);
       }
+
+      if (metrics.themeColor !== '#075f61') fail(scope, `theme-color=${metrics.themeColor || 'missing'}; expected #075f61`);
 
       if (metrics.scrollWidth > viewport.width + 2) {
         fail(scope, `horizontal overflow ${metrics.scrollWidth}px > viewport ${viewport.width}px`);
@@ -161,10 +183,27 @@ try {
         }
       }
 
-      if (route.name === 'home' && metrics.heroFontSize !== null) {
-        const min = viewport.name === 'mobile' ? 34 : 42;
-        const max = viewport.name === 'mobile' ? 60 : 90;
-        if (metrics.heroFontSize < min || metrics.heroFontSize > max) fail(scope, `hero title font ${metrics.heroFontSize}px is outside ${min}-${max}px`);
+      if (route.name === 'home') {
+        if (metrics.heroFontSize !== null) {
+          const min = viewport.name === 'mobile' ? 34 : 42;
+          const max = viewport.name === 'mobile' ? 60 : 90;
+          if (metrics.heroFontSize < min || metrics.heroFontSize > max) fail(scope, `hero title font ${metrics.heroFontSize}px is outside ${min}-${max}px`);
+        }
+
+        const homeSurface = metrics.homeSurface;
+        if (!homeSurface.heroPathwayList || homeSurface.heroPathwayList.display !== 'grid') fail(scope, 'hero pathway list is not rendered as the V5 grid surface');
+        if (!homeSurface.heroPathwayLink) fail(scope, 'hero pathway link surface is missing');
+        else {
+          if (homeSurface.heroPathwayLink.color !== 'rgb(255, 255, 255)') fail(scope, `hero pathway link color ${homeSurface.heroPathwayLink.color} is not white`);
+          if (homeSurface.heroPathwayLink.textDecorationLine !== 'none') fail(scope, `hero pathway link decoration leaked: ${homeSurface.heroPathwayLink.textDecorationLine}`);
+        }
+        if (!homeSurface.heroPathwayStrong || homeSurface.heroPathwayStrong.color !== 'rgb(255, 255, 255)') fail(scope, 'hero pathway title lost high-contrast white text');
+        if (!homeSurface.editorialGrid || homeSurface.editorialGrid.display !== 'grid') fail(scope, 'homepage editorial content is not rendered as a card grid');
+        if (!homeSurface.editorialTitleLink) fail(scope, 'homepage editorial title link is missing');
+        else {
+          if (homeSurface.editorialTitleLink.color !== 'rgb(18, 52, 59)') fail(scope, `editorial title color ${homeSurface.editorialTitleLink.color} does not match --rf-ink`);
+          if (homeSurface.editorialTitleLink.textDecorationLine !== 'none') fail(scope, `editorial title decoration leaked: ${homeSurface.editorialTitleLink.textDecorationLine}`);
+        }
       }
 
       await page.screenshot({
