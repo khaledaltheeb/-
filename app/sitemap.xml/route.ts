@@ -2,17 +2,19 @@ import { createClient } from '@/lib/supabase/server';
 import { sitemapIndexResponse } from '@/lib/sitemap-xml';
 
 export const dynamic = 'force-dynamic';
-const PAGE_SIZE=50000;
-const ENCYCLOPEDIA_PAGE_SIZE=5000;
+const PAGE_SIZE = 5000;
+const ENCYCLOPEDIA_PAGE_SIZE = 5000;
 
 export async function GET() {
   const supabase = await createClient();
+  const now = new Date().toISOString();
   const [contentResult, encyclopediaResult] = await Promise.all([
     supabase
       .from('content')
       .select('id', { count: 'exact', head: true })
       .eq('status', 'published')
-      .lte('published_at', new Date().toISOString())
+      .neq('content_type', 'condition')
+      .lte('published_at', now)
       .eq('robots_index', true)
       .not('slug', 'like', 'quick-info-%'),
     supabase
@@ -20,7 +22,7 @@ export async function GET() {
       .select('id', { count: 'exact', head: true })
       .eq('content_type', 'condition')
       .eq('status', 'published')
-      .lte('published_at', new Date().toISOString())
+      .lte('published_at', now)
       .eq('robots_index', true),
   ]);
 
