@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import SiteHeader from '@/components/site-header';
+import SiteFooter from '@/components/site-footer';
 import ProviderDocumentManager from '@/components/provider-document-manager';
 import { createClient } from '@/lib/supabase/server';
 
@@ -38,10 +40,11 @@ export default async function VerificationDocumentsPage() {
     return { ...doc, signed_url: signed?.signedUrl ?? null };
   }));
   const editable = profile.role === 'user' && ['unverified','pending','rejected'].includes(verification);
+  const applicationHref = providerType === 'specialist' ? '/join/specialist' : '/join/center';
 
-  return <main className="dashboard-shell account-shell"><section className="dashboard-card account-card">
-    <div className="admin-heading"><div><span className="eyebrow">توثيق خاص</span><h1>مستندات {providerType === 'specialist' ? 'المختص' : 'المركز'}</h1><p>مساحة خاصة لرفع الوثائق التي يحتاجها فريق منصة روافد للتحقق من المؤهلات والترخيص والهوية أو تسجيل المنشأة. هذه الملفات لا تُنشر في الدليل العام.</p></div><div className="dashboard-actions"><Link className="button" href="/account">حسابي</Link><Link className="button" href={providerType === 'specialist' ? '/join/specialist' : '/join/center'}>طلب الانضمام</Link></div></div>
+  return <><SiteHeader/><main className="dashboard-shell account-shell"><nav className="breadcrumbs" aria-label="مسار الصفحة"><Link href="/">الرئيسية</Link><span>/</span><Link href="/account">حسابي</Link><span>/</span><span aria-current="page">مستندات التوثيق</span></nav><nav className="account-local-nav" aria-label="خدمات الحساب"><Link href="/account">حسابي</Link><Link href={applicationHref}>طلب الانضمام</Link><Link className="active" href="/account/verification-documents" aria-current="page">مستندات التوثيق</Link><Link href="/account/security">أمان الحساب</Link></nav><section className="dashboard-card account-card">
+    <div className="admin-heading"><div><span className="eyebrow">توثيق خاص</span><h1>مستندات {providerType === 'specialist' ? 'المختص' : 'المركز'}</h1><p>مساحة خاصة لرفع الوثائق التي يحتاجها فريق منصة روافد للتحقق من المؤهلات والترخيص والهوية أو تسجيل المنشأة. هذه الملفات لا تُنشر في الدليل العام.</p></div><div className="dashboard-actions"><Link className="button" href="/account">حسابي</Link><Link className="button" href={applicationHref}>طلب الانضمام</Link></div></div>
     {!editable && <div className="portal-notice"><strong>الرفع مقفل في هذه المرحلة.</strong><span>يمكنك مراجعة المستندات المحفوظة، لكن التعديل يتوقف بعد الاعتماد أو انتقال الحساب إلى البوابة المهنية.</span></div>}
-    <section className="account-section"><div className="section-mini-heading"><h2>الوثائق</h2><span>Private Storage · روابط عرض مؤقتة فقط</span></div><ProviderDocumentManager userId={userId} providerType={providerType} editable={editable} documents={documents} /></section>
-  </section></main>;
+    <section className="account-section"><div className="section-mini-heading"><h2>الوثائق</h2><span>تخزين خاص · روابط عرض مؤقتة فقط</span></div><ProviderDocumentManager userId={userId} providerType={providerType} editable={editable} documents={documents} /></section>
+  </section></main><SiteFooter/></>;
 }
