@@ -3,6 +3,7 @@ export type HomepageContent = {
   title: string;
   excerpt: string | null;
   content_type: string;
+  canonical_url: string | null;
   published_at: string | null;
   updated_at: string;
 };
@@ -13,7 +14,7 @@ export async function getHomepageContent(limit = 6): Promise<HomepageContent[]> 
   if (!projectUrl || !publishableKey) return [];
 
   const params = new URLSearchParams({
-    select: 'slug,title,excerpt,content_type,published_at,updated_at',
+    select: 'slug,title,excerpt,content_type,canonical_url,published_at,updated_at',
     status: 'eq.published',
     robots_index: 'eq.true',
     published_at: `lte.${new Date().toISOString()}`,
@@ -42,6 +43,7 @@ export async function getHomepageContent(limit = 6): Promise<HomepageContent[]> 
         title: item.title,
         excerpt: typeof item.excerpt === 'string' ? item.excerpt : null,
         content_type: typeof item.content_type === 'string' ? item.content_type : 'article',
+        canonical_url: typeof item.canonical_url === 'string' ? item.canonical_url : null,
         published_at: typeof item.published_at === 'string' ? item.published_at : null,
         updated_at: item.updated_at,
       }];
