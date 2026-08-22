@@ -1,0 +1,71 @@
+name: Verify Live Cognitive Lab
+
+on:
+  push:
+    branches: [cloudflare-workers-deploy]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-live-cognitive-lab
+  cancel-in-progress: true
+
+jobs:
+  verify-live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Verify deployed Cognitive Lab 100
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE='https://rawafid-platform-staging.khaledaltheeb.workers.dev'
+
+          fetch() {
+            local path="$1"
+            local stamp="$2"
+            curl --fail --silent --show-error --location --compressed \
+              --max-time 25 \
+              -H 'Cache-Control: no-cache, no-store, max-age=0' \
+              -H 'Pragma: no-cache' \
+              "${BASE}${path}?live_verify=${stamp}"
+          }
+
+          for attempt in $(seq 1 60); do
+            stamp="${GITHUB_SHA}-${attempt}-$(date +%s)"
+            page="$(fetch '/cognitive-lab' "$stamp" 2>/dev/null || true)"
+            sitemap="$(fetch '/sitemaps/cognitive-lab.xml' "$stamp" 2>/dev/null || true)"
+            simon="$(fetch '/cognitive-lab/simon-conflict' "$stamp" 2>/dev/null || true)"
+            coding="$(fetch '/cognitive-lab/symbol-coding' "$stamp" 2>/dev/null || true)"
+            ambiguity="$(fetch '/cognitive-lab/ambiguity-resolution' "$stamp" 2>/dev/null || true)"
+            error_detection="$(fetch '/cognitive-lab/error-detection' "$stamp" 2>/dev/null || true)"
+
+            url_count="$(printf '%s' "$sitemap" | grep -o '<loc>' | wc -l | tr -d ' ' || true)"
+            url_count="${url_count:-0}"
+
+            if printf '%s' "$page" | grep -Fq '100 نشاط معرفي واضح' \
+              && printf '%s' "$page" | grep -Fq '47' \
+              && printf '%s' "$page" | grep -Fq '14' \
+              && [ "$url_count" = '101' ] \
+              && printf '%s' "$simon" | grep -Fq 'تعارض الموقع والاستجابة' \
+              && printf '%s' "$simon" | grep -Fq 'توسعة بحثية 2026' \
+              && printf '%s' "$coding" | grep -Fq 'ترميز الرمز والرقم' \
+              && printf '%s' "$ambiguity" | grep -Fq 'حل الغموض السياقي' \
+              && printf '%s' "$error_detection" | grep -Fq 'اكتشاف الخطأ في الإجراء'; then
+              echo "LIVE_COGNITIVE_LAB_STATUS=passed"
+              echo "LIVE_COGNITIVE_LAB_URL_COUNT=${url_count}"
+              echo "LIVE_COGNITIVE_LAB_TOTAL_TOOLS=100"
+              echo "LIVE_COGNITIVE_LAB_EXTENSION_TOOLS=47"
+              echo "LIVE_COGNITIVE_LAB_VERIFIED_DIFFICULTY=14"
+              echo "Verified sample routes: simon-conflict, symbol-coding, ambiguity-resolution, error-detection"
+              exit 0
+            fi
+
+            echo "Attempt ${attempt}: deployment not yet matching the verified Cognitive Lab 100 snapshot (sitemap URLs: ${url_count})."
+            sleep 10
+          done
+
+          echo 'Live Cognitive Lab did not converge to the verified 100-tool snapshot.' >&2
+          exit 1
