@@ -28,7 +28,7 @@ export default async function ResetPasswordPage({ searchParams }: { searchParams
   return (
     <main className="auth-shell">
       <section className="auth-card auth-card-polished" aria-labelledby="reset-title">
-        <Link href="/" className="brand auth-brand"><span className="brand-mark">ر</span><span><strong>منصة روافد</strong><small>Rawafid Platform</small></span></Link>
+        <Link href="/" className="brand auth-brand"><span className="brand-mark">ر</span><span><strong>منصة روافد</strong><small>معرفة · دعم · خدمات موثقة</small></span></Link>
         <span className="eyebrow">حماية الحساب</span>
         <h1 id="reset-title">تعيين كلمة مرور جديدة</h1>
         <p>استخدم كلمة مرور قوية وفريدة لا تستخدمها في خدمة أخرى.</p>
@@ -40,7 +40,7 @@ export default async function ResetPasswordPage({ searchParams }: { searchParams
           <input id="confirm_password" name="confirm_password" type="password" autoComplete="new-password" required minLength={10} maxLength={128} />
           <button className="auth-primary" type="submit">حفظ كلمة المرور الجديدة</button>
         </form>
-        <div className="auth-links"><Link href="/forgot-password">طلب رابط جديد</Link><Link href="/login">تسجيل الدخول</Link></div>
+        <div className="auth-links"><Link href="/forgot-password">طلب رابط جديد</Link><Link href="/login">تسجيل الدخول</Link><Link href="/privacy">الخصوصية</Link></div>
       </section>
     </main>
   );
