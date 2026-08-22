@@ -4,6 +4,7 @@ import { Noto_Sans_Arabic } from 'next/font/google';
 import { BRAND_NAME, DEFAULT_DESCRIPTION, SITE_URL, organizationJsonLd } from '@/lib/seo';
 import './rawafid-theme.css';
 import './discovery-v1.css';
+import './visual-stability.css';
 
 /* Compatibility modules now live behind the central entry point:
  './theme-empty.css' './dashboard-v3.css' './theme-preview.css'
