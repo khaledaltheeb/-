@@ -22,15 +22,21 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
+      NEXT_PUBLIC_SITE_URL: https://rawafid-platform-staging.khaledaltheeb.workers.dev
+      NEXT_PUBLIC_ALLOW_INDEXING: 'false'
+      NEXT_PUBLIC_ENABLE_ANALYTICS: 'false'
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with:
           node-version: 24
-          package-manager-cache: false
-      - name: Install dependencies
-        run: npm install --no-audit --no-fund
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
       - name: Validate cognitive trial contracts
         run: npm run cognitive-lab:validate
       - name: Audit extension semantics and balance
@@ -39,3 +45,7 @@ jobs:
         run: npm run typecheck
       - name: Lint cognitive implementation
         run: npx eslint app/cognitive-lab components/cognitive-lab-browser.tsx components/cognitive-lab-runner.tsx components/cognitive-lab-extension-runner.tsx lib/cognitive-lab scripts/cognitive-lab-contract.mjs scripts/cognitive-lab-extension-audit-contract.mjs
+      - name: Build Cloudflare Worker with OpenNext
+        run: npx opennextjs-cloudflare build
+      - name: Validate Wrangler package
+        run: npx wrangler deploy --dry-run
