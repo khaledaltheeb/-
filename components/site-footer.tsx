@@ -3,42 +3,35 @@ import RawafidBrand from '@/components/rawafid-brand';
 const groups = [
   {
     id: 'knowledge',
-    title: 'المعرفة',
+    title: 'المعرفة والرعاية',
     links: [
       { href: '/sectors', label: 'القطاعات' },
       { href: '/sections', label: 'جميع الأقسام' },
-      { href: '/encyclopedia/', label: 'الموسوعة' },
+      { href: '/care-guides/', label: 'أدلة التعامل والرعاية' },
       { href: '/evidence-guides/', label: 'الأدلة العلمية' },
+      { href: '/encyclopedia/', label: 'الموسوعة' },
     ],
   },
   {
-    id: 'care',
-    title: 'الرعاية والدعم',
+    id: 'priority',
+    title: 'مسارات مباشرة',
     links: [
-      { href: '/care-guides/', label: 'أدلة التعامل والرعاية' },
       { href: '/sectors/pediatric-oncology', label: 'مركز سرطان الأطفال' },
       { href: '/search?q=دعم+الأسرة', label: 'دعم الأسرة' },
+      { href: '/search?q=الصحة+النفسية', label: 'الصحة النفسية' },
+      { href: '/search?q=الإدمان+والتعافي', label: 'الإدمان والتعافي' },
       { href: '/cognitive-lab', label: 'المختبر المعرفي' },
     ],
   },
   {
-    id: 'support',
-    title: 'الخدمات',
+    id: 'services',
+    title: 'الخدمات والمشاركة',
     links: [
       { href: '/specialists', label: 'دليل المختصين' },
       { href: '/centers', label: 'دليل المراكز' },
       { href: '/search', label: 'البحث المتقدم' },
       { href: '/community', label: 'المجتمع' },
-    ],
-  },
-  {
-    id: 'professional',
-    title: 'المشاركة المهنية',
-    links: [
-      { href: '/join', label: 'الانضمام المهني' },
-      { href: '/join/specialist', label: 'التقدم كمختص' },
-      { href: '/join/center', label: 'تسجيل مركز' },
-      { href: '/experiences/', label: 'شاركنا تجربتك' },
+      { href: '/join', label: 'الانضمام إلى روافد' },
     ],
   },
   {
@@ -49,6 +42,7 @@ const groups = [
       { href: '/editorial-policy', label: 'السياسة التحريرية' },
       { href: '/privacy', label: 'الخصوصية' },
       { href: '/terms', label: 'شروط الاستخدام' },
+      { href: '/disclaimer', label: 'إخلاء المسؤولية والتنبيهات' },
     ],
   },
 ];
