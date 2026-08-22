@@ -16,7 +16,7 @@ permissions:
 jobs:
   quality:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 50
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -40,12 +40,16 @@ jobs:
           NEXT_PUBLIC_SITE_URL: https://rawafid-platform-staging.khaledaltheeb.workers.dev
           NEXT_PUBLIC_ALLOW_INDEXING: 'true'
         run: npm run build
-      - name: Production HTTP smoke, full sitemap SEO gate, and Lighthouse lab audit
+      - name: Install visual browser driver
+        run: npm install --no-save --package-lock=false --ignore-scripts playwright-core@1.62.1
+      - name: Visual layout, production HTTP smoke, full sitemap SEO gate, and Lighthouse lab audit
         env:
           NEXT_PUBLIC_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
           NEXT_PUBLIC_SITE_URL: https://rawafid-platform-staging.khaledaltheeb.workers.dev
           NEXT_PUBLIC_ALLOW_INDEXING: 'true'
+          VISUAL_BASE_URL: http://127.0.0.1:3000
+          VISUAL_OUTPUT_DIR: visual-artifacts
           SMOKE_BASE_URL: http://127.0.0.1:3000
           SEO_GATE_BASE_URL: http://127.0.0.1:3000
           SEO_GATE_CONCURRENCY: '6'
@@ -60,6 +64,12 @@ jobs:
             if curl -fsS http://127.0.0.1:3000/ >/dev/null; then break; fi
             sleep 1
           done
+          CHROME_BIN="$(command -v google-chrome-stable || command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          if [ -z "$CHROME_BIN" ]; then
+            echo 'No Chrome/Chromium executable found for visual regression checks.' >&2
+            exit 1
+          fi
+          VISUAL_CHROME_PATH="$CHROME_BIN" node scripts/visual-regression.mjs
           npm run smoke
           node scripts/seo-gate.mjs
           for run in 1 2 3; do
@@ -98,3 +108,11 @@ jobs:
           console.log('Lighthouse performance scores:',performances,'median:',median);
           if(median<0.70) throw new Error(`Median Lighthouse performance below 0.70: ${median}`);
           NODE
+      - name: Upload visual regression artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rawafid-visual-regression-${{ github.run_id }}
+          path: visual-artifacts/
+          if-no-files-found: ignore
+          retention-days: 14
