@@ -19,6 +19,7 @@ const intentLinks = [
 ];
 
 const serviceLinks = [
+  { href: '/all-pages', label: 'فهرس الصفحات المنشورة', icon: 'knowledge' as const },
   { href: '/specialists', label: 'العثور على مختص', icon: 'specialist' as const },
   { href: '/centers', label: 'العثور على مركز', icon: 'center' as const },
   { href: '/cognitive-lab', label: 'المختبر المعرفي', icon: 'tools' as const },
@@ -101,7 +102,7 @@ export default async function SiteHeader() {
                     </div>
                   </section>
                   <section className="mega-nav-column mega-services">
-                    <h2>الدليل والخدمات</h2>
+                    <h2>الفهرس والدليل والخدمات</h2>
                     <div>{serviceLinks.map((link) => <a href={link.href} key={link.href}><PlatformIcon name={link.icon} size={19} /><span>{link.label}</span></a>)}</div>
                     {signedIn && <div className="mega-member-links"><a href="/messages">الرسائل</a><a href="/appointments">المواعيد</a><a href="/notifications">الإشعارات</a></div>}
                   </section>
@@ -122,6 +123,7 @@ export default async function SiteHeader() {
               <a href="/">الرئيسية</a>
               <a href="/sectors">جميع القطاعات</a>
               <a href="/sections">جميع الأقسام</a>
+              <a href="/all-pages">فهرس الصفحات المنشورة</a>
               <a href="/sectors/pediatric-oncology">سرطان الأطفال</a>
               <a href="/care-guides/">أدلة التعامل والرعاية</a>
               <a href="/evidence-guides/">الأدلة العلمية</a>
@@ -129,7 +131,7 @@ export default async function SiteHeader() {
               <span className="mobile-menu-label">القطاعات</span>
               {sectors.map((sector) => <a key={sector.slug} href={'/sectors/' + sector.slug}>{sector.name_ar}</a>)}
               <span className="mobile-menu-label">الدليل والخدمات</span>
-              {serviceLinks.map((link) => <a key={link.href} href={link.href}>{link.label}</a>)}
+              {serviceLinks.filter((link) => link.href !== '/all-pages').map((link) => <a key={link.href} href={link.href}>{link.label}</a>)}
               {signedIn ? <><a href="/messages">الرسائل</a><a href="/appointments">المواعيد</a><a href="/notifications">الإشعارات</a><a href="/account">حسابي</a></> : <a href="/login">تسجيل الدخول</a>}
             </div>
           </details>
