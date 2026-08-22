@@ -1,0 +1,38 @@
+name: Cognitive Lab 100 Validate
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'app/cognitive-lab/**'
+      - 'components/cognitive-lab-*.tsx'
+      - 'data/cognitive-lab/**'
+      - 'lib/cognitive-lab/**'
+      - 'scripts/cognitive-lab-contract.mjs'
+      - '.github/workflows/cognitive-lab-100-validate.yml'
+
+concurrency:
+  group: cognitive-lab-100-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Validate cognitive trial contracts
+        run: npm run cognitive-lab:validate
+      - name: Type check
+        run: npm run typecheck
+      - name: Lint cognitive implementation
+        run: npx eslint app/cognitive-lab components/cognitive-lab-browser.tsx components/cognitive-lab-runner.tsx components/cognitive-lab-extension-runner.tsx lib/cognitive-lab
