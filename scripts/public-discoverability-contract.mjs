@@ -24,7 +24,8 @@ for (const [label, source] of [['section page', sectionPage], ['sector page', se
 }
 
 for (const required of [
-  "path: '/all-pages'",
+  'return `/all-pages',
+  'action="/all-pages"',
   ".eq('status', 'published')",
   '<PublicPagination',
   'content_categories',
