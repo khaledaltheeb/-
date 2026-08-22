@@ -1,8 +1,10 @@
 import type { CSSProperties } from 'react';
+import Link from 'next/link';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import PlatformIcon from '@/components/platform-icon';
 import { getPublicSectors } from '@/lib/public-taxonomy';
+import { getHomepageContent } from '@/lib/public-content';
 import { buildSeoMetadata } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
@@ -18,97 +20,136 @@ export const metadata = buildSeoMetadata({
 const quickSearches = [
   ['سرطان الأطفال', 'سرطان الأطفال'],
   ['الصحة النفسية', 'الصحة النفسية'],
-  ['ذوو الاحتياجات الخاصة', 'ذوو الاحتياجات الخاصة'],
   ['الإدمان والتعافي', 'الإدمان والتعافي'],
+  ['ذوو الاحتياجات الخاصة', 'ذوو الاحتياجات الخاصة'],
   ['دعم الأسرة', 'دعم الأسرة'],
 ];
 
-const intentRoutes = [
-  { href: '/sectors/pediatric-oncology', icon: 'review' as const, title: 'أفهم سرطان الأطفال', text: 'مركز متكامل للأنواع والتشخيص والعلاج والأبحاث والدعم النفسي والأسري والرعاية الداعمة والنجاة.' },
-  { href: '/search?q=أعراض+نفسية', icon: 'search' as const, title: 'أفهم حالة أو عرضًا', text: 'ابدأ من السؤال أو العرض للوصول إلى المعرفة والمسارات المرتبطة.' },
-  { href: '/search?q=دعم+الأسرة', icon: 'community' as const, title: 'أساعد شخصًا قريبًا', text: 'محتوى ومسارات عملية للأسرة ومقدمي الدعم والرعاية.' },
-  { href: '/search?q=الإدمان+والتعافي', icon: 'review' as const, title: 'أبحث عن مسار تعافٍ', text: 'معرفة وخيارات دعم وعلاج ومراكز مرتبطة بالتعافي.' },
-  { href: '/specialists', icon: 'specialist' as const, title: 'أجد مختصًا', text: 'ابحث في دليل الملفات المهنية الموثقة ونمط الخدمة والموقع.' },
-  { href: '/centers', icon: 'center' as const, title: 'أجد مركزًا', text: 'استكشف المراكز والخدمات والفروع وطرق التواصل المتاحة.' },
-];
-
-const platformModules = [
-  { href: '/sectors/pediatric-oncology', icon: 'review' as const, title: 'مركز سرطان الأطفال', text: 'التشخيص والعلاج والأبحاث والدراسات والدعم النفسي والأسري والرعاية الداعمة والمدرسة والنجاة ضمن قطاع واحد متكامل.', accent: '#b85c5c' },
-  { href: '/sectors/knowledge', icon: 'knowledge' as const, title: 'المعرفة والموسوعة', text: 'موضوعات ومقالات وأدلة ومصطلحات وأبحاث منظمة ضمن أقسام واضحة.', accent: '#3d78bd' },
-  { href: '/sectors/special-needs-inclusion', icon: 'community' as const, title: 'الاحتياجات الخاصة والتربية الدامجة', text: 'التعلم والتواصل والدعم الأسري والتأهيل والحقوق والمشاركة والتمكين.', accent: '#7564c9' },
-  { href: '/specialists', icon: 'specialist' as const, title: 'دليل المختصين', text: 'ملفات مهنية موثقة مع تخصصات ومؤهلات وخيارات تواصل واضحة.', accent: '#0b8f92' },
-  { href: '/centers', icon: 'center' as const, title: 'دليل المراكز', text: 'مراكز وخدمات وفروع ومعلومات تساعد على الوصول إلى الجهة المناسبة.', accent: '#f4b942' },
-  { href: '/evidence-guides/', icon: 'tools' as const, title: 'الأدلة العملية', text: 'أدلة مبنية على المصادر ومسارات عملية للاستخدام الآمن والواعي.', accent: '#d8604c' },
-];
+const contentTypeLabels: Record<string, string> = {
+  article: 'مقال', guide: 'دليل', condition: 'حالة', research: 'بحث', comparison: 'مقارنة',
+  tool: 'أداة', assessment: 'تقييم إرشادي', resource: 'مورد', faq: 'أسئلة شائعة', news: 'خبر',
+};
 
 export default async function HomePage() {
-  const sectors = await getPublicSectors(12);
+  const [sectors, latestContent] = await Promise.all([
+    getPublicSectors(12),
+    getHomepageContent(6),
+  ]);
 
-  return <>
-    <SiteHeader />
-    <main className="site-shell rawafid-home">
-      <section className="rawafid-hero" aria-labelledby="home-title">
-        <div className="rawafid-hero-copy">
-          <span className="rawafid-kicker">منصة عربية مؤسسية متكاملة</span>
-          <h1 id="home-title">كيف يمكن لـ<em>منصة روافد</em> مساعدتك اليوم؟</h1>
-          <p>الوصول إلى المعرفة الموثوقة يبدأ من احتياجك: الصحة النفسية، ذوو الاحتياجات الخاصة، مركز سرطان الأطفال، التعافي، الأدلة العملية أو الوصول إلى مختص ومركز مناسب.</p>
-          <form className="search rawafid-search" action="/search" method="get" role="search">
-            <label className="sr-only" htmlFor="home-search">البحث في منصة روافد</label>
-            <input id="home-search" name="q" type="search" minLength={2} maxLength={160} autoComplete="off" placeholder="ابحث عن حالة، سرطان أطفال، مصطلح، مختص، مركز، أداة، مقال أو سؤال..." />
-            <button type="submit">ابحث الآن</button>
-          </form>
-          <div className="rawafid-quick-links" aria-label="عمليات بحث مقترحة">{quickSearches.map(([label, query]) => <a key={label} href={`/search?q=${encodeURIComponent(query)}`}>{label}</a>)}</div>
-        </div>
+  return (
+    <>
+      <SiteHeader />
+      <main className="site-shell rawafid-home">
+        <section className="rawafid-hero" aria-labelledby="home-title">
+          <div className="rawafid-hero-copy">
+            <span className="rawafid-kicker">المعرفة والرعاية تبدأ من فهم احتياجك</span>
+            <h1 id="home-title">طريق أوضح إلى <em>المعرفة والدعم</em> المناسبين.</h1>
+            <p>منصة عربية تجمع المعرفة الموثوقة والأدلة العملية ومركزًا متكاملًا لسرطان الأطفال، مع المختصين والمراكز ضمن تجربة تحترم خصوصيتك وتساعدك على اتخاذ الخطوة التالية بثقة.</p>
 
-        <aside className="rawafid-hero-visual" aria-label="مكونات منصة روافد">
+            <form className="search rawafid-search" action="/search" method="get" role="search">
+              <label className="sr-only" htmlFor="home-search">البحث في منصة روافد</label>
+              <input id="home-search" name="q" type="search" minLength={2} maxLength={160} autoComplete="off" placeholder="ابحث عن حالة، سرطان أطفال، مصطلح، مختص، مركز، أداة، مقال أو سؤال..." />
+              <button type="submit">ابحث الآن</button>
+            </form>
+
+            <div className="rawafid-quick-links" aria-label="عمليات بحث مقترحة">
+              {quickSearches.map(([label, query]) => <Link prefetch={false} key={label} href={`/search?q=${encodeURIComponent(query)}`}>{label}</Link>)}
+            </div>
+          </div>
+
+          <aside className="rawafid-hero-visual" aria-label="مسارات البدء في منصة روافد">
+            <div className="hero-pathway-heading">
+              <span className="rawafid-visual-badge"><i className="rawafid-visual-status" aria-hidden="true" />ابدأ بخطوة بسيطة</span>
+              <h2>ما الأقرب إلى احتياجك الآن؟</h2>
+              <p>اختر مسارًا، ويمكنك تغييره في أي وقت.</p>
+            </div>
+            <div className="hero-pathway-list">
+              <Link prefetch={false} href="/sectors/pediatric-oncology"><span><PlatformIcon name="review" /></span><div><strong>أبحث عن معلومات عن سرطان الأطفال</strong><small>التشخيص والعلاج والأبحاث والدعم النفسي والأسري والنجاة</small></div><i aria-hidden="true">←</i></Link>
+              <Link prefetch={false} href="/search"><span><PlatformIcon name="knowledge" /></span><div><strong>أحتاج معلومة موثوقة</strong><small>حالات، أدلة، أسئلة وأدوات عملية</small></div><i aria-hidden="true">←</i></Link>
+              <Link prefetch={false} href="/specialists"><span><PlatformIcon name="specialist" /></span><div><strong>أبحث عن مساعدة مهنية</strong><small>مختصون ومراكز ضمن دليل واضح</small></div><i aria-hidden="true">←</i></Link>
+              <Link prefetch={false} href="/search?q=دعم+الأسرة"><span><PlatformIcon name="community" /></span><div><strong>أساند قريبًا أو أسرة</strong><small>مسارات عملية لمقدمي الدعم والرعاية</small></div><i aria-hidden="true">←</i></Link>
+            </div>
+            <p className="hero-safety-note"><PlatformIcon name="secure" size={18} />إذا كان هناك خطر مباشر، تواصل فورًا مع خدمات الطوارئ المحلية في بلدك.</p>
+          </aside>
+        </section>
+
+        <section className="rawafid-trust-bar" aria-label="معايير الثقة في منصة روافد">
+          <div className="rawafid-trust-item"><PlatformIcon name="review" /><div><strong>مراجعة واضحة</strong><span>مراحل علمية وتحريرية قبل النشر</span></div></div>
+          <div className="rawafid-trust-item"><PlatformIcon name="knowledge" /><div><strong>مصادر قابلة للتتبع</strong><span>مراجع وتاريخ مراجعة حيث يلزم</span></div></div>
+          <div className="rawafid-trust-item"><PlatformIcon name="secure" /><div><strong>خصوصيتك أولًا</strong><span>بياناتك لا تظهر خارج الغرض المصرح به</span></div></div>
+          <div className="rawafid-trust-item"><PlatformIcon name="tools" /><div><strong>إرشاد مسؤول</strong><span>المعرفة لا تستبدل التشخيص الفردي</span></div></div>
+        </section>
+
+        <section className="rawafid-section" id="sectors" aria-labelledby="sectors-title">
+          <div className="rawafid-section-head">
+            <div className="rawafid-section-title"><span>مجالات روافد</span><h2 id="sectors-title">استكشف المعرفة حسب المجال</h2><p>قطاعات مترابطة تشمل الصحة النفسية، سرطان الأطفال، التعافي، الدمج والتمكين؛ ويظهر سرطان الأطفال كقطاع موحد واحد يجمع المسار السريري والعلمي والنفسي والأسري.</p></div>
+            <Link prefetch={false} className="section-text-link" href="/sectors">عرض جميع القطاعات ←</Link>
+          </div>
+
+          {sectors.length > 0 ? (
+            <div className="rawafid-sector-grid">
+              {sectors.map((sector) => {
+                const style = { '--sector-accent': sector.accent || '#0b8f92' } as CSSProperties;
+                return <Link prefetch={false} className="rawafid-sector-card" style={style} href={`/sectors/${sector.slug}`} key={sector.slug}>
+                  <div className="sector-dot" aria-hidden="true" />
+                  <h3>{sector.name_ar}</h3>
+                  <p>{sector.description || 'قطاع ضمن الهيكل المؤسسي لمنصة روافد.'}</p>
+                  <span>استكشف القطاع ←</span>
+                </Link>;
+              })}
+            </div>
+          ) : (
+            <div className="rawafid-empty">
+              <div className="rawafid-empty-icon"><PlatformIcon name="knowledge" size={30} /></div>
+              <h3>لا توجد قطاعات منشورة حاليًا</h3>
+              <p>يمكنك استخدام البحث أو تصفح الأقسام للوصول إلى المعرفة المتاحة.</p>
+              <Link prefetch={false} className="section-text-link" href="/sections">تصفح الأقسام ←</Link>
+            </div>
+          )}
+        </section>
+
+        {latestContent.length > 0 && <section className="rawafid-section rawafid-editorial-section" aria-labelledby="latest-content-title">
+          <div className="rawafid-section-head">
+            <div className="rawafid-section-title"><span>مختارات المعرفة</span><h2 id="latest-content-title">محتوى حديث من مكتبة روافد</h2><p>صفحات منشورة من قاعدة المعرفة، تظهر هنا تلقائيًا عند تحديثها واعتمادها.</p></div>
+            <Link prefetch={false} className="section-text-link" href="/search">استكشف كل المعرفة ←</Link>
+          </div>
+          <div className="rawafid-editorial-grid">
+            {latestContent.map((item, index) => <article className={index === 0 ? 'featured' : ''} key={item.slug}>
+              <div className="editorial-card-meta"><span>{contentTypeLabels[item.content_type] ?? 'معرفة'}</span><time dateTime={item.published_at ?? item.updated_at}>{new Intl.DateTimeFormat('ar', { dateStyle: 'medium' }).format(new Date(item.published_at ?? item.updated_at))}</time></div>
+              <h3><Link prefetch={false} href={`/content/${item.slug}`}>{item.title}</Link></h3>
+              {item.excerpt && <p>{item.excerpt}</p>}
+              <Link prefetch={false} className="editorial-card-link" href={`/content/${item.slug}`}>اقرأ الصفحة ←</Link>
+            </article>)}
+          </div>
+        </section>}
+
+        <section className="rawafid-section">
+          <div className="rawafid-directory-band">
+            <div>
+              <span className="rawafid-kicker">الدليل المهني</span>
+              <h2>اعثر على مختص أو مركز بمعلومات أوضح وثقة أكبر</h2>
+              <p>ملفات مهنية منظمة، حالة توثيق ظاهرة، تخصصات وخدمات ومواقع وطرق تواصل تساعدك على مقارنة الخيارات قبل اتخاذ القرار.</p>
+              <div className="rawafid-directory-actions"><Link prefetch={false} className="primary-link" href="/specialists">دليل المختصين</Link><Link prefetch={false} className="button" href="/centers">دليل المراكز</Link></div>
+            </div>
+            <div className="rawafid-directory-panel" aria-label="خصائص الدليل">
+              <div><PlatformIcon name="review" /><strong>توثيق واعتماد</strong></div>
+              <div><PlatformIcon name="secure" /><strong>خصوصية البيانات</strong></div>
+              <div><PlatformIcon name="specialist" /><strong>تواصل ومواعيد</strong></div>
+              <div><PlatformIcon name="center" /><strong>موقع وفروع</strong></div>
+            </div>
+          </div>
+        </section>
+
+        <section className="rawafid-section rawafid-professional-callout" aria-labelledby="professional-title">
           <div>
-            <div className="rawafid-visual-top"><span className="rawafid-visual-badge"><i className="rawafid-visual-status" aria-hidden="true" />منصة واحدة · معرفة وخدمات مترابطة</span></div>
-            <h2>من السؤال الأول إلى المعرفة المتخصصة والدعم المناسب.</h2>
-            <p>تجمع روافد القطاعات المعرفية والأدلة والخدمات في تجربة موحدة، ويضم مركز سرطان الأطفال مسارات سريرية وعلمية ونفسية وأسرية مترابطة داخل قطاع واحد.</p>
+            <span className="rawafid-kicker">للمختصين والجهات والمجتمع المهني</span>
+            <h2 id="professional-title">ساهم بمعرفة موثوقة أو انضم إلى دليل روافد.</h2>
+            <p>مسار تقديم واضح، مستندات خاصة، مراجعة إدارية، ومحرر منظم يتيح للمختص إنشاء محتواه ومتابعة مراحله.</p>
           </div>
-          <div className="rawafid-visual-grid">
-            <div className="rawafid-visual-card"><PlatformIcon name="knowledge" /><div><strong>معرفة منظمة</strong><span>قطاعات وأقسام وموضوعات مترابطة</span></div></div>
-            <div className="rawafid-visual-card"><PlatformIcon name="review" /><div><strong>مراجعة منهجية</strong><span>توثيق وتحديث وضبط جودة المحتوى</span></div></div>
-            <div className="rawafid-visual-card"><PlatformIcon name="specialist" /><div><strong>دليل مهني</strong><span>مختصون ومراكز وملفات موثقة</span></div></div>
-            <div className="rawafid-visual-card"><PlatformIcon name="secure" /><div><strong>خصوصية واضحة</strong><span>وصول آمن وحدود استخدام مفهومة</span></div></div>
-          </div>
-        </aside>
-      </section>
-
-      <section className="rawafid-trust-bar" aria-label="معايير بناء المنصة">
-        <div className="rawafid-trust-item"><PlatformIcon name="review" /><div><strong>مراجعة منهجية</strong><span>محتوى يمر بمراحل مراجعة وضبط قبل النشر</span></div></div>
-        <div className="rawafid-trust-item"><PlatformIcon name="secure" /><div><strong>خصوصية بالتصميم</strong><span>عرض البيانات والخدمات وفق الحاجة والصلاحيات</span></div></div>
-        <div className="rawafid-trust-item"><PlatformIcon name="search" /><div><strong>بحث ووصول مترابط</strong><span>تصنيف واضح وروابط تساعد على اكتشاف المحتوى</span></div></div>
-        <div className="rawafid-trust-item"><PlatformIcon name="tools" /><div><strong>تجربة متجاوبة</strong><span>استخدام مريح على الهاتف والحاسوب والأجهزة اللوحية</span></div></div>
-      </section>
-
-      <section className="rawafid-section rawafid-intent-section" aria-labelledby="intent-title">
-        <div className="rawafid-section-head"><div className="rawafid-section-title"><span>ابدأ حسب احتياجك</span><h2 id="intent-title">اختر ما تريد فعله الآن</h2><p>مسارات قصيرة تقود إلى المعرفة أو الخدمة المناسبة بدل إغراق المستخدم في قوائم طويلة.</p></div></div>
-        <div className="rawafid-platform-grid rawafid-intent-grid">{intentRoutes.map((intent) => <a href={intent.href} className="rawafid-platform-card rawafid-intent-card" key={intent.title}><span className="icon-shell"><PlatformIcon name={intent.icon} /></span><div><h3>{intent.title}</h3><p>{intent.text}</p></div><span className="intent-arrow" aria-hidden="true">فتح المسار ←</span></a>)}</div>
-      </section>
-
-      <section className="rawafid-section" aria-labelledby="platform-modules-title">
-        <div className="rawafid-section-head"><div className="rawafid-section-title"><span>مكونات المنصة</span><h2 id="platform-modules-title">منظومة واحدة، ومسارات مترابطة</h2><p>المعرفة والأدلة والدلائل والخدمات تتشارك هوية واحدة وتجربة استخدام متناسقة، مع انتقال واضح بين كل جزء والآخر.</p></div></div>
-        <div className="rawafid-platform-grid">{platformModules.map((module) => { const style = { '--card-accent': module.accent } as CSSProperties; return <a className="rawafid-platform-card" style={style} href={module.href} key={module.title}><span className="icon-shell"><PlatformIcon name={module.icon} /></span><h3>{module.title}</h3><p>{module.text}</p><span>فتح المسار ←</span></a>; })}</div>
-      </section>
-
-      <section className="rawafid-section" id="sectors" aria-labelledby="sectors-title">
-        <div className="rawafid-section-head"><div className="rawafid-section-title"><span>القطاعات</span><h2 id="sectors-title">قطاعات رئيسية تنظّم المعرفة والخدمات</h2><p>كل قطاع يجمع مجموعة واضحة من الأقسام والموضوعات المتخصصة. ويظهر سرطان الأطفال هنا كقطاع موحد واحد يغطي المسار السريري والعلمي والنفسي والأسري كاملًا.</p></div><a href="/sectors">عرض كل القطاعات ←</a></div>
-        {sectors.length > 0 ? <div className="rawafid-sector-grid">{sectors.map((sector) => { const style = { '--sector-accent': sector.accent || '#0b8f92' } as CSSProperties; return <a className="rawafid-sector-card" style={style} href={`/sectors/${sector.slug}`} key={sector.slug}><div className="sector-dot" aria-hidden="true" /><h3>{sector.name_ar}</h3><p>{sector.description || 'قطاع رئيسي ضمن الخريطة الموضوعية لمنصة روافد.'}</p><span>استكشف القطاع ←</span></a>; })}</div> : <div className="rawafid-empty"><div className="rawafid-empty-icon"><PlatformIcon name="knowledge" size={30} /></div><h3>لا توجد قطاعات عامة متاحة حاليًا</h3><p>ستظهر القطاعات هنا بعد اعتمادها للنشر العام.</p></div>}
-      </section>
-
-      <section className="rawafid-section">
-        <div className="rawafid-directory-band">
-          <div>
-            <span className="rawafid-kicker">الدليل المهني</span>
-            <h2>الوصول إلى المختص أو المركز جزء من رحلة واحدة</h2>
-            <p>تساعدك الملفات المهنية ومعلومات الخدمات والموقع ووسائل التواصل المتاحة على الانتقال من المعرفة إلى الجهة المناسبة ضمن تجربة مترابطة وواضحة.</p>
-            <div className="rawafid-directory-actions"><a className="primary-link" href="/specialists">دليل المختصين</a><a className="button" href="/centers">دليل المراكز</a></div>
-          </div>
-          <div className="rawafid-directory-panel" aria-label="خصائص الدليل"><div><PlatformIcon name="review" /><strong>توثيق واعتماد</strong></div><div><PlatformIcon name="secure" /><strong>خصوصية البيانات</strong></div><div><PlatformIcon name="specialist" /><strong>تواصل ومواعيد</strong></div><div><PlatformIcon name="center" /><strong>موقع وفروع</strong></div></div>
-        </div>
-      </section>
-    </main>
-    <SiteFooter />
-  </>;
+          <div><Link prefetch={false} className="primary-link" href="/join">ابدأ طلب الانضمام</Link><Link prefetch={false} className="button" href="/editorial-policy">تعرف على معايير النشر</Link></div>
+        </section>
+      </main>
+      <SiteFooter />
+    </>
+  );
 }
