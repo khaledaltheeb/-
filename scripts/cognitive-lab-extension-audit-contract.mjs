@@ -82,7 +82,12 @@ for (const tool of extensionCatalog) {
           fail(`${tool.slug} level ${level} has empty user-facing trial text`);
         }
 
-        const promptKey = [trial.study ?? '', trial.prompt, trial.display ?? ''].join('::');
+        const promptKey = [
+          trial.study ?? '',
+          trial.prompt,
+          trial.display ?? '',
+          [...values].sort().join('|'),
+        ].join('::');
         levelFingerprints.add(trial.fingerprint);
         levelPrompts.add(promptKey);
         levelAnswers.add(answer);
