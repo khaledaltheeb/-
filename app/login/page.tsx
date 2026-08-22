@@ -31,7 +31,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Search
   return (
     <main className="auth-shell">
       <section className="auth-card auth-card-polished" aria-labelledby="login-title">
-        <Link href="/" className="brand auth-brand"><span className="brand-mark">ر</span><span><strong>منصة روافد</strong><small>Rawafid Platform</small></span></Link>
+        <Link href="/" className="brand auth-brand"><span className="brand-mark">ر</span><span><strong>منصة روافد</strong><small>معرفة · دعم · خدمات موثقة</small></span></Link>
         <span className="eyebrow">حسابات منصة روافد</span>
         <h1 id="login-title">تسجيل الدخول</h1>
         <p>وصول آمن إلى حسابك، المراسلات، المواعيد والبوابات المهنية وفق صلاحيات الحساب.</p>
@@ -47,7 +47,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Search
         </form>
         <div className="auth-register-callout"><span>ليس لديك حساب؟</span><Link className="auth-secondary" href={`/register?next=${encodeURIComponent(next)}`}>إنشاء حساب جديد</Link></div>
         <small className="auth-note">إنشاء الحساب لا يمنح صلاحيات مهنية أو إدارية ولا يعني اعتماد الملف كمختص أو مركز.</small>
-        <div className="auth-links"><Link href="/">الرئيسية</Link><Link href="/join">الانضمام المهني</Link><Link href="/specialists">دليل المختصين</Link><Link href="/centers">دليل المراكز</Link></div>
+        <div className="auth-links"><Link href="/">الرئيسية</Link><Link href="/join">الانضمام المهني</Link><Link href="/privacy">الخصوصية</Link><Link href="/terms">شروط الاستخدام</Link></div>
       </section>
     </main>
   );
