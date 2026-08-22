@@ -25,6 +25,15 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: 1910e1ad3c793fd568ba1caafe34f964
     steps:
+      - name: Require Cloudflare API token
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "${CLOUDFLARE_API_TOKEN:-}" ]; then
+            echo '::error title=Cloudflare authentication unavailable::Repository Actions secret CLOUDFLARE_API_TOKEN is not configured.'
+            exit 1
+          fi
+
       - uses: actions/checkout@v7
         with:
           ref: main
@@ -41,7 +50,18 @@ jobs:
       - name: Architecture contracts
         run: npm run architecture-check
       - name: Verify Cloudflare credentials and account access
-        run: npx wrangler whoami
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! auth_output="$(npx wrangler whoami 2>&1)"; then
+            printf '%s\n' "$auth_output" >&2
+            exit 1
+          fi
+          printf '%s\n' "$auth_output"
+          if printf '%s' "$auth_output" | grep -Eqi 'not authenticated|wrangler login|not logged in'; then
+            echo 'Wrangler did not authenticate with the configured API token.' >&2
+            exit 1
+          fi
       - name: Build Cloudflare Worker with OpenNext
         run: npx opennextjs-cloudflare build
       - name: Deploy Cloudflare Worker with OpenNext
