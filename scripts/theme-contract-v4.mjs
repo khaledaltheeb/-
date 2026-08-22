@@ -14,6 +14,7 @@ const serviceWorker = read('public/sw.js');
 const pwaIcon = read('lib/pwa-icon.ts');
 const theme = read('app/rawafid-theme.css');
 const visualStability = read('app/visual-stability.css');
+const megaNav = read('app/mega-nav-v3.css');
 const adminTheme = read('app/theme-admin-v4.css');
 const themeLib = read('lib/theme.ts');
 const agents = read('AGENTS.md');
@@ -65,6 +66,10 @@ for (const token of ['Rawafid Institutional V5.1', 'font-family:var(--font-arabi
 if (!header.includes('data-nav-priority') || !header.includes('حالة، دليل أو خدمة')) fail('V5.1 header must keep intent-led navigation and search');
 for (const token of ['footer-search', 'footer-trust-list', 'back-to-top']) {
   if (!footer.includes(token)) fail(`V5.1 footer missing ${token}`);
+}
+if (!footer.includes("style={{ display: 'block', padding: 0 }}")) fail('institutional footer must stay isolated from the legacy generic footer flex/padding rule');
+for (const token of ['position:fixed!important', 'max-height:min(76dvh,680px)!important', 'overflow-y:auto!important']) {
+  if (!megaNav.includes(token)) fail(`mega navigation viewport guard missing ${token}`);
 }
 if (!layout.includes('<body id="top">') || !layout.includes('?v=6')) fail('root layout must expose the top target and V6 PWA identity');
 if (!manifest.includes('?v=6')) fail('PWA manifest must use V6 icon identity');
