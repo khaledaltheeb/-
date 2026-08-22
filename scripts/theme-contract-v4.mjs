@@ -14,6 +14,7 @@ const serviceWorker = read('public/sw.js');
 const pwaIcon = read('lib/pwa-icon.ts');
 const theme = read('app/rawafid-theme.css');
 const visualStability = read('app/visual-stability.css');
+const shellGuard = read('app/institutional-shell-guard.css');
 const adminTheme = read('app/theme-admin-v4.css');
 const themeLib = read('lib/theme.ts');
 const agents = read('AGENTS.md');
@@ -26,8 +27,15 @@ if (directCssImports.length !== 1 || directCssImports[0] !== './rawafid-theme.cs
 }
 
 const visualStabilityExecutable = visualStability.replace(/\/\*[\s\S]*?\*\//g, '').trim();
-if (visualStabilityExecutable) {
-  fail('visual-stability.css is retired and must not contain executable global overrides');
+if (visualStabilityExecutable !== "@import './institutional-shell-guard.css';") {
+  fail('visual-stability.css is retired and may only import the narrow institutional shell guard');
+}
+
+for (const token of ['.site-footer', 'display: block', 'padding: 0', 'justify-content: normal']) {
+  if (!shellGuard.includes(token)) fail(`institutional shell guard missing ${token}`);
+}
+if (/:root|body\s|--rf-|!important/.test(shellGuard)) {
+  fail('institutional shell guard must not redefine global palette/tokens or use high-specificity global overrides');
 }
 
 for (const token of ['--rf-brand:', '--rf-page:', '--rf-ink:', '--rf-radius-lg:', '--rf-shadow-md:', '--rf-font-display:']) {
