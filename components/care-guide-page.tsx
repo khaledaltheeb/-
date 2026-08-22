@@ -24,6 +24,30 @@ type Props = {
   routeSegments?: string[];
 };
 
+type JsonRecord = Record<string, unknown>;
+
+function asRecord(value: unknown): JsonRecord | null {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value as JsonRecord : null;
+}
+
+function getGuideOutline(bodyJson: unknown) {
+  const root = asRecord(bodyJson);
+  const blocks = Array.isArray(root?.blocks) ? root.blocks : [];
+  return blocks.flatMap((block, index) => {
+    const row = asRecord(block);
+    if (!row || row.type !== 'heading') return [];
+    const level = Number(row.level);
+    const title = typeof row.text === 'string' ? row.text.trim() : '';
+    if (!title || (level !== 2 && level !== 3)) return [];
+    return [{ id: `section-${index + 1}`, title, level }];
+  }).slice(0, 24);
+}
+
+function estimateReadingMinutes(bodyText: string | null) {
+  const words = String(bodyText ?? '').trim().split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.round(words / 180));
+}
+
 function CareGuidesNav({ end = false }: { end?: boolean }) {
   return <nav className={end ? styles.endNav : styles.referenceNav} aria-label="التنقل داخل أدلة التعامل والرعاية">
     <Link href="/care-guides/">كل أدلة التعامل والرعاية</Link>
@@ -68,6 +92,8 @@ export default function CareGuidePage({ record, items = [], related = [], routeS
   const url = canonical.startsWith('https://') ? canonical : `${SITE_URL}${canonical}`;
   const audiences = Array.isArray(record.audience) ? record.audience.map(String) : [];
   const category = careGuideCategory(record.schema_json);
+  const outline = getGuideOutline(record.body_json);
+  const readingMinutes = estimateReadingMinutes(record.body_text);
   const breadcrumbs = breadcrumbJsonLd([
     { name: 'الرئيسية', path: '/' },
     ...(routeSegments.length ? [{ name: 'أدلة التعامل والرعاية', path: '/care-guides/' }] : []),
@@ -127,10 +153,16 @@ export default function CareGuidePage({ record, items = [], related = [], routeS
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schemas).replace(/</g, '\\u003c') }} />
     <nav className="breadcrumbs" aria-label="مسار الصفحة"><Link href="/">الرئيسية</Link>{routeSegments.length ? <><span>/</span><Link href="/care-guides/">أدلة التعامل والرعاية</Link></> : null}<span>/</span><span aria-current="page">{record.title}</span></nav>
     <article>
-      <header className="article-hero">
+      <header className={`article-hero ${styles.hero}`}>
         <span className="eyebrow">{role === 'hub' ? 'أدلة التعامل والرعاية' : category}</span>
         <h1>{record.title}</h1>
         {record.excerpt ? <p>{record.excerpt}</p> : null}
+        <div className={styles.quickFacts} aria-label="ملخص معلومات الدليل">
+          <span><strong>{readingMinutes}</strong> دقائق قراءة تقريبًا</span>
+          {references.length ? <span><strong>{references.length}</strong> مصادر ومراجع</span> : null}
+          {faqItems.length ? <span><strong>{faqItems.length}</strong> أسئلة شائعة</span> : null}
+          {review.lastReviewedAt ? <span><strong>مراجع</strong> من فريق روافد</span> : null}
+        </div>
         <div className="article-meta">
           {record.author_display_name ? <span>إعداد: {record.author_display_name}</span> : null}
           {review.reviewerName ? <span>تمت المراجعة بواسطة {review.reviewerName}{review.reviewerCredentials ? ` — ${review.reviewerCredentials}` : ''}</span> : null}
@@ -141,14 +173,27 @@ export default function CareGuidePage({ record, items = [], related = [], routeS
       </header>
       <CareGuidesNav />
       {role === 'hub' && items.length ? <GuideBrowser items={items} /> : null}
-      <div className="article-body">
-        {record.featured_image_url ? <figure className="article-featured-image"><Image src={record.featured_image_url} alt={record.featured_image_alt || record.title} width={1200} height={675} sizes="(max-width: 900px) 100vw, 900px" priority={role === 'hub'} unoptimized /></figure> : null}
-        <ContentRenderer bodyJson={record.body_json} bodyText={record.body_text} recordId={record.id} />
+      <div className={styles.readingLayout}>
+        {role !== 'hub' && outline.length >= 3 ? <aside className={styles.outline} aria-label="فهرس محتويات الدليل">
+          <div className={styles.outlineInner}>
+            <span className="eyebrow">في هذا الدليل</span>
+            <nav>
+              {outline.map((item) => <a key={item.id} href={`#${item.id}`} className={item.level === 3 ? styles.outlineNested : undefined}>{item.title}</a>)}
+            </nav>
+            <a className={styles.referencesShortcut} href="#care-guide-references-title">الانتقال إلى المصادر والمراجع ↓</a>
+          </div>
+        </aside> : null}
+        <div className={styles.readingColumn}>
+          <div className="article-body">
+            {record.featured_image_url ? <figure className="article-featured-image"><Image src={record.featured_image_url} alt={record.featured_image_alt || record.title} width={1200} height={675} sizes="(max-width: 900px) 100vw, 900px" priority={role === 'hub'} unoptimized /></figure> : null}
+            <ContentRenderer bodyJson={record.body_json} bodyText={record.body_text} recordId={record.id} />
+          </div>
+          {(record.medical_disclaimer || centralDisclaimer) ? <aside className="medical-disclaimer" aria-label="حدود المحتوى"><strong>حدود المحتوى الصحي</strong>{record.medical_disclaimer ? <p>{record.medical_disclaimer}</p> : <p>هذا الدليل للتثقيف والدعم العملي العام، ولا يحل محل التقييم أو التشخيص أو العلاج المهني الفردي.</p>}<Link href={centralDisclaimer?.url || '/disclaimer'}>{centralDisclaimer?.label || 'إخلاء المسؤولية الكامل'}</Link></aside> : null}
+        </div>
       </div>
-      {(record.medical_disclaimer || centralDisclaimer) ? <aside className="medical-disclaimer" aria-label="حدود المحتوى"><strong>تنبيه صحي ومنهجي</strong>{record.medical_disclaimer ? <p>{record.medical_disclaimer}</p> : <p>هذا الدليل للتثقيف والدعم العملي العام، ولا يحل محل التقييم أو التشخيص أو العلاج المهني الفردي.</p>}<Link href={centralDisclaimer?.url || '/disclaimer'}>{centralDisclaimer?.label || 'إخلاء المسؤولية الكامل'}</Link></aside> : null}
-      {related.length ? <section className="article-related" aria-labelledby="care-guide-related-title"><div className="section-mini-heading"><div><span className="eyebrow">روابط داخلية دلالية</span><h2 id="care-guide-related-title">محتوى مرتبط</h2></div><span>اختيار من المحتوى المنشور وفق الصلة الموضوعية</span></div><div className="related-content-grid">{related.map((item) => <article key={item.id}><span>{item.contentType}</span><h3><Link href={item.href}>{item.title}</Link></h3>{item.excerpt ? <p>{item.excerpt}</p> : null}<Link href={item.href}>متابعة القراءة ←</Link></article>)}</div></section> : null}
+      {related.length ? <section className={`article-related ${styles.related}`} aria-labelledby="care-guide-related-title"><div className="section-mini-heading"><div><span className="eyebrow">تابع من هنا</span><h2 id="care-guide-related-title">أدلة وموضوعات مرتبطة</h2></div><span>مختارة بحسب القطاع والتصنيف والتقارب الدلالي</span></div><div className="related-content-grid">{related.map((item) => <article key={item.id}><span>{item.contentType === 'guide' ? 'دليل عملي' : item.contentType}</span><h3><Link href={item.href}>{item.title}</Link></h3>{item.excerpt ? <p>{item.excerpt}</p> : null}<Link href={item.href}>اقرأ الموضوع المرتبط ←</Link></article>)}</div></section> : null}
       <CareGuidesNav end />
-      {references.length ? <section className="article-references" aria-labelledby="care-guide-references-title"><h2 id="care-guide-references-title">المصادر والمراجع</h2><ol>{references.map((reference, index) => <li key={`${reference.url || reference.title}-${index}`}>{reference.url ? <a href={reference.url} target="_blank" rel="noopener noreferrer">{reference.title || reference.url}</a> : <span>{reference.title}</span>}{reference.publisher ? <small>{reference.publisher}</small> : null}{reference.year ? <small>{String(reference.year)}</small> : null}</li>)}</ol></section> : null}
+      {references.length ? <section className={`article-references ${styles.references}`} aria-labelledby="care-guide-references-title"><div className={styles.referencesHeading}><div><span className="eyebrow">القاعدة العلمية</span><h2 id="care-guide-references-title">المصادر والمراجع</h2></div><span>{references.length} مصدرًا مستخدمًا في إعداد الدليل</span></div><ol>{references.map((reference, index) => <li key={`${reference.url || reference.title}-${index}`}>{reference.url ? <a href={reference.url} target="_blank" rel="noopener noreferrer">{reference.title || reference.url}</a> : <span>{reference.title}</span>}<div className={styles.referenceMeta}>{reference.publisher ? <small>{reference.publisher}</small> : null}{reference.year ? <small>{String(reference.year)}</small> : null}</div></li>)}</ol></section> : null}
     </article>
   </main><SiteFooter /></>;
 }
