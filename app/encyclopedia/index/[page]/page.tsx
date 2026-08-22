@@ -69,28 +69,27 @@ export default async function EncyclopediaIndexPage({ params }: { params: Params
   const pageLinks = Array.from({ length: result.totalPages }, (_, index) => index + 1)
     .filter((page) => page === 1 || page === result.totalPages || Math.abs(page - result.page) <= 2);
 
-  return <><SiteHeader /><main className="article-shell">
+  return <><SiteHeader /><main className="article-shell encyclopedia-index-page">
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify([breadcrumbs, schema]).replace(/</g, '\\u003c') }} />
     <nav className="breadcrumbs" aria-label="مسار الصفحة"><Link href="/">الرئيسية</Link><span>/</span><Link href="/encyclopedia/">الموسوعة النفسية</Link><span>/</span><span aria-current="page">الفهرس {result.page}</span></nav>
     <section className="article-hero">
       <span className="eyebrow">الفهرس الأبجدي الكامل</span>
       <h1>فهرس الموسوعة النفسية — الصفحة {result.page}</h1>
       <p>يعرض هذا الفهرس {result.pageSize} صفحة في كل جزء للحفاظ على سرعة التحميل وقابلية الزحف. إجمالي الحالات المنشورة حاليًا {result.total} موزعة على {result.totalPages} صفحة فهرس.</p>
+      <nav className="encyclopedia-nav" aria-label="أدوات الفهرس"><Link href="/encyclopedia/">مدخل الموسوعة</Link><Link href="/search/?type=condition">البحث في الحالات</Link><Link href="/care-guides/">أدلة الرعاية</Link><Link href="/evidence-guides/">الأدلة العلمية</Link></nav>
     </section>
-    <nav className="article-related" aria-label="التنقل بين صفحات الفهرس">
-      {result.page > 1 ? <Link rel="prev" href={`/encyclopedia/index/${result.page - 1}/`}>← الصفحة السابقة</Link> : <Link href="/encyclopedia/">← مدخل الموسوعة</Link>}
-      {' · '}
-      <Link href="/search/?type=condition">البحث في الموسوعة</Link>
-      {' · '}
-      {result.page < result.totalPages ? <Link rel="next" href={`/encyclopedia/index/${result.page + 1}/`}>الصفحة التالية →</Link> : <Link href="/encyclopedia/">مدخل الموسوعة →</Link>}
+    <nav className="encyclopedia-pagination" aria-label="التنقل بين صفحات الفهرس">
+      {result.page > 1 ? <Link rel="prev" href={`/encyclopedia/index/${result.page - 1}/`}>← الصفحة السابقة</Link> : <span />}
+      <strong>الصفحة {result.page} من {result.totalPages}</strong>
+      {result.page < result.totalPages ? <Link rel="next" href={`/encyclopedia/index/${result.page + 1}/`}>الصفحة التالية →</Link> : <span />}
     </nav>
-    <section className="article-related" aria-labelledby="full-index-title">
+    <section className="article-related encyclopedia-index-preview" aria-labelledby="full-index-title">
       <div className="section-mini-heading"><div><span className="eyebrow">{result.total} حالة</span><h2 id="full-index-title">الحالات في هذه الصفحة</h2></div><span>{result.items.length} نتيجة</span></div>
       <div className="related-content-grid">
         {result.items.map((item) => <article key={item.id}><span>حالة نفسية</span><h3><Link href={item.canonicalUrl}>{item.title}</Link></h3>{item.excerpt ? <p>{item.excerpt}</p> : null}<Link href={item.canonicalUrl}>قراءة الدليل ←</Link></article>)}
       </div>
     </section>
-    {result.totalPages > 1 ? <nav className="article-related" aria-label="أرقام صفحات الفهرس">
+    {result.totalPages > 1 ? <nav className="encyclopedia-page-numbers" aria-label="أرقام صفحات الفهرس">
       {pageLinks.map((page, index) => <span key={page}>{index > 0 && pageLinks[index - 1] !== page - 1 ? ' … ' : ' '}<Link aria-current={page === result.page ? 'page' : undefined} href={`/encyclopedia/index/${page}/`}>{page}</Link></span>)}
     </nav> : null}
   </main><SiteFooter /></>;
