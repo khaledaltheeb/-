@@ -5,20 +5,30 @@ const groups = [
     id: 'knowledge',
     title: 'المعرفة',
     links: [
+      { href: '/sectors', label: 'القطاعات' },
       { href: '/sections', label: 'جميع الأقسام' },
       { href: '/encyclopedia/', label: 'الموسوعة' },
       { href: '/evidence-guides/', label: 'الأدلة العلمية' },
+    ],
+  },
+  {
+    id: 'care',
+    title: 'الرعاية والدعم',
+    links: [
+      { href: '/care-guides/', label: 'أدلة التعامل والرعاية' },
+      { href: '/sectors/pediatric-oncology', label: 'مركز سرطان الأطفال' },
+      { href: '/search?q=دعم+الأسرة', label: 'دعم الأسرة' },
       { href: '/cognitive-lab', label: 'المختبر المعرفي' },
     ],
   },
   {
     id: 'support',
-    title: 'الخدمات والدعم',
+    title: 'الخدمات',
     links: [
       { href: '/specialists', label: 'دليل المختصين' },
       { href: '/centers', label: 'دليل المراكز' },
       { href: '/search', label: 'البحث المتقدم' },
-      { href: '/experiences/', label: 'شاركنا تجربتك' },
+      { href: '/community', label: 'المجتمع' },
     ],
   },
   {
@@ -28,7 +38,7 @@ const groups = [
       { href: '/join', label: 'الانضمام المهني' },
       { href: '/join/specialist', label: 'التقدم كمختص' },
       { href: '/join/center', label: 'تسجيل مركز' },
-      { href: '/community', label: 'المتدربون والمتطوعون' },
+      { href: '/experiences/', label: 'شاركنا تجربتك' },
     ],
   },
   {
@@ -49,15 +59,16 @@ export default function SiteFooter() {
       <div className="site-footer-inner">
         <div className="footer-brand-block">
           <RawafidBrand className="footer-brand" />
-          <p>منصة عربية مؤسسية تربط المعرفة الموثوقة بالأدلة العملية والخدمات المهنية في الصحة النفسية والتعافي والدمج والتمكين.</p>
+          <p>منصة عربية مؤسسية تربط المعرفة الموثوقة بالأدلة العملية والرعاية الأسرية والخدمات المهنية، مع مسارات واضحة للصحة النفسية وسرطان الأطفال والتعافي والدمج والتمكين.</p>
           <form className="footer-search" action="/search" method="get" role="search">
             <label className="sr-only" htmlFor="footer-search-input">البحث في منصة روافد</label>
-            <input id="footer-search-input" name="q" type="search" placeholder="ابحث عن معلومة أو خدمة" maxLength={120} enterKeyHint="search" />
+            <input id="footer-search-input" name="q" type="search" placeholder="ابحث عن معلومة أو دليل أو خدمة" maxLength={120} enterKeyHint="search" />
             <button type="submit">بحث</button>
           </form>
           <div className="footer-trust-list" aria-label="معايير الثقة">
             <span>مراجعة منهجية</span>
             <span>مصادر قابلة للتتبع</span>
+            <span>روابط داخلية منظمة</span>
             <span>خصوصية ووصولية</span>
           </div>
           <span className="footer-trust-note">المحتوى للتثقيف العام ولا يحل محل التقييم أو التشخيص أو العلاج المهني الفردي.</span>
@@ -73,7 +84,7 @@ export default function SiteFooter() {
       </div>
       <div className="footer-bottom">
         <span>© {new Date().getFullYear()} منصة روافد. جميع الحقوق محفوظة.</span>
-        <span>هوية عربية · متوافق مع الهاتف · وصولية وخصوصية منذ التصميم</span>
+        <span>معرفة موثوقة · رعاية عملية · وصولية وخصوصية منذ التصميم</span>
         <a className="back-to-top" href="#top">العودة إلى الأعلى ↑</a>
       </div>
     </footer>
