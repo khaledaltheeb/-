@@ -6,6 +6,8 @@ import { createClient } from '@/lib/supabase/server';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const INTENTS = new Set(['informational','transactional','navigational','commercial','local']);
+const SOURCE_TYPES = new Set(['official-definition','guideline','systematic-review','primary-study','randomized-trial','cohort-study','meta-analysis','review','reference']);
+const AUTHORITY_TIERS = new Set(['primary','secondary','tertiary']);
 
 function field(formData: FormData, key: string, max: number) {
   return String(formData.get(key) ?? '').trim().slice(0, max);
@@ -15,10 +17,19 @@ function list(formData: FormData, key: string, maxItems = 50) {
 }
 function parseReferences(raw: string) {
   return raw.split('\n').map((line) => line.trim()).filter(Boolean).slice(0, 100).flatMap((line) => {
-    const [titleRaw, urlRaw, publisherRaw, yearRaw] = line.split('|').map((part) => part?.trim() || '');
+    const [titleRaw, urlRaw, publisherRaw, yearRaw, sourceTypeRaw, authorityTierRaw] = line.split('|').map((part) => part?.trim() || '');
     if (!titleRaw && !urlRaw) return [];
     const url = /^https:\/\//i.test(urlRaw) ? urlRaw.slice(0, 1000) : undefined;
-    return [{ title: titleRaw.slice(0, 400) || undefined, url, publisher: publisherRaw.slice(0, 240) || undefined, year: yearRaw.slice(0, 20) || undefined }];
+    const source_type = SOURCE_TYPES.has(sourceTypeRaw) ? sourceTypeRaw : undefined;
+    const authority_tier = AUTHORITY_TIERS.has(authorityTierRaw) ? authorityTierRaw : undefined;
+    return [{
+      title: titleRaw.slice(0, 400) || undefined,
+      url,
+      publisher: publisherRaw.slice(0, 240) || undefined,
+      year: yearRaw.slice(0, 20) || undefined,
+      source_type,
+      authority_tier,
+    }];
   });
 }
 
@@ -51,7 +62,7 @@ export async function updateSeoAuthority(formData: FormData) {
     p_reviewer_credentials: field(formData, 'reviewer_credentials', 300) || null,
     p_last_reviewed_at: reviewedDate ? reviewedDate.toISOString() : null,
     p_references: references,
-    p_medical_disclaimer: field(formData, 'medical_disclaimer', 3000) || null,
+    p_medical_disclaimer: null,
     p_featured_image_alt: field(formData, 'featured_image_alt', 500) || null,
   });
   if (error) redirect(`/admin/content/${id}?error=seo-authority-update-failed`);

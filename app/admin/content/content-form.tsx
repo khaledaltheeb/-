@@ -32,7 +32,7 @@ const TYPES = [
   ['directory_page', 'صفحة دليل'], ['news', 'خبر'], ['sector_page', 'صفحة قطاع'], ['landing_page', 'صفحة هبوط'],
 ];
 
-export default function ContentForm({ action, sectors, categories, record, submitLabel, allowedTypes, mediaLibraryHref='/admin/media' }: {
+export default function ContentForm({ action, sectors, categories, record, submitLabel, allowedTypes, mediaLibraryHref='/admin/media', revisionMode=false }: {
   action: (formData: FormData) => void | Promise<void>;
   sectors: Sector[];
   categories: Category[];
@@ -40,16 +40,18 @@ export default function ContentForm({ action, sectors, categories, record, submi
   submitLabel: string;
   allowedTypes?: string[];
   mediaLibraryHref?: string;
+  revisionMode?: boolean;
 }) {
   const typeOptions = allowedTypes?.length ? TYPES.filter(([value]) => allowedTypes.includes(value)) : TYPES;
   const defaultType = record?.content_type && typeOptions.some(([value]) => value === record.content_type) ? record.content_type : typeOptions[0]?.[0] ?? 'article';
   return (
     <form action={action} className="cms-form">
       {record?.id && <input type="hidden" name="id" value={record.id} />}
+      {revisionMode && <input type="hidden" name="content_type" value={defaultType} />}
       <div className="cms-grid">
-        <label>نوع الصفحة<select name="content_type" required defaultValue={defaultType}>{typeOptions.map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select></label>
+        <label>نوع الصفحة<select name={revisionMode?undefined:'content_type'} required={!revisionMode} disabled={revisionMode} defaultValue={defaultType}>{typeOptions.map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select>{revisionMode&&<small>نوع الصفحة ثابت في النسخة التحريرية؛ تغيير الهوية البنيوية يحتاج مساراً مستقلاً.</small>}</label>
         <label>العنوان<input name="title" required minLength={3} maxLength={300} defaultValue={record?.title ?? ''} /></label>
-        <label>Slug<input name="slug" required dir="ltr" maxLength={140} pattern="[a-z0-9]+(?:-[a-z0-9]+)*" defaultValue={record?.slug ?? ''} placeholder="clear-stable-slug" /></label>
+        <label>Slug<input name="slug" required dir="ltr" maxLength={140} pattern="[a-z0-9]+(?:-[a-z0-9]+)*" defaultValue={record?.slug ?? ''} placeholder="clear-stable-slug" readOnly={revisionMode} />{revisionMode&&<small>Slug داخلي للنسخة فقط ولا يستبدل عنوان الصفحة الحية.</small>}</label>
         <label>القطاع<select name="sector_id" defaultValue={record?.sector_id ?? ''}><option value="">بدون قطاع</option>{sectors.map((sector) => <option value={sector.id} key={sector.id}>{sector.name_ar}</option>)}</select></label>
         <label>القسم الأساسي<select name="category_id" defaultValue={record?.category_id ?? ''}><option value="">بدون قسم</option>{categories.map((category) => <option value={category.id} key={category.id}>{category.name_ar}</option>)}</select></label>
         <label>الجمهور<input name="audience" defaultValue={(record?.audience ?? []).join(', ')} placeholder="الفرد، الأسرة، المختص" /></label>
@@ -70,15 +72,15 @@ export default function ContentForm({ action, sectors, categories, record, submi
         <summary>SEO والبحث الأساسي</summary>
         <div className="cms-grid cms-details-grid">
           <label>SEO Title الأساسي<input name="seo_title" maxLength={47} defaultValue={record?.seo_title ?? ''} /><small>حتى 47 حرفًا؛ يضاف «منصة روافد» آليًا ليبقى Title Tag النهائي ضمن 60 حرفًا.</small></label>
-          <label>Canonical URL<input name="canonical_url" dir="ltr" maxLength={500} defaultValue={record?.canonical_url ?? ''} placeholder="/content/example" /></label>
+          <label>Canonical URL<input name="canonical_url" dir="ltr" maxLength={500} defaultValue={record?.canonical_url ?? ''} placeholder="/content/example" readOnly={revisionMode} />{revisionMode&&<small>الـCanonical ثابت أثناء Revision حتى لا يتغير مسار الصفحة الحية بالخطأ.</small>}</label>
           <label className="cms-wide">Meta Description<textarea name="seo_description" rows={3} minLength={150} maxLength={160} defaultValue={record?.seo_description ?? ''} /><small>إذا كُتب الوصف فالمعيار 150–160 حرفًا. يمكن تركه فارغًا أثناء المسودة المبكرة.</small></label>
           <label className="cms-wide">مرادفات البحث<input name="search_aliases" defaultValue={(record?.search_aliases ?? []).join(', ')} placeholder="مرادف، اسم آخر، مصطلح إنجليزي" /></label>
-          <label className="check-field"><input type="checkbox" name="robots_index" defaultChecked={record?.robots_index ?? true} /> Index عند النشر</label>
+          {revisionMode?<><input type="hidden" name="robots_index" value=""/><div className="check-field"><span>نسخة التحرير Noindex دائماً؛ الصفحة الحية تحتفظ بإعداد الفهرسة الحالي حتى التطبيق.</span></div></>:<label className="check-field"><input type="checkbox" name="robots_index" defaultChecked={record?.robots_index ?? true} /> Index عند النشر</label>}
           <label className="check-field"><input type="checkbox" name="robots_follow" defaultChecked={record?.robots_follow ?? true} /> Follow عند النشر</label>
         </div>
       </details>
 
-      <div className="cms-actions"><button className="primary-action" type="submit">{submitLabel}</button><span>الحفظ هنا ينشئ نسخة جديدة ولا ينشر الصفحة؛ النشر يمر عبر Workflow المؤسسي.</span></div>
+      <div className="cms-actions"><button className="primary-action" type="submit">{submitLabel}</button><span>{revisionMode?'الحفظ يغيّر النسخة التحريرية فقط. الصفحة الحية لا تتغير حتى اعتماد النسخة وتطبيقها صراحة.':'الحفظ هنا ينشئ نسخة جديدة ولا ينشر الصفحة؛ النشر يمر عبر Workflow المؤسسي.'}</span></div>
     </form>
   );
 }

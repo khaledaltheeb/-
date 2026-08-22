@@ -22,7 +22,13 @@ requireText('app/login/actions.ts',['signInWithPassword','safeNext','getAuthenti
 if(read('app/login/actions.ts').includes('signUp('))fail('login action must not contain registration logic');
 requireText('app/forgot-password/actions.ts',['resetPasswordForEmail','/auth/callback','/reset-password','encodeURIComponent']);
 requireText('app/reset-password/actions.ts',["updateUser({ password",'password_mismatch']);
-requireText('app/auth/callback/route.ts',['exchangeCodeForSession','safeNext']);
+const authCallback=requireText('app/auth/callback/route.ts',['exchangeCodeForSession','safeNext',"value.includes('\\\\')"]);
+const callbackSafeNext=(value)=>!value||!value.startsWith('/')||value.startsWith('//')||value.includes('\\')?'/account':value;
+for(const maliciousNext of ['//evil.example','/\\evil.example','/content\\evil.example']){
+  if(callbackSafeNext(maliciousNext)!=='/account')fail(`auth callback redirect guard accepts ${maliciousNext}`);
+}
+if(new URL('/\\evil.example','https://rawafid.example').origin!=='https://evil.example')fail('backslash open-redirect regression fixture is no longer representative');
+if(!authCallback.includes("value.includes('\\\\')"))fail('auth callback must explicitly reject backslashes before URL resolution');
 requireText('app/mfa/page.tsx',['getAuthenticatorAssuranceLevel','listFactors',"factor.status === 'verified'",'hasVerifiedTotp','currentLevel','MfaChallenge','robots: { index: false']);
 requireText('components/mfa-challenge.tsx',['listFactors',"factor.status === 'verified'",'challengeAndVerify','one-time-code','nextPath']);
 requireText('components/mfa-settings.tsx',['mfa.enroll','challengeAndVerify','mfa.unenroll','refreshSession','qr_code','one-time-code','لا تتوفر رموز استعادة']);
