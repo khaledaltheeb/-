@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import PublicPagination from '@/components/public-pagination';
 import SiteHeader from '@/components/site-header';
@@ -6,12 +7,6 @@ import { createClient } from '@/lib/supabase/server';
 import { buildSeoMetadata } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
-export const metadata = buildSeoMetadata({
-  title: 'دليل المراكز النفسية',
-  description: 'دليل المراكز الموثقة في منصة روافد: ابحث حسب اسم المركز والمدينة والدولة، واستعرض الملفات العامة للمراكز والفروع التي اجتازت مسار التحقق.',
-  path: '/centers', index: true,
-  keywords: ['مركز نفسي', 'مركز علاج نفسي', 'مراكز التعافي', 'دليل المراكز', 'منصة روافد'],
-});
 
 type SearchParams = Promise<{ q?: string | string[]; city?: string | string[]; country?: string | string[]; page?: string | string[] }>;
 type CenterRow = { id: string; slug: string; name: string; description: string | null; logo_url: string | null; country: string | null; region: string | null; city: string | null; address: string | null };
@@ -28,15 +23,28 @@ const pageHref = (page: number, filters: DirectoryFilters) => {
   if (page > 1) params.set('page', String(page));
   return `/centers${params.size ? `?${params}` : ''}`;
 };
-
-export default async function CentersDirectory({ searchParams }: { searchParams: SearchParams }) {
-  const params = await searchParams;
+const directoryState = (params: Awaited<SearchParams>) => {
   const q = safeFilter(one(params.q));
   const city = safeFilter(one(params.city));
   const country = safeFilter(one(params.country));
   const page = pageNo(one(params.page));
   const filters = { q, city, country };
-  const hasFilters = Boolean(q || city || country);
+  return { q, city, country, page, filters, hasFilters: Boolean(q || city || country) };
+};
+
+export async function generateMetadata({ searchParams }: { searchParams: SearchParams }): Promise<Metadata> {
+  const state = directoryState(await searchParams);
+  return buildSeoMetadata({
+    title: state.hasFilters ? 'نتائج دليل المراكز النفسية' : state.page > 1 ? `دليل المراكز النفسية — الصفحة ${state.page}` : 'دليل المراكز النفسية',
+    description: 'دليل المراكز الموثقة في منصة روافد: ابحث حسب اسم المركز والمدينة والدولة، واستعرض الملفات العامة للمراكز والفروع التي اجتازت مسار التحقق.',
+    path: pageHref(state.page, state.filters),
+    index: !state.hasFilters,
+    keywords: ['مركز نفسي', 'مركز علاج نفسي', 'مراكز التعافي', 'دليل المراكز', 'منصة روافد'],
+  });
+}
+
+export default async function CentersDirectory({ searchParams }: { searchParams: SearchParams }) {
+  const { q, city, country, page, filters, hasFilters } = directoryState(await searchParams);
   const supabase = await createClient();
 
   let query = supabase
