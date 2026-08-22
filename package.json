@@ -44,7 +44,8 @@
     "encyclopedia:assets": "node scripts/build_psych_encyclopedia_assets.mjs",
     "encyclopedia:assets:check": "node scripts/psych-encyclopedia-assets-contract.mjs",
     "expanded-encyclopedia:assets": "node scripts/build_expanded_encyclopedia_assets.mjs",
-    "expanded-encyclopedia:validate": "node scripts/build_expanded_encyclopedia_assets.mjs --check"
+    "expanded-encyclopedia:validate": "node scripts/build_expanded_encyclopedia_assets.mjs --check",
+    "expanded-encyclopedia:live-duplicates": "node scripts/check_expanded_encyclopedia_live_duplicates.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",
