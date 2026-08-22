@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import PublicPagination from '@/components/public-pagination';
 import SiteHeader from '@/components/site-header';
@@ -6,12 +7,6 @@ import { createClient } from '@/lib/supabase/server';
 import { buildSeoMetadata } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
-export const metadata = buildSeoMetadata({
-  title: 'دليل المختصين النفسيين',
-  description: 'دليل المختصين الموثقين في منصة روافد: ابحث حسب الاسم والتخصص والمدينة ونمط الخدمة، واستعرض الملفات المهنية والبيانات العامة التي اجتازت التحقق.',
-  path: '/specialists', index: true,
-  keywords: ['مختص نفسي', 'أخصائي نفسي', 'طبيب نفسي', 'معالج نفسي', 'دليل المختصين', 'منصة روافد'],
-});
 
 type SearchParams = Promise<{ q?: string | string[]; specialty?: string | string[]; city?: string | string[]; mode?: string | string[]; page?: string | string[] }>;
 type SpecialistRow = {
@@ -34,9 +29,7 @@ const pageHref = (page: number, filters: DirectoryFilters) => {
   if (page > 1) params.set('page', String(page));
   return `/specialists${params.size ? `?${params}` : ''}`;
 };
-
-export default async function SpecialistsDirectory({ searchParams }: { searchParams: SearchParams }) {
-  const params = await searchParams;
+const directoryState = (params: Awaited<SearchParams>) => {
   const q = safeFilter(one(params.q));
   const specialty = safeFilter(one(params.specialty));
   const city = safeFilter(one(params.city));
@@ -44,7 +37,22 @@ export default async function SpecialistsDirectory({ searchParams }: { searchPar
   const mode = ['remote', 'in_person'].includes(modeValue) ? modeValue : '';
   const page = pageNo(one(params.page));
   const filters = { q, specialty, city, mode };
-  const hasFilters = Boolean(q || specialty || city || mode);
+  return { q, specialty, city, mode, page, filters, hasFilters: Boolean(q || specialty || city || mode) };
+};
+
+export async function generateMetadata({ searchParams }: { searchParams: SearchParams }): Promise<Metadata> {
+  const state = directoryState(await searchParams);
+  return buildSeoMetadata({
+    title: state.hasFilters ? 'نتائج دليل المختصين النفسيين' : state.page > 1 ? `دليل المختصين النفسيين — الصفحة ${state.page}` : 'دليل المختصين النفسيين',
+    description: 'دليل المختصين الموثقين في منصة روافد: ابحث حسب الاسم والتخصص والمدينة ونمط الخدمة، واستعرض الملفات المهنية والبيانات العامة التي اجتازت التحقق.',
+    path: pageHref(state.page, state.filters),
+    index: !state.hasFilters,
+    keywords: ['مختص نفسي', 'أخصائي نفسي', 'طبيب نفسي', 'معالج نفسي', 'دليل المختصين', 'منصة روافد'],
+  });
+}
+
+export default async function SpecialistsDirectory({ searchParams }: { searchParams: SearchParams }) {
+  const { q, specialty, city, mode, page, filters, hasFilters } = directoryState(await searchParams);
 
   const supabase = await createClient();
   let query = supabase
