@@ -1,4 +1,5 @@
 import toolsData from '@/data/cognitive-lab/tools.v1.json';
+import extensionData from '@/data/cognitive-lab/tools.v2-extension.json';
 
 export type CognitiveDifficultyStatus = 'verified' | 'review';
 
@@ -12,7 +13,7 @@ export type CognitiveTool = {
   difficultyStatus: CognitiveDifficultyStatus;
 };
 
-export const cognitiveTools = toolsData as CognitiveTool[];
+export const cognitiveTools = [...toolsData, ...extensionData] as CognitiveTool[];
 
 export const cognitiveToolCategories = Array.from(
   new Set(cognitiveTools.map((tool) => tool.category)),
