@@ -1,0 +1,60 @@
+name: Probe Live Cognitive Lab
+
+on:
+  push:
+    branches: [temp-unused]
+
+permissions:
+  contents: read
+  statuses: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Probe live Cognitive Lab endpoints
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          BASE='https://rawafid-platform-staging.khaledaltheeb.workers.dev'
+          API="https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}"
+
+          status() {
+            local context="$1"
+            local state="$2"
+            curl --fail --silent --show-error -X POST \
+              -H "Authorization: Bearer ${GH_TOKEN}" \
+              -H 'Accept: application/vnd.github+json' \
+              -H 'X-GitHub-Api-Version: 2022-11-28' \
+              "$API" \
+              -d "{\"state\":\"${state}\",\"context\":\"${context}\"}" >/dev/null
+          }
+
+          get() {
+            local path="$1"
+            curl --fail --silent --show-error --location --compressed --max-time 25 \
+              -H 'Cache-Control: no-cache, no-store, max-age=0' \
+              "${BASE}${path}?probe=${GITHUB_SHA}-$(date +%s)" 2>/dev/null || true
+          }
+
+          page="$(get '/cognitive-lab')"
+          sitemap="$(get '/sitemaps/cognitive-lab.xml')"
+          simon="$(get '/cognitive-lab/simon-conflict')"
+          coding="$(get '/cognitive-lab/symbol-coding')"
+          ambiguity="$(get '/cognitive-lab/ambiguity-resolution')"
+          error_detection="$(get '/cognitive-lab/error-detection')"
+          url_count="$(printf '%s' "$sitemap" | grep -o '<loc>' | wc -l | tr -d ' ' || true)"
+          url_count="${url_count:-0}"
+
+          overall=success
+          if printf '%s' "$page" | grep -Fq '100 نشاط معرفي واضح'; then status 'probe/page-100' success; else status 'probe/page-100' failure; overall=failure; fi
+          if [ "$url_count" = '101' ]; then status 'probe/sitemap-101' success; else status 'probe/sitemap-101' failure; overall=failure; fi
+          if printf '%s' "$simon" | grep -Fq 'تعارض الموقع والاستجابة'; then status 'probe/simon-conflict' success; else status 'probe/simon-conflict' failure; overall=failure; fi
+          if printf '%s' "$coding" | grep -Fq 'ترميز الرمز والرقم'; then status 'probe/symbol-coding' success; else status 'probe/symbol-coding' failure; overall=failure; fi
+          if printf '%s' "$ambiguity" | grep -Fq 'حل الغموض السياقي'; then status 'probe/ambiguity-resolution' success; else status 'probe/ambiguity-resolution' failure; overall=failure; fi
+          if printf '%s' "$error_detection" | grep -Fq 'اكتشاف الخطأ في الإجراء'; then status 'probe/error-detection' success; else status 'probe/error-detection' failure; overall=failure; fi
+          status 'probe/live-cognitive-overall' "$overall"
+          echo "url_count=${url_count} overall=${overall}"
