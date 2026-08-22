@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import Link from 'next/link';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
@@ -9,20 +10,21 @@ import {
   type LegacyPreservedPage,
 } from '@/lib/legacy-preserved-page';
 
-type Props = { page: LegacyPreservedPage; route: string };
+type Props = { page: LegacyPreservedPage; route: string; lead?: ReactNode };
 
 function familyLabel(value: string | null): string {
   if (!value) return 'المحتوى التاريخي';
   return value.replace(/[-_]+/g, ' ').trim() || 'المحتوى التاريخي';
 }
 
-export default function LegacyPreservedPageView({ page, route }: Props) {
+export default function LegacyPreservedPageView({ page, route, lead }: Props) {
   const canonical = legacyCanonicalPath(route);
   const title = page.h1 || page.title || 'محتوى محفوظ';
   const internalLinks = legacyInternalLinks(page.internal_links_json);
   const references = legacyReferences(page.references_json);
 
   return <><SiteHeader /><main className="article-shell">
+    {lead}
     <nav className="breadcrumbs" aria-label="مسار الصفحة">
       <Link href="/">الرئيسية</Link><span>/</span><span>{familyLabel(page.source_family)}</span><span>/</span><span aria-current="page">{title}</span>
     </nav>
