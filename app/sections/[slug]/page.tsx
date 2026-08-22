@@ -10,6 +10,7 @@ import { createClient } from '@/lib/supabase/server';
 import { buildSeoMetadata, breadcrumbJsonLd, SITE_URL } from '@/lib/seo';
 import { getLegacyPreservedPage, legacyPreservedMetadata } from '@/lib/legacy-preserved-page';
 import { COGNITIVE_ROOT_SLUG, getCognitiveCategories, getCognitiveCategory, getCognitivePageIndex } from '@/lib/cognitive-program';
+import { getExpandedEncyclopediaCategories, getExpandedEncyclopediaCategory, getExpandedEncyclopediaIndex } from '@/lib/expanded-encyclopedia';
 import { publicContentHref, publicContentTypeLabel } from '@/lib/public-content-routing';
 
 export const dynamic = 'force-dynamic';
@@ -32,8 +33,10 @@ async function dbCategory(slug: string) {
 }
 
 function virtualCategory(slug: string): Category | null {
-  const category = getCognitiveCategory(slug);
-  return category ? { id: `virtual:${slug}`, sector_id: 'f9af56ce-734c-4867-9999-957db0933414', parent_id: '369841c2-d33b-43a5-ad04-8dff6f40747e', slug, name_ar: category.name, description: category.description, seo_title: null, seo_description: null, editorial_content_id: null } : null;
+  const cognitive = getCognitiveCategory(slug);
+  if (cognitive) return { id: `virtual:${slug}`, sector_id: 'f9af56ce-734c-4867-9999-957db0933414', parent_id: '369841c2-d33b-43a5-ad04-8dff6f40747e', slug, name_ar: cognitive.name, description: cognitive.description, seo_title: null, seo_description: null, editorial_content_id: null };
+  const expanded = getExpandedEncyclopediaCategory(slug);
+  return expanded ? { id: `virtual-expanded:${slug}`, sector_id: 'f9af56ce-734c-4867-9999-957db0933414', parent_id: '369841c2-d33b-43a5-ad04-8dff6f40747e', slug, name_ar: expanded.name, description: expanded.description, seo_title: null, seo_description: null, editorial_content_id: null } : null;
 }
 async function resolvedCategory(slug: string) { return await dbCategory(slug) ?? virtualCategory(slug); }
 
@@ -61,7 +64,9 @@ export default async function SectionPage({ params, searchParams }: { params: Pa
   const supabase = await createClient();
   const now = new Date().toISOString();
   const isRoot = slug === COGNITIVE_ROOT_SLUG;
-  const virtual = Boolean(getCognitiveCategory(slug));
+  const cognitiveVirtual = Boolean(getCognitiveCategory(slug));
+  const expandedVirtual = Boolean(getExpandedEncyclopediaCategory(slug));
+  const virtual = cognitiveVirtual || expandedVirtual;
 
   let rows: Item[] = [];
   let total = 0;
@@ -76,7 +81,14 @@ export default async function SectionPage({ params, searchParams }: { params: Pa
   }
 
   if (isRoot || virtual) {
-    const generated = getCognitivePageIndex().filter((item) => isRoot || item.categorySlug === slug).map((item) => ({ id: `cognitive:${item.slug}`, slug: item.slug, title: item.title, excerpt: item.excerpt, content_type: item.contentType, published_at: '2026-08-14T00:00:00.000Z', canonical_url: null }));
+    const cognitiveGenerated = getCognitivePageIndex()
+      .filter((item) => isRoot || (cognitiveVirtual && item.categorySlug === slug))
+      .map((item) => ({ id: `cognitive:${item.slug}`, slug: item.slug, title: item.title, excerpt: item.excerpt, content_type: item.contentType, published_at: '2026-08-14T00:00:00.000Z', canonical_url: null }));
+    const expandedIndex = await getExpandedEncyclopediaIndex();
+    const expandedGenerated = expandedIndex
+      .filter((item) => isRoot || (expandedVirtual && item.category_slug === slug))
+      .map((item) => ({ id: item.id, slug: item.slug, title: item.title, excerpt: item.excerpt, content_type: item.content_type, published_at: item.updated_at, canonical_url: item.canonical_url }));
+    const generated: Item[] = [...cognitiveGenerated, ...expandedGenerated];
     let existing: Item[] = [];
     if (isRoot) {
       const { data: mappings } = await supabase.from('content_categories').select('content_id').eq('category_id', category.id).eq('is_primary', true);
@@ -85,9 +97,12 @@ export default async function SectionPage({ params, searchParams }: { params: Pa
         const { data } = await supabase.from('content').select('id,slug,title,excerpt,content_type,published_at,canonical_url').in('id', ids).eq('status', 'published').lte('published_at', now).eq('robots_index', true).order('title');
         existing = (data ?? []) as Item[];
       }
-      childCards = getCognitiveCategories().map((item) => ({ slug: item.slug, name_ar: item.name, description: item.description }));
+      childCards = [
+        ...getExpandedEncyclopediaCategories().map((item) => ({ slug: item.slug, name_ar: item.name, description: item.description })),
+        ...getCognitiveCategories().map((item) => ({ slug: item.slug, name_ar: item.name, description: item.description })),
+      ];
     } else {
-      parent = { slug: COGNITIVE_ROOT_SLUG, name_ar: 'المصطلحات والعمليات المعرفية' };
+      parent = { slug: COGNITIVE_ROOT_SLUG, name_ar: 'الموسوعة النفسية والمعرفية الموسعة' };
     }
     sector = { slug: 'knowledge', name_ar: 'المعرفة والموسوعة' };
     const bySlug = new Map<string, Item>();
