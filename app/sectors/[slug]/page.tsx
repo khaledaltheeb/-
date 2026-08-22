@@ -83,7 +83,6 @@ export default async function SectorPage({ params, searchParams }: { params: Par
       .in('content_categories.category_id', categoryIds)
       .eq('status', 'published')
       .lte('published_at', now)
-      .eq('robots_index', true)
       .order('published_at', { ascending: false })
       .order('title')
       .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
@@ -107,7 +106,7 @@ export default async function SectorPage({ params, searchParams }: { params: Par
         <a href="#sector-categories">الأقسام الرئيسية</a>
         {totalContent > 0 && <a href="#sector-content">كل محتوى القطاع</a>}
         <Link href={`/search?q=${sectorQuery}`}>البحث في القطاع</Link>
-        <Link href="/all-pages">كل صفحات المنصة</Link>
+        <Link href="/all-pages">فهرس الصفحات</Link>
         <Link href="/care-guides/">أدلة التعامل والرعاية</Link>
         <Link href="/evidence-guides/">الأدلة العلمية</Link>
         {sector.slug === 'pediatric-oncology' && <Link href="/search?q=سرطان+الأطفال+دعم+الأسرة">دعم أسرة طفل السرطان</Link>}
@@ -117,7 +116,7 @@ export default async function SectorPage({ params, searchParams }: { params: Par
         {categoryForest.map((node) => { const descendants = countPublicCategoryNodes(node.children); return <article className="public-category-card" key={node.category.id}><Link href={`/sections/${node.category.slug}`}><h3>{node.category.name_ar}</h3></Link><p>{node.category.description || 'قسم متخصص ضمن هذا القطاع.'}</p><PublicCategoryTree nodes={node.children} ariaLabel={`الأقسام المتفرعة من ${node.category.name_ar}`} />{descendants > 0 && <span className="category-descendant-count">{descendants.toLocaleString('ar')} أقسام متفرعة</span>}<Link href={`/sections/${node.category.slug}`}>استعراض القسم ←</Link></article>; })}
         {!categoryForest.length && <div className="empty-state"><strong>لا توجد أقسام عامة متاحة في هذا القطاع حاليًا.</strong></div>}
       </div></section>
-      {totalContent > 0 && <section className="section related-content-section" id="sector-content"><div className="section-heading"><span>مكتبة القطاع</span><h2>كل المحتوى المنشور في {sector.name_ar}</h2><p>جميع الصفحات العامة المصنفة تحت أقسام هذا القطاع، مرتبة من الأحدث مع إمكانية الانتقال بين جميع صفحات النتائج دون فقد أي مادة.</p></div>{contentRows.length > 0 ? <><div className="related-content-grid">{contentRows.map((item) => { const href = publicContentHref(item); return <article key={item.id}><span className="content-type-pill">{publicContentTypeLabel(item.content_type)}</span><h3><Link href={href}>{item.title}</Link></h3>{item.excerpt && <p>{item.excerpt}</p>}<Link href={href}>قراءة الصفحة ←</Link></article>; })}</div><PublicPagination currentPage={page} totalPages={contentPages} hrefForPage={(targetPage) => pageHref(sector.slug, targetPage)} ariaLabel={`صفحات محتوى قطاع ${sector.name_ar}`} /></> : <div className="empty-state"><strong>هذه الصفحة خارج نطاق النتائج المتاحة.</strong><span>استخدم أرقام الصفحات للعودة إلى محتوى القطاع.</span><PublicPagination currentPage={Math.min(page, contentPages)} totalPages={contentPages} hrefForPage={(targetPage) => pageHref(sector.slug, targetPage)} ariaLabel={`صفحات محتوى قطاع ${sector.name_ar}`} /></div>}</section>}
+      {totalContent > 0 && <section className="section related-content-section" id="sector-content"><div className="section-heading"><span>مكتبة القطاع</span><h2>كل المحتوى المنشور في {sector.name_ar}</h2><p>كل الصفحات المنشورة المصنفة تحت أقسام هذا القطاع تظهر داخليًا هنا؛ قرار فهرسة محركات البحث يبقى مستقلًا على مستوى الصفحة.</p></div>{contentRows.length > 0 ? <><div className="related-content-grid">{contentRows.map((item) => { const href = publicContentHref(item); return <article key={item.id}><span className="content-type-pill">{publicContentTypeLabel(item.content_type)}</span><h3><Link href={href}>{item.title}</Link></h3>{item.excerpt && <p>{item.excerpt}</p>}<Link href={href}>قراءة الصفحة ←</Link></article>; })}</div><PublicPagination currentPage={page} totalPages={contentPages} hrefForPage={(targetPage) => pageHref(sector.slug, targetPage)} ariaLabel={`صفحات محتوى قطاع ${sector.name_ar}`} /></> : <div className="empty-state"><strong>هذه الصفحة خارج نطاق النتائج المتاحة.</strong><span>استخدم أرقام الصفحات للعودة إلى محتوى القطاع.</span><PublicPagination currentPage={Math.min(page, contentPages)} totalPages={contentPages} hrefForPage={(targetPage) => pageHref(sector.slug, targetPage)} ariaLabel={`صفحات محتوى قطاع ${sector.name_ar}`} /></div>}</section>}
     </main>
     <SiteFooter />
   </>;
