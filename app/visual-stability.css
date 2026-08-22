@@ -88,6 +88,11 @@ body .desktop-nav summary {
 }
 
 body .mega-nav-panel {
+  position: fixed;
+  top: calc(var(--rf-header-height) + 8px);
+  right: auto;
+  left: 50%;
+  transform: translateX(-50%);
   max-height: min(76dvh, 680px);
   overflow-x: hidden;
   overflow-y: auto;
