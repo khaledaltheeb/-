@@ -81,6 +81,10 @@ function decodedPathname(pathname: string) {
   }
 }
 
+function headerSafePathname(pathname: string) {
+  return encodeURI(pathname);
+}
+
 function preservedContentAliasCanonical(pathname: string) {
   const match = pathname.match(/^\/content\/([a-z0-9]+(?:-[a-z0-9]+)*)\/?$/);
   if (!match) return null;
@@ -102,7 +106,10 @@ function applyPreservedAliasSeoHeaders(response: NextResponse, pathname: string)
 }
 
 export async function updateSession(request: NextRequest) {
-  const trustedPathname = decodedPathname(request.nextUrl.pathname);
+  const routePathname = decodedPathname(request.nextUrl.pathname);
+  // Forwarded request headers must remain byte-safe. encodeURI preserves the route
+  // while leaving ASCII admin paths unchanged for authorization checks downstream.
+  const trustedPathname = headerSafePathname(routePathname);
   const forwardedHeaders = () => {
     const headers = new Headers(request.headers);
     headers.set('x-rawafid-pathname', trustedPathname);
@@ -128,7 +135,7 @@ export async function updateSession(request: NextRequest) {
     },
   );
 
-  const pathname = trustedPathname;
+  const pathname = routePathname;
   let legacyExists: boolean | null = null;
   async function isLegacyProductionRoute() {
     if (legacyExists !== null) return legacyExists;
