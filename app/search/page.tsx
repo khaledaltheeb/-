@@ -4,6 +4,10 @@ import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import { createClient } from '@/lib/supabase/server';
 import { searchCognitivePages } from '@/lib/cognitive-program';
+import {
+  getExpandedEncyclopediaIndex,
+  type ExpandedEncyclopediaIndexRecord,
+} from '@/lib/expanded-encyclopedia';
 import { getQuickInfoItems, quickInfoContentSlug } from '@/lib/quick-info';
 import {
   getPsychEncyclopediaReleaseIndex,
@@ -34,7 +38,7 @@ type R = {
 
 const labels: Record<T, string> = {
   content: 'المحتوى',
-  condition: 'الموسوعة النفسية',
+  condition: 'الموسوعة المختصرة',
   sector: 'القطاعات',
   category: 'الأقسام',
   specialist: 'المختصون',
@@ -44,11 +48,12 @@ const labels: Record<T, string> = {
 const allowed = new Set(Object.keys(labels));
 
 const discoveryLinks = [
+  { href: '/sections/cognitive-processes', title: 'الموسوعة النفسية والمعرفية الموسعة', detail: 'مصطلحات نفسية وسريرية ومعرفية فريدة ضمن أقسام مترابطة ومراجع موثوقة.' },
+  { href: '/encyclopedia/', title: 'الموسوعة المختصرة', detail: 'الحالات والاضطرابات النفسية في الصفحات التاريخية المحفوظة.' },
   { href: '/sectors', title: 'القطاعات', detail: 'ابدأ من المجال الرئيسي ثم انتقل إلى الأقسام المتخصصة.' },
   { href: '/sections', title: 'الأقسام', detail: 'خريطة موضوعية مرتبة للموضوعات والأقسام الفرعية.' },
   { href: '/care-guides/', title: 'أدلة التعامل والرعاية', detail: 'أدلة عملية للأسرة ومقدمي الرعاية حسب الموقف والحاجة.' },
   { href: '/evidence-guides/', title: 'الأدلة العلمية', detail: 'مكتبة تربط الأسئلة العملية بالمصادر الأصلية وحدود الدليل.' },
-  { href: '/encyclopedia/', title: 'الموسوعة النفسية', detail: 'الحالات والاضطرابات النفسية ضمن فهرس موثق.' },
   { href: '/sectors/pediatric-oncology', title: 'سرطان الأطفال', detail: 'مركز موحد للتشخيص والعلاج والدعم والنجاة والمتابعة.' },
 ];
 
@@ -96,7 +101,51 @@ function searchPsychEncyclopedia(query: string, records: PsychEncyclopediaReleas
       entity_id: record.id,
       slug: record.slug,
       title: record.title,
-      subtitle: 'الموسوعة النفسية — دليل سريري موثق',
+      subtitle: 'الموسوعة المختصرة — دليل سريري موثق',
+      excerpt: record.excerpt,
+      destination: record.canonical_url,
+      score,
+    }];
+  }).sort((a, b) => b.score - a.score || a.title.localeCompare(b.title, 'ar')).slice(0, limit);
+}
+
+function searchExpandedEncyclopedia(query: string, records: ExpandedEncyclopediaIndexRecord[], limit = 75): R[] {
+  const normalizedQuery = normalizeSearch(query);
+  const queryTokens = normalizedQuery.split(' ').filter(Boolean);
+  if (!normalizedQuery || queryTokens.length === 0) return [];
+
+  return records.flatMap((record): R[] => {
+    const canonicalTerm = normalizeSearch(record.canonical_term);
+    const englishName = normalizeSearch(record.english_name ?? '');
+    const title = normalizeSearch(record.title);
+    const primary = normalizeSearch(record.primary_keyword ?? '');
+    const aliases = record.aliases.map(normalizeSearch);
+    const secondary = record.secondary_keywords.map(normalizeSearch);
+    const semantic = record.semantic_terms.map(normalizeSearch);
+    const excerpt = normalizeSearch(record.excerpt ?? '');
+    const searchable = [canonicalTerm, englishName, title, primary, ...aliases, ...secondary, ...semantic, excerpt].join(' ');
+    if (!queryTokens.every((token) => searchable.includes(token))) return [];
+
+    let score = 125;
+    if (canonicalTerm === normalizedQuery) score = 320;
+    else if (englishName === normalizedQuery) score = 310;
+    else if (primary === normalizedQuery) score = 300;
+    else if (aliases.some((value) => value === normalizedQuery)) score = 295;
+    else if (title === normalizedQuery) score = 285;
+    else if (canonicalTerm.includes(normalizedQuery)) score = 270;
+    else if (primary.includes(normalizedQuery)) score = 260;
+    else if (aliases.some((value) => value.includes(normalizedQuery))) score = 250;
+    else if (secondary.some((value) => value.includes(normalizedQuery))) score = 225;
+    else if (semantic.some((value) => value.includes(normalizedQuery))) score = 190;
+    else if (excerpt.includes(normalizedQuery)) score = 170;
+    score += Math.min(queryTokens.length * 2, 12);
+
+    return [{
+      entity_type: 'content',
+      entity_id: record.id,
+      slug: record.slug,
+      title: record.title,
+      subtitle: `${record.category_name} — الموسوعة الموسعة`,
       excerpt: record.excerpt,
       destination: record.canonical_url,
       score,
@@ -122,11 +171,18 @@ export async function PlatformSearchExperience({ searchParams, routeBase = '/sea
     let dbError = false;
     let approvedQuickInfo: Awaited<ReturnType<typeof getQuickInfoItems>> = [];
     let psychIndex: PsychEncyclopediaReleaseIndexRecord[] = [];
+    let expandedIndex: ExpandedEncyclopediaIndexRecord[] = [];
 
     try {
       psychIndex = await getPsychEncyclopediaReleaseIndex();
     } catch {
       psychIndex = [];
+    }
+
+    try {
+      expandedIndex = await getExpandedEncyclopediaIndex();
+    } catch {
+      expandedIndex = [];
     }
 
     try {
@@ -165,7 +221,7 @@ export async function PlatformSearchExperience({ searchParams, routeBase = '/sea
       }
 
       if (item.destination.startsWith('/encyclopedia/') || psychReleaseSlugs.has(item.slug)) {
-        return [{ ...item, entity_type: 'condition', subtitle: item.subtitle || 'الموسوعة النفسية' }];
+        return [{ ...item, entity_type: 'condition', subtitle: item.subtitle || 'الموسوعة المختصرة' }];
       }
       return [item];
     });
@@ -181,16 +237,17 @@ export async function PlatformSearchExperience({ searchParams, routeBase = '/sea
       score: 150 - i / 100,
     }));
 
+    const expanded = searchExpandedEncyclopedia(q, expandedIndex, 75);
     const psych = searchPsychEncyclopedia(q, psychIndex, 75);
     const by = new Map<string, R>();
-    for (const x of [...db, ...generated, ...psych]) {
+    for (const x of [...db, ...expanded, ...generated, ...psych]) {
       const old = by.get(x.destination);
       if (!old || Number(x.score) > Number(old.score)) by.set(x.destination, x);
     }
     results = [...by.values()]
       .sort((a, b) => Number(b.score) - Number(a.score) || a.title.localeCompare(b.title, 'ar'))
       .slice(0, 100);
-    if (dbError && generated.length === 0 && psych.length === 0) error = 'تعذر تنفيذ البحث الآن.';
+    if (dbError && generated.length === 0 && expanded.length === 0 && psych.length === 0) error = 'تعذر تنفيذ البحث الآن.';
   }
 
   const visible = type ? results.filter((x) => x.entity_type === type) : results;
@@ -205,25 +262,26 @@ export async function PlatformSearchExperience({ searchParams, routeBase = '/sea
       <section className="search-hero">
         <span className="eyebrow">بحث موحد ودلالي</span>
         <h1>{legacyIntro ? 'اكتب سؤالك بلغتك الطبيعية' : 'ابحث في منصة روافد'}</h1>
-        <p>{legacyIntro ? 'هذا هو مسار البحث الذكي التاريخي بعد نقله إلى محرك روافد الحالي. اكتب المصطلح أو السؤال كما تفكر فيه، وسيبحث المحرك في المحتوى والقطاعات والمختصين والمراكز والموسوعات المعرفية والنفسية.' : 'ابحث في المحتوى والقطاعات والأقسام والمختصين والمراكز والموسوعات من نقطة واحدة، ثم استخدم الفلاتر للوصول إلى النوع الأقرب لاحتياجك.'}</p>
+        <p>{legacyIntro ? 'هذا هو مسار البحث الذكي التاريخي بعد نقله إلى محرك روافد الحالي. اكتب المصطلح أو السؤال كما تفكر فيه، وسيبحث المحرك في المحتوى والقطاعات والمختصين والمراكز والموسوعة الموسعة والموسوعة المختصرة.' : 'ابحث في المحتوى والقطاعات والأقسام والمختصين والمراكز والموسوعات من نقطة واحدة، ثم استخدم الفلاتر للوصول إلى النوع الأقرب لاحتياجك.'}</p>
         <form className="search search-page-form" action={routeBase} method="get" role="search">
           <label className="sr-only" htmlFor={legacyIntro ? 'legacy-platform-search' : 'platform-search'}>عبارة البحث</label>
-          <input id={legacyIntro ? 'legacy-platform-search' : 'platform-search'} name="q" type="search" minLength={2} maxLength={160} defaultValue={q} placeholder="مثال: القلق الاجتماعي، سرطان الأطفال، الذاكرة العاملة، دعم الأسرة، مختص في عمّان..." autoComplete="off" />
+          <input id={legacyIntro ? 'legacy-platform-search' : 'platform-search'} name="q" type="search" minLength={2} maxLength={160} defaultValue={q} placeholder="مثال: القلق الاجتماعي، فرط اليقظة، فقدان التلذذ، دعم الأسرة، مختص في عمّان..." autoComplete="off" />
           <button type="submit">بحث</button>
         </form>
         <nav className="search-discovery-links" aria-label="مسارات استكشاف سريعة">
+          <Link href="/sections/cognitive-processes">الموسوعة الموسعة</Link>
+          <Link href="/encyclopedia/">الموسوعة المختصرة</Link>
           <Link href="/sectors">القطاعات</Link>
           <Link href="/sections">الأقسام</Link>
           <Link href="/care-guides/">أدلة الرعاية</Link>
           <Link href="/evidence-guides/">الأدلة العلمية</Link>
-          <Link href="/encyclopedia/">الموسوعة النفسية</Link>
           <Link href="/sectors/pediatric-oncology">سرطان الأطفال</Link>
         </nav>
       </section>
       {legacyIntro && <section className="search-state" aria-labelledby="legacy-search-method">
         <h2 id="legacy-search-method">كيف نُقلت وظيفة البحث الذكي؟</h2>
         <p>احتفظنا بالفكرة المفيدة من الصفحة القديمة بدل تحويل عنوانها: البحث باللغة الطبيعية والمرادفات، وإظهار النتائج من أكثر من نوع محتوى. أفضل استعلام عادةً جملة قصيرة واضحة؛ ويمكن تجربة مرادف أو مصطلح تقني عندما لا تظهر النتيجة المقصودة.</p>
-        <p>المحرك الحالي يجمع نتائج قاعدة المنصة مع فهرس الموسوعة النفسية ومحتوى العمليات المعرفية، ثم يوحّد الوجهات المتكررة ويرتبها بحسب درجة المطابقة. لذلك لا تعتمد النتائج على قائمة المصطلحات القديمة الثابتة.</p>
+        <p>المحرك الحالي يجمع نتائج قاعدة المنصة مع فهرس الموسوعة الموسعة والموسوعة المختصرة ومحتوى العمليات المعرفية، ثم يوحّد الوجهات المتكررة ويرتبها بحسب درجة المطابقة. لذلك لا تعتمد النتائج على قائمة المصطلحات القديمة الثابتة.</p>
         <p><strong>حد مهم:</strong> البحث أداة للوصول إلى المعرفة، وليس محرك تشخيص. في الموضوعات الصحية أو النفسية الحساسة ارجع إلى الصفحة الكاملة ومراجعها وحدودها بدل بناء قرار شخصي على مقتطف نتيجة البحث.</p>
       </section>}
       {!q && !legacyIntro && <section className="search-start" aria-labelledby="search-start-title">
@@ -239,7 +297,7 @@ export async function PlatformSearchExperience({ searchParams, routeBase = '/sea
         </nav>
         <section className="search-results" aria-live="polite">
           <div className="search-summary"><strong>{visible.length.toLocaleString('ar')}</strong><span>نتيجة لعبارة «{q}»</span></div>
-          {visible.length === 0 && <div className="search-state search-empty"><h2>لا توجد نتائج مطابقة</h2><p>جرّب مرادفًا أو مصطلحًا أوسع، أو انتقل مباشرة إلى إحدى المكتبات الرئيسية.</p><div className="search-empty-links"><Link href="/sections">الأقسام</Link><Link href="/care-guides/">أدلة الرعاية</Link><Link href="/evidence-guides/">الأدلة العلمية</Link><Link href="/encyclopedia/">الموسوعة النفسية</Link></div></div>}
+          {visible.length === 0 && <div className="search-state search-empty"><h2>لا توجد نتائج مطابقة</h2><p>جرّب مرادفًا أو مصطلحًا أوسع، أو انتقل مباشرة إلى إحدى المكتبات الرئيسية.</p><div className="search-empty-links"><Link href="/sections/cognitive-processes">الموسوعة الموسعة</Link><Link href="/encyclopedia/">الموسوعة المختصرة</Link><Link href="/sections">الأقسام</Link><Link href="/care-guides/">أدلة الرعاية</Link><Link href="/evidence-guides/">الأدلة العلمية</Link></div></div>}
           <div className="search-result-list">
             {visible.map((x) => <article className="search-result-card" key={`${x.entity_type}-${x.entity_id}`}>
               <div className="result-type">{labels[x.entity_type]}</div>
