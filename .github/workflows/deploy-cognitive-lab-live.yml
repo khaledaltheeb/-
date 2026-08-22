@@ -92,7 +92,7 @@ jobs:
             exit 1
           fi
           printf '%s\n' "$auth_output"
-          if printf '%s' "$auth_output" | grep -Eqi 'not authenticated|wrangler login|not logged in'; then
+          if grep -Eqi 'not authenticated|wrangler login|not logged in' <<< "$auth_output"; then
             echo 'Wrangler did not authenticate with the configured API token.' >&2
             exit 1
           fi
@@ -178,13 +178,13 @@ jobs:
             error_detection="$(curl -fsSL --compressed --max-time 25 -H 'Cache-Control: no-cache, no-store, max-age=0' "${base}/cognitive-lab/error-detection?deploy=${stamp}" 2>/dev/null || true)"
             url_count="$(printf '%s' "$sitemap" | grep -o '<loc>' | wc -l | tr -d ' ' || true)"
             url_count="${url_count:-0}"
-            if printf '%s' "$page" | grep -Fq '100 نشاط معرفي واضح' \
+            if grep -Fq '100 نشاط معرفي واضح' <<< "$page" \
               && [ "$url_count" = '101' ] \
-              && printf '%s' "$simon" | grep -Fq 'تعارض الموقع والاستجابة' \
-              && printf '%s' "$simon" | grep -Fq 'توسعة بحثية 2026' \
-              && printf '%s' "$coding" | grep -Fq 'ترميز الرمز والرقم' \
-              && printf '%s' "$ambiguity" | grep -Fq 'حل الغموض السياقي' \
-              && printf '%s' "$error_detection" | grep -Fq 'اكتشاف الخطأ في الإجراء'; then
+              && grep -Fq 'تعارض الموقع والاستجابة' <<< "$simon" \
+              && grep -Fq 'توسعة بحثية 2026' <<< "$simon" \
+              && grep -Fq 'ترميز الرمز والرقم' <<< "$coding" \
+              && grep -Fq 'حل الغموض السياقي' <<< "$ambiguity" \
+              && grep -Fq 'اكتشاف الخطأ في الإجراء' <<< "$error_detection"; then
               echo "Live Cognitive Lab verified: 100 tools, 101 sitemap URLs, extension routes reachable."
               exit 0
             fi
