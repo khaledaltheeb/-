@@ -81,6 +81,10 @@ function decodedPathname(pathname: string) {
   }
 }
 
+function headerSafePathname(pathname: string) {
+  return encodeURI(pathname);
+}
+
 function preservedContentAliasCanonical(pathname: string) {
   const match = pathname.match(/^\/content\/([a-z0-9]+(?:-[a-z0-9]+)*)\/?$/);
   if (!match) return null;
@@ -105,7 +109,7 @@ export async function updateSession(request: NextRequest) {
   const trustedPathname = decodedPathname(request.nextUrl.pathname);
   const forwardedHeaders = () => {
     const headers = new Headers(request.headers);
-    headers.set('x-rawafid-pathname', trustedPathname);
+    headers.set('x-rawafid-pathname', headerSafePathname(trustedPathname));
     return headers;
   };
   let response = NextResponse.next({ request: { headers: forwardedHeaders() } });
