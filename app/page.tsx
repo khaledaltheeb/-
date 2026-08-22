@@ -10,14 +10,15 @@ import { buildSeoMetadata } from '@/lib/seo';
 export const dynamic = 'force-dynamic';
 
 export const metadata = buildSeoMetadata({
-  title: 'الصحة النفسية وذوو الاحتياجات الخاصة والتعافي',
-  description: 'منصة روافد للصحة النفسية وذوي الاحتياجات الخاصة والدمج والتعافي والتمكين: معرفة موثوقة، أدلة عملية، مختصون ومراكز وخدمات مترابطة للأفراد والأسر ومقدمي الخدمة.',
+  title: 'روافد: الصحة النفسية وذوو الاحتياجات الخاصة وسرطان الأطفال والتعافي',
+  description: 'منصة روافد للمعرفة الصحية والاجتماعية العربية: الصحة النفسية، ذوو الاحتياجات الخاصة والتربية الدامجة، سرطان الأطفال، الإدمان والتعافي، الأدلة العملية، المختصون والمراكز ضمن مسارات مترابطة.',
   path: '/',
   index: true,
-  keywords: ['الصحة النفسية', 'ذوو الاحتياجات الخاصة', 'الدمج', 'التمكين', 'الإدمان والتعافي', 'مختص نفسي', 'مراكز نفسية', 'منصة روافد'],
+  keywords: ['الصحة النفسية', 'ذوو الاحتياجات الخاصة', 'سرطان الأطفال', 'أورام الأطفال', 'التربية الدامجة', 'الإدمان والتعافي', 'دعم الأسرة', 'مختص نفسي', 'مراكز نفسية', 'منصة روافد'],
 });
 
 const quickSearches = [
+  ['سرطان الأطفال', 'سرطان الأطفال'],
   ['الصحة النفسية', 'الصحة النفسية'],
   ['الإدمان والتعافي', 'الإدمان والتعافي'],
   ['ذوو الاحتياجات الخاصة', 'ذوو الاحتياجات الخاصة'],
@@ -43,11 +44,11 @@ export default async function HomePage() {
           <div className="rawafid-hero-copy">
             <span className="rawafid-kicker">المعرفة والرعاية تبدأ من فهم احتياجك</span>
             <h1 id="home-title">طريق أوضح إلى <em>المعرفة والدعم</em> المناسبين.</h1>
-            <p>منصة عربية تجمع المعرفة الموثوقة، الأدلة العملية، والمختصين والمراكز ضمن تجربة تحترم خصوصيتك وتساعدك على اتخاذ الخطوة التالية بثقة.</p>
+            <p>منصة عربية تجمع المعرفة الموثوقة والأدلة العملية ومركزًا متكاملًا لسرطان الأطفال، مع المختصين والمراكز ضمن تجربة تحترم خصوصيتك وتساعدك على اتخاذ الخطوة التالية بثقة.</p>
 
             <form className="search rawafid-search" action="/search" method="get" role="search">
               <label className="sr-only" htmlFor="home-search">البحث في منصة روافد</label>
-              <input id="home-search" name="q" type="search" minLength={2} maxLength={160} autoComplete="off" placeholder="ابحث عن حالة، مصطلح، مختص، مركز، أداة، مقال أو سؤال..." />
+              <input id="home-search" name="q" type="search" minLength={2} maxLength={160} autoComplete="off" placeholder="ابحث عن حالة، سرطان أطفال، مصطلح، مختص، مركز، أداة، مقال أو سؤال..." />
               <button type="submit">ابحث الآن</button>
             </form>
 
@@ -63,6 +64,7 @@ export default async function HomePage() {
               <p>اختر مسارًا، ويمكنك تغييره في أي وقت.</p>
             </div>
             <div className="hero-pathway-list">
+              <Link prefetch={false} href="/sectors/pediatric-oncology"><span><PlatformIcon name="review" /></span><div><strong>أبحث عن معلومات عن سرطان الأطفال</strong><small>التشخيص والعلاج والأبحاث والدعم النفسي والأسري والنجاة</small></div><i aria-hidden="true">←</i></Link>
               <Link prefetch={false} href="/search"><span><PlatformIcon name="knowledge" /></span><div><strong>أحتاج معلومة موثوقة</strong><small>حالات، أدلة، أسئلة وأدوات عملية</small></div><i aria-hidden="true">←</i></Link>
               <Link prefetch={false} href="/specialists"><span><PlatformIcon name="specialist" /></span><div><strong>أبحث عن مساعدة مهنية</strong><small>مختصون ومراكز ضمن دليل واضح</small></div><i aria-hidden="true">←</i></Link>
               <Link prefetch={false} href="/search?q=دعم+الأسرة"><span><PlatformIcon name="community" /></span><div><strong>أساند قريبًا أو أسرة</strong><small>مسارات عملية لمقدمي الدعم والرعاية</small></div><i aria-hidden="true">←</i></Link>
@@ -80,7 +82,7 @@ export default async function HomePage() {
 
         <section className="rawafid-section" id="sectors" aria-labelledby="sectors-title">
           <div className="rawafid-section-head">
-            <div className="rawafid-section-title"><span>مجالات روافد</span><h2 id="sectors-title">استكشف المعرفة حسب المجال</h2><p>موضوعات مترابطة في الصحة النفسية والتعافي والدمج والتمكين، منظمة لتصل إلى ما يفيدك بأقل خطوات ممكنة.</p></div>
+            <div className="rawafid-section-title"><span>مجالات روافد</span><h2 id="sectors-title">استكشف المعرفة حسب المجال</h2><p>قطاعات مترابطة تشمل الصحة النفسية، سرطان الأطفال، التعافي، الدمج والتمكين؛ ويظهر سرطان الأطفال كقطاع موحد واحد يجمع المسار السريري والعلمي والنفسي والأسري.</p></div>
             <Link prefetch={false} className="section-text-link" href="/sectors">عرض جميع القطاعات ←</Link>
           </div>
 
