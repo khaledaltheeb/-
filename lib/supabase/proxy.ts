@@ -106,12 +106,13 @@ function applyPreservedAliasSeoHeaders(response: NextResponse, pathname: string)
 }
 
 export async function updateSession(request: NextRequest) {
-  const trustedPathname = decodedPathname(request.nextUrl.pathname);
+  const routePathname = decodedPathname(request.nextUrl.pathname);
+  // Forwarded request headers must remain byte-safe. encodeURI preserves the route
+  // while leaving ASCII admin paths unchanged for authorization checks downstream.
+  const trustedPathname = headerSafePathname(routePathname);
   const forwardedHeaders = () => {
     const headers = new Headers(request.headers);
-    // HTTP header values are byte strings. Preserve Unicode path semantics by
-    // forwarding an encodeURI representation; ASCII admin routes remain unchanged.
-    headers.set('x-rawafid-pathname', headerSafePathname(trustedPathname));
+    headers.set('x-rawafid-pathname', trustedPathname);
     return headers;
   };
   let response = NextResponse.next({ request: { headers: forwardedHeaders() } });
@@ -134,7 +135,7 @@ export async function updateSession(request: NextRequest) {
     },
   );
 
-  const pathname = trustedPathname;
+  const pathname = routePathname;
   let legacyExists: boolean | null = null;
   async function isLegacyProductionRoute() {
     if (legacyExists !== null) return legacyExists;
