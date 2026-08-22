@@ -89,7 +89,6 @@ export default async function SectionPage({ params, searchParams }: { params: Pa
           .eq('content_categories.is_primary', true)
           .eq('status', 'published')
           .lte('published_at', now)
-          .eq('robots_index', true)
           .order('title')
           .range(offset, offset + FETCH_BATCH - 1);
         if (error) {
@@ -129,7 +128,6 @@ export default async function SectionPage({ params, searchParams }: { params: Pa
       .eq('content_categories.is_primary', true)
       .eq('status', 'published')
       .lte('published_at', now)
-      .eq('robots_index', true)
       .order('published_at', { ascending: false })
       .order('title');
     if (query) contentQuery = contentQuery.or(`title.ilike.%${query}%,excerpt.ilike.%${query}%`);
@@ -157,13 +155,13 @@ export default async function SectionPage({ params, searchParams }: { params: Pa
         <a href="#section-content">المحتوى المنشور</a>
         {sector && <Link href={`/sectors/${sector.slug}`}>العودة إلى {sector.name_ar}</Link>}
         {parent && <Link href={`/sections/${parent.slug}`}>القسم الأب: {parent.name_ar}</Link>}
-        <Link href="/all-pages">كل صفحات المنصة</Link>
+        <Link href="/all-pages">فهرس الصفحات</Link>
         <Link href="/care-guides/">أدلة التعامل والرعاية</Link>
         <Link href="/evidence-guides/">الأدلة العلمية</Link>
       </nav>
       {editorialContent && <section className="section category-editorial-content" aria-labelledby="category-editorial-title"><div className="section-heading"><span>الدليل التحريري للقسم</span><h2 id="category-editorial-title">{editorialContent.title}</h2>{editorialContent.excerpt && <p>{editorialContent.excerpt}</p>}</div><div className="article-body"><ContentRenderer bodyJson={editorialContent.body_json} bodyText={editorialContent.body_text} recordId={editorialContent.id} /></div></section>}
       {childCards.length > 0 && <section className="section" id="section-children"><div className="section-mini-heading"><div><span className="eyebrow">موضوعات فرعية</span><h2>استكشف داخل القسم</h2></div><span>{childCards.length.toLocaleString('ar')} موضوعات</span></div><div className="category-public-grid">{childCards.map((child) => <article className="public-category-card" key={child.slug}><Link href={`/sections/${child.slug}`}><h3>{child.name_ar}</h3></Link><p>{child.description}</p><Link href={`/sections/${child.slug}`}>استعراض الصفحات ←</Link></article>)}</div></section>}
-      <section className="section related-content-section" id="section-content"><div className="section-heading"><span>المحتوى المنشور</span><h2>{query ? `نتائج البحث عن «${query}»` : `محتوى ${category.name_ar}`}</h2><p>صفحات مرتبة ضمن هذا القسم وفق التصنيف الأساسي المعتمد، وتفتح على عناوينها العامة الأصلية.</p></div>{rows.length ? <><div className="related-content-grid">{rows.map((item) => { const href = publicContentHref(item); return <article key={item.id}><span className="content-type-pill">{publicContentTypeLabel(item.content_type)}</span><h3><Link href={href}>{item.title}</Link></h3>{item.excerpt && <p>{item.excerpt}</p>}<Link href={href}>قراءة الصفحة ←</Link></article>; })}</div><PublicPagination currentPage={page} totalPages={pages} hrefForPage={(targetPage) => pageHref(slug, targetPage, query)} ariaLabel={`صفحات محتوى قسم ${category.name_ar}`} /></> : <div className="empty-state"><strong>لا توجد نتيجة مطابقة.</strong><span>جرّب مصطلحًا أقصر أو انتقل إلى أحد الموضوعات الفرعية.</span></div>}</section>
+      <section className="section related-content-section" id="section-content"><div className="section-heading"><span>المحتوى المنشور</span><h2>{query ? `نتائج البحث عن «${query}»` : `محتوى ${category.name_ar}`}</h2><p>كل الصفحات المنشورة المرتبطة بهذا القسم تظهر داخليًا هنا؛ قرار فهرسة محركات البحث يبقى مستقلًا على مستوى الصفحة.</p></div>{rows.length ? <><div className="related-content-grid">{rows.map((item) => { const href = publicContentHref(item); return <article key={item.id}><span className="content-type-pill">{publicContentTypeLabel(item.content_type)}</span><h3><Link href={href}>{item.title}</Link></h3>{item.excerpt && <p>{item.excerpt}</p>}<Link href={href}>قراءة الصفحة ←</Link></article>; })}</div><PublicPagination currentPage={page} totalPages={pages} hrefForPage={(targetPage) => pageHref(slug, targetPage, query)} ariaLabel={`صفحات محتوى قسم ${category.name_ar}`} /></> : <div className="empty-state"><strong>لا توجد نتيجة مطابقة.</strong><span>جرّب مصطلحًا أقصر أو انتقل إلى أحد الموضوعات الفرعية.</span></div>}</section>
     </main>
     <SiteFooter />
   </>;
