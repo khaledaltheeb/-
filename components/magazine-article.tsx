@@ -4,7 +4,7 @@ import SiteFooter from '@/components/site-footer';
 import ContentRenderer from '@/components/content-renderer';
 import ContentDisclaimerLink from '@/components/content-disclaimer-link';
 import { breadcrumbJsonLd, SITE_URL } from '@/lib/seo';
-import { evidenceKind, sourceUrl, type MagazineRecord } from '@/lib/magazine';
+import { evidenceKind, sourceUrl, type MagazineListingRecord, type MagazineRecord } from '@/lib/magazine';
 import styles from './magazine.module.css';
 
 type Block = { type?: string; items?: Array<{ question?: string; answer?: string }> };
@@ -21,7 +21,7 @@ function faqItems(record: MagazineRecord) {
   return blocks.flatMap((block) => block.type === 'faq' && Array.isArray(block.items) ? block.items : []).filter((item) => item.question && item.answer);
 }
 
-export default function MagazineArticle({ record, related }: { record: MagazineRecord; related: MagazineRecord[] }) {
+export default function MagazineArticle({ record, related }: { record: MagazineRecord; related: MagazineListingRecord[] }) {
   const canonical = record.canonical_url || `/content/${record.slug}`;
   const references = (record.references_json ?? []).filter((ref) => ref && (ref.title || ref.url));
   const primarySource = sourceUrl(record);
