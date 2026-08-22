@@ -29,33 +29,13 @@ function asRecord(value: unknown): JsonRecord | null {
   return value && typeof value === 'object' && !Array.isArray(value) ? value as JsonRecord : null;
 }
 
-function asNumber(value: unknown) {
-  if (typeof value === 'number' && Number.isFinite(value)) return value;
-  if (typeof value === 'string' && value.trim() !== '') {
-    const parsed = Number(value);
-    return Number.isFinite(parsed) ? parsed : 0;
-  }
-  return 0;
-}
-
 function sitemapEligible(item: ContentSitemapRecord) {
   const schema = asRecord(item.schema_json);
-  if (!schema || !('legacy_migration' in schema)) return true;
-
-  const legacy = asRecord(schema.legacy_migration);
-  const originality = asRecord(schema.originality_report);
-  return Boolean(
-    legacy
-    && asNumber(schema.migration_release_contract_version) >= 1
-    && schema.publication_ready === true
-    && schema.editorial_review_required === false
-    && schema.migration_route_verified === true
-    && schema.taxonomy_reviewed === true
-    && asNumber(schema.classification_confidence) >= .9
-    && originality?.passed === true
-    && typeof item.canonical_url === 'string'
-    && item.canonical_url.startsWith('/'),
-  );
+  // Production-baseline routes are intentionally preserved as noindex pages until
+  // they are rebuilt as first-class modern routes. A noindex URL must never be
+  // advertised in an XML sitemap, even when its source content row is published.
+  if (schema && 'legacy_migration' in schema) return false;
+  return true;
 }
 
 export async function GET(request: Request) {
@@ -79,6 +59,7 @@ export async function GET(request: Request) {
       .not('slug', 'like', 'quick-info-%')
       .lte('published_at', now)
       .eq('robots_index', true)
+      .is('schema_json->legacy_migration', null)
       .order('updated_at', { ascending: false })
       .order('id', { ascending: false })
       .range(batchStart, batchEnd);
