@@ -1,4 +1,5 @@
 import { sitemapResponse } from '@/lib/sitemap-xml';
+import { infographics } from '@/lib/practical-resources';
 
 export async function GET() {
   return sitemapResponse([
@@ -19,6 +20,18 @@ export async function GET() {
     { path:'/guided-assessment', changeFrequency:'monthly', priority:.68 },
     { path:'/assessment-lab', changeFrequency:'monthly', priority:.68 },
     { path:'/resources', changeFrequency:'weekly', priority:.68 },
+    { path:'/resources/worksheets', changeFrequency:'monthly', priority:.66 },
+    { path:'/resources/infographics', changeFrequency:'monthly', priority:.7 },
+    ...infographics.map((item) => ({ path:`/resources/infographics/${item.slug}`, changeFrequency:'monthly' as const, priority:.68 })),
+    { path:'/tools', changeFrequency:'weekly', priority:.7 },
+    { path:'/tools/compare', changeFrequency:'monthly', priority:.64 },
+    { path:'/tools/quiz', changeFrequency:'monthly', priority:.64 },
+    { path:'/tools/daily-term', changeFrequency:'daily', priority:.64 },
+    { path:'/audiences', changeFrequency:'monthly', priority:.66 },
+    { path:'/capabilities/ideas/', changeFrequency:'monthly', priority:.68 },
+    { path:'/capabilities/printables/', changeFrequency:'monthly', priority:.68 },
+    { path:'/downloads', changeFrequency:'weekly', priority:.62 },
+    { path:'/citation', changeFrequency:'monthly', priority:.58 },
     { path:'/sources', changeFrequency:'monthly', priority:.62 },
     { path:'/join', changeFrequency:'monthly', priority:.55 },
     { path:'/join/specialist', changeFrequency:'monthly', priority:.5 },
