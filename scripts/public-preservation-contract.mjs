@@ -29,8 +29,15 @@ const requiredSectorSlugs = [
   'addiction-recovery',
 ];
 
+const FETCH_TIMEOUT_MS = 15000;
+const fetchWithTimeout = (input, init = {}) => fetch(input, {
+  ...init,
+  signal: init.signal || AbortSignal.timeout(FETCH_TIMEOUT_MS),
+});
+
 const supabase = createClient(url, key, {
   auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+  global: { fetch: fetchWithTimeout },
 });
 
 const now = new Date().toISOString();
@@ -38,7 +45,19 @@ const failures = [];
 const fail = (message) => failures.push(message);
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-async function withRetry(label, task, attempts = 3) {
+function errorMessage(error) {
+  if (error instanceof Error && error.message) return error.message;
+  if (error && typeof error === 'object') {
+    const values = ['message', 'details', 'hint', 'code']
+      .map((key) => error[key])
+      .filter((value) => typeof value === 'string' && value.trim());
+    if (values.length) return values.join(' | ');
+    try { return JSON.stringify(error); } catch { /* ignore */ }
+  }
+  return String(error || 'unknown error');
+}
+
+async function withRetry(label, task, attempts = 5) {
   let lastError;
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
     try {
@@ -46,22 +65,48 @@ async function withRetry(label, task, attempts = 3) {
     } catch (error) {
       lastError = error;
       if (attempt === attempts) break;
-      const delayMs = 750 * attempt;
-      console.warn(`PUBLIC PRESERVATION CONTRACT RETRY: ${label} failed on attempt ${attempt}; retrying in ${delayMs}ms.`);
+      const delayMs = Math.min(6000, 750 * (2 ** (attempt - 1)));
+      console.warn(`PUBLIC PRESERVATION CONTRACT RETRY: ${label} failed on attempt ${attempt}: ${errorMessage(error)}; retrying in ${delayMs}ms.`);
       await sleep(delayMs);
     }
   }
-  throw lastError instanceof Error ? lastError : new Error(`${label}: transient check failed`);
+  throw lastError instanceof Error ? lastError : new Error(`${label}: ${errorMessage(lastError)}`);
+}
+
+async function countByRows(table, configure) {
+  const batchSize = 1000;
+  let total = 0;
+  for (let start = 0; start < 50000; start += batchSize) {
+    const batch = await withRetry(`${table} paged count rows ${start}-${start + batchSize - 1}`, async () => {
+      let query = supabase.from(table).select('id');
+      query = configure(query);
+      const { data, error } = await query.order('id', { ascending: true }).range(start, start + batchSize - 1);
+      if (error) throw new Error(`${table}: ${errorMessage(error)}`);
+      if (!Array.isArray(data)) throw new Error(`${table}: paged count returned no data array`);
+      return data;
+    });
+    total += batch.length;
+    if (batch.length < batchSize) return total;
+  }
+  throw new Error(`${table}: paged count exceeded the 50000-row safety bound`);
 }
 
 async function exactCount(table, configure) {
-  return withRetry(`${table} count`, async () => {
-    let query = supabase.from(table).select('id', { count: 'exact', head: true });
-    query = configure(query);
-    const { count, error } = await query;
-    if (error) throw new Error(`${table}: ${error.message}`);
-    return count ?? 0;
-  });
+  try {
+    return await withRetry(`${table} exact count`, async () => {
+      let query = supabase.from(table).select('id', { count: 'exact', head: true });
+      query = configure(query);
+      const { count, error } = await query;
+      if (error) throw new Error(`${table}: ${errorMessage(error)}`);
+      if (typeof count !== 'number') throw new Error(`${table}: exact count was unavailable`);
+      return count;
+    }, 2);
+  } catch (error) {
+    // Do not convert a transient HEAD/count failure into zero. Fall back to paged row reads,
+    // which independently verifies the same filtered inventory before applying the no-loss floor.
+    console.warn(`PUBLIC PRESERVATION CONTRACT FALLBACK: ${table} exact count unavailable (${errorMessage(error)}); verifying by paged row reads.`);
+    return countByRows(table, configure);
+  }
 }
 
 try {
@@ -72,7 +117,7 @@ try {
   const indexablePublishedContent = await exactCount('content', (query) => query.eq('status', 'published').lte('published_at', now).eq('robots_index', true));
   const sectorRows = await withRetry('public sector list', async () => {
     const result = await supabase.from('sectors').select('slug').eq('is_active', true).eq('visibility', 'public').limit(100);
-    if (result.error) throw new Error(`sectors: ${result.error.message}`);
+    if (result.error) throw new Error(`sectors: ${errorMessage(result.error)}`);
     return result.data ?? [];
   });
 
@@ -98,7 +143,7 @@ try {
     try {
       const data = await withRetry(`search «${test.query}»`, async () => {
         const result = await supabase.rpc('search_platform', { p_query: test.query, p_limit: 5 });
-        if (result.error) throw new Error(result.error.message);
+        if (result.error) throw new Error(errorMessage(result.error));
         return result.data ?? [];
       });
       const first = data[0];
@@ -106,7 +151,7 @@ try {
         fail(`search regression for «${test.query}»: expected ${test.expectedDestination} first`);
       }
     } catch (error) {
-      fail(`search failed for «${test.query}»: ${error instanceof Error ? error.message : String(error)}`);
+      fail(`search failed for «${test.query}»: ${errorMessage(error)}`);
     }
   }
 
@@ -117,6 +162,6 @@ try {
 
   console.log(`Public preservation contract passed: ${publicSectors} sectors, ${publicCategories} categories, ${publishedContent} published pages, ${indexablePublishedContent} indexable published pages.`);
 } catch (error) {
-  console.error(`PUBLIC PRESERVATION CONTRACT FAILED: ${error instanceof Error ? error.message : String(error)}`);
+  console.error(`PUBLIC PRESERVATION CONTRACT FAILED: ${errorMessage(error)}`);
   process.exit(1);
 }
