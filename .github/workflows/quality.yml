@@ -82,6 +82,8 @@ jobs:
         run: npm run smoke
       - name: Full sitemap SEO gate
         run: node scripts/seo-gate.mjs
+      - name: Rich results and discovery gate
+        run: node scripts/rich-discovery-gate.mjs
       - name: Lighthouse lab audit
         shell: bash
         run: |
