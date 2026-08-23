@@ -10,7 +10,7 @@ export const DEFAULT_DESCRIPTION = 'روافد منصة عربية للمعرف�
 const INDEXING_ENABLED = process.env.NEXT_PUBLIC_ALLOW_INDEXING === 'true';
 const HOME_TITLE = 'روافد | الصحة النفسية والتربية الخاصة وسرطان الأطفال';
 const HOME_DESCRIPTION = DEFAULT_DESCRIPTION;
-const HOME_IMAGE_PATH = '/seo-card';
+const DEFAULT_SOCIAL_IMAGE_PATH = '/seo-card';
 
 function absoluteUrl(pathOrUrl: string) {
   if (/^https?:\/\//i.test(pathOrUrl)) return pathOrUrl;
@@ -55,25 +55,24 @@ export function buildSeoMetadata(input: SeoMetadataInput): Metadata {
   const canonical = absoluteUrl(input.path);
   const canIndex = INDEXING_ENABLED && input.index !== false;
   const canFollow = input.follow !== false;
-  const imagePath = input.image || (isHomepage ? HOME_IMAGE_PATH : undefined);
-  const image = imagePath ? absoluteUrl(imagePath) : undefined;
+  const usesDefaultImage = !input.image;
+  const image = absoluteUrl(input.image || DEFAULT_SOCIAL_IMAGE_PATH);
   const languages = input.hreflang
     ? Object.fromEntries(Object.entries(input.hreflang).map(([key, value]) => [key, absoluteUrl(value)]))
     : undefined;
 
-  // Kept only for compatibility with callers/secondary engines. Google does not use meta keywords for ranking.
+  // Compatibility only. Google does not use meta keywords as a ranking signal.
   const keywords = input.keywords?.length ? Array.from(new Set(input.keywords)).slice(0, 20) : undefined;
-
-  const openGraphImage = image
-    ? isHomepage
-      ? [{ url: image, width: 1200, height: 630, alt: 'روافد — منصة عربية للمعرفة الصحية والنفسية' }]
-      : [{ url: image, alt: input.title }]
-    : undefined;
+  const openGraphImages = usesDefaultImage
+    ? [{ url: image, width: 1200, height: 630, alt: 'روافد — منصة عربية للمعرفة الصحية والنفسية الموثوقة' }]
+    : [{ url: image, alt: input.title }];
 
   return {
     title: { absolute: title },
     description,
     keywords,
+    creator: BRAND_NAME,
+    publisher: BRAND_NAME,
     alternates: { canonical, languages },
     robots: {
       index: canIndex,
@@ -98,7 +97,7 @@ export function buildSeoMetadata(input: SeoMetadataInput): Metadata {
       description,
       siteName: BRAND_SHORT,
       locale: DEFAULT_LOCALE,
-      images: openGraphImage,
+      images: openGraphImages,
       ...(input.type === 'article'
         ? {
             publishedTime: input.publishedTime || undefined,
@@ -108,10 +107,10 @@ export function buildSeoMetadata(input: SeoMetadataInput): Metadata {
         : {}),
     },
     twitter: {
-      card: image ? 'summary_large_image' : 'summary',
+      card: 'summary_large_image',
       title,
       description,
-      images: image ? [image] : undefined,
+      images: [image],
     },
   };
 }
