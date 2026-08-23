@@ -1,0 +1,1 @@
+alter trigger content_institutional_authorship_guard on public.content rename to y_content_institutional_authorship_guard;
