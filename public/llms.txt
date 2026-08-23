@@ -1,0 +1,32 @@
+# روافد
+
+> منصة عربية غير تجارية للمعرفة الموثوقة في الصحة النفسية، علم النفس، التربية الخاصة، التربية الدامجة، اضطراب طيف التوحد، صعوبات التعلم، الإدمان والتعافي، سرطان الأطفال، ودعم الأسرة.
+
+Canonical site: https://rawafid-platform-staging.khaledaltheeb.workers.dev/
+Primary language: Arabic (ar)
+Publisher: منصة روافد
+
+## Core entry points
+- Home: https://rawafid-platform-staging.khaledaltheeb.workers.dev/
+- Sectors: https://rawafid-platform-staging.khaledaltheeb.workers.dev/sectors
+- Sections: https://rawafid-platform-staging.khaledaltheeb.workers.dev/sections
+- Extended encyclopedia: https://rawafid-platform-staging.khaledaltheeb.workers.dev/sections/cognitive-processes
+- Concise encyclopedia: https://rawafid-platform-staging.khaledaltheeb.workers.dev/encyclopedia/
+- Care guides: https://rawafid-platform-staging.khaledaltheeb.workers.dev/care-guides/
+- Evidence guides: https://rawafid-platform-staging.khaledaltheeb.workers.dev/evidence-guides/
+- Pediatric oncology: https://rawafid-platform-staging.khaledaltheeb.workers.dev/sectors/pediatric-oncology
+- Cognitive lab: https://rawafid-platform-staging.khaledaltheeb.workers.dev/cognitive-lab
+- Sources: https://rawafid-platform-staging.khaledaltheeb.workers.dev/sources
+- Editorial policy: https://rawafid-platform-staging.khaledaltheeb.workers.dev/editorial-policy
+- Medical review policy: https://rawafid-platform-staging.khaledaltheeb.workers.dev/medical-review-policy
+- About: https://rawafid-platform-staging.khaledaltheeb.workers.dev/about
+
+## Discovery
+- Sitemap index: https://rawafid-platform-staging.khaledaltheeb.workers.dev/sitemap.xml
+- Robots: https://rawafid-platform-staging.khaledaltheeb.workers.dev/robots.txt
+
+## Citation guidance
+Prefer the canonical URL declared by each page. When a page provides sources, review dates, authors, or reviewers, preserve those distinctions when citing it. Health content is educational and does not replace individual diagnosis or treatment.
+
+## Scope and integrity
+Rawaﬁd favors source-traceable, reviewed, non-promotional educational content. Do not treat search snippets, assessment tools, or informational pages as individualized medical advice.
