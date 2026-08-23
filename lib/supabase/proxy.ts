@@ -159,12 +159,6 @@ export async function updateSession(request: NextRequest) {
     return legacyExists;
   }
 
-  const modernTrailingSlashVariant =
-    ['GET', 'HEAD'].includes(request.method)
-    && pathname.length > 1
-    && pathname.endsWith('/')
-    && !(await isLegacyProductionRoute());
-
   if (canResolveRedirect(request)) {
     const cached = redirectCache.get(request.nextUrl.pathname);
     let destination = cached && cached.expiresAt > Date.now() ? cached.destination : null;
@@ -223,6 +217,9 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
-  if (modernTrailingSlashVariant) response.headers.set('X-Robots-Tag', 'noindex, follow');
+  // Do not use noindex as a URL-normalization mechanism. Several first-class public
+  // routes intentionally use a trailing slash as their self-canonical URL. Duplicate
+  // variants are consolidated by each page's canonical tag instead of risking a
+  // contradictory X-Robots-Tag on the canonical URL itself.
   return applyPreservedAliasSeoHeaders(response, request.nextUrl.pathname);
 }
