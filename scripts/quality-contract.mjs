@@ -65,7 +65,7 @@ requireText('supabase/migrations/20260807185500_initial_owner_bootstrap.sql',['b
 
 const home=read('app/page.tsx');
 if(home.includes('fallbackPillars')) fail('homepage must not contain fallback/demo sectors');
-for(const needle of ['sectors.length > 0','rawafid-empty','getPublicSectors','ذوو الاحتياجات الخاصة']) if(!home.includes(needle)) fail(`homepage empty-theme behavior missing ${needle}`);
+for(const needle of ['sectors.length > 0','rawafid-empty','getPublicSectors','التربية الخاصة والدامجة','التوحد','صعوبات التعلم']) if(!home.includes(needle)) fail(`homepage empty-theme behavior missing ${needle}`);
 requireText('components/site-header.tsx',['ذوو الاحتياجات الخاصة والدمج','/sections']);
 requireText('app/sectors/page.tsx',['قطاعات روافد','visibility','public']);
 requireText('app/sections/page.tsx',['ذوي الاحتياجات الخاصة والدمج','PlatformIcon name="knowledge"']);
