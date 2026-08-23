@@ -44,7 +44,7 @@ jobs:
               -d "$payload" >/dev/null
           }
           post_status 'validate/cloudflare' 'Validating Rawafid for Cloudflare Workers'
-          post_status 'validate/cloudflare/code-quality' 'Waiting for TypeScript, ESLint and architecture contracts'
+          post_status 'validate/cloudflare/code-quality' 'Waiting for code quality and public preservation contracts'
           post_status 'validate/cloudflare/build' 'Waiting for OpenNext Cloudflare Worker build'
           post_status 'validate/cloudflare/dry-run' 'Waiting for Wrangler dry-run packaging'
 
@@ -66,11 +66,14 @@ jobs:
       - name: Architecture contracts
         run: npm run architecture-check
 
+      - name: Public preservation contract
+        run: node scripts/public-preservation-contract.mjs
+
       - name: Mark code quality passed
         if: github.event_name == 'push'
         shell: bash
         run: |
-          payload="$(printf '{\"state\":\"success\",\"context\":\"validate/cloudflare/code-quality\",\"description\":\"TypeScript, ESLint and architecture contracts passed\",\"target_url\":\"%s\"}' "$RUN_URL")"
+          payload="$(printf '{\"state\":\"success\",\"context\":\"validate/cloudflare/code-quality\",\"description\":\"Code quality, architecture and no-loss contracts passed\",\"target_url\":\"%s\"}' "$RUN_URL")"
           curl --fail --silent --show-error -X POST \
             -H "Authorization: Bearer ${GH_TOKEN}" -H 'Accept: application/vnd.github+json' -H 'X-GitHub-Api-Version: 2022-11-28' \
             "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" -d "$payload" >/dev/null
