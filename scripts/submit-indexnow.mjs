@@ -1,4 +1,4 @@
-const base = (process.env.INDEXNOW_SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://rawafid-platform-staging.khaledaltheeb.workers.dev').replace(/\/$/, '');
+const base = (process.env.INDEXNOW_SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://healthrenewal.org').replace(/\/$/, '');
 const key = process.env.INDEXNOW_KEY || 'b7f31d3c5a694e2f8b04c71d9a6e53f2';
 const endpoint = process.env.INDEXNOW_ENDPOINT || 'https://api.indexnow.org/indexnow';
 const batchSize = Math.max(1, Math.min(10000, Number(process.env.INDEXNOW_BATCH_SIZE || 10000)));
