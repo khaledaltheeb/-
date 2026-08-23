@@ -110,10 +110,15 @@ async function loadPublishedCanonicalContent() {
     throw new Error('NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY are required');
   }
 
+  // Expanded canonical term pages are published at /content/<slug>. Preserved
+  // legacy term-like pages use /encyclopedia/... or other historical routes.
+  // Using the canonical route family avoids scanning TOAST-heavy schema_json
+  // while preserving the same non-legacy comparison set.
   const params = new URLSearchParams({
-    select: 'slug,title,content_type,primary_keyword,legacy_migration:schema_json->legacy_migration',
+    select: 'slug,title,content_type,primary_keyword',
     status: 'eq.published',
     content_type: `in.(${TERM_LIKE_TYPES.join(',')})`,
+    canonical_url: 'like./content/%',
     order: 'slug.asc',
   });
   const endpoint = `${baseUrl}/rest/v1/content?${params.toString()}`;
@@ -128,7 +133,7 @@ async function loadPublishedCanonicalContent() {
       Range: `${offset}-${offset + PAGE_SIZE - 1}`,
     });
     if (!Array.isArray(batch)) throw new Error('Supabase canonical-content query returned a non-array payload');
-    rows.push(...batch.filter((row) => isRecord(row) && row.legacy_migration == null));
+    rows.push(...batch);
     if (batch.length < PAGE_SIZE) break;
   }
 
