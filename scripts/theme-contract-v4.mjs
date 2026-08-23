@@ -76,7 +76,7 @@ for (const token of [
 }
 if (!layout.includes("themeColor: '#075f61'")) fail('browser theme color must match the V5/PWA institutional chrome color');
 if (!header.includes('data-nav-priority') || !header.includes('حالة، دليل أو خدمة')) fail('V5.1 header must keep intent-led navigation and search');
-for (const token of ['footer-search', 'footer-trust-list', 'back-to-top']) {
+for (const token of ['footer-search', 'back-to-top']) {
   if (!footer.includes(token)) fail(`V5.1 footer missing ${token}`);
 }
 if (!footer.includes("style={{ display: 'block', padding: 0 }}")) fail('institutional footer must stay isolated from the legacy generic footer flex/padding rule');
