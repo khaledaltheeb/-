@@ -27,7 +27,7 @@ async function fetchText(url) {
     const response = await fetch(url, {
       redirect: 'follow',
       signal: controller.signal,
-      headers: { 'user-agent': 'Rawafid-Healthrenewal-Cutover-Gate/1.1' },
+      headers: { 'user-agent': 'Rawafid-Healthrenewal-Cutover-Gate/1.2' },
     });
     const text = await response.text();
     if (!response.ok) throw new Error(`${url} returned ${response.status}`);
@@ -79,10 +79,12 @@ async function main() {
   const total = publicUrls.size;
   const overlaps = [...occurrences.entries()].filter(([, count]) => count > 1);
   console.log(`Healthrenewal cutover inventory: ${total.toLocaleString('en-US')} unique canonical URLs across ${childMaps.length} child sitemaps.`);
-  console.log(`Raw sitemap occurrences: ${rawOccurrences.toLocaleString('en-US')}; expected/allowed overlap: ${overlaps.length.toLocaleString('en-US')} URLs.`);
-  console.log(`Required minimum: ${minimumUrls.toLocaleString('en-US')} unique qualified/indexable URLs.`);
+  console.log(`Raw sitemap occurrences: ${rawOccurrences.toLocaleString('en-US')}; duplicate canonical URLs: ${overlaps.length.toLocaleString('en-US')}.`);
+  console.log(`Required minimum: ${minimumUrls.toLocaleString('en-US')} unique sitemap URLs.`);
+
   if (overlaps.length) {
-    console.log(`Overlap sample: ${overlaps.slice(0, 10).map(([url, count]) => `${count}x ${url}`).join(' | ')}`);
+    const sample = overlaps.slice(0, 10).map(([url, count]) => `${count}x ${url}`).join(' | ');
+    throw new Error(`CUTOVER BLOCKED: duplicate canonical URLs occur across sitemaps (${overlaps.length}). Sample: ${sample}`);
   }
 
   if (total < minimumUrls) {
