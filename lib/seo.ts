@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { RAWAFID_BRAND_NAME, RAWAFID_BRAND_SHORT } from '@/lib/theme';
 
 export const PRODUCTION_SITE_URL = 'https://healthrenewal.org';
+export const STAGING_SITE_URL = 'https://rawafid-platform-staging.khaledaltheeb.workers.dev';
 
 function normalizedSiteUrl(value?: string) {
   const candidate = (value || PRODUCTION_SITE_URL).trim().replace(/\/$/, '');
