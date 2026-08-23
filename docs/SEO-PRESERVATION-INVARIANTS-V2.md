@@ -12,4 +12,5 @@ This validation round treats the existing public inventory as monotonic and non-
 - Static and generated indexable routes must have literal, generated-family, or database-backed sitemap coverage.
 - Network instability in a live preservation check may trigger retries or an independent paged-row count, but it must never be converted into a successful zero/unknown count.
 - Deterministic architecture contracts are separated from live inventory gates; Cloudflare validation, the full quality workflow, and production cutover all require the live preservation gate before build/deploy.
+- Review attribution requires a recorded review timestamp; a named reviewer is preserved when recorded, otherwise the Rawafid review team may be used only as the institutional fallback for that recorded review.
 - Passing validation never authorizes hiding, deleting, unpublishing, or changing the canonical identity of existing published content.
