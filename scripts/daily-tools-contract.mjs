@@ -138,7 +138,7 @@ if (!bad) {
   if (/readFileSync|loadPayload\s*\(/.test(catalog)) fail('Daily Tools runtime catalog must not synchronously read the multi-megabyte source corpus');
   if (/createClient|getLegacyPreservedPage|get_legacy_preserved_page/.test(catalog)) fail('first-class Daily Tools catalog must not depend on Supabase/legacy RPC at runtime');
 
-  for (const marker of ['build-daily-tools-route-manifest', 'EXPECTED_TOOL_COUNT = 150', 'generated/daily-tools-routes.json', 'public/daily-tools-data/records', 'assets', 'source_path']) {
+  for (const marker of ['EXPECTED_TOOL_COUNT = 150', 'generated/daily-tools-routes.json', 'public/daily-tools-data/records', 'const assets = new Map()', 'source_path', 'fs.writeFileSync']) {
     if (!generator.includes(marker)) fail(`route/content asset generator marker missing: ${marker}`);
   }
 
