@@ -24,6 +24,10 @@
         {
           "pattern": "healthrenewal.org",
           "custom_domain": true
+        },
+        {
+          "pattern": "www.healthrenewal.org",
+          "custom_domain": true
         }
       ],
       "vars": {
