@@ -37,11 +37,13 @@ requireAll(seo, [
   'relatedTerms?: string[]',
   'searchIntents?: string[]',
   'const semanticProfile = buildSemanticSeoProfile(input)',
-  'const keywords = semanticProfile.keywords',
+  'const keywords = semanticProfile.topicKeywords.slice(0, 12)',
 ], 'SEO metadata integration');
 
-if (/slice\(0,\s*20\)/.test(seo)) {
-  throw new Error('SEO metadata integration: legacy 20-keyword truncation returned');
+// The 100-signal inventory is an editorial/query-coverage instrument, not a reason to emit
+// 100 meta keywords. Google explicitly ignores meta keywords; keep public metadata concise.
+if (seo.includes('const keywords = semanticProfile.keywords')) {
+  throw new Error('SEO metadata integration: full 100-signal inventory must not be emitted as meta keywords');
 }
 
 // Never use hidden page copy or synthetic numbered filler to satisfy the inventory.
@@ -66,7 +68,8 @@ if (/throw new Error/.test(semantic)) {
   throw new Error('semantic SEO profile: runtime SEO generation must remain non-throwing');
 }
 
-// Execute the TypeScript generator itself so the 50 + 50 rule is behavioral, not merely textual.
+// Execute the TypeScript generator itself so the 50 + 50 internal rule is behavioral,
+// not merely textual. The public meta-keywords tag intentionally emits only a small subset.
 const transpiled = ts.transpileModule(semantic, {
   compilerOptions: {
     module: ts.ModuleKind.ES2022,
@@ -170,4 +173,4 @@ if (indexableFloor < 3519) {
   throw new Error(`public no-loss protection: indexable published baseline regressed to ${indexableFloor}`);
 }
 
-console.log(`Semantic SEO contract: OK — ${samples.length} runtime profiles each produced exactly 50 topical signals + 50 domain-aware search intents, all unique and filler-free, with published-page preservation enforced.`);
+console.log(`Semantic SEO contract: OK — ${samples.length} runtime profiles each produced exactly 50 topical signals + 50 domain-aware search intents internally, while public meta keywords remain concise and filler-free.`);
