@@ -26,19 +26,34 @@ const requiredSectorSlugs = [
   'addiction-recovery',
 ];
 
+const REQUEST_TIMEOUT_MS = 15000;
+const RETRY_ATTEMPTS = 5;
+const RETRY_BASE_DELAY_MS = 2000;
+
+async function boundedFetch(input, init = {}) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  try {
+    return await fetch(input, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 const supabase = createClient(url, key, {
   auth: {
     persistSession: false,
     autoRefreshToken: false,
     detectSessionInUrl: false,
   },
+  global: {
+    fetch: boundedFetch,
+  },
 });
 
 const now = new Date().toISOString();
 const failures = [];
 const fail = (message) => failures.push(message);
-const RETRY_ATTEMPTS = 5;
-const RETRY_BASE_DELAY_MS = 2000;
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -47,9 +62,10 @@ function sleep(ms) {
 function isTransientSupabaseError(error) {
   if (!error) return false;
   const code = String(error.code ?? '').toUpperCase();
+  const name = String(error.name ?? '').toLowerCase();
   const message = `${error.message ?? ''} ${error.details ?? ''} ${error.hint ?? ''}`.toLowerCase();
-  if (code === '57014') return true;
-  return /timeout|timed out|fetch failed|network|connection|econn|socket|429|500|502|503|504|temporarily unavailable|upstream/.test(message);
+  if (code === '57014' || name === 'aborterror') return true;
+  return /timeout|timed out|aborted|fetch failed|network|connection|econn|socket|429|500|502|503|504|temporarily unavailable|upstream/.test(message);
 }
 
 async function withTransientRetry(label, operation) {
