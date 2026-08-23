@@ -1,58 +1,65 @@
 import { ImageResponse } from 'next/og';
 
-export const dynamic = 'force-static';
+export const dynamic = 'force-dynamic';
 
-export function GET() {
+function clean(value: string | null, max: number) {
+  return String(value || '').replace(/\s+/g, ' ').trim().slice(0, max);
+}
+
+export function GET(request: Request) {
+  const url = new URL(request.url);
+  const title = clean(url.searchParams.get('title'), 120) || 'روافد — معرفة عربية موثوقة';
+  const context = clean(url.searchParams.get('context'), 70) || 'معرفة موثوقة · مصادر قابلة للتتبع · مسارات عملية';
+
   return new ImageResponse(
     (
       <div
+        dir="rtl"
         style={{
           width: '100%',
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
-          padding: '72px 84px',
-          background: 'linear-gradient(135deg, #f7fbfa 0%, #e9f5f3 55%, #d9efec 100%)',
+          padding: '68px 78px',
+          background: 'linear-gradient(135deg, #f7fbfa 0%, #e8f5f2 56%, #fff9ed 100%)',
           color: '#123b3c',
           fontFamily: 'Arial, sans-serif',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 22, justifyContent: 'flex-start' }}>
           <div
             style={{
-              width: 82,
-              height: 82,
-              borderRadius: 24,
+              width: 78,
+              height: 78,
+              borderRadius: 23,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               background: '#075f61',
               color: '#fff',
-              fontSize: 44,
+              fontSize: 40,
               fontWeight: 800,
             }}
-          >
-            R
-          </div>
+          >ر</div>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <div style={{ fontSize: 54, fontWeight: 800, lineHeight: 1.1 }}>RAWAFID</div>
-            <div style={{ fontSize: 24, marginTop: 10, color: '#416a6a' }}>Arabic knowledge platform for trusted health and wellbeing information</div>
+            <div style={{ fontSize: 48, fontWeight: 800, lineHeight: 1.1 }}>روافد</div>
+            <div style={{ fontSize: 22, marginTop: 8, color: '#416a6a' }}>منصة عربية للمعرفة الصحية والنفسية الموثوقة</div>
           </div>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', maxWidth: 980 }}>
-          <div style={{ fontSize: 46, fontWeight: 750, lineHeight: 1.35 }}>
-            Mental health · Inclusive education · Autism · Learning difficulties · Pediatric cancer
+        <div style={{ display: 'flex', flexDirection: 'column', maxWidth: 1040 }}>
+          <div style={{ fontSize: title.length > 80 ? 40 : 48, fontWeight: 800, lineHeight: 1.42 }}>
+            {title}
           </div>
-          <div style={{ fontSize: 25, lineHeight: 1.6, marginTop: 26, color: '#345d5e' }}>
-            Trusted knowledge, practical guides, specialists, centers, and clear pathways for families and caregivers.
+          <div style={{ fontSize: 23, lineHeight: 1.6, marginTop: 22, color: '#345d5e' }}>
+            {context}
           </div>
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 20, color: '#4f7172' }}>
-          <span>rawafid</span>
-          <span>Knowledge starts with a clear question</span>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 19, color: '#4f7172' }}>
+          <span>healthrenewal.org</span>
+          <span>اسأل · افهم · تحقق من المصدر</span>
         </div>
       </div>
     ),
