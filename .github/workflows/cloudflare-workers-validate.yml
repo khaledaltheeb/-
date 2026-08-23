@@ -3,8 +3,7 @@ name: Cloudflare Workers Validate
 on:
   push:
     branches: [main, cloudflare-workers-deploy]
-  pull_request:
-    branches: [main]
+  workflow_dispatch:
 
 concurrency:
   group: cloudflare-workers-${{ github.ref }}

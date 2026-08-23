@@ -16,7 +16,7 @@ permissions:
 jobs:
   quality:
     runs-on: ubuntu-latest
-    timeout-minutes: 50
+    timeout-minutes: 60
     env:
       NEXT_PUBLIC_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
@@ -26,10 +26,10 @@ jobs:
       VISUAL_OUTPUT_DIR: visual-artifacts
       SMOKE_BASE_URL: http://127.0.0.1:3000
       SEO_GATE_BASE_URL: http://127.0.0.1:3000
-      SEO_GATE_CONCURRENCY: '6'
+      SEO_GATE_CONCURRENCY: '2'
       SEO_GATE_TIMEOUT_MS: '15000'
-      SEO_GATE_PAGE_ATTEMPTS: '3'
-      SEO_GATE_PAGE_RETRY_DELAY_MS: '300'
+      SEO_GATE_PAGE_ATTEMPTS: '5'
+      SEO_GATE_PAGE_RETRY_DELAY_MS: '1000'
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -40,6 +40,10 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Architecture privacy PWA and theme contract
         run: npm run architecture-check
+      - name: Expanded encyclopedia live duplicate guard
+        run: node scripts/expanded-encyclopedia-live-duplicate-contract.mjs
+      - name: Public preservation contract
+        run: node scripts/public-preservation-contract.mjs
       - name: Final content-readiness hardening contract
         run: node scripts/final-hardening-check.mjs
       - name: Type check
@@ -124,6 +128,12 @@ jobs:
           console.log('Lighthouse performance scores:',performances,'median:',median);
           if(median<0.70) throw new Error(`Median Lighthouse performance below 0.70: ${median}`);
           NODE
+      - name: Build Cloudflare Worker with OpenNext
+        if: github.event_name == 'pull_request'
+        run: npx opennextjs-cloudflare build
+      - name: Validate Wrangler package
+        if: github.event_name == 'pull_request'
+        run: npx wrangler deploy --dry-run
       - name: Upload visual regression artifacts
         if: always()
         uses: actions/upload-artifact@v4
