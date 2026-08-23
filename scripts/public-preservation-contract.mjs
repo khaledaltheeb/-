@@ -11,7 +11,7 @@ if (!url || !key) {
 const baseline = {
   publicSectors: 9,
   publicCategories: 126,
-  publishedContent: 3642,
+  publishedContent: 3660,
 };
 
 const requiredSectorSlugs = [
