@@ -1,7 +1,11 @@
 name: Deploy Production
 
-# Manual fallback only. Production cutover target: healthrenewal.org.
+# Production deployment for healthrenewal.org from the Cloudflare/Rawafid repository.
+# Runs automatically after updates to main and remains manually dispatchable as a fallback.
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 concurrency:
