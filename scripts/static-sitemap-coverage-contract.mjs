@@ -56,6 +56,16 @@ function coveredByGeneratedFamily(route) {
     route.startsWith('/daily-tools/');
 }
 
+function hasDynamicMetadata(source) {
+  return /export\s+(?:async\s+)?function\s+generateMetadata\s*\(/.test(source);
+}
+
+function hasDataDrivenIndexability(source) {
+  // Examples: index: record.robots_index or index: page.robots_index. Literal true/false
+  // remains statically auditable and must not be skipped here.
+  return /index\s*:\s*(?!true\b|false\b)[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)+/.test(source);
+}
+
 async function dbBackedContentCanonicals() {
   const supabase = createClient(url, key, {
     auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
@@ -100,7 +110,14 @@ for (const file of pageFiles) {
   const source = fs.readFileSync(file, 'utf8');
   if (!source.includes('buildSeoMetadata')) continue;
   if (/index\s*:\s*false/.test(source)) continue;
-  candidates.push({ file, route: normalizeRoute(route) || route });
+  const normalizedRoute = normalizeRoute(route) || route;
+
+  // A route whose index flag comes from the live content record is covered if and only if
+  // that live record is indexable. If no indexable canonical exists now, do not force an
+  // intentionally noindex data-driven page into the static sitemap merely to satisfy CI.
+  if (hasDynamicMetadata(source) && hasDataDrivenIndexability(source) && !dbCanonicals.has(normalizedRoute)) continue;
+
+  candidates.push({ file, route: normalizedRoute });
 }
 
 const missing = candidates.filter(({ route }) => {
@@ -109,10 +126,27 @@ const missing = candidates.filter(({ route }) => {
   return !variants(route).some((variant) => sitemapSource.includes(variant));
 });
 
+// Bracket routes need an explicit generated-family check because pageRoute deliberately
+// skips them. Infographic details are indexable; worksheet details are deliberately noindex.
+const staticSitemap = fs.readFileSync('app/sitemaps/static.xml/route.ts', 'utf8');
+const infographicDetail = fs.readFileSync('app/resources/infographics/[slug]/page.tsx', 'utf8');
+const worksheetDetail = fs.readFileSync('app/resources/worksheets/[slug]/page.tsx', 'utf8');
+if (/index\s*:\s*true/.test(infographicDetail)) {
+  if (!staticSitemap.includes("import { infographics } from '@/lib/practical-resources'")) {
+    missing.push({ route: '/resources/infographics/[slug]', file: 'app/resources/infographics/[slug]/page.tsx — sitemap must import infographics' });
+  }
+  if (!staticSitemap.includes('`/resources/infographics/${item.slug}`')) {
+    missing.push({ route: '/resources/infographics/[slug]', file: 'app/resources/infographics/[slug]/page.tsx — generated sitemap URLs missing' });
+  }
+}
+if (/index\s*:\s*true/.test(worksheetDetail)) {
+  missing.push({ route: '/resources/worksheets/[slug]', file: 'app/resources/worksheets/[slug]/page.tsx — unexpectedly became indexable without sitemap coverage' });
+}
+
 if (missing.length) {
-  console.error(`STATIC SITEMAP COVERAGE CONTRACT FAILED: ${missing.length} indexable static route(s) are absent from static/generated/DB-backed sitemap coverage.`);
+  console.error(`STATIC SITEMAP COVERAGE CONTRACT FAILED: ${missing.length} indexable route(s) are absent from static/generated/DB-backed sitemap coverage.`);
   for (const item of missing) console.error(`- ${item.route} (${item.file})`);
   process.exit(1);
 }
 
-console.log(`Static sitemap coverage contract passed: ${candidates.length} indexable static routes are represented by literal, generated-family, or DB-backed sitemap coverage.`);
+console.log(`Static sitemap coverage contract passed: ${candidates.length} indexable static routes are represented by literal, generated-family, or DB-backed sitemap coverage, with generated practical-resource details audited explicitly.`);
