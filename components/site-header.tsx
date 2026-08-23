@@ -16,9 +16,11 @@ const primaryLinks = [
 
 const intentLinks = [
   { href: '/search?q=أعراض+نفسية', label: 'أفهم عرضًا أو حالة', detail: 'ابدأ من سؤالك واحصل على مسار معرفي واضح' },
+  { href: '/sectors/mental-health', label: 'الصحة النفسية', detail: 'فهم الأعراض والاضطرابات والتقييم والدعم والعلاج المبني على الدليل' },
   { href: '/care-guides/', label: 'أحتاج دليل رعاية عمليًا', detail: 'أدلة للأسرة والتعامل اليومي والمواقف المتكررة' },
   { href: '/sectors/pediatric-oncology', label: 'سرطان الأطفال', detail: 'التشخيص والعلاج والأبحاث والدعم والنجاة' },
-  { href: '/search?q=ذوو+الاحتياجات+الخاصة+الدمج', label: 'ذوو الاحتياجات الخاصة والدمج', detail: 'تعليم وتأهيل وتمكين عبر مراحل الحياة' },
+  { href: '/sectors/special-needs-inclusion', label: 'ذوو الاحتياجات الخاصة والدمج', detail: 'تعليم وتأهيل وتمكين عبر مراحل الحياة' },
+  { href: '/sectors/addiction-recovery', label: 'الإدمان والتعافي', detail: 'الوقاية والعلاج والتعافي ودعم الأسرة وتقليل الانتكاس' },
 ];
 
 const serviceLinks = [
