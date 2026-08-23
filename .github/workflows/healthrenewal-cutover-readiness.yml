@@ -1,0 +1,89 @@
+name: Healthrenewal Cutover Readiness
+
+# This workflow never deploys. It builds the current candidate exactly as production,
+# audits its full sitemap locally, and blocks cutover below the 10,000-URL requirement.
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: healthrenewal-cutover-readiness
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  readiness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
+      NEXT_PUBLIC_SITE_URL: https://healthrenewal.org
+      NEXT_PUBLIC_ALLOW_INDEXING: 'true'
+      NEXT_PUBLIC_ENABLE_ANALYTICS: 'false'
+      SEO_GATE_BASE_URL: http://127.0.0.1:3000
+      SEO_GATE_CONCURRENCY: '6'
+      SEO_GATE_TIMEOUT_MS: '20000'
+      SEO_GATE_PAGE_ATTEMPTS: '3'
+      SEO_GATE_PAGE_RETRY_DELAY_MS: '350'
+      CUTOVER_BASE_URL: http://127.0.0.1:3000
+      CUTOVER_CANONICAL_ORIGIN: https://healthrenewal.org
+      CUTOVER_MIN_INDEXABLE_URLS: '10000'
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Type check
+        run: npm run typecheck
+      - name: Lint
+        run: npm run lint
+      - name: Architecture and SEO contracts
+        run: npm run architecture-check
+      - name: Build production-canonical candidate
+        run: npm run build
+      - name: Start candidate locally
+        shell: bash
+        run: |
+          set -euo pipefail
+          nohup npm run start -- --hostname 127.0.0.1 --port 3000 > /tmp/rawafid-cutover.log 2>&1 &
+          echo $! > /tmp/rawafid-cutover.pid
+          ready=0
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:3000/ >/dev/null; then
+              ready=1
+              break
+            fi
+            sleep 1
+          done
+          if [ "$ready" -ne 1 ]; then
+            cat /tmp/rawafid-cutover.log >&2 || true
+            exit 1
+          fi
+      - name: Count canonical URLs and enforce 10k cutover threshold
+        run: node scripts/healthrenewal-cutover-readiness.mjs
+      - name: Full sitemap SEO audit
+        run: node scripts/seo-gate.mjs
+      - name: Rich discovery and structured-data audit
+        run: node scripts/rich-discovery-gate.mjs
+      - name: Stop candidate server
+        if: always()
+        shell: bash
+        run: |
+          if [ -f /tmp/rawafid-cutover.pid ]; then
+            kill "$(cat /tmp/rawafid-cutover.pid)" 2>/dev/null || true
+          fi
+      - name: Upload cutover diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: healthrenewal-cutover-diagnostics-${{ github.run_id }}
+          path: /tmp/rawafid-cutover.log
+          if-no-files-found: ignore
+          retention-days: 14
