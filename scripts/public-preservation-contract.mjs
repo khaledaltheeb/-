@@ -12,7 +12,7 @@ if (!url || !key) {
 const baseline = {
   publicSectors: 9,
   publicCategories: 126,
-  publishedContent: 3709,
+  publishedContent: 3746,
 };
 
 const requiredSectorSlugs = [
@@ -34,30 +34,50 @@ const supabase = createClient(url, key, {
 const now = new Date().toISOString();
 const failures = [];
 const fail = (message) => failures.push(message);
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+async function withRetry(label, task, attempts = 3) {
+  let lastError;
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      return await task();
+    } catch (error) {
+      lastError = error;
+      if (attempt === attempts) break;
+      const delayMs = 750 * attempt;
+      console.warn(`PUBLIC PRESERVATION CONTRACT RETRY: ${label} failed on attempt ${attempt}; retrying in ${delayMs}ms.`);
+      await sleep(delayMs);
+    }
+  }
+  throw lastError instanceof Error ? lastError : new Error(`${label}: transient check failed`);
+}
 
 async function exactCount(table, configure) {
-  let query = supabase.from(table).select('id', { count: 'exact', head: true });
-  query = configure(query);
-  const { count, error } = await query;
-  if (error) throw new Error(`${table}: ${error.message}`);
-  return count ?? 0;
+  return withRetry(`${table} count`, async () => {
+    let query = supabase.from(table).select('id', { count: 'exact', head: true });
+    query = configure(query);
+    const { count, error } = await query;
+    if (error) throw new Error(`${table}: ${error.message}`);
+    return count ?? 0;
+  });
 }
 
 try {
-  const [publicSectors, publicCategories, publishedContent, sectorRows] = await Promise.all([
-    exactCount('sectors', (query) => query.eq('is_active', true).eq('visibility', 'public')),
-    exactCount('categories', (query) => query.eq('is_active', true).eq('visibility', 'public')),
-    exactCount('content', (query) => query.eq('status', 'published').lte('published_at', now)),
-    supabase.from('sectors').select('slug').eq('is_active', true).eq('visibility', 'public').limit(100),
-  ]);
-
-  if (sectorRows.error) throw new Error(`sectors: ${sectorRows.error.message}`);
+  // Keep preservation checks sequential: this is a safety gate, not a load test.
+  const publicSectors = await exactCount('sectors', (query) => query.eq('is_active', true).eq('visibility', 'public'));
+  const publicCategories = await exactCount('categories', (query) => query.eq('is_active', true).eq('visibility', 'public'));
+  const publishedContent = await exactCount('content', (query) => query.eq('status', 'published').lte('published_at', now));
+  const sectorRows = await withRetry('public sector list', async () => {
+    const result = await supabase.from('sectors').select('slug').eq('is_active', true).eq('visibility', 'public').limit(100);
+    if (result.error) throw new Error(`sectors: ${result.error.message}`);
+    return result.data ?? [];
+  });
 
   if (publicSectors < baseline.publicSectors) fail(`public sectors decreased: ${publicSectors} < ${baseline.publicSectors}`);
   if (publicCategories < baseline.publicCategories) fail(`public categories decreased: ${publicCategories} < ${baseline.publicCategories}`);
   if (publishedContent < baseline.publishedContent) fail(`published content decreased: ${publishedContent} < ${baseline.publishedContent}`);
 
-  const sectorSlugs = new Set((sectorRows.data ?? []).map((row) => row.slug));
+  const sectorSlugs = new Set(sectorRows.map((row) => row.slug));
   for (const slug of requiredSectorSlugs) {
     if (!sectorSlugs.has(slug)) fail(`required public sector disappeared: ${slug}`);
   }
@@ -71,14 +91,18 @@ try {
   ];
 
   for (const test of criticalSearches) {
-    const { data, error } = await supabase.rpc('search_platform', { p_query: test.query, p_limit: 5 });
-    if (error) {
-      fail(`search failed for «${test.query}»: ${error.message}`);
-      continue;
-    }
-    const first = data?.[0];
-    if (!first || first.entity_type !== test.expectedType || first.destination !== test.expectedDestination) {
-      fail(`search regression for «${test.query}»: expected ${test.expectedDestination} first`);
+    try {
+      const data = await withRetry(`search «${test.query}»`, async () => {
+        const result = await supabase.rpc('search_platform', { p_query: test.query, p_limit: 5 });
+        if (result.error) throw new Error(result.error.message);
+        return result.data ?? [];
+      });
+      const first = data[0];
+      if (!first || first.entity_type !== test.expectedType || first.destination !== test.expectedDestination) {
+        fail(`search regression for «${test.query}»: expected ${test.expectedDestination} first`);
+      }
+    } catch (error) {
+      fail(`search failed for «${test.query}»: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
