@@ -2,28 +2,29 @@
 
 > منصة عربية غير تجارية للمعرفة الموثوقة في الصحة النفسية، علم النفس، التربية الخاصة، التربية الدامجة، اضطراب طيف التوحد، صعوبات التعلم، الإدمان والتعافي، سرطان الأطفال، ودعم الأسرة.
 
-Canonical site: https://rawafid-platform-staging.khaledaltheeb.workers.dev/
+Canonical site: https://healthrenewal.org/
 Primary language: Arabic (ar)
 Publisher: منصة روافد
 
 ## Core entry points
-- Home: https://rawafid-platform-staging.khaledaltheeb.workers.dev/
-- Sectors: https://rawafid-platform-staging.khaledaltheeb.workers.dev/sectors
-- Sections: https://rawafid-platform-staging.khaledaltheeb.workers.dev/sections
-- Extended encyclopedia: https://rawafid-platform-staging.khaledaltheeb.workers.dev/sections/cognitive-processes
-- Concise encyclopedia: https://rawafid-platform-staging.khaledaltheeb.workers.dev/encyclopedia/
-- Care guides: https://rawafid-platform-staging.khaledaltheeb.workers.dev/care-guides/
-- Evidence guides: https://rawafid-platform-staging.khaledaltheeb.workers.dev/evidence-guides/
-- Pediatric oncology: https://rawafid-platform-staging.khaledaltheeb.workers.dev/sectors/pediatric-oncology
-- Cognitive lab: https://rawafid-platform-staging.khaledaltheeb.workers.dev/cognitive-lab
-- Sources: https://rawafid-platform-staging.khaledaltheeb.workers.dev/sources
-- Editorial policy: https://rawafid-platform-staging.khaledaltheeb.workers.dev/editorial-policy
-- Medical review policy: https://rawafid-platform-staging.khaledaltheeb.workers.dev/medical-review-policy
-- About: https://rawafid-platform-staging.khaledaltheeb.workers.dev/about
+- Home: https://healthrenewal.org/
+- Sectors: https://healthrenewal.org/sectors
+- Sections: https://healthrenewal.org/sections
+- Extended encyclopedia: https://healthrenewal.org/sections/cognitive-processes
+- Concise encyclopedia: https://healthrenewal.org/encyclopedia/
+- Care guides: https://healthrenewal.org/care-guides/
+- Evidence guides: https://healthrenewal.org/evidence-guides/
+- Pediatric oncology: https://healthrenewal.org/sectors/pediatric-oncology
+- Cognitive lab: https://healthrenewal.org/cognitive-lab
+- Sources: https://healthrenewal.org/sources
+- Editorial policy: https://healthrenewal.org/editorial-policy
+- Medical review policy: https://healthrenewal.org/medical-review-policy
+- About: https://healthrenewal.org/about
 
 ## Discovery
-- Sitemap index: https://rawafid-platform-staging.khaledaltheeb.workers.dev/sitemap.xml
-- Robots: https://rawafid-platform-staging.khaledaltheeb.workers.dev/robots.txt
+- Sitemap index: https://healthrenewal.org/sitemap.xml
+- Robots: https://healthrenewal.org/robots.txt
+- RSS: https://healthrenewal.org/feed.xml
 
 ## Citation guidance
 Prefer the canonical URL declared by each page. When a page provides sources, review dates, authors, or reviewers, preserve those distinctions when citing it. Health content is educational and does not replace individual diagnosis or treatment.
