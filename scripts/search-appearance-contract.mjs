@@ -19,6 +19,7 @@ const staticSitemap = read('app/sitemaps/static.xml/route.ts');
 const sitemapIndex = read('app/sitemap.xml/route.ts');
 const header = read('components/site-header.tsx');
 const footer = read('components/site-footer.tsx');
+const middleware = read('middleware.ts');
 const wrangler = read('wrangler.jsonc');
 const productionWorkflow = read('.github/workflows/deploy-production.yml');
 const qualityWorkflow = read('.github/workflows/quality.yml');
@@ -120,12 +121,24 @@ requireAll(footer, [
 requireAll(wrangler, [
   '"NEXT_PUBLIC_SITE_URL": "https://rawafid-platform-staging.khaledaltheeb.workers.dev"',
   '"NEXT_PUBLIC_ALLOW_INDEXING": "false"',
-], 'staging must stay non-indexable');
+  '"pattern": "healthrenewal.org"',
+  '"pattern": "www.healthrenewal.org"',
+], 'staging and production host contract');
+requireAll(middleware, [
+  "hostname === 'www.healthrenewal.org'",
+  "canonical.host = 'healthrenewal.org'",
+  'NextResponse.redirect(canonical, 308)',
+], 'www canonical redirect');
 requireAll(productionWorkflow, [
+  'workflow_dispatch:',
   'NEXT_PUBLIC_SITE_URL: https://healthrenewal.org',
   "NEXT_PUBLIC_ALLOW_INDEXING: 'true'",
+  'www.healthrenewal.org',
   "grep -q 'workers.dev'",
 ], 'production domain migration');
+if (/^\s*push\s*:/m.test(productionWorkflow)) {
+  throw new Error('production cutover guard: deploy-production must remain manual until launch day');
+}
 requireAll(qualityWorkflow, [
   'NEXT_PUBLIC_SITE_URL: https://healthrenewal.org',
   'SEO_GATE_BASE_URL: http://127.0.0.1:3000',
