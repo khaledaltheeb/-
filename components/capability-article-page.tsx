@@ -8,6 +8,8 @@ import styles from './capability-article-page.module.css';
 import {
   capabilityBodyWithoutRegistryCards,
   safeCapabilityReferences,
+  sanitizeCapabilityBody,
+  sanitizeCapabilityText,
   visibleCapabilityFaq,
   type CapabilityRecord,
   type CapabilityRegistryItem,
@@ -21,6 +23,8 @@ type Props = {
   routeSlug?: string;
   registryItems?: CapabilityRegistryItem[];
 };
+
+const DEFAULT_DISCLAIMER = 'هذا المحتوى تثقيفي وعملي عام. لا يشخّص حالة، ولا يصف علاجًا فرديًا، ولا يستبدل التقييم الطبي أو النفسي أو التأهيلي المتخصص. عند وجود ألم، تدهور، أعراض جديدة أو مخاطر سلامة، تُقدَّم الرعاية المهنية المناسبة على أي تجربة وظيفية.';
 
 function asRecord(value: unknown): JsonRecord | null {
   return value && typeof value === 'object' && !Array.isArray(value) ? (value as JsonRecord) : null;
@@ -49,10 +53,13 @@ function protocolSteps(value: unknown) {
 
 function ReferenceNav({ end = false }: { end?: boolean }) {
   return (
-    <nav className={end ? styles.endNav : styles.referenceNav} aria-label={end ? 'الخطوة التالية في مرجع القدرات' : 'أقسام مرجع القدرات'}>
-      <Link href="/capabilities/">مدخل المرجع</Link>
-      <Link href="/capabilities/registry/">سجل الحالات المئة</Link>
+    <nav className={end ? styles.endNav : styles.referenceNav} aria-label={end ? 'الخطوة التالية في قطاع لنرتقي بقدراتهم' : 'أقسام قطاع لنرتقي بقدراتهم'}>
+      <Link href="/sectors/capabilities">واجهة القطاع</Link>
+      <Link href="/capabilities/">ابدأ من هنا</Link>
+      <Link href="/capabilities/registry/">أدلة الحالات المئة</Link>
       <Link href="/capabilities/protocol/">البروتوكول العملي</Link>
+      <Link href="/capabilities/printables/">أوراق قابلة للطباعة</Link>
+      <Link href="/capabilities/ideas/">أفكار خارج الصندوق</Link>
       <Link href="/capabilities/methodology/">المنهجية والأدلة</Link>
     </nav>
   );
@@ -60,19 +67,22 @@ function ReferenceNav({ end = false }: { end?: boolean }) {
 
 export default function CapabilityArticlePage({ record, routeSlug, registryItems = [] }: Props) {
   const references = safeCapabilityReferences(record.references_json);
-  const faqItems = visibleCapabilityFaq(record.body_json);
+  const sanitizedBody = sanitizeCapabilityBody(record.body_json);
+  const faqItems = visibleCapabilityFaq(sanitizedBody);
   const role = pageRole(record.schema_json);
   const review = contentReviewProvenance(record);
   const canonical = record.canonical_url || (routeSlug ? `/capabilities/${routeSlug}/` : '/capabilities/');
   const url = canonical.startsWith('https://') ? canonical : `${SITE_URL}${canonical}`;
-  const bodyJson = role === 'registry' ? capabilityBodyWithoutRegistryCards(record.body_json) : record.body_json;
+  const bodyJson = role === 'registry' ? capabilityBodyWithoutRegistryCards(sanitizedBody) : sanitizedBody;
   const audiences = Array.isArray(record.audience) ? record.audience.map(String) : [];
   const registry = role === 'registry' ? registryItems : [];
+  const disclaimer = sanitizeCapabilityText(record.medical_disclaimer || DEFAULT_DISCLAIMER);
 
   const breadcrumbs = breadcrumbJsonLd([
     { name: 'الرئيسية', path: '/' },
-    { name: 'ذوو الاحتياجات الخاصة والدمج والتمكين', path: '/sectors/special-needs-inclusion' },
-    ...(routeSlug ? [{ name: 'لنرتقي بقدراتهم', path: '/capabilities/' }] : []),
+    { name: 'القطاعات', path: '/sectors' },
+    { name: 'لنرتقي بقدراتهم', path: '/sectors/capabilities' },
+    ...(routeSlug ? [{ name: 'مرجع القدرات', path: '/capabilities/' }] : []),
     { name: record.title, path: canonical },
   ]);
 
@@ -94,7 +104,7 @@ export default function CapabilityArticlePage({ record, routeSlug, registryItems
       : undefined,
   };
 
-  const steps = role === 'protocol' ? protocolSteps(record.body_json) : [];
+  const steps = role === 'protocol' ? protocolSteps(bodyJson) : [];
   const contentSchema: Record<string, unknown> = role === 'registry'
     ? {
         ...common,
@@ -115,9 +125,11 @@ export default function CapabilityArticlePage({ record, routeSlug, registryItems
           ...common,
           '@type': 'CollectionPage',
           hasPart: [
-            { '@type': 'CollectionPage', name: 'سجل القدرات', url: `${SITE_URL}/capabilities/registry/` },
+            { '@type': 'CollectionPage', name: 'أدلة الحالات المئة', url: `${SITE_URL}/capabilities/registry/` },
             { '@type': 'HowTo', name: 'بروتوكول اكتشاف وتنمية القدرة', url: `${SITE_URL}/capabilities/protocol/` },
             { '@type': 'Article', name: 'منهجية اكتشاف القدرات', url: `${SITE_URL}/capabilities/methodology/` },
+            { '@type': 'CollectionPage', name: 'أوراق قابلة للطباعة', url: `${SITE_URL}/capabilities/printables/` },
+            { '@type': 'CollectionPage', name: 'أفكار خارج الصندوق', url: `${SITE_URL}/capabilities/ideas/` },
           ],
         }
       : role === 'protocol' && steps.length > 0
@@ -167,11 +179,13 @@ export default function CapabilityArticlePage({ record, routeSlug, registryItems
         <nav className="breadcrumbs" aria-label="مسار الصفحة">
           <Link href="/">الرئيسية</Link>
           <span>/</span>
-          <Link href="/sectors/special-needs-inclusion">ذوو الاحتياجات الخاصة والدمج والتمكين</Link>
+          <Link href="/sectors">القطاعات</Link>
+          <span>/</span>
+          <Link href="/sectors/capabilities">لنرتقي بقدراتهم</Link>
           {routeSlug ? (
             <>
               <span>/</span>
-              <Link href="/capabilities/">لنرتقي بقدراتهم</Link>
+              <Link href="/capabilities/">مرجع القدرات</Link>
             </>
           ) : null}
           <span>/</span>
@@ -180,7 +194,7 @@ export default function CapabilityArticlePage({ record, routeSlug, registryItems
 
         <article>
           <header className="article-hero">
-            <span className="eyebrow">لنرتقي بقدراتهم</span>
+            <span className="eyebrow">قطاع لنرتقي بقدراتهم</span>
             <h1>{record.title}</h1>
             {record.excerpt ? <p>{record.excerpt}</p> : null}
             <div className="article-meta">
@@ -212,16 +226,14 @@ export default function CapabilityArticlePage({ record, routeSlug, registryItems
                 />
               </figure>
             ) : null}
-            <ContentRenderer bodyJson={bodyJson} bodyText={record.body_text} recordId={record.id} />
+            <ContentRenderer bodyJson={bodyJson} bodyText={sanitizeCapabilityText(record.body_text || '')} recordId={record.id} />
           </div>
 
-          {record.medical_disclaimer ? (
-            <aside className="medical-disclaimer" aria-label="إخلاء المسؤولية الطبية">
-              <strong>تنبيه منهجي وصحي</strong>
-              <p>{record.medical_disclaimer}</p>
-              <Link href="/disclaimer">إخلاء المسؤولية الكامل</Link>
-            </aside>
-          ) : null}
+          <aside className="medical-disclaimer" aria-label="تنبيه منهجي وصحي">
+            <strong>تنبيه منهجي وصحي</strong>
+            <p>{disclaimer}</p>
+            <Link href="/disclaimer">إخلاء المسؤولية الكامل</Link>
+          </aside>
 
           <ReferenceNav end />
 
