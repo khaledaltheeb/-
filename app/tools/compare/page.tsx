@@ -1,12 +1,17 @@
-import type { Metadata } from 'next';
 import Link from 'next/link';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
+import { buildSeoMetadata } from '@/lib/seo';
 import { getTerminologyToolTerms } from '@/lib/terminology-tools';
 import styles from '../tools.module.css';
 
 export const dynamic = 'force-dynamic';
-export const metadata: Metadata = { title: 'مقارنة مصطلحين نفسيين', description: 'قارن تعريفين مختصرين لمصطلحين منشورين في موسوعة روافد وافتح الصفحتين الكاملتين للتحقق من الفروق والسياق.', alternates: { canonical: '/tools/compare' } };
+export const metadata = buildSeoMetadata({
+  title: 'مقارنة مصطلحين نفسيين',
+  description: 'قارن تعريفين مختصرين لمصطلحين منشورين في موسوعة روافد وافتح الصفحتين الكاملتين للتحقق من الفروق والسياق.',
+  path: '/tools/compare',
+  index: true,
+});
 type SP = Promise<{ a?: string; b?: string }>;
 
 export default async function CompareTermsPage({ searchParams }: { searchParams: SP }) {
