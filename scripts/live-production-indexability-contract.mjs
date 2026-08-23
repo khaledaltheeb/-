@@ -1,5 +1,6 @@
 const ORIGIN = (process.env.PRODUCTION_ORIGIN || 'https://healthrenewal.org').replace(/\/$/, '');
 const EXPECTED_HOST = new URL(ORIGIN).hostname;
+const EXPECTED_HOME_TITLE = 'روافد | الصحة النفسية والتربية الخاصة وسرطان الأطفال';
 const MIN_URLS = Number(process.env.MIN_LIVE_INDEXABLE_URLS || '3806');
 const CONCURRENCY = Math.max(1, Number(process.env.INDEXABILITY_CONCURRENCY || '16'));
 const TIMEOUT_MS = Math.max(3000, Number(process.env.INDEXABILITY_TIMEOUT_MS || '20000'));
@@ -38,6 +39,10 @@ function canonicalHref(html) {
     return tag.match(/\bhref\s*=\s*["']([^"']+)["']/i)?.[1] || null;
   }
   return null;
+}
+
+function documentTitle(html) {
+  return html.match(/<title\b[^>]*>([\s\S]*?)<\/title>/i)?.[1]?.replace(/\s+/g, ' ').trim() || '';
 }
 
 async function fetchText(url, { attempts = 3 } = {}) {
@@ -96,27 +101,30 @@ async function collectSitemapUrls() {
   return { urls: [...urls], sitemapCount: visitedSitemaps.size };
 }
 
-async function verifyHomepage() {
-  const url = `${ORIGIN}/?indexability-live=${Date.now()}`;
+async function verifyHomepageUrl(url, label) {
   const { response, text } = await fetchText(url);
-  if (!response.ok) throw new Error(`Homepage returned HTTP ${response.status}`);
+  if (!response.ok) throw new Error(`${label} homepage returned HTTP ${response.status}`);
   if (response.url && new URL(response.url).hostname !== EXPECTED_HOST) {
-    throw new Error(`Homepage redirected away from ${EXPECTED_HOST}: ${response.url}`);
+    throw new Error(`${label} homepage redirected away from ${EXPECTED_HOST}: ${response.url}`);
   }
   const headerRobots = response.headers.get('x-robots-tag') || '';
-  if (/\bnoindex\b/i.test(headerRobots)) throw new Error(`Homepage X-Robots-Tag contains noindex: ${headerRobots}`);
+  if (/\bnoindex\b/i.test(headerRobots)) throw new Error(`${label} homepage X-Robots-Tag contains noindex: ${headerRobots}`);
   for (const name of ['robots', 'googlebot']) {
     if (metaDirectives(text, name).some((value) => /\bnoindex\b/i.test(value))) {
-      throw new Error(`Homepage meta ${name} contains noindex`);
+      throw new Error(`${label} homepage meta ${name} contains noindex`);
     }
   }
   const canonical = canonicalHref(text);
-  if (canonical !== `${ORIGIN}/`) throw new Error(`Homepage canonical is ${canonical || 'missing'}, expected ${ORIGIN}/`);
-  if (/workers\.dev|rawafid-platform-staging/i.test(text)) throw new Error('Staging hostname leaked into homepage HTML');
-  if (!text.includes('روافد: الصحة النفسية والتربية الخاصة وسرطان الأطفال')) {
-    throw new Error('Homepage is not the current Rawafid production build signature');
-  }
-  console.log(`Homepage OK: HTTP ${response.status}, canonical ${canonical}, no noindex, current production signature present.`);
+  if (canonical !== `${ORIGIN}/`) throw new Error(`${label} homepage canonical is ${canonical || 'missing'}, expected ${ORIGIN}/`);
+  if (/workers\.dev|rawafid-platform-staging/i.test(text)) throw new Error(`${label} homepage leaks the staging hostname`);
+  const title = documentTitle(text);
+  if (title !== EXPECTED_HOME_TITLE) throw new Error(`${label} homepage title is ${JSON.stringify(title)}, expected ${JSON.stringify(EXPECTED_HOME_TITLE)}`);
+  console.log(`${label} homepage OK: HTTP ${response.status}; title=${JSON.stringify(title)}; canonical=${canonical}; no noindex.`);
+}
+
+async function verifyHomepage() {
+  await verifyHomepageUrl(`${ORIGIN}/`, 'Bare');
+  await verifyHomepageUrl(`${ORIGIN}/?indexability-live=${Date.now()}`, 'Cache-busted');
 }
 
 async function verifyRobots() {
@@ -206,4 +214,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log(`Live production indexability contract passed: homepage + robots.txt + ${urls.length} sitemap URLs are crawlable, free of noindex, and canonicalized to ${ORIGIN}.`);
+console.log(`Live production indexability contract passed: bare homepage + cache-busted homepage + robots.txt + ${urls.length} sitemap URLs are crawlable, free of noindex, and canonicalized to ${ORIGIN}.`);
