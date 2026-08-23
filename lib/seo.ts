@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { RAWAFID_BRAND_NAME, RAWAFID_BRAND_SHORT } from '@/lib/theme';
-import { buildSemanticSeoProfile } from '@/lib/semantic-seo';
+import { buildSemanticSeoProfile } from '@/lib/semantic-seo-safe';
 
 export const PRODUCTION_SITE_URL = 'https://healthrenewal.org';
 export const STAGING_SITE_URL = 'https://rawafid-platform-staging.khaledaltheeb.workers.dev';
