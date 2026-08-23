@@ -1,0 +1,38 @@
+name: Rawafid IndexNow Discovery
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 * * * *'
+
+concurrency:
+  group: rawafid-indexnow-discovery
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NEXT_PUBLIC_SITE_URL: https://rawafid-platform-staging.khaledaltheeb.workers.dev
+      INDEXNOW_SITE_URL: https://rawafid-platform-staging.khaledaltheeb.workers.dev
+      INDEXNOW_KEY: b7f31d3c5a694e2f8b04c71d9a6e53f2
+      INDEXNOW_BATCH_SIZE: '10000'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Verify public discovery endpoints
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS --retry 5 --retry-delay 3 "${INDEXNOW_SITE_URL}/robots.txt" | grep -q 'Sitemap:'
+          curl -fsS --retry 5 --retry-delay 3 "${INDEXNOW_SITE_URL}/sitemap.xml" | grep -q '<sitemapindex'
+          test "$(curl -fsS --retry 5 --retry-delay 3 "${INDEXNOW_SITE_URL}/${INDEXNOW_KEY}.txt")" = "${INDEXNOW_KEY}"
+      - name: Notify IndexNow participants from canonical sitemaps
+        run: node scripts/submit-indexnow.mjs
