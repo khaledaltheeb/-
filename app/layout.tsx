@@ -28,14 +28,15 @@ export const metadata: Metadata = {
   manifest: '/manifest.webmanifest',
   icons: {
     icon: [
-      { url: '/pwa-icon-192?v=6', type: 'image/png', sizes: '192x192' },
-      { url: '/icons/rawafid-app.svg?v=6', type: 'image/svg+xml', sizes: 'any' },
+      { url: '/icons/rawafid-app.svg', type: 'image/svg+xml', sizes: 'any' },
+      { url: '/pwa-icon-192', type: 'image/png', sizes: '192x192' },
     ],
-    apple: [{ url: '/pwa-icon-180?v=6', type: 'image/png', sizes: '180x180' }],
+    shortcut: [{ url: '/icons/rawafid-app.svg', type: 'image/svg+xml' }],
+    apple: [{ url: '/pwa-icon-180', type: 'image/png', sizes: '180x180' }],
   },
   appleWebApp: {
     capable: true,
-    title: 'منصة روافد',
+    title: BRAND_NAME,
     statusBarStyle: 'default',
   },
   formatDetection: { telephone: false, email: false, address: false },
