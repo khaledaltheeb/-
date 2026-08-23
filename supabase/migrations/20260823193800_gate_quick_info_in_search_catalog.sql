@@ -22,7 +22,7 @@ begin
       and new.schema_json->>'editorial_review_required' = 'false'
       and (
         new.canonical_url is null
-        or new.canonical_url = '/quick-info/' || pg_catalog.substring(new.slug from 12) || '/'
+        or new.canonical_url = '/quick-info/' || pg_catalog.substr(new.slug, 12) || '/'
       )
     )
   );
@@ -32,7 +32,7 @@ begin
      and quick_info_ready then
     target_destination := case
       when new.slug like 'quick-info-%'
-        then coalesce(new.canonical_url, '/quick-info/' || pg_catalog.substring(new.slug from 12) || '/')
+        then coalesce(new.canonical_url, '/quick-info/' || pg_catalog.substr(new.slug, 12) || '/')
       else '/content/' || new.slug
     end;
 
@@ -82,7 +82,7 @@ select
     coalesce(pg_catalog.array_to_string(c.search_aliases,' '),'')
   ),
   c.content_type::text,c.excerpt,
-  coalesce(c.canonical_url, '/quick-info/' || pg_catalog.substring(c.slug from 12) || '/'),
+  coalesce(c.canonical_url, '/quick-info/' || pg_catalog.substr(c.slug, 12) || '/'),
   c.published_at,true
 from public.content c
 where c.slug like 'quick-info-%'
@@ -94,7 +94,7 @@ where c.slug like 'quick-info-%'
   and c.schema_json->>'editorial_review_required'='false'
   and (
     c.canonical_url is null
-    or c.canonical_url = '/quick-info/' || pg_catalog.substring(c.slug from 12) || '/'
+    or c.canonical_url = '/quick-info/' || pg_catalog.substr(c.slug, 12) || '/'
   )
 on conflict(entity_type,entity_id) do update set
   slug=excluded.slug,title=excluded.title,normalized_title=excluded.normalized_title,
