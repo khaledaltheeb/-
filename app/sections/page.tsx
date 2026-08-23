@@ -47,7 +47,7 @@ export default async function SectionsIndex() {
         <Link href="/sectors/pediatric-oncology">سرطان الأطفال</Link>
         <Link href="/care-guides/">أدلة التعامل والرعاية</Link>
         <Link href="/evidence-guides/">الأدلة العلمية</Link>
-        <Link href="/encyclopedia/">الموسوعة</Link>
+        <Link href="/encyclopedia/">الموسوعة المختصرة — الصفحات المحفوظة</Link>
       </nav>
 
       <section className="taxonomy-sector-stack" aria-label="الأقسام مرتبة حسب القطاع">
@@ -68,7 +68,7 @@ export default async function SectionsIndex() {
                   {children.length > 0 && <div className="taxonomy-child-links" aria-label={`الأقسام الفرعية في ${category.name_ar}`}>{children.map((child) => <Link href={`/sections/${child.slug}`} key={child.id}>{child.name_ar}</Link>)}</div>}
                 </section>;
               })}
-              {roots.length === 0 && <div className="empty-state"><strong>لا توجد أقسام عامة في هذا القطاع حاليًا.</strong></div>}
+              {roots.length === 0 && <div className="empty-state"><strong>هذا القطاع يعمل كمسار متخصص مباشر.</strong><p>لا يحتاج إلى طبقة أقسام مستقلة للوصول إلى محتواه الحالي.</p><Link href={`/sectors/${sector.slug}`}>فتح صفحة القطاع ←</Link></div>}
             </div>
           </article>;
         })}
