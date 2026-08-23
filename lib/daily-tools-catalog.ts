@@ -1,5 +1,7 @@
+import 'server-only';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
 import type { Metadata } from 'next';
-import dailyToolsPayload from '@/data/legacy-production-batches/daily-tools/001.json';
 import type { LegacyPreservedPage } from '@/lib/legacy-preserved-page';
 import { buildSeoMetadata } from '@/lib/seo';
 
@@ -17,6 +19,16 @@ function asRecord(value: unknown): UnknownRecord | null {
 
 function cleanText(value: unknown, max = 500000): string {
   return typeof value === 'string' ? value.trim().slice(0, max) : '';
+}
+
+function loadPayload(): DailyToolsPayload {
+  // This corpus is intentionally read from disk only while Next prerenders the
+  // force-static Daily Tools routes. A JSON import makes Turbopack inline the
+  // multi-megabyte corpus into several server chunks, which can exceed the
+  // Cloudflare Worker script limit even though these pages are static assets.
+  const relative = ['data', 'legacy-production-batches', 'daily-tools', '001.json'].join(path.sep);
+  const absolute = path.resolve(process.cwd(), relative);
+  return JSON.parse(readFileSync(absolute, 'utf8')) as DailyToolsPayload;
 }
 
 function pageFromRecord(value: unknown): LegacyPreservedPage | null {
@@ -61,7 +73,7 @@ function normalizeInternalHref(value: unknown): string | null {
   }
 }
 
-const payload = dailyToolsPayload as unknown as DailyToolsPayload;
+const payload = loadPayload();
 const routeMap = new Map<string, LegacyPreservedPage>();
 for (const raw of Array.isArray(payload.records) ? payload.records : []) {
   const page = pageFromRecord(raw);
