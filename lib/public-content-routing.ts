@@ -26,6 +26,8 @@ export function publicContentTypeLabel(type?: string | null) {
     case 'guide': return 'دليل';
     case 'research': return 'بحث ودراسة';
     case 'article': return 'مقال';
+    case 'news': return 'خبر وتحديث';
+    case 'protocol': return 'بروتوكول';
     case 'resource': return 'مورد';
     case 'glossary_term': return 'مصطلح';
     case 'condition': return 'حالة';
