@@ -27,7 +27,6 @@ export const DEFAULT_DESCRIPTION = 'روافد منصة عربية للمعرف�
 
 const HOME_TITLE = 'روافد | الصحة النفسية والتربية الخاصة وسرطان الأطفال';
 const HOME_DESCRIPTION = DEFAULT_DESCRIPTION;
-const DEFAULT_SOCIAL_IMAGE_PATH = '/seo-card';
 
 export function absoluteSiteUrl(pathOrUrl: string) {
   if (/^https?:\/\//i.test(pathOrUrl)) return pathOrUrl;
@@ -48,6 +47,15 @@ function clampTitle(value: string) {
 function clampDescription(value?: string | null) {
   const clean = (value || DEFAULT_DESCRIPTION).replace(/\s+/g, ' ').trim();
   return clean.length > 160 ? `${clean.slice(0, 159).trimEnd()}…` : clean;
+}
+
+function fallbackSocialImagePath(title: string, type?: SeoMetadataInput['type']) {
+  const context = type === 'article'
+    ? 'مقال موثق · مصادر قابلة للتتبع · قراءة عربية واضحة'
+    : type === 'profile'
+      ? 'ملف موثق · معلومات عامة · منصة روافد'
+      : 'معرفة موثوقة · مصادر قابلة للتتبع · مسارات عملية';
+  return `/seo-card?title=${encodeURIComponent(title)}&context=${encodeURIComponent(context)}`;
 }
 
 export type SeoMetadataInput = {
@@ -75,7 +83,7 @@ export function buildSeoMetadata(input: SeoMetadataInput): Metadata {
   const canIndex = INDEXING_ENABLED && input.index !== false;
   const canFollow = input.follow !== false;
   const usesDefaultImage = !input.image;
-  const image = absoluteSiteUrl(input.image || DEFAULT_SOCIAL_IMAGE_PATH);
+  const image = absoluteSiteUrl(input.image || fallbackSocialImagePath(input.title, input.type));
   const languages = input.hreflang
     ? Object.fromEntries(Object.entries(input.hreflang).map(([key, value]) => [key, absoluteSiteUrl(value)]))
     : undefined;
@@ -86,7 +94,7 @@ export function buildSeoMetadata(input: SeoMetadataInput): Metadata {
   const semanticProfile = buildSemanticSeoProfile(input);
   const keywords = semanticProfile.keywords;
   const openGraphImages = usesDefaultImage
-    ? [{ url: image, width: 1200, height: 630, alt: 'روافد — منصة عربية للمعرفة الصحية والنفسية الموثوقة' }]
+    ? [{ url: image, width: 1200, height: 630, alt: input.title }]
     : [{ url: image, alt: input.title }];
 
   return {
