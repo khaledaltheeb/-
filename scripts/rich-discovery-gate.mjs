@@ -1,5 +1,5 @@
 const base = (process.env.SEO_GATE_BASE_URL || process.env.SMOKE_BASE_URL || 'http://127.0.0.1:3000').replace(/\/$/, '');
-const expectedOrigin = new URL(base).origin;
+const canonicalOrigin = new URL(process.env.NEXT_PUBLIC_SITE_URL || base).origin;
 const concurrency = Math.max(1, Math.min(24, Number(process.env.SEO_GATE_CONCURRENCY || 6)));
 const timeoutMs = Math.max(2000, Number(process.env.SEO_GATE_TIMEOUT_MS || 15000));
 const maxUrls = Math.max(0, Number(process.env.SEO_GATE_MAX_URLS || 0));
@@ -38,7 +38,7 @@ async function discoverUrls() {
   const maps = sitemapLocs(index.text);
   const urls = [];
   for (const map of maps) {
-    const parsed = new URL(map, base);
+    const parsed = new URL(map, canonicalOrigin);
     const result = await fetchText(`${base}${parsed.pathname}${parsed.search}`);
     if (!result.response.ok || !/<urlset\b/i.test(result.text)) {
       failures.push(`${map}: invalid sitemap child`);
@@ -48,8 +48,8 @@ async function discoverUrls() {
   }
   const normalized = [...new Set(urls.flatMap((value) => {
     try {
-      const parsed = new URL(value, base);
-      if (parsed.origin !== expectedOrigin) return [];
+      const parsed = new URL(value, canonicalOrigin);
+      if (parsed.origin !== canonicalOrigin) return [];
       return [`${base}${parsed.pathname}${parsed.search}`];
     } catch { return []; }
   }))].sort();
@@ -92,8 +92,8 @@ async function audit(url) {
   const canonical = linkHref(html, 'canonical');
   if (canonical) {
     try {
-      const parsed = new URL(canonical, url);
-      if (parsed.origin !== expectedOrigin) failures.push(`${url}: canonical leaves Rawafid origin (${canonical})`);
+      const parsed = new URL(canonical, canonicalOrigin);
+      if (parsed.origin !== canonicalOrigin) failures.push(`${url}: canonical leaves Rawafid origin (${canonical})`);
     } catch { failures.push(`${url}: invalid canonical (${canonical})`); }
   }
 
