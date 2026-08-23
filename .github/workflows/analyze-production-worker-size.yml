@@ -1,0 +1,71 @@
+name: Analyze production Worker size
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/analyze-production-worker-size.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: analyze-production-worker-size
+  cancel-in-progress: true
+
+env:
+  NEXT_PUBLIC_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
+  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
+  NEXT_PUBLIC_SITE_URL: https://healthrenewal.org
+  NEXT_PUBLIC_ALLOW_INDEXING: 'true'
+  NEXT_PUBLIC_ENABLE_ANALYTICS: 'false'
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Build production Worker
+        run: npx opennextjs-cloudflare build --env production
+      - name: Bundle dry run with esbuild metafile
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf bundled bundle-meta.json
+          npx wrangler deploy --env production --dry-run --outdir bundled --metafile bundle-meta.json 2>&1 | tee wrangler-dry-run.log
+          echo '--- dry-run size summary ---'
+          grep -E 'Total Upload|gzip:' wrangler-dry-run.log || true
+      - name: Report largest bundle inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs = require('fs');
+          const meta = JSON.parse(fs.readFileSync('bundle-meta.json','utf8'));
+          const byInput = new Map();
+          for (const out of Object.values(meta.outputs || {})) {
+            for (const [name, info] of Object.entries(out.inputs || {})) {
+              byInput.set(name, (byInput.get(name) || 0) + (info.bytesInOutput || 0));
+            }
+          }
+          const rows = [...byInput.entries()].sort((a,b)=>b[1]-a[1]).slice(0,120);
+          console.log('--- top inputs by bytes in output ---');
+          for (const [name, bytes] of rows) console.log(`${String(bytes).padStart(12)}  ${name}`);
+          console.log('--- top source files by original bytes ---');
+          const src = Object.entries(meta.inputs || {}).map(([name,v])=>[name,v.bytes||0]).sort((a,b)=>b[1]-a[1]).slice(0,120);
+          for (const [name, bytes] of src) console.log(`${String(bytes).padStart(12)}  ${name}`);
+          NODE
+      - name: Report generated OpenNext file sizes
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo '--- largest OpenNext files ---'
+          find .open-next -type f -printf '%s %p\n' | sort -nr | head -n 120
