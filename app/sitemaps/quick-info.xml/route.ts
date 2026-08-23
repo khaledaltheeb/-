@@ -43,6 +43,8 @@ export async function GET(request: Request) {
   const pageEndExclusive = pageStart + PAGE_SIZE;
   const data: QuickInfoSitemapRecord[] = [];
 
+  // Keep page boundaries stable while titles/content are edited. updated_at is used for
+  // <lastmod>; it must never decide which sitemap page a canonical URL belongs to.
   for (let batchStart = pageStart; batchStart < pageEndExclusive; batchStart += DB_BATCH_SIZE) {
     const batchEnd = Math.min(batchStart + DB_BATCH_SIZE - 1, pageEndExclusive - 1);
     const requestedRows = batchEnd - batchStart + 1;
@@ -53,7 +55,6 @@ export async function GET(request: Request) {
       .eq('status', 'published')
       .eq('robots_index', true)
       .lte('published_at', now)
-      .order('title', { ascending: true })
       .order('id', { ascending: true })
       .range(batchStart, batchEnd);
 
