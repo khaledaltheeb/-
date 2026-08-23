@@ -2,6 +2,7 @@ import { getDailyToolRoutes } from '@/lib/daily-tools-catalog';
 import { sitemapResponse } from '@/lib/sitemap-xml';
 
 export const dynamic = 'force-static';
+export const revalidate = false;
 
 export async function GET() {
   const entries = getDailyToolRoutes().map((path, index) => ({
