@@ -1,0 +1,153 @@
+name: Verify healthrenewal.org Worker Binding
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/verify-healthrenewal-binding.yml'
+
+permissions:
+  contents: read
+  statuses: write
+
+concurrency:
+  group: verify-healthrenewal-binding
+  cancel-in-progress: true
+
+env:
+  DOMAIN: healthrenewal.org
+  WWW_DOMAIN: www.healthrenewal.org
+  EXPECTED_WORKER: rawafid-platform-production
+  EXPECTED_NS_1: aisha.ns.cloudflare.com
+  EXPECTED_NS_2: kyle.ns.cloudflare.com
+  CLOUDFLARE_ACCOUNT_ID: 1910e1ad3c793fd568ba1caafe34f964
+  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Publish pending status
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          payload="$(jq -n \
+            --arg state pending \
+            --arg context 'cutover/healthrenewal-binding' \
+            --arg description 'Verifying Cloudflare Worker custom-domain binding' \
+            --arg target_url "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}" \
+            '{state:$state,context:$context,description:$description,target_url:$target_url}')"
+          curl -fsS -X POST \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H 'Accept: application/vnd.github+json' \
+            -H 'X-GitHub-Api-Version: 2022-11-28' \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" \
+            -d "${payload}" >/dev/null
+
+      - uses: actions/checkout@v7
+
+      - name: Require Cloudflare credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${CLOUDFLARE_API_TOKEN:-}"
+
+      - name: Verify authoritative DNS delegation
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual_ns="$(dig +short NS "${DOMAIN}" @1.1.1.1 | tr '[:upper:]' '[:lower:]' | sed 's/\.$//' | sort)"
+          expected_ns="$(printf '%s\n%s\n' "${EXPECTED_NS_1}" "${EXPECTED_NS_2}" | sort)"
+          printf 'Authoritative nameservers:\n%s\n' "${actual_ns}"
+          test "${actual_ns}" = "${expected_ns}"
+          dig +dnssec A "${DOMAIN}" @1.1.1.1 | grep -q 'status: NOERROR'
+
+      - name: Verify Worker custom-domain ownership
+        shell: bash
+        run: |
+          set -euo pipefail
+          response="$(curl -fsS \
+            -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+            -H 'Content-Type: application/json' \
+            "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/workers/domains")"
+          printf '%s' "${response}" | jq -e '.success == true' >/dev/null
+          printf '%s' "${response}" | jq -c \
+            --arg root "${DOMAIN}" --arg www "${WWW_DOMAIN}" \
+            '.result[] | select(.hostname == $root or .hostname == $www) | {hostname,service,environment,zone_name}'
+          printf '%s' "${response}" | jq -e \
+            --arg host "${DOMAIN}" --arg service "${EXPECTED_WORKER}" \
+            '.result[] | select(.hostname == $host and .service == $service)' >/dev/null
+          printf '%s' "${response}" | jq -e \
+            --arg host "${WWW_DOMAIN}" --arg service "${EXPECTED_WORKER}" \
+            '.result[] | select(.hostname == $host and .service == $service)' >/dev/null
+
+      - name: Verify live production SEO contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="https://${DOMAIN}"
+          stamp="${GITHUB_SHA}-$(date +%s)"
+
+          home="$(curl -fsS --retry 5 --retry-delay 2 --retry-all-errors \
+            -H 'Cache-Control: no-cache, no-store, max-age=0' \
+            "${base}/?binding_check=${stamp}")"
+          printf '%s' "${home}" | grep -q 'rel="canonical" href="https://healthrenewal.org/"'
+          printf '%s' "${home}" | grep -q 'منصة روافد'
+          if printf '%s' "${home}" | grep -Eqi '<meta[^>]+name="robots"[^>]+content="[^"]*noindex|<meta[^>]+content="[^"]*noindex[^"]*"[^>]+name="robots"'; then
+            echo 'Production homepage unexpectedly contains noindex.' >&2
+            exit 1
+          fi
+          if printf '%s' "${home}" | grep -q 'rawafid-platform-staging\.khaledaltheeb\.workers\.dev'; then
+            echo 'Production homepage leaks the staging hostname.' >&2
+            exit 1
+          fi
+
+          robots="$(curl -fsS --retry 5 --retry-delay 2 --retry-all-errors "${base}/robots.txt?binding_check=${stamp}")"
+          printf '%s' "${robots}" | grep -q "Sitemap: ${base}/sitemap.xml"
+
+          sitemap="$(curl -fsS --retry 5 --retry-delay 2 --retry-all-errors "${base}/sitemap.xml?binding_check=${stamp}")"
+          printf '%s' "${sitemap}" | grep -Eq '<sitemapindex|<urlset'
+          if printf '%s' "${sitemap}" | grep -q 'workers.dev'; then
+            echo 'Production sitemap leaks a workers.dev hostname.' >&2
+            exit 1
+          fi
+
+      - name: Verify www canonical redirect
+        shell: bash
+        run: |
+          set -euo pipefail
+          headers="$(curl -sS -o /dev/null -D - --max-redirs 0 "https://${WWW_DOMAIN}/sections?binding_check=1")"
+          printf '%s' "${headers}" | head -n 1 | grep -Eq ' 30(1|2|7|8)( |$)'
+          printf '%s' "${headers}" | grep -Eqi '^location: https://healthrenewal\.org/sections\?binding_check=1\r?$'
+
+      - name: Publish verification result
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${JOB_STATUS}" = 'success' ]; then
+            state='success'
+            description='healthrenewal.org is bound to the production Rawafid Worker'
+          else
+            state='failure'
+            description='healthrenewal.org Worker binding or SEO contract is incorrect'
+          fi
+          payload="$(jq -n \
+            --arg state "${state}" \
+            --arg context 'cutover/healthrenewal-binding' \
+            --arg description "${description}" \
+            --arg target_url "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}" \
+            '{state:$state,context:$context,description:$description,target_url:$target_url}')"
+          curl -fsS -X POST \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H 'Accept: application/vnd.github+json' \
+            -H 'X-GitHub-Api-Version: 2022-11-28' \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" \
+            -d "${payload}" >/dev/null
