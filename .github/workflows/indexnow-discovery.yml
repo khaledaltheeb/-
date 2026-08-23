@@ -4,6 +4,7 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '17 * * * *'
+    - cron: '23 2 * * *'
 
 concurrency:
   group: rawafid-indexnow-discovery
@@ -21,7 +22,7 @@ jobs:
       INDEXNOW_SITE_URL: https://rawafid-platform-staging.khaledaltheeb.workers.dev
       INDEXNOW_KEY: b7f31d3c5a694e2f8b04c71d9a6e53f2
       INDEXNOW_BATCH_SIZE: '10000'
-      INDEXNOW_SINCE_HOURS: ${{ github.event_name == 'schedule' && '2' || '0' }}
+      INDEXNOW_SINCE_HOURS: ${{ github.event_name == 'workflow_dispatch' && '0' || github.event.schedule == '23 2 * * *' && '0' || '2' }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
