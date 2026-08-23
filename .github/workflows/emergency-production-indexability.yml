@@ -152,39 +152,16 @@ jobs:
             exit 1
           fi
 
-      - name: Verify homepage and robots immediately as Googlebot
+      - name: Purge Cloudflare edge cache after production cutover
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         shell: bash
         run: |
           set -euo pipefail
-          stamp="${GITHUB_SHA}-$(date +%s)"
-          curl -fsS --retry 10 --retry-delay 3 --retry-all-errors -A 'Googlebot' -D /tmp/home.headers "${PRODUCTION_ORIGIN}/?indexability-check=${stamp}" -o /tmp/home.html
-          if grep -Eqi '^x-robots-tag:.*noindex' /tmp/home.headers; then
-            echo 'noindex remains in homepage X-Robots-Tag.' >&2
-            exit 1
-          fi
-          grep -q 'rel="canonical" href="https://healthrenewal.org/"' /tmp/home.html
-          grep -q 'روافد: الصحة النفسية والتربية الخاصة وسرطان الأطفال' /tmp/home.html
-          if grep -Eqi '<meta[^>]+name="(robots|googlebot)"[^>]+content="[^"]*noindex' /tmp/home.html; then
-            echo 'noindex is still present in production homepage metadata.' >&2
-            exit 1
-          fi
-          if grep -Eqi 'workers\.dev|rawafid-platform-staging' /tmp/home.html; then
-            echo 'Staging origin leaked into production homepage HTML.' >&2
-            exit 1
-          fi
+          response="$(curl -fsS -X POST -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" -H 'Content-Type: application/json' "https://api.cloudflare.com/client/v4/zones/${CLOUDFLARE_ZONE_ID}/purge_cache" --data '{"purge_everything":true}')"
+          printf '%s' "$response" | jq -e '.success == true' >/dev/null
 
-          robots="$(curl -fsS --retry 10 --retry-delay 3 --retry-all-errors -A 'Googlebot' "${PRODUCTION_ORIGIN}/robots.txt?indexability-check=${stamp}")"
-          printf '%s\n' "$robots" | grep -q "Sitemap: ${PRODUCTION_ORIGIN}/sitemap.xml"
-          if printf '%s\n' "$robots" | grep -Eq '^Disallow:[[:space:]]*/[[:space:]]*$'; then
-            echo 'robots.txt still globally blocks crawling.' >&2
-            exit 1
-          fi
-          if printf '%s\n' "$robots" | grep -Eqi 'workers\.dev|rawafid-platform-staging'; then
-            echo 'Staging origin leaked into production robots.txt.' >&2
-            exit 1
-          fi
-
-      - name: Audit every URL advertised by production sitemaps
+      - name: Audit bare homepage, Googlebot metadata, robots and every sitemap URL
         env:
           INDEXABILITY_CONCURRENCY: '16'
           INDEXABILITY_TIMEOUT_MS: '20000'
