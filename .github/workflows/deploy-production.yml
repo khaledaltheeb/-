@@ -1,11 +1,9 @@
 name: Deploy Production
 
-# Production is now cut over to healthrenewal.org on Cloudflare.
-# Deploy every approved main-branch change and keep manual dispatch as a fallback.
+# CUTOVER GUARD: healthrenewal.org must not be switched to the new Rawafid build
+# until the manual cutover-readiness workflow confirms >=10,000 qualified public URLs
+# and the migration/SEO checks pass. Keep this workflow manual-only until launch day.
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
 concurrency:
