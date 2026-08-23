@@ -7,8 +7,9 @@ import SiteFooter from '@/components/site-footer';
 import ContentRenderer from '@/components/content-renderer';
 import { createClient } from '@/lib/supabase/server';
 import { buildSeoMetadata, breadcrumbJsonLd, SITE_URL } from '@/lib/seo';
-import { getCognitivePageBySlug, getCognitivePageIndexItem } from '@/lib/cognitive-program';
+import { getCognitivePageBySlug, getCognitivePageIndex, getCognitivePageIndexItem } from '@/lib/cognitive-program';
 import { getExpandedEncyclopediaIndex, getExpandedEncyclopediaRecord } from '@/lib/expanded-encyclopedia';
+import { publicContentTypeLabel } from '@/lib/public-content-routing';
 import { contentReviewProvenance } from '@/lib/review-provenance';
 
 export const dynamic = 'force-dynamic';
@@ -198,6 +199,49 @@ function curatedRelatedSlugs(schema: Record<string, unknown>): string[] {
   return raw.filter((item): item is string => typeof item === 'string').slice(0, 6);
 }
 
+function uniqueRelated(items: RelatedItem[]): RelatedItem[] {
+  const seen = new Set<string>();
+  return items.filter((item) => {
+    if (seen.has(item.slug)) return false;
+    seen.add(item.slug);
+    return true;
+  }).slice(0, 6);
+}
+
+async function generatedRelatedContent(record: ContentRecord): Promise<RelatedItem[]> {
+  const category = taxonomyNode(record.categories);
+  const cognitiveCurrent = getCognitivePageIndexItem(record.slug);
+  if (cognitiveCurrent) {
+    const index = getCognitivePageIndex();
+    const bySlug = new Map(index.map((item) => [item.slug, item]));
+    const preferred = cognitiveCurrent.relatedSlugs.flatMap((slug): RelatedItem[] => {
+      const item = bySlug.get(slug);
+      return item ? [{ id: `cognitive:${item.slug}`, slug: item.slug, title: item.title, excerpt: item.excerpt, content_type: item.contentType, score: 120 }] : [];
+    });
+    const sameCategory = index
+      .filter((item) => item.slug !== record.slug && item.categorySlug === category?.slug)
+      .map((item): RelatedItem => ({ id: `cognitive:${item.slug}`, slug: item.slug, title: item.title, excerpt: item.excerpt, content_type: item.contentType, score: 90 }));
+    return uniqueRelated([...preferred, ...sameCategory]);
+  }
+
+  const expanded = await getExpandedEncyclopediaIndex();
+  const queryTerms = new Set(
+    [record.primary_keyword, ...record.secondary_keywords, ...record.semantic_terms]
+      .filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
+      .map((value) => value.trim().toLocaleLowerCase('ar')),
+  );
+  return expanded
+    .filter((item) => item.slug !== record.slug && (!category || item.category_slug === category.slug))
+    .map((item): RelatedItem => {
+      const candidateTerms = [item.primary_keyword, ...item.secondary_keywords, ...item.semantic_terms]
+        .map((value) => value.trim().toLocaleLowerCase('ar'));
+      const overlap = candidateTerms.reduce((score, term) => score + (queryTerms.has(term) ? 1 : 0), 0);
+      return { id: item.id, slug: item.slug, title: item.title, excerpt: item.excerpt, content_type: item.content_type, score: 80 + overlap };
+    })
+    .sort((a, b) => b.score - a.score || a.title.localeCompare(b.title, 'ar'))
+    .slice(0, 6);
+}
+
 async function relatedContent(record: ContentRecord): Promise<RelatedItem[]> {
   const slugs = curatedRelatedSlugs(record.schema_json);
   const expandedIndex = slugs.length ? await getExpandedEncyclopediaIndex() : [];
@@ -229,7 +273,7 @@ async function relatedContent(record: ContentRecord): Promise<RelatedItem[]> {
       return item ? [item] : [];
     });
   }
-  if (record.generated_program) return [];
+  if (record.generated_program) return generatedRelatedContent(record);
   const { data } = await supabase.rpc('related_public_content', { p_content_id: record.id, p_limit: 6 });
   return (data ?? []) as RelatedItem[];
 }
@@ -377,7 +421,7 @@ export default async function PublishedContentPage({ params }: { params: Params 
       </nav>
       <article>
         <header className="article-hero">
-          <span className="eyebrow">{record.content_type}</span>
+          <span className="eyebrow">{publicContentTypeLabel(record.content_type)}</span>
           <h1>{record.title}</h1>
           {record.excerpt && <p>{record.excerpt}</p>}
           <div className="article-meta">
@@ -397,10 +441,16 @@ export default async function PublishedContentPage({ params }: { params: Params 
         {record.medical_disclaimer && <aside className="medical-disclaimer" aria-label="إخلاء المسؤولية الطبية">
           <strong>تنبيه طبي</strong><p>{record.medical_disclaimer}</p><Link href="/disclaimer">إخلاء المسؤولية الكامل</Link>
         </aside>}
+        <nav className="sector-quick-nav" aria-label="متابعة التصفح بعد الصفحة">
+          {category && <Link href={`/sections/${category.slug}`}>العودة إلى قسم {category.name_ar}</Link>}
+          {sector && <Link href={`/sectors/${sector.slug}`}>استكشاف قطاع {sector.name_ar}</Link>}
+          <Link href={`/search?q=${encodeURIComponent(record.primary_keyword || record.title)}`}>موضوعات مشابهة</Link>
+          <Link href="/sections">خريطة الأقسام</Link>
+        </nav>
         {related.length > 0 && <section className="article-related" aria-labelledby="related-title">
-          <div className="section-mini-heading"><div><span className="eyebrow">Topical Authority</span><h2 id="related-title">محتوى مرتبط</h2></div><span>روابط منتقاة من خريطة المفاهيم ونية البحث</span></div>
+          <div className="section-mini-heading"><div><span className="eyebrow">روابط موضوعية</span><h2 id="related-title">محتوى مرتبط</h2></div><span>روابط منتقاة من خريطة المفاهيم ونية البحث</span></div>
           <div className="related-content-grid">{related.map((item) => <article key={item.id}>
-            <span>{item.content_type}</span><h3><Link href={`/content/${item.slug}`}>{item.title}</Link></h3>{item.excerpt && <p>{item.excerpt}</p>}<Link href={`/content/${item.slug}`}>متابعة القراءة ←</Link>
+            <span>{publicContentTypeLabel(item.content_type)}</span><h3><Link href={`/content/${item.slug}`}>{item.title}</Link></h3>{item.excerpt && <p>{item.excerpt}</p>}<Link href={`/content/${item.slug}`}>متابعة القراءة ←</Link>
           </article>)}</div>
         </section>}
         {references.length > 0 && <section className="article-references" aria-labelledby="references-title">
