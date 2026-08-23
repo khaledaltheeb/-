@@ -55,7 +55,7 @@ export default async function SiteHeader() {
     { href: '/search', label: 'بحث', icon: 'search' },
     { href: '/care-guides/', label: 'الأدلة', icon: 'discover' },
     { href: '/specialists', label: 'مختصون', icon: 'specialists' },
-    { href: '/about', label: 'المزيد', icon: 'more' },
+    { href: '/about', label: 'من نحن', icon: 'more' },
   ];
 
   return (
