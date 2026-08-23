@@ -1,13 +1,15 @@
+import { cookies } from 'next/headers';
 import PlatformIcon from '@/components/platform-icon';
 import RawafidBrand from '@/components/rawafid-brand';
 import { getPublicSectors } from '@/lib/public-taxonomy';
 import { createClient } from '@/lib/supabase/server';
+import { hasSupabaseAuthCookie } from '@/lib/supabase/auth-cookie';
 
 const primaryLinks = [
   { href: '/sectors', label: 'القطاعات', secondary: false },
   { href: '/sections', label: 'الأقسام', secondary: false },
   { href: '/sectors/pediatric-oncology', label: 'سرطان الأطفال', secondary: false },
-  { href: '/care-guides/', label: 'أدلة الرعاية', secondary: true },
+  { href: '/care-guides/', label: 'أدلة التعامل والرعاية', secondary: true },
   { href: '/evidence-guides/', label: 'الأدلة العلمية', secondary: true },
   { href: '/about', label: 'من نحن', secondary: true },
 ];
@@ -41,9 +43,17 @@ function NavIcon({ name }: { name: IconName }) {
 }
 
 export default async function SiteHeader() {
-  const supabase = await createClient();
-  const [sectors, { data: claims }] = await Promise.all([getPublicSectors(50), supabase.auth.getClaims()]);
-  const signedIn = Boolean(claims?.claims?.sub);
+  const sectorsPromise = getPublicSectors(50);
+  const cookieStore = await cookies();
+  let signedIn = false;
+
+  if (hasSupabaseAuthCookie(cookieStore.getAll())) {
+    const supabase = await createClient();
+    const { data: claims } = await supabase.auth.getClaims();
+    signedIn = Boolean(claims?.claims?.sub);
+  }
+
+  const sectors = await sectorsPromise;
   const mobileItems: Array<{ href: string; label: string; icon: IconName }> = signedIn ? [
     { href: '/', label: 'الرئيسية', icon: 'home' },
     { href: '/search', label: 'بحث', icon: 'search' },
@@ -127,7 +137,7 @@ export default async function SiteHeader() {
               <a href="/sectors/pediatric-oncology">سرطان الأطفال</a>
               <a href="/care-guides/">أدلة التعامل والرعاية</a>
               <a href="/evidence-guides/">الأدلة العلمية</a>
-              <a href="/encyclopedia/">الموسوعة</a>
+              <a href="/encyclopedia/">الموسوعة المختصرة — الصفحات المحفوظة</a>
               <span className="mobile-menu-label">القطاعات</span>
               {sectors.map((sector) => <a key={sector.slug} href={'/sectors/' + sector.slug}>{sector.name_ar}</a>)}
               <span className="mobile-menu-label">الدليل والخدمات</span>
