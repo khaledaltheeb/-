@@ -30,7 +30,7 @@ export async function GET(request: Request, { params }: { params: Params }) {
       'content-type': 'text/html; charset=utf-8',
       'cache-control': 'no-store, max-age=0',
       'x-robots-tag': 'noindex, nofollow',
-      'x-rawafid-release-probe': 'v5',
+      'x-rawafid-release-probe': 'v6',
     },
   });
 }
