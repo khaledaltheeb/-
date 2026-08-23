@@ -12,6 +12,7 @@ import { dailyToolMetadata, getDailyToolPage, getDailyToolSlugs } from '@/lib/da
 
 export const dynamic = 'force-static';
 export const dynamicParams = false;
+export const revalidate = false;
 type Params = Promise<{ slug: string }>;
 const routeFor = (slug: string) => `/daily-tools/${slug}/`;
 
