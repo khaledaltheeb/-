@@ -1,0 +1,111 @@
+name: Bind healthrenewal.org to current Rawafid Worker
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/bind-healthrenewal-domain-only.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  statuses: write
+
+env:
+  CLOUDFLARE_ACCOUNT_ID: '1910e1ad3c793fd568ba1caafe34f964'
+  CLOUDFLARE_ZONE_ID: 'f0024a96330e938e8ceb86ae75200008'
+  CLOUDFLARE_ZONE_NAME: 'healthrenewal.org'
+  CLOUDFLARE_WORKER_SERVICE: 'rawafid-platform-staging'
+
+jobs:
+  bind-domain:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Verify Cloudflare token exists
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${CLOUDFLARE_API_TOKEN:-}"
+
+      - name: Show current Worker domain mappings
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS \
+            -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+            -H 'Content-Type: application/json' \
+            "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/workers/domains" \
+            | jq '{success,domains:[.result[] | {hostname,service,zone_name}]}'
+
+      - name: Bind apex domain to current Rawafid Worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          payload="$(jq -n \
+            --arg hostname 'healthrenewal.org' \
+            --arg service "${CLOUDFLARE_WORKER_SERVICE}" \
+            --arg zone_id "${CLOUDFLARE_ZONE_ID}" \
+            --arg zone_name "${CLOUDFLARE_ZONE_NAME}" \
+            '{hostname:$hostname,service:$service,zone_id:$zone_id,zone_name:$zone_name}')"
+          response="$(curl -sS -X PUT \
+            -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+            -H 'Content-Type: application/json' \
+            "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/workers/domains" \
+            --data "$payload")"
+          echo "$response" | jq '{success,result:{hostname:.result.hostname,service:.result.service,zone_name:.result.zone_name},errors}'
+          test "$(echo "$response" | jq -r '.success')" = true
+
+      - name: Bind www domain to current Rawafid Worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          payload="$(jq -n \
+            --arg hostname 'www.healthrenewal.org' \
+            --arg service "${CLOUDFLARE_WORKER_SERVICE}" \
+            --arg zone_id "${CLOUDFLARE_ZONE_ID}" \
+            --arg zone_name "${CLOUDFLARE_ZONE_NAME}" \
+            '{hostname:$hostname,service:$service,zone_id:$zone_id,zone_name:$zone_name}')"
+          response="$(curl -sS -X PUT \
+            -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+            -H 'Content-Type: application/json' \
+            "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/workers/domains" \
+            --data "$payload")"
+          echo "$response" | jq '{success,result:{hostname:.result.hostname,service:.result.service,zone_name:.result.zone_name},errors}'
+          test "$(echo "$response" | jq -r '.success')" = true
+
+      - name: Verify Cloudflare domain mappings
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          response="$(curl -fsS \
+            -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+            -H 'Content-Type: application/json' \
+            "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/workers/domains")"
+          echo "$response" | jq '{success,domains:[.result[] | select(.hostname=="healthrenewal.org" or .hostname=="www.healthrenewal.org") | {hostname,service,zone_name}]}'
+          test "$(echo "$response" | jq -r '[.result[] | select(.hostname=="healthrenewal.org" and .service=="rawafid-platform-staging")] | length')" -eq 1
+          test "$(echo "$response" | jq -r '[.result[] | select(.hostname=="www.healthrenewal.org" and .service=="rawafid-platform-staging")] | length')" -eq 1
+
+      - name: Verify HTTPS reaches the bound domain
+        shell: bash
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 18); do
+            if curl -fsSIL --max-time 20 https://healthrenewal.org/ >/tmp/apex.headers 2>/tmp/apex.err; then
+              cat /tmp/apex.headers
+              exit 0
+            fi
+            cat /tmp/apex.err || true
+            sleep 10
+          done
+          exit 1
