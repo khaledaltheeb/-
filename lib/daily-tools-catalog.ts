@@ -1,17 +1,20 @@
 import 'server-only';
-import { readFileSync } from 'node:fs';
-import path from 'node:path';
+import { getCloudflareContext } from '@opennextjs/cloudflare';
 import type { Metadata } from 'next';
+import dailyToolRoutesJson from '@/generated/daily-tools-routes.json';
 import type { LegacyPreservedPage } from '@/lib/legacy-preserved-page';
 import { buildSeoMetadata } from '@/lib/seo';
 
 type UnknownRecord = Record<string, unknown>;
-type DailyToolsPayload = { records?: unknown[] };
+type AssetBinding = { fetch(input: Request | string | URL): Promise<Response> };
+type AssetEnvironment = { ASSETS?: AssetBinding };
 export type DailyToolRelatedLink = { title: string; href: string };
 export type DailyToolReference = { title: string; url: string; publisher?: string; year?: string };
 
 export const DAILY_TOOLS_TOTAL = 150;
 export const DAILY_TOOLS_HUB_ROUTE = '/daily-tools/';
+const ASSET_ROOT = '/daily-tools-data/records';
+const EXPECTED_ROUTES = DAILY_TOOLS_TOTAL + 1;
 
 function asRecord(value: unknown): UnknownRecord | null {
   return value !== null && typeof value === 'object' && !Array.isArray(value) ? value as UnknownRecord : null;
@@ -19,16 +22,6 @@ function asRecord(value: unknown): UnknownRecord | null {
 
 function cleanText(value: unknown, max = 500000): string {
   return typeof value === 'string' ? value.trim().slice(0, max) : '';
-}
-
-function loadPayload(): DailyToolsPayload {
-  // This corpus is intentionally read from disk only while Next prerenders the
-  // force-static Daily Tools routes. A JSON import makes Turbopack inline the
-  // multi-megabyte corpus into several server chunks, which can exceed the
-  // Cloudflare Worker script limit even though these pages are static assets.
-  const relative = ['data', 'legacy-production-batches', 'daily-tools', '001.json'].join(path.sep);
-  const absolute = path.resolve(process.cwd(), relative);
-  return JSON.parse(readFileSync(absolute, 'utf8')) as DailyToolsPayload;
 }
 
 function pageFromRecord(value: unknown): LegacyPreservedPage | null {
@@ -55,7 +48,90 @@ function pageFromRecord(value: unknown): LegacyPreservedPage | null {
 function sourcePathToRoute(sourcePath: string): string | null {
   if (sourcePath === 'daily-tools/index.html') return DAILY_TOOLS_HUB_ROUTE;
   const match = /^daily-tools\/([a-z0-9][a-z0-9-]{0,119})\/index\.html$/i.exec(sourcePath);
-  return match ? `/daily-tools/${match[1]}/` : null;
+  return match ? `/daily-tools/${match[1].toLowerCase()}/` : null;
+}
+
+function normalizeRoute(route: string): string | null {
+  const trimmed = route.trim();
+  if (trimmed === '/daily-tools' || trimmed === DAILY_TOOLS_HUB_ROUTE) return DAILY_TOOLS_HUB_ROUTE;
+  const match = /^\/daily-tools\/([a-z0-9][a-z0-9-]{0,119})\/?$/i.exec(trimmed);
+  return match ? `/daily-tools/${match[1].toLowerCase()}/` : null;
+}
+
+function assetPathForRoute(route: string): string | null {
+  if (route === DAILY_TOOLS_HUB_ROUTE) return `${ASSET_ROOT}/hub.json`;
+  const match = /^\/daily-tools\/([a-z0-9][a-z0-9-]{0,119})\/$/i.exec(route);
+  return match ? `${ASSET_ROOT}/${match[1].toLowerCase()}.json` : null;
+}
+
+async function readCloudflareAsset(pathname: string): Promise<unknown | null> {
+  try {
+    const context = getCloudflareContext();
+    const assets = (context.env as unknown as AssetEnvironment).ASSETS;
+    if (!assets) return null;
+    const response = await assets.fetch(`https://assets.local${pathname}`);
+    if (!response.ok) return null;
+    return await response.json() as unknown;
+  } catch {
+    return null;
+  }
+}
+
+async function readLocalAsset(pathname: string): Promise<unknown | null> {
+  try {
+    const [{ readFile }, path] = await Promise.all([
+      import('node:fs/promises'),
+      import('node:path'),
+    ]);
+    const segments = pathname.split('/').filter(Boolean);
+    const filename = path.join(process.cwd(), 'public', ...segments);
+    return JSON.parse(await readFile(filename, 'utf8')) as unknown;
+  } catch {
+    return null;
+  }
+}
+
+const manifestRoutes = [...new Set(
+  (dailyToolRoutesJson as unknown[])
+    .filter((value): value is string => typeof value === 'string')
+    .map(normalizeRoute)
+    .filter((value): value is string => Boolean(value)),
+)];
+const manifestSet = new Set(manifestRoutes);
+const toolRoutes = manifestRoutes.filter((route) => route !== DAILY_TOOLS_HUB_ROUTE).sort();
+const pageCache = new Map<string, Promise<LegacyPreservedPage | null>>();
+
+async function loadDailyToolPage(route: string): Promise<LegacyPreservedPage | null> {
+  const assetPath = assetPathForRoute(route);
+  if (!assetPath) return null;
+  const raw = await readCloudflareAsset(assetPath) ?? await readLocalAsset(assetPath);
+  const page = pageFromRecord(raw);
+  if (!page || sourcePathToRoute(page.source_path) !== route) return null;
+  return page;
+}
+
+export async function getDailyToolPage(route: string): Promise<LegacyPreservedPage | null> {
+  const normalized = normalizeRoute(route);
+  if (!normalized || !manifestSet.has(normalized)) return null;
+  const cached = pageCache.get(normalized);
+  if (cached) return cached;
+  const pending = loadDailyToolPage(normalized);
+  pageCache.set(normalized, pending);
+  return pending;
+}
+
+export function getDailyToolSlugs(): string[] {
+  if (manifestRoutes.length !== EXPECTED_ROUTES || !manifestSet.has(DAILY_TOOLS_HUB_ROUTE)) {
+    throw new Error(`Daily Tools manifest integrity failure: expected ${EXPECTED_ROUTES} routes, found ${manifestRoutes.length}.`);
+  }
+  return toolRoutes.map((route) => route.slice('/daily-tools/'.length, -1));
+}
+
+export function getDailyToolRoutes(): string[] {
+  if (manifestRoutes.length !== EXPECTED_ROUTES || !manifestSet.has(DAILY_TOOLS_HUB_ROUTE)) {
+    throw new Error(`Daily Tools manifest integrity failure: expected ${EXPECTED_ROUTES} routes, found ${manifestRoutes.length}.`);
+  }
+  return [DAILY_TOOLS_HUB_ROUTE, ...toolRoutes];
 }
 
 function normalizeInternalHref(value: unknown): string | null {
@@ -71,34 +147,6 @@ function normalizeInternalHref(value: unknown): string | null {
   } catch {
     return null;
   }
-}
-
-const payload = loadPayload();
-const routeMap = new Map<string, LegacyPreservedPage>();
-for (const raw of Array.isArray(payload.records) ? payload.records : []) {
-  const page = pageFromRecord(raw);
-  if (!page) continue;
-  const route = sourcePathToRoute(page.source_path);
-  if (!route || routeMap.has(route)) continue;
-  routeMap.set(route, page);
-}
-
-const toolRoutes = [...routeMap.keys()].filter((route) => route !== DAILY_TOOLS_HUB_ROUTE).sort();
-if (!routeMap.has(DAILY_TOOLS_HUB_ROUTE) || toolRoutes.length !== DAILY_TOOLS_TOTAL) {
-  throw new Error(`Daily Tools catalog integrity failure: expected hub + ${DAILY_TOOLS_TOTAL} tools, found ${routeMap.size} records.`);
-}
-
-export function getDailyToolPage(route: string): LegacyPreservedPage | null {
-  const normalized = route.endsWith('/') ? route : `${route}/`;
-  return routeMap.get(normalized) ?? null;
-}
-
-export function getDailyToolSlugs(): string[] {
-  return toolRoutes.map((route) => route.slice('/daily-tools/'.length, -1));
-}
-
-export function getDailyToolRoutes(): string[] {
-  return [DAILY_TOOLS_HUB_ROUTE, ...toolRoutes];
 }
 
 export function getDailyToolRelatedLinks(page: LegacyPreservedPage, currentRoute?: string): DailyToolRelatedLink[] {
