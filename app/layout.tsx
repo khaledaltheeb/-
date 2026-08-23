@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import Script from 'next/script';
 import { Noto_Sans_Arabic } from 'next/font/google';
-import { BRAND_NAME, BRAND_SHORT, DEFAULT_DESCRIPTION, SITE_URL, organizationJsonLd } from '@/lib/seo';
+import { BRAND_NAME, BRAND_SHORT, DEFAULT_DESCRIPTION, INDEXING_ENABLED, SITE_URL, organizationJsonLd } from '@/lib/seo';
 import './rawafid-theme.css';
 
 /* Compatibility modules now live behind the central entry point:
@@ -11,7 +11,6 @@ import './rawafid-theme.css';
  './admin-shell-v3.css'.
 */
 
-const INDEXING_ENABLED = process.env.NEXT_PUBLIC_ALLOW_INDEXING === 'true';
 const DEFAULT_SOCIAL_IMAGE = `${SITE_URL}/seo-card`;
 
 const arabicFont = Noto_Sans_Arabic({
