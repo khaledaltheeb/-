@@ -4,7 +4,7 @@ const preservedRoutes=[
   ['/hubs/angle-001/','القلق: التعريف والمفهوم',true],
   ['/encyclopedia/concept-0001/','تعريف دقيق وسياق الاستخدام',true],
   ['/addiction/','منظومة عربية مؤسسية للإدمان: من الطوارئ إلى التعافي الوظيفي',false],
-  ['/addiction/protocol-atlas/','أطلس البروتوكولات العلاجية للإدمان',true],
+  ['/addiction/protocol-atlas/','أطلس علاج اضطرابات الإدمان: كيف تُبنى الخطة من التقييم إلى التعافي؟',true],
   ['/family-guide/tools/behavior-log/','سجل السلوك والسياق الوظيفي',true],
 ];
 const upgradedRoutes=[
