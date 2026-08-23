@@ -57,6 +57,9 @@ jobs:
       - name: Install locked dependencies
         run: npm ci --no-audit --no-fund
 
+      - name: Materialize Daily Tools route and content assets
+        run: node scripts/build-daily-tools-route-manifest.mjs
+
       - name: Type check
         run: npm run typecheck
 
