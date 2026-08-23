@@ -18,14 +18,14 @@ export const metadata = buildSeoMetadata({
   keywords: ['روافد', 'منصة روافد', 'الصحة النفسية', 'التربية الخاصة', 'التوحد', 'صعوبات التعلم', 'سرطان الأطفال', 'التربية الدامجة', 'الإدمان والتعافي', 'دعم الأسرة'],
 });
 
-const quickSearches = [
-  ['الصحة النفسية', 'الصحة النفسية'],
-  ['التوحد', 'التوحد'],
-  ['صعوبات التعلم', 'صعوبات التعلم'],
-  ['سرطان الأطفال', 'سرطان الأطفال'],
-  ['الإدمان والتعافي', 'الإدمان والتعافي'],
-  ['دعم الأسرة', 'دعم الأسرة'],
-];
+const quickLinks = [
+  ['الصحة النفسية', '/sectors/mental-health'],
+  ['التوحد', '/sections/autism'],
+  ['صعوبات التعلم', '/sections/special-ed-learning-disabilities'],
+  ['سرطان الأطفال', '/sectors/pediatric-oncology'],
+  ['الإدمان والتعافي', '/sectors/addiction-recovery'],
+  ['دعم الأسرة', '/sections/parenting-family'],
+] as const;
 
 const homepageJsonLd = {
   '@context': 'https://schema.org',
@@ -79,7 +79,7 @@ export default async function HomePage() {
             </form>
 
             <div className="rawafid-quick-links" aria-label="موضوعات شائعة في روافد">
-              {quickSearches.map(([label, query]) => <Link prefetch={false} key={label} href={`/search?q=${encodeURIComponent(query)}`}>{label}</Link>)}
+              {quickLinks.map(([label, href]) => <Link prefetch={false} key={label} href={href}>{label}</Link>)}
             </div>
           </div>
 
@@ -93,7 +93,7 @@ export default async function HomePage() {
               <Link prefetch={false} href="/sectors/pediatric-oncology"><span><PlatformIcon name="review" /></span><div><strong>أبحث عن معلومات عن سرطان الأطفال</strong><small>التشخيص والعلاج والأبحاث والدعم النفسي والأسري والنجاة</small></div><i aria-hidden="true">←</i></Link>
               <Link prefetch={false} href="/care-guides/"><span><PlatformIcon name="knowledge" /></span><div><strong>أحتاج دليلًا عمليًا للرعاية</strong><small>أدلة للأسرة والتعامل اليومي والخطوات العملية</small></div><i aria-hidden="true">←</i></Link>
               <Link prefetch={false} href="/specialists"><span><PlatformIcon name="specialist" /></span><div><strong>أبحث عن مساعدة مهنية</strong><small>مختصون ومراكز ضمن دليل واضح</small></div><i aria-hidden="true">←</i></Link>
-              <Link prefetch={false} href="/search?q=دعم+الأسرة"><span><PlatformIcon name="community" /></span><div><strong>أساند قريبًا أو أسرة</strong><small>مسارات عملية لمقدمي الدعم والرعاية</small></div><i aria-hidden="true">←</i></Link>
+              <Link prefetch={false} href="/sections/parenting-family"><span><PlatformIcon name="community" /></span><div><strong>أساند قريبًا أو أسرة</strong><small>مسارات عملية لمقدمي الدعم والرعاية</small></div><i aria-hidden="true">←</i></Link>
             </div>
             <p className="hero-safety-note"><PlatformIcon name="secure" size={18} />إذا كان هناك خطر مباشر، تواصل فورًا مع خدمات الطوارئ المحلية في بلدك.</p>
           </aside>
