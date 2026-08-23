@@ -108,6 +108,6 @@ for(const socialFile of ['app/opengraph-image.tsx','app/twitter-image.tsx']){
 requireText('app/layout.tsx',["'./theme-empty.css'","'./dashboard-v3.css'","'./theme-preview.css'","'./public-modules-v3.css'","'./system-states.css'","'./content-v3.css'","'./structured-content.css'","'./block-editor-v3.css'","'./profile-v3.css'","'./admin-shell-v3.css'","/pwa-icon-180",'DEFAULT_SOCIAL_IMAGE']);
 requireText('app/api/health/route.ts',['supabase: \'ok\'','database: \'ok\'','status: \'ok\'']);
 requireText('.env.example',['NEXT_PUBLIC_SITE_URL=https://rawafid-platform-staging.khaledaltheeb.workers.dev','NEXT_PUBLIC_ALLOW_INDEXING=false']);
-requireText('lib/seo.ts',["'https://rawafid-platform-staging.khaledaltheeb.workers.dev'",'DEFAULT_SOCIAL_IMAGE_PATH']);
+requireText('lib/seo.ts',["'https://rawafid-platform-staging.khaledaltheeb.workers.dev'",'fallbackSocialImagePath','/seo-card?title=','buildSemanticSeoProfile']);
 
 if(!process.exitCode)console.log('Rawafid architecture/privacy/PWA/theme/content-readiness quality contract passed.');
