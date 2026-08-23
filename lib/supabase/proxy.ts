@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+import { hasSupabaseAuthCookie } from '@/lib/supabase/auth-cookie';
 
 const protectedPrefixes = [
   '/account',
@@ -185,10 +186,12 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
-  const { data } = await supabase.auth.getClaims();
   const isProtected = protectedPrefixes.some((prefix) => isPrefix(request.nextUrl.pathname, prefix));
+  const shouldCheckAuth = isProtected || hasSupabaseAuthCookie(request.cookies.getAll());
+  const claimsResult = shouldCheckAuth ? await supabase.auth.getClaims() : null;
+  const claims = claimsResult?.data?.claims;
 
-  if (isProtected && !data?.claims?.sub) {
+  if (isProtected && !claims?.sub) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     url.search = '';
@@ -196,7 +199,7 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (isProtected && data?.claims?.sub) {
+  if (isProtected && claims?.sub) {
     const assurance = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
     const factors = assurance.error ? null : await supabase.auth.mfa.listFactors();
     const hasVerifiedTotp = (factors?.data?.totp ?? []).some((factor) => factor.status === 'verified');
