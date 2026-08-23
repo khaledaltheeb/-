@@ -52,7 +52,7 @@ jobs:
           npx wrangler deploy --env production --dry-run --outdir bundled --metafile bundle-meta.json 2>&1 | tee wrangler-dry-run.log
           echo '--- dry-run size summary ---'
           grep -E 'Total Upload|gzip:' wrangler-dry-run.log || true
-      - name: Report largest bundle inputs
+      - name: Report Wrangler bundle inputs
         shell: bash
         run: |
           set -euo pipefail
@@ -65,17 +65,34 @@ jobs:
               byInput.set(name, (byInput.get(name) || 0) + (info.bytesInOutput || 0));
             }
           }
-          console.log('--- top inputs by bytes in output ---');
-          for (const [name, bytes] of [...byInput.entries()].sort((a,b)=>b[1]-a[1]).slice(0,120)) console.log(`${String(bytes).padStart(12)}  ${name}`);
-          console.log('--- top source files by original bytes ---');
-          for (const [name, info] of Object.entries(meta.inputs || {}).sort((a,b)=>(b[1].bytes||0)-(a[1].bytes||0)).slice(0,120)) console.log(`${String(info.bytes||0).padStart(12)}  ${name}`);
+          console.log('--- Wrangler top inputs by bytes in output ---');
+          for (const [name, bytes] of [...byInput.entries()].sort((a,b)=>b[1]-a[1]).slice(0,80)) console.log(`${String(bytes).padStart(12)}  ${name}`);
+          NODE
+      - name: Report OpenNext handler source inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs = require('fs');
+          const path = '.open-next/server-functions/default/handler.mjs.meta.json';
+          const meta = JSON.parse(fs.readFileSync(path,'utf8'));
+          const byInput = new Map();
+          for (const out of Object.values(meta.outputs || {})) {
+            for (const [name, info] of Object.entries(out.inputs || {})) {
+              byInput.set(name, (byInput.get(name) || 0) + (info.bytesInOutput || 0));
+            }
+          }
+          console.log('--- OpenNext handler top inputs by bytes in output ---');
+          for (const [name, bytes] of [...byInput.entries()].sort((a,b)=>b[1]-a[1]).slice(0,160)) console.log(`${String(bytes).padStart(12)}  ${name}`);
+          console.log('--- OpenNext handler largest original inputs ---');
+          for (const [name, info] of Object.entries(meta.inputs || {}).sort((a,b)=>(b[1].bytes||0)-(a[1].bytes||0)).slice(0,160)) console.log(`${String(info.bytes||0).padStart(12)}  ${name}`);
           NODE
       - name: Report generated OpenNext file sizes
         shell: bash
         run: |
           set -euo pipefail
           echo '--- largest OpenNext files ---'
-          find .open-next -type f -printf '%s %p\n' | sort -nr | head -n 120
+          find .open-next -type f -printf '%s %p\n' | sort -nr | awk 'NR<=120 {print}'
       - name: Publish result
         if: always()
         env:
