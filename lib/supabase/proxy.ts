@@ -107,6 +107,16 @@ function applyPreservedAliasSeoHeaders(response: NextResponse, pathname: string)
 }
 
 export async function updateSession(request: NextRequest) {
+  // Canonical host enforcement must happen before auth and database redirect work.
+  // Preserve path/query while permanently consolidating www signals into healthrenewal.org.
+  if (request.nextUrl.hostname.toLowerCase() === 'www.healthrenewal.org') {
+    const canonicalHost = request.nextUrl.clone();
+    canonicalHost.protocol = 'https:';
+    canonicalHost.hostname = 'healthrenewal.org';
+    canonicalHost.port = '';
+    return NextResponse.redirect(canonicalHost, 308);
+  }
+
   const trustedPathname = decodedPathname(request.nextUrl.pathname);
   const forwardedHeaders = () => {
     const headers = new Headers(request.headers);
