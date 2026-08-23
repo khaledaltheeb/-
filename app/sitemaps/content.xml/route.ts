@@ -15,28 +15,12 @@ type SitemapRow = {
   priority: number;
 };
 
-type JsonRecord = Record<string, unknown>;
-
 type ContentSitemapRecord = {
   id: string;
   slug: string;
   updated_at: string | null;
   canonical_url: string | null;
-  schema_json: JsonRecord | null;
 };
-
-function asRecord(value: unknown): JsonRecord | null {
-  return value && typeof value === 'object' && !Array.isArray(value) ? value as JsonRecord : null;
-}
-
-function sitemapEligible(item: ContentSitemapRecord) {
-  const schema = asRecord(item.schema_json);
-  // Production-baseline routes are intentionally preserved as noindex pages until
-  // they are rebuilt as first-class modern routes. A noindex URL must never be
-  // advertised in an XML sitemap, even when its source content row is published.
-  if (schema && 'legacy_migration' in schema) return false;
-  return true;
-}
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -48,18 +32,20 @@ export async function GET(request: Request) {
   const now = new Date().toISOString();
   const data: ContentSitemapRecord[] = [];
 
+  // No-loss rule: every live, indexable database record that is not a condition belongs
+  // to this sitemap safety net. Dedicated maps such as quick-info may repeat the same
+  // canonical URL; overlap is preferable to silently dropping an indexable published page.
+  // Conditions remain in the encyclopedia sitemap, whose public route is canonicalized there.
   for (let batchStart = pageStart; batchStart < pageEndExclusive; batchStart += DB_BATCH_SIZE) {
     const batchEnd = Math.min(batchStart + DB_BATCH_SIZE - 1, pageEndExclusive - 1);
     const requestedRows = batchEnd - batchStart + 1;
     const { data: batch, error } = await supabase
       .from('content')
-      .select('id,slug,updated_at,canonical_url,schema_json')
+      .select('id,slug,updated_at,canonical_url')
       .eq('status', 'published')
       .neq('content_type', 'condition')
-      .not('slug', 'like', 'quick-info-%')
       .lte('published_at', now)
       .eq('robots_index', true)
-      .is('schema_json->legacy_migration', null)
       .order('updated_at', { ascending: false })
       .order('id', { ascending: false })
       .range(batchStart, batchEnd);
@@ -75,14 +61,12 @@ export async function GET(request: Request) {
     if (batch.length < requestedRows) break;
   }
 
-  const databaseRows: SitemapRow[] = data
-    .filter(sitemapEligible)
-    .map((item) => ({
-      path: item.canonical_url || `/content/${item.slug}`,
-      lastModified: item.updated_at,
-      changeFrequency: 'monthly',
-      priority: .7,
-    }));
+  const databaseRows: SitemapRow[] = data.map((item) => ({
+    path: item.canonical_url || `/content/${item.slug}`,
+    lastModified: item.updated_at,
+    changeFrequency: 'monthly',
+    priority: .7,
+  }));
 
   let generatedRows: SitemapRow[] = [];
   if (page === 0) {
