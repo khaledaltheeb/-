@@ -1,0 +1,62 @@
+{
+  "batch_id": "expanded-encyclopedia-008-addiction-b-complement",
+  "status": "editorial-source",
+  "records": [
+    {
+      "content_type": "glossary_term",
+      "slug": "hazardous-substance-use",
+      "canonical_term": "الاستخدام الخطِر للمادة",
+      "english_name": "Hazardous Substance Use",
+      "aliases": ["استخدام المادة في مواقف خطرة"],
+      "category_slug": "substance-addiction",
+      "title": "الاستخدام الخطِر للمادة: المواقف والعواقب والتقييم",
+      "excerpt": "الاستخدام الخطِر للمادة هو تكرار استخدامها في ظروف تزيد احتمال الأذى، مثل القيادة أو تشغيل الآلات أو مواقف تتطلب يقظة وتنسيقًا. هو مؤشر سريري مهم ولا يعتمد على حدوث حادث فعلي.",
+      "definition": "الاستخدام الخطِر للمادة هو استخدام متكرر في أوضاع يكون فيها التسمم أو ضعف الحكم أو التنسيق عاملًا يزيد احتمال الإصابة أو الأذى. يدخل هذا النوع من السلوك ضمن تقييم اضطرابات استخدام المواد.",
+      "presentation_or_use": "قد يشمل القيادة بعد الشرب أو استخدام مادة قبل عمل على ارتفاع أو قرب آلات أو في مواقف يكون فيها بطء الاستجابة خطيرًا. تكرار النجاة دون حادث لا يجعل السلوك آمنًا.",
+      "mechanisms_or_context": "يمكن أن تضعف بعض المواد الانتباه والحكم وزمن الاستجابة والتنسيق، بينما قد يؤدي الاعتياد أو الثقة الزائدة إلى تقليل إدراك الخطر. يتأثر القرار أيضًا بالسياق الاجتماعي وتوفر بدائل النقل والدعم.",
+      "assessment_or_practice": "يُسأل عن المواقف لا عن الحوادث فقط: القيادة والعمل والسباحة والرعاية والمسؤوليات الحساسة، مع تحديد المادة والتوقيت والكمية. يُناقش تقليل الخطر وخطة النقل والسلامة بصورة غير وصمية.",
+      "boundary": "الاستخدام الخطِر ليس مرادفًا لكل استخدام للمادة ولا يحدد شدة الاضطراب وحده. كما تختلف المخاطر باختلاف المادة والجرعة والدواء الموصوف والسياق الصحي والقانوني.",
+      "faq": [
+        {"question": "هل يجب وقوع حادث حتى يعد الاستخدام خطِرًا؟", "answer": "لا. المعيار السلوكي يتعلق بتكرار الاستخدام في موقف يرفع احتمال الأذى حتى إذا لم يحدث حادث في المرات السابقة."},
+        {"question": "هل القيادة بعد كمية صغيرة آمنة دائمًا؟", "answer": "لا يمكن افتراض الأمان من الانطباع الذاتي؛ يتأثر الأداء بالمادة والكمية والزمن والفرد، وتوجد حدود قانونية وسلامية يجب احترامها."}
+      ],
+      "references": [
+        {"title": "Alcohol Use Disorder: From Risk to Diagnosis to Recovery", "publisher": "National Institute on Alcohol Abuse and Alcoholism", "url": "https://www.niaaa.nih.gov/health-professionals-communities/core-resource-on-alcohol/alcohol-use-disorder-risk-diagnosis-recovery"},
+        {"title": "Drugs, Brains, and Behavior: The Science of Addiction", "publisher": "National Institute on Drug Abuse", "url": "https://nida.nih.gov/publications/drugs-brains-behavior-science-addiction"}
+      ],
+      "primary_keyword": "الاستخدام الخطِر للمادة",
+      "secondary_keywords": ["Hazardous Substance Use بالعربي", "استخدام المخدر في مواقف خطرة", "القيادة وتعاطي المواد"],
+      "semantic_terms": ["السلامة", "التسمم", "القيادة", "اضطراب استخدام المواد"],
+      "related_slugs": ["acute-intoxication", "continued-use-despite-harm"],
+      "classification_status": "clinical-behavior"
+    },
+    {
+      "content_type": "glossary_term",
+      "slug": "substance-lapse",
+      "canonical_term": "الزلة في التعافي من استخدام المواد",
+      "english_name": "Substance Use Lapse",
+      "aliases": ["تعثر قصير في التعافي"],
+      "category_slug": "substance-addiction",
+      "title": "الزلة في التعافي: الفرق عن الانتكاس وكيف تُفهم دون وصمة",
+      "excerpt": "الزلة مصطلح علاجي يصف استخدامًا محدودًا أو قصيرًا بعد فترة توقف أو تحسن، مع محاولة منع تحوله إلى عودة أوسع للنمط السابق. الحد الفاصل بينها وبين الانتكاس يعتمد على التعريف والخطة العلاجية.",
+      "definition": "الزلة في التعافي من استخدام المواد هي وصف لحدث استخدام محدود بعد فترة امتناع أو تحسن، ويستعمل أحيانًا للتمييز بين حدث منفرد وبين عودة مستمرة إلى نمط الاستخدام السابق.",
+      "presentation_or_use": "قد تكون جرعة أو مناسبة واحدة يعقبها توقف وطلب دعم، أو بداية سلسلة تتوسع إذا صاحبها يأس ولوم ذاتي. فهم ما حدث بسرعة يساعد في تقليل الضرر وتعديل خطة المواجهة.",
+      "mechanisms_or_context": "يمكن لتوقع الكمال أن يجعل أي زلة تُفسر كفشل كامل، ما يزيد احتمال استمرار الاستخدام. نماذج الوقاية من الانتكاس تركز على الاستجابة للحدث والتعلم منه بدل التفكير الكلي أو الوصمة.",
+      "assessment_or_practice": "يُحدد حجم الحدث والمدة والمادة والمخاطر وما إذا عاد النمط السابق، ثم تُراجع المحفزات والدعم وخطة السلامة. يجب تجنب التقليل من المخاطر لمجرد تسمية الحدث زلة.",
+      "boundary": "الزلة ليست مصطلحًا تشخيصيًا رسميًا ولا يوجد حد عالمي يفصلها عن الانتكاس. بعض الخدمات تستخدم تعريفات مختلفة، والأولوية للسلامة والأثر الفعلي لا للملصق.",
+      "faq": [
+        {"question": "هل الزلة تمحو التعافي السابق؟", "answer": "لا. هي حدث يمكن التعامل معه والتعلم منه، مع تقييم المخاطر وتفعيل الدعم بسرعة لمنع اتساع العودة إلى الاستخدام."},
+        {"question": "متى تصبح الزلة انتكاسًا؟", "answer": "لا يوجد حد واحد متفق عليه؛ يعتمد ذلك على مدة العودة وشدتها والنمط والهدف العلاجي والتعريف المستخدم في البرنامج أو الدراسة."}
+      ],
+      "references": [
+        {"title": "Recovery and Recovery Support", "publisher": "SAMHSA", "url": "https://www.samhsa.gov/substance-use/recovery"},
+        {"title": "Drugs, Brains, and Behavior: The Science of Addiction", "publisher": "National Institute on Drug Abuse", "url": "https://nida.nih.gov/publications/drugs-brains-behavior-science-addiction"}
+      ],
+      "primary_keyword": "الزلة في التعافي من استخدام المواد",
+      "secondary_keywords": ["Substance Use Lapse بالعربي", "الفرق بين الزلة والانتكاس", "تعثر التعافي"],
+      "semantic_terms": ["الانتكاس", "التعافي", "الوقاية", "الوصمة"],
+      "related_slugs": ["relapse", "recovery-process"],
+      "classification_status": "recovery-concept"
+    }
+  ]
+}
