@@ -60,6 +60,8 @@ type RedirectCacheItem = { destination: string | null; status: 301 | 302 | 307 |
 type LegacyRouteCacheItem = { exists: boolean; expiresAt: number };
 const redirectCache = new Map<string, RedirectCacheItem>();
 const legacyRouteCache = new Map<string, LegacyRouteCacheItem>();
+const redirectInFlight = new Map<string, Promise<RedirectCacheItem>>();
+const legacyRouteInFlight = new Map<string, Promise<LegacyRouteCacheItem>>();
 
 function isPrefix(pathname: string, prefix: string) {
   return pathname === prefix || pathname.startsWith(`${prefix}/`);
@@ -137,16 +139,39 @@ export async function updateSession(request: NextRequest) {
   let legacyExists: boolean | null = null;
   async function isLegacyProductionRoute() {
     if (legacyExists !== null) return legacyExists;
+
     const cached = legacyRouteCache.get(pathname);
     if (cached && cached.expiresAt > Date.now()) {
       legacyExists = cached.exists;
       return legacyExists;
     }
-    const { data, error } = await supabase.rpc('legacy_preserved_route_exists', { p_route: pathname });
-    legacyExists = !error && data === true;
-    if (legacyRouteCache.size >= LEGACY_ROUTE_CACHE_LIMIT) legacyRouteCache.clear();
-    legacyRouteCache.set(pathname, { exists: legacyExists, expiresAt: Date.now() + LEGACY_ROUTE_TTL_MS });
-    return legacyExists;
+
+    let requestPromise = legacyRouteInFlight.get(pathname);
+    if (!requestPromise) {
+      requestPromise = (async (): Promise<LegacyRouteCacheItem> => {
+        let exists = false;
+        try {
+          const { data, error } = await supabase.rpc('legacy_preserved_route_exists', { p_route: pathname });
+          exists = !error && data === true;
+        } catch {
+          exists = false;
+        }
+
+        const item = { exists, expiresAt: Date.now() + LEGACY_ROUTE_TTL_MS };
+        if (legacyRouteCache.size >= LEGACY_ROUTE_CACHE_LIMIT) legacyRouteCache.clear();
+        legacyRouteCache.set(pathname, item);
+        return item;
+      })();
+      legacyRouteInFlight.set(pathname, requestPromise);
+    }
+
+    try {
+      const item = await requestPromise;
+      legacyExists = item.exists;
+      return legacyExists;
+    } finally {
+      if (legacyRouteInFlight.get(pathname) === requestPromise) legacyRouteInFlight.delete(pathname);
+    }
   }
 
   const modernTrailingSlashVariant =
@@ -156,27 +181,50 @@ export async function updateSession(request: NextRequest) {
     && !(await isLegacyProductionRoute());
 
   if (canResolveRedirect(request)) {
-    const cached = redirectCache.get(request.nextUrl.pathname);
-    let destination = cached && cached.expiresAt > Date.now() ? cached.destination : null;
-    let status: 301 | 302 | 307 | 308 = cached && cached.expiresAt > Date.now() ? cached.status : 301;
+    const redirectPath = request.nextUrl.pathname;
+    let item = redirectCache.get(redirectPath);
 
-    if (!cached || cached.expiresAt <= Date.now()) {
-      const { data, error } = await supabase
-        .from('redirects')
-        .select('destination_path,status_code')
-        .eq('source_path', request.nextUrl.pathname)
-        .eq('is_active', true)
-        .maybeSingle();
+    if (!item || item.expiresAt <= Date.now()) {
+      let requestPromise = redirectInFlight.get(redirectPath);
+      if (!requestPromise) {
+        requestPromise = (async (): Promise<RedirectCacheItem> => {
+          let destination: string | null = null;
+          let status: 301 | 302 | 307 | 308 = 301;
 
-      if (!error && data) {
-        destination = typeof data.destination_path === 'string' ? data.destination_path : null;
-        status = validRedirectStatus(Number(data.status_code)) ? Number(data.status_code) as 301 | 302 | 307 | 308 : 301;
+          try {
+            const { data, error } = await supabase
+              .from('redirects')
+              .select('destination_path,status_code')
+              .eq('source_path', redirectPath)
+              .eq('is_active', true)
+              .maybeSingle();
+
+            if (!error && data) {
+              destination = typeof data.destination_path === 'string' ? data.destination_path : null;
+              status = validRedirectStatus(Number(data.status_code)) ? Number(data.status_code) as 301 | 302 | 307 | 308 : 301;
+            }
+          } catch {
+            destination = null;
+            status = 301;
+          }
+
+          const resolved = { destination, status, expiresAt: Date.now() + REDIRECT_TTL_MS };
+          if (redirectCache.size >= REDIRECT_CACHE_LIMIT) redirectCache.clear();
+          redirectCache.set(redirectPath, resolved);
+          return resolved;
+        })();
+        redirectInFlight.set(redirectPath, requestPromise);
       }
 
-      if (redirectCache.size >= REDIRECT_CACHE_LIMIT) redirectCache.clear();
-      redirectCache.set(request.nextUrl.pathname, { destination, status, expiresAt: Date.now() + REDIRECT_TTL_MS });
+      try {
+        item = await requestPromise;
+      } finally {
+        if (redirectInFlight.get(redirectPath) === requestPromise) redirectInFlight.delete(redirectPath);
+      }
     }
 
+    const destination = item?.destination ?? null;
+    const status = item?.status ?? 301;
     if (destination && destination.startsWith('/') && !destination.startsWith('//')) {
       if (!(await isLegacyProductionRoute())) {
         const target = request.nextUrl.clone();
