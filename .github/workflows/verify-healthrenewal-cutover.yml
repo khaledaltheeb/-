@@ -8,6 +8,7 @@ on:
     paths:
       - .github/workflows/verify-healthrenewal-cutover.yml
       - .deployment/healthrenewal-cloudflare-cutover.txt
+      - scripts/seo-cutover-url-readiness.mjs
 
 permissions:
   contents: read
@@ -16,7 +17,7 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     env:
       DOMAIN: healthrenewal.org
       EXPECTED_NS_1: aisha.ns.cloudflare.com
@@ -116,6 +117,13 @@ jobs:
             exit 1
           fi
 
+      - name: Require at least 10,000 unique canonical sitemap URLs
+        env:
+          SEO_CUTOVER_BASE_URL: https://healthrenewal.org
+          SEO_TARGET_URLS: '10000'
+          SEO_ENFORCE_TARGET: 'true'
+        run: node scripts/seo-cutover-url-readiness.mjs
+
       - name: Publish cutover verification status
         if: always()
         env:
@@ -126,10 +134,10 @@ jobs:
           set -euo pipefail
           if [ "${JOB_STATUS}" = 'success' ]; then
             state='success'
-            description='Cloudflare cutover verified'
+            description='Cloudflare cutover and 10k SEO target verified'
           else
             state='failure'
-            description='Cloudflare cutover verification failed'
+            description='Cloudflare/SEO cutover verification failed'
           fi
           payload="$(jq -n \
             --arg state "${state}" \
