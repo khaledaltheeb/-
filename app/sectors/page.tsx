@@ -42,6 +42,13 @@ export default async function SectorsIndex() {
         <div className="public-stat-strip"><span>{rows.length.toLocaleString('ar')} قطاعات رئيسية</span><span>{categoryRows.length.toLocaleString('ar')} قسمًا وقسمًا فرعيًا</span><span>تصنيف موحد للمحتوى المنشور</span></div>
       </section>
 
+      <nav className="sector-quick-nav" aria-label="الوصول السريع من خريطة القطاعات">
+        <Link href="/sections">جميع الأقسام</Link>
+        <Link href="/search">البحث في المنصة</Link>
+        <Link href="/care-guides/">أدلة التعامل والرعاية</Link>
+        <Link href="/evidence-guides/">الأدلة العلمية</Link>
+      </nav>
+
       {rows.length > 0 ? <section className="institutional-sector-grid" aria-label="قطاعات منصة روافد">
         {rows.map((sector, index) => {
           const sectorCategories = categoryRows.filter((category) => category.sector_id === sector.id);
@@ -52,7 +59,11 @@ export default async function SectorsIndex() {
             <span className="sector-number">{String(index + 1).padStart(2, '0')}</span>
             <h2>{sector.name_ar}</h2>
             <p>{sector.description || 'قطاع رئيسي يجمع موضوعات مترابطة ضمن بنية معرفية وخدمية واضحة.'}</p>
-            <div className="sector-metrics"><span>{rootCount.toLocaleString('ar')} أقسام رئيسية</span>{childCount > 0 && <span>{childCount.toLocaleString('ar')} أقسام فرعية</span>}</div>
+            <div className="sector-metrics">
+              {sectorCategories.length === 0
+                ? <span>مسار متخصص مباشر</span>
+                : <><span>{rootCount.toLocaleString('ar')} أقسام رئيسية</span>{childCount > 0 && <span>{childCount.toLocaleString('ar')} أقسام فرعية</span>}</>}
+            </div>
             <span className="sector-open">استكشف القطاع ←</span>
           </Link>;
         })}
