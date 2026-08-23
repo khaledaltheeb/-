@@ -59,32 +59,58 @@ export default async function EncyclopediaConditionPage({ params }: { params: Pa
   const faqItems = visibleEncyclopediaFaq(record.body_json);
   const audiences = Array.isArray(record.audience) ? record.audience.map(String) : [];
   const review = contentReviewProvenance(record);
+  const wordCount = String(record.body_text ?? '').trim().split(/\s+/u).filter(Boolean).length;
+  const topicKeywords = [record.primary_keyword, ...(record.secondary_keywords ?? []), ...(record.semantic_terms ?? []).slice(0, 12)]
+    .filter((item): item is string => typeof item === 'string' && item.trim().length > 0);
   const breadcrumbs = breadcrumbJsonLd([
     { name: 'الرئيسية', path: '/' },
     { name: 'الموسوعة المختصرة', path: '/encyclopedia/' },
     { name: record.title, path: canonical },
   ]);
 
+  const conditionId = `${url}#condition`;
   const conditionSchema = {
-    '@context': 'https://schema.org', '@type': 'MedicalCondition', '@id': `${url}#condition`,
+    '@context': 'https://schema.org',
+    '@type': 'MedicalCondition',
+    '@id': conditionId,
     name: record.primary_keyword || record.title,
     alternateName: (record.secondary_keywords ?? []).slice(0, 12),
-    description: record.seo_description || record.excerpt || undefined, url,
+    description: record.seo_description || record.excerpt || undefined,
+    url,
   };
   const pageSchema = {
-    '@context': 'https://schema.org', '@type': 'MedicalWebPage', '@id': `${url}#page`, url,
-    name: record.title, headline: record.title,
+    '@context': 'https://schema.org',
+    '@type': 'MedicalWebPage',
+    '@id': `${url}#page`,
+    url,
+    name: record.title,
+    headline: record.title,
     description: record.seo_description || record.excerpt || undefined,
-    inLanguage: 'ar', datePublished: record.published_at || undefined, dateModified: record.updated_at || undefined,
-    lastReviewed: review.lastReviewedAt || undefined, about: { '@id': `${url}#condition` },
+    inLanguage: 'ar',
+    isAccessibleForFree: true,
+    datePublished: record.published_at || undefined,
+    dateModified: record.updated_at || undefined,
+    lastReviewed: review.lastReviewedAt || undefined,
+    mainEntity: { '@id': conditionId },
+    about: { '@id': conditionId },
     author: record.author_display_name ? { '@type': 'Person', name: record.author_display_name } : { '@id': `${SITE_URL}/#organization` },
     reviewedBy: review.reviewedBySchema,
-    publisher: { '@id': `${SITE_URL}/#organization` }, isPartOf: { '@id': `${SITE_URL}/encyclopedia/#page` },
+    publisher: { '@id': `${SITE_URL}/#organization` },
+    isPartOf: { '@id': `${SITE_URL}/encyclopedia/#page` },
+    keywords: topicKeywords.join(', '),
+    wordCount,
+    image: record.featured_image_url || `${SITE_URL}/seo-card`,
     citation: references.flatMap((reference) => reference.url ? [reference.url] : []),
   };
   const faqSchema = faqItems.length ? {
-    '@context': 'https://schema.org', '@type': 'FAQPage', '@id': `${url}#faq`,
-    mainEntity: faqItems.map((item) => ({ '@type': 'Question', name: item.question, acceptedAnswer: { '@type': 'Answer', text: item.answer } })),
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    '@id': `${url}#faq`,
+    mainEntity: faqItems.map((item) => ({
+      '@type': 'Question',
+      name: item.question,
+      acceptedAnswer: { '@type': 'Answer', text: item.answer },
+    })),
   } : null;
   const schemas = [breadcrumbs, conditionSchema, pageSchema, ...(faqSchema ? [faqSchema] : [])];
 
