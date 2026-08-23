@@ -21,7 +21,25 @@ function renderBlock(blockValue: unknown, index: number) {
     if (level === 4) return <h4 id={id} key={key}>{value}</h4>;
     return <h2 id={id} key={key}>{value}</h2>;
   }
+  if (type === 'definition' || type === 'answer') {
+    const term = text(block.term ?? block.title ?? block.question, 500);
+    const value = text(block.definition ?? block.answer ?? block.text, 6000);
+    if (!value) return null;
+    return <section className="content-definition" key={key} aria-labelledby={term ? `${sectionAnchor(index)}-definition` : undefined}>
+      {term && <h2 id={`${sectionAnchor(index)}-definition`}>{term}</h2>}
+      <p>{value}</p>
+    </section>;
+  }
   if (type === 'list') { const items = stringArray(block.items, 100, 1000); if (!items.length) return null; return block.ordered === true ? <ol key={key}>{items.map((item, i) => <li key={`${key}-${i}`}>{item}</li>)}</ol> : <ul key={key}>{items.map((item, i) => <li key={`${key}-${i}`}>{item}</li>)}</ul>; }
+  if (type === 'steps') {
+    const title = text(block.title, 500);
+    const items = stringArray(block.items ?? block.steps, 50, 1500);
+    if (!items.length) return null;
+    return <section className="content-steps" key={key} aria-labelledby={title ? `${sectionAnchor(index)}-steps` : undefined}>
+      {title && <h2 id={`${sectionAnchor(index)}-steps`}>{title}</h2>}
+      <ol>{items.map((item, i) => <li key={`${key}-${i}`}>{item}</li>)}</ol>
+    </section>;
+  }
   if (type === 'quote') { const value = text(block.text, 5000); const cite = text(block.cite, 500); return value ? <blockquote key={key}><p>{value}</p>{cite && <cite>{cite}</cite>}</blockquote> : null; }
   if (type === 'callout') { const value = text(block.text, 7000); const title = text(block.title, 300); const tone = ['info', 'success', 'warning', 'danger'].includes(text(block.tone, 20)) ? text(block.tone, 20) : 'info'; if (!value && !title) return null; return <aside key={key} className={`content-callout ${tone}`}>{title && <strong>{title}</strong>}{value && <p>{value}</p>}</aside>; }
   if (type === 'table') { const headers = stringArray(block.headers, 12, 300); const rawRows = Array.isArray(block.rows) ? block.rows.slice(0, 100) : []; const rows = rawRows.map((row) => stringArray(row, 12, 1000)).filter((row) => row.length); if (!headers.length && !rows.length) return null; return <div className="content-table-wrap" key={key} role="region" aria-label={text(block.caption, 300) || 'جدول معلومات'} tabIndex={0}><table>{text(block.caption, 300) && <caption>{text(block.caption, 300)}</caption>}{headers.length > 0 && <thead><tr>{headers.map((header, i) => <th key={`${key}-h-${i}`} scope="col">{header}</th>)}</tr></thead>}{rows.length > 0 && <tbody>{rows.map((row, rowIndex) => <tr key={`${key}-r-${rowIndex}`}>{row.map((cell, cellIndex) => <td key={`${key}-c-${rowIndex}-${cellIndex}`}>{cell}</td>)}</tr>)}</tbody>}</table></div>; }
@@ -33,7 +51,15 @@ function renderBlock(blockValue: unknown, index: number) {
   if (type === 'faq') {
     const raw=Array.isArray(block.items)?block.items.slice(0,40):[];
     const items=raw.flatMap((item)=>{const entry=asRecord(item); if(!entry)return[]; const question=text(entry.question,500); const answer=text(entry.answer,6000); return question.length>=3&&answer.length>=3?[{question,answer}]:[];});
-    return items.length?<section className="content-faq" key={key} aria-label="الأسئلة الشائعة">{items.map((item,i)=><details key={`${key}-${i}`}><summary>{item.question}</summary><p>{item.answer}</p></details>)}</section>:null;
+    if (!items.length) return null;
+    const headingId = `${sectionAnchor(index)}-faq`;
+    return <section className="content-faq" key={key} aria-labelledby={headingId}>
+      <h2 id={headingId}>أسئلة شائعة</h2>
+      {items.map((item,i)=><article key={`${key}-${i}`} className="content-faq-item">
+        <h3>{item.question}</h3>
+        <p>{item.answer}</p>
+      </article>)}
+    </section>;
   }
   if (type === 'divider') return <hr className="content-divider" key={key} />;
   return null;
