@@ -16,7 +16,7 @@ permissions:
 jobs:
   quality:
     runs-on: ubuntu-latest
-    timeout-minutes: 50
+    timeout-minutes: 70
     env:
       NEXT_PUBLIC_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
@@ -26,10 +26,11 @@ jobs:
       VISUAL_OUTPUT_DIR: visual-artifacts
       SMOKE_BASE_URL: http://127.0.0.1:3000
       SEO_GATE_BASE_URL: http://127.0.0.1:3000
-      SEO_GATE_CONCURRENCY: '6'
-      SEO_GATE_TIMEOUT_MS: '15000'
+      SEO_GATE_CONCURRENCY: '8'
+      SEO_GATE_TIMEOUT_MS: '20000'
       SEO_GATE_PAGE_ATTEMPTS: '3'
       SEO_GATE_PAGE_RETRY_DELAY_MS: '300'
+      SEO_RICH_MIN_WORDS: '100'
       SEO_TARGET_URLS: '10000'
       SEO_REQUIRE_TARGET: 'false'
     steps:
@@ -86,6 +87,8 @@ jobs:
         run: node scripts/seo-gate.mjs
       - name: Rich results and discovery gate
         run: node scripts/rich-discovery-gate.mjs
+      - name: Content richness and duplicate-body gate
+        run: node scripts/content-richness-gate.mjs
       - name: SEO readiness progress toward 10000 canonical URLs
         run: node scripts/seo-readiness-report.mjs
       - name: Lighthouse lab audit
