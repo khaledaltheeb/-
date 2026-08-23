@@ -10,14 +10,14 @@ const groups = [
       { href: '/care-guides/', label: 'أدلة التعامل والرعاية' },
       { href: '/evidence-guides/', label: 'الأدلة العلمية' },
       { href: '/sectors/short-encyclopedia', label: 'قطاع الموسوعة المختصرة' },
-      { href: '/encyclopedia/', label: 'الموسوعة المختصرة' },
+      { href: '/encyclopedia/', label: 'الموسوعة المختصرة — الصفحات المحفوظة' },
     ],
   },
   {
     id: 'priority',
     title: 'مسارات مباشرة',
     links: [
-      { href: '/sectors/pediatric-oncology', label: 'مركز سرطان الأطفال' },
+      { href: '/sectors/pediatric-oncology', label: 'سرطان الأطفال' },
       { href: '/search?q=دعم+الأسرة', label: 'دعم الأسرة' },
       { href: '/search?q=الصحة+النفسية', label: 'الصحة النفسية' },
       { href: '/search?q=الإدمان+والتعافي', label: 'الإدمان والتعافي' },
