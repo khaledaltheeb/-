@@ -22,6 +22,8 @@ const footer = read('components/site-footer.tsx');
 const middleware = read('middleware.ts');
 const wrangler = read('wrangler.jsonc');
 const productionWorkflow = read('.github/workflows/deploy-production.yml');
+const cutoverWorkflow = read('.github/workflows/healthrenewal-cutover-readiness.yml');
+const cutoverGate = read('scripts/healthrenewal-cutover-readiness.mjs');
 const qualityWorkflow = read('.github/workflows/quality.yml');
 const indexNowWorkflow = read('.github/workflows/indexnow-discovery.yml');
 const llms = read('public/llms.txt');
@@ -139,6 +141,24 @@ requireAll(productionWorkflow, [
 if (/^\s*push\s*:/m.test(productionWorkflow)) {
   throw new Error('production cutover guard: deploy-production must remain manual until launch day');
 }
+
+requireAll(cutoverWorkflow, [
+  'workflow_dispatch:',
+  "CUTOVER_MIN_INDEXABLE_URLS: '10000'",
+  'node scripts/healthrenewal-cutover-readiness.mjs',
+  'node scripts/seo-gate.mjs',
+  'node scripts/rich-discovery-gate.mjs',
+], '10k no-deploy cutover readiness');
+if (/opennextjs-cloudflare\s+deploy|wrangler\s+deploy/i.test(cutoverWorkflow)) {
+  throw new Error('10k cutover readiness workflow must never deploy');
+}
+requireAll(cutoverGate, [
+  "CUTOVER_MIN_INDEXABLE_URLS || 10000",
+  "CUTOVER BLOCKED",
+  "workers\\.dev",
+  "https://healthrenewal.org",
+], '10k canonical inventory gate');
+
 requireAll(qualityWorkflow, [
   'NEXT_PUBLIC_SITE_URL: https://healthrenewal.org',
   'SEO_GATE_BASE_URL: http://127.0.0.1:3000',
