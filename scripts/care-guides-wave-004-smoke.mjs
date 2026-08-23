@@ -1,7 +1,7 @@
 const base = (process.env.SMOKE_BASE_URL || 'http://127.0.0.1:3000').replace(/\/$/, '');
 const canonicalOrigin = (process.env.NEXT_PUBLIC_SITE_URL || 'https://healthrenewal.org').replace(/\/$/, '');
 
-const published = [
+const heldPublished = [
   ['/care-guides/cognitive-flexibility-switching-plan/', 'المرونة المعرفية وتبديل المهام'],
   ['/care-guides/cognitive-load-instruction-audit/', 'الحمل المعرفي في التعليمات'],
   ['/care-guides/inhibitory-control-pause-plan/', 'التوقف قبل الاستجابة'],
@@ -15,7 +15,10 @@ const published = [
   ['/care-guides/working-memory-task-breakdown/', 'الذاكرة العاملة والمهام الطويلة'],
 ];
 
-const draftRoute = '/care-guides/care-guide-dual-task-attention-limit/';
+const reviewedPublished = [
+  ['/care-guides/care-guide-dual-task-attention-limit/', 'تعدد المهام وحدود الانتباه'],
+];
+
 const disclaimerLabel = 'إخلاء المسؤولية والتنبيهات';
 let failed = false;
 
@@ -36,7 +39,7 @@ function canonicalHref(html) {
   return tag ? attr(tag, 'href') : '';
 }
 
-for (const [route, titleMarker] of published) {
+async function verifyPublishedRoute(route, titleMarker, expectedIndex) {
   try {
     const response = await fetch(`${base}${route}`, { redirect: 'manual' });
     const location = response.headers.get('location') || '';
@@ -45,7 +48,7 @@ for (const [route, titleMarker] of published) {
     if (response.status !== 200 || location) {
       console.error(`WAVE004 ${route}: expected direct 200, got ${response.status} ${location}`);
       failed = true;
-      continue;
+      return;
     }
     if (html.length < 5000 || !html.includes(titleMarker)) {
       console.error(`WAVE004 ${route}: rendered body/title marker missing or too small (${html.length})`);
@@ -53,7 +56,12 @@ for (const [route, titleMarker] of published) {
     }
 
     const robots = metaContent(html, 'robots').toLowerCase().replace(/\s+/g, '');
-    if (!robots.includes('noindex') || !robots.includes('follow') || robots.includes('nofollow')) {
+    if (expectedIndex) {
+      if (!robots.includes('index') || !robots.includes('follow') || robots.includes('noindex') || robots.includes('nofollow')) {
+        console.error(`WAVE004 ${route}: expected robots index,follow without noindex/nofollow; got ${robots || 'missing'}`);
+        failed = true;
+      }
+    } else if (!robots.includes('noindex') || !robots.includes('follow') || robots.includes('nofollow')) {
       console.error(`WAVE004 ${route}: expected robots noindex,follow without nofollow; got ${robots || 'missing'}`);
       failed = true;
     }
@@ -79,26 +87,20 @@ for (const [route, titleMarker] of published) {
       failed = true;
     }
 
-    if (!failed) console.log(`WAVE004 ${route}: 200 + noindex,follow + canonical + disclaimer + references verified`);
-    else console.log(`WAVE004 ${route}: rendered checks completed with failures above`);
+    console.log(`WAVE004 ${route}: 200 + ${expectedIndex ? 'index,follow' : 'noindex,follow'} + canonical + disclaimer + references checked`);
   } catch (error) {
     console.error(`WAVE004 ${route}:`, error);
     failed = true;
   }
 }
 
-try {
-  const response = await fetch(`${base}${draftRoute}`, { redirect: 'manual' });
-  if (response.status !== 404) {
-    console.error(`WAVE004_DRAFT ${draftRoute}: expected 404 while draft, got ${response.status}`);
-    failed = true;
-  } else {
-    console.log(`WAVE004_DRAFT ${draftRoute}: unpublished draft remains unavailable (404)`);
-  }
-} catch (error) {
-  console.error(`WAVE004_DRAFT ${draftRoute}:`, error);
-  failed = true;
+for (const [route, titleMarker] of heldPublished) {
+  await verifyPublishedRoute(route, titleMarker, false);
+}
+
+for (const [route, titleMarker] of reviewedPublished) {
+  await verifyPublishedRoute(route, titleMarker, true);
 }
 
 if (failed) process.exit(1);
-console.log(`Wave 004 rendered smoke passed for ${published.length} held published pages + 1 draft route.`);
+console.log(`Wave 004 rendered smoke passed for ${heldPublished.length} held published pages + ${reviewedPublished.length} reviewed indexable page.`);

@@ -80,6 +80,10 @@ async function loadPublishedCanonicalContent() {
     select: 'slug,title,content_type,primary_keyword',
     status: 'eq.published',
     content_type: `in.(${TERM_LIKE_TYPES.join(',')})`,
+    // Legacy migration routes are intentionally preserved as noindex history.
+    // They must not block the single indexable canonical term rebuilt under
+    // the expanded encyclopedia; true published non-legacy peers still do.
+    'schema_json->legacy_migration': 'is.null',
     order: 'slug.asc',
   });
   const endpoint = `${baseUrl}/rest/v1/content?${params.toString()}`;
