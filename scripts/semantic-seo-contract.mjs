@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import ts from 'typescript';
 
 function read(path) {
   return fs.readFileSync(path, 'utf8');
@@ -65,6 +66,88 @@ if (/throw new Error/.test(semantic)) {
   throw new Error('semantic SEO profile: runtime SEO generation must remain non-throwing');
 }
 
+// Execute the TypeScript generator itself so the 50 + 50 rule is behavioral, not merely textual.
+const transpiled = ts.transpileModule(semantic, {
+  compilerOptions: {
+    module: ts.ModuleKind.ES2022,
+    target: ts.ScriptTarget.ES2022,
+  },
+  fileName: 'semantic-seo.ts',
+}).outputText;
+const semanticModule = await import(`data:text/javascript;base64,${Buffer.from(transpiled).toString('base64')}`);
+
+const samples = [
+  {
+    name: 'ar mental health',
+    expectedLocale: 'ar', expectedDomain: 'mental-health',
+    input: { title: 'القلق الاجتماعي', description: 'شرح موثوق لأعراض القلق الاجتماعي وأسبابه وتقييمه وعلاجه والدعم العملي.', path: '/content/social-anxiety', keywords: ['القلق الاجتماعي', 'اضطراب القلق الاجتماعي'] },
+  },
+  {
+    name: 'ar pediatric oncology',
+    expectedLocale: 'ar', expectedDomain: 'oncology',
+    input: { title: 'ابيضاض الدم عند الأطفال', description: 'التشخيص والعلاج والرعاية الداعمة والمتابعة في سرطان الدم لدى الأطفال.', path: '/content/childhood-leukemia', keywords: ['ابيضاض الدم عند الأطفال', 'سرطان الدم عند الأطفال'] },
+  },
+  {
+    name: 'ar inclusive education',
+    expectedLocale: 'ar', expectedDomain: 'education',
+    input: { title: 'دعم الطالب ذي التوحد في الصف', description: 'التكييفات الصفية والتواصل والخطة التربوية والممارسات القائمة على الدليل.', path: '/content/autism-classroom-support', keywords: ['التوحد في المدرسة', 'التربية الدامجة'] },
+  },
+  {
+    name: 'ar addiction',
+    expectedLocale: 'ar', expectedDomain: 'addiction',
+    input: { title: 'منع الانتكاس في التعافي من الإدمان', description: 'المحفزات وخطة التعافي والدعم النفسي والأسري والمتابعة.', path: '/content/addiction-relapse-prevention', keywords: ['منع الانتكاس', 'التعافي من الإدمان'] },
+  },
+  {
+    name: 'ar legal',
+    expectedLocale: 'ar', expectedDomain: 'legal',
+    input: { title: 'سياسة الخصوصية', description: 'حماية البيانات وحقوق المستخدم وإدارة المعلومات في منصة روافد.', path: '/privacy', keywords: ['سياسة الخصوصية', 'حماية البيانات'] },
+  },
+  {
+    name: 'ar tools',
+    expectedLocale: 'ar', expectedDomain: 'tools',
+    input: { title: 'اختبار الذاكرة العاملة', description: 'أداة معرفية لقياس الأداء وفهم النتيجة وحدود التقييم.', path: '/cognitive-lab/working-memory', keywords: ['الذاكرة العاملة', 'تقييم معرفي'] },
+  },
+  {
+    name: 'en mental health',
+    expectedLocale: 'en', expectedDomain: 'mental-health',
+    input: { title: 'Social anxiety disorder', description: 'Evidence-based information about symptoms, assessment, treatment, coping and recovery.', path: '/en/mental-health/social-anxiety', keywords: ['social anxiety disorder', 'social anxiety'] },
+  },
+  {
+    name: 'en directory',
+    expectedLocale: 'en', expectedDomain: 'directory',
+    input: { title: 'Mental health specialists', description: 'How to find and verify qualified specialists and appropriate services.', path: '/en/specialists', keywords: ['mental health specialists', 'professional directory'] },
+  },
+  {
+    name: 'es education',
+    expectedLocale: 'es', expectedDomain: 'education',
+    input: { title: 'Apoyo educativo para el autismo', description: 'Evaluación educativa, adaptaciones de aula, inclusión y apoyo familiar.', path: '/es/education/autism-support', keywords: ['autismo', 'educación inclusiva'] },
+  },
+  {
+    name: 'es addiction',
+    expectedLocale: 'es', expectedDomain: 'addiction',
+    input: { title: 'Prevención de recaídas en la adicción', description: 'Tratamiento, recuperación, desencadenantes, apoyo familiar y seguimiento.', path: '/es/addiction/relapse-prevention', keywords: ['adicción', 'recuperación'] },
+  },
+  {
+    name: 'general',
+    expectedLocale: 'ar', expectedDomain: 'general',
+    input: { title: 'عن روافد', description: 'منصة معرفية عربية للمعلومات الموثوقة والأدلة العملية والمصادر.', path: '/about', keywords: ['منصة معرفية عربية'] },
+  },
+];
+
+for (const sample of samples) {
+  const profile = semanticModule.buildSemanticSeoProfile(sample.input);
+  if (profile.locale !== sample.expectedLocale) throw new Error(`${sample.name}: locale=${profile.locale}`);
+  if (profile.domain !== sample.expectedDomain) throw new Error(`${sample.name}: domain=${profile.domain}`);
+  if (profile.topicKeywords.length !== 50) throw new Error(`${sample.name}: topicKeywords=${profile.topicKeywords.length}, expected 50`);
+  if (profile.searchIntents.length !== 50) throw new Error(`${sample.name}: searchIntents=${profile.searchIntents.length}, expected 50`);
+  if (profile.keywords.length !== 100) throw new Error(`${sample.name}: keywords=${profile.keywords.length}, expected 100`);
+  const unique = new Set(profile.keywords.map((value) => String(value).normalize('NFKC').toLocaleLowerCase(profile.locale).trim()));
+  if (unique.size !== 100) throw new Error(`${sample.name}: only ${unique.size} raw-unique signals out of 100`);
+  if (!profile.searchIntents.every((value) => String(value).includes(profile.primaryTopic))) {
+    throw new Error(`${sample.name}: generated search intent lost the page primary topic`);
+  }
+}
+
 // Preserve the existing hard no-loss gate for published/public content. The baseline may
 // move upward as publishing continues, but it must never fall below the last verified floor.
 requireAll(preservation, [
@@ -87,4 +170,4 @@ if (indexableFloor < 3519) {
   throw new Error(`public no-loss protection: indexable published baseline regressed to ${indexableFloor}`);
 }
 
-console.log('Semantic SEO contract: OK — 50 topical signals + 50 domain-aware search intents, no synthetic filler, with published-page preservation enforced.');
+console.log(`Semantic SEO contract: OK — ${samples.length} runtime profiles each produced exactly 50 topical signals + 50 domain-aware search intents, all unique and filler-free, with published-page preservation enforced.`);
