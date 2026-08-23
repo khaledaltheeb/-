@@ -2,9 +2,14 @@ const ORIGIN = (process.env.PRODUCTION_ORIGIN || 'https://healthrenewal.org').re
 const EXPECTED_HOST = new URL(ORIGIN).hostname;
 const EXPECTED_HOME_TITLE = 'روافد | الصحة النفسية والتربية الخاصة وسرطان الأطفال';
 const MIN_URLS = Number(process.env.MIN_LIVE_INDEXABLE_URLS || '3806');
-const CONCURRENCY = Math.max(1, Number(process.env.INDEXABILITY_CONCURRENCY || '16'));
-const TIMEOUT_MS = Math.max(3000, Number(process.env.INDEXABILITY_TIMEOUT_MS || '20000'));
+const CONCURRENCY = Math.max(1, Number(process.env.INDEXABILITY_CONCURRENCY || '4'));
+const TIMEOUT_MS = Math.max(3000, Number(process.env.INDEXABILITY_TIMEOUT_MS || '30000'));
+const PACING_MS = Math.max(0, Number(process.env.INDEXABILITY_PACING_MS || '100'));
+const MAX_ATTEMPTS = Math.max(1, Number(process.env.INDEXABILITY_ATTEMPTS || '5'));
 const USER_AGENT = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)';
+const RETRYABLE_STATUS = new Set([429, 500, 502, 503, 504]);
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function decodeXml(value) {
   return value
@@ -59,7 +64,15 @@ function homepageCanonicalIsValid(canonical) {
   }
 }
 
-async function fetchText(url, { attempts = 3 } = {}) {
+function retryDelay(response, attempt) {
+  const retryAfter = response?.headers?.get('retry-after');
+  if (retryAfter && /^\d+$/.test(retryAfter.trim())) {
+    return Math.min(30000, Number(retryAfter.trim()) * 1000);
+  }
+  return Math.min(10000, 600 * (2 ** (attempt - 1))) + Math.floor(Math.random() * 250);
+}
+
+async function fetchText(url, { attempts = MAX_ATTEMPTS } = {}) {
   let lastError;
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
     const controller = new AbortController();
@@ -75,13 +88,22 @@ async function fetchText(url, { attempts = 3 } = {}) {
           accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         },
       });
-      const text = await response.text();
       clearTimeout(timer);
-      return { response, text };
+
+      if (RETRYABLE_STATUS.has(response.status) && attempt < attempts) {
+        await response.body?.cancel().catch(() => {});
+        await sleep(retryDelay(response, attempt));
+        continue;
+      }
+
+      const text = await response.text();
+      return { response, text, attemptsUsed: attempt };
     } catch (error) {
       clearTimeout(timer);
       lastError = error;
-      if (attempt < attempts) await new Promise((resolve) => setTimeout(resolve, attempt * 700));
+      if (attempt < attempts) {
+        await sleep(Math.min(10000, 600 * (2 ** (attempt - 1))) + Math.floor(Math.random() * 250));
+      }
     }
   }
   throw lastError;
@@ -162,7 +184,7 @@ async function verifyPage(url) {
   if (parsed.hostname !== EXPECTED_HOST) return `foreign sitemap hostname: ${url}`;
 
   try {
-    const { response, text } = await fetchText(url, { attempts: 2 });
+    const { response, text } = await fetchText(url);
     if (!response.ok) return `HTTP ${response.status}: ${url}`;
     if (new URL(response.url).hostname !== EXPECTED_HOST) return `redirected off canonical host: ${url} -> ${response.url}`;
 
@@ -191,8 +213,20 @@ async function verifyPage(url) {
   }
 }
 
+function failureKind(failure) {
+  if (failure.startsWith('HTTP ')) return failure.split(':', 1)[0];
+  if (failure.startsWith('X-Robots-Tag noindex')) return 'X-Robots-Tag noindex';
+  if (failure.startsWith('meta robots noindex')) return 'meta robots noindex';
+  if (failure.startsWith('meta googlebot noindex')) return 'meta googlebot noindex';
+  if (failure.startsWith('missing canonical')) return 'missing canonical';
+  if (failure.startsWith('canonical points off')) return 'canonical host';
+  if (failure.startsWith('fetch failed')) return 'fetch failed';
+  return 'other';
+}
+
 async function verifyAll(urls) {
   const failures = [];
+  const failureKinds = new Map();
   let cursor = 0;
   let checked = 0;
 
@@ -201,17 +235,23 @@ async function verifyAll(urls) {
       const index = cursor;
       cursor += 1;
       if (index >= urls.length) return;
+      if (PACING_MS) await sleep(PACING_MS);
       const failure = await verifyPage(urls[index]);
       checked += 1;
-      if (failure) failures.push(failure);
+      if (failure) {
+        failures.push(failure);
+        const kind = failureKind(failure);
+        failureKinds.set(kind, (failureKinds.get(kind) || 0) + 1);
+      }
       if (checked % 250 === 0 || checked === urls.length) {
-        console.log(`Live indexability progress: ${checked}/${urls.length}; failures=${failures.length}`);
+        const summary = [...failureKinds.entries()].map(([kind, count]) => `${kind}=${count}`).join(', ') || 'none';
+        console.log(`Live indexability progress: ${checked}/${urls.length}; failures=${failures.length}; categories: ${summary}`);
       }
     }
   }
 
   await Promise.all(Array.from({ length: Math.min(CONCURRENCY, urls.length) }, () => worker()));
-  return failures;
+  return { failures, failureKinds };
 }
 
 await verifyHomepage();
@@ -220,13 +260,14 @@ const { urls, sitemapCount } = await collectSitemapUrls();
 if (urls.length < MIN_URLS) {
   throw new Error(`Production sitemap exposes only ${urls.length} unique URLs; expected at least ${MIN_URLS}`);
 }
-console.log(`Collected ${urls.length} unique production URLs from ${sitemapCount} sitemap documents.`);
+console.log(`Collected ${urls.length} unique production URLs from ${sitemapCount} sitemap documents. Audit settings: concurrency=${CONCURRENCY}, pacing=${PACING_MS}ms, attempts=${MAX_ATTEMPTS}, timeout=${TIMEOUT_MS}ms.`);
 
-const failures = await verifyAll(urls);
+const { failures, failureKinds } = await verifyAll(urls);
 if (failures.length) {
-  console.error(`LIVE PRODUCTION INDEXABILITY CONTRACT FAILED: ${failures.length}/${urls.length} sitemap URLs failed.`);
-  for (const failure of failures.slice(0, 200)) console.error(`- ${failure}`);
-  if (failures.length > 200) console.error(`- ... ${failures.length - 200} additional failures omitted`);
+  console.error(`LIVE PRODUCTION INDEXABILITY CONTRACT FAILED: ${failures.length}/${urls.length} sitemap URLs failed after retries.`);
+  console.error(`Failure categories: ${[...failureKinds.entries()].map(([kind, count]) => `${kind}=${count}`).join(', ')}`);
+  for (const failure of failures.slice(0, 300)) console.error(`- ${failure}`);
+  if (failures.length > 300) console.error(`- ... ${failures.length - 300} additional failures omitted`);
   process.exit(1);
 }
 
