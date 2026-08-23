@@ -88,11 +88,11 @@ export function buildSeoMetadata(input: SeoMetadataInput): Metadata {
     ? Object.fromEntries(Object.entries(input.hreflang).map(([key, value]) => [key, absoluteSiteUrl(value)]))
     : undefined;
 
-  // Per-page semantic inventory: 50 page/topic terms + 50 search-intent/question phrases.
-  // Google does not use the meta-keywords tag as a ranking signal; these terms remain a
-  // compatibility/editorial/query-coverage inventory. No hidden copy is injected into pages.
+  // Keep the full 50 topical + 50 intent profile for editorial/query-coverage validation.
+  // Google explicitly ignores <meta name="keywords">, so only a small, highly relevant
+  // topical subset is emitted for compatibility with secondary clients. No hidden copy is used.
   const semanticProfile = buildSemanticSeoProfile(input);
-  const keywords = semanticProfile.keywords;
+  const keywords = semanticProfile.topicKeywords.slice(0, 12);
   const openGraphImages = usesDefaultImage
     ? [{ url: image, width: 1200, height: 630, alt: input.title }]
     : [{ url: image, alt: input.title }];
