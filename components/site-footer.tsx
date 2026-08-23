@@ -7,6 +7,9 @@ const groups = [
     links: [
       { href: '/sectors', label: 'القطاعات' },
       { href: '/sections', label: 'جميع الأقسام' },
+      { href: '/sections/autism', label: 'التوحد' },
+      { href: '/sections/special-ed-learning-disabilities', label: 'صعوبات واضطرابات التعلم' },
+      { href: '/sections/parenting-family', label: 'التربية والوالدية والأسرة' },
       { href: '/care-guides/', label: 'أدلة التعامل والرعاية' },
       { href: '/evidence-guides/', label: 'الأدلة العلمية' },
       { href: '/sectors/short-encyclopedia', label: 'قطاع الموسوعة المختصرة' },
