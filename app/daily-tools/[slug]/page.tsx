@@ -23,13 +23,13 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params;
   const route = routeFor(slug);
-  return dailyToolMetadata(getDailyToolPage(route), route);
+  return dailyToolMetadata(await getDailyToolPage(route), route);
 }
 
 export default async function DailyToolPage({ params }: { params: Params }) {
   const { slug } = await params;
   const route = routeFor(slug);
-  const page = getDailyToolPage(route);
+  const page = await getDailyToolPage(route);
   if (!page) notFound();
   const title = page.h1 || page.title || slug;
   const spec = deriveDailyToolSpec(page);
