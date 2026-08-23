@@ -10,7 +10,7 @@ export const DEFAULT_DESCRIPTION = 'روافد منصة عربية للمعرف�
 const INDEXING_ENABLED = process.env.NEXT_PUBLIC_ALLOW_INDEXING === 'true';
 const HOME_TITLE = 'روافد | الصحة النفسية والتربية الخاصة وسرطان الأطفال';
 const HOME_DESCRIPTION = DEFAULT_DESCRIPTION;
-const HOME_IMAGE_PATH = '/pwa-icon-512';
+const HOME_IMAGE_PATH = '/seo-card';
 
 function absoluteUrl(pathOrUrl: string) {
   if (/^https?:\/\//i.test(pathOrUrl)) return pathOrUrl;
@@ -66,7 +66,7 @@ export function buildSeoMetadata(input: SeoMetadataInput): Metadata {
 
   const openGraphImage = image
     ? isHomepage
-      ? [{ url: image, width: 512, height: 512, alt: 'روافد — منصة عربية للمعرفة الصحية والنفسية' }]
+      ? [{ url: image, width: 1200, height: 630, alt: 'روافد — منصة عربية للمعرفة الصحية والنفسية' }]
       : [{ url: image, alt: input.title }]
     : undefined;
 
