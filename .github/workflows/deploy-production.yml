@@ -1,11 +1,8 @@
 name: Deploy Production
 
-# Production deployment for healthrenewal.org from the Cloudflare/Rawafid repository.
-# Runs automatically after updates to main and remains manually dispatchable as a fallback.
+# CUTOVER GUARD: healthrenewal.org remains on the current production site until launch day.
+# Run this workflow manually only after the 10k qualified-page and migration checks are approved.
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
 concurrency:
@@ -61,6 +58,7 @@ jobs:
           grep -q "PRODUCTION_SITE_URL = 'https://healthrenewal.org'" lib/seo.ts
           grep -q '"production"' wrangler.jsonc
           grep -q '"pattern": "healthrenewal.org"' wrangler.jsonc
+          grep -q '"pattern": "www.healthrenewal.org"' wrangler.jsonc
           grep -q '"custom_domain": true' wrangler.jsonc
       - name: Verify Cloudflare credentials and account access
         shell: bash
@@ -82,7 +80,7 @@ jobs:
         run: npx opennextjs-cloudflare build --env production
       - name: Deploy Cloudflare Worker with OpenNext production environment
         run: npx opennextjs-cloudflare deploy --env production
-      - name: Verify production discovery and canonical origin
+      - name: Verify production discovery canonical host and www redirect
         shell: bash
         run: |
           set -euo pipefail
@@ -102,3 +100,6 @@ jobs:
             echo 'Production homepage is unexpectedly noindex.' >&2
             exit 1
           fi
+          www_headers="$(curl -sS -o /dev/null -D - --retry 8 --retry-delay 3 --retry-all-errors 'https://www.healthrenewal.org/sections?cutover-check=1')"
+          printf '%s' "${www_headers}" | head -n 1 | grep -Eq ' 308( |$)'
+          printf '%s' "${www_headers}" | grep -Eqi '^location: https://healthrenewal\.org/sections\?cutover-check=1\r?$'
