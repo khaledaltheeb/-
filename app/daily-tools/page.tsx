@@ -11,12 +11,12 @@ export const dynamic = 'force-static';
 export const revalidate = false;
 const route = DAILY_TOOLS_HUB_ROUTE;
 
-export function generateMetadata(): Metadata {
-  return dailyToolMetadata(getDailyToolPage(route), route);
+export async function generateMetadata(): Promise<Metadata> {
+  return dailyToolMetadata(await getDailyToolPage(route), route);
 }
 
-export default function DailyToolsPage() {
-  const page = getDailyToolPage(route);
+export default async function DailyToolsPage() {
+  const page = await getDailyToolPage(route);
   if (!page) notFound();
   const items = deriveDailyToolDirectory(page);
   return <>
