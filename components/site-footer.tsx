@@ -18,9 +18,10 @@ const groups = [
     title: 'مسارات مباشرة',
     links: [
       { href: '/sectors/pediatric-oncology', label: 'سرطان الأطفال' },
-      { href: '/search?q=دعم+الأسرة', label: 'دعم الأسرة' },
-      { href: '/search?q=الصحة+النفسية', label: 'الصحة النفسية' },
-      { href: '/search?q=الإدمان+والتعافي', label: 'الإدمان والتعافي' },
+      { href: '/sectors/mental-health', label: 'الصحة النفسية' },
+      { href: '/sectors/special-needs-inclusion', label: 'ذوو الاحتياجات الخاصة والدمج' },
+      { href: '/sectors/addiction-recovery', label: 'الإدمان والتعافي' },
+      { href: '/sectors/child-family-education', label: 'الطفل والأسرة والتعليم' },
       { href: '/cognitive-lab', label: 'المختبر المعرفي' },
     ],
   },
