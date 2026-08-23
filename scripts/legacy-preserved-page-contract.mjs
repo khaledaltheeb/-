@@ -8,6 +8,7 @@ const migration=read('supabase/migrations/20260816040102_fix_legacy_preserved_pa
 const routeExistsMigration=read('supabase/migrations/20260816100619_align_legacy_route_exists_public_filter.sql');
 const grantFix=read('supabase/migrations/20260816102121_restore_legacy_preservation_public_execute_grants.sql');
 const helper=read('lib/legacy-preserved-page.ts');
+const seo=read('lib/seo.ts');
 const view=read('components/legacy-preserved-page.tsx');
 const proxy=read('lib/supabase/proxy.ts');
 const preservationSmoke=read('scripts/legacy-preservation-smoke.mjs');
@@ -49,7 +50,10 @@ for(const fn of ['get_legacy_preserved_page','legacy_preserved_route_exists']){
 }
 
 for(const forbidden of ['service_role','secret_key']) if(helper.toLowerCase().includes(forbidden)||view.toLowerCase().includes(forbidden)||proxy.toLowerCase().includes(forbidden)) fail(`forbidden preservation secret pattern: ${forbidden}`);
-for(const marker of ['get_legacy_preserved_page','legacyPreservedMetadata','index: false','noarchive: true','healthrenewal.org','decodeURIComponent',"normalize('NFC')"]) if(!helper.includes(marker)) fail(`helper marker missing: ${marker}`);
+for(const marker of ['get_legacy_preserved_page','legacyPreservedMetadata','buildSeoMetadata','index: false','follow: true','healthrenewal.org','decodeURIComponent',"normalize('NFC')"]) if(!helper.includes(marker)) fail(`helper marker missing: ${marker}`);
+// The preserved helper now delegates robots directives to the centralized SEO generator.
+// Keep the historical noarchive behavior without duplicating a second metadata implementation.
+for(const marker of ['const canIndex = INDEXING_ENABLED && input.index !== false','noarchive: !canIndex','nosnippet: !canIndex']) if(!seo.includes(marker)) fail(`central SEO noindex preservation marker missing: ${marker}`);
 for(const marker of ['نسخة إنتاجية محفوظة','لم تُمنح هذه النسخة اعتماد دورة المراجعة العلمية الحالية','ContentRenderer','legacyInternalLinks','legacyReferences']) if(!view.includes(marker)) fail(`preserved view marker missing: ${marker}`);
 for(const marker of ['NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY',"rpc('legacy_preserved_route_exists'",'isLegacyProductionRoute']) if(!proxy.includes(marker)) fail(`proxy must document its public preservation RPC dependency: ${marker}`);
 for(const path of routes){
@@ -82,4 +86,4 @@ for(const path of [
 ]) if(!fs.existsSync(path)) fail(`deployed migration history not mirrored: ${path}`);
 
 if(failed)process.exit(1);
-console.log('Legacy preservation contract passed: production HTML remains available through a Unicode-safe public read-only noindex boundary, reviewed modern takeovers keep priority over fallback rendering, and the latest migration state preserves the required anon/authenticated RPC grants.');
+console.log('Legacy preservation contract passed: production HTML remains available through a Unicode-safe public read-only noindex boundary, reviewed modern takeovers keep priority over fallback rendering, and centralized SEO preserves the historical noarchive/nosnippet behavior without duplicating metadata logic.');
