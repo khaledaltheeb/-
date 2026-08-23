@@ -1,0 +1,48 @@
+name: Diagnose Daily Tool Production 500
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/diagnose-daily-tool-production-500.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: '1910e1ad3c793fd568ba1caafe34f964'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Capture Worker exception while reproducing the 500
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${CLOUDFLARE_API_TOKEN:-}"
+          : > /tmp/tail.log
+          npx wrangler tail rawafid-platform-production --format json > /tmp/tail.log 2>&1 &
+          tail_pid=$!
+          cleanup() { kill "$tail_pid" 2>/dev/null || true; }
+          trap cleanup EXIT
+          sleep 5
+          curl -sS -A 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)' -D /tmp/headers.txt -o /tmp/body.txt -w 'HTTP %{http_code}\n' 'https://healthrenewal.org/daily-tools/sleep-wind-down-plan/' || true
+          sleep 8
+          cleanup
+          echo '--- RESPONSE HEADERS ---'
+          cat /tmp/headers.txt || true
+          echo '--- RESPONSE BODY ---'
+          head -c 2000 /tmp/body.txt || true
+          echo
+          echo '--- WORKER TAIL ---'
+          cat /tmp/tail.log || true
+          grep -Eqi 'exception|error|daily-tools|sleep-wind-down-plan' /tmp/tail.log
