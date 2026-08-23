@@ -11,6 +11,7 @@ export async function GET() {
     { path:'/magazine/', changeFrequency:'daily', priority:.84 },
     { path:'/care-guides/', changeFrequency:'weekly', priority:.86 },
     { path:'/evidence-guides/', changeFrequency:'weekly', priority:.86 },
+    { path:'/addiction', changeFrequency:'weekly', priority:.82 },
     { path:'/specialists', changeFrequency:'weekly', priority:.78 },
     { path:'/centers', changeFrequency:'weekly', priority:.78 },
     { path:'/cognitive-lab', changeFrequency:'monthly', priority:.8 },
