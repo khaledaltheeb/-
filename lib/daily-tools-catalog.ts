@@ -66,7 +66,10 @@ function assetPathForRoute(route: string): string | null {
 
 async function readCloudflareAsset(pathname: string): Promise<unknown | null> {
   try {
-    const context = getCloudflareContext();
+    // OpenNext requires async context access from statically generated routes.
+    // The synchronous API can fail inside SSG/ISR execution even though the
+    // same binding is valid at runtime.
+    const context = await getCloudflareContext({ async: true });
     const assets = (context.env as unknown as AssetEnvironment).ASSETS;
     if (!assets) return null;
     const response = await assets.fetch(`https://assets.local${pathname}`);
