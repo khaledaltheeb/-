@@ -6,6 +6,8 @@ on:
     paths:
       - '.github/workflows/emergency-production-indexability.yml'
       - 'lib/daily-tools-catalog.ts'
+      - 'lib/public-taxonomy.ts'
+      - 'lib/supabase/proxy.ts'
       - 'app/daily-tools/**'
       - 'app/sitemaps/daily-tools.xml/route.ts'
       - 'scripts/build-daily-tools-route-manifest.mjs'
@@ -158,20 +160,12 @@ jobs:
             exit 1
           fi
 
-      - name: Purge Cloudflare edge cache after production cutover
-        continue-on-error: true
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          response="$(curl -fsS -X POST -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" -H 'Content-Type: application/json' "https://api.cloudflare.com/client/v4/zones/${CLOUDFLARE_ZONE_ID}/purge_cache" --data '{"purge_everything":true}')"
-          printf '%s' "$response" | jq -e '.success == true' >/dev/null
-
       - name: Audit bare homepage, Googlebot metadata, robots and every sitemap URL
         env:
-          INDEXABILITY_CONCURRENCY: '16'
-          INDEXABILITY_TIMEOUT_MS: '20000'
+          INDEXABILITY_CONCURRENCY: '4'
+          INDEXABILITY_TIMEOUT_MS: '30000'
+          INDEXABILITY_PACING_MS: '100'
+          INDEXABILITY_ATTEMPTS: '5'
         run: node scripts/live-production-indexability-contract.mjs
 
       - name: Publish final status
