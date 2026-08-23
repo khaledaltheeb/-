@@ -25,7 +25,10 @@ function explicitlyNoIndex(source) {
 }
 
 function usesCentralSeo(source) {
-  return source.includes('buildSeoMetadata(') || source.includes('legacyPreservedMetadata(') || source.includes('preservedRouteMetadata(');
+  return source.includes('buildSeoMetadata(')
+    || source.includes('legacyPreservedMetadata(')
+    || source.includes('preservedRouteMetadata(')
+    || source.includes('dailyToolMetadata(');
 }
 
 function hasDynamicMetadata(source) {
