@@ -9,6 +9,7 @@ const primaryLinks = [
   { href: '/sectors/pediatric-oncology', label: 'سرطان الأطفال', secondary: false },
   { href: '/care-guides/', label: 'أدلة الرعاية', secondary: true },
   { href: '/evidence-guides/', label: 'الأدلة العلمية', secondary: true },
+  { href: '/about', label: 'من نحن', secondary: true },
 ];
 
 const intentLinks = [
@@ -54,7 +55,7 @@ export default async function SiteHeader() {
     { href: '/search', label: 'بحث', icon: 'search' },
     { href: '/care-guides/', label: 'الأدلة', icon: 'discover' },
     { href: '/specialists', label: 'مختصون', icon: 'specialists' },
-    { href: '/about', label: 'المزيد', icon: 'more' },
+    { href: '/about', label: 'من نحن', icon: 'more' },
   ];
 
   return (
@@ -120,6 +121,7 @@ export default async function SiteHeader() {
             <div className="mobile-menu-panel">
               <form className="mobile-search" action="/search" method="get" role="search"><label className="sr-only" htmlFor="mobile-search-input">البحث في منصة روافد</label><input id="mobile-search-input" name="q" type="search" placeholder="حالة، دليل أو خدمة" maxLength={120} enterKeyHint="search" /><button type="submit">بحث</button></form>
               <a href="/">الرئيسية</a>
+              <a href="/about">من نحن</a>
               <a href="/sectors">جميع القطاعات</a>
               <a href="/sections">جميع الأقسام</a>
               <a href="/sectors/pediatric-oncology">سرطان الأطفال</a>
