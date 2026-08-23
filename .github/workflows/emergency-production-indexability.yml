@@ -26,13 +26,23 @@ env:
   PRODUCTION_WORKER: 'rawafid-platform-production'
   PRODUCTION_ORIGIN: 'https://healthrenewal.org'
   MIN_PUBLISHED_PAGES: '3806'
-  MIN_INDEXABLE_PUBLISHED_PAGES: '3573'
+  MIN_INDEXABLE_PUBLISHED_PAGES: '3806'
+  MIN_LIVE_INDEXABLE_URLS: '3806'
 
 jobs:
   restore-indexability:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
+      - name: Publish pending status
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          payload="$(jq -n --arg state pending --arg context 'indexability/production' --arg description 'Deploying and verifying indexable Rawafid production' --arg target_url "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}" '{state:$state,context:$context,description:$description,target_url:$target_url}')"
+          curl -fsS -X POST -H "Authorization: Bearer ${GH_TOKEN}" -H 'Accept: application/vnd.github+json' -H 'X-GitHub-Api-Version: 2022-11-28' "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" -d "$payload" >/dev/null
+
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with:
@@ -42,7 +52,7 @@ jobs:
       - name: Install locked dependencies
         run: npm ci --no-audit --no-fund
 
-      - name: Preserve every currently published page before deployment
+      - name: Preserve all published pages and require all to be indexable
         shell: bash
         run: |
           set -euo pipefail
@@ -54,7 +64,9 @@ jobs:
           test -n "$indexable"
           test "$published" -ge "$MIN_PUBLISHED_PAGES"
           test "$indexable" -ge "$MIN_INDEXABLE_PUBLISHED_PAGES"
+          test "$published" -eq "$indexable"
           npm run sitemap-preservation:validate
+          npm run static-sitemap:validate
 
       - name: Type check and lint
         run: |
@@ -136,19 +148,24 @@ jobs:
             exit 1
           fi
 
-      - name: Verify Google-visible production HTML is indexable
+      - name: Verify homepage and robots immediately as Googlebot
         shell: bash
         run: |
           set -euo pipefail
           stamp="${GITHUB_SHA}-$(date +%s)"
-          home="$(curl -fsS --retry 10 --retry-delay 3 --retry-all-errors -A 'Googlebot' "${PRODUCTION_ORIGIN}/?indexability-check=${stamp}")"
-          printf '%s' "$home" | grep -q 'rel="canonical" href="https://healthrenewal.org/"'
-          if printf '%s' "$home" | grep -Eqi '<meta[^>]+name="(robots|googlebot)"[^>]+content="[^"]*noindex'; then
-            echo 'noindex is still present on the production homepage.' >&2
+          curl -fsS --retry 10 --retry-delay 3 --retry-all-errors -A 'Googlebot' -D /tmp/home.headers "${PRODUCTION_ORIGIN}/?indexability-check=${stamp}" -o /tmp/home.html
+          if grep -Eqi '^x-robots-tag:.*noindex' /tmp/home.headers; then
+            echo 'noindex remains in homepage X-Robots-Tag.' >&2
             exit 1
           fi
-          if printf '%s' "$home" | grep -Eqi 'workers\.dev|rawafid-platform-staging'; then
-            echo 'Staging origin leaked into production HTML.' >&2
+          grep -q 'rel="canonical" href="https://healthrenewal.org/"' /tmp/home.html
+          grep -q 'روافد: الصحة النفسية والتربية الخاصة وسرطان الأطفال' /tmp/home.html
+          if grep -Eqi '<meta[^>]+name="(robots|googlebot)"[^>]+content="[^"]*noindex' /tmp/home.html; then
+            echo 'noindex is still present in production homepage metadata.' >&2
+            exit 1
+          fi
+          if grep -Eqi 'workers\.dev|rawafid-platform-staging' /tmp/home.html; then
+            echo 'Staging origin leaked into production homepage HTML.' >&2
             exit 1
           fi
 
@@ -163,10 +180,20 @@ jobs:
             exit 1
           fi
 
-          for path in / /sections /sectors/mental-health /sections/autism /sectors/pediatric-oncology; do
-            page="$(curl -fsS --retry 6 --retry-delay 2 --retry-all-errors -A 'Googlebot' "${PRODUCTION_ORIGIN}${path}?indexability-sample=${stamp}")"
-            if printf '%s' "$page" | grep -Eqi '<meta[^>]+name="(robots|googlebot)"[^>]+content="[^"]*noindex'; then
-              echo "Unexpected noindex on public sample: $path" >&2
-              exit 1
-            fi
-          done
+      - name: Audit every URL advertised by production sitemaps
+        env:
+          INDEXABILITY_CONCURRENCY: '16'
+          INDEXABILITY_TIMEOUT_MS: '20000'
+        run: node scripts/live-production-indexability-contract.mjs
+
+      - name: Publish final status
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Production is indexable and every sitemap URL passed'; else state=failure; description='Production indexability deployment or audit failed'; fi
+          payload="$(jq -n --arg state "$state" --arg context 'indexability/production' --arg description "$description" --arg target_url "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}" '{state:$state,context:$context,description:$description,target_url:$target_url}')"
+          curl -fsS -X POST -H "Authorization: Bearer ${GH_TOKEN}" -H 'Accept: application/vnd.github+json' -H 'X-GitHub-Api-Version: 2022-11-28' "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" -d "$payload" >/dev/null
