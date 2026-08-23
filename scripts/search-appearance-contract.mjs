@@ -72,8 +72,9 @@ requireAll(sitemapXml, ['INDEXING_ENABLED', 'SITE_URL'], 'sitemap indexability g
 requireAll(sitemapIndex, [
   "'/sitemaps/static.xml'",
   "'/sitemaps/taxonomy.xml'",
-  "'/sitemaps/encyclopedia.xml?page=${page}'",
-  "'/sitemaps/content.xml?page=${page}'",
+  '/sitemaps/quick-info.xml?page=${page}',
+  '/sitemaps/encyclopedia.xml?page=${page}',
+  '/sitemaps/content.xml?page=${page}',
 ], 'sitemap index');
 
 requireAll(staticSitemap, [
