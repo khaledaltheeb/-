@@ -62,11 +62,22 @@ if (/rawafid-app\.svg\?v=|pwa-icon-(?:180|192)\?v=/.test(layout)) {
 }
 
 requireAll(robots, [
-  "INDEXING_ENABLED",
+  "SITE_HOSTNAME.endsWith('.workers.dev')",
   "sitemap: `${SITE_URL}/sitemap.xml`",
   "'Googlebot'",
+  "'Google-Extended'",
   "'Bingbot'",
+  "'Applebot'",
+  "'Applebot-Extended'",
   "'OAI-SearchBot'",
+  "'ChatGPT-User'",
+  "'GPTBot'",
+  "'ClaudeBot'",
+  "'PerplexityBot'",
+  "'Amazonbot'",
+  "'Bytespider'",
+  "'CCBot'",
+  "'meta-externalagent'",
   "'/search?'",
   "'/api/private/'",
 ], 'robots discovery');
@@ -74,7 +85,12 @@ requireAll(sitemapXml, ['INDEXING_ENABLED', 'SITE_URL'], 'sitemap indexability g
 
 requireAll(sitemapIndex, [
   "'/sitemaps/static.xml'",
+  "'/sitemaps/daily-tools.xml'",
   "'/sitemaps/taxonomy.xml'",
+  "'/sitemaps/cognitive-lab.xml'",
+  "'/sitemaps/specialists.xml'",
+  "'/sitemaps/centers.xml'",
+  "'/sitemaps/community.xml'",
   '/sitemaps/quick-info.xml?page=${page}',
   '/sitemaps/encyclopedia.xml?page=${page}',
   '/sitemaps/content.xml?page=${page}',
