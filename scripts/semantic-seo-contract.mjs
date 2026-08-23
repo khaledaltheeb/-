@@ -46,14 +46,26 @@ if (/throw new Error/.test(semantic)) {
   throw new Error('semantic SEO profile: runtime SEO generation must remain non-throwing');
 }
 
-// Preserve the existing hard no-loss gate for published/public content.
+// Preserve the existing hard no-loss gate for published/public content. The baseline may
+// move upward as publishing continues, but it must never fall below the last verified floor.
 requireAll(preservation, [
-  'publishedContent: 3746',
   'publicSectors: 9',
   'publicCategories: 126',
+  'publishedContent:',
+  'indexablePublishedContent:',
   'published content decreased',
+  'indexable published content decreased',
   'public sectors decreased',
   'public categories decreased',
 ], 'public no-loss protection');
+
+const publishedFloor = Number(preservation.match(/publishedContent:\s*(\d+)/)?.[1] ?? 0);
+const indexableFloor = Number(preservation.match(/indexablePublishedContent:\s*(\d+)/)?.[1] ?? 0);
+if (publishedFloor < 3752) {
+  throw new Error(`public no-loss protection: published baseline regressed to ${publishedFloor}`);
+}
+if (indexableFloor < 3519) {
+  throw new Error(`public no-loss protection: indexable published baseline regressed to ${indexableFloor}`);
+}
 
 console.log('Semantic SEO contract: OK — 50 topical signals + 50 search intents, with published-page preservation enforced.');
