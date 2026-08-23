@@ -1,12 +1,6 @@
 name: Expanded Encyclopedia Live Duplicate Guard
 
 on:
-  pull_request:
-    branches: [main]
-    paths:
-      - 'data/expanded-encyclopedia/**'
-      - 'scripts/expanded-encyclopedia-live-duplicate-contract.mjs'
-      - '.github/workflows/expanded-encyclopedia-live-dedup.yml'
   workflow_dispatch:
 
 permissions:

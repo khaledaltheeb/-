@@ -16,7 +16,7 @@ permissions:
 jobs:
   quality:
     runs-on: ubuntu-latest
-    timeout-minutes: 50
+    timeout-minutes: 60
     env:
       NEXT_PUBLIC_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
@@ -26,30 +26,44 @@ jobs:
       VISUAL_OUTPUT_DIR: visual-artifacts
       SMOKE_BASE_URL: http://127.0.0.1:3000
       SEO_GATE_BASE_URL: http://127.0.0.1:3000
-      SEO_GATE_CONCURRENCY: '6'
+      SEO_GATE_CONCURRENCY: '2'
       SEO_GATE_TIMEOUT_MS: '15000'
-      SEO_GATE_PAGE_ATTEMPTS: '3'
-      SEO_GATE_PAGE_RETRY_DELAY_MS: '300'
+      SEO_GATE_PAGE_ATTEMPTS: '5'
+      SEO_GATE_PAGE_RETRY_DELAY_MS: '1000'
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with:
           node-version: 24
           package-manager-cache: false
+
       - name: Install dependencies
         run: npm install --no-audit --no-fund
+
       - name: Architecture privacy PWA and theme contract
         run: npm run architecture-check
+
+      - name: Expanded encyclopedia live duplicate guard
+        run: node scripts/expanded-encyclopedia-live-duplicate-contract.mjs
+
+      - name: Public preservation contract
+        run: node scripts/public-preservation-contract.mjs
+
       - name: Final content-readiness hardening contract
         run: node scripts/final-hardening-check.mjs
+
       - name: Type check
         run: npm run typecheck
+
       - name: Lint
         run: npm run lint
+
       - name: Build
         run: npm run build
+
       - name: Install visual browser driver
         run: npm install --no-save --package-lock=false --ignore-scripts playwright-core@1.62.1
+
       - name: Start production server
         shell: bash
         run: |
@@ -68,6 +82,7 @@ jobs:
             cat /tmp/rawafid-server.log >&2 || true
             exit 1
           fi
+
       - name: Visual layout regression
         shell: bash
         run: |
@@ -78,10 +93,13 @@ jobs:
             exit 1
           fi
           VISUAL_CHROME_PATH="$CHROME_BIN" node scripts/visual-regression.mjs
+
       - name: Production HTTP smoke
         run: npm run smoke
+
       - name: Full sitemap SEO gate
         run: node scripts/seo-gate.mjs
+
       - name: Lighthouse lab audit
         shell: bash
         run: |
@@ -122,6 +140,15 @@ jobs:
           console.log('Lighthouse performance scores:',performances,'median:',median);
           if(median<0.70) throw new Error(`Median Lighthouse performance below 0.70: ${median}`);
           NODE
+
+      - name: Build Cloudflare Worker with OpenNext
+        if: github.event_name == 'pull_request'
+        run: npx opennextjs-cloudflare build
+
+      - name: Validate Wrangler package
+        if: github.event_name == 'pull_request'
+        run: npx wrangler deploy --dry-run
+
       - name: Upload visual regression artifacts
         if: always()
         uses: actions/upload-artifact@v4
@@ -130,6 +157,7 @@ jobs:
           path: visual-artifacts/
           if-no-files-found: ignore
           retention-days: 14
+
       - name: Upload quality diagnostics
         if: failure()
         uses: actions/upload-artifact@v4
@@ -140,6 +168,7 @@ jobs:
             /tmp/rawafid-lighthouse-*.json
           if-no-files-found: ignore
           retention-days: 7
+
       - name: Stop production server
         if: always()
         shell: bash

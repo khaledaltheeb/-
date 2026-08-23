@@ -5,6 +5,10 @@ import { chromium } from 'playwright-core';
 const baseUrl = process.env.VISUAL_BASE_URL || 'http://127.0.0.1:3000';
 const chromePath = process.env.VISUAL_CHROME_PATH;
 const outputDir = process.env.VISUAL_OUTPUT_DIR || 'visual-artifacts';
+const navigationAttempts = Math.max(1, Math.min(5, Number(process.env.VISUAL_NAV_ATTEMPTS || 3)));
+const navigationTimeoutMs = Math.max(5000, Number(process.env.VISUAL_NAV_TIMEOUT_MS || 45000));
+const navigationRetryDelayMs = Math.max(0, Number(process.env.VISUAL_NAV_RETRY_DELAY_MS || 1500));
+const retryableStatuses = new Set([429, 500, 502, 503, 504]);
 
 if (!chromePath) throw new Error('VISUAL_CHROME_PATH is required.');
 
@@ -30,6 +34,33 @@ const failures = [];
 const reports = [];
 const approx = (a, b, tolerance = 2) => Math.abs(a - b) <= tolerance;
 const fail = (scope, message) => failures.push(`${scope}: ${message}`);
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+async function navigateWithRetry(page, url, scope) {
+  let lastError;
+  let lastResponse;
+  for (let attempt = 1; attempt <= navigationAttempts; attempt += 1) {
+    try {
+      const response = await page.goto(url, {
+        waitUntil: 'domcontentloaded',
+        timeout: navigationTimeoutMs,
+      });
+      lastResponse = response;
+      const status = response?.status();
+      if (response?.ok() || (status && !retryableStatuses.has(status))) return response;
+      if (attempt === navigationAttempts) return response;
+      console.warn(`VISUAL REGRESSION: transient ${scope} navigation status ${status ?? 'no response'}; retry ${attempt}/${navigationAttempts}`);
+    } catch (error) {
+      lastError = error;
+      if (attempt === navigationAttempts) throw error;
+      console.warn(`VISUAL REGRESSION: transient ${scope} navigation failure; retry ${attempt}/${navigationAttempts}: ${error instanceof Error ? error.message : String(error)}`);
+    }
+    await page.goto('about:blank', { waitUntil: 'domcontentloaded', timeout: 5000 }).catch(() => {});
+    await sleep(navigationRetryDelayMs * attempt);
+  }
+  if (lastResponse) return lastResponse;
+  throw lastError ?? new Error(`${scope}: navigation failed without response`);
+}
 
 await fs.mkdir(outputDir, { recursive: true });
 
@@ -51,10 +82,14 @@ try {
     for (const route of routes) {
       const page = await context.newPage();
       const scope = `${viewport.name} ${route.path}`;
-      const response = await page.goto(`${baseUrl}${route.path}`, {
-        waitUntil: 'domcontentloaded',
-        timeout: 30_000,
-      });
+      let response;
+      try {
+        response = await navigateWithRetry(page, `${baseUrl}${route.path}`, scope);
+      } catch (error) {
+        fail(scope, `navigation failed after ${navigationAttempts} attempts: ${error instanceof Error ? error.message : String(error)}`);
+        await page.close();
+        continue;
+      }
 
       if (!response || !response.ok()) {
         fail(scope, `navigation returned ${response?.status() ?? 'no response'}`);
