@@ -67,6 +67,58 @@ function asString(value: unknown) {
   return typeof value === 'string' ? value.trim() : '';
 }
 
+function safeImageUrl(value: unknown) {
+  const raw = asString(value);
+  if (!raw) return '';
+  try {
+    const url = new URL(raw);
+    if (url.protocol !== 'https:') return '';
+    // Legacy Quick Info cards are first-party assets that will remain on the
+    // canonical healthrenewal.org domain after cutover.
+    if (url.hostname !== 'healthrenewal.org' && url.hostname !== 'www.healthrenewal.org') return '';
+    if (!url.pathname.startsWith('/assets/')) return '';
+    return url.toString();
+  } catch {
+    return '';
+  }
+}
+
+function schemaImageCandidate(value: unknown): string {
+  const root = asRecord(value);
+  const legacySchemas = Array.isArray(root?.legacy_schema) ? root.legacy_schema : [];
+
+  for (const schemaValue of legacySchemas) {
+    const schema = asRecord(schemaValue);
+    if (!schema) continue;
+    const graph = Array.isArray(schema['@graph']) ? schema['@graph'] : [schema];
+    for (const nodeValue of graph) {
+      const node = asRecord(nodeValue);
+      if (!node) continue;
+      const image = node.image;
+      if (Array.isArray(image)) {
+        for (const item of image) {
+          const direct = safeImageUrl(item);
+          if (direct) return direct;
+          const objectUrl = safeImageUrl(asRecord(item)?.url ?? asRecord(item)?.contentUrl);
+          if (objectUrl) return objectUrl;
+        }
+      } else {
+        const direct = safeImageUrl(image);
+        if (direct) return direct;
+        const imageObject = asRecord(image);
+        const objectUrl = safeImageUrl(imageObject?.url ?? imageObject?.contentUrl);
+        if (objectUrl) return objectUrl;
+      }
+    }
+  }
+  return '';
+}
+
+function effectiveFeaturedImage(featuredImage: unknown, schema: unknown) {
+  const explicit = safeImageUrl(featuredImage);
+  return explicit || schemaImageCandidate(schema) || null;
+}
+
 function publicationApproved(schema: unknown): boolean {
   const record = asRecord(schema);
   return Boolean(
@@ -143,7 +195,13 @@ export async function getQuickInfoRecord(routeSlug: string): Promise<QuickInfoRe
   if (!publicationApproved(record.schema_json)) return null;
   const expectedCanonical = `/quick-info/${routeSlug}/`;
   if (record.canonical_url && record.canonical_url !== expectedCanonical) return null;
-  return { ...record, body_json: sanitizeQuickInfoBodyJson(record.body_json) };
+  const featuredImage = effectiveFeaturedImage(record.featured_image_url, record.schema_json);
+  return {
+    ...record,
+    body_json: sanitizeQuickInfoBodyJson(record.body_json),
+    featured_image_url: featuredImage,
+    featured_image_alt: featuredImage ? (record.featured_image_alt || record.title) : record.featured_image_alt,
+  };
 }
 
 export async function getQuickInfoItems(limit = 500): Promise<QuickInfoItem[]> {
@@ -170,7 +228,7 @@ export async function getQuickInfoItems(limit = 500): Promise<QuickInfoItem[]> {
       title: asString(row.title),
       excerpt: typeof row.excerpt === 'string' ? row.excerpt : null,
       canonicalUrl,
-      featuredImageUrl: typeof row.featured_image_url === 'string' ? row.featured_image_url : null,
+      featuredImageUrl: effectiveFeaturedImage(row.featured_image_url, row.schema_json),
       updatedAt: typeof row.updated_at === 'string' ? row.updated_at : null,
     }];
   });
