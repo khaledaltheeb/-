@@ -30,15 +30,16 @@ export async function GET() {
   }
 
   const [contentResult, quickInfoResult, encyclopediaResult] = await Promise.all([
+    // This is deliberately a no-loss superset. Quick Info URLs may also appear in their
+    // dedicated sitemap, but no published/indexable non-condition row may disappear merely
+    // because it originated in a migration or has a specialized slug family.
     supabase
       .from('content')
       .select('id', { count: 'exact', head: true })
       .eq('status', 'published')
       .neq('content_type', 'condition')
       .lte('published_at', now)
-      .eq('robots_index', true)
-      .is('schema_json->legacy_migration', null)
-      .not('slug', 'like', 'quick-info-%'),
+      .eq('robots_index', true),
     supabase
       .from('content')
       .select('id', { count: 'exact', head: true })
