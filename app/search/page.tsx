@@ -35,6 +35,12 @@ type R = {
   score: number;
 };
 
+type QuickInfoGateRow = {
+  slug: string | null;
+  canonical_url: string | null;
+  schema_json: unknown;
+};
+
 const labels: Record<T, string> = {
   content: 'المحتوى',
   condition: 'الموسوعة المختصرة',
@@ -65,6 +71,20 @@ function normalizeSearch(value: string) {
     .replace(/[^\p{L}\p{N}]+/gu, ' ')
     .trim()
     .replace(/\s+/gu, ' ');
+}
+
+function isApprovedQuickInfoGateRow(row: QuickInfoGateRow) {
+  if (!row.slug?.startsWith('quick-info-')) return false;
+  const schema = row.schema_json && typeof row.schema_json === 'object' && !Array.isArray(row.schema_json)
+    ? row.schema_json as Record<string, unknown>
+    : null;
+  if (!schema) return false;
+  if (schema.page_role !== 'quick-info' || schema.publication_ready !== true || schema.editorial_review_required !== false) return false;
+  const routeSlug = row.slug.slice('quick-info-'.length);
+  if (!/^[a-z0-9][a-z0-9-]*$/.test(routeSlug)) return false;
+  const expectedCanonical = `/quick-info/${routeSlug}/`;
+  const storedCanonical = typeof row.canonical_url === 'string' ? row.canonical_url.trim() : '';
+  return !storedCanonical || storedCanonical === expectedCanonical;
 }
 
 function searchPsychEncyclopedia(query: string, records: PsychEncyclopediaReleaseIndexRecord[], limit = 75): R[] {
@@ -168,6 +188,7 @@ export async function PlatformSearchExperience({ searchParams, routeBase = '/sea
   if (q.length >= 2) {
     let dbData: R[] = [];
     let dbError = false;
+    let approvedQuickInfoSlugs = new Set<string>();
     let psychIndex: PsychEncyclopediaReleaseIndexRecord[] = [];
     let expandedIndex: ExpandedEncyclopediaIndexRecord[] = [];
 
@@ -188,27 +209,49 @@ export async function PlatformSearchExperience({ searchParams, routeBase = '/sea
       const { data, error: e } = await s.rpc('search_platform', { p_query: q, p_limit: 75 });
       dbData = (data ?? []) as R[];
       dbError = Boolean(e);
+
+      if (!e) {
+        const quickInfoSlugs = [...new Set(dbData.filter((item) => item.slug.startsWith('quick-info-')).map((item) => item.slug))];
+        if (quickInfoSlugs.length > 0) {
+          const { data: gateRows, error: gateError } = await s
+            .from('content')
+            .select('slug,canonical_url,schema_json')
+            .in('slug', quickInfoSlugs)
+            .eq('status', 'published')
+            .eq('robots_index', true)
+            .lte('published_at', new Date().toISOString());
+
+          if (!gateError) {
+            approvedQuickInfoSlugs = new Set(
+              ((gateRows ?? []) as QuickInfoGateRow[])
+                .filter(isApprovedQuickInfoGateRow)
+                .map((row) => row.slug as string),
+            );
+          }
+        }
+      }
     } catch {
       dbError = true;
     }
 
     const psychReleaseSlugs = new Set(psychIndex.map((record) => record.slug));
 
-    const db = dbData.map((item): R => {
+    const db = dbData.flatMap((item): R[] => {
       if (item.slug.startsWith('quick-info-')) {
+        if (!approvedQuickInfoSlugs.has(item.slug)) return [];
         const routeSlug = item.slug.slice('quick-info-'.length);
-        return {
+        return [{
           ...item,
           entity_type: 'content',
           subtitle: 'معلومة سريعة — محتوى مراجع',
           destination: `/quick-info/${routeSlug}/`,
-        };
+        }];
       }
 
       if (item.destination.startsWith('/encyclopedia/') || psychReleaseSlugs.has(item.slug)) {
-        return { ...item, entity_type: 'condition', subtitle: item.subtitle || 'الموسوعة المختصرة' };
+        return [{ ...item, entity_type: 'condition', subtitle: item.subtitle || 'الموسوعة المختصرة' }];
       }
-      return item;
+      return [item];
     });
 
     const generated = searchCognitivePages(q, 75).map((x, i): R => ({
