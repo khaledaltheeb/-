@@ -1,8 +1,11 @@
 name: Deploy Production
 
-# CUTOVER GUARD: healthrenewal.org remains on the current production site until launch day.
-# Run this workflow manually only after the 10k qualified-page and migration checks are approved.
+# Production is now cut over to healthrenewal.org on Cloudflare.
+# Deploy every approved main-branch change and keep manual dispatch as a fallback.
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 concurrency:
