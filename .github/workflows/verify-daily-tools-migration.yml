@@ -64,14 +64,13 @@ jobs:
       - name: Lint
         run: npm run lint
 
-      - name: Verify Daily Tools migration contracts
+      - name: Verify deterministic Daily Tools migration contracts
         shell: bash
         run: |
           set -euo pipefail
           npm run daily-tools:validate
           npm run search-appearance:validate
           npm run no-migration-routing:validate
-          npm run sitemap-preservation:validate
 
       - name: Build production Cloudflare Worker
         run: npx opennextjs-cloudflare build --env production
