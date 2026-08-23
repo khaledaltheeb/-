@@ -9,6 +9,61 @@ export const DEFAULT_DESCRIPTION = 'منصة روافد العربية للصح�
 
 const INDEXING_ENABLED = process.env.NEXT_PUBLIC_ALLOW_INDEXING === 'true';
 
+// Competitor/entity names are emitted only as homepage metadata keywords.
+// They are not rendered as visible page copy and are not injected as hidden HTML/CSS text.
+const HOMEPAGE_COMPETITOR_KEYWORDS = [
+  'الطبي',
+  'ويب طب',
+  'موضوع',
+  'كل يوم معلومة طبية',
+  'الكونسلتو',
+  'صحتك',
+  'حلوها',
+  'سوبرماما',
+  'طبكان',
+  'عرب ثيرابي',
+  'لبيه',
+  'شيزلونج',
+  'O7 Therapy',
+  'تكلّم',
+  'أوبستان',
+  'نفسيتي Nafseeti',
+  'استراحة Estaraht',
+  'أيادي Ayadi Health',
+  'تهون Tuhoon',
+  'حاكيني Hakeeni',
+  'سيطر Psyter',
+  'جذور Roots',
+  'ونس Wanas',
+  'نفسجي Nafsaji',
+  'منصة نفسي',
+  'نفسيتى Nafsiaty',
+  'صفاء Safaa',
+  'Mentali.ai',
+  'أكاديمية سكينة',
+  'سلامتك',
+  'محطات',
+  'روى',
+  'مجانين',
+  'المركز الوطني لتعزيز الصحة النفسية',
+  'صحتك النفسية وزارة الصحة القطرية',
+  'تحليل السلوك التطبيقي بالعربي ABA Arabic',
+  'أطفال الخليج ذوي الاحتياجات الخاصة',
+  'مدينة الشارقة للخدمات الإنسانية',
+  'مركز الملك سلمان لأبحاث الإعاقة',
+  'هيئة رعاية الأشخاص ذوي الإعاقة',
+  'المجلس الأعلى لحقوق الأشخاص ذوي الإعاقة',
+  'هيئة زايد لأصحاب الهمم',
+  'جمعية أسر التوحد',
+  'الجمعية السعودية للتوحد',
+  'مركز الشارقة لصعوبات التعلم',
+  'مركز تقويم وتعليم الطفل',
+  'مؤسسة ومركز الحسين للسرطان',
+  'مستشفى سرطان الأطفال 57357',
+  'مركز سرطان الأطفال في لبنان CCCL',
+  'جمعية سند لدعم الأطفال المرضى بالسرطان',
+];
+
 function absoluteUrl(pathOrUrl: string) {
   if (/^https?:\/\//i.test(pathOrUrl)) return pathOrUrl;
   const path = pathOrUrl.startsWith('/') ? pathOrUrl : `/${pathOrUrl}`;
@@ -54,11 +109,14 @@ export function buildSeoMetadata(input: SeoMetadataInput): Metadata {
   const languages = input.hreflang
     ? Object.fromEntries(Object.entries(input.hreflang).map(([key, value]) => [key, absoluteUrl(value)]))
     : undefined;
+  const keywords = input.path === '/'
+    ? Array.from(new Set([...(input.keywords || []), ...HOMEPAGE_COMPETITOR_KEYWORDS]))
+    : input.keywords;
 
   return {
     title: { absolute: title },
     description,
-    keywords: input.keywords?.length ? input.keywords : undefined,
+    keywords: keywords?.length ? keywords : undefined,
     alternates: { canonical, languages },
     robots: {
       index: canIndex,
