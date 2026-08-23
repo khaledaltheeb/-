@@ -52,7 +52,7 @@ const groups = [
 export default function SiteFooter() {
   return (
     <footer className="site-footer" style={{ display: 'block', padding: 0 }}>
-      <div className="site-footer-inner">
+      <div className="site-footer-inner" data-nosnippet>
         <div className="footer-brand-block">
           <RawafidBrand className="footer-brand" />
           <p>منصة عربية مؤسسية تربط المعرفة الموثوقة بالأدلة العملية والرعاية الأسرية والخدمات المهنية، مع مسارات واضحة للصحة النفسية وسرطان الأطفال والتعافي والدمج والتمكين.</p>
@@ -71,7 +71,7 @@ export default function SiteFooter() {
           ))}
         </nav>
       </div>
-      <div className="footer-bottom">
+      <div className="footer-bottom" data-nosnippet>
         <span>© {new Date().getFullYear()} منصة روافد. جميع الحقوق محفوظة.</span>
         <span>معرفة موثوقة · رعاية عملية · وصولية وخصوصية منذ التصميم</span>
         <a className="back-to-top" href="#top">العودة إلى الأعلى ↑</a>
