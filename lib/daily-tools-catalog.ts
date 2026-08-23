@@ -5,6 +5,8 @@ import { buildSeoMetadata } from '@/lib/seo';
 
 type UnknownRecord = Record<string, unknown>;
 type DailyToolsPayload = { records?: unknown[] };
+export type DailyToolRelatedLink = { title: string; href: string };
+export type DailyToolReference = { title: string; url: string; publisher?: string; year?: string };
 
 export const DAILY_TOOLS_TOTAL = 150;
 export const DAILY_TOOLS_HUB_ROUTE = '/daily-tools/';
@@ -44,6 +46,21 @@ function sourcePathToRoute(sourcePath: string): string | null {
   return match ? `/daily-tools/${match[1]}/` : null;
 }
 
+function normalizeInternalHref(value: unknown): string | null {
+  const raw = cleanText(value, 2000);
+  if (!raw) return null;
+  try {
+    const url = new URL(raw, 'https://healthrenewal.org');
+    const host = url.hostname.toLowerCase();
+    if (host !== 'healthrenewal.org' && host !== 'www.healthrenewal.org') return null;
+    const pathname = decodeURIComponent(url.pathname).normalize('NFC');
+    if (pathname.includes('\\') || pathname.split('/').some((part) => part === '..' || part === '.')) return null;
+    return `${pathname || '/'}${url.search}${url.hash}`;
+  } catch {
+    return null;
+  }
+}
+
 const payload = dailyToolsPayload as unknown as DailyToolsPayload;
 const routeMap = new Map<string, LegacyPreservedPage>();
 for (const raw of Array.isArray(payload.records) ? payload.records : []) {
@@ -70,6 +87,47 @@ export function getDailyToolSlugs(): string[] {
 
 export function getDailyToolRoutes(): string[] {
   return [DAILY_TOOLS_HUB_ROUTE, ...toolRoutes];
+}
+
+export function getDailyToolRelatedLinks(page: LegacyPreservedPage, currentRoute?: string): DailyToolRelatedLink[] {
+  if (!Array.isArray(page.internal_links_json)) return [];
+  const seen = new Set<string>();
+  const normalizedCurrent = currentRoute?.split(/[?#]/, 1)[0];
+  const links: DailyToolRelatedLink[] = [];
+  for (const item of page.internal_links_json.slice(0, 250)) {
+    const entry = asRecord(item);
+    if (!entry) continue;
+    const href = normalizeInternalHref(entry.url ?? entry.href);
+    const title = cleanText(entry.title ?? entry.label, 500);
+    if (!href || !title || seen.has(href) || (normalizedCurrent && href.split(/[?#]/, 1)[0] === normalizedCurrent)) continue;
+    seen.add(href);
+    links.push({ title, href });
+  }
+  return links;
+}
+
+export function getDailyToolReferences(page: LegacyPreservedPage): DailyToolReference[] {
+  if (!Array.isArray(page.references_json)) return [];
+  const seen = new Set<string>();
+  const references: DailyToolReference[] = [];
+  for (const item of page.references_json.slice(0, 100)) {
+    const entry = asRecord(item);
+    if (!entry) continue;
+    const title = cleanText(entry.title ?? entry.label ?? entry.publisher, 600);
+    const url = cleanText(entry.url, 2000);
+    if (!title || !/^https:\/\//i.test(url) || seen.has(url)) continue;
+    try {
+      const parsed = new URL(url);
+      if (parsed.protocol !== 'https:') continue;
+    } catch {
+      continue;
+    }
+    seen.add(url);
+    const publisher = cleanText(entry.publisher, 300);
+    const year = cleanText(entry.year, 40);
+    references.push({ title, url, ...(publisher ? { publisher } : {}), ...(year ? { year } : {}) });
+  }
+  return references;
 }
 
 function cleanTitle(page: LegacyPreservedPage, fallback: string): string {
