@@ -50,6 +50,8 @@ jobs:
         run: npm run lint
       - name: Architecture contracts
         run: npm run architecture-check
+      - name: Live public and sitemap preservation gate
+        run: npm run live-preservation:validate
       - name: Verify production SEO origin contract
         shell: bash
         run: |
