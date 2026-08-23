@@ -22,7 +22,7 @@ const PRIVATE_PATHS = [
 ];
 
 // Explicit discovery rules make our intent unambiguous to major search and AI systems.
-// The wildcard rule remains the authoritative fallback for compliant crawlers.
+// The wildcard rule remains the authoritative fallback for standards-compliant crawlers.
 const DISCOVERY_CRAWLERS = [
   'Googlebot',
   'Google-Extended',
@@ -37,6 +37,7 @@ const DISCOVERY_CRAWLERS = [
   'Claude-User',
   'ClaudeBot',
   'PerplexityBot',
+  'Perplexity-User',
 ];
 
 export default function robots(): MetadataRoute.Robots {
@@ -47,17 +48,14 @@ export default function robots(): MetadataRoute.Robots {
     };
   }
 
-  const publicRule = (userAgent: string): MetadataRoute.Robots['rules'] extends Array<infer R> ? R : never => ({
+  const publicRule = (userAgent: string) => ({
     userAgent,
     allow: '/',
     disallow: PRIVATE_PATHS,
   });
 
   return {
-    rules: [
-      publicRule('*'),
-      ...DISCOVERY_CRAWLERS.map(publicRule),
-    ],
+    rules: [publicRule('*'), ...DISCOVERY_CRAWLERS.map(publicRule)],
     sitemap: `${SITE_URL}/sitemap.xml`,
     host: SITE_URL,
   };
