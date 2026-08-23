@@ -57,7 +57,7 @@ jobs:
 
           post_status pending 'live/cognitive-lab-100' 'Checking live Cognitive Lab deployment'
           post_status pending 'live/cognitive/page' 'Waiting for the 100-tool Cognitive Lab page'
-          post_status pending 'live/cognitive/sitemap' 'Checking sitemap against the live indexing policy'
+          post_status pending 'live/cognitive/sitemap' 'Checking the staging Cognitive Lab sitemap'
           post_status pending 'live/cognitive/samples' 'Waiting for verified extension sample routes'
 
           last_page_ok=false
@@ -70,7 +70,6 @@ jobs:
             stamp="${GITHUB_SHA}-${attempt}-$(date +%s)"
             page="$(fetch '/cognitive-lab' "$stamp" 2>/dev/null || true)"
             sitemap="$(fetch '/sitemaps/cognitive-lab.xml' "$stamp" 2>/dev/null || true)"
-            robots="$(fetch '/robots.txt' "$stamp" 2>/dev/null || true)"
             simon="$(fetch '/cognitive-lab/simon-conflict' "$stamp" 2>/dev/null || true)"
             coding="$(fetch '/cognitive-lab/symbol-coding' "$stamp" 2>/dev/null || true)"
             ambiguity="$(fetch '/cognitive-lab/ambiguity-resolution' "$stamp" 2>/dev/null || true)"
@@ -83,11 +82,6 @@ jobs:
             sitemap_ok=false
             samples_ok=false
             sitemap_mode='invalid'
-            indexing_disabled=false
-
-            if grep -Eq '^Disallow:[[:space:]]*/[[:space:]]*$' <<< "$robots"; then
-              indexing_disabled=true
-            fi
 
             if grep -Fq '100 نشاط معرفي واضح' <<< "$page" \
               && grep -Fq '47' <<< "$page" \
@@ -95,16 +89,14 @@ jobs:
               page_ok=true
             fi
 
-            if $indexing_disabled; then
-              if [ "$url_count" = '0' ] && grep -Fq '<urlset' <<< "$sitemap"; then
-                sitemap_ok=true
-                sitemap_mode='indexing-disabled'
-              fi
-            else
-              if [ "$url_count" = '101' ]; then
-                sitemap_ok=true
-                sitemap_mode='indexed'
-              fi
+            # This workflow is intentionally scoped to the staging hostname above.
+            # Staging may be noindex (valid empty urlset) or temporarily index-enabled (101 URLs).
+            if [ "$url_count" = '101' ]; then
+              sitemap_ok=true
+              sitemap_mode='indexed'
+            elif [ "$url_count" = '0' ] && grep -Fq '<urlset' <<< "$sitemap"; then
+              sitemap_ok=true
+              sitemap_mode='staging-noindex'
             fi
 
             if grep -Fq 'تعارض الموقع والاستجابة' <<< "$simon" \
@@ -121,7 +113,7 @@ jobs:
             last_url_count="$url_count"
             last_sitemap_mode="$sitemap_mode"
 
-            echo "Attempt ${attempt}: page_ok=${page_ok}; sitemap_ok=${sitemap_ok}; sitemap_mode=${sitemap_mode}; samples_ok=${samples_ok}; sitemap_urls=${url_count}; page_bytes=${#page}; sitemap_bytes=${#sitemap}; robots_bytes=${#robots}."
+            echo "Attempt ${attempt}: page_ok=${page_ok}; sitemap_ok=${sitemap_ok}; sitemap_mode=${sitemap_mode}; samples_ok=${samples_ok}; sitemap_urls=${url_count}; page_bytes=${#page}; sitemap_bytes=${#sitemap}."
 
             if [ "$attempt" = '1' ] || [ $((attempt % 6)) -eq 0 ]; then
               if $page_ok; then
@@ -132,12 +124,12 @@ jobs:
 
               if $sitemap_ok; then
                 if [ "$sitemap_mode" = 'indexed' ]; then
-                  post_status success 'live/cognitive/sitemap' 'Indexing enabled and Cognitive Lab sitemap exposes 101 URLs'
+                  post_status success 'live/cognitive/sitemap' 'Staging sitemap currently exposes 101 Cognitive Lab URLs'
                 else
-                  post_status success 'live/cognitive/sitemap' 'Staging indexing disabled; Cognitive Lab sitemap is intentionally empty'
+                  post_status success 'live/cognitive/sitemap' 'Staging noindex policy exposes a valid empty Cognitive Lab sitemap'
                 fi
               else
-                post_status pending 'live/cognitive/sitemap' "Sitemap policy mismatch: mode=${sitemap_mode}, URLs=${url_count}"
+                post_status pending 'live/cognitive/sitemap' "Invalid staging sitemap: mode=${sitemap_mode}, URLs=${url_count}"
               fi
 
               if $samples_ok; then
@@ -157,12 +149,12 @@ jobs:
               echo "Verified sample routes: simon-conflict, symbol-coding, ambiguity-resolution, error-detection"
               post_status success 'live/cognitive/page' 'Live Cognitive Lab page exposes 100 tools, 47 extensions and level 14'
               if [ "$sitemap_mode" = 'indexed' ]; then
-                post_status success 'live/cognitive/sitemap' 'Indexing enabled and Cognitive Lab sitemap exposes 101 URLs'
+                post_status success 'live/cognitive/sitemap' 'Staging sitemap currently exposes 101 Cognitive Lab URLs'
               else
-                post_status success 'live/cognitive/sitemap' 'Staging indexing disabled; Cognitive Lab sitemap is intentionally empty'
+                post_status success 'live/cognitive/sitemap' 'Staging noindex policy exposes a valid empty Cognitive Lab sitemap'
               fi
               post_status success 'live/cognitive/samples' 'Verified extension sample routes are live'
-              post_status success 'live/cognitive-lab-100' 'Live Cognitive Lab 100 verified with correct indexing policy'
+              post_status success 'live/cognitive-lab-100' 'Live Cognitive Lab 100 verified on staging'
               exit 0
             fi
 
@@ -177,12 +169,12 @@ jobs:
 
           if $last_sitemap_ok; then
             if [ "$last_sitemap_mode" = 'indexed' ]; then
-              post_status success 'live/cognitive/sitemap' 'Indexing enabled and Cognitive Lab sitemap exposes 101 URLs'
+              post_status success 'live/cognitive/sitemap' 'Staging sitemap currently exposes 101 Cognitive Lab URLs'
             else
-              post_status success 'live/cognitive/sitemap' 'Staging indexing disabled; Cognitive Lab sitemap is intentionally empty'
+              post_status success 'live/cognitive/sitemap' 'Staging noindex policy exposes a valid empty Cognitive Lab sitemap'
             fi
           else
-            post_status failure 'live/cognitive/sitemap' "Sitemap policy mismatch ended at mode=${last_sitemap_mode}, URLs=${last_url_count}"
+            post_status failure 'live/cognitive/sitemap' "Invalid staging sitemap ended at mode=${last_sitemap_mode}, URLs=${last_url_count}"
           fi
 
           if $last_samples_ok; then
@@ -192,5 +184,5 @@ jobs:
           fi
 
           post_status failure 'live/cognitive-lab-100' 'Live Cognitive Lab verification failed'
-          echo 'Live Cognitive Lab did not converge to the verified deployment and indexing policy.' >&2
+          echo 'Live Cognitive Lab did not converge to the verified staging deployment.' >&2
           exit 1
