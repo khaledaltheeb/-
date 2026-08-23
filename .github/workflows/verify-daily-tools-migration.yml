@@ -8,13 +8,18 @@ on:
       - '.github/workflows/verify-daily-tools-migration.yml'
       - 'app/daily-tools/**'
       - 'app/sitemaps/daily-tools.xml/**'
+      - 'app/sitemaps/static.xml/route.ts'
       - 'app/sitemap.xml/route.ts'
       - 'components/daily-tool-*.tsx'
       - 'components/daily-tools-directory.tsx'
       - 'components/site-header.tsx'
       - 'lib/daily-tools-*.ts'
+      - 'lib/seo.ts'
       - 'scripts/daily-tools-contract.mjs'
       - 'scripts/metadata-coverage-contract.mjs'
+      - 'scripts/search-appearance-contract.mjs'
+      - 'wrangler.jsonc'
+      - '.github/workflows/deploy-production.yml'
 
 permissions:
   contents: read
