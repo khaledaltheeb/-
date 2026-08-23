@@ -8,7 +8,6 @@ import {
   getExpandedEncyclopediaIndex,
   type ExpandedEncyclopediaIndexRecord,
 } from '@/lib/expanded-encyclopedia';
-import { getQuickInfoItems, quickInfoContentSlug } from '@/lib/quick-info';
 import {
   getPsychEncyclopediaReleaseIndex,
   type PsychEncyclopediaReleaseIndexRecord,
@@ -169,7 +168,6 @@ export async function PlatformSearchExperience({ searchParams, routeBase = '/sea
   if (q.length >= 2) {
     let dbData: R[] = [];
     let dbError = false;
-    let approvedQuickInfo: Awaited<ReturnType<typeof getQuickInfoItems>> = [];
     let psychIndex: PsychEncyclopediaReleaseIndexRecord[] = [];
     let expandedIndex: ExpandedEncyclopediaIndexRecord[] = [];
 
@@ -187,43 +185,30 @@ export async function PlatformSearchExperience({ searchParams, routeBase = '/sea
 
     try {
       const s = await createClient();
-      const [{ data, error: e }, quickInfo] = await Promise.all([
-        s.rpc('search_platform', { p_query: q, p_limit: 75 }),
-        getQuickInfoItems(500),
-      ]);
+      const { data, error: e } = await s.rpc('search_platform', { p_query: q, p_limit: 75 });
       dbData = (data ?? []) as R[];
-      approvedQuickInfo = quickInfo;
       dbError = Boolean(e);
     } catch {
       dbError = true;
-      try {
-        approvedQuickInfo = await getQuickInfoItems(500);
-      } catch {
-        approvedQuickInfo = [];
-      }
     }
 
     const psychReleaseSlugs = new Set(psychIndex.map((record) => record.slug));
-    const approvedByStoredSlug = new Map(
-      approvedQuickInfo.map((item) => [quickInfoContentSlug(item.routeSlug), item]),
-    );
 
-    const db = dbData.flatMap((item): R[] => {
+    const db = dbData.map((item): R => {
       if (item.slug.startsWith('quick-info-')) {
-        const approved = approvedByStoredSlug.get(item.slug);
-        if (!approved) return [];
-        return [{
+        const routeSlug = item.slug.slice('quick-info-'.length);
+        return {
           ...item,
           entity_type: 'content',
           subtitle: 'معلومة سريعة — محتوى مراجع',
-          destination: approved.canonicalUrl,
-        }];
+          destination: `/quick-info/${routeSlug}/`,
+        };
       }
 
       if (item.destination.startsWith('/encyclopedia/') || psychReleaseSlugs.has(item.slug)) {
-        return [{ ...item, entity_type: 'condition', subtitle: item.subtitle || 'الموسوعة المختصرة' }];
+        return { ...item, entity_type: 'condition', subtitle: item.subtitle || 'الموسوعة المختصرة' };
       }
-      return [item];
+      return item;
     });
 
     const generated = searchCognitivePages(q, 75).map((x, i): R => ({
