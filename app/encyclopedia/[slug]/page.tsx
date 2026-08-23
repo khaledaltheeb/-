@@ -39,7 +39,6 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     keywords: [record.primary_keyword, ...(record.secondary_keywords ?? []), ...(record.semantic_terms ?? []).slice(0, 12)].filter(Boolean) as string[],
     publishedTime: record.published_at,
     modifiedTime: record.updated_at,
-    authors: record.author_display_name ? [{ name: record.author_display_name }] : undefined,
   });
 }
 
@@ -93,7 +92,7 @@ export default async function EncyclopediaConditionPage({ params }: { params: Pa
     lastReviewed: review.lastReviewedAt || undefined,
     mainEntity: { '@id': conditionId },
     about: { '@id': conditionId },
-    author: record.author_display_name ? { '@type': 'Person', name: record.author_display_name } : { '@id': `${SITE_URL}/#organization` },
+    author: { '@id': `${SITE_URL}/#organization` },
     reviewedBy: review.reviewedBySchema,
     publisher: { '@id': `${SITE_URL}/#organization` },
     isPartOf: { '@id': `${SITE_URL}/encyclopedia/#page` },
@@ -119,8 +118,8 @@ export default async function EncyclopediaConditionPage({ params }: { params: Pa
     <nav className="breadcrumbs" aria-label="مسار الصفحة"><Link href="/">الرئيسية</Link><span>/</span><Link href="/sectors/short-encyclopedia">قطاع الموسوعة المختصرة</Link><span>/</span><Link href="/encyclopedia/">الموسوعة المختصرة</Link><span>/</span><span aria-current="page">{record.title}</span></nav>
     <article>
       <header className="article-hero"><span className="eyebrow">الموسوعة المختصرة</span><h1>{record.title}</h1>{record.excerpt ? <p>{record.excerpt}</p> : null}<div className="article-meta">
-        {record.author_display_name ? <span>إعداد: {record.author_display_name}</span> : null}
-        {review.reviewerName ? <span>مراجعة: {review.reviewerName}{review.reviewerCredentials ? ` — ${review.reviewerCredentials}` : ''}</span> : null}
+        <span>إعداد: منصة روافد</span>
+        {review.reviewerName ? <span>مراجعة: {review.reviewerName}</span> : null}
         {record.published_at ? <span>نُشر {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(record.published_at))}</span> : null}
         {review.lastReviewedAt ? <span>آخر مراجعة {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(review.lastReviewedAt))}</span> : null}
       </div><div className="tag-list">{audiences.map((audience) => <span key={audience}>{audience}</span>)}<span>{references.length} مراجع</span>{faqItems.length > 0 ? <span>{faqItems.length} أسئلة شائعة</span> : null}</div></header>
