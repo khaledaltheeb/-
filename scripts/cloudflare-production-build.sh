@@ -11,5 +11,6 @@ export NEXT_PUBLIC_ENABLE_ANALYTICS='false'
 node scripts/build_psych_encyclopedia_assets.mjs
 node scripts/build_expanded_encyclopedia_assets.mjs
 node scripts/materialize-legacy-static-assets.mjs
+node scripts/build-daily-tools-sitemap.mjs
 
 npx opennextjs-cloudflare build --env production
