@@ -9,6 +9,7 @@ const pageAttempts = Math.max(1, Math.min(5, Number(process.env.SEO_GATE_PAGE_AT
 const pageRetryDelayMs = Math.max(0, Number(process.env.SEO_GATE_PAGE_RETRY_DELAY_MS || 300));
 const internalLinkAttempts = 3;
 const internalLinkRetryDelayMs = 150;
+const retryablePageStatuses = new Set([429, 500, 502, 503, 504]);
 
 function decodeXml(value) {
   return value.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
@@ -64,15 +65,19 @@ async function getText(url) {
 }
 async function getTextWithRetry(url, attempts = pageAttempts) {
   let lastError;
+  let lastResult;
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
     try {
-      return await getText(url);
+      const result = await getText(url);
+      lastResult = result;
+      if (!retryablePageStatuses.has(result.response.status) || attempt === attempts) return result;
     } catch (error) {
       lastError = error;
       if (attempt === attempts) break;
-      await sleep(pageRetryDelayMs * attempt);
     }
+    await sleep(pageRetryDelayMs * attempt);
   }
+  if (lastResult) return lastResult;
   throw lastError;
 }
 function sitemapLocs(xml) {
