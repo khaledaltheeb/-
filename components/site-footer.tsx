@@ -60,13 +60,6 @@ export default function SiteFooter() {
             <input id="footer-search-input" name="q" type="search" placeholder="ابحث عن معلومة أو دليل أو خدمة" maxLength={120} enterKeyHint="search" />
             <button type="submit">بحث</button>
           </form>
-          <div className="footer-trust-list" aria-label="معايير الثقة">
-            <span>مراجعة منهجية</span>
-            <span>مصادر قابلة للتتبع</span>
-            <span>روابط داخلية منظمة</span>
-            <span>خصوصية ووصولية</span>
-          </div>
-          <span className="footer-trust-note">المحتوى للتثقيف العام ولا يحل محل التقييم أو التشخيص أو العلاج المهني الفردي.</span>
         </div>
         <nav className="footer-groups" aria-label="روابط تذييل المنصة">
           {groups.map((group) => (

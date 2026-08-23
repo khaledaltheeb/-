@@ -37,6 +37,7 @@ export async function GET() {
       .neq('content_type', 'condition')
       .lte('published_at', now)
       .eq('robots_index', true)
+      .is('schema_json->legacy_migration', null)
       .not('slug', 'like', 'quick-info-%'),
     supabase
       .from('content')
