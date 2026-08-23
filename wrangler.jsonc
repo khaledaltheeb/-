@@ -9,6 +9,8 @@
   "preview_urls": true,
   "minify": true,
   "vars": {
+    "NEXT_PUBLIC_SUPABASE_URL": "https://ghljwfwqsyfnthvlzxjy.supabase.co",
+    "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY": "sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs",
     "NEXT_PUBLIC_SITE_URL": "https://rawafid-platform-staging.khaledaltheeb.workers.dev",
     "NEXT_PUBLIC_ALLOW_INDEXING": "false",
     "NEXT_PUBLIC_ENABLE_ANALYTICS": "false"
@@ -25,6 +27,8 @@
         }
       ],
       "vars": {
+        "NEXT_PUBLIC_SUPABASE_URL": "https://ghljwfwqsyfnthvlzxjy.supabase.co",
+        "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY": "sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs",
         "NEXT_PUBLIC_SITE_URL": "https://healthrenewal.org",
         "NEXT_PUBLIC_ALLOW_INDEXING": "true",
         "NEXT_PUBLIC_ENABLE_ANALYTICS": "false"
