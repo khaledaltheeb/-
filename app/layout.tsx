@@ -29,6 +29,11 @@ export const metadata: Metadata = {
   creator: BRAND_NAME,
   publisher: BRAND_NAME,
   manifest: '/manifest.webmanifest',
+  alternates: {
+    types: {
+      'application/rss+xml': `${SITE_URL}/feed.xml`,
+    },
+  },
   icons: {
     icon: [
       { url: '/icons/rawafid-app.svg', type: 'image/svg+xml', sizes: 'any' },
