@@ -4,7 +4,7 @@ type ReviewRecord = {
   reviewer_credentials?: string | null;
 };
 
-const RAWAFID_REVIEW_TEAM = 'فريق روافد';
+export const RAWAFID_REVIEW_TEAM = 'فريق روافد';
 
 function nonEmptyString(value: unknown) {
   return typeof value === 'string' && value.trim() ? value.trim() : null;
@@ -12,26 +12,21 @@ function nonEmptyString(value: unknown) {
 
 export function contentReviewProvenance(record: ReviewRecord) {
   const recordedReviewDate = nonEmptyString(record.last_reviewed_at);
-  const explicitReviewer = nonEmptyString(record.reviewer_display_name);
-  const recordedCredentials = nonEmptyString(record.reviewer_credentials);
   const hasRecordedReview = Boolean(recordedReviewDate);
   const lastReviewedAt = hasRecordedReview ? recordedReviewDate : null;
-  const reviewerName = hasRecordedReview ? explicitReviewer || RAWAFID_REVIEW_TEAM : null;
-  const reviewerCredentials = explicitReviewer ? recordedCredentials : null;
-  const reviewerType = hasRecordedReview ? (explicitReviewer ? 'Person' : 'Organization') : null;
 
-  const reviewedBySchema = !hasRecordedReview
-    ? undefined
-    : explicitReviewer
-      ? {
-          '@type': 'Person',
-          name: explicitReviewer,
-          description: recordedCredentials || undefined,
-        }
-      : {
-          '@type': 'Organization',
-          name: RAWAFID_REVIEW_TEAM,
-        };
+  // Rawafid review provenance is institutional. Historical reviewer labels in the
+  // database are variants of the same editorial/scientific team, not individual people.
+  // Keep one stable public entity rather than manufacturing Person entities.
+  const reviewerName = hasRecordedReview ? RAWAFID_REVIEW_TEAM : null;
+  const reviewerCredentials = null;
+  const reviewerType = hasRecordedReview ? 'Organization' : null;
+  const reviewedBySchema = hasRecordedReview
+    ? {
+        '@type': 'Organization',
+        name: RAWAFID_REVIEW_TEAM,
+      }
+    : undefined;
 
   return {
     lastReviewedAt,
