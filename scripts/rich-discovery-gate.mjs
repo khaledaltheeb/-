@@ -28,7 +28,7 @@ async function fetchText(url) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const response = await fetch(url, { redirect: 'follow', signal: controller.signal, headers: { 'user-agent': 'Rawafid-Rich-Discovery-Gate/1.0' } });
+    const response = await fetch(url, { redirect: 'follow', signal: controller.signal, headers: { 'user-agent': 'Rawafid-Rich-Discovery-Gate/1.1' } });
     return { response, text: await response.text() };
   } finally { clearTimeout(timer); }
 }
@@ -79,6 +79,34 @@ function isContentLike(pathname) {
 function hasPageSchema(types) {
   return ['WebPage','CollectionPage','Article','NewsArticle','ScholarlyArticle','MedicalWebPage','ProfilePage','FAQPage','DefinedTerm','DefinedTermSet','MedicalCondition'].some((type) => types.has(type));
 }
+function requireTypes(url, pathname, types) {
+  const require = (...expected) => {
+    for (const type of expected) if (!types.has(type)) failures.push(`${url}: ${pathname} requires ${type} structured data (found: ${[...types].join(', ') || 'none'})`);
+  };
+  const requireAny = (...expected) => {
+    if (!expected.some((type) => types.has(type))) failures.push(`${url}: ${pathname} requires one of ${expected.join(', ')} structured data types (found: ${[...types].join(', ') || 'none'})`);
+  };
+
+  if (['/sectors','/sectors/','/sections','/sections/','/specialists','/specialists/','/centers','/centers/','/quick-info','/quick-info/','/encyclopedia','/encyclopedia/','/magazine','/magazine/'].includes(pathname)) {
+    require('CollectionPage');
+    return;
+  }
+  if (/^\/sectors\/[^/]+\/?$/.test(pathname)) { require('CollectionPage'); return; }
+  if (/^\/sections\/[^/]+\/?$/.test(pathname)) { require('CollectionPage'); return; }
+  if (/^\/specialists\/[^/]+\/?$/.test(pathname)) { require('ProfilePage', 'Person'); return; }
+  if (/^\/centers\/[^/]+\/?$/.test(pathname)) {
+    require('ProfilePage');
+    requireAny('MedicalClinic','Hospital','EducationalOrganization','Organization','MedicalOrganization');
+    return;
+  }
+  if (/^\/magazine\/.+/.test(pathname)) { require('ScholarlyArticle'); return; }
+  if (/^\/quick-info\/[^/]+\/?$/.test(pathname)) { require('Article', 'MedicalWebPage'); return; }
+  if (/^\/encyclopedia\/(?!index(?:\/|$))[^/]+\/?$/.test(pathname)) { require('MedicalWebPage', 'MedicalCondition'); return; }
+
+  if (isContentLike(pathname) && !hasPageSchema(types)) {
+    failures.push(`${url}: content-like page lacks page/content structured-data type (${[...types].join(', ') || 'none'})`);
+  }
+}
 async function audit(url) {
   let result;
   try { result = await fetchText(url); }
@@ -107,6 +135,8 @@ async function audit(url) {
   if (!twitterImage) failures.push(`${url}: missing twitter:image`);
   if (!ogSiteName) failures.push(`${url}: missing og:site_name`);
 
+  const robots = `${metaContent(html, 'name', 'robots')},${metaContent(html, 'name', 'googlebot')}`.toLowerCase().replace(/\s+/g, '');
+  if (robots.includes('noindex')) failures.push(`${url}: sitemap URL renders noindex`);
   const googlebot = metaContent(html, 'name', 'googlebot').toLowerCase().replace(/\s+/g, '');
   if (googlebot && !googlebot.includes('max-image-preview:large')) failures.push(`${url}: googlebot lacks max-image-preview:large`);
   if (googlebot && !googlebot.includes('max-snippet:-1')) failures.push(`${url}: googlebot lacks max-snippet:-1`);
@@ -118,9 +148,7 @@ async function audit(url) {
 
   const types = schemaTypes(html);
   const pathname = new URL(url).pathname;
-  if (isContentLike(pathname) && !hasPageSchema(types)) {
-    failures.push(`${url}: content-like page lacks page/content structured-data type (${[...types].join(', ') || 'none'})`);
-  }
+  requireTypes(url, pathname, types);
 }
 async function runPool(items, worker) {
   let cursor = 0;
@@ -138,6 +166,7 @@ async function verifyDiscoveryFiles() {
     ['/robots.txt', /Sitemap:/i],
     ['/sitemap.xml', /<sitemapindex\b/i],
     ['/llms.txt', /^#\s*روافد/m],
+    ['/feed.xml', /<rss\b/i],
     ['/b7f31d3c5a694e2f8b04c71d9a6e53f2.txt', /^b7f31d3c5a694e2f8b04c71d9a6e53f2\s*$/],
   ];
   for (const [path, pattern] of checks) {
