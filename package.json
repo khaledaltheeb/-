@@ -15,6 +15,7 @@
     "typecheck": "tsc --noEmit",
     "search-appearance:validate": "node scripts/search-appearance-contract.mjs",
     "semantic-seo:validate": "node scripts/semantic-seo-contract.mjs",
+    "cutover-readiness": "node scripts/cutover-readiness.mjs",
     "public-preservation:validate": "node scripts/public-preservation-contract.mjs",
     "sitemap-preservation:validate": "node scripts/sitemap-preservation-contract.mjs",
     "static-sitemap:validate": "node scripts/static-sitemap-coverage-contract.mjs",
