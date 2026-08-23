@@ -1,0 +1,90 @@
+{
+  "batch_id": "expanded-encyclopedia-008-addiction-d-complement",
+  "status": "editorial-source",
+  "records": [
+    {
+      "content_type": "glossary_term",
+      "slug": "negative-reinforcement-addiction",
+      "canonical_term": "التعزيز السلبي في الإدمان",
+      "english_name": "Negative Reinforcement in Addiction",
+      "aliases": ["استخدام المادة لتخفيف الضيق"],
+      "category_slug": "substance-addiction",
+      "title": "التعزيز السلبي في الإدمان: عندما يستمر الاستخدام لتخفيف الضيق",
+      "excerpt": "التعزيز السلبي هو زيادة احتمال سلوك لأنه يزيل أو يخفض حالة مزعجة. في الإدمان قد يستمر الاستخدام لأنه يخفف انسحابًا أو قلقًا أو ضيقًا مؤقتًا، وليس فقط بسبب طلب المتعة.",
+      "definition": "التعزيز السلبي في الإدمان هو عملية تعلم يزداد فيها استخدام المادة لأن نتيجته المباشرة تخفض تجربة غير مريحة مثل أعراض الانسحاب أو التوتر أو المشاعر السلبية، فيقوى السلوك مستقبلًا.",
+      "presentation_or_use": "قد يتحول الدافع من البحث عن المتعة إلى استخدام المادة كي يشعر الشخص بأنه طبيعي أو يتجنب أعراضًا مزعجة. هذا التحول قد يظهر بوضوح في مرحلة الانسحاب والمزاج السلبي لبعض نماذج الإدمان.",
+      "mechanisms_or_context": "يرتبط التعزيز السلبي بالتعلم وبأنظمة الضغط والانفعال والتكيف الجسدي. إزالة الضيق بعد الاستخدام تعمل كمكافأة سلوكية رغم أن النتيجة ليست إضافة متعة بل إزالة حالة مكروهة.",
+      "assessment_or_practice": "يُسأل عما يحدث قبل الاستخدام وما الحالة التي يحاول الشخص تخفيفها وما يشعر به بعدها. يساعد ذلك على بناء بدائل لعلاج الانسحاب والضغط والمشاعر بدل التركيز على المادة وحدها.",
+      "boundary": "كلمة سلبي لا تعني عقابًا أو سوءًا أخلاقيًا؛ في علم السلوك تعني إزالة شيء مزعج. كما أن هذا المسار لا يفسر وحده كل استخدام أو كل إدمان.",
+      "faq": [
+        {"question": "ما الفرق بين التعزيز السلبي والعقاب؟", "answer": "التعزيز السلبي يزيد السلوك عبر إزالة حالة مزعجة، أما العقاب فيهدف إلى خفض السلوك عبر نتيجة تقلل احتمال تكراره."},
+        {"question": "هل الاستخدام لتجنب الانسحاب مثال على التعزيز السلبي؟", "answer": "نعم، عندما يخفف الاستخدام أعراضًا مزعجة ويجعل تكراره أكثر احتمالًا، فهذا مثال نموذجي على هذه العملية."}
+      ],
+      "references": [
+        {"title": "Alcohol Use Disorder: From Risk to Diagnosis to Recovery", "publisher": "National Institute on Alcohol Abuse and Alcoholism", "url": "https://www.niaaa.nih.gov/health-professionals-communities/core-resource-on-alcohol/alcohol-use-disorder-risk-diagnosis-recovery"},
+        {"title": "Drugs, Brains, and Behavior: The Science of Addiction", "publisher": "National Institute on Drug Abuse", "url": "https://nida.nih.gov/publications/drugs-brains-behavior-science-addiction"}
+      ],
+      "primary_keyword": "التعزيز السلبي في الإدمان",
+      "secondary_keywords": ["Negative Reinforcement in Addiction بالعربي", "استخدام المخدر لتخفيف الضيق", "الانسحاب والتعزيز"],
+      "semantic_terms": ["التعلم", "الانسحاب", "الضغط", "المكافأة"],
+      "related_slugs": ["withdrawal-syndrome", "compulsive-substance-use", "substance-craving"],
+      "classification_status": "addiction-theory"
+    },
+    {
+      "content_type": "glossary_term",
+      "slug": "binge-drinking",
+      "canonical_term": "الشرب بنهم",
+      "english_name": "Binge Drinking",
+      "aliases": ["نمط الشرب بنهم"],
+      "category_slug": "substance-addiction",
+      "title": "الشرب بنهم: التعريف الكمي والمخاطر والفرق عن اضطراب استخدام الكحول",
+      "excerpt": "الشرب بنهم هو نمط استهلاك يرفع تركيز الكحول في الدم سريعًا إلى مستوى مرتفع؛ تستخدم NIAAA حدودًا كمية تقريبية للبالغين لأغراض التثقيف والبحث. هو نمط خطر وليس تشخيص AUD بمفرده.",
+      "definition": "الشرب بنهم هو نمط شرب كمية من الكحول خلال فترة قصيرة تكفي عادةً لرفع تركيز الكحول في الدم إلى مستوى محدد. تستخدم الجهات البحثية والصحية تعريفات تشغيلية متقاربة لكنها ليست متطابقة في كل بلد.",
+      "presentation_or_use": "قد يحدث في مناسبة واحدة أو يتكرر، ويرتبط بارتفاع خطر الإصابات والتسمم والحوادث والعنف ومشكلات صحية أخرى. لا يلزم أن يكون الشخص يشرب يوميًا حتى يتعرض لمخاطر هذا النمط.",
+      "mechanisms_or_context": "سرعة الشرب والكمية وحجم الجسم والجنس البيولوجي والطعام والأدوية تؤثر في تركيز الكحول وتأثيره. لذلك لا يمكن ضمان الأمان اعتمادًا على الشعور الذاتي بالقدرة على التحمل.",
+      "assessment_or_practice": "يُسأل عن عدد المشروبات القياسية والمدة والتكرار والسياق والحوادث أو فقد الذاكرة، مع فحص بقية أعراض AUD. التعريفات الكمية يجب أن تُذكر مع مصدرها لأنها قد تختلف بين الأنظمة الصحية.",
+      "boundary": "الشرب بنهم ليس تشخيص اضطراب استخدام الكحول، كما أن عدم تجاوز حد تعريفي لا يعني انعدام الضرر. توجد مخاطر صحية حتى عند مستويات أقل لبعض الأشخاص والسياقات.",
+      "faq": [
+        {"question": "هل الشرب بنهم يعني أن الشخص لديه AUD؟", "answer": "ليس تلقائيًا. هو نمط يزيد الخطر، بينما AUD تشخيص يعتمد على مجموعة أعراض وتأثيرات خلال فترة زمنية."},
+        {"question": "لماذا نستخدم مفهوم المشروب القياسي؟", "answer": "لأن أحجام البيرة والنبيذ والمشروبات الروحية تختلف، والمشروب القياسي يحولها إلى كمية تقريبية مشتركة من الإيثانول."}
+      ],
+      "references": [
+        {"title": "Understanding Alcohol Drinking Patterns", "publisher": "National Institute on Alcohol Abuse and Alcoholism", "url": "https://www.niaaa.nih.gov/alcohols-effects-health/alcohol-drinking-patterns"},
+        {"title": "Understanding Binge Drinking", "publisher": "National Institute on Alcohol Abuse and Alcoholism", "url": "https://www.niaaa.nih.gov/publications/brochures-and-fact-sheets/binge-drinking"}
+      ],
+      "primary_keyword": "الشرب بنهم",
+      "secondary_keywords": ["Binge Drinking بالعربي", "نمط الشرب بنهم", "الإفراط السريع في الكحول"],
+      "semantic_terms": ["الكحول", "المشروب القياسي", "تركيز الكحول في الدم", "AUD"],
+      "related_slugs": ["standard-drink", "hazardous-substance-use"],
+      "classification_status": "risk-pattern"
+    },
+    {
+      "content_type": "glossary_term",
+      "slug": "standard-drink",
+      "canonical_term": "المشروب القياسي",
+      "english_name": "Standard Drink",
+      "aliases": ["المكافئ القياسي للكحول"],
+      "category_slug": "substance-addiction",
+      "title": "المشروب القياسي: لماذا يختلف عن حجم الكأس أو العبوة؟",
+      "excerpt": "المشروب القياسي وحدة تثقيفية تمثل كمية محددة من الإيثانول الخالص لتسهيل مقارنة المشروبات المختلفة. في الولايات المتحدة تعرّفه NIAAA بنحو 14 غرامًا من الكحول الخالص، وتختلف الوحدات دوليًا.",
+      "definition": "المشروب القياسي هو وحدة مرجعية تحسب كمية الكحول الخالص بدل حجم الشراب نفسه. تحدد كل دولة أو جهة كمية الإيثانول الخاصة بوحدتها، لذلك يجب ذكر المعيار المستخدم عند تفسير الأرقام.",
+      "presentation_or_use": "قد تحتوي عبوة بيرة قوية أو كأس نبيذ كبير أو كوكتيل على أكثر من مشروب قياسي رغم أنها تبدو حصة واحدة. تساعد الوحدة في تقدير الاستهلاك ومقارنة أنماط الشرب والإرشادات.",
+      "mechanisms_or_context": "تركيز الكحول وحجم الحصة يحددان كمية الإيثانول الفعلية، لذلك لا يكفي عد الكؤوس. اختلاف التعريفات الدولية يعني أن رقم المشروبات القياسية لا ينتقل بين البلدان من دون معرفة الغرامات المعتمدة.",
+      "assessment_or_practice": "يُسأل عن نوع المشروب وحجمه ونسبة الكحول ويُحوّل إلى وحدة الجهة المحلية المناسبة. في التثقيف يجب تجنب افتراض أن كل زجاجة أو كأس يساوي وحدة واحدة.",
+      "boundary": "المشروب القياسي ليس حدًا آمنًا أو توصية للشرب، بل أداة قياس. كما أن NIAAA تستخدم تعريفًا أمريكيًا بنحو 14 غرامًا من الكحول الخالص، وقد تختلف البلدان الأخرى.",
+      "faq": [
+        {"question": "هل كل كأس يساوي مشروبًا قياسيًا واحدًا؟", "answer": "لا. يعتمد ذلك على الحجم ونسبة الكحول، وقد تحتوي حصة واحدة على أقل أو أكثر من وحدة قياسية."},
+        {"question": "هل تعريف المشروب القياسي واحد عالميًا؟", "answer": "لا. تختلف كمية الكحول الخالص التي تمثل الوحدة بين الدول والجهات، لذلك يجب ذكر النظام المستخدم."}
+      ],
+      "references": [
+        {"title": "What Is A Standard Drink?", "publisher": "National Institute on Alcohol Abuse and Alcoholism", "url": "https://www.niaaa.nih.gov/alcohols-effects-health/what-standard-drink"},
+        {"title": "Understanding Alcohol Drinking Patterns", "publisher": "National Institute on Alcohol Abuse and Alcoholism", "url": "https://www.niaaa.nih.gov/alcohols-effects-health/alcohol-drinking-patterns"}
+      ],
+      "primary_keyword": "المشروب القياسي",
+      "secondary_keywords": ["Standard Drink بالعربي", "14 غرام كحول", "وحدة الكحول القياسية"],
+      "semantic_terms": ["الكحول", "الإيثانول", "الشرب بنهم", "قياس الاستهلاك"],
+      "related_slugs": ["binge-drinking"],
+      "classification_status": "measurement-concept"
+    }
+  ]
+}
