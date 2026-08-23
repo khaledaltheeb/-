@@ -8,6 +8,7 @@ if (!url || !key) {
   process.exit(1);
 }
 
+// No-loss baseline captured after the 2026-08-23 search and taxonomy repair round.
 const baseline = {
   publicSectors: 9,
   publicCategories: 126,
