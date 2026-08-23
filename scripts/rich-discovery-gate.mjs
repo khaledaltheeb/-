@@ -28,7 +28,7 @@ async function fetchText(url) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const response = await fetch(url, { redirect: 'follow', signal: controller.signal, headers: { 'user-agent': 'Rawafid-Rich-Discovery-Gate/1.1' } });
+    const response = await fetch(url, { redirect: 'follow', signal: controller.signal, headers: { 'user-agent': 'Rawafid-Rich-Discovery-Gate/1.2' } });
     return { response, text: await response.text() };
   } finally { clearTimeout(timer); }
 }
@@ -39,6 +39,10 @@ async function discoverUrls() {
   const urls = [];
   for (const map of maps) {
     const parsed = new URL(map, canonicalOrigin);
+    if (parsed.origin !== canonicalOrigin) {
+      failures.push(`${map}: sitemap child leaves canonical origin`);
+      continue;
+    }
     const result = await fetchText(`${base}${parsed.pathname}${parsed.search}`);
     if (!result.response.ok || !/<urlset\b/i.test(result.text)) {
       failures.push(`${map}: invalid sitemap child`);
@@ -118,15 +122,20 @@ async function audit(url) {
   if (attr(htmlTag, 'dir').toLowerCase() !== 'rtl') failures.push(`${url}: html dir is not rtl`);
 
   const canonical = linkHref(html, 'canonical');
+  if (!canonical) failures.push(`${url}: missing canonical`);
   if (canonical) {
     try {
       const parsed = new URL(canonical, canonicalOrigin);
-      if (parsed.origin !== canonicalOrigin) failures.push(`${url}: canonical leaves Rawafid origin (${canonical})`);
+      if (parsed.origin !== canonicalOrigin) failures.push(`${url}: canonical leaves production origin (${canonical})`);
+      if (parsed.hostname.endsWith('.workers.dev')) failures.push(`${url}: canonical points to temporary workers.dev host (${canonical})`);
     } catch { failures.push(`${url}: invalid canonical (${canonical})`); }
   }
 
   const head = (html.match(/<head\b[^>]*>([\s\S]*?)<\/head>/i) || [,''])[1];
-  if (/healthrenewal\.org/i.test(head)) failures.push(`${url}: legacy healthrenewal.org leaked into <head>`);
+  if (/\.workers\.dev/i.test(head)) failures.push(`${url}: temporary workers.dev host leaked into <head>`);
+  if (canonicalOrigin === 'https://healthrenewal.org' && !/healthrenewal\.org/i.test(head)) {
+    failures.push(`${url}: production head does not reference healthrenewal.org`);
+  }
 
   const ogImage = metaContent(html, 'property', 'og:image');
   const twitterImage = metaContent(html, 'name', 'twitter:image');
@@ -134,6 +143,12 @@ async function audit(url) {
   if (!ogImage) failures.push(`${url}: missing og:image`);
   if (!twitterImage) failures.push(`${url}: missing twitter:image`);
   if (!ogSiteName) failures.push(`${url}: missing og:site_name`);
+  for (const imageUrl of [ogImage, twitterImage].filter(Boolean)) {
+    try {
+      const parsed = new URL(imageUrl, canonicalOrigin);
+      if (parsed.hostname.endsWith('.workers.dev')) failures.push(`${url}: social image leaks workers.dev (${imageUrl})`);
+    } catch { failures.push(`${url}: invalid social image URL (${imageUrl})`); }
+  }
 
   const robots = `${metaContent(html, 'name', 'robots')},${metaContent(html, 'name', 'googlebot')}`.toLowerCase().replace(/\s+/g, '');
   if (robots.includes('noindex')) failures.push(`${url}: sitemap URL renders noindex`);
@@ -180,13 +195,14 @@ async function verifyDiscoveryFiles() {
     for (const crawler of ['Googlebot','Bingbot','OAI-SearchBot','Claude-SearchBot','PerplexityBot']) {
       if (!text.includes(crawler)) failures.push(`/robots.txt: missing explicit ${crawler} rule`);
     }
+    if (/\.workers\.dev/i.test(text) && canonicalOrigin === 'https://healthrenewal.org') failures.push('/robots.txt: production robots leaks workers.dev');
   } catch {}
 }
 async function main() {
   await verifyDiscoveryFiles();
   const urls = await discoverUrls();
   if (!urls.length) throw new Error('No sitemap URLs discovered');
-  console.log(`Rich discovery gate: auditing ${urls.length} indexable URLs`);
+  console.log(`Rich discovery gate: auditing ${urls.length} indexable URLs for ${canonicalOrigin}`);
   await runPool(urls, audit);
   console.log(`Rich discovery gate summary: pages=${urls.length}, failures=${failures.length}`);
   if (failures.length) {
