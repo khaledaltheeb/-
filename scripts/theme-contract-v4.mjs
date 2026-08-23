@@ -83,7 +83,14 @@ if (!footer.includes("style={{ display: 'block', padding: 0 }}")) fail('institut
 for (const token of ['position:fixed!important', 'max-height:min(76dvh,680px)!important', 'overflow-y:auto!important']) {
   if (!megaNav.includes(token)) fail(`mega navigation viewport guard missing ${token}`);
 }
-if (!layout.includes('<body id="top">') || !layout.includes('?v=6')) fail('root layout must expose the top target and V6 PWA identity');
+
+if (!layout.includes('<body id="top">')) fail('root layout must expose the top target');
+for (const token of ["url: '/icons/rawafid-app.svg'", "url: '/pwa-icon-192'", "url: '/pwa-icon-180'"]) {
+  if (!layout.includes(token)) fail(`root layout must expose stable crawlable PWA identity URL ${token}`);
+}
+if (/\/icons\/rawafid-app\.svg\?v=|\/pwa-icon-(?:180|192)\?v=/.test(layout)) {
+  fail('root layout favicon and browser icon URLs must stay stable without cache-busting query strings');
+}
 if (!manifest.includes('?v=6')) fail('PWA manifest must use V6 icon identity');
 if (!serviceWorker.includes('rawafid-shell-v6') || !serviceWorker.includes('event.waitUntil(cacheWrite')) fail('service worker must use the V6 cache and durable asset writes');
 
