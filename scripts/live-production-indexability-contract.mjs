@@ -45,6 +45,20 @@ function documentTitle(html) {
   return html.match(/<title\b[^>]*>([\s\S]*?)<\/title>/i)?.[1]?.replace(/\s+/g, ' ').trim() || '';
 }
 
+function homepageCanonicalIsValid(canonical) {
+  if (!canonical) return false;
+  try {
+    const url = new URL(canonical, ORIGIN);
+    return url.protocol === 'https:'
+      && url.hostname === EXPECTED_HOST
+      && (url.pathname === '/' || url.pathname === '')
+      && !url.search
+      && !url.hash;
+  } catch {
+    return false;
+  }
+}
+
 async function fetchText(url, { attempts = 3 } = {}) {
   let lastError;
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
@@ -107,19 +121,21 @@ async function verifyHomepageUrl(url, label) {
   if (response.url && new URL(response.url).hostname !== EXPECTED_HOST) {
     throw new Error(`${label} homepage redirected away from ${EXPECTED_HOST}: ${response.url}`);
   }
+
   const headerRobots = response.headers.get('x-robots-tag') || '';
+  const robots = metaDirectives(text, 'robots');
+  const googlebot = metaDirectives(text, 'googlebot');
   if (/\bnoindex\b/i.test(headerRobots)) throw new Error(`${label} homepage X-Robots-Tag contains noindex: ${headerRobots}`);
-  for (const name of ['robots', 'googlebot']) {
-    if (metaDirectives(text, name).some((value) => /\bnoindex\b/i.test(value))) {
-      throw new Error(`${label} homepage meta ${name} contains noindex`);
-    }
-  }
+  if (robots.some((value) => /\bnoindex\b/i.test(value))) throw new Error(`${label} homepage meta robots contains noindex`);
+  if (googlebot.some((value) => /\bnoindex\b/i.test(value))) throw new Error(`${label} homepage meta googlebot contains noindex`);
+
   const canonical = canonicalHref(text);
-  if (canonical !== `${ORIGIN}/`) throw new Error(`${label} homepage canonical is ${canonical || 'missing'}, expected ${ORIGIN}/`);
+  if (!homepageCanonicalIsValid(canonical)) throw new Error(`${label} homepage canonical is ${canonical || 'missing'}, expected the production root ${ORIGIN}`);
   if (/workers\.dev|rawafid-platform-staging/i.test(text)) throw new Error(`${label} homepage leaks the staging hostname`);
+
   const title = documentTitle(text);
   if (title !== EXPECTED_HOME_TITLE) throw new Error(`${label} homepage title is ${JSON.stringify(title)}, expected ${JSON.stringify(EXPECTED_HOME_TITLE)}`);
-  console.log(`${label} homepage OK: HTTP ${response.status}; title=${JSON.stringify(title)}; canonical=${canonical}; no noindex.`);
+  console.log(`${label} homepage OK: HTTP ${response.status}; title=${JSON.stringify(title)}; canonical=${canonical}; meta robots=${JSON.stringify(robots)}; meta googlebot=${JSON.stringify(googlebot)}; X-Robots-Tag=${JSON.stringify(headerRobots || '(none)')}.`);
 }
 
 async function verifyHomepage() {
