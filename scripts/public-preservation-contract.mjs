@@ -11,7 +11,7 @@ if (!url || !key) {
 const baseline = {
   publicSectors: 9,
   publicCategories: 126,
-  publishedContent: 3660,
+  publishedContent: 3709,
 };
 
 const requiredSectorSlugs = [
@@ -27,11 +27,7 @@ const requiredSectorSlugs = [
 ];
 
 const supabase = createClient(url, key, {
-  auth: {
-    persistSession: false,
-    autoRefreshToken: false,
-    detectSessionInUrl: false,
-  },
+  auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
 });
 
 const now = new Date().toISOString();
