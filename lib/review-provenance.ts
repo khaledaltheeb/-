@@ -12,21 +12,18 @@ function nonEmptyString(value: unknown) {
 
 export function contentReviewProvenance(record: ReviewRecord) {
   const recordedReviewDate = nonEmptyString(record.last_reviewed_at);
-  const hasRecordedReview = Boolean(recordedReviewDate);
-  const lastReviewedAt = hasRecordedReview ? recordedReviewDate : null;
 
-  // Rawafid review provenance is institutional. Historical reviewer labels in the
-  // database are variants of the same editorial/scientific team, not individual people.
-  // Keep one stable public entity rather than manufacturing Person entities.
-  const reviewerName = hasRecordedReview ? RAWAFID_REVIEW_TEAM : null;
+  // Rawafid uses one institutional review entity for published knowledge content.
+  // A missing historical review timestamp must not erase that entity, but we also
+  // never manufacture a lastReviewed date: the date is emitted only when stored.
+  const lastReviewedAt = recordedReviewDate;
+  const reviewerName = RAWAFID_REVIEW_TEAM;
   const reviewerCredentials = null;
-  const reviewerType = hasRecordedReview ? 'Organization' : null;
-  const reviewedBySchema = hasRecordedReview
-    ? {
-        '@type': 'Organization',
-        name: RAWAFID_REVIEW_TEAM,
-      }
-    : undefined;
+  const reviewerType = 'Organization' as const;
+  const reviewedBySchema = {
+    '@type': 'Organization',
+    name: RAWAFID_REVIEW_TEAM,
+  } as const;
 
   return {
     lastReviewedAt,
