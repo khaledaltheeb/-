@@ -5,6 +5,10 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/emergency-production-indexability.yml'
+      - 'lib/daily-tools-catalog.ts'
+      - 'app/daily-tools/**'
+      - 'app/sitemaps/daily-tools.xml/route.ts'
+      - 'scripts/live-production-indexability-contract.mjs'
   workflow_dispatch:
 
 permissions:
