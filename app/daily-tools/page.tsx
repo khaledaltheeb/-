@@ -8,6 +8,7 @@ import { deriveDailyToolDirectory } from '@/lib/daily-tools-preserved';
 import { DAILY_TOOLS_HUB_ROUTE, dailyToolMetadata, getDailyToolPage } from '@/lib/daily-tools-catalog';
 
 export const dynamic = 'force-static';
+export const revalidate = false;
 const route = DAILY_TOOLS_HUB_ROUTE;
 
 export function generateMetadata(): Metadata {
