@@ -96,7 +96,7 @@ function getCognitiveGeneratedRecord(slug: string): ContentRecord | null {
     secondary_keywords: page.secondaryKeywords,
     semantic_terms: page.semanticTerms,
     search_intent: page.searchIntent,
-    author_display_name: 'فريق روافد التحريري',
+    author_display_name: null,
     reviewer_display_name: null,
     reviewer_credentials: null,
     last_reviewed_at: null,
@@ -136,7 +136,7 @@ async function getExpandedGeneratedRecord(slug: string): Promise<ContentRecord |
     secondary_keywords: page.secondary_keywords,
     semantic_terms: page.semantic_terms,
     search_intent: page.search_intent,
-    author_display_name: page.author_display_name,
+    author_display_name: null,
     reviewer_display_name: page.reviewer_display_name,
     reviewer_credentials: page.reviewer_credentials,
     last_reviewed_at: page.last_reviewed_at,
@@ -295,7 +295,6 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     keywords,
     publishedTime: record.published_at,
     modifiedTime: record.updated_at,
-    authors: record.generated_program ? undefined : record.author_display_name ? [{ name: record.author_display_name }] : undefined,
   });
 }
 
@@ -341,14 +340,10 @@ export default async function PublishedContentPage({ params }: { params: Params 
     datePublished: record.published_at || undefined,
     dateModified: record.updated_at || undefined,
     lastReviewed: review.lastReviewedAt || undefined,
-    author: record.generated_program
-      ? { '@id': `${SITE_URL}/#organization` }
-      : record.author_display_name
-        ? { '@type': 'Person', name: record.author_display_name }
-        : { '@id': `${SITE_URL}/#organization` },
+    author: { '@id': `${SITE_URL}/#organization` },
     reviewedBy: review.reviewedBySchema,
     publisher: { '@id': `${SITE_URL}/#organization` },
-    image: record.featured_image_url || undefined,
+    image: record.featured_image_url || `${SITE_URL}/seo-card`,
     keywords: [record.primary_keyword, ...record.secondary_keywords, ...record.semantic_terms.slice(0, 8)]
       .filter((item): item is string => typeof item === 'string' && item.length > 0)
       .join(', '),
@@ -425,8 +420,8 @@ export default async function PublishedContentPage({ params }: { params: Params 
           <h1>{record.title}</h1>
           {record.excerpt && <p>{record.excerpt}</p>}
           <div className="article-meta">
-            {record.author_display_name && <span>إعداد: {record.author_display_name}</span>}
-            {review.reviewerName && <span>مراجعة: {review.reviewerName}{review.reviewerCredentials ? ` — ${review.reviewerCredentials}` : ''}</span>}
+            <span>إعداد: منصة روافد</span>
+            {review.reviewerName && <span>مراجعة: {review.reviewerName}</span>}
             {record.published_at && <span>نُشر {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(record.published_at))}</span>}
             {review.lastReviewedAt && <span>آخر مراجعة {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(review.lastReviewedAt))}</span>}
           </div>
