@@ -28,9 +28,9 @@ const DOMAIN_TERMS: Record<Locale, DomainTerms> = {
   ar: {
     legal: ['حقوق المستخدم','مسؤوليات المستخدم','الاستخدام المقبول','حماية الحساب','حماية البيانات','خصوصية المستخدم','الموافقة','إدارة الحساب','التحقق من الهوية','المحتوى المنشور','الملفات المهنية','سياسات المنصة','شروط الخدمة','حدود المسؤولية','تحديث السياسات','أمن المعلومات','الشفافية','الامتثال','الوصولية','حقوق المحتوى','إدارة الصلاحيات','تعليق الحساب','حذف الحساب','حماية المنصة','التواصل والدعم'],
     oncology: ['سرطان الأطفال','أورام الأطفال','طب أورام الأطفال','الأعراض والعلامات','التشخيص','الفحوصات','العلاج','العلاج الكيميائي','العلاج الإشعاعي','الجراحة','العلاج الموجه','العلاج المناعي','الرعاية الداعمة','الآثار الجانبية','مكافحة العدوى','التغذية','الألم','الدعم النفسي','دعم الأسرة','الدراسة أثناء العلاج','المتابعة','النجاة من السرطان','التجارب السريرية','البروتوكولات العلاجية','الرعاية التلطيفية'],
-    'mental-health': ['الصحة النفسية','الصحة العقلية','الأعراض','الأسباب','عوامل الخطر','التقييم النفسي','التشخيص','العلاج النفسي','العلاج الدوائي','الدعم النفسي','الوقاية','المهارات اليومية','التكيف','إدارة الضغوط','القلق','الاكتئاب','الصدمات النفسية','النوم','العلاقات','جودة الحياة','التعافي','الانتكاس','متى أطلب المساعدة','المختص النفسي','خطة الأمان'],
+    'mental-health': ['الصحة النفسية','الصحة العقلية','الأعراض','الأسباب','عوامل الخطر','التقييم النفسي','التشخيص','العلاج النفسي','العلاج الدوائي','الدعم النفسي','الوقاية','المهارات اليومية','التكيف','إدارة الضغوط','القلق','الاكتئاب','الصدمات النفسية','النوم','العلاقات','جودة الحياة','التعافي','منع الانتكاس','متى أطلب المساعدة','المختص النفسي','خطة الأمان'],
     education: ['التربية الخاصة','التربية الدامجة','ذوو الاحتياجات الخاصة','اضطراب طيف التوحد','صعوبات التعلم','الإعاقة','التقييم التربوي','الخطة التربوية الفردية','التدخل المبكر','التكييفات الصفية','التعديلات التعليمية','التصميم الشامل للتعلم','السلوك','التواصل','المهارات الأكاديمية','المهارات الاجتماعية','الاستقلالية','دعم الأسرة','دعم المعلم','المدرسة الدامجة','التقنيات المساندة','الوصول التعليمي','الانتقال','المشاركة','التقييم الوظيفي'],
-    addiction: ['الإدمان','التعافي','اضطرابات استخدام المواد','الاعتماد','الانسحاب','الرغبة الملحة','عوامل الخطر','التقييم','العلاج','العلاج النفسي','الدعم الاجتماعي','منع الانتكاس','المحفزات','خطة التعافي','الحد من الضرر','الدعم الأسري','الصحة النفسية','الاضطرابات المصاحبة','مجموعات الدعم','خدمات العلاج','التعافي طويل المدى','مهارات المواجهة','الأزمات','الإحالة للمختص','المتابعة'],
+    addiction: ['الإدمان','اضطرابات استخدام المواد','تعاطي المواد','الاعتماد','الانسحاب','الرغبة الملحة','عوامل الخطر','التقييم','العلاج','العلاج النفسي','الدعم الاجتماعي','منع الانتكاس','المحفزات','خطة التعافي','الحد من الضرر','الدعم الأسري','الصحة النفسية','الاضطرابات المصاحبة','مجموعات الدعم','خدمات العلاج','التعافي طويل المدى','مهارات المواجهة','الأزمات','الإحالة للمختص','المتابعة'],
     directory: ['مختصون','مراكز','خدمات','دليل مهني','التخصص','المؤهلات','التحقق المهني','الخبرة','مجال الممارسة','نوع الخدمة','الفئة العمرية','المدينة','الدولة','التواصل','الحجز','الخدمة الحضورية','الخدمة عن بعد','معلومات مهنية','اختيار المختص','اختيار المركز','الإحالة','الوصول للخدمة','ملف مهني','معايير الثقة','توثيق البيانات'],
     tools: ['أداة معرفية','تقييم إرشادي','مقياس','استبيان','حاسبة','نتيجة','تفسير النتيجة','طريقة الاستخدام','حدود الأداة','الخصوصية','الدقة','الموثوقية','التحقق','خطوات عملية','متابعة التقدم','مؤشرات','ملاحظات','سجل','تقرير','رسم بياني','مقارنة','قرار مستنير','إرشاد','دعم','إحالة للمختص'],
     general: ['تعريف','مفهوم','أساسيات','مبادئ','مصطلحات','موضوعات ذات صلة','معلومات موثوقة','محتوى عربي','دليل معرفي','دليل عملي','شرح مفصل','شرح مبسط','أدلة علمية','مصادر موثوقة','مراجع','دراسات','أبحاث','كتب','مقالات','أسئلة شائعة','إرشادات','توصيات','ممارسات','أمثلة','تطبيقات'],
@@ -40,7 +40,7 @@ const DOMAIN_TERMS: Record<Locale, DomainTerms> = {
     oncology: ['pediatric cancer','pediatric oncology','childhood cancer','signs and symptoms','diagnosis','diagnostic tests','treatment','chemotherapy','radiation therapy','surgery','targeted therapy','immunotherapy','supportive care','treatment side effects','infection prevention','nutrition','pain management','psychological support','family support','school during treatment','follow-up care','cancer survivorship','clinical trials','treatment protocols','palliative care'],
     'mental-health': ['mental health','mental wellbeing','symptoms','causes','risk factors','psychological assessment','diagnosis','psychotherapy','medication','psychological support','prevention','daily coping skills','coping strategies','stress management','anxiety','depression','psychological trauma','sleep','relationships','quality of life','recovery','relapse prevention','when to seek help','mental health professional','safety planning'],
     education: ['special education','inclusive education','special educational needs','autism spectrum disorder','learning disabilities','disability','educational assessment','individualized education plan','early intervention','classroom accommodations','curriculum modifications','universal design for learning','behavior support','communication','academic skills','social skills','independence','family support','teacher support','inclusive school','assistive technology','educational access','transition planning','participation','functional assessment'],
-    addiction: ['addiction','recovery','substance use disorders','dependence','withdrawal','craving','risk factors','assessment','treatment','psychotherapy','social support','relapse prevention','triggers','recovery plan','harm reduction','family support','mental health','co-occurring conditions','support groups','treatment services','long-term recovery','coping skills','crisis support','professional referral','follow-up'],
+    addiction: ['addiction','substance use disorders','substance use','dependence','withdrawal','craving','risk factors','assessment','treatment','psychotherapy','social support','relapse prevention','triggers','recovery plan','harm reduction','family support','mental health','co-occurring conditions','support groups','treatment services','long-term recovery','coping skills','crisis support','professional referral','follow-up'],
     directory: ['specialists','centers','services','professional directory','specialty','qualifications','professional verification','experience','scope of practice','service type','age group','city','country','contact information','booking','in-person service','remote service','professional information','choosing a specialist','choosing a center','referral','access to care','professional profile','trust criteria','verified information'],
     tools: ['knowledge tool','guided assessment','scale','questionnaire','calculator','result','result interpretation','how to use','tool limitations','privacy','accuracy','reliability','validation','practical steps','progress tracking','indicators','notes','history','report','chart','comparison','informed decision','guidance','support','professional referral'],
     general: ['definition','meaning','fundamentals','principles','terminology','related topics','trusted information','knowledge guide','practical guide','detailed explanation','plain-language explanation','scientific evidence','trusted sources','references','studies','research','books','articles','frequently asked questions','guidance','recommendations','practices','examples','applications','awareness'],
@@ -50,7 +50,7 @@ const DOMAIN_TERMS: Record<Locale, DomainTerms> = {
     oncology: ['cáncer infantil','oncología pediátrica','cáncer pediátrico','signos y síntomas','diagnóstico','pruebas diagnósticas','tratamiento','quimioterapia','radioterapia','cirugía','terapia dirigida','inmunoterapia','cuidados de apoyo','efectos secundarios','prevención de infecciones','nutrición','manejo del dolor','apoyo psicológico','apoyo familiar','escuela durante el tratamiento','seguimiento','supervivencia al cáncer','ensayos clínicos','protocolos de tratamiento','cuidados paliativos'],
     'mental-health': ['salud mental','bienestar mental','síntomas','causas','factores de riesgo','evaluación psicológica','diagnóstico','psicoterapia','medicación','apoyo psicológico','prevención','habilidades de afrontamiento','estrategias de afrontamiento','manejo del estrés','ansiedad','depresión','trauma psicológico','sueño','relaciones','calidad de vida','recuperación','prevención de recaídas','cuándo buscar ayuda','profesional de salud mental','plan de seguridad'],
     education: ['educación especial','educación inclusiva','necesidades educativas especiales','trastorno del espectro autista','dificultades de aprendizaje','discapacidad','evaluación educativa','plan educativo individualizado','intervención temprana','adaptaciones en el aula','modificaciones curriculares','diseño universal para el aprendizaje','apoyo conductual','comunicación','habilidades académicas','habilidades sociales','independencia','apoyo familiar','apoyo docente','escuela inclusiva','tecnología de apoyo','acceso educativo','planificación de transición','participación','evaluación funcional'],
-    addiction: ['adicción','recuperación','trastornos por consumo de sustancias','dependencia','abstinencia','deseo intenso','factores de riesgo','evaluación','tratamiento','psicoterapia','apoyo social','prevención de recaídas','desencadenantes','plan de recuperación','reducción de daños','apoyo familiar','salud mental','trastornos concurrentes','grupos de apoyo','servicios de tratamiento','recuperación a largo plazo','habilidades de afrontamiento','apoyo en crisis','derivación profesional','seguimiento'],
+    addiction: ['adicción','trastornos por consumo de sustancias','consumo de sustancias','dependencia','abstinencia','deseo intenso','factores de riesgo','evaluación','tratamiento','psicoterapia','apoyo social','prevención de recaídas','desencadenantes','plan de recuperación','reducción de daños','apoyo familiar','salud mental','trastornos concurrentes','grupos de apoyo','servicios de tratamiento','recuperación a largo plazo','habilidades de afrontamiento','apoyo en crisis','derivación profesional','seguimiento'],
     directory: ['especialistas','centros','servicios','directorio profesional','especialidad','cualificaciones','verificación profesional','experiencia','ámbito de práctica','tipo de servicio','grupo de edad','ciudad','país','información de contacto','reserva','servicio presencial','servicio remoto','información profesional','elegir especialista','elegir centro','derivación','acceso a la atención','perfil profesional','criterios de confianza','información verificada'],
     tools: ['herramienta de conocimiento','evaluación guiada','escala','cuestionario','calculadora','resultado','interpretación del resultado','cómo usar','límites de la herramienta','privacidad','precisión','fiabilidad','validación','pasos prácticos','seguimiento del progreso','indicadores','notas','historial','informe','gráfico','comparación','decisión informada','orientación','apoyo','derivación profesional'],
     general: ['definición','significado','fundamentos','principios','terminología','temas relacionados','información confiable','guía de conocimiento','guía práctica','explicación detallada','explicación sencilla','evidencia científica','fuentes confiables','referencias','estudios','investigación','libros','artículos','preguntas frecuentes','orientación','recomendaciones','prácticas','ejemplos','aplicaciones','concienciación'],
@@ -112,14 +112,28 @@ function localeFor(path: string): Locale {
 }
 
 function domainFor(input: SemanticSeoInput): Domain {
-  const text = [input.path,input.title,input.description || '',...(input.keywords || []),...(input.relatedTerms || [])].join(' ').toLowerCase();
-  if (/\/terms|\/privacy|\/disclaimer|\/accessibility|editorial-policy|medical-review-policy|\/citation|\/trust|سياس|خصوص|شروط|إخلاء|وصولية|legal|privacy|terms|disclaimer/.test(text)) return 'legal';
-  if (/pediatric-oncology|oncolog|cancer|سرطان|أورام|لوكيميا|ابيضاض/.test(text)) return 'oncology';
-  if (/addiction|recovery|substance|إدمان|التعافي|تعاطي|انسحاب/.test(text)) return 'addiction';
-  if (/special-needs|inclusive|education|autism|learning-disab|school|تربية|تعليم|توحد|صعوبات التعلم|احتياجات خاصة|إعاقة|دمج/.test(text)) return 'education';
-  if (/mental-health|psych|anxiety|depress|trauma|نفسي|عقلي|قلق|اكتئاب|صدمة|اضطراب/.test(text)) return 'mental-health';
-  if (/specialists|centers|directory|مختص|مركز|دليل مهني/.test(text)) return 'directory';
-  if (/tools|assessment|calculator|cognitive-lab|questionnaire|scale|checklist|أداة|تقييم|مقياس|استبيان|حاسبة|مختبر/.test(text)) return 'tools';
+  const path = input.path.toLowerCase();
+  const text = [input.title,input.description || '',...(input.keywords || []),...(input.relatedTerms || [])].join(' ').toLowerCase();
+
+  // Route families are the strongest signal. This prevents a generic word such as
+  // "recovery" on a mental-health page from incorrectly turning the page into addiction.
+  if (/\/(?:terms|privacy|disclaimer|accessibility|editorial-policy|medical-review-policy|citation|trust)(?:\/|$)/.test(path)) return 'legal';
+  if (/(?:pediatric-oncology|oncology|childhood-cancer|cancer)/.test(path)) return 'oncology';
+  if (/\/(?:addiction|substance-use)(?:\/|-|$)/.test(path) || /addiction-recovery/.test(path)) return 'addiction';
+  if (/(?:special-needs|inclusive-education|education|autism|learning-disab|schools?)/.test(path)) return 'education';
+  if (/(?:mental-health|psychology|psychiatry|anxiety|depression|trauma)/.test(path)) return 'mental-health';
+  if (/\/(?:specialists|centers|directory)(?:\/|$)/.test(path)) return 'directory';
+  if (/(?:\/tools(?:\/|$)|assessment|calculator|cognitive-lab|questionnaire|scale|checklist)/.test(path)) return 'tools';
+
+  // Content signals intentionally exclude generic recovery/التعافي/recuperación from the
+  // addiction detector because those concepts are also legitimate in mental-health care.
+  if (/سياس|خصوص|شروط|إخلاء|وصولية|legal|privacy|terms|disclaimer/.test(text)) return 'legal';
+  if (/oncolog|cancer|سرطان|أورام|لوكيميا|ابيضاض|cáncer|oncología/.test(text)) return 'oncology';
+  if (/addiction|substance use|substance-use|dependence|withdrawal|إدمان|تعاطي|استخدام المواد|انسحاب|adicción|consumo de sustancias|abstinencia/.test(text)) return 'addiction';
+  if (/special education|inclusive education|autism|learning disab|school|تربية|تعليم|توحد|صعوبات التعلم|احتياجات خاصة|إعاقة|دمج|educación especial|educación inclusiva|autismo/.test(text)) return 'education';
+  if (/mental health|mental wellbeing|psycholog|psychiatr|anxiety|depress|trauma|الصحة النفسية|الصحة العقلية|نفسي|قلق|اكتئاب|صدمة|salud mental|ansiedad|depresión|trauma/.test(text)) return 'mental-health';
+  if (/specialist|professional directory|center|مختص|مركز|دليل مهني|especialista|directorio profesional|centro/.test(text)) return 'directory';
+  if (/knowledge tool|guided assessment|calculator|questionnaire|checklist|أداة|تقييم إرشادي|مقياس|استبيان|حاسبة|مختبر|herramienta|evaluación guiada|cuestionario|calculadora/.test(text)) return 'tools';
   return 'general';
 }
 
@@ -179,7 +193,6 @@ function buildTopicKeywords(input: SemanticSeoInput, locale: Locale, domain: Dom
   for (const value of GENERIC_TERMS[locale]) add(value);
   for (const value of domainTerms) add(`${topic} ${value}`);
   for (const value of GENERIC_TERMS[locale]) add(`${topic} ${value}`);
-
   return out.slice(0, SEO_TOPIC_KEYWORD_TARGET);
 }
 
@@ -187,7 +200,8 @@ function buildSearchIntents(input: SemanticSeoInput, locale: Locale, domain: Dom
   const out: string[] = [];
   const seen = new Set(occupied.map((value) => key(value, locale)));
   const add = (value: string) => addUnique(out, seen, value, locale, SEO_SEARCH_INTENT_TARGET);
-  for (const value of input.searchIntents || []) add(value);
+  const ensureTopic = (value: string) => key(value, locale).includes(key(topic, locale)) ? value : `${value} ${topic}`;
+  for (const value of input.searchIntents || []) add(ensureTopic(value));
   for (const frame of DOMAIN_INTENT_FRAMES[locale][domain] || []) add(frame.replaceAll('{topic}', topic));
   for (const frame of GENERIC_INTENT_FRAMES[locale]) add(frame.replaceAll('{topic}', topic));
   return out.slice(0, SEO_SEARCH_INTENT_TARGET);
