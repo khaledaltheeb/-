@@ -8,11 +8,13 @@ if (!url || !key) {
   process.exit(1);
 }
 
-// No-loss baseline captured after the 2026-08-23 search and taxonomy repair round.
+// Monotonic no-loss baseline captured after the 2026-08-24 visibility-preservation guard.
+// These are minimums only: new publishing may increase them, but existing public inventory must not fall below them.
 const baseline = {
   publicSectors: 9,
   publicCategories: 126,
-  publishedContent: 3746,
+  publishedContent: 3752,
+  indexablePublishedContent: 3519,
 };
 
 const requiredSectorSlugs = [
@@ -67,6 +69,7 @@ try {
   const publicSectors = await exactCount('sectors', (query) => query.eq('is_active', true).eq('visibility', 'public'));
   const publicCategories = await exactCount('categories', (query) => query.eq('is_active', true).eq('visibility', 'public'));
   const publishedContent = await exactCount('content', (query) => query.eq('status', 'published').lte('published_at', now));
+  const indexablePublishedContent = await exactCount('content', (query) => query.eq('status', 'published').lte('published_at', now).eq('robots_index', true));
   const sectorRows = await withRetry('public sector list', async () => {
     const result = await supabase.from('sectors').select('slug').eq('is_active', true).eq('visibility', 'public').limit(100);
     if (result.error) throw new Error(`sectors: ${result.error.message}`);
@@ -76,6 +79,7 @@ try {
   if (publicSectors < baseline.publicSectors) fail(`public sectors decreased: ${publicSectors} < ${baseline.publicSectors}`);
   if (publicCategories < baseline.publicCategories) fail(`public categories decreased: ${publicCategories} < ${baseline.publicCategories}`);
   if (publishedContent < baseline.publishedContent) fail(`published content decreased: ${publishedContent} < ${baseline.publishedContent}`);
+  if (indexablePublishedContent < baseline.indexablePublishedContent) fail(`indexable published content decreased: ${indexablePublishedContent} < ${baseline.indexablePublishedContent}`);
 
   const sectorSlugs = new Set(sectorRows.map((row) => row.slug));
   for (const slug of requiredSectorSlugs) {
@@ -111,7 +115,7 @@ try {
     process.exit(1);
   }
 
-  console.log(`Public preservation contract passed: ${publicSectors} sectors, ${publicCategories} categories, ${publishedContent} published pages.`);
+  console.log(`Public preservation contract passed: ${publicSectors} sectors, ${publicCategories} categories, ${publishedContent} published pages, ${indexablePublishedContent} indexable published pages.`);
 } catch (error) {
   console.error(`PUBLIC PRESERVATION CONTRACT FAILED: ${error instanceof Error ? error.message : String(error)}`);
   process.exit(1);
