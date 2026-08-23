@@ -37,7 +37,8 @@ const supabase = createClient(url, key, {
 const now = new Date().toISOString();
 const failures = [];
 const fail = (message) => failures.push(message);
-const RETRY_ATTEMPTS = 3;
+const RETRY_ATTEMPTS = 5;
+const RETRY_BASE_DELAY_MS = 2000;
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -48,7 +49,7 @@ function isTransientSupabaseError(error) {
   const code = String(error.code ?? '').toUpperCase();
   const message = `${error.message ?? ''} ${error.details ?? ''} ${error.hint ?? ''}`.toLowerCase();
   if (code === '57014') return true;
-  return /timeout|timed out|fetch failed|network|connection|econn|socket|429|502|503|504|temporarily unavailable|upstream/.test(message);
+  return /timeout|timed out|fetch failed|network|connection|econn|socket|429|500|502|503|504|temporarily unavailable|upstream/.test(message);
 }
 
 async function withTransientRetry(label, operation) {
@@ -64,7 +65,7 @@ async function withTransientRetry(label, operation) {
       if (!isTransientSupabaseError(error) || attempt === RETRY_ATTEMPTS) throw error;
     }
     console.warn(`PUBLIC PRESERVATION CONTRACT: transient ${label} failure; retry ${attempt}/${RETRY_ATTEMPTS}`);
-    await sleep(300 * attempt);
+    await sleep(RETRY_BASE_DELAY_MS * attempt);
   }
   throw lastError ?? new Error(`${label}: exhausted retries`);
 }
