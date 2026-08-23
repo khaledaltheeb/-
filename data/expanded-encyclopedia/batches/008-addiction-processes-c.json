@@ -1,0 +1,62 @@
+{
+  "batch_id": "expanded-encyclopedia-008-addiction-c-complement",
+  "status": "editorial-source",
+  "records": [
+    {
+      "content_type": "glossary_term",
+      "slug": "cue-induced-craving",
+      "canonical_term": "الاشتهاء المحفز بالمثيرات",
+      "english_name": "Cue-Induced Craving",
+      "aliases": ["اشتهاء المادة بسبب المثيرات"],
+      "category_slug": "substance-addiction",
+      "title": "الاشتهاء المحفز بالمثيرات: كيف تستدعي الإشارات رغبة المادة؟",
+      "excerpt": "الاشتهاء المحفز بالمثيرات هو ارتفاع الرغبة في المادة بعد مواجهة إشارة ارتبطت بها سابقًا، مثل مكان أو شخص أو أداة أو شعور. يمثل استجابة متعلمة وقد يحدث بعد فترات طويلة من التوقف.",
+      "definition": "الاشتهاء المحفز بالمثيرات هو زيادة محددة في الرغبة أو الدافع لاستخدام مادة بعد التعرض لإشارة خارجية أو داخلية ارتبطت بتاريخ الاستخدام. هو حالة متغيرة وليس صفة ثابتة.",
+      "presentation_or_use": "قد يكون الشخص مستقرًا ثم يواجه رائحة أو حيًا أو محادثة أو ضغطًا مألوفًا فيرتفع الاشتهاء بسرعة. قد ينخفض لاحقًا دون استخدام، وتختلف مدة الموجة وقوتها باختلاف الشخص والموقف.",
+      "mechanisms_or_context": "يرتبط بالتعلم الشرطي والبروز التحفيزي والذاكرة؛ فالإشارات التي تنبأت بالمادة تكتسب قدرة على جذب الانتباه وتحريك الدافع. الضغط والتعب وسهولة الوصول قد يضيفون إلى الخطر.",
+      "assessment_or_practice": "يُقاس الاشتهاء قبل المثير وبعده أو يُتابع في الحياة اليومية مع تسجيل السياق. تُستخدم المعلومات لبناء خطط مواجهة ودعم وتقليل تعرض غير ضروري للمواقف عالية الخطورة.",
+      "boundary": "الاشتهاء المحفز لا يعني أن الانتكاس حتمي ولا أن التعافي ضعيف. كما أن وجود استجابة فسيولوجية لمثير لا يثبت أن الشخص سيختار الاستخدام.",
+      "faq": [
+        {"question": "لماذا تظهر الرغبة فجأة عند زيارة مكان قديم؟", "answer": "لأن المكان قد أصبح إشارة متعلمة مرتبطة بتوقع المادة، فيستدعي الذاكرة والدافع حتى بعد مرور وقت طويل."},
+        {"question": "هل يمكن أن تنخفض موجة الاشتهاء دون استخدام؟", "answer": "نعم. الاشتهاء حالة متغيرة غالبًا ما ترتفع ثم تنخفض، ويمكن لخطط المواجهة والدعم أن تساعد في عبور الفترات عالية الخطورة."}
+      ],
+      "references": [
+        {"title": "Drugs, Brains, and Behavior: The Science of Addiction", "publisher": "National Institute on Drug Abuse", "url": "https://nida.nih.gov/publications/drugs-brains-behavior-science-addiction"},
+        {"title": "NACDA Guidelines for Administration of Drugs to Human Subjects", "publisher": "National Institute on Drug Abuse", "url": "https://nida.nih.gov/research/clinical-research/nacda-guidelines-administration-drugs-to-human-subjects"}
+      ],
+      "primary_keyword": "الاشتهاء المحفز بالمثيرات",
+      "secondary_keywords": ["Cue-Induced Craving بالعربي", "المثيرات والرغبة بالمخدر", "اشتهاء محفز"],
+      "semantic_terms": ["التفاعل مع المثيرات", "التعلم الشرطي", "الاشتهاء", "الانتكاس"],
+      "related_slugs": ["cue-reactivity", "substance-craving", "relapse"],
+      "classification_status": "addiction-process"
+    },
+    {
+      "content_type": "glossary_term",
+      "slug": "incentive-salience-addiction",
+      "canonical_term": "البروز التحفيزي في الإدمان",
+      "english_name": "Incentive Salience in Addiction",
+      "aliases": ["Incentive Salience"],
+      "category_slug": "substance-addiction",
+      "title": "البروز التحفيزي في الإدمان: لماذا تصبح إشارات المادة شديدة الجذب؟",
+      "excerpt": "البروز التحفيزي هو العملية التي تكتسب بها المادة وإشاراتها قدرة كبيرة على جذب الانتباه وتحريك الرغبة والسعي. يساعد المفهوم في تفسير قوة بعض المثيرات لكنه لا يختزل الإدمان كله في آلية واحدة.",
+      "definition": "البروز التحفيزي في الإدمان هو اكتساب المادة أو الإشارات المرتبطة بها قيمة دافعية تجعلها تلفت الانتباه وتستدعي السعي والرغبة بقوة، حتى عندما تقل المتعة الفعلية أو تصبح العواقب سلبية.",
+      "presentation_or_use": "قد يصبح منظر عبوة أو مكان أو فرصة استخدام أكثر جذبًا من أنشطة أخرى مهمة، ويظهر اندفاع قوي نحو المادة عند توفر المثير. هذا لا يعني أن كل رغبة واعية تنشأ بالطريقة نفسها.",
+      "mechanisms_or_context": "يرتبط المفهوم بدوائر المكافأة والتعلم والدوبامين وتكرار الاقتران بين الإشارات والتأثيرات. تميز بعض النماذج بين الرغبة التحفيزية والمتعة، ما يفسر استمرار السعي رغم انخفاض المتعة أحيانًا.",
+      "assessment_or_practice": "يُستخدم أساسًا كنموذج تفسيري وبحثي، ويمكن استكشافه سريريًا عبر المثيرات التي تخطف الانتباه وتزيد السعي. لا يوجد اختبار منفرد يشخص البروز التحفيزي لدى الفرد.",
+      "boundary": "البروز التحفيزي ليس تشخيصًا ولا يفسر وحده جميع اضطرابات الاستخدام. العوامل التنفيذية والضغط والعادات والبيئة والصحة النفسية والاجتماعية تظل أجزاء مهمة من الصورة.",
+      "faq": [
+        {"question": "هل البروز التحفيزي يعني أن المادة تمنح متعة أكبر دائمًا؟", "answer": "لا. بعض النماذج تفرق بين قوة الرغبة والسعي وبين مقدار المتعة الفعلية، وقد يستمر السعي رغم تراجع المتعة."},
+        {"question": "هل يمكن قياسه باختبار سريري واحد؟", "answer": "لا يوجد اختبار منفرد كافٍ؛ هو مفهوم بحثي يدرس عبر الانتباه والمثيرات والسلوك والدوائر العصبية ضمن سياقات متعددة."}
+      ],
+      "references": [
+        {"title": "Alcohol Use Disorder: From Risk to Diagnosis to Recovery", "publisher": "National Institute on Alcohol Abuse and Alcoholism", "url": "https://www.niaaa.nih.gov/health-professionals-communities/core-resource-on-alcohol/alcohol-use-disorder-risk-diagnosis-recovery"},
+        {"title": "Drugs, Brains, and Behavior: The Science of Addiction", "publisher": "National Institute on Drug Abuse", "url": "https://nida.nih.gov/publications/drugs-brains-behavior-science-addiction"}
+      ],
+      "primary_keyword": "البروز التحفيزي في الإدمان",
+      "secondary_keywords": ["Incentive Salience بالعربي", "البروز التحفيزي والمخدرات", "دافع السعي للمادة"],
+      "semantic_terms": ["المكافأة", "الدوبامين", "المثيرات", "الاشتهاء"],
+      "related_slugs": ["cue-reactivity", "cue-induced-craving", "compulsive-substance-use"],
+      "classification_status": "addiction-theory"
+    }
+  ]
+}
