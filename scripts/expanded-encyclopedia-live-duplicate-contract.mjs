@@ -10,6 +10,7 @@ const BATCH_DIR = path.join(ROOT, 'data', 'expanded-encyclopedia', 'batches');
 const TERM_LIKE_TYPES = ['condition', 'glossary_term', 'assessment', 'intervention'];
 const PAGE_SIZE = 1000;
 const FETCH_ATTEMPTS = 5;
+const FETCH_TIMEOUT_MS = 15000;
 const RETRY_BASE_DELAY_MS = 2000;
 const RETRYABLE_STATUSES = new Set([429, 500, 502, 503, 504]);
 
@@ -45,11 +46,6 @@ function localIdentityValues(record) {
 }
 
 function databaseIdentityValues(record) {
-  // A legacy/contextual page such as «الاجترار الفكري: في العلاقات» is not
-  // the same canonical identity as the general term «الاجترار الفكري».
-  // Compare the complete title and its explicit primary keyword; never strip
-  // a subtitle because doing so manufactures a duplicate that the source row
-  // itself does not claim.
   return [record.primary_keyword, record.title]
     .map(clean)
     .filter(Boolean);
@@ -73,13 +69,23 @@ async function loadLocalTerms() {
   return records;
 }
 
+async function fetchAttempt(endpoint, headers) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  try {
+    return await fetch(endpoint, { headers, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function fetchJsonWithRetry(endpoint, headers) {
   let lastError;
   let lastResponse;
   let lastDetail = '';
   for (let attempt = 1; attempt <= FETCH_ATTEMPTS; attempt += 1) {
     try {
-      const response = await fetch(endpoint, { headers });
+      const response = await fetchAttempt(endpoint, headers);
       lastResponse = response;
       if (response.ok) return { response, payload: await response.json() };
       lastDetail = await response.text().catch(() => '');
@@ -88,6 +94,7 @@ async function fetchJsonWithRetry(endpoint, headers) {
       lastError = error;
       if (attempt === FETCH_ATTEMPTS) break;
     }
+    console.warn(`EXPANDED_ENCYCLOPEDIA_LIVE_DEDUP: transient fetch failure; retry ${attempt}/${FETCH_ATTEMPTS}`);
     await sleep(RETRY_BASE_DELAY_MS * attempt);
   }
   if (lastResponse) {
@@ -103,10 +110,6 @@ async function loadPublishedCanonicalContent() {
     throw new Error('NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY are required');
   }
 
-  // Do not filter legacy_migration inside PostgreSQL. The schema_json value is
-  // TOAST-heavy and the JSON predicate forced a multi-second scan that could
-  // exceed PostgREST's statement timeout. Instead, project only that JSON key
-  // and exclude legacy rows in Node. This preserves the exact canonical set.
   const params = new URLSearchParams({
     select: 'slug,title,content_type,primary_keyword,legacy_migration:schema_json->legacy_migration',
     status: 'eq.published',
