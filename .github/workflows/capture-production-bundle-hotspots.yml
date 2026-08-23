@@ -50,17 +50,18 @@ jobs:
           set -euo pipefail
           mkdir -p bundle-hotspots/chunks bundle-hotspots/meta
           cp .open-next/server-functions/default/handler.mjs.meta.json bundle-hotspots/meta/
-          find .open-next/server-functions/default/.next/server/chunks -type f -name '*.js' -printf '%s %p\n' | sort -nr | head -n 12 > bundle-hotspots/largest-chunks.txt
+          find .open-next/server-functions/default/.next/server/chunks -type f -name '*.js' -printf '%s %p\n' | sort -nr > bundle-hotspots/all-chunks.txt
+          sed -n '1,12p' bundle-hotspots/all-chunks.txt > bundle-hotspots/largest-chunks.txt
           while read -r bytes path; do
             cp --parents "$path" bundle-hotspots/chunks/
           done < bundle-hotspots/largest-chunks.txt
           find .open-next/server-functions/default/.next/server -maxdepth 2 -type f \( -name '*manifest*.json' -o -name '*.nft.json' \) -print0 | xargs -0 -r cp --parents -t bundle-hotspots/meta/
           echo '--- likely source/module markers in top 3 chunks ---' | tee bundle-hotspots/signatures.txt
-          head -n 3 bundle-hotspots/largest-chunks.txt | while read -r bytes path; do
+          sed -n '1,3p' bundle-hotspots/largest-chunks.txt | while read -r bytes path; do
             echo "### $bytes $path" | tee -a bundle-hotspots/signatures.txt
-            grep -Eo '([A-Za-z0-9_.@-]+/){2,}[A-Za-z0-9_./@\[\]-]+\.(ts|tsx|js|jsx|json|mjs|cjs)' "$path" | sort | uniq -c | sort -nr | head -n 250 | tee -a bundle-hotspots/signatures.txt || true
+            grep -Eo '([A-Za-z0-9_.@-]+/){2,}[A-Za-z0-9_./@\[\]-]+\.(ts|tsx|js|jsx|json|mjs|cjs)' "$path" | sort | uniq -c | sort -nr | sed -n '1,250p' | tee -a bundle-hotspots/signatures.txt || true
             echo '-- frequent long quoted fragments --' | tee -a bundle-hotspots/signatures.txt
-            grep -Eo '"[^"\\]{80,}"' "$path" | head -n 200 | tee -a bundle-hotspots/signatures.txt || true
+            grep -Eo '"[^"\\]{80,}"' "$path" | sed -n '1,200p' | tee -a bundle-hotspots/signatures.txt || true
           done
       - uses: actions/upload-artifact@v4
         with:
