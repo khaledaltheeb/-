@@ -21,6 +21,14 @@ requireAll(semantic, [
   'buildSemanticSeoProfile',
   'topicKeywords',
   'searchIntents',
+  'DOMAIN_TERMS',
+  'DOMAIN_INTENT_FRAMES',
+  "oncology:",
+  "'mental-health':",
+  'education:',
+  'addiction:',
+  'directory:',
+  'tools:',
 ], 'semantic SEO profile');
 
 requireAll(seo, [
@@ -35,13 +43,24 @@ if (/slice\(0,\s*20\)/.test(seo)) {
   throw new Error('SEO metadata integration: legacy 20-keyword truncation returned');
 }
 
-// Never use hidden page copy to satisfy the semantic inventory.
-for (const forbidden of ['display:none', 'visibility:hidden', 'opacity:0', 'aria-hidden="true" dangerouslySetInnerHTML']) {
-  if (semantic.includes(forbidden)) throw new Error(`semantic SEO profile: hidden-copy technique is forbidden: ${forbidden}`);
+// Never use hidden page copy or synthetic numbered filler to satisfy the inventory.
+for (const forbidden of [
+  'display:none',
+  'visibility:hidden',
+  'opacity:0',
+  'aria-hidden="true" dangerouslySetInnerHTML',
+  "'موضوع مرتبط'",
+  "'related topic'",
+  "'tema relacionado'",
+  "'سؤال مهم عن'",
+  "'important question about'",
+  "'pregunta importante sobre'",
+]) {
+  if (semantic.includes(forbidden)) throw new Error(`semantic SEO profile: synthetic/hidden filler is forbidden: ${forbidden}`);
 }
 
-// Runtime metadata generation must not be allowed to remove a public page just because
-// semantic expansion is incomplete. Validation belongs here in CI, not in page rendering.
+// Runtime metadata generation must not remove a public page just because semantic expansion
+// is incomplete. Validation belongs here in CI, not in page rendering.
 if (/throw new Error/.test(semantic)) {
   throw new Error('semantic SEO profile: runtime SEO generation must remain non-throwing');
 }
@@ -68,4 +87,4 @@ if (indexableFloor < 3519) {
   throw new Error(`public no-loss protection: indexable published baseline regressed to ${indexableFloor}`);
 }
 
-console.log('Semantic SEO contract: OK — 50 topical signals + 50 search intents, with published-page preservation enforced.');
+console.log('Semantic SEO contract: OK — 50 topical signals + 50 domain-aware search intents, no synthetic filler, with published-page preservation enforced.');
