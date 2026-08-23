@@ -6,11 +6,17 @@ const EXPECTED_TOOLS = 150;
 const HUB_PATH = 'daily-tools/index.html';
 const SLEEP_PATH = 'daily-tools/sleep-wind-down-plan/index.html';
 const EXPECTED_STANDARD = 149;
-const read = (path) => fs.readFileSync(path, 'utf8');
-let bad = false;
-const fail = (message) => { console.error(`DAILY TOOLS CONTRACT FAILED: ${message}`); bad = true; };
+const read = (file) => fs.readFileSync(file, 'utf8');
 const text = (value) => typeof value === 'string' ? value.trim() : '';
 const blocks = (record) => record?.body_json && typeof record.body_json === 'object' && !Array.isArray(record.body_json) && Array.isArray(record.body_json.blocks) ? record.body_json.blocks : [];
+let bad = false;
+const fail = (message) => { console.error(`DAILY TOOLS CONTRACT FAILED: ${message}`); bad = true; };
+
+function sourcePathToRoute(sourcePath) {
+  if (sourcePath === HUB_PATH) return '/daily-tools/';
+  const match = /^daily-tools\/([a-z0-9][a-z0-9-]{0,119})\/index\.html$/i.exec(sourcePath);
+  return match ? `/daily-tools/${match[1]}/` : null;
+}
 
 function runtimeShape(record) {
   const source = blocks(record);
@@ -46,13 +52,19 @@ for (const record of records) {
   if (daily.has(sourcePath)) fail(`duplicate source_path: ${sourcePath}`);
   else daily.set(sourcePath, record);
 }
+
 if (daily.size !== EXPECTED_TOTAL) fail(`expected ${EXPECTED_TOTAL} Daily Tools records, found ${daily.size}`);
 const hub = daily.get(HUB_PATH);
 const sleep = daily.get(SLEEP_PATH);
 if (!hub) fail(`missing hub: ${HUB_PATH}`);
 if (!sleep) fail(`missing sleep tracker: ${SLEEP_PATH}`);
-const standard = [...daily.entries()].filter(([path]) => path !== HUB_PATH && path !== SLEEP_PATH);
+const standard = [...daily.entries()].filter(([sourcePath]) => sourcePath !== HUB_PATH && sourcePath !== SLEEP_PATH);
 if (standard.length !== EXPECTED_STANDARD) fail(`expected ${EXPECTED_STANDARD} standard tools, found ${standard.length}`);
+
+const expectedRoutes = [...new Set([...daily.keys()].map(sourcePathToRoute).filter(Boolean))];
+if (expectedRoutes.length !== EXPECTED_TOTAL) fail(`source corpus must resolve to ${EXPECTED_TOTAL} unique public routes, found ${expectedRoutes.length}`);
+if (!expectedRoutes.includes('/daily-tools/')) fail('Daily Tools public hub route is missing');
+
 if (hub) {
   const linkedTools = hubToolLinks(hub);
   if (linkedTools.size !== EXPECTED_TOOLS) fail(`Daily Tools hub must expose exactly ${EXPECTED_TOOLS} unique tool routes, found ${linkedTools.size}`);
@@ -60,10 +72,6 @@ if (hub) {
 
 let runtimeMatches = 0;
 for (const [sourcePath, record] of standard) {
-  if (!/^daily-tools\/[a-z0-9][a-z0-9-]{0,119}\/index\.html$/i.test(sourcePath)) {
-    fail(`${sourcePath}: unsupported standard tool route shape`);
-    continue;
-  }
   const { steps, fields } = runtimeShape(record);
   if (steps.length !== 4) {
     fail(`${sourcePath}: runtime parser must derive exactly four steps, found ${steps.length}`);
@@ -91,6 +99,8 @@ if (sleep) {
 const files = {
   parser: 'lib/daily-tools-preserved.ts',
   catalog: 'lib/daily-tools-catalog.ts',
+  manifestGenerator: 'scripts/build-daily-tools-route-manifest.mjs',
+  manifest: 'generated/daily-tools-routes.json',
   resources: 'components/daily-tool-resources.tsx',
   workspace: 'components/daily-tool-workspace.tsx',
   sleep: 'components/sleep-log-local.tsx',
@@ -101,13 +111,14 @@ const files = {
   sitemapIndex: 'app/sitemap.xml/route.ts',
   header: 'components/site-header.tsx',
 };
-for (const [name, path] of Object.entries(files)) {
-  if (!fs.existsSync(path)) fail(`${name} missing: ${path}`);
+for (const [name, file] of Object.entries(files)) {
+  if (!fs.existsSync(file)) fail(`${name} missing: ${file}`);
 }
 
 if (!bad) {
   const parser = read(files.parser);
   const catalog = read(files.catalog);
+  const generator = read(files.manifestGenerator);
   const resources = read(files.resources);
   const workspace = read(files.workspace);
   const sleepSource = read(files.sleep);
@@ -121,15 +132,18 @@ if (!bad) {
   for (const marker of ['deriveDailyToolSpec', 'تشمل حقول المتابعة:', 'stepBlock', 'fieldKind']) {
     if (!parser.includes(marker)) fail(`source-derived specification marker missing: ${marker}`);
   }
-  for (const marker of ['DAILY_TOOLS_TOTAL = 150', 'dailyToolsPayload', 'getDailyToolSlugs', 'getDailyToolRoutes', 'getDailyToolRelatedLinks', 'getDailyToolReferences', 'dailyToolMetadata', 'index: true']) {
-    if (!catalog.includes(marker)) fail(`first-class catalog marker missing: ${marker}`);
+  for (const marker of ["import 'server-only'", 'readFileSync', 'DAILY_TOOLS_TOTAL = 150', 'loadPayload', 'getDailyToolSlugs', 'getDailyToolRoutes', 'getDailyToolRelatedLinks', 'getDailyToolReferences', 'dailyToolMetadata', 'index: true']) {
+    if (!catalog.includes(marker)) fail(`build-time catalog marker missing: ${marker}`);
   }
   if (/createClient|getLegacyPreservedPage|get_legacy_preserved_page/.test(catalog)) fail('first-class Daily Tools catalog must not depend on Supabase/legacy RPC at runtime');
+
+  for (const marker of ['build-daily-tools-route-manifest', 'EXPECTED_TOOL_COUNT = 150', 'generated/daily-tools-routes.json', 'source_path']) {
+    if (!generator.includes(marker)) fail(`route manifest generator marker missing: ${marker}`);
+  }
 
   for (const marker of ['أدوات ومسارات مرتبطة', 'المصادر والمراجع', 'getDailyToolReferences', 'getDailyToolRelatedLinks', 'noopener noreferrer']) {
     if (!resources.includes(marker)) fail(`resources renderer marker missing: ${marker}`);
   }
-
   for (const marker of ['localStorage', 'rawafid:daily-tool:', 'تصدير JSON', 'window.print()', 'progress', 'مسح']) {
     if (!workspace.includes(marker)) fail(`workspace marker missing: ${marker}`);
   }
@@ -140,17 +154,20 @@ if (!bad) {
     if (!directory.includes(marker)) fail(`directory marker missing: ${marker}`);
   }
 
-  for (const marker of ["dynamic = 'force-static'", 'getDailyToolPage', 'dailyToolMetadata', 'deriveDailyToolDirectory', 'ContentRenderer']) {
+  for (const marker of ["dynamic = 'force-static'", 'revalidate = false', 'getDailyToolPage', 'dailyToolMetadata', 'deriveDailyToolDirectory', 'ContentRenderer']) {
     if (!index.includes(marker)) fail(`first-class Daily Tools hub marker missing: ${marker}`);
   }
   if (/getLegacyPreservedPage|force-dynamic/.test(index)) fail('Daily Tools hub must not use legacy runtime lookup');
 
-  for (const marker of ["dynamic = 'force-static'", 'dynamicParams = false', 'generateStaticParams', 'getDailyToolSlugs', 'getDailyToolPage', 'dailyToolMetadata', "slug === 'sleep-wind-down-plan'", 'DailyToolWorkspace', 'DailyToolResources', 'ContentRenderer']) {
+  for (const marker of ["dynamic = 'force-static'", 'dynamicParams = false', 'revalidate = false', 'generateStaticParams', 'getDailyToolSlugs', 'getDailyToolPage', 'dailyToolMetadata', "slug === 'sleep-wind-down-plan'", 'DailyToolWorkspace', 'DailyToolResources', 'ContentRenderer']) {
     if (!detail.includes(marker)) fail(`first-class Daily Tools detail marker missing: ${marker}`);
   }
   if (/getLegacyPreservedPage|force-dynamic/.test(detail)) fail('Daily Tools detail pages must not use legacy runtime lookup');
 
-  if (!sitemap.includes('getDailyToolRoutes') || !sitemap.includes('sitemapResponse')) fail('Daily Tools sitemap must enumerate the first-class catalog');
+  for (const marker of ["@/generated/daily-tools-routes.json", "dynamic = 'force-static'", 'EXPECTED_ROUTES = 151', 'sitemapResponse']) {
+    if (!sitemap.includes(marker)) fail(`Daily Tools sitemap build-manifest marker missing: ${marker}`);
+  }
+  if (sitemap.includes('daily-tools-catalog')) fail('Daily Tools sitemap must not import the multi-megabyte content catalog into the Worker');
   if (!sitemapIndex.includes("'/sitemaps/daily-tools.xml'")) fail('main sitemap index must include Daily Tools sitemap');
   if (!header.includes("href: '/daily-tools/'") || !header.includes("label: 'الأدوات اليومية'")) fail('global navigation must expose the migrated Daily Tools hub');
 
@@ -165,4 +182,4 @@ if (!bad) {
 
 if (bad) process.exit(1);
 console.log(`Daily Tools contract passed: ${EXPECTED_TOOLS} first-class indexable tools + hub, including ${runtimeMatches} standard source-derived tools and the specialized sleep tracker.`);
-console.log('Daily Tools are repository-backed, statically published, sitemap-covered, globally linked, canonical in place, and keep user inputs local-only while preserving source references/related paths when present.');
+console.log('Daily Tools stay repository-backed and statically published; their sitemap uses a generated lightweight route manifest so the full content corpus is not bundled into the Cloudflare Worker.');
