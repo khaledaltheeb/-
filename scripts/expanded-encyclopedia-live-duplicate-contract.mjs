@@ -9,7 +9,8 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const BATCH_DIR = path.join(ROOT, 'data', 'expanded-encyclopedia', 'batches');
 const TERM_LIKE_TYPES = ['condition', 'glossary_term', 'assessment', 'intervention'];
 const PAGE_SIZE = 1000;
-const FETCH_ATTEMPTS = 3;
+const FETCH_ATTEMPTS = 5;
+const RETRY_BASE_DELAY_MS = 2000;
 const RETRYABLE_STATUSES = new Set([429, 500, 502, 503, 504]);
 
 const clean = (value) => typeof value === 'string' ? value.trim().replace(/\s+/gu, ' ') : '';
@@ -87,7 +88,7 @@ async function fetchJsonWithRetry(endpoint, headers) {
       lastError = error;
       if (attempt === FETCH_ATTEMPTS) break;
     }
-    await sleep(350 * attempt);
+    await sleep(RETRY_BASE_DELAY_MS * attempt);
   }
   if (lastResponse) {
     throw new Error(`Supabase canonical-content query failed (${lastResponse.status}): ${lastDetail.slice(0, 500)}`);
