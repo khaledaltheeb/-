@@ -1,7 +1,6 @@
 name: Deploy Production
 
-# Manual fallback only. The live Rawafid Worker is deployed from
-# cloudflare-workers-deploy by Cloudflare Workers Builds Git integration.
+# Manual fallback only. Production cutover target: healthrenewal.org.
 on:
   workflow_dispatch:
 
@@ -19,7 +18,7 @@ jobs:
     env:
       NEXT_PUBLIC_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
-      NEXT_PUBLIC_SITE_URL: https://rawafid-platform-staging.khaledaltheeb.workers.dev
+      NEXT_PUBLIC_SITE_URL: https://healthrenewal.org
       NEXT_PUBLIC_ALLOW_INDEXING: 'true'
       NEXT_PUBLIC_ENABLE_ANALYTICS: 'false'
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -49,6 +48,13 @@ jobs:
         run: npm run lint
       - name: Architecture contracts
         run: npm run architecture-check
+      - name: Verify production SEO origin contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${NEXT_PUBLIC_SITE_URL}" = "https://healthrenewal.org"
+          test "${NEXT_PUBLIC_ALLOW_INDEXING}" = "true"
+          grep -q "PRODUCTION_SITE_URL = 'https://healthrenewal.org'" lib/seo.ts
       - name: Verify Cloudflare credentials and account access
         shell: bash
         run: |
@@ -63,21 +69,29 @@ jobs:
             exit 1
           fi
       - name: Build Cloudflare Worker with OpenNext
+        env:
+          NEXT_PUBLIC_SITE_URL: https://healthrenewal.org
+          NEXT_PUBLIC_ALLOW_INDEXING: 'true'
         run: npx opennextjs-cloudflare build
       - name: Deploy Cloudflare Worker with OpenNext
         run: npx opennextjs-cloudflare deploy
-      - name: Verify deployed indexability and nested evidence route
+      - name: Verify production discovery and canonical origin
         shell: bash
         run: |
           set -euo pipefail
           base="${NEXT_PUBLIC_SITE_URL}"
           stamp="${GITHUB_SHA}"
+          robots="$(curl -fsS --retry 8 --retry-delay 3 --retry-all-errors "${base}/robots.txt?deploy=${stamp}")"
+          printf '%s' "${robots}" | grep -q "Sitemap: ${base}/sitemap.xml"
           sitemap="$(curl -fsS --retry 8 --retry-delay 3 --retry-all-errors "${base}/sitemaps/content.xml?page=0&deploy=${stamp}")"
           printf '%s' "${sitemap}" | grep -q '<url>'
-          page="$(curl -fsS --retry 8 --retry-delay 3 --retry-all-errors "${base}/magazine/pediatric-oncology/studies/pediatric-neuroblastoma-racotumomab-phase2-42136000/?deploy=${stamp}")"
-          printf '%s' "${page}" | grep -q 'rel="canonical"'
-          printf '%s' "${page}" | grep -q 'name="robots"'
-          if printf '%s' "${page}" | grep -qi 'noindex'; then
-            echo 'Deployed nested evidence route is unexpectedly noindex.' >&2
+          if printf '%s' "${sitemap}" | grep -q 'workers.dev'; then
+            echo 'Production sitemap leaked a temporary workers.dev URL.' >&2
+            exit 1
+          fi
+          home="$(curl -fsS --retry 8 --retry-delay 3 --retry-all-errors "${base}/?deploy=${stamp}")"
+          printf '%s' "${home}" | grep -q "rel=\"canonical\" href=\"${base}/\""
+          if printf '%s' "${home}" | grep -qi 'noindex'; then
+            echo 'Production homepage is unexpectedly noindex.' >&2
             exit 1
           fi

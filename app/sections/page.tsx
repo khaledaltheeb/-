@@ -4,7 +4,7 @@ import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import PlatformIcon from '@/components/platform-icon';
 import { createClient } from '@/lib/supabase/server';
-import { buildSeoMetadata, breadcrumbJsonLd } from '@/lib/seo';
+import { buildSeoMetadata, breadcrumbJsonLd, SITE_URL } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = buildSeoMetadata({
@@ -27,11 +27,33 @@ export default async function SectionsIndex() {
   const sectorRows = (sectors ?? []) as Sector[];
   const categoryRows = (categories ?? []) as Category[];
   const breadcrumbs = breadcrumbJsonLd([{ name: 'الرئيسية', path: '/' }, { name: 'الأقسام', path: '/sections' }]);
+  const collection = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    '@id': `${SITE_URL}/sections#collection`,
+    url: `${SITE_URL}/sections`,
+    name: 'أقسام روافد',
+    description: 'الخريطة الموضوعية لأقسام منصة روافد تحت القطاعات الرئيسية.',
+    inLanguage: 'ar',
+    isAccessibleForFree: true,
+    isPartOf: { '@id': `${SITE_URL}/#website` },
+    mainEntity: {
+      '@type': 'ItemList',
+      numberOfItems: categoryRows.length,
+      itemListElement: categoryRows.map((category, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        name: category.name_ar,
+        description: category.description || undefined,
+        url: `${SITE_URL}/sections/${category.slug}`,
+      })),
+    },
+  };
 
   return <>
     <SiteHeader />
     <main className="site-shell sector-page-shell">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbs).replace(/</g, '\\u003c') }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify([breadcrumbs, collection]).replace(/</g, '\\u003c') }} />
       <nav className="breadcrumbs" aria-label="مسار الصفحة"><Link href="/">الرئيسية</Link><span>/</span><span aria-current="page">الأقسام</span></nav>
 
       <section className="public-index-hero" aria-labelledby="sections-title">

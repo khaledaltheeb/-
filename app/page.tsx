@@ -6,25 +6,54 @@ import PlatformIcon from '@/components/platform-icon';
 import { getPublicSectors } from '@/lib/public-taxonomy';
 import { getHomepageContent } from '@/lib/public-content';
 import { publicContentHref, publicContentTypeLabel } from '@/lib/public-content-routing';
-import { buildSeoMetadata } from '@/lib/seo';
+import { buildSeoMetadata, SITE_URL } from '@/lib/seo';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 300;
 
 export const metadata = buildSeoMetadata({
-  title: 'روافد: الصحة النفسية وذوو الاحتياجات الخاصة وسرطان الأطفال والتعافي',
-  description: 'منصة روافد للمعرفة الصحية والاجتماعية العربية: الصحة النفسية، ذوو الاحتياجات الخاصة والتربية الدامجة، سرطان الأطفال، الإدمان والتعافي، الأدلة العملية، المختصون والمراكز ضمن مسارات مترابطة.',
+  title: 'روافد: الصحة النفسية والتربية الخاصة وسرطان الأطفال',
+  description: 'روافد منصة عربية للمعرفة الموثوقة في الصحة النفسية والتربية الخاصة والتوحد وصعوبات التعلم وسرطان الأطفال والتعافي، مع أدلة عملية ومختصين ومراكز.',
   path: '/',
   index: true,
-  keywords: ['الصحة النفسية', 'ذوو الاحتياجات الخاصة', 'سرطان الأطفال', 'أورام الأطفال', 'التربية الدامجة', 'الإدمان والتعافي', 'دعم الأسرة', 'مختص نفسي', 'مراكز نفسية', 'منصة روافد'],
+  keywords: ['روافد', 'منصة روافد', 'الصحة النفسية', 'التربية الخاصة', 'التوحد', 'صعوبات التعلم', 'سرطان الأطفال', 'التربية الدامجة', 'الإدمان والتعافي', 'دعم الأسرة'],
 });
 
 const quickSearches = [
-  ['سرطان الأطفال', 'سرطان الأطفال'],
   ['الصحة النفسية', 'الصحة النفسية'],
+  ['التوحد', 'التوحد'],
+  ['صعوبات التعلم', 'صعوبات التعلم'],
+  ['سرطان الأطفال', 'سرطان الأطفال'],
   ['الإدمان والتعافي', 'الإدمان والتعافي'],
-  ['ذوو الاحتياجات الخاصة', 'ذوو الاحتياجات الخاصة'],
   ['دعم الأسرة', 'دعم الأسرة'],
 ];
+
+const homepageJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  '@id': `${SITE_URL}/#homepage`,
+  url: `${SITE_URL}/`,
+  name: 'روافد | الصحة النفسية والتربية الخاصة وسرطان الأطفال',
+  description: 'روافد منصة عربية للمعرفة الموثوقة في الصحة النفسية والتربية الخاصة والتوحد وصعوبات التعلم وسرطان الأطفال والتعافي، مع أدلة عملية ومختصين ومراكز.',
+  inLanguage: 'ar',
+  isPartOf: { '@id': `${SITE_URL}/#website` },
+  about: [
+    'الصحة النفسية',
+    'التربية الخاصة',
+    'اضطراب طيف التوحد',
+    'صعوبات التعلم',
+    'التربية الدامجة',
+    'سرطان الأطفال',
+    'الإدمان والتعافي',
+    'دعم الأسرة',
+  ].map((name) => ({ '@type': 'Thing', name })),
+  primaryImageOfPage: {
+    '@type': 'ImageObject',
+    url: `${SITE_URL}/pwa-icon-512`,
+    width: 512,
+    height: 512,
+  },
+  publisher: { '@id': `${SITE_URL}/#organization` },
+};
 
 export default async function HomePage() {
   const [sectors, latestContent] = await Promise.all([
@@ -34,21 +63,22 @@ export default async function HomePage() {
 
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(homepageJsonLd).replace(/</g, '\\u003c') }} />
       <SiteHeader />
       <main className="site-shell rawafid-home">
         <section className="rawafid-hero" aria-labelledby="home-title">
           <div className="rawafid-hero-copy">
-            <span className="rawafid-kicker">المعرفة والرعاية تبدأ من فهم احتياجك</span>
-            <h1 id="home-title">طريق أوضح إلى <em>المعرفة والدعم</em> المناسبين.</h1>
-            <p>منصة عربية تجمع المعرفة الموثوقة والأدلة العملية ومركزًا متكاملًا لسرطان الأطفال، مع المختصين والمراكز ضمن تجربة تحترم خصوصيتك وتساعدك على اتخاذ الخطوة التالية بثقة.</p>
+            <span className="rawafid-kicker">روافد — معرفة عربية موثوقة تقودك إلى الخطوة التالية</span>
+            <h1 id="home-title">روافد: <em>الصحة النفسية والتربية الخاصة</em> في منصة معرفية مترابطة.</h1>
+            <p>استكشف محتوى عربيًا موثوقًا في الصحة النفسية، التوحد، صعوبات التعلم، التربية الخاصة والدامجة، سرطان الأطفال، الإدمان والتعافي ودعم الأسرة؛ مع أدلة عملية ودليل للمختصين والمراكز.</p>
 
             <form className="search rawafid-search" action="/search" method="get" role="search">
               <label className="sr-only" htmlFor="home-search">البحث في منصة روافد</label>
-              <input id="home-search" name="q" type="search" minLength={2} maxLength={160} autoComplete="off" placeholder="ابحث عن حالة، سرطان أطفال، مصطلح، مختص، مركز، أداة، مقال أو سؤال..." />
-              <button type="submit">ابحث الآن</button>
+              <input id="home-search" name="q" type="search" minLength={2} maxLength={160} autoComplete="off" placeholder="ابحث عن حالة، توحد، صعوبات تعلم، سرطان أطفال، مختص، مركز، دليل أو سؤال..." />
+              <button type="submit">ابحث في روافد</button>
             </form>
 
-            <div className="rawafid-quick-links" aria-label="عمليات بحث مقترحة">
+            <div className="rawafid-quick-links" aria-label="موضوعات شائعة في روافد">
               {quickSearches.map(([label, query]) => <Link prefetch={false} key={label} href={`/search?q=${encodeURIComponent(query)}`}>{label}</Link>)}
             </div>
           </div>
@@ -78,7 +108,7 @@ export default async function HomePage() {
 
         <section className="rawafid-section" id="sectors" aria-labelledby="sectors-title">
           <div className="rawafid-section-head">
-            <div className="rawafid-section-title"><span>مجالات روافد</span><h2 id="sectors-title">استكشف المعرفة حسب المجال</h2><p>قطاعات مترابطة تشمل الصحة النفسية، سرطان الأطفال، التعافي، الدمج والتمكين؛ ويظهر سرطان الأطفال كقطاع موحد واحد يجمع المسار السريري والعلمي والنفسي والأسري.</p></div>
+            <div className="rawafid-section-title"><span>مجالات روافد</span><h2 id="sectors-title">استكشف المعرفة حسب المجال</h2><p>قطاعات مترابطة تشمل الصحة النفسية، التوحد وصعوبات التعلم، التربية الخاصة والدامجة، سرطان الأطفال، التعافي ودعم الأسرة؛ لتسهيل الانتقال من السؤال إلى المعرفة المناسبة.</p></div>
             <Link prefetch={false} className="section-text-link" href="/sectors">عرض جميع القطاعات ←</Link>
           </div>
 

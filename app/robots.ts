@@ -1,7 +1,5 @@
 import type { MetadataRoute } from 'next';
-import { SITE_URL } from '@/lib/seo';
-
-const INDEXING_ENABLED = process.env.NEXT_PUBLIC_ALLOW_INDEXING === 'true';
+import { INDEXING_ENABLED, SITE_URL } from '@/lib/seo';
 
 const PRIVATE_PATHS = [
   '/admin/',
@@ -21,8 +19,6 @@ const PRIVATE_PATHS = [
   '/api/private/',
 ];
 
-// Explicit discovery rules make our intent unambiguous to major search and AI systems.
-// The wildcard rule remains the authoritative fallback for standards-compliant crawlers.
 const DISCOVERY_CRAWLERS = [
   'Googlebot',
   'Google-Extended',

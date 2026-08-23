@@ -1,26 +1,39 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import { createClient } from '@/lib/supabase/server';
-import { buildSeoMetadata } from '@/lib/seo';
+import { buildSeoMetadata, breadcrumbJsonLd, SITE_URL } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
-export const metadata = buildSeoMetadata({
-  title: 'دليل المراكز النفسية',
-  description: 'دليل المراكز الموثقة في منصة روافد: ابحث حسب اسم المركز والمدينة والدولة، واستعرض الملفات العامة للمراكز والفروع التي اجتازت مسار التحقق.',
-  path: '/centers', index: true,
-  keywords: ['مركز نفسي', 'مركز علاج نفسي', 'مراكز التعافي', 'دليل المراكز', 'منصة روافد'],
-});
 
 type SearchParams = Promise<{ q?: string; city?: string; country?: string }>;
 type CenterRow = { id: string; slug: string; name: string; description: string | null; logo_url: string | null; country: string | null; region: string | null; city: string | null; address: string | null };
 
-export default async function CentersDirectory({ searchParams }: { searchParams: SearchParams }) {
-  const params = await searchParams;
+function normalizedFilters(params: Awaited<SearchParams>) {
   const q = String(params.q ?? '').trim().slice(0, 120);
   const city = String(params.city ?? '').trim().slice(0, 120);
   const country = String(params.country ?? '').trim().slice(0, 120);
-  const hasFilters = Boolean(q || city || country);
+  return { q, city, country, hasFilters: Boolean(q || city || country) };
+}
+
+export async function generateMetadata({ searchParams }: { searchParams: SearchParams }): Promise<Metadata> {
+  const filters = normalizedFilters(await searchParams);
+  return buildSeoMetadata({
+    title: filters.hasFilters ? 'نتائج تصفية دليل المراكز' : 'دليل المراكز النفسية',
+    description: filters.hasFilters
+      ? 'نتائج تصفية داخل دليل المراكز الموثقة في روافد. ارجع إلى صفحة الدليل الأساسية للوصول إلى الفهرس العام.'
+      : 'دليل المراكز الموثقة في منصة روافد: ابحث حسب اسم المركز والمدينة والدولة، واستعرض الملفات العامة للمراكز والفروع التي اجتازت مسار التحقق.',
+    path: '/centers',
+    index: !filters.hasFilters,
+    follow: true,
+    keywords: ['مركز نفسي', 'مركز علاج نفسي', 'مراكز التعافي', 'دليل المراكز', 'منصة روافد'],
+  });
+}
+
+export default async function CentersDirectory({ searchParams }: { searchParams: SearchParams }) {
+  const filters = normalizedFilters(await searchParams);
+  const { q, city, country, hasFilters } = filters;
   const supabase = await createClient();
 
   let query = supabase.from('centers').select('id,slug,name,description,logo_url,country,region,city,address').eq('verification', 'verified').eq('is_active', true).order('name').limit(100);
@@ -30,10 +43,35 @@ export default async function CentersDirectory({ searchParams }: { searchParams:
   const { data, error } = await query;
   const rows = (Array.isArray(data) ? data : []) as CenterRow[];
 
+  const directoryUrl = `${SITE_URL}/centers`;
+  const breadcrumbs = breadcrumbJsonLd([{ name: 'الرئيسية', path: '/' }, { name: 'دليل المراكز', path: '/centers' }]);
+  const collectionSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    '@id': `${directoryUrl}#collection`,
+    url: directoryUrl,
+    name: hasFilters ? 'نتائج تصفية دليل المراكز' : 'دليل المراكز',
+    description: 'دليل عام للمراكز والجهات الموثقة والمنشورة في منصة روافد.',
+    inLanguage: 'ar',
+    isAccessibleForFree: true,
+    isPartOf: { '@id': `${SITE_URL}/#website` },
+    mainEntity: {
+      '@type': 'ItemList',
+      numberOfItems: rows.length,
+      itemListElement: rows.map((center, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        name: center.name,
+        url: `${SITE_URL}/centers/${center.slug}`,
+      })),
+    },
+  };
+
   return (
     <>
       <SiteHeader />
       <main className="directory-shell">
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify([breadcrumbs, collectionSchema]).replace(/</g, '\\u003c') }} />
         <nav className="breadcrumbs" aria-label="مسار الصفحة"><Link href="/">الرئيسية</Link><span>/</span><span aria-current="page">دليل المراكز</span></nav>
         <section className="directory-hero">
           <span className="eyebrow">دليل جهات موثقة</span>

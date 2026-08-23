@@ -25,6 +25,7 @@ export default function MagazineArticle({ record, related }: { record: MagazineR
   const references = (record.references_json ?? []).filter((ref) => ref && (ref.title || ref.url));
   const primarySource = sourceUrl(record);
   const faqs = faqItems(record);
+  const articleUrl = `${SITE_URL}${canonical}`;
   const breadcrumb = breadcrumbJsonLd([
     { name: 'الرئيسية', path: '/' },
     { name: 'المجلة والأبحاث', path: '/magazine/' },
@@ -33,18 +34,25 @@ export default function MagazineArticle({ record, related }: { record: MagazineR
   const scholarly = {
     '@context': 'https://schema.org',
     '@type': 'ScholarlyArticle',
-    '@id': `${SITE_URL}${canonical}#article`,
+    '@id': `${articleUrl}#article`,
     headline: record.title,
+    name: record.title,
     description: record.excerpt || record.seo_description,
-    url: `${SITE_URL}${canonical}`,
+    url: articleUrl,
+    mainEntityOfPage: { '@type': 'WebPage', '@id': articleUrl },
     inLanguage: 'ar',
+    isAccessibleForFree: true,
     datePublished: record.published_at || undefined,
     dateModified: record.updated_at || undefined,
-    author: { '@type': 'Organization', name: record.author_display_name || 'منصة روافد', url: SITE_URL },
-    publisher: { '@type': 'Organization', name: 'منصة روافد', url: SITE_URL },
+    author: record.author_display_name
+      ? { '@type': 'Organization', name: record.author_display_name }
+      : { '@id': `${SITE_URL}/#organization` },
+    publisher: { '@id': `${SITE_URL}/#organization` },
     isPartOf: { '@type': 'CollectionPage', name: 'المجلة والأبحاث', url: `${SITE_URL}/magazine/` },
     isBasedOn: primarySource || undefined,
+    citation: references.flatMap((reference) => reference.url ? [reference.url] : []),
     about: [record.primary_keyword, ...(record.semantic_terms ?? [])].filter(Boolean),
+    image: `${SITE_URL}/seo-card`,
   };
   const faqSchema = faqs.length ? {
     '@context': 'https://schema.org',
@@ -56,9 +64,9 @@ export default function MagazineArticle({ record, related }: { record: MagazineR
     <>
       <SiteHeader />
       <main className={styles.page} dir="rtl">
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(scholarly) }} />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }} />
-        {faqSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />}
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(scholarly).replace(/</g, '\\u003c') }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb).replace(/</g, '\\u003c') }} />
+        {faqSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema).replace(/</g, '\\u003c') }} />}
 
         <div className={styles.shell}>
           <nav className={styles.breadcrumbs} aria-label="مسار الصفحة"><Link href="/">الرئيسية</Link><span>←</span><Link href="/magazine/">المجلة والأبحاث</Link><span>←</span><span aria-current="page">القراءة الحالية</span></nav>

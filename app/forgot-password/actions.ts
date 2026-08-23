@@ -3,6 +3,7 @@
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import { PRODUCTION_SITE_URL } from '@/lib/seo';
 
 function normalizedEmail(formData: FormData) {
   const email = String(formData.get('email') ?? '').trim().toLowerCase();
@@ -18,7 +19,7 @@ async function siteOrigin() {
   if (origin) return origin.replace(/\/$/, '');
   const host = requestHeaders.get('x-forwarded-host') || requestHeaders.get('host');
   const proto = requestHeaders.get('x-forwarded-proto') || 'https';
-  return host ? `${proto}://${host}` : 'https://rawafid-platform-staging.khaledaltheeb.workers.dev';
+  return host ? `${proto}://${host}` : PRODUCTION_SITE_URL;
 }
 
 export async function requestPasswordReset(formData: FormData) {
@@ -31,7 +32,6 @@ export async function requestPasswordReset(formData: FormData) {
     redirectTo: `${origin}/auth/callback?next=${encodeURIComponent('/reset-password')}`,
   });
 
-  // Do not disclose whether an account exists for the submitted email.
   if (error) redirect('/forgot-password?status=sent');
   redirect('/forgot-password?status=sent');
 }

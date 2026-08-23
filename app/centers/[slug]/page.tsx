@@ -39,7 +39,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   return buildSeoMetadata({
     title: center.name,
     description: center.description || `${center.name} — مركز موثق في دليل منصة روافد مع بيانات الموقع والخدمات وطرق التواصل التي يسمح المركز بعرضها للعامة.`,
-    path: `/centers/${center.slug}`, index: true, image: center.cover_url || center.logo_url,
+    path: `/centers/${center.slug}`, index: true, type: 'profile', image: center.cover_url || center.logo_url,
     keywords: [center.name, ...(center.services ?? []).slice(0, 8), center.city, center.country].filter(Boolean) as string[],
   });
 }
@@ -68,11 +68,13 @@ export default async function CenterProfile({ params }: { params: Params }) {
   const location = [center.address, center.city, center.region, center.country].filter(Boolean).join('، ');
   const mapUrl = center.public_latitude !== null && center.public_longitude !== null ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${center.public_latitude},${center.public_longitude}`)}` : null;
   const hours = hoursRows(center.working_hours);
+  const profileUrl = `${SITE_URL}/centers/${center.slug}`;
+  const organizationId = `${profileUrl}#organization`;
   const breadcrumbs = breadcrumbJsonLd([{ name:'الرئيسية', path:'/' }, { name:'المراكز', path:'/centers' }, { name:center.name, path:`/centers/${center.slug}` }]);
   const jsonLd = {
-    '@context': 'https://schema.org', '@type': schemaType(center.center_type), '@id': `${SITE_URL}/centers/${center.slug}#organization`,
-    name: center.name, description: center.description || undefined, url: `${SITE_URL}/centers/${center.slug}`,
-    image: center.logo_url || center.cover_url || undefined,
+    '@context': 'https://schema.org', '@type': schemaType(center.center_type), '@id': organizationId,
+    name: center.name, description: center.description || undefined, url: profileUrl,
+    image: center.logo_url || center.cover_url || `${SITE_URL}/seo-card`,
     address: location ? { '@type': 'PostalAddress', streetAddress: center.address || undefined, addressLocality: center.city || undefined, addressRegion: center.region || undefined, addressCountry: center.country || undefined } : undefined,
     telephone: phone || undefined, email: email || undefined, sameAs: website ? [website] : undefined,
     geo: center.public_latitude !== null && center.public_longitude !== null ? { '@type':'GeoCoordinates', latitude:center.public_latitude, longitude:center.public_longitude } : undefined,
@@ -81,12 +83,25 @@ export default async function CenterProfile({ params }: { params: Params }) {
     identifier: license?.license_number || undefined,
     additionalProperty: license?.regulatory_authority ? [{ '@type':'PropertyValue', name:'Regulatory authority', value:license.regulatory_authority }] : undefined,
   };
+  const profileSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'ProfilePage',
+    '@id': `${profileUrl}#profile`,
+    url: profileUrl,
+    name: center.name,
+    description: center.description || undefined,
+    inLanguage: 'ar',
+    isAccessibleForFree: true,
+    mainEntity: { '@id': organizationId },
+    about: { '@id': organizationId },
+    isPartOf: { '@id': `${SITE_URL}/#website` },
+  };
 
   return (
     <>
       <SiteHeader />
       <main className="profile-shell">
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify([breadcrumbs,jsonLd]).replace(/</g, '\\u003c') }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify([breadcrumbs,profileSchema,jsonLd]).replace(/</g, '\\u003c') }} />
         <nav className="breadcrumbs" aria-label="مسار الصفحة"><Link href="/">الرئيسية</Link><span>/</span><Link href="/centers">المراكز</Link><span>/</span><span aria-current="page">{center.name}</span></nav>
         <section className="profile-hero center-profile-hero"><div className="profile-avatar center-profile-avatar" aria-hidden="true">{center.name.slice(0, 1)}</div><div className="profile-title-block"><span className="verified-label">مركز موثق</span><h1>{center.name}</h1>{location && <p>{location}</p>}<div className="directory-tags">{(center.services ?? []).slice(0, 8).map((service) => <span key={service}>{service}</span>)}</div></div></section>
         <nav className="profile-service-nav" aria-label="مسارات الخدمة"><Link href="/centers">كل المراكز</Link><Link href="/specialists">المختصون</Link><Link href="/care-guides/">أدلة الرعاية</Link><Link href="/search">البحث العام</Link>{canContact===true&&<><Link href={`/messages/new?center=${center.id}`}>بدء محادثة</Link><Link href={`/appointments/new?center=${center.id}`}>طلب موعد</Link></>}</nav>

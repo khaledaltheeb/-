@@ -23,6 +23,7 @@ const PAGE_SIZE = 24;
 const one = (value: string | string[] | undefined) => Array.isArray(value) ? value[0] ?? '' : value ?? '';
 const pageNo = (value: string) => { const n = Number(value); return Number.isInteger(n) && n > 0 && n < 10000 ? n : 1; };
 const qSafe = (value: string) => value.trim().replace(/[%_(),]/g, ' ').replace(/\s+/g, ' ').slice(0, 100);
+const indexPagePath = (slug: string, page: number) => `/sections/${slug}${page > 1 ? `?page=${page}` : ''}`;
 const pageHref = (slug: string, page: number, q: string) => { const params = new URLSearchParams(); if (page > 1) params.set('page', String(page)); if (q) params.set('q', q); return `/sections/${slug}${params.size ? `?${params}` : ''}`; };
 const legacyRoute = (slug: string) => `/sections/${slug}/`;
 
@@ -40,14 +41,25 @@ function virtualCategory(slug: string): Category | null {
 }
 async function resolvedCategory(slug: string) { return await dbCategory(slug) ?? virtualCategory(slug); }
 
-export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
-  const { slug } = await params;
+export async function generateMetadata({ params, searchParams }: { params: Params; searchParams: SearchParams }): Promise<Metadata> {
+  const [{ slug }, raw] = await Promise.all([params, searchParams]);
   const category = await resolvedCategory(slug);
   if (!category) {
     const route = legacyRoute(slug);
     return legacyPreservedMetadata(await getLegacyPreservedPage(route), route);
   }
-  return buildSeoMetadata({ title: category.seo_title || category.name_ar, description: category.seo_description || category.description || `${category.name_ar} في منصة روافد: محتوى عربي موثوق ومترابط.`, path: `/sections/${slug}`, index: true, keywords: [category.name_ar, 'منصة روافد', 'دليل موضوعي'] });
+  const page = pageNo(one(raw.page));
+  const query = qSafe(one(raw.q));
+  const baseTitle = category.seo_title || category.name_ar;
+  const baseDescription = category.seo_description || category.description || `${category.name_ar} في منصة روافد: محتوى عربي موثوق ومترابط.`;
+  return buildSeoMetadata({
+    title: query ? `نتائج البحث داخل ${category.name_ar}` : page > 1 ? `${baseTitle} - الصفحة ${page}` : baseTitle,
+    description: query ? `نتائج البحث الداخلي داخل قسم ${category.name_ar}. استخدم صفحة القسم الرئيسية للوصول إلى المحتوى المعتمد والمنظم.` : page > 1 ? `${baseDescription} صفحة ${page} من محتوى القسم.` : baseDescription,
+    path: query ? `/sections/${slug}` : indexPagePath(slug, page),
+    index: !query,
+    follow: true,
+    keywords: [category.name_ar, 'منصة روافد', 'دليل موضوعي'],
+  });
 }
 
 export default async function SectionPage({ params, searchParams }: { params: Params; searchParams: SearchParams }) {
@@ -133,10 +145,32 @@ export default async function SectionPage({ params, searchParams }: { params: Pa
   }
 
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  const canonical = `${SITE_URL}/sections/${slug}`;
+  if (page > pages && page > 1) notFound();
+  const canonicalPath = query ? `/sections/${slug}` : indexPagePath(slug, page);
+  const canonical = `${SITE_URL}${canonicalPath}`;
   const schemas = [
     breadcrumbJsonLd([{ name: 'الرئيسية', path: '/' }, { name: 'الأقسام', path: '/sections' }, ...(sector ? [{ name: sector.name_ar, path: `/sectors/${sector.slug}` }] : []), ...(parent ? [{ name: parent.name_ar, path: `/sections/${parent.slug}` }] : []), { name: category.name_ar, path: `/sections/${slug}` }]),
-    { '@context': 'https://schema.org', '@type': 'CollectionPage', '@id': `${canonical}#collection`, url: canonical, name: category.name_ar, description: category.description || undefined, inLanguage: 'ar', isPartOf: { '@id': `${SITE_URL}/#website` }, mainEntity: { '@type': 'ItemList', numberOfItems: total, itemListElement: rows.map((item, index) => ({ '@type': 'ListItem', position: (page - 1) * PAGE_SIZE + index + 1, name: item.title, url: `${SITE_URL}${publicContentHref(item)}` })) } },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'CollectionPage',
+      '@id': `${canonical}#collection`,
+      url: canonical,
+      name: query ? `نتائج البحث داخل ${category.name_ar}` : page > 1 ? `${category.name_ar} - الصفحة ${page}` : category.name_ar,
+      description: category.description || undefined,
+      inLanguage: 'ar',
+      isAccessibleForFree: true,
+      isPartOf: { '@id': `${SITE_URL}/#website` },
+      mainEntity: {
+        '@type': 'ItemList',
+        numberOfItems: total,
+        itemListElement: rows.map((item, index) => ({
+          '@type': 'ListItem',
+          position: (page - 1) * PAGE_SIZE + index + 1,
+          name: item.title,
+          url: `${SITE_URL}${publicContentHref(item)}`,
+        })),
+      },
+    },
   ];
 
   return <>
@@ -155,7 +189,7 @@ export default async function SectionPage({ params, searchParams }: { params: Pa
       </nav>
       {editorialContent && <section className="section category-editorial-content" aria-labelledby="category-editorial-title"><div className="section-heading"><span>الدليل التحريري للقسم</span><h2 id="category-editorial-title">{editorialContent.title}</h2>{editorialContent.excerpt && <p>{editorialContent.excerpt}</p>}</div><div className="article-body"><ContentRenderer bodyJson={editorialContent.body_json} bodyText={editorialContent.body_text} recordId={editorialContent.id} /></div></section>}
       {childCards.length > 0 && <section className="section" id="section-children"><div className="section-mini-heading"><div><span className="eyebrow">موضوعات فرعية</span><h2>استكشف داخل القسم</h2></div><span>{childCards.length.toLocaleString('ar')} موضوعات</span></div><div className="category-public-grid">{childCards.map((child) => <article className="public-category-card" key={child.slug}><Link href={`/sections/${child.slug}`}><h3>{child.name_ar}</h3></Link><p>{child.description}</p><Link href={`/sections/${child.slug}`}>استعراض الصفحات ←</Link></article>)}</div></section>}
-      <section className="section related-content-section" id="section-content"><div className="section-heading"><span>المحتوى المنشور</span><h2>{query ? `نتائج البحث عن «${query}»` : `محتوى ${category.name_ar}`}</h2><p>صفحات مرتبطة بهذا القسم وفق التصنيف المعرفي المعتمد، مع الحفاظ على العنوان والمسار الأصلي لكل صفحة لمنع التكرار.</p></div>{rows.length ? <><div className="related-content-grid">{rows.map((item) => { const href = publicContentHref(item); return <article key={item.id}><span className="content-type-pill">{publicContentTypeLabel(item.content_type)}</span><h3><Link href={href}>{item.title}</Link></h3>{item.excerpt && <p>{item.excerpt}</p>}<Link href={href}>قراءة الصفحة ←</Link></article>; })}</div><PublicPagination currentPage={page} totalPages={pages} hrefForPage={(targetPage) => pageHref(slug, targetPage, query)} ariaLabel={`صفحات محتوى قسم ${category.name_ar}`} /></> : <div className="empty-state"><strong>لا توجد نتيجة مطابقة.</strong><span>جرّب مصطلحًا أقصر أو انتقل إلى أحد الموضوعات الفرعية.</span></div>}</section>
+      <section className="section related-content-section" id="section-content"><div className="section-heading"><span>المحتوى المنشور</span><h2>{query ? `نتائج البحث عن «${query}»` : page > 1 ? `محتوى ${category.name_ar} - الصفحة ${page}` : `محتوى ${category.name_ar}`}</h2><p>صفحات مرتبطة بهذا القسم وفق التصنيف المعرفي المعتمد، مع الحفاظ على العنوان والمسار الأصلي لكل صفحة لمنع التكرار.</p></div>{rows.length ? <><div className="related-content-grid">{rows.map((item) => { const href = publicContentHref(item); return <article key={item.id}><span className="content-type-pill">{publicContentTypeLabel(item.content_type)}</span><h3><Link href={href}>{item.title}</Link></h3>{item.excerpt && <p>{item.excerpt}</p>}<Link href={href}>قراءة الصفحة ←</Link></article>; })}</div><PublicPagination currentPage={page} totalPages={pages} hrefForPage={(targetPage) => pageHref(slug, targetPage, query)} ariaLabel={`صفحات محتوى قسم ${category.name_ar}`} /></> : <div className="empty-state"><strong>لا توجد نتيجة مطابقة.</strong><span>جرّب مصطلحًا أقصر أو انتقل إلى أحد الموضوعات الفرعية.</span></div>}</section>
     </main>
     <SiteFooter />
   </>;

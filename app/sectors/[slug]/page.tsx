@@ -8,7 +8,7 @@ import PublicPagination from '@/components/public-pagination';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import { createClient } from '@/lib/supabase/server';
-import { buildSeoMetadata, breadcrumbJsonLd } from '@/lib/seo';
+import { buildSeoMetadata, breadcrumbJsonLd, SITE_URL } from '@/lib/seo';
 import { getLegacyPreservedPage, legacyPreservedMetadata } from '@/lib/legacy-preserved-page';
 import { resolveSectorAccent } from '@/lib/theme';
 import { publicContentHref, publicContentTypeLabel } from '@/lib/public-content-routing';
@@ -23,7 +23,8 @@ type EditorialContent = { id: string; title: string; excerpt: string | null; bod
 const PAGE_SIZE = 24;
 const one = (value: string | string[] | undefined) => Array.isArray(value) ? value[0] ?? '' : value ?? '';
 const pageNo = (value: string) => { const n = Number(value); return Number.isInteger(n) && n > 0 && n < 10000 ? n : 1; };
-const pageHref = (slug: string, page: number) => `/sectors/${slug}${page > 1 ? `?page=${page}` : ''}#sector-content`;
+const pagePath = (slug: string, page: number) => `/sectors/${slug}${page > 1 ? `?page=${page}` : ''}`;
+const pageHref = (slug: string, page: number) => `${pagePath(slug, page)}#sector-content`;
 const legacyRoute = (slug: string) => `/sectors/${slug}/`;
 
 async function getSector(slug: string): Promise<Sector | null> {
@@ -32,18 +33,22 @@ async function getSector(slug: string): Promise<Sector | null> {
   return data as Sector | null;
 }
 
-export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
-  const { slug } = await params;
+export async function generateMetadata({ params, searchParams }: { params: Params; searchParams: SearchParams }): Promise<Metadata> {
+  const [{ slug }, raw] = await Promise.all([params, searchParams]);
+  const page = pageNo(one(raw.page));
   const sector = await getSector(slug);
   if (!sector) {
     const route = legacyRoute(slug);
     return legacyPreservedMetadata(await getLegacyPreservedPage(route), route);
   }
+  const baseTitle = sector.seo_title || sector.name_ar;
+  const baseDescription = sector.seo_description || sector.description || `${sector.name_ar} في منصة روافد: أقسام مترابطة ومحتوى عربي موثوق ومسارات وصول منظمة حسب احتياج المستخدم.`;
   return buildSeoMetadata({
-    title: sector.seo_title || sector.name_ar,
-    description: sector.seo_description || sector.description || `${sector.name_ar} في منصة روافد: أقسام مترابطة ومحتوى عربي موثوق ومسارات وصول منظمة حسب احتياج المستخدم.`,
-    path: `/sectors/${sector.slug}`,
+    title: page > 1 ? `${baseTitle} - الصفحة ${page}` : baseTitle,
+    description: page > 1 ? `${baseDescription} صفحة ${page} من محتوى القطاع.` : baseDescription,
+    path: pagePath(sector.slug, page),
     index: true,
+    follow: true,
     keywords: [sector.name_ar, 'منصة روافد'],
   });
 }
@@ -92,15 +97,39 @@ export default async function SectorPage({ params, searchParams }: { params: Par
   }
 
   const contentPages = Math.max(1, Math.ceil(totalContent / PAGE_SIZE));
+  if (page > contentPages && page > 1) notFound();
   const roots = categoryRows.filter((category) => !category.parent_id);
+  const canonicalPath = pagePath(sector.slug, page);
+  const canonicalUrl = `${SITE_URL}${canonicalPath}`;
   const breadcrumbs = breadcrumbJsonLd([{ name: 'الرئيسية', path: '/' }, { name: 'القطاعات', path: '/sectors' }, { name: sector.name_ar, path: `/sectors/${sector.slug}` }]);
+  const collectionSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    '@id': `${canonicalUrl}#collection`,
+    url: canonicalUrl,
+    name: page > 1 ? `${sector.name_ar} - الصفحة ${page}` : sector.name_ar,
+    description: sector.description || undefined,
+    inLanguage: 'ar',
+    isAccessibleForFree: true,
+    isPartOf: { '@id': `${SITE_URL}/#website` },
+    mainEntity: {
+      '@type': 'ItemList',
+      numberOfItems: totalContent,
+      itemListElement: contentRows.map((item, index) => ({
+        '@type': 'ListItem',
+        position: (page - 1) * PAGE_SIZE + index + 1,
+        name: item.title,
+        url: `${SITE_URL}${publicContentHref(item)}`,
+      })),
+    },
+  };
   const accentStyle = { '--accent': resolveSectorAccent(sector.accent) } as CSSProperties;
   const sectorQuery = encodeURIComponent(sector.name_ar);
 
   return <>
     <SiteHeader />
     <main className="site-shell sector-page" style={accentStyle}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbs).replace(/</g, '\\u003c') }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify([breadcrumbs, collectionSchema]).replace(/</g, '\\u003c') }} />
       <nav className="breadcrumbs" aria-label="مسار الصفحة"><Link href="/">الرئيسية</Link><span>/</span><Link href="/sectors">القطاعات</Link><span>/</span><span aria-current="page">{sector.name_ar}</span></nav>
       <section className="sector-hero"><span className="eyebrow">قطاع رئيسي</span><h1>{sector.name_ar}</h1><p>{sector.description || 'قطاع رئيسي يجمع موضوعات مترابطة ضمن منصة روافد.'}</p><div className="public-stat-strip"><span>{roots.length.toLocaleString('ar')} أقسام رئيسية</span><span>{categoryRows.length.toLocaleString('ar')} قسمًا وقسمًا فرعيًا</span>{totalContent > 0 && <span>{totalContent.toLocaleString('ar')} صفحة منشورة</span>}</div><form className="sector-search" action="/search" method="get"><label className="sr-only" htmlFor="sector-search">ابحث في منصة روافد</label><input id="sector-search" name="q" defaultValue={sector.name_ar} aria-label={`ابحث عن موضوع مرتبط بـ ${sector.name_ar}`} /><button type="submit">بحث</button></form></section>
       <nav className="sector-quick-nav" aria-label={`وصول سريع داخل ${sector.name_ar}`}>
@@ -116,7 +145,7 @@ export default async function SectorPage({ params, searchParams }: { params: Par
         {roots.map((category) => { const children = categoryRows.filter((candidate) => candidate.parent_id === category.id); return <article className="public-category-card" key={category.id}><Link href={`/sections/${category.slug}`}><h3>{category.name_ar}</h3></Link><p>{category.description || 'قسم متخصص ضمن هذا القطاع.'}</p>{children.length > 0 && <div className="subcategories">{children.map((child) => <Link href={`/sections/${child.slug}`} key={child.id}>{child.name_ar}</Link>)}</div>}<Link href={`/sections/${category.slug}`}>استعراض القسم ←</Link></article>; })}
         {!roots.length && <div className="empty-state"><strong>لا توجد أقسام عامة متاحة في هذا القطاع حاليًا.</strong></div>}
       </div></section>
-      {totalContent > 0 && <section className="section related-content-section" id="sector-content"><div className="section-heading"><span>مكتبة القطاع</span><h2>كل المحتوى المنشور في {sector.name_ar}</h2><p>جميع الصفحات العامة المصنفة تحت أقسام هذا القطاع، مرتبة من الأحدث مع إمكانية الانتقال بين جميع صفحات النتائج دون فقد أي مادة.</p></div>{contentRows.length > 0 ? <><div className="related-content-grid">{contentRows.map((item) => { const href = publicContentHref(item); return <article key={item.id}><span className="content-type-pill">{publicContentTypeLabel(item.content_type)}</span><h3><Link href={href}>{item.title}</Link></h3>{item.excerpt && <p>{item.excerpt}</p>}<Link href={href}>قراءة الصفحة ←</Link></article>; })}</div><PublicPagination currentPage={page} totalPages={contentPages} hrefForPage={(targetPage) => pageHref(sector.slug, targetPage)} ariaLabel={`صفحات محتوى قطاع ${sector.name_ar}`} /></> : <div className="empty-state"><strong>هذه الصفحة خارج نطاق النتائج المتاحة.</strong><span>استخدم أرقام الصفحات للعودة إلى محتوى القطاع.</span><PublicPagination currentPage={Math.min(page, contentPages)} totalPages={contentPages} hrefForPage={(targetPage) => pageHref(sector.slug, targetPage)} ariaLabel={`صفحات محتوى قطاع ${sector.name_ar}`} /></div>}</section>}
+      {totalContent > 0 && <section className="section related-content-section" id="sector-content"><div className="section-heading"><span>مكتبة القطاع</span><h2>{page > 1 ? `محتوى ${sector.name_ar} - الصفحة ${page}` : `كل المحتوى المنشور في ${sector.name_ar}`}</h2><p>جميع الصفحات العامة المصنفة تحت أقسام هذا القطاع، مرتبة من الأحدث مع إمكانية الانتقال بين جميع صفحات النتائج دون فقد أي مادة.</p></div>{contentRows.length > 0 ? <><div className="related-content-grid">{contentRows.map((item) => { const href = publicContentHref(item); return <article key={item.id}><span className="content-type-pill">{publicContentTypeLabel(item.content_type)}</span><h3><Link href={href}>{item.title}</Link></h3>{item.excerpt && <p>{item.excerpt}</p>}<Link href={href}>قراءة الصفحة ←</Link></article>; })}</div><PublicPagination currentPage={page} totalPages={contentPages} hrefForPage={(targetPage) => pageHref(sector.slug, targetPage)} ariaLabel={`صفحات محتوى قطاع ${sector.name_ar}`} /></> : null}</section>}
     </main>
     <SiteFooter />
   </>;

@@ -52,18 +52,43 @@ export default async function QuickInfoDetailPage({ params }: { params: Params }
   const references = safeQuickInfoReferences(record.references_json);
   const faqItems = visibleQuickInfoFaq(record.body_json);
   const review = contentReviewProvenance(record);
+  const wordCount = String(record.body_text ?? '').trim().split(/\s+/u).filter(Boolean).length;
+  const keywords = [record.primary_keyword, ...(record.secondary_keywords ?? []), ...(record.semantic_terms ?? []).slice(0, 10)]
+    .filter((item): item is string => typeof item === 'string' && item.trim().length > 0);
   const breadcrumbs = breadcrumbJsonLd([{ name: 'الرئيسية', path: '/' }, { name: 'معلومات سريعة', path: '/quick-info/' }, { name: record.title, path: canonical }]);
   const articleSchema = {
-    '@context': 'https://schema.org', '@type': ['Article', 'MedicalWebPage'], '@id': `${url}#article`, url,
-    mainEntityOfPage: { '@type': 'WebPage', '@id': url }, headline: record.title,
-    description: record.seo_description || record.excerpt || undefined, inLanguage: 'ar',
-    datePublished: record.published_at || undefined, dateModified: record.updated_at || undefined, lastReviewed: review.lastReviewedAt || undefined,
+    '@context': 'https://schema.org',
+    '@type': ['Article', 'MedicalWebPage'],
+    '@id': `${url}#article`,
+    url,
+    mainEntityOfPage: { '@type': 'WebPage', '@id': url },
+    headline: record.title,
+    name: record.title,
+    description: record.seo_description || record.excerpt || undefined,
+    inLanguage: 'ar',
+    isAccessibleForFree: true,
+    datePublished: record.published_at || undefined,
+    dateModified: record.updated_at || undefined,
+    lastReviewed: review.lastReviewedAt || undefined,
     author: record.author_display_name ? { '@type': 'Organization', name: record.author_display_name } : { '@id': `${SITE_URL}/#organization` },
     reviewedBy: review.reviewedBySchema,
-    publisher: { '@id': `${SITE_URL}/#organization` }, image: record.featured_image_url || undefined,
-    citation: references.flatMap((reference) => reference.url ? [reference.url] : []), isPartOf: { '@id': `${SITE_URL}/#website` },
+    publisher: { '@id': `${SITE_URL}/#organization` },
+    image: record.featured_image_url || `${SITE_URL}/seo-card`,
+    keywords: keywords.join(', '),
+    wordCount,
+    citation: references.flatMap((reference) => reference.url ? [reference.url] : []),
+    isPartOf: { '@id': `${SITE_URL}/#website` },
   };
-  const faqSchema = faqItems.length ? { '@context': 'https://schema.org', '@type': 'FAQPage', '@id': `${url}#faq`, mainEntity: faqItems.map((item) => ({ '@type': 'Question', name: item.question, acceptedAnswer: { '@type': 'Answer', text: item.answer } })) } : null;
+  const faqSchema = faqItems.length ? {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    '@id': `${url}#faq`,
+    mainEntity: faqItems.map((item) => ({
+      '@type': 'Question',
+      name: item.question,
+      acceptedAnswer: { '@type': 'Answer', text: item.answer },
+    })),
+  } : null;
   const schemas = [breadcrumbs, articleSchema, ...(faqSchema ? [faqSchema] : [])];
 
   return <><SiteHeader /><main className="article-shell">

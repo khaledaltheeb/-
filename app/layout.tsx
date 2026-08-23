@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import Script from 'next/script';
 import { Noto_Sans_Arabic } from 'next/font/google';
-import { BRAND_NAME, DEFAULT_DESCRIPTION, SITE_URL, organizationJsonLd } from '@/lib/seo';
+import { BRAND_NAME, BRAND_SHORT, DEFAULT_DESCRIPTION, INDEXING_ENABLED, SITE_URL, organizationJsonLd } from '@/lib/seo';
 import './rawafid-theme.css';
 
 /* Compatibility modules now live behind the central entry point:
@@ -11,7 +11,7 @@ import './rawafid-theme.css';
  './admin-shell-v3.css'.
 */
 
-const INDEXING_ENABLED = process.env.NEXT_PUBLIC_ALLOW_INDEXING === 'true';
+const DEFAULT_SOCIAL_IMAGE = `${SITE_URL}/seo-card`;
 
 const arabicFont = Noto_Sans_Arabic({
   subsets: ['arabic'],
@@ -25,7 +25,14 @@ export const metadata: Metadata = {
   title: { default: BRAND_NAME, template: `%s | ${BRAND_NAME}` },
   description: DEFAULT_DESCRIPTION,
   applicationName: BRAND_NAME,
+  creator: BRAND_NAME,
+  publisher: BRAND_NAME,
   manifest: '/manifest.webmanifest',
+  alternates: {
+    types: {
+      'application/rss+xml': `${SITE_URL}/feed.xml`,
+    },
+  },
   icons: {
     icon: [
       { url: '/icons/rawafid-app.svg', type: 'image/svg+xml', sizes: 'any' },
@@ -41,8 +48,38 @@ export const metadata: Metadata = {
   },
   formatDetection: { telephone: false, email: false, address: false },
   robots: INDEXING_ENABLED
-    ? { index: true, follow: true }
-    : { index: false, follow: false, noarchive: true },
+    ? {
+        index: true,
+        follow: true,
+        googleBot: {
+          index: true,
+          follow: true,
+          'max-image-preview': 'large',
+          'max-snippet': -1,
+          'max-video-preview': -1,
+        },
+      }
+    : { index: false, follow: false, noarchive: true, nosnippet: true },
+  openGraph: {
+    type: 'website',
+    siteName: BRAND_SHORT,
+    locale: 'ar_AR',
+    title: BRAND_NAME,
+    description: DEFAULT_DESCRIPTION,
+    url: SITE_URL,
+    images: [{
+      url: DEFAULT_SOCIAL_IMAGE,
+      width: 1200,
+      height: 630,
+      alt: 'روافد — منصة عربية للمعرفة الصحية والنفسية الموثوقة',
+    }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: BRAND_NAME,
+    description: DEFAULT_DESCRIPTION,
+    images: [DEFAULT_SOCIAL_IMAGE],
+  },
   referrer: 'strict-origin-when-cross-origin',
 };
 

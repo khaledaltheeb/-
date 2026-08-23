@@ -60,21 +60,39 @@ export default async function SpecialistProfile({ params }: { params: Params }) 
   const qualifications = qualificationText(specialist.qualifications);
   const location = [specialist.city,specialist.region,specialist.country].filter(Boolean).join('، ');
   const mapUrl = specialist.public_latitude !== null && specialist.public_longitude !== null ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${specialist.public_latitude},${specialist.public_longitude}`)}` : null;
+  const profileUrl = `${SITE_URL}/specialists/${specialist.slug}`;
+  const personId = `${profileUrl}#person`;
   const breadcrumbs = breadcrumbJsonLd([{name:'الرئيسية',path:'/'},{name:'المختصون',path:'/specialists'},{name:specialist.full_name,path:`/specialists/${specialist.slug}`}]);
   const personSchema = {
-    '@context':'https://schema.org','@type':'Person','@id':`${SITE_URL}/specialists/${specialist.slug}#person`,name:specialist.full_name,
-    jobTitle:specialist.professional_title || undefined,description:specialist.bio || undefined,url:`${SITE_URL}/specialists/${specialist.slug}`,
+    '@context':'https://schema.org','@type':'Person','@id':personId,name:specialist.full_name,
+    jobTitle:specialist.professional_title || undefined,description:specialist.bio || undefined,url:profileUrl,
     address:location ? {'@type':'PostalAddress',addressLocality:specialist.city || undefined,addressRegion:specialist.region || undefined,addressCountry:specialist.country || undefined} : undefined,
     knowsLanguage:specialist.languages?.length ? specialist.languages : undefined,knowsAbout:specialist.specialties?.length ? specialist.specialties : undefined,
     hasCredential: specialist.license_number ? {'@type':'EducationalOccupationalCredential',credentialCategory:'Professional license',identifier:specialist.license_number} : undefined,
     workLocation: centers.map((center) => ({'@type':'MedicalOrganization',name:center.name,url:`${SITE_URL}/centers/${center.slug}`})),
+    sameAs: website ? [website] : undefined,
+    email: email || undefined,
+    telephone: phone || undefined,
+  };
+  const profileSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'ProfilePage',
+    '@id': `${profileUrl}#profile`,
+    url: profileUrl,
+    name: `${specialist.full_name}${specialist.professional_title ? ` — ${specialist.professional_title}` : ''}`,
+    description: specialist.bio || undefined,
+    inLanguage: 'ar',
+    isAccessibleForFree: true,
+    mainEntity: { '@id': personId },
+    about: { '@id': personId },
+    isPartOf: { '@id': `${SITE_URL}/#website` },
   };
 
   return (
     <>
       <SiteHeader />
       <main className="profile-shell">
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify([breadcrumbs,personSchema]).replace(/</g,'\\u003c') }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify([breadcrumbs,profileSchema,personSchema]).replace(/</g,'\\u003c') }} />
         <nav className="breadcrumbs" aria-label="مسار الصفحة"><Link href="/">الرئيسية</Link><span>/</span><Link href="/specialists">المختصون</Link><span>/</span><span aria-current="page">{specialist.full_name}</span></nav>
         <section className="profile-hero"><div className="profile-avatar" aria-hidden="true">{specialist.full_name.slice(0,1)}</div><div className="profile-title-block"><span className="verified-label">ملف موثق</span><h1>{specialist.full_name}</h1>{specialist.professional_title && <p>{specialist.professional_title}</p>}<div className="profile-quick-meta">{location && <span>{location}</span>}{specialist.years_experience !== null && <span>{specialist.years_experience.toLocaleString('ar')} سنوات خبرة</span>}{specialist.offers_remote && <span>عن بُعد</span>}{specialist.offers_in_person && <span>حضوري</span>}</div></div></section>
         <nav className="profile-service-nav" aria-label="مسارات الخدمة"><Link href="/specialists">كل المختصين</Link><Link href="/centers">المراكز</Link><Link href="/care-guides/">أدلة الرعاية</Link><Link href="/search">البحث العام</Link>{canContact===true&&<><Link href={`/messages/new?specialist=${specialist.id}`}>بدء محادثة</Link><Link href={`/appointments/new?specialist=${specialist.id}`}>طلب موعد</Link></>}</nav>

@@ -8,7 +8,6 @@ import {
   getExpandedEncyclopediaIndex,
   type ExpandedEncyclopediaIndexRecord,
 } from '@/lib/expanded-encyclopedia';
-import { getQuickInfoItems, quickInfoContentSlug } from '@/lib/quick-info';
 import {
   getPsychEncyclopediaReleaseIndex,
   type PsychEncyclopediaReleaseIndexRecord,
@@ -34,6 +33,12 @@ type R = {
   excerpt: string | null;
   destination: string;
   score: number;
+};
+
+type QuickInfoGateRow = {
+  slug: string | null;
+  canonical_url: string | null;
+  schema_json: unknown;
 };
 
 const labels: Record<T, string> = {
@@ -66,6 +71,20 @@ function normalizeSearch(value: string) {
     .replace(/[^\p{L}\p{N}]+/gu, ' ')
     .trim()
     .replace(/\s+/gu, ' ');
+}
+
+function isApprovedQuickInfoGateRow(row: QuickInfoGateRow) {
+  if (!row.slug?.startsWith('quick-info-')) return false;
+  const schema = row.schema_json && typeof row.schema_json === 'object' && !Array.isArray(row.schema_json)
+    ? row.schema_json as Record<string, unknown>
+    : null;
+  if (!schema) return false;
+  if (schema.page_role !== 'quick-info' || schema.publication_ready !== true || schema.editorial_review_required !== false) return false;
+  const routeSlug = row.slug.slice('quick-info-'.length);
+  if (!/^[a-z0-9][a-z0-9-]*$/.test(routeSlug)) return false;
+  const expectedCanonical = `/quick-info/${routeSlug}/`;
+  const storedCanonical = typeof row.canonical_url === 'string' ? row.canonical_url.trim() : '';
+  return !storedCanonical || storedCanonical === expectedCanonical;
 }
 
 function searchPsychEncyclopedia(query: string, records: PsychEncyclopediaReleaseIndexRecord[], limit = 75): R[] {
@@ -169,7 +188,7 @@ export async function PlatformSearchExperience({ searchParams, routeBase = '/sea
   if (q.length >= 2) {
     let dbData: R[] = [];
     let dbError = false;
-    let approvedQuickInfo: Awaited<ReturnType<typeof getQuickInfoItems>> = [];
+    let approvedQuickInfoSlugs = new Set<string>();
     let psychIndex: PsychEncyclopediaReleaseIndexRecord[] = [];
     let expandedIndex: ExpandedEncyclopediaIndexRecord[] = [];
 
@@ -187,36 +206,45 @@ export async function PlatformSearchExperience({ searchParams, routeBase = '/sea
 
     try {
       const s = await createClient();
-      const [{ data, error: e }, quickInfo] = await Promise.all([
-        s.rpc('search_platform', { p_query: q, p_limit: 75 }),
-        getQuickInfoItems(500),
-      ]);
+      const { data, error: e } = await s.rpc('search_platform', { p_query: q, p_limit: 75 });
       dbData = (data ?? []) as R[];
-      approvedQuickInfo = quickInfo;
       dbError = Boolean(e);
+
+      if (!e) {
+        const quickInfoSlugs = [...new Set(dbData.filter((item) => item.slug.startsWith('quick-info-')).map((item) => item.slug))];
+        if (quickInfoSlugs.length > 0) {
+          const { data: gateRows, error: gateError } = await s
+            .from('content')
+            .select('slug,canonical_url,schema_json')
+            .in('slug', quickInfoSlugs)
+            .eq('status', 'published')
+            .eq('robots_index', true)
+            .lte('published_at', new Date().toISOString());
+
+          if (!gateError) {
+            approvedQuickInfoSlugs = new Set(
+              ((gateRows ?? []) as QuickInfoGateRow[])
+                .filter(isApprovedQuickInfoGateRow)
+                .map((row) => row.slug as string),
+            );
+          }
+        }
+      }
     } catch {
       dbError = true;
-      try {
-        approvedQuickInfo = await getQuickInfoItems(500);
-      } catch {
-        approvedQuickInfo = [];
-      }
     }
 
     const psychReleaseSlugs = new Set(psychIndex.map((record) => record.slug));
-    const approvedByStoredSlug = new Map(
-      approvedQuickInfo.map((item) => [quickInfoContentSlug(item.routeSlug), item]),
-    );
 
     const db = dbData.flatMap((item): R[] => {
       if (item.slug.startsWith('quick-info-')) {
-        const approved = approvedByStoredSlug.get(item.slug);
-        if (!approved) return [];
+        if (!approvedQuickInfoSlugs.has(item.slug)) return [];
+        const routeSlug = item.slug.slice('quick-info-'.length);
         return [{
           ...item,
           entity_type: 'content',
           subtitle: 'معلومة سريعة — محتوى مراجع',
-          destination: approved.canonicalUrl,
+          destination: `/quick-info/${routeSlug}/`,
         }];
       }
 

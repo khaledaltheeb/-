@@ -3,6 +3,7 @@
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import { PRODUCTION_SITE_URL } from '@/lib/seo';
 
 function safeNext(formData: FormData) {
   const value = String(formData.get('next') ?? '').trim().slice(0, 500);
@@ -17,7 +18,7 @@ async function siteOrigin() {
   if (origin) return origin.replace(/\/$/, '');
   const host = requestHeaders.get('x-forwarded-host') || requestHeaders.get('host');
   const proto = requestHeaders.get('x-forwarded-proto') || 'https';
-  return host ? `${proto}://${host}` : 'https://rawafid-platform-staging.khaledaltheeb.workers.dev';
+  return host ? `${proto}://${host}` : PRODUCTION_SITE_URL;
 }
 
 export async function register(formData: FormData) {
@@ -48,7 +49,6 @@ export async function register(formData: FormData) {
     },
   });
 
-  // Keep the public response intentionally generic so registration cannot be used as an account-enumeration oracle.
   if (error) redirect(`/register?status=check_email&next=${encodeURIComponent(next)}`);
   redirect(`/register?status=check_email&next=${encodeURIComponent(next)}`);
 }

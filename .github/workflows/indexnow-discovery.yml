@@ -1,0 +1,41 @@
+name: Rawafid IndexNow Discovery
+
+# Intentionally manual until healthrenewal.org is cut over to the new Rawafid build.
+# Re-enable hourly/daily schedules only after the production sitemap and key file
+# are verified on the canonical domain.
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: rawafid-indexnow-discovery
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NEXT_PUBLIC_SITE_URL: https://healthrenewal.org
+      INDEXNOW_SITE_URL: https://healthrenewal.org
+      INDEXNOW_KEY: b7f31d3c5a694e2f8b04c71d9a6e53f2
+      INDEXNOW_BATCH_SIZE: '10000'
+      INDEXNOW_SINCE_HOURS: '0'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Verify canonical production discovery endpoints
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${INDEXNOW_SITE_URL}" = "https://healthrenewal.org"
+          curl -fsS --retry 5 --retry-delay 3 "${INDEXNOW_SITE_URL}/robots.txt" | grep -q "Sitemap: ${INDEXNOW_SITE_URL}/sitemap.xml"
+          curl -fsS --retry 5 --retry-delay 3 "${INDEXNOW_SITE_URL}/sitemap.xml" | grep -q '<sitemapindex'
+          test "$(curl -fsS --retry 5 --retry-delay 3 "${INDEXNOW_SITE_URL}/${INDEXNOW_KEY}.txt")" = "${INDEXNOW_KEY}"
+      - name: Notify IndexNow participants from canonical production sitemaps
+        run: node scripts/submit-indexnow.mjs

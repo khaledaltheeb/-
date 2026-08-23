@@ -4,7 +4,7 @@ import Link from 'next/link';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import { createClient } from '@/lib/supabase/server';
-import { buildSeoMetadata, breadcrumbJsonLd } from '@/lib/seo';
+import { buildSeoMetadata, breadcrumbJsonLd, SITE_URL } from '@/lib/seo';
 import { resolveSectorAccent } from '@/lib/theme';
 
 export const dynamic = 'force-dynamic';
@@ -28,11 +28,33 @@ export default async function SectorsIndex() {
   const rows = (sectors ?? []) as Sector[];
   const categoryRows = (categories ?? []) as Category[];
   const breadcrumbs = breadcrumbJsonLd([{ name: 'الرئيسية', path: '/' }, { name: 'القطاعات', path: '/sectors' }]);
+  const collection = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    '@id': `${SITE_URL}/sectors#collection`,
+    url: `${SITE_URL}/sectors`,
+    name: 'قطاعات روافد',
+    description: 'الخريطة الرئيسية لقطاعات المعرفة والخدمات العامة في منصة روافد.',
+    inLanguage: 'ar',
+    isAccessibleForFree: true,
+    isPartOf: { '@id': `${SITE_URL}/#website` },
+    mainEntity: {
+      '@type': 'ItemList',
+      numberOfItems: rows.length,
+      itemListElement: rows.map((sector, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        name: sector.name_ar,
+        description: sector.description || undefined,
+        url: `${SITE_URL}/sectors/${sector.slug}`,
+      })),
+    },
+  };
 
   return <>
     <SiteHeader />
     <main className="site-shell sector-page-shell">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbs).replace(/</g, '\\u003c') }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify([breadcrumbs, collection]).replace(/</g, '\\u003c') }} />
       <nav className="breadcrumbs" aria-label="مسار الصفحة"><Link href="/">الرئيسية</Link><span>/</span><span aria-current="page">القطاعات</span></nav>
 
       <section className="public-index-hero" aria-labelledby="sectors-title">

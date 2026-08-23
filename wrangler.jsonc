@@ -10,7 +10,7 @@
   "minify": true,
   "vars": {
     "NEXT_PUBLIC_SITE_URL": "https://rawafid-platform-staging.khaledaltheeb.workers.dev",
-    "NEXT_PUBLIC_ALLOW_INDEXING": "true",
+    "NEXT_PUBLIC_ALLOW_INDEXING": "false",
     "NEXT_PUBLIC_ENABLE_ANALYTICS": "false"
   },
   "assets": {

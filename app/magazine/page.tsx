@@ -30,19 +30,31 @@ export default async function MagazinePage() {
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
+    '@id': `${SITE_URL}/magazine/#collection`,
     name: 'المجلة والأبحاث العلمية | منصة روافد',
     description,
     url: `${SITE_URL}/magazine/`,
     inLanguage: 'ar',
-    isPartOf: { '@type': 'WebSite', '@id': `${SITE_URL}/#website` },
-    hasPart: items.map((item) => ({ '@type': 'ScholarlyArticle', name: item.title, url: `${SITE_URL}${item.canonical_url}` })),
+    isAccessibleForFree: true,
+    isPartOf: { '@id': `${SITE_URL}/#website` },
+    publisher: { '@id': `${SITE_URL}/#organization` },
+    mainEntity: {
+      '@type': 'ItemList',
+      numberOfItems: items.length,
+      itemListElement: items.map((item, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        name: item.title,
+        url: `${SITE_URL}${item.canonical_url || `/content/${item.slug}`}`,
+      })),
+    },
   };
 
   return (
     <>
       <SiteHeader />
       <main className={styles.page} dir="rtl">
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema).replace(/</g, '\\u003c') }} />
         <section className={styles.hero}>
           <div className={styles.shell}>
             <p className={styles.eyebrow}>المجلة والأبحاث</p>

@@ -1,16 +1,11 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import { createClient } from '@/lib/supabase/server';
-import { buildSeoMetadata } from '@/lib/seo';
+import { buildSeoMetadata, breadcrumbJsonLd, SITE_URL } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
-export const metadata = buildSeoMetadata({
-  title: 'دليل المختصين النفسيين',
-  description: 'دليل المختصين الموثقين في منصة روافد: ابحث حسب الاسم والتخصص والمدينة ونمط الخدمة، واستعرض الملفات المهنية والبيانات العامة التي اجتازت التحقق.',
-  path: '/specialists', index: true,
-  keywords: ['مختص نفسي', 'أخصائي نفسي', 'طبيب نفسي', 'معالج نفسي', 'دليل المختصين', 'منصة روافد'],
-});
 
 type SearchParams = Promise<{ q?: string; specialty?: string; city?: string; mode?: string }>;
 type SpecialistRow = {
@@ -19,13 +14,31 @@ type SpecialistRow = {
   years_experience: number | null; offers_remote: boolean; offers_in_person: boolean;
 };
 
-export default async function SpecialistsDirectory({ searchParams }: { searchParams: SearchParams }) {
-  const params = await searchParams;
+function normalizedFilters(params: Awaited<SearchParams>) {
   const q = String(params.q ?? '').trim().slice(0, 120);
   const specialty = String(params.specialty ?? '').trim().slice(0, 120);
   const city = String(params.city ?? '').trim().slice(0, 120);
   const mode = ['remote', 'in_person'].includes(String(params.mode ?? '')) ? String(params.mode) : '';
-  const hasFilters = Boolean(q || specialty || city || mode);
+  return { q, specialty, city, mode, hasFilters: Boolean(q || specialty || city || mode) };
+}
+
+export async function generateMetadata({ searchParams }: { searchParams: SearchParams }): Promise<Metadata> {
+  const filters = normalizedFilters(await searchParams);
+  return buildSeoMetadata({
+    title: filters.hasFilters ? 'نتائج تصفية دليل المختصين' : 'دليل المختصين النفسيين',
+    description: filters.hasFilters
+      ? 'نتائج تصفية داخل دليل المختصين الموثقين في روافد. ارجع إلى صفحة الدليل الأساسية للوصول إلى الفهرس العام.'
+      : 'دليل المختصين الموثقين في منصة روافد: ابحث حسب الاسم والتخصص والمدينة ونمط الخدمة، واستعرض الملفات المهنية والبيانات العامة التي اجتازت التحقق.',
+    path: '/specialists',
+    index: !filters.hasFilters,
+    follow: true,
+    keywords: ['مختص نفسي', 'أخصائي نفسي', 'طبيب نفسي', 'معالج نفسي', 'دليل المختصين', 'منصة روافد'],
+  });
+}
+
+export default async function SpecialistsDirectory({ searchParams }: { searchParams: SearchParams }) {
+  const filters = normalizedFilters(await searchParams);
+  const { q, specialty, city, mode, hasFilters } = filters;
 
   const supabase = await createClient();
   let query = supabase.from('specialists').select('id,slug,full_name,professional_title,bio,country,region,city,specialties,languages,years_experience,offers_remote,offers_in_person').eq('verification', 'verified').eq('is_active', true).order('full_name').limit(100);
@@ -37,10 +50,35 @@ export default async function SpecialistsDirectory({ searchParams }: { searchPar
   const { data, error } = await query;
   const rows = (Array.isArray(data) ? data : []) as SpecialistRow[];
 
+  const directoryUrl = `${SITE_URL}/specialists`;
+  const breadcrumbs = breadcrumbJsonLd([{ name: 'الرئيسية', path: '/' }, { name: 'دليل المختصين', path: '/specialists' }]);
+  const collectionSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    '@id': `${directoryUrl}#collection`,
+    url: directoryUrl,
+    name: hasFilters ? 'نتائج تصفية دليل المختصين' : 'دليل المختصين',
+    description: 'دليل عام للملفات المهنية الموثقة والمنشورة في منصة روافد.',
+    inLanguage: 'ar',
+    isAccessibleForFree: true,
+    isPartOf: { '@id': `${SITE_URL}/#website` },
+    mainEntity: {
+      '@type': 'ItemList',
+      numberOfItems: rows.length,
+      itemListElement: rows.map((specialist, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        name: specialist.full_name,
+        url: `${SITE_URL}/specialists/${specialist.slug}`,
+      })),
+    },
+  };
+
   return (
     <>
       <SiteHeader />
       <main className="directory-shell">
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify([breadcrumbs, collectionSchema]).replace(/</g, '\\u003c') }} />
         <nav className="breadcrumbs" aria-label="مسار الصفحة"><Link href="/">الرئيسية</Link><span>/</span><span aria-current="page">دليل المختصين</span></nav>
         <section className="directory-hero">
           <span className="eyebrow">دليل مهني موثق</span>
