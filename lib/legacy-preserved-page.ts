@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { createClient } from '@/lib/supabase/server';
+import { buildSeoMetadata } from '@/lib/seo';
 
 type UnknownRecord = Record<string, unknown>;
 
@@ -126,12 +127,12 @@ export async function getLegacyPreservedPage(route: string): Promise<LegacyPrese
 
 export function legacyPreservedMetadata(page: LegacyPreservedPage | null, route: string): Metadata {
   if (!page) return {};
-  const title = page.title || page.h1 || 'محتوى محفوظ';
-  const description = page.meta_description || undefined;
-  return {
-    title,
-    description,
-    alternates: { canonical: legacyCanonicalPath(route) },
-    robots: { index: false, follow: true, noarchive: true },
-  };
+  return buildSeoMetadata({
+    title: page.title || page.h1 || 'محتوى محفوظ',
+    description: page.meta_description || page.body_text?.slice(0, 220) || 'صفحة محفوظة من مكتبة روافد قيد المراجعة والترقية التحريرية.',
+    path: legacyCanonicalPath(route),
+    index: false,
+    follow: true,
+    type: 'website',
+  });
 }
