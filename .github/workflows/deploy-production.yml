@@ -55,6 +55,9 @@ jobs:
           test "${NEXT_PUBLIC_SITE_URL}" = "https://healthrenewal.org"
           test "${NEXT_PUBLIC_ALLOW_INDEXING}" = "true"
           grep -q "PRODUCTION_SITE_URL = 'https://healthrenewal.org'" lib/seo.ts
+          grep -q '"production"' wrangler.jsonc
+          grep -q '"pattern": "healthrenewal.org"' wrangler.jsonc
+          grep -q '"custom_domain": true' wrangler.jsonc
       - name: Verify Cloudflare credentials and account access
         shell: bash
         run: |
@@ -68,13 +71,13 @@ jobs:
             echo 'Wrangler did not authenticate with the configured API token.' >&2
             exit 1
           fi
-      - name: Build Cloudflare Worker with OpenNext
+      - name: Build Cloudflare Worker with OpenNext production environment
         env:
           NEXT_PUBLIC_SITE_URL: https://healthrenewal.org
           NEXT_PUBLIC_ALLOW_INDEXING: 'true'
-        run: npx opennextjs-cloudflare build
-      - name: Deploy Cloudflare Worker with OpenNext
-        run: npx opennextjs-cloudflare deploy
+        run: npx opennextjs-cloudflare build --env production
+      - name: Deploy Cloudflare Worker with OpenNext production environment
+        run: npx opennextjs-cloudflare deploy --env production
       - name: Verify production discovery and canonical origin
         shell: bash
         run: |

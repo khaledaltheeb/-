@@ -1,12 +1,17 @@
-import type { Metadata } from 'next';
 import Link from 'next/link';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
+import { buildSeoMetadata } from '@/lib/seo';
 import { getTerminologyToolTerms } from '@/lib/terminology-tools';
 import styles from '../tools.module.css';
 
 export const dynamic = 'force-dynamic';
-export const metadata: Metadata = { title: 'مصطلح اليوم', description: 'مصطلح نفسي عربي يتغير يوميًا من بين المواد المنشورة والمراجعة في روافد، مع تعريف مختصر ورابط للمقال الكامل.', alternates: { canonical: '/tools/daily-term' } };
+export const metadata = buildSeoMetadata({
+  title: 'مصطلح اليوم',
+  description: 'مصطلح نفسي عربي يتغير يوميًا من بين المواد المنشورة والمراجعة في روافد، مع تعريف مختصر ورابط للمقال الكامل.',
+  path: '/tools/daily-term',
+  index: true,
+});
 
 export default async function DailyTermPage() {
   const terms=await getTerminologyToolTerms(); const now=new Date(); const day=Math.floor(Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),now.getUTCDate())/86400000); const term=terms.length?terms[((day%terms.length)+terms.length)%terms.length]:null;

@@ -25,7 +25,7 @@ function explicitlyNoIndex(source) {
 }
 
 function usesCentralSeo(source) {
-  return source.includes('buildSeoMetadata(') || source.includes('legacyPreservedMetadata(');
+  return source.includes('buildSeoMetadata(') || source.includes('legacyPreservedMetadata(') || source.includes('preservedRouteMetadata(');
 }
 
 function hasDynamicMetadata(source) {
