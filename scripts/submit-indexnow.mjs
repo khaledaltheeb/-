@@ -3,6 +3,7 @@ const key = process.env.INDEXNOW_KEY || 'b7f31d3c5a694e2f8b04c71d9a6e53f2';
 const endpoint = process.env.INDEXNOW_ENDPOINT || 'https://api.indexnow.org/indexnow';
 const batchSize = Math.max(1, Math.min(10000, Number(process.env.INDEXNOW_BATCH_SIZE || 10000)));
 const maxUrls = Math.max(0, Number(process.env.INDEXNOW_MAX_URLS || 0));
+const sinceHours = Math.max(0, Number(process.env.INDEXNOW_SINCE_HOURS || 0));
 
 function decodeXml(value) {
   return value
@@ -13,19 +14,39 @@ function decodeXml(value) {
     .replace(/&apos;/g, "'");
 }
 
+function text(value) {
+  return decodeXml(String(value || '').replace(/<[^>]*>/g, '').trim());
+}
+
 function sitemapLocs(xml) {
-  return [...xml.matchAll(/<loc>([\s\S]*?)<\/loc>/gi)]
-    .map((match) => decodeXml(match[1].replace(/<[^>]*>/g, '').trim()))
-    .filter(Boolean);
+  return [...xml.matchAll(/<loc>([\s\S]*?)<\/loc>/gi)].map((match) => text(match[1])).filter(Boolean);
+}
+
+function sitemapEntries(xml) {
+  return [...xml.matchAll(/<url>([\s\S]*?)<\/url>/gi)].flatMap((match) => {
+    const body = match[1];
+    const loc = body.match(/<loc>([\s\S]*?)<\/loc>/i);
+    if (!loc) return [];
+    const lastmod = body.match(/<lastmod>([\s\S]*?)<\/lastmod>/i);
+    return [{ url: text(loc[1]), lastModified: lastmod ? text(lastmod[1]) : null }];
+  });
 }
 
 async function fetchText(url) {
   const response = await fetch(url, {
-    headers: { 'user-agent': 'Rawafid-IndexNow/1.0' },
+    headers: { 'user-agent': 'Rawafid-IndexNow/1.1' },
     redirect: 'follow',
   });
   if (!response.ok) throw new Error(`${url} returned ${response.status}`);
   return response.text();
+}
+
+function recentEnough(lastModified) {
+  if (sinceHours <= 0) return true;
+  if (!lastModified) return false;
+  const stamp = Date.parse(lastModified);
+  if (!Number.isFinite(stamp)) return false;
+  return stamp >= Date.now() - sinceHours * 60 * 60 * 1000;
 }
 
 async function discoverUrls() {
@@ -34,17 +55,18 @@ async function discoverUrls() {
   const sitemapUrls = sitemapLocs(indexXml);
   if (!sitemapUrls.length) throw new Error('No sitemap URLs found in sitemap index');
 
-  const urls = [];
+  const entries = [];
   for (const sitemapUrl of sitemapUrls) {
     const xml = await fetchText(sitemapUrl);
-    urls.push(...sitemapLocs(xml));
+    entries.push(...sitemapEntries(xml));
   }
 
   const sameHost = new Set();
   const host = new URL(base).host;
-  for (const value of urls) {
+  for (const entry of entries) {
+    if (!recentEnough(entry.lastModified)) continue;
     try {
-      const url = new URL(value);
+      const url = new URL(entry.url);
       url.hash = '';
       if (url.host === host && /^https?:$/.test(url.protocol)) sameHost.add(url.toString());
     } catch {}
@@ -64,7 +86,7 @@ async function submitBatch(urlList) {
     method: 'POST',
     headers: {
       'content-type': 'application/json; charset=utf-8',
-      'user-agent': 'Rawafid-IndexNow/1.0',
+      'user-agent': 'Rawafid-IndexNow/1.1',
     },
     body: JSON.stringify(payload),
   });
@@ -77,8 +99,11 @@ async function submitBatch(urlList) {
 
 async function main() {
   const urls = await discoverUrls();
-  if (!urls.length) throw new Error('No public URLs discovered for IndexNow');
-  console.log(`IndexNow: discovered ${urls.length} public URLs from ${base}/sitemap.xml`);
+  if (!urls.length) {
+    console.log(`IndexNow: no URLs changed in the configured ${sinceHours || 'full'} window; nothing to submit.`);
+    return;
+  }
+  console.log(`IndexNow: discovered ${urls.length} eligible public URLs from ${base}/sitemap.xml`);
 
   let accepted = 0;
   for (let offset = 0; offset < urls.length; offset += batchSize) {
