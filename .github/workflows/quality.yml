@@ -26,10 +26,10 @@ jobs:
       VISUAL_OUTPUT_DIR: visual-artifacts
       SMOKE_BASE_URL: http://127.0.0.1:3000
       SEO_GATE_BASE_URL: http://127.0.0.1:3000
-      SEO_GATE_CONCURRENCY: '6'
+      SEO_GATE_CONCURRENCY: '2'
       SEO_GATE_TIMEOUT_MS: '15000'
-      SEO_GATE_PAGE_ATTEMPTS: '3'
-      SEO_GATE_PAGE_RETRY_DELAY_MS: '300'
+      SEO_GATE_PAGE_ATTEMPTS: '5'
+      SEO_GATE_PAGE_RETRY_DELAY_MS: '1000'
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
