@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { RAWAFID_BRAND_NAME, RAWAFID_BRAND_SHORT } from '@/lib/theme';
+import { buildSemanticSeoProfile } from '@/lib/semantic-seo';
 
 export const PRODUCTION_SITE_URL = 'https://healthrenewal.org';
 export const STAGING_SITE_URL = 'https://rawafid-platform-staging.khaledaltheeb.workers.dev';
@@ -58,6 +59,8 @@ export type SeoMetadataInput = {
   type?: 'website' | 'article' | 'profile';
   image?: string | null;
   keywords?: string[];
+  relatedTerms?: string[];
+  searchIntents?: string[];
   publishedTime?: string | null;
   modifiedTime?: string | null;
   authors?: { name: string; url?: string }[];
@@ -77,8 +80,11 @@ export function buildSeoMetadata(input: SeoMetadataInput): Metadata {
     ? Object.fromEntries(Object.entries(input.hreflang).map(([key, value]) => [key, absoluteSiteUrl(value)]))
     : undefined;
 
-  // Compatibility only. Google does not use meta keywords as a ranking signal.
-  const keywords = input.keywords?.length ? Array.from(new Set(input.keywords)).slice(0, 20) : undefined;
+  // Per-page semantic inventory: 50 page/topic terms + 50 search-intent/question phrases.
+  // Google does not use the meta-keywords tag as a ranking signal; these terms remain a
+  // compatibility/editorial/query-coverage inventory. No hidden copy is injected into pages.
+  const semanticProfile = buildSemanticSeoProfile(input);
+  const keywords = semanticProfile.keywords;
   const openGraphImages = usesDefaultImage
     ? [{ url: image, width: 1200, height: 630, alt: 'روافد — منصة عربية للمعرفة الصحية والنفسية الموثوقة' }]
     : [{ url: image, alt: input.title }];
