@@ -98,6 +98,8 @@ export function buildSeoMetadata(input: SeoMetadataInput): Metadata {
 }
 
 export function organizationJsonLd() {
+  const logoUrl = `${SITE_URL}/icons/rawafid-app.svg`;
+
   return {
     '@context': 'https://schema.org',
     '@graph': [
@@ -107,8 +109,14 @@ export function organizationJsonLd() {
         name: BRAND_NAME,
         alternateName: BRAND_SHORT,
         url: SITE_URL,
-        logo: `${SITE_URL}/icons/rawafid-app.svg`,
         description: DEFAULT_DESCRIPTION,
+        logo: {
+          '@type': 'ImageObject',
+          '@id': `${SITE_URL}/#logo`,
+          url: logoUrl,
+          contentUrl: logoUrl,
+          caption: BRAND_NAME,
+        },
       },
       {
         '@type': 'WebSite',
@@ -118,11 +126,6 @@ export function organizationJsonLd() {
         url: SITE_URL,
         inLanguage: 'ar',
         publisher: { '@id': `${SITE_URL}/#organization` },
-        potentialAction: {
-          '@type': 'SearchAction',
-          target: { '@type': 'EntryPoint', urlTemplate: `${SITE_URL}/search?q={search_term_string}` },
-          'query-input': 'required name=search_term_string',
-        },
       },
     ],
   };
