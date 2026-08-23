@@ -33,6 +33,7 @@ jobs:
       SEO_RICH_MIN_WORDS: '100'
       SEO_TARGET_URLS: '10000'
       SEO_REQUIRE_TARGET: 'false'
+      EDITORIAL_REQUIRE_READY: 'false'
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -89,6 +90,8 @@ jobs:
         run: node scripts/rich-discovery-gate.mjs
       - name: Content richness and duplicate-body gate
         run: node scripts/content-richness-gate.mjs
+      - name: YMYL editorial SEO readiness report
+        run: node scripts/editorial-seo-readiness.mjs
       - name: SEO readiness progress toward 10000 canonical URLs
         run: node scripts/seo-readiness-report.mjs
       - name: Lighthouse lab audit
