@@ -40,7 +40,9 @@ requireAll(seo, [
   "PRODUCTION_SITE_URL = 'https://healthrenewal.org'",
   "STAGING_SITE_URL = 'https://rawafid-platform-staging.khaledaltheeb.workers.dev'",
   "SITE_HOSTNAME.endsWith('.workers.dev')",
-  "process.env.NEXT_PUBLIC_ALLOW_INDEXING === 'true' && !IS_TEMPORARY_HOST",
+  'PRODUCTION_HOSTNAME',
+  'IS_PRODUCTION_HOST',
+  "!IS_TEMPORARY_HOST && (IS_PRODUCTION_HOST || process.env.NEXT_PUBLIC_ALLOW_INDEXING === 'true')",
 ], 'structured identity and domain safety');
 
 if (seo.includes("'@type': 'SearchAction'")) {
