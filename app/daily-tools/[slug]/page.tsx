@@ -8,17 +8,16 @@ import DailyToolResources from '@/components/daily-tool-resources';
 import DailyToolWorkspace from '@/components/daily-tool-workspace';
 import SleepLogLocal from '@/components/sleep-log-local';
 import { deriveDailyToolSpec } from '@/lib/daily-tools-preserved';
-import { dailyToolMetadata, getDailyToolPage, getDailyToolSlugs } from '@/lib/daily-tools-catalog';
+import { dailyToolMetadata, getDailyToolPage } from '@/lib/daily-tools-catalog';
 
-export const dynamic = 'force-static';
-export const dynamicParams = false;
-export const revalidate = false;
+// Dynamic rendering is intentional on Cloudflare. The tool corpus is still immutable,
+// repository-backed and served through the ASSETS binding, but dynamic [slug] SSG output
+// was returning edge 500s for valid generated pages. SSR avoids that OpenNext cache-path
+// failure without changing, hiding or redirecting any public Daily Tools URL.
+export const dynamic = 'force-dynamic';
+export const revalidate = 3600;
 type Params = Promise<{ slug: string }>;
 const routeFor = (slug: string) => `/daily-tools/${slug}/`;
-
-export function generateStaticParams() {
-  return getDailyToolSlugs().map((slug) => ({ slug }));
-}
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params;
