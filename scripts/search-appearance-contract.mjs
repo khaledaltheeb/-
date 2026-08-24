@@ -23,6 +23,7 @@ const middleware = read('middleware.ts');
 const wrangler = read('wrangler.jsonc');
 const productionWorkflow = read('.github/workflows/deploy-production.yml');
 const cutoverWorkflow = read('.github/workflows/healthrenewal-cutover-readiness.yml');
+const hiddenSeoWorkflow = read('.github/workflows/hidden-seo-sitewide.yml');
 const cutoverGate = read('scripts/healthrenewal-cutover-readiness.mjs');
 const qualityWorkflow = read('.github/workflows/quality.yml');
 const indexNowWorkflow = read('.github/workflows/indexnow-discovery.yml');
@@ -164,9 +165,12 @@ requireAll(cutoverWorkflow, [
   'workflow_dispatch:',
   "CUTOVER_MIN_INDEXABLE_URLS: '10000'",
   'node scripts/healthrenewal-cutover-readiness.mjs',
-  'node scripts/seo-gate.mjs',
-  'node scripts/rich-discovery-gate.mjs',
+  'node scripts/hidden-seo-sitewide-agent.mjs',
+  "SEO_AGENT_CONCURRENCY: '8'",
 ], '10k no-deploy cutover readiness');
+if (/node scripts\/(seo-gate|rich-discovery-gate)\.mjs/.test(cutoverWorkflow)) {
+  throw new Error('10k cutover readiness must use the consolidated hidden SEO pass, not duplicate legacy scans');
+}
 if (/opennextjs-cloudflare\s+deploy|wrangler\s+deploy/i.test(cutoverWorkflow)) {
   throw new Error('10k cutover readiness workflow must never deploy');
 }
@@ -179,8 +183,22 @@ requireAll(cutoverGate, [
 
 requireAll(qualityWorkflow, [
   'NEXT_PUBLIC_SITE_URL: https://healthrenewal.org',
-  'SEO_GATE_BASE_URL: http://127.0.0.1:3000',
+  'SEO_AGENT_BASE_URL: http://127.0.0.1:3000',
+  'node scripts/hidden-seo-sitewide-agent.mjs',
 ], 'CI production-canonical simulation');
+if (/node scripts\/(seo-gate|rich-discovery-gate)\.mjs/.test(qualityWorkflow)) {
+  throw new Error('quality gate must use one consolidated sitewide SEO scan');
+}
+requireAll(hiddenSeoWorkflow, [
+  'workflow_dispatch:',
+  'push:',
+  'branches: [main]',
+  'node scripts/hidden-seo-sitewide-agent.mjs',
+  "SEO_AGENT_CONCURRENCY: '8'",
+], 'persistent hidden SEO agent');
+if (/pull_request:/.test(hiddenSeoWorkflow)) {
+  throw new Error('persistent hidden SEO workflow must not duplicate the pull-request quality scan');
+}
 requireAll(indexNowWorkflow, [
   'workflow_dispatch:',
   'INDEXNOW_SITE_URL: https://healthrenewal.org',
