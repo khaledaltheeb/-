@@ -45,14 +45,14 @@ export default async function AdminUsersPage({ searchParams }: { searchParams: S
     <main className="dashboard-shell users-admin-shell">
       <section className="dashboard-card users-admin-card">
         <div className="admin-heading">
-          <div><span className="eyebrow">Identity & Access</span><h1>المستخدمون والصلاحيات</h1><p>يمكن إدارة الأدوار العامة من هنا. المالك وحده يستطيع كذلك اعتماد مستخدم مباشرةً كمختص موثق دون الحاجة إلى طلب انضمام مسبق.</p></div>
+          <div><span className="eyebrow">Identity & Access</span><h1>المستخدمون والصلاحيات</h1><p>يمكن إدارة الأدوار العامة من هنا. المالك وحده يستطيع كذلك اعتماد أي حساب غير مالك مباشرةً كمختص موثق دون الحاجة إلى طلب انضمام مسبق، ما لم يكن الحساب مرتبطًا بمركز.</p></div>
           <Link className="button" href="/admin">لوحة الإدارة</Link>
         </div>
 
         {params.ok === 'specialist-direct' && <p className="system-message success">تم تعيين المستخدم مباشرةً كمختص موثق وتفعيل بوابة المختص وإشعاره.</p>}
         {params.ok && params.ok !== 'specialist-direct' && <p className="system-message success">تم تحديث صلاحية المستخدم وتسجيل العملية.</p>}
         {params.error === 'owner-required' && <p className="system-message error">التعيين المباشر لمختص موثق متاح للمالك فقط.</p>}
-        {params.error === 'direct-specialist-failed' && <p className="system-message error">تعذر التعيين المباشر. تأكد أن الحساب مستخدم عادي أو مختص، وليس مديرًا أو مالكًا أو مدير مركز.</p>}
+        {params.error === 'direct-specialist-failed' && <p className="system-message error">تعذر التعيين المباشر. لا يمكن تحويل حساب المالك أو حساب مرتبط بمركز إلى مختص بهذه الطريقة.</p>}
         {((params.error && !['owner-required','direct-specialist-failed'].includes(params.error)) || error) && <p className="system-message error">تعذر تحميل أو تحديث المستخدمين.</p>}
 
         <nav className="verification-filters" aria-label="تصفية حسب الدور">
@@ -76,9 +76,9 @@ export default async function AdminUsersPage({ searchParams }: { searchParams: S
                   <label className="check-field"><input name="is_active" type="checkbox" defaultChecked={user.is_active} /> الحساب نشط</label>
                   <button className="primary-action" type="submit">حفظ الصلاحية</button>
                 </form>
-                {currentProfile.role === 'owner' && user.id !== currentUserId && ['user','specialist'].includes(user.role) && (
+                {currentProfile.role === 'owner' && user.id !== currentUserId && user.role !== 'owner' && user.role !== 'center_manager' && (
                   <details className="direct-specialist-assignment">
-                    <summary>{user.role === 'specialist' ? 'إعادة اعتماد المختص مباشرة' : 'تعيين كمختص موثّق مباشرة'}</summary>
+                    <summary>{user.role === 'specialist' ? 'إعادة اعتماد المختص مباشرة' : 'تحويل واعتماد كمختص موثّق'}</summary>
                     <form action={assignSpecialistDirect} className="verification-controls direct-specialist-form">
                       <input type="hidden" name="user_id" value={user.id} />
                       <p>هذا المسار لا يحتاج طلبًا من المستخدم. إذا كان لديه طلب سابق فسيتم اعتماده مباشرة، وإن لم يكن لديه ملف فسيُنشأ له ملف مختص موثق ويستطيع إكماله من بوابة المختص.</p>
