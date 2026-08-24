@@ -93,8 +93,34 @@ jobs:
       - name: Build production Worker
         run: bash scripts/cloudflare-production-build.sh
 
-      - name: Deploy production Worker
-        run: npx opennextjs-cloudflare deploy --env production
+      - name: Upload production Worker version without changing DNS or routes
+        shell: bash
+        env:
+          WRANGLER_OUTPUT_FILE: /tmp/wrangler-output.jsonl
+        run: |
+          set -euo pipefail
+          rm -f "${WRANGLER_OUTPUT_FILE}"
+          tag="analytics-${GITHUB_SHA}"
+          npx wrangler versions upload --env production --tag "${tag}" --message "Production analytics ${GITHUB_SHA}"
+          version_id="$(node - <<'NODE'
+          const fs = require('fs');
+          const p = process.env.WRANGLER_OUTPUT_FILE;
+          const rows = fs.readFileSync(p, 'utf8').trim().split(/\r?\n/).filter(Boolean).map((line) => JSON.parse(line));
+          const hit = [...rows].reverse().find((row) => row.type === 'version-upload');
+          if (!hit || !hit.version_id) process.exit(2);
+          process.stdout.write(hit.version_id);
+          NODE
+          )"
+          test -n "${version_id}"
+          echo "WORKER_VERSION_ID=${version_id}" >> "${GITHUB_ENV}"
+          echo "Uploaded Worker version ${version_id}."
+
+      - name: Activate uploaded Worker version at 100 percent
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${WORKER_VERSION_ID:-}"
+          npx wrangler versions deploy "${WORKER_VERSION_ID}@100%" --env production -y --message "Activate production analytics ${GITHUB_SHA}"
 
       - name: Verify analytics on live production
         shell: bash
