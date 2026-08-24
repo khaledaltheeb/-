@@ -34,8 +34,8 @@ jobs:
           urls=(
             '/daily-tools/sleep-wind-down-plan'
             '/daily-tools/sleep-wind-down-plan/'
-            '/daily-tools/cravings-trigger-map'
-            '/daily-tools/cravings-trigger-map/'
+            '/daily-tools/active-listening-checklist'
+            '/daily-tools/active-listening-checklist/'
           )
           for path in "${urls[@]}"; do
             headers="$(mktemp)"
@@ -58,7 +58,7 @@ jobs:
             '/capabilities/printables/'
             '/daily-tools/'
             '/daily-tools/sleep-wind-down-plan/'
-            '/daily-tools/cravings-trigger-map/'
+            '/daily-tools/active-listening-checklist/'
           )
           for path in "${urls[@]}"; do
             headers="$(mktemp)"
