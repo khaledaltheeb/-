@@ -80,22 +80,36 @@ jobs:
         run: |
           set -euo pipefail
           base="${NEXT_PUBLIC_SITE_URL}"
-          for attempt in $(seq 1 36); do
+          for attempt in $(seq 1 18); do
             stamp="${TARGET_SHA}-${attempt}-$(date +%s)"
             home="$(curl -fsSL --compressed --max-time 25 -H 'Cache-Control: no-cache, no-store, max-age=0' "${base}/?deploy=${stamp}" 2>/dev/null || true)"
             article="$(curl -fsSL --compressed --max-time 25 -H 'Cache-Control: no-cache, no-store, max-age=0' "${base}/content/concept-1618?deploy=${stamp}" 2>/dev/null || true)"
             about_code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 25 -H 'Cache-Control: no-cache, no-store, max-age=0' "${base}/about/?deploy=${stamp}" || true)"
-            search_code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 25 -H 'Cache-Control: no-cache, no-store, max-age=0' "${base}/search?q=%D8%A7%D9%84%D8%B5%D8%AD%D8%A9%20%D8%A7%D9%84%D9%86%D9%81%D8%B3%D9%8A%D8%A9&deploy=${stamp}" || true)"
 
-            if [ -n "$home" ] \
-              && printf '%s' "$home" | grep -Eqi 'noindex' \
-              && printf '%s' "$article" | grep -Fq 'أفضل خطة قد تجمع أكثر من مستوى' \
+            home_has_noindex=false
+            article_has_full_body=false
+            search_code=skipped
+            if [[ "$home" == *"noindex"* ]]; then
+              home_has_noindex=true
+            fi
+            if [[ "$article" == *"أفضل خطة قد تجمع أكثر من مستوى"* ]]; then
+              article_has_full_body=true
+            fi
+
+            if [ "$home_has_noindex" = 'true' ] \
+              && [ "$article_has_full_body" = 'true' ] \
+              && [ "$about_code" = '200' ]; then
+              search_code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 25 -H 'Cache-Control: no-cache, no-store, max-age=0' "${base}/search?q=%D8%A7%D9%84%D8%B5%D8%AD%D8%A9%20%D8%A7%D9%84%D9%86%D9%81%D8%B3%D9%8A%D8%A9&deploy=${stamp}" || true)"
+            fi
+
+            if [ "$home_has_noindex" = 'true' ] \
+              && [ "$article_has_full_body" = 'true' ] \
               && [ "$about_code" = '200' ] \
               && [ "$search_code" = '200' ]; then
               echo 'Validated noindex staging is live; preserved route, search route, and full-body renderer smoke checks passed.'
               exit 0
             fi
-            echo "Staging not fully propagated on attempt ${attempt}; about=${about_code:-none}, search=${search_code:-none}."
+            echo "Staging verification attempt ${attempt}: noindex=${home_has_noindex}, full_body=${article_has_full_body}, about=${about_code:-none}, search=${search_code:-none}."
             sleep 5
           done
           echo 'Post-deploy staging verification failed.' >&2
