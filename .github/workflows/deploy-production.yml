@@ -22,7 +22,10 @@ jobs:
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
       NEXT_PUBLIC_SITE_URL: https://healthrenewal.org
       NEXT_PUBLIC_ALLOW_INDEXING: 'true'
-      NEXT_PUBLIC_ENABLE_ANALYTICS: 'false'
+      NEXT_PUBLIC_ENABLE_ANALYTICS: 'true'
+      NEXT_PUBLIC_GTM_ID: GTM-WBLQVBG4
+      NEXT_PUBLIC_GA_MEASUREMENT_ID: G-VLZMV8Y4JP
+      NEXT_PUBLIC_ENABLE_DIRECT_GA: 'true'
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: 1910e1ad3c793fd568ba1caafe34f964
     steps:
@@ -52,17 +55,24 @@ jobs:
         run: npm run architecture-check
       - name: Live public and sitemap preservation gate
         run: npm run live-preservation:validate
-      - name: Verify production SEO origin contract
+      - name: Verify production SEO and analytics origin contract
         shell: bash
         run: |
           set -euo pipefail
           test "${NEXT_PUBLIC_SITE_URL}" = "https://healthrenewal.org"
           test "${NEXT_PUBLIC_ALLOW_INDEXING}" = "true"
+          test "${NEXT_PUBLIC_ENABLE_ANALYTICS}" = "true"
+          test "${NEXT_PUBLIC_GTM_ID}" = "GTM-WBLQVBG4"
+          test "${NEXT_PUBLIC_GA_MEASUREMENT_ID}" = "G-VLZMV8Y4JP"
+          test "${NEXT_PUBLIC_ENABLE_DIRECT_GA}" = "true"
           grep -q "PRODUCTION_SITE_URL = 'https://healthrenewal.org'" lib/seo.ts
           grep -q '"production"' wrangler.jsonc
           grep -q '"pattern": "healthrenewal.org"' wrangler.jsonc
           grep -q '"pattern": "www.healthrenewal.org"' wrangler.jsonc
           grep -q '"custom_domain": true' wrangler.jsonc
+          grep -q '"NEXT_PUBLIC_ENABLE_ANALYTICS": "true"' wrangler.jsonc
+          grep -q '"NEXT_PUBLIC_GTM_ID": "GTM-WBLQVBG4"' wrangler.jsonc
+          grep -q '"NEXT_PUBLIC_GA_MEASUREMENT_ID": "G-VLZMV8Y4JP"' wrangler.jsonc
       - name: Verify Cloudflare credentials and account access
         shell: bash
         run: |
@@ -121,10 +131,14 @@ jobs:
         env:
           NEXT_PUBLIC_SITE_URL: https://healthrenewal.org
           NEXT_PUBLIC_ALLOW_INDEXING: 'true'
+          NEXT_PUBLIC_ENABLE_ANALYTICS: 'true'
+          NEXT_PUBLIC_GTM_ID: GTM-WBLQVBG4
+          NEXT_PUBLIC_GA_MEASUREMENT_ID: G-VLZMV8Y4JP
+          NEXT_PUBLIC_ENABLE_DIRECT_GA: 'true'
         run: npx opennextjs-cloudflare build --env production
       - name: Deploy Cloudflare Worker with OpenNext production environment
         run: npx opennextjs-cloudflare deploy --env production
-      - name: Verify production discovery canonical host and www redirect
+      - name: Verify production discovery, analytics, canonical host and www redirect
         shell: bash
         run: |
           set -euo pipefail
@@ -140,6 +154,8 @@ jobs:
           fi
           home="$(curl -fsS --retry 8 --retry-delay 3 --retry-all-errors "${base}/?deploy=${stamp}")"
           printf '%s' "${home}" | grep -q "rel=\"canonical\" href=\"${base}/\""
+          printf '%s' "${home}" | grep -q 'GTM-WBLQVBG4'
+          printf '%s' "${home}" | grep -q 'G-VLZMV8Y4JP'
           if printf '%s' "${home}" | grep -qi 'noindex'; then
             echo 'Production homepage is unexpectedly noindex.' >&2
             exit 1
