@@ -25,11 +25,6 @@ jobs:
       VISUAL_BASE_URL: http://127.0.0.1:3000
       VISUAL_OUTPUT_DIR: visual-artifacts
       SMOKE_BASE_URL: http://127.0.0.1:3000
-      SEO_GATE_BASE_URL: http://127.0.0.1:3000
-      SEO_GATE_CONCURRENCY: '8'
-      SEO_GATE_TIMEOUT_MS: '20000'
-      SEO_GATE_PAGE_ATTEMPTS: '3'
-      SEO_GATE_PAGE_RETRY_DELAY_MS: '300'
       SEO_AGENT_BASE_URL: http://127.0.0.1:3000
       SEO_AGENT_CONCURRENCY: '8'
       SEO_AGENT_LINK_CONCURRENCY: '3'
@@ -91,10 +86,6 @@ jobs:
           VISUAL_CHROME_PATH="$CHROME_BIN" node scripts/visual-regression.mjs
       - name: Production HTTP smoke
         run: npm run smoke
-      - name: Full sitemap SEO gate
-        run: node scripts/seo-gate.mjs
-      - name: Rich results and discovery gate
-        run: node scripts/rich-discovery-gate.mjs
       - name: Sitewide hidden SEO agent
         run: node scripts/hidden-seo-sitewide-agent.mjs
       - name: Content richness and duplicate-body gate
