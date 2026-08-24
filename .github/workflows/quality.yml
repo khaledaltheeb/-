@@ -30,6 +30,11 @@ jobs:
       SEO_GATE_TIMEOUT_MS: '20000'
       SEO_GATE_PAGE_ATTEMPTS: '3'
       SEO_GATE_PAGE_RETRY_DELAY_MS: '300'
+      SEO_AGENT_BASE_URL: http://127.0.0.1:3000
+      SEO_AGENT_CONCURRENCY: '8'
+      SEO_AGENT_LINK_CONCURRENCY: '3'
+      SEO_AGENT_TIMEOUT_MS: '20000'
+      SEO_AGENT_ATTEMPTS: '3'
       SEO_RICH_MIN_WORDS: '100'
       SEO_TARGET_URLS: '10000'
       SEO_REQUIRE_TARGET: 'false'
@@ -90,6 +95,8 @@ jobs:
         run: node scripts/seo-gate.mjs
       - name: Rich results and discovery gate
         run: node scripts/rich-discovery-gate.mjs
+      - name: Sitewide hidden SEO agent
+        run: node scripts/hidden-seo-sitewide-agent.mjs
       - name: Content richness and duplicate-body gate
         run: node scripts/content-richness-gate.mjs
       - name: YMYL editorial SEO readiness report
