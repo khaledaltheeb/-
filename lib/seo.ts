@@ -18,8 +18,10 @@ function normalizedSiteUrl(value?: string) {
 
 export const SITE_URL = normalizedSiteUrl(process.env.NEXT_PUBLIC_SITE_URL);
 export const SITE_HOSTNAME = new URL(SITE_URL).hostname.toLowerCase();
+export const PRODUCTION_HOSTNAME = new URL(PRODUCTION_SITE_URL).hostname.toLowerCase();
 export const IS_TEMPORARY_HOST = SITE_HOSTNAME.endsWith('.workers.dev');
-export const INDEXING_ENABLED = process.env.NEXT_PUBLIC_ALLOW_INDEXING === 'true' && !IS_TEMPORARY_HOST;
+export const IS_PRODUCTION_HOST = SITE_HOSTNAME === PRODUCTION_HOSTNAME;
+export const INDEXING_ENABLED = !IS_TEMPORARY_HOST && (IS_PRODUCTION_HOST || process.env.NEXT_PUBLIC_ALLOW_INDEXING === 'true');
 export const BRAND_NAME = RAWAFID_BRAND_NAME;
 export const BRAND_SHORT = RAWAFID_BRAND_SHORT;
 export const DEFAULT_LOCALE = 'ar_AR';
