@@ -144,18 +144,24 @@ export async function updateSession(request: NextRequest) {
   );
 
   const pathname = trustedPathname;
+  // The preservation lookup treats `/legacy` and `/legacy/` as the same historical
+  // production route, matching the database function. Normalizing the cache/RPC key
+  // keeps both boundary variants protected without using noindex for slash handling.
+  const legacyLookupPathname = pathname.length > 1 && pathname.endsWith('/')
+    ? pathname.slice(0, -1)
+    : pathname;
   let legacyExists: boolean | null = null;
   async function isLegacyProductionRoute() {
     if (legacyExists !== null) return legacyExists;
-    const cached = legacyRouteCache.get(pathname);
+    const cached = legacyRouteCache.get(legacyLookupPathname);
     if (cached && cached.expiresAt > Date.now()) {
       legacyExists = cached.exists;
       return legacyExists;
     }
-    const { data, error } = await supabase.rpc('legacy_preserved_route_exists', { p_route: pathname });
+    const { data, error } = await supabase.rpc('legacy_preserved_route_exists', { p_route: legacyLookupPathname });
     legacyExists = !error && data === true;
     if (legacyRouteCache.size >= LEGACY_ROUTE_CACHE_LIMIT) legacyRouteCache.clear();
-    legacyRouteCache.set(pathname, { exists: legacyExists, expiresAt: Date.now() + LEGACY_ROUTE_TTL_MS });
+    legacyRouteCache.set(legacyLookupPathname, { exists: legacyExists, expiresAt: Date.now() + LEGACY_ROUTE_TTL_MS });
     return legacyExists;
   }
 
