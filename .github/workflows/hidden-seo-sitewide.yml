@@ -1,0 +1,98 @@
+name: Rawafid Hidden SEO Sitewide Agent
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'app/**'
+      - 'components/**'
+      - 'lib/**'
+      - 'public/**'
+      - 'scripts/**'
+      - 'supabase/migrations/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'wrangler.jsonc'
+      - '.github/workflows/hidden-seo-sitewide.yml'
+
+concurrency:
+  group: rawafid-hidden-seo-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  sitewide-hidden-seo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 70
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
+      NEXT_PUBLIC_SITE_URL: https://healthrenewal.org
+      NEXT_PUBLIC_ALLOW_INDEXING: 'true'
+      NEXT_PUBLIC_ENABLE_ANALYTICS: 'false'
+      SEO_AGENT_BASE_URL: http://127.0.0.1:3000
+      SEO_AGENT_CONCURRENCY: '8'
+      SEO_AGENT_LINK_CONCURRENCY: '3'
+      SEO_AGENT_TIMEOUT_MS: '20000'
+      SEO_AGENT_ATTEMPTS: '3'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Enforce centralized metadata and search contracts
+        run: |
+          node scripts/metadata-coverage-contract.mjs
+          npm run search-appearance:validate
+          npm run semantic-seo:validate
+          npm run sitemap-preservation:validate
+          npm run static-sitemap:validate
+      - name: Type check and lint
+        run: |
+          npm run typecheck
+          npm run lint
+      - name: Build production-canonical candidate
+        run: npm run build
+      - name: Start production candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          nohup npm run start -- --hostname 127.0.0.1 --port 3000 > /tmp/rawafid-hidden-seo.log 2>&1 &
+          echo $! > /tmp/rawafid-hidden-seo.pid
+          ready=0
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:3000/ >/dev/null; then
+              ready=1
+              break
+            fi
+            sleep 1
+          done
+          if [ "$ready" -ne 1 ]; then
+            cat /tmp/rawafid-hidden-seo.log >&2 || true
+            exit 1
+          fi
+      - name: Audit every sitemap page in one hidden-SEO pass
+        run: node scripts/hidden-seo-sitewide-agent.mjs
+      - name: Preserve published-page inventory
+        run: npm run public-preservation:validate
+      - name: Stop candidate
+        if: always()
+        shell: bash
+        run: |
+          if [ -f /tmp/rawafid-hidden-seo.pid ]; then
+            kill "$(cat /tmp/rawafid-hidden-seo.pid)" 2>/dev/null || true
+          fi
+      - name: Upload diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rawafid-hidden-seo-${{ github.run_id }}
+          path: /tmp/rawafid-hidden-seo.log
+          if-no-files-found: ignore
+          retention-days: 7
