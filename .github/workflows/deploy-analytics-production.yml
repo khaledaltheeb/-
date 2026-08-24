@@ -75,11 +75,14 @@ jobs:
           test "${NEXT_PUBLIC_GTM_ID}" = 'GTM-WBLQVBG4'
           test "${NEXT_PUBLIC_GA_MEASUREMENT_ID}" = 'G-VLZMV8Y4JP'
           test "${NEXT_PUBLIC_ENABLE_DIRECT_GA}" = 'true'
-          grep -q 'GTM-WBLQVBG4' app/layout.tsx
+          grep -q 'NEXT_PUBLIC_GTM_ID' app/layout.tsx
           grep -q 'NEXT_PUBLIC_GA_MEASUREMENT_ID' app/layout.tsx
+          grep -q 'NEXT_PUBLIC_ENABLE_ANALYTICS' app/layout.tsx
+          grep -q 'NEXT_PUBLIC_ENABLE_DIRECT_GA' app/layout.tsx
           grep -q '"NEXT_PUBLIC_ENABLE_ANALYTICS": "true"' wrangler.jsonc
           grep -q '"NEXT_PUBLIC_GTM_ID": "GTM-WBLQVBG4"' wrangler.jsonc
           grep -q '"NEXT_PUBLIC_GA_MEASUREMENT_ID": "G-VLZMV8Y4JP"' wrangler.jsonc
+          grep -q '"NEXT_PUBLIC_ENABLE_DIRECT_GA": "true"' wrangler.jsonc
 
       - name: Type check
         run: npm run typecheck
