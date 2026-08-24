@@ -15,18 +15,18 @@ permissions:
 jobs:
   readiness:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 70
     env:
       NEXT_PUBLIC_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
       NEXT_PUBLIC_SITE_URL: https://healthrenewal.org
       NEXT_PUBLIC_ALLOW_INDEXING: 'true'
       NEXT_PUBLIC_ENABLE_ANALYTICS: 'false'
-      SEO_GATE_BASE_URL: http://127.0.0.1:3000
-      SEO_GATE_CONCURRENCY: '6'
-      SEO_GATE_TIMEOUT_MS: '20000'
-      SEO_GATE_PAGE_ATTEMPTS: '3'
-      SEO_GATE_PAGE_RETRY_DELAY_MS: '350'
+      SEO_AGENT_BASE_URL: http://127.0.0.1:3000
+      SEO_AGENT_CONCURRENCY: '8'
+      SEO_AGENT_LINK_CONCURRENCY: '3'
+      SEO_AGENT_TIMEOUT_MS: '20000'
+      SEO_AGENT_ATTEMPTS: '3'
       CUTOVER_BASE_URL: http://127.0.0.1:3000
       CUTOVER_CANONICAL_ORIGIN: https://healthrenewal.org
       CUTOVER_MIN_INDEXABLE_URLS: '10000'
@@ -68,10 +68,8 @@ jobs:
           fi
       - name: Count canonical URLs and enforce 10k cutover threshold
         run: node scripts/healthrenewal-cutover-readiness.mjs
-      - name: Full sitemap SEO audit
-        run: node scripts/seo-gate.mjs
-      - name: Rich discovery and structured-data audit
-        run: node scripts/rich-discovery-gate.mjs
+      - name: One-pass full hidden SEO audit
+        run: node scripts/hidden-seo-sitewide-agent.mjs
       - name: Stop candidate server
         if: always()
         shell: bash
