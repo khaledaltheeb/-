@@ -59,8 +59,8 @@ for (const page of pages) {
     }
 
     const robots = metaContent(html, 'robots').toLowerCase().replace(/\s+/g, '');
-    if (!robots.includes('index') || !robots.includes('follow') || robots.includes('noindex') || robots.includes('nofollow')) {
-      console.error(`V7_CRITICAL ${page.route}: expected robots index,follow after fresh Rawafid review; got ${robots || 'missing'}`);
+    if (!robots.includes('noindex') || !robots.includes('follow') || robots.includes('nofollow')) {
+      console.error(`V7_CRITICAL ${page.route}: expected robots noindex,follow without nofollow; got ${robots || 'missing'}`);
       failed = true;
     }
 
@@ -94,12 +94,12 @@ for (const page of pages) {
       console.error(`V7_CRITICAL ${page.route}: removed generic V7 template marker is still rendered`);
       failed = true;
     }
-    if (!html.includes('آخر مراجعة') && !html.includes('"lastReviewed"')) {
-      console.error(`V7_CRITICAL ${page.route}: fresh Rawafid review provenance is not rendered`);
+    if (html.includes('آخر مراجعة') || html.includes('"lastReviewed"')) {
+      console.error(`V7_CRITICAL ${page.route}: rewritten version must not claim a fresh Rawafid review before re-review`);
       failed = true;
     }
 
-    console.log(`V7_CRITICAL ${page.route}: 200 + index,follow + canonical + safety content + fresh review provenance checked`);
+    console.log(`V7_CRITICAL ${page.route}: rendered rewrite checks completed${failed ? ' with failures above' : ' successfully'}`);
   } catch (error) {
     console.error(`V7_CRITICAL ${page.route}:`, error);
     failed = true;
@@ -107,4 +107,4 @@ for (const page of pages) {
 }
 
 if (failed) process.exit(1);
-console.log(`V7 critical rewrite rendered smoke passed for ${pages.length} freshly reviewed and released pages.`);
+console.log(`V7 critical rewrite rendered smoke passed for ${pages.length} held pages.`);
