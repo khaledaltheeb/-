@@ -62,9 +62,14 @@ try {
     if (await search.count() !== 1) fail('desktop hub', 'assessment directory search input missing or duplicated');
     else {
       await search.fill('النوم');
-      const sleepLink = hub.locator('a[href="/assessment-lab/sleep-quality"]');
-      if (!await sleepLink.isVisible()) fail('desktop hub', 'search did not surface sleep-quality tool');
-      else pass('desktop hub', 'search filters the tool directory');
+      const sleepLinks = hub.locator('a[href="/assessment-lab/sleep-quality"]');
+      const visibleSleepLinks = await sleepLinks.evaluateAll((anchors) => anchors.filter((anchor) => {
+        const style = getComputedStyle(anchor);
+        const rect = anchor.getBoundingClientRect();
+        return style.visibility !== 'hidden' && style.display !== 'none' && rect.width > 0 && rect.height > 0;
+      }).length);
+      if (visibleSleepLinks < 1) fail('desktop hub', 'search did not surface sleep-quality tool');
+      else pass('desktop hub', `search surfaced sleep-quality tool through ${visibleSleepLinks} visible discovery link(s)`);
       await search.fill('');
     }
 
