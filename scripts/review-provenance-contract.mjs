@@ -57,9 +57,22 @@ for (const file of surfaces) {
   if (!source.includes('review.lastReviewedAt')) {
     throw new Error(`${file}: lastReviewed must be sourced from recorded review provenance`);
   }
-  if (!source.includes('review.reviewerName')) {
+
+  if (file === 'components/care-guide-page.tsx') {
+    const metadataOnlyFragments = [
+      "review_visibility === 'metadata_only'",
+      'visibleReview.reviewerName',
+      'visibleReview.lastReviewedAt',
+      'review.reviewedBySchema',
+    ];
+    for (const fragment of metadataOnlyFragments) {
+      if (!source.includes(fragment)) {
+        throw new Error(`${file}: metadata-only review provenance contract missing: ${fragment}`);
+      }
+    }
+  } else if (!source.includes('review.reviewerName')) {
     throw new Error(`${file}: visible review attribution must use the resolved reviewer`);
   }
 }
 
-console.log(`Review provenance contract passed: ${surfaces.length} public surfaces preserve lastReviewed as a real Rawafid review date, using a named reviewer when recorded and فريق روافد as the organization fallback.`);
+console.log(`Review provenance contract passed: ${surfaces.length} public surfaces preserve lastReviewed as recorded provenance; Care Guides may explicitly mark review provenance metadata-only to preserve visual parity while structured data remains truthful.`);
