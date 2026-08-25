@@ -35,6 +35,8 @@ const LEGACY_BRAND_REPLACEMENTS: ReadonlyArray<readonly [string, string]> = [
   ['Mental Health Knowledge Platform', BRAND_NAME],
 ];
 
+const REVIEW_GATED_PRESERVED_PREFIXES = ['/care-guides/', '/evidence-guides/'] as const;
+
 export function normalizeLegacyBrandText(value: unknown, max = 20000): string {
   let normalized = cleanText(value, max);
   for (const [legacy, current] of LEGACY_BRAND_REPLACEMENTS) {
@@ -61,6 +63,11 @@ function safeRoute(route: string): string | null {
 
 export function legacyCanonicalPath(route: string): string {
   return safeRoute(route) ?? '/';
+}
+
+export function legacyPreservedCanIndex(route: string): boolean {
+  const canonical = legacyCanonicalPath(route);
+  return !REVIEW_GATED_PRESERVED_PREFIXES.some((prefix) => canonical.startsWith(prefix));
 }
 
 export function normalizeLegacyInternalHref(value: unknown): string | null {
@@ -147,14 +154,14 @@ export function legacyPreservedMetadata(page: LegacyPreservedPage | null, route:
   if (!page) return {};
   const title = legacyDisplayTitle(page);
   const description = normalizeLegacyBrandText(
-    page.meta_description || page.body_text?.slice(0, 220) || 'صفحة منشورة من مكتبة منصة روافد، محفوظة على مسارها الأصلي وتخضع للترقية التحريرية المستمرة دون إخفائها من البحث.',
+    page.meta_description || page.body_text?.slice(0, 220) || 'صفحة منشورة من مكتبة منصة روافد، محفوظة على مسارها الأصلي وتخضع للترقية التحريرية المستمرة.',
     2000,
   );
   return buildSeoMetadata({
     title,
     description,
     path: legacyCanonicalPath(route),
-    index: true,
+    index: legacyPreservedCanIndex(route),
     follow: true,
     type: 'website',
   });
