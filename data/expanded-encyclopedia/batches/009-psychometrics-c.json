@@ -1,0 +1,146 @@
+{
+  "batch_id": "expanded-encyclopedia-009-psychometrics-c",
+  "status": "editorial-source",
+  "records": [
+    {
+      "content_type": "assessment",
+      "slug": "mcdonald-omega",
+      "canonical_term": "معامل أوميغا ماكدونالد",
+      "english_name": "McDonald's Omega",
+      "aliases": ["McDonald Omega", "أوميغا للثبات"],
+      "category_slug": "assessment-psychometrics",
+      "title": "معامل أوميغا ماكدونالد: تقدير للاتساق يعتمد على نموذج القياس",
+      "excerpt": "أوميغا ماكدونالد عائلة من معاملات الثبات تعتمد على تحميلات البنود ومكونات التباين، وقد تكون أكثر ملاءمة من ألفا عندما لا تكون مساهمات البنود متساوية.",
+      "definition": "معامل أوميغا ماكدونالد يشير إلى تقديرات للثبات تُشتق من نموذج عاملي أو نموذج قياس وتفصل التباين المنسوب إلى عامل أو عوامل عن الخطأ. توجد صيغ متعددة لأوميغا، لذلك يجب تحديد الصيغة والسؤال الذي تجيب عنه بدل استخدام كلمة أوميغا كرقم واحد مبهم.",
+      "presentation_or_use": "إذا كانت بنود مقياس ما تحمل بقوى مختلفة على العامل، فقد يكون افتراض تساوي مساهماتها غير واقعي. يمكن لأوميغا أن يستخدم التحميلات المقدرة لتلخيص نسبة التباين المنسوبة للمكونات المشتركة، لكنه يظل تابعًا لجودة النموذج الذي بُني عليه.",
+      "mechanisms_or_context": "لا تصبح أوميغا صحيحة تلقائيًا لأنها بديل حديث لألفا؛ إذا كان النموذج العاملي غير ملائم أو البيانات لا تدعم البنية المفترضة فقد يكون التقدير مضللًا. كما تختلف أوميغا الكلية عن الهرمية في معنى التباين الذي تنسبه إلى العامل العام والمكونات الأخرى.",
+      "assessment_or_practice": "يُفحص الصدق البنيوي أولًا ثم تُذكر صيغة أوميغا والنموذج المستخدم وطريقة التقدير والعينة وفاصل الثقة. عند المقارنة بألفا لا ينبغي اختيار الرقم الأعلى، بل المعامل الذي تتوافق افتراضاته مع بنية الدرجة والغرض من استخدامها.",
+      "boundary": "أوميغا ليست دليل صدق ولا علاجًا لكل مشكلات ألفا، ولا يوجد حد واحد يضمن كفاية القياس لكل قرار. كما أن تقديرًا مرتفعًا لا يعني أن البنود تغطي البناء كاملًا أو تعمل بعدالة عبر المجموعات.",
+      "faq": [
+        {"question": "هل أوميغا أفضل من ألفا دائمًا؟", "answer": "لا. قد تكون أنسب في نماذج معينة، لكن فائدتها تعتمد على صحة البنية وطريقة التقدير والسؤال المراد الإجابة عنه."},
+        {"question": "هل توجد قيمة أوميغا واحدة فقط؟", "answer": "لا. توجد صيغ مثل أوميغا الكلية والهرمية، وتختلف دلالتها بحسب النموذج ومكونات التباين."}
+      ],
+      "references": [
+        {"title": "COSMIN Manual for Systematic Reviews of PROMs, Version 2.0", "publisher": "COSMIN", "url": "https://www.cosmin.nl/wp-content/uploads/COSMIN-manual-V2_final.pdf"},
+        {"title": "Standards for Educational and Psychological Testing", "publisher": "AERA, APA, NCME", "url": "https://www.testingstandards.net/open-access-files.html"}
+      ],
+      "primary_keyword": "معامل أوميغا ماكدونالد",
+      "secondary_keywords": ["McDonald's Omega بالعربي", "أوميغا والثبات النفسي"],
+      "semantic_terms": ["الثبات", "الاتساق الداخلي", "التحميلات العاملية", "ألفا"],
+      "related_slugs": ["cronbach-alpha", "internal-consistency", "factor-loading"],
+      "classification_status": "reliability-coefficient"
+    },
+    {
+      "content_type": "assessment",
+      "slug": "minimal-detectable-change",
+      "canonical_term": "أصغر تغير قابل للكشف",
+      "english_name": "Smallest Detectable Change",
+      "aliases": ["SDC", "الحد الأدنى للتغير القابل للكشف"],
+      "category_slug": "assessment-psychometrics",
+      "title": "أصغر تغير قابل للكشف: متى يتجاوز فرق الدرجات خطأ القياس؟",
+      "excerpt": "أصغر تغير قابل للكشف يقدّر مقدار التغير الذي يجب تجاوزه كي يكون الفرق بين قياسين أكبر من المتوقع بسبب خطأ القياس وحده عند مستوى ثقة محدد.",
+      "definition": "أصغر تغير قابل للكشف هو عتبة مشتقة من خطأ القياس تحدد حجم التغير الذي يتجاوز نطاق التذبذب المتوقع من عدم دقة القياس. غالبًا يُحسب من SEM مع عامل يعكس القياسين ومستوى الثقة، وقد يستخدم على المستوى الفردي أو الجماعي بصيغ مختلفة.",
+      "presentation_or_use": "إذا تحسنت درجة شخص بنقطتين بينما SDC للفرد خمس نقاط، فلا يمكن الجزم من الأداة وحدها بأن الفرق تجاوز خطأ القياس. أما تغير ست نقاط فقد يتجاوز هذا الحد، لكنه لا يخبرنا تلقائيًا إن كان التحسن مهمًا للمريض أو القرار السريري.",
+      "mechanisms_or_context": "توضح COSMIN أن SDC مرتبط بمكونات خطأ القياس وطريقة حساب SEM، وأن agreement وconsistency قد ينتجان تقديرات مختلفة. كما تعتمد القيمة على جودة دراسة الإعادة وشروطها، ولذلك لا تنقل عتبة من سياق مختلف دون مراجعة.",
+      "assessment_or_practice": "يُذكر ما إذا كانت العتبة للفرد أو متوسط مجموعة، وطريقة حساب SEM ومستوى الثقة ومصدر البيانات. عند تفسير المتابعة يُقارن التغير بـSDC وبمؤشر للأهمية مثل minimal important change حتى نفصل الدقة الإحصائية عن المعنى العملي.",
+      "boundary": "SDC ليس الحد الأدنى للتغير المهم، ولا يثبت استجابة للعلاج أو سببية التغير. هو حد يتعلق بقدرة الأداة على تمييز تغير حقيقي نسبيًا عن خطأ القياس، بينما أهمية التغير سؤال منفصل يركز على معنى الفرق.",
+      "faq": [
+        {"question": "إذا تجاوز التغير SDC فهل هو مهم سريريًا؟", "answer": "ليس بالضرورة. تجاوز SDC يعني أن الفرق أكبر من خطأ القياس المتوقع، أما الأهمية فتحتاج معيارًا مستقلًا."},
+        {"question": "ما علاقة SDC بـSEM؟", "answer": "يُشتق SDC غالبًا من SEM مع عامل يأخذ في الحسبان خطأ قياسين ومستوى الثقة المستخدم."}
+      ],
+      "references": [
+        {"title": "COSMIN Manual for Systematic Reviews of PROMs, Version 2.0", "publisher": "COSMIN", "url": "https://www.cosmin.nl/wp-content/uploads/COSMIN-manual-V2_final.pdf"},
+        {"title": "Standards for Educational and Psychological Testing", "publisher": "AERA, APA, NCME", "url": "https://www.testingstandards.net/open-access-files.html"}
+      ],
+      "primary_keyword": "أصغر تغير قابل للكشف",
+      "secondary_keywords": ["Smallest Detectable Change بالعربي", "SDC القياس"],
+      "semantic_terms": ["خطأ القياس", "SEM", "التغير", "المتابعة"],
+      "related_slugs": ["standard-error-of-measurement", "minimal-important-change", "responsiveness-measurement"],
+      "classification_status": "change-interpretation-concept"
+    },
+    {
+      "content_type": "assessment",
+      "slug": "minimal-important-change",
+      "canonical_term": "أصغر تغير مهم",
+      "english_name": "Minimal Important Change",
+      "aliases": ["MIC", "الحد الأدنى للتغير المهم"],
+      "category_slug": "assessment-psychometrics",
+      "title": "أصغر تغير مهم: متى يصبح فرق الدرجة ذا معنى للشخص أو القرار؟",
+      "excerpt": "أصغر تغير مهم يصف مقدار التغير الذي يعتبر ذا معنى بالنسبة للمريض أو المستخدم أو السياق السريري، وهو مفهوم مختلف عن مجرد تجاوز خطأ القياس.",
+      "definition": "أصغر تغير مهم هو تقدير للفرق في الدرجة الذي يُعد ذا أهمية ذات معنى في سياق محدد. يمكن اشتقاقه بطرائق ترتكز إلى معيار خارجي مثل تقدير الشخص لتغيره أو بطرائق توزيع، مع تفضيل وجود مرساة ذات صلاحية وعلاقة كافية بالبناء المقاس.",
+      "presentation_or_use": "قد تكشف أداة تغيرًا صغيرًا بدقة إحصائية، لكن الشخص لا يشعر بأنه مهم؛ وقد يكون تغير آخر مهمًا له لكنه قريب من حدود خطأ القياس. لذلك يفيد الجمع بين MIC ومؤشرات خطأ القياس لفهم ما إذا كان الفرق قابلًا للكشف وذا معنى معًا.",
+      "mechanisms_or_context": "قيمة MIC ليست ثابتة عالميًا؛ يمكن أن تختلف حسب السكان وشدة الحالة واتجاه التغير ومرساة التقييم وطريقة التقدير. كما أن استخدام متوسط واحد قد يخفي تباينًا بين الأشخاص، ولهذا يجب وصف عدم اليقين والمنهج الذي اشتقت منه العتبة.",
+      "assessment_or_practice": "يُختار معيار خارجي مفهوم ومرتبط بالبناء، ويُفحص مقدار الارتباط وتوزيع درجات التغير ثم تقدّر العتبة مع عدم اليقين. يجب التحقق من أن MIC أكبر بما يكفي من خطأ القياس أو مناقشة التعارض إذا كانت الأداة لا تستطيع كشف تغير مهم بدقة.",
+      "boundary": "MIC ليس SDC ولا درجة قطع تشخيصية، ولا يعني أن كل شخص سيعد القيمة نفسها مهمة. كما أنه لا يثبت أن العلاج سبب التغير؛ هو أداة لتفسير معنى مقدار التغير بعد حدوثه.",
+      "faq": [
+        {"question": "هل MIC وSDC متساويان؟", "answer": "لا. SDC يتعلق بتجاوز خطأ القياس، بينما MIC يتعلق بالمعنى أو الأهمية في السياق المقصود."},
+        {"question": "هل يوجد MIC عالمي لكل مقياس؟", "answer": "لا. قد تختلف التقديرات بين السكان والسياقات وطرق الاشتقاق والمرساة المستخدمة."}
+      ],
+      "references": [
+        {"title": "COSMIN Manual for Systematic Reviews of PROMs, Version 2.0", "publisher": "COSMIN", "url": "https://www.cosmin.nl/wp-content/uploads/COSMIN-manual-V2_final.pdf"},
+        {"title": "COSMIN - Conducting a study on measurement properties", "publisher": "COSMIN", "url": "https://www.cosmin.nl/finding-right-tool/conducting-study-measurement-properties/"}
+      ],
+      "primary_keyword": "أصغر تغير مهم",
+      "secondary_keywords": ["Minimal Important Change بالعربي", "MIC في المقاييس"],
+      "semantic_terms": ["الأهمية السريرية", "التغير", "المرساة", "خطأ القياس"],
+      "related_slugs": ["minimal-detectable-change", "responsiveness-measurement"],
+      "classification_status": "change-interpretation-concept"
+    },
+    {
+      "content_type": "assessment",
+      "slug": "floor-effect",
+      "canonical_term": "تأثير الأرضية في القياس",
+      "english_name": "Floor Effect",
+      "aliases": ["Floor Effect", "تراكم الدرجات عند الحد الأدنى"],
+      "category_slug": "assessment-psychometrics",
+      "title": "تأثير الأرضية: عندما تتكدس الدرجات قرب الحد الأدنى للمقياس",
+      "excerpt": "تأثير الأرضية يظهر عندما يحصل عدد كبير من المشاركين على أدنى الدرجات أو قريبًا منها، ما قد يحد من قدرة الأداة على تمييز المستويات المنخفضة أو كشف مزيد من التحسن أو التدهور بحسب اتجاه الدرجة.",
+      "definition": "تأثير الأرضية هو تراكم ملحوظ للدرجات عند الطرف الأدنى من مجال أداة القياس. قد يشير إلى أن الأداة لا تحتوي بنودًا كافية لتمييز الأشخاص في المستويات المنخفضة من البناء، أو أن العينة لا تناسب نطاق صعوبة أو شدة المقياس.",
+      "presentation_or_use": "إذا كان معظم أفراد مجتمع سليم يسجلون صفرًا على مقياس شديد الأعراض، فلن يميز المقياس جيدًا الفروق الصغيرة بينهم. وفي متابعة حالة تتحسن باتجاه درجات أقل، قد يصل الشخص إلى الحد الأدنى فلا تستطيع الأداة تسجيل تحسن إضافي رغم وجوده.",
+      "mechanisms_or_context": "قد ينتج التأثير من نطاق استجابة ضيق أو بنود غير مناسبة للسكان أو توزيع حقيقي شديد الانحراف. وجود تكدس عند الحد لا يثبت وحده عيبًا؛ يجب ربطه بغرض القياس وبقدرة المقياس على تغطية المجال المطلوب واتخاذ القرار.",
+      "assessment_or_practice": "يُفحص توزيع الدرجات ونسبة من هم عند الحد الأدنى، ونطاق البنود وخصائص السكان. إذا كان التأثير يهدد الاستخدام قد تُضاف بنود مناسبة للمستويات المنخفضة أو تُختار أداة ذات مدى أوسع بدل تغيير الحدود اعتباطيًا.",
+      "boundary": "تأثير الأرضية ليس انخفاض المتوسط فقط، وليس دليلًا على أن المشاركين لا يملكون البناء. كما يختلف عن السلبية الكاذبة في الاختبارات التشخيصية؛ هو مشكلة في نطاق القياس وتوزيع الدرجات لا في جدول تصنيف ثنائي.",
+      "faq": [
+        {"question": "هل أي تركز عند الصفر يعني تأثير أرضية خطيرًا؟", "answer": "لا. يهم مقدار التركز والغرض والسكان وما إذا كان يحد فعليًا من التمييز أو متابعة التغير."},
+        {"question": "ما عكس تأثير الأرضية؟", "answer": "تأثير السقف، حيث تتجمع الدرجات عند الطرف الأعلى ويضعف تمييز المستويات المرتفعة."}
+      ],
+      "references": [
+        {"title": "COSMIN Manual for Systematic Reviews of PROMs, Version 2.0", "publisher": "COSMIN", "url": "https://www.cosmin.nl/wp-content/uploads/COSMIN-manual-V2_final.pdf"},
+        {"title": "Standards for Educational and Psychological Testing", "publisher": "AERA, APA, NCME", "url": "https://www.testingstandards.net/open-access-files.html"}
+      ],
+      "primary_keyword": "تأثير الأرضية في القياس",
+      "secondary_keywords": ["Floor Effect بالعربي", "تكدس الدرجات الدنيا"],
+      "semantic_terms": ["نطاق القياس", "توزيع الدرجات", "التغير", "البنود"],
+      "related_slugs": ["ceiling-effect", "responsiveness-measurement"],
+      "classification_status": "score-distribution-concept"
+    },
+    {
+      "content_type": "assessment",
+      "slug": "ceiling-effect",
+      "canonical_term": "تأثير السقف في القياس",
+      "english_name": "Ceiling Effect",
+      "aliases": ["Ceiling Effect", "تراكم الدرجات عند الحد الأعلى"],
+      "category_slug": "assessment-psychometrics",
+      "title": "تأثير السقف: عندما تتكدس الدرجات قرب الحد الأعلى للمقياس",
+      "excerpt": "تأثير السقف يظهر عندما يصل عدد كبير من الأشخاص إلى أعلى الدرجات أو قريبًا منها، فتضعف قدرة الأداة على تمييز المستويات المرتفعة أو تسجيل مزيد من التغير في ذلك الاتجاه.",
+      "definition": "تأثير السقف هو تركز الدرجات عند الطرف الأعلى من مجال أداة القياس. قد يعني أن البنود سهلة أو قليلة الشدة بالنسبة للسكان، أو أن نطاق الاستجابة لا يمتد بما يكفي لتمثيل مستويات أعلى من البناء الذي يفترض قياسه.",
+      "presentation_or_use": "في اختبار قدرة سهل جدًا قد يجيب كثير من المشاركين عن جميع البنود بصورة صحيحة، فيصبح من الصعب التفريق بين أصحاب القدرات المرتفعة. وفي مقياس تحسن ترتفع فيه الدرجة، قد يمنع الحد الأعلى تسجيل فائدة إضافية بعد بلوغ السقف.",
+      "mechanisms_or_context": "يتأثر ظهور السقف بخصائص العينة وبنك البنود وطريقة التسجيل. قد يكون التركز طبيعيًا إذا صُممت الأداة للفحص عند مستويات منخفضة، لكنه يصبح مشكلة عندما يكون الهدف قياس فروق أو تغيرات في نطاق لا تغطيه الأداة.",
+      "assessment_or_practice": "تُراجع نسبة الدرجات القصوى، شكل التوزيع، صعوبة البنود والغرض من الاستخدام. يمكن توسيع بنك البنود أو استخدام أداة أكثر ملاءمة بدل افتراض أن عدم تغير الدرجة يعني عدم تغير الحالة الفعلية.",
+      "boundary": "تأثير السقف ليس ببساطة ارتفاع متوسط المجموعة، ولا يثبت أن المقياس غير صالح لكل استخدام. كما لا يساوي الإيجابية الكاذبة أو درجة القطع؛ هو قيد في مدى التمييز عند الطرف الأعلى من المقياس.",
+      "faq": [
+        {"question": "هل الدرجة القصوى لشخص واحد تعني تأثير سقف؟", "answer": "لا. المصطلح يتعلق بنمط تركز يؤثر في قدرة القياس، لا بحالة فردية واحدة."},
+        {"question": "كيف يؤثر السقف على متابعة العلاج؟", "answer": "إذا كان التحسن يرفع الدرجة فقد يعجز المقياس بعد بلوغ الحد الأعلى عن تسجيل تحسن إضافي حقيقي."}
+      ],
+      "references": [
+        {"title": "COSMIN Manual for Systematic Reviews of PROMs, Version 2.0", "publisher": "COSMIN", "url": "https://www.cosmin.nl/wp-content/uploads/COSMIN-manual-V2_final.pdf"},
+        {"title": "Standards for Educational and Psychological Testing", "publisher": "AERA, APA, NCME", "url": "https://www.testingstandards.net/open-access-files.html"}
+      ],
+      "primary_keyword": "تأثير السقف في القياس",
+      "secondary_keywords": ["Ceiling Effect بالعربي", "تكدس الدرجات العليا"],
+      "semantic_terms": ["نطاق القياس", "توزيع الدرجات", "البنود", "المتابعة"],
+      "related_slugs": ["floor-effect", "responsiveness-measurement"],
+      "classification_status": "score-distribution-concept"
+    }
+  ]
+}
