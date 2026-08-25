@@ -9,7 +9,7 @@ import styles from './assessment-lab.module.css';
 
 export const metadata: Metadata = buildSeoMetadata({
   title: 'اختبر نفسك: أدوات وصف ذاتي آمنة',
-  description: '36 أداة عربية أصلية من روافد لتنظيم الملاحظة الذاتية بنتائج وصفية غير تشخيصية، بلا حفظ للإجابات، مع أدلة مستقلة للمقاييس المعروفة ومنهج تطوير شفاف.',
+  description: '36 أداة عربية أصلية من روافد لتنظيم الملاحظة الذاتية بملخصات وصفية غير تشخيصية، بلا حفظ للإجابات، مع أدلة مستقلة للمقاييس المعروفة ومنهج تطوير شفاف.',
   path: '/assessment-lab',
   index: true,
   follow: true,
@@ -44,17 +44,17 @@ export default function AssessmentLabPage() {
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbs).replace(/</g, '\\u003c') }} />
     <section className={styles.hero}><div className={styles.shell}>
       <nav className={styles.breadcrumbs} aria-label="مسار الصفحة"><Link href="/">الرئيسية</Link><span>/</span><span aria-current="page">اختبر نفسك</span></nav>
-      <div className={styles.heroLayout}><div><span className={styles.eyebrow}>اختبر نفسك · Self-check</span><h1>افهم النمط، ولا تحوّل النتيجة إلى تشخيص</h1><p>مكتبة عربية أصلية لتنظيم ما تلاحظه في المزاج والنوم والضغط والعلاقات والدراسة والرعاية والقدرات اليومية. كل أداة تعطي ملخصًا وصفيًا لأربعة مجالات، ثم تقترح أسئلة وخطوات يمكن مناقشتها مع مختص عند الحاجة.</p><div className={styles.heroActions}><a href="#library">استكشف الأدوات</a><a href="#method">كيف نطورها؟</a></div></div><aside className={styles.heroBoundary}><strong>اقرأ قبل البدء</strong><p>النتيجة استرشادية وغير تشخيصية. قد تدعوك إلى إعادة النظر في جانب يثير قلقك، لكنها لا تثبت اضطرابًا ولا تنفيه، ولا تقدم قرار علاج.</p><span>لا حفظ · لا حساب · لا إرسال للإجابات</span></aside></div>
-      <div className={styles.facts}><span><strong>36</strong> أداة روافد أصلية</span><span><strong>432</strong> بندًا عربيًا واضحًا</span><span><strong>4</strong> مجالات في كل نتيجة</span><span><strong>0</strong> إجابات محفوظة</span></div>
+      <div className={styles.heroLayout}><div><span className={styles.eyebrow}>اختبر نفسك · Self-check</span><h1>افهم النمط، ولا تحوّل النتيجة إلى تشخيص</h1><p>مكتبة عربية أصلية لتنظيم ما تلاحظه في المزاج والنوم والضغط والعلاقات والدراسة والرعاية والقدرات اليومية. كل أداة ترتب إجاباتك في أربعة مجالات، ثم تقترح أسئلة وخطوات يمكن مناقشتها مع مختص عند الحاجة.</p><div className={styles.heroActions}><a href="#library">استكشف الأدوات</a><a href="#method">كيف نطورها؟</a></div></div><aside className={styles.heroBoundary}><strong>اقرأ قبل البدء</strong><p>النتيجة استرشادية وغير تشخيصية. قد تدعوك إلى إعادة النظر في جانب يثير قلقك، لكنها لا تثبت اضطرابًا ولا تنفيه، ولا تقدم قرار علاج.</p><span>لا حفظ · لا تصنيف · لا إرسال للإجابات</span></aside></div>
+      <div className={styles.facts}><span><strong>36</strong> أداة روافد أصلية</span><span><strong>432</strong> بندًا عربيًا واضحًا</span><span><strong>4</strong> مجالات في كل أداة</span><span><strong>0</strong> إجابات محفوظة</span></div>
     </div></section>
 
     <section className={`${styles.shell} ${styles.principles}`} aria-labelledby="principles-title">
       <div className={styles.sectionHeading}><span className={styles.eyebrow}>حدود تحميك</span><h2 id="principles-title">ما الذي تقدمه الأداة وما الذي لا تقدمه؟</h2></div>
       <div className={styles.principleGrid}>
-        <article><span>تقدم</span><h3>وصفًا منظمًا</h3><p>تجمع إجاباتك بحسب مجالات واضحة وتبين أين تكررت الملاحظات خلال فترة محددة.</p></article>
-        <article><span>تقدم</span><h3>خطوة قابلة للنقاش</h3><p>تحول النتيجة إلى مثال أو سؤال أو تعديل بيئي صغير، مع مسار للوصول إلى مختص أو مركز.</p></article>
-        <article><span>لا تقدم</span><h3>تشخيصًا أو شدة سريرية</h3><p>لا توجد درجة كلية أو مقارنة بمعيار سكاني أو حدود فاصلة؛ الأرقام تصف إجابات الجلسة فقط.</p></article>
-        <article><span>لا تقدم</span><h3>حكمًا على الشخص</h3><p>خاصة في أدوات الأسرة والإعاقة: نقيس ملاءمة الدعم والبيئة، لا قيمة الطفل ولا «شدة» تشخيصه.</p></article>
+        <article><span>تقدم</span><h3>وصفًا منظمًا</h3><p>تعرض إجاباتك بحسب مجالات واضحة وبالفترة المرجعية المحددة، من دون تحويلها إلى حكم آلي.</p></article>
+        <article><span>تقدم</span><h3>خطوة قابلة للنقاش</h3><p>تحول الملاحظة إلى مثال أو سؤال أو تعديل بيئي صغير، مع مسار للوصول إلى مختص أو مركز.</p></article>
+        <article><span>لا تقدم</span><h3>تشخيصًا أو شدة سريرية</h3><p>لا توجد درجة كلية أو نسبة شدة أو مقارنة بمعيار سكاني أو حدود فاصلة في الإصدار التطويري.</p></article>
+        <article><span>لا تقدم</span><h3>حكمًا على الشخص</h3><p>خاصة في أدوات الأسرة والإعاقة: نراجع ملاءمة الدعم والبيئة، لا قيمة الطفل ولا «شدة» تشخيصه.</p></article>
       </div>
     </section>
 
