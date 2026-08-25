@@ -62,7 +62,7 @@ for(const file of [
  if(!body.includes('LegacyPreservedRoute'))fail(`${file} must render the complete preserved production record`);
 }
 const preserved=read('components/legacy-preserved-page.tsx');
-for(const marker of ['ContentRenderer','legacyInternalLinks','legacyReferences','محتوى من مكتبة منصة روافد'])if(!preserved.includes(marker))fail(`preserved landing renderer missing ${marker}`);
+for(const marker of ['ContentRenderer','legacyInternalLinks','legacyReferences','من مكتبة منصة روافد','صفحة منشورة ومحفوظة'])if(!preserved.includes(marker))fail(`preserved landing renderer missing ${marker}`);
 const proxy=read('lib/supabase/proxy.ts');
 for(const marker of ['legacy_preserved_route_exists','isLegacyProductionRoute','pathname.endsWith','redirects'])if(!proxy.includes(marker))fail(`proxy legacy-route boundary missing ${marker}`);
 const migration=read('supabase/migrations/20260816092116_legacy_preserved_route_exists.sql');
