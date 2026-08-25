@@ -6,6 +6,8 @@ on:
     paths:
       - '.github/workflows/deploy-analytics-production.yml'
       - 'app/layout.tsx'
+      - 'lib/seo.ts'
+      - 'scripts/search-appearance-contract.mjs'
       - 'wrangler.jsonc'
       - 'scripts/cloudflare-production-build.sh'
       - '.github/workflows/deploy-production.yml'
@@ -44,7 +46,7 @@ jobs:
             -H 'Accept: application/vnd.github+json' \
             -H 'X-GitHub-Api-Version: 2022-11-28' \
             "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" \
-            -d "{\"state\":\"pending\",\"context\":\"deploy/analytics-production\",\"description\":\"Deploying GTM and GA4 to healthrenewal.org\",\"target_url\":\"${RUN_URL}\"}" >/dev/null
+            -d "{\"state\":\"pending\",\"context\":\"deploy/analytics-production\",\"description\":\"Deploying production metadata and analytics to healthrenewal.org\",\"target_url\":\"${RUN_URL}\"}" >/dev/null
 
       - uses: actions/checkout@v7
         with:
@@ -66,11 +68,12 @@ jobs:
           npx wrangler --version
           npx wrangler whoami
 
-      - name: Verify analytics production contract
+      - name: Verify production contract
         shell: bash
         run: |
           set -euo pipefail
           test "${NEXT_PUBLIC_SITE_URL}" = 'https://healthrenewal.org'
+          test "${NEXT_PUBLIC_ALLOW_INDEXING}" = 'true'
           test "${NEXT_PUBLIC_ENABLE_ANALYTICS}" = 'true'
           test "${NEXT_PUBLIC_GTM_ID}" = 'GTM-WBLQVBG4'
           test "${NEXT_PUBLIC_GA_MEASUREMENT_ID}" = 'G-VLZMV8Y4JP'
@@ -79,6 +82,9 @@ jobs:
           grep -q 'NEXT_PUBLIC_GA_MEASUREMENT_ID' app/layout.tsx
           grep -q 'NEXT_PUBLIC_ENABLE_ANALYTICS' app/layout.tsx
           grep -q 'NEXT_PUBLIC_ENABLE_DIRECT_GA' app/layout.tsx
+          grep -q "const HOME_TITLE = 'منصة روافد" lib/seo.ts
+          grep -q 'siteName: BRAND_NAME' app/layout.tsx
+          grep -q 'siteName: BRAND_NAME' lib/seo.ts
           grep -q '"NEXT_PUBLIC_ENABLE_ANALYTICS": "true"' wrangler.jsonc
           grep -q '"NEXT_PUBLIC_GTM_ID": "GTM-WBLQVBG4"' wrangler.jsonc
           grep -q '"NEXT_PUBLIC_GA_MEASUREMENT_ID": "G-VLZMV8Y4JP"' wrangler.jsonc
@@ -90,55 +96,40 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Search appearance contract
+        run: npm run search-appearance:validate
+
       - name: Build production Worker
         run: bash scripts/cloudflare-production-build.sh
 
-      - name: Upload production Worker version without changing DNS or routes
-        shell: bash
-        env:
-          WRANGLER_OUTPUT_FILE: /tmp/wrangler-output.jsonl
-        run: |
-          set -euo pipefail
-          rm -f "${WRANGLER_OUTPUT_FILE}"
-          tag="analytics-${GITHUB_SHA}"
-          npx wrangler versions upload --env production --tag "${tag}" --message "Production analytics ${GITHUB_SHA}"
-          version_id="$(node - <<'NODE'
-          const fs = require('fs');
-          const p = process.env.WRANGLER_OUTPUT_FILE;
-          const rows = fs.readFileSync(p, 'utf8').trim().split(/\r?\n/).filter(Boolean).map((line) => JSON.parse(line));
-          const hit = [...rows].reverse().find((row) => row.type === 'version-upload');
-          if (!hit || !hit.version_id) process.exit(2);
-          process.stdout.write(hit.version_id);
-          NODE
-          )"
-          test -n "${version_id}"
-          echo "WORKER_VERSION_ID=${version_id}" >> "${GITHUB_ENV}"
-          echo "Uploaded Worker version ${version_id}."
-
-      - name: Activate uploaded Worker version at 100 percent
+      - name: Deploy production Worker
         shell: bash
         run: |
           set -euo pipefail
-          test -n "${WORKER_VERSION_ID:-}"
-          npx wrangler versions deploy "${WORKER_VERSION_ID}@100%" --env production -y --message "Activate production analytics ${GITHUB_SHA}"
+          npx opennextjs-cloudflare deploy --env production
 
-      - name: Verify analytics on live production
+      - name: Verify live production metadata, indexing and analytics
         shell: bash
         run: |
           set -euo pipefail
           base='https://healthrenewal.org'
           for attempt in $(seq 1 24); do
             stamp="${GITHUB_SHA}-${attempt}-$(date +%s)"
-            home="$(curl -fsSL --compressed --max-time 25 -H 'Cache-Control: no-cache, no-store, max-age=0' "${base}/?analytics-deploy=${stamp}" 2>/dev/null || true)"
-            if printf '%s' "$home" | grep -q 'GTM-WBLQVBG4' \
+            home="$(curl -fsSL --compressed --max-time 25 -H 'Cache-Control: no-cache, no-store, max-age=0' "${base}/?production-deploy=${stamp}" 2>/dev/null || true)"
+            robots="$(curl -fsSL --compressed --max-time 25 -H 'Cache-Control: no-cache, no-store, max-age=0' "${base}/robots.txt?production-deploy=${stamp}" 2>/dev/null || true)"
+            if printf '%s' "$home" | grep -q '<title>منصة روافد' \
+              && printf '%s' "$home" | grep -q 'GTM-WBLQVBG4' \
               && printf '%s' "$home" | grep -q 'G-VLZMV8Y4JP' \
-              && ! printf '%s' "$home" | grep -qi 'noindex'; then
-              echo 'Production analytics deployment verified.'
+              && printf '%s' "$home" | grep -q 'rel="canonical" href="https://healthrenewal.org/' \
+              && printf '%s' "$home" | grep -q 'منصة روافد' \
+              && ! printf '%s' "$home" | grep -qi 'noindex' \
+              && printf '%s' "$robots" | grep -q 'Sitemap: https://healthrenewal.org/sitemap.xml'; then
+              echo 'Production deployment verified: site name, canonical, indexability and analytics are live.'
               exit 0
             fi
             sleep 5
           done
-          echo 'Production analytics identifiers were not visible after deployment.' >&2
+          echo 'Production metadata deployment was not fully visible after deployment.' >&2
           exit 1
 
       - name: Mark deployment success
@@ -150,7 +141,7 @@ jobs:
             -H 'Accept: application/vnd.github+json' \
             -H 'X-GitHub-Api-Version: 2022-11-28' \
             "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" \
-            -d "{\"state\":\"success\",\"context\":\"deploy/analytics-production\",\"description\":\"GTM and GA4 deployed and verified on production\",\"target_url\":\"${RUN_URL}\"}" >/dev/null
+            -d "{\"state\":\"success\",\"context\":\"deploy/analytics-production\",\"description\":\"Production metadata and analytics deployed and verified\",\"target_url\":\"${RUN_URL}\"}" >/dev/null
 
       - name: Mark deployment failure
         if: failure()
@@ -161,4 +152,4 @@ jobs:
             -H 'Accept: application/vnd.github+json' \
             -H 'X-GitHub-Api-Version: 2022-11-28' \
             "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" \
-            -d "{\"state\":\"failure\",\"context\":\"deploy/analytics-production\",\"description\":\"Production analytics deployment failed\",\"target_url\":\"${RUN_URL}\"}" >/dev/null || true
+            -d "{\"state\":\"failure\",\"context\":\"deploy/analytics-production\",\"description\":\"Production metadata deployment failed\",\"target_url\":\"${RUN_URL}\"}" >/dev/null || true
