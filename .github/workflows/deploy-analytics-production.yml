@@ -102,11 +102,21 @@ jobs:
       - name: Build production Worker
         run: bash scripts/cloudflare-production-build.sh
 
-      - name: Deploy production Worker
+      - name: Upload and activate production Worker version without changing routes
         shell: bash
         run: |
           set -euo pipefail
-          npx opennextjs-cloudflare deploy --env production
+          tag="metadata-${GITHUB_SHA}"
+          upload_output="$(npx wrangler versions upload --env production --tag "${tag}" --message "Production metadata ${GITHUB_SHA}" 2>&1 | tee /tmp/wrangler-version-upload.log)"
+          printf '%s\n' "${upload_output}"
+          version_id="$(printf '%s\n' "${upload_output}" | sed -n 's/.*Worker Version ID: \([0-9A-Fa-f-][0-9A-Fa-f-]*\).*/\1/p' | tail -n 1)"
+          if [ -z "${version_id}" ]; then
+            echo 'Unable to parse Worker Version ID from Wrangler output.' >&2
+            cat /tmp/wrangler-version-upload.log >&2 || true
+            exit 1
+          fi
+          echo "Activating Worker version ${version_id} at 100%."
+          npx wrangler versions deploy "${version_id}@100%" --env production -y --message "Activate production metadata ${GITHUB_SHA}"
 
       - name: Verify live production metadata, indexing and analytics
         shell: bash
