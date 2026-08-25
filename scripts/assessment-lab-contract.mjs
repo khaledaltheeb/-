@@ -11,6 +11,8 @@ const detail = fs.readFileSync('app/assessment-lab/[slug]/page.tsx', 'utf8');
 const sitemap = fs.readFileSync('app/sitemaps/static.xml/route.ts', 'utf8');
 const header = fs.readFileSync('components/site-header.tsx', 'utf8');
 const plan = fs.readFileSync('.rawafid-self-assessment-plan.md', 'utf8');
+const e2e = fs.readFileSync('scripts/assessment-lab-e2e.mjs', 'utf8');
+const qualityWorkflow = fs.readFileSync('.github/workflows/quality.yml', 'utf8');
 
 const failures = [];
 const fail = (message) => failures.push(message);
@@ -88,6 +90,24 @@ if (!detail.includes('من دون نسبة أو ترتيب أو فئة شدة أ
 if (!sitemap.includes('assessmentSlugs.map')) fail('all 40 reviewed routes must be present in the static sitemap');
 if (!header.includes("{ href: '/assessment-lab', label: 'اختبر نفسك'")) fail('section must be discoverable from the services navigation');
 
+for (const required of [
+  "'/assessment-lab'",
+  "'/assessment-lab/mood-daily'",
+  "'/assessment-lab/phq-9-plus'",
+  "getByRole('button', { name: 'أفهم الحدود وأبدأ' })",
+  "buttonName = index === 11 ? 'عرض ملخصي' : 'التالي'",
+  "storageSnapshot(tool)",
+  "mutatingRequests",
+  "no horizontal overflow",
+  "\\d+\\s*%",
+  "https://www.nih.gov/node/19946",
+]) {
+  if (!e2e.includes(required)) fail('interactive browser regression coverage missing: ' + required);
+}
+if (!qualityWorkflow.includes('Assessment lab interactive regression') || !qualityWorkflow.includes('scripts/assessment-lab-e2e.mjs')) {
+  fail('Rawafid Quality Gate must execute the assessment lab interactive browser regression');
+}
+
 for (const required of ['الغاية النهائية', 'لا ادعاء بالتقنين', '432 بندًا', 'المراحل المتبقية ميدانيًا', 'المسارات التاريخية', 'لا نسبة شدة']) {
   if (!plan.includes(required)) fail('continuity plan missing: ' + required);
 }
@@ -97,4 +117,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log('Assessment lab contract passed: 36 original developmental tools / 432 explicit Arabic items / 4 source-only guides / no persistence / no unvalidated numeric interpretation / self-canonical discovery.');
+console.log('Assessment lab contract passed: 36 original developmental tools / 432 explicit Arabic items / 4 source-only guides / no persistence / no unvalidated numeric interpretation / self-canonical discovery / interactive browser regression wired into CI.');
