@@ -17,11 +17,10 @@ const responseOptions = [
   { value: 4, label: 'دائمًا تقريبًا' },
 ] as const;
 
-function patternLabel(score: number) {
-  if (score < 25) return 'لم يظهر كثيرًا في إجاباتك';
-  if (score < 50) return 'ظهر أحيانًا في إجاباتك';
-  if (score < 75) return 'ظهر بصورة متكررة في إجاباتك';
-  return 'ظهر بصورة بارزة في إجاباتك';
+function answerLabel(answer: Answer | undefined) {
+  if (answer === 'na') return 'لا ينطبق';
+  if (answer === undefined) return 'لم تُجب';
+  return responseOptions.find((option) => option.value === answer)?.label ?? 'لم تُجب';
 }
 
 export default function AssessmentMonitorRunner({ monitor }: Props) {
@@ -41,20 +40,21 @@ export default function AssessmentMonitorRunner({ monitor }: Props) {
   const answeredCount = Object.keys(answers).length;
 
   const results = useMemo(() => monitor.domains.map((domain) => {
-    const domainAnswers = domain.items
-      .map((item, itemIndex) => ({ item, answer: answers[`${domain.id}-${itemIndex + 1}`] }))
-      .filter((entry): entry is { item: typeof entry.item; answer: number } => typeof entry.answer === 'number');
-    const score = domainAnswers.length === 0 ? null : Math.round(
-      domainAnswers.reduce((sum, entry) => sum + (entry.item.direction === 'concern' ? entry.answer : 4 - entry.answer), 0)
-      / (domainAnswers.length * 4) * 100,
-    );
-    return { ...domain, score, answered: domainAnswers.length };
+    const responses = domain.items.map((item, itemIndex) => {
+      const answer = answers[`${domain.id}-${itemIndex + 1}`];
+      return {
+        ...item,
+        answer,
+        label: answerLabel(answer),
+      };
+    });
+    return {
+      ...domain,
+      responses,
+      described: responses.filter((entry) => typeof entry.answer === 'number').length,
+      notApplicable: responses.filter((entry) => entry.answer === 'na').length,
+    };
   }), [answers, monitor.domains]);
-
-  const focusDomains = results
-    .filter((domain) => domain.score !== null && domain.score >= 25)
-    .sort((a, b) => (b.score ?? -1) - (a.score ?? -1))
-    .slice(0, 2);
 
   function chooseAnswer(answer: Answer) {
     setAnswers((current) => ({ ...current, [currentQuestion.id]: answer }));
@@ -90,7 +90,7 @@ export default function AssessmentMonitorRunner({ monitor }: Props) {
         <div><dt>المدة</dt><dd>نحو {monitor.estimatedMinutes} دقائق</dd></div>
         <div><dt>لمن؟</dt><dd>{monitor.ageLabel}</dd></div>
       </dl>
-      <div className={styles.privacyNotice}><strong>خصوصيتك أولًا</strong><p>تجري الإجابات والحساب داخل الصفحة المفتوحة فقط. لا ترسل روافد إجاباتك إلى خادم، ولا تحفظها في حساب أو متصفح، ولا تضعها في رابط الصفحة. عند الإغلاق تختفي.</p></div>
+      <div className={styles.privacyNotice}><strong>خصوصيتك أولًا</strong><p>تجري الإجابات والمعالجة داخل الصفحة المفتوحة فقط. لا ترسل روافد إجاباتك إلى خادم، ولا تحفظها في حساب أو متصفح، ولا تضعها في رابط الصفحة. عند الإغلاق تختفي.</p></div>
       {monitor.safetyNote && <div className={styles.safetyNotice} role="note"><strong>تنبيه سلامة</strong><p>{monitor.safetyNote}</p></div>}
       <div className={styles.actions}><button type="button" onClick={() => setPhase('questions')}>أفهم الحدود وأبدأ</button></div>
     </div>}
@@ -126,16 +126,17 @@ export default function AssessmentMonitorRunner({ monitor }: Props) {
       <div className={styles.resultHeading}>
         <span className={styles.eyebrow}>ملخص وصفي خاص بهذه الجلسة</span>
         <h2 id="assessment-runner-title">ما الذي ظهر في إجاباتك؟</h2>
-        <p>لا توجد درجة كلية ولا حدود تشخيصية. النسب أدناه تنظّم نمط إجاباتك داخل كل مجال فقط؛ ليست مقارنة بأشخاص آخرين ولا تقديرًا لشدة حالة.</p>
+        <p>لا توجد درجة كلية ولا حدود تشخيصية. تُعرض كل إجابة كما اخترتها، من دون تحويلها إلى نسبة أو ترتيب أو فئة شدة، ومن دون مقارنتها بأشخاص آخرين.</p>
       </div>
-      <div className={styles.resultBoundary} role="note"><strong>النتيجة استرشادية</strong><p>{focusDomains.length ? <>قد تدعوك إلى إعادة النظر في {focusDomains.map((domain) => `«${domain.title}»`).join(' و')}، لكنها لا تثبت وجود اضطراب أو تنفيه.</> : <>لم يظهر مجال بصورة متكررة في هذه الإجابات. هذا لا ينفي وجود حاجة أو مشكلة خارج ما سألته الأداة.</>}</p></div>
+      <div className={styles.resultBoundary} role="note"><strong>النتيجة استرشادية</strong><p>راجع المجالات واحدًا واحدًا. إذا لفتك بند يتكرر في حياتك أو مورد داعم لا يتاح لك بما يكفي، دوّن مثالًا واقعيًا أو سؤالًا لمناقشته. روافد لا ترتب المجالات ولا تقرر أيها «أشد» في هذا الإصدار التطويري.</p></div>
       <div className={styles.resultGrid}>
         {results.map((domain) => <article className={styles.resultCard} key={domain.id}>
-          <div className={styles.resultCardHeading}><h3>{domain.title}</h3><span>{domain.score === null ? 'غير محسوب' : `${domain.score}%`}</span></div>
-          {domain.score === null ? <p>اخترت «لا ينطبق» لكل بنود هذا المجال، لذلك لا توجد بيانات كافية لوصفه.</p> : <>
-            <div className={styles.resultBar} aria-hidden="true"><span style={{ width: `${domain.score}%` }} /></div>
-            <p><strong>{patternLabel(domain.score)}</strong> — بناءً على {domain.answered} بنود مجاب عنها.</p>
-          </>}
+          <div className={styles.resultCardHeading}><h3>{domain.title}</h3><span>{domain.described ? `${domain.described} إجابات وصفية` : 'بلا وصف عددي'}</span></div>
+          {domain.responses.map((entry, itemIndex) => <p key={`${domain.id}-${itemIndex + 1}`}>
+            <strong>{entry.direction === 'concern' ? 'بند مراجعة' : 'مورد داعم'} · {entry.label}</strong><br />
+            {entry.text}
+          </p>)}
+          {domain.notApplicable > 0 && <p>اختيار «لا ينطبق» ظاهر كما هو ولا يدخل في أي حساب أو استنتاج.</p>}
           <p className={styles.domainAction}><strong>خطوة قابلة للنقاش:</strong> {domain.action}</p>
           <label className={styles.noteField}><span>مثال أو ملاحظة اختيارية للطباعة</span><textarea rows={3} maxLength={600} value={notes[domain.id] ?? ''} onChange={(event) => setNotes((current) => ({ ...current, [domain.id]: event.target.value }))} placeholder="متى ظهر؟ ما أثره؟ وما الذي ساعد؟" /></label>
         </article>)}
