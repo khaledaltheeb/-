@@ -25,7 +25,7 @@ export const BRAND_SHORT = RAWAFID_BRAND_SHORT;
 export const DEFAULT_LOCALE = 'ar_AR';
 export const DEFAULT_DESCRIPTION = 'روافد منصة عربية للمعرفة الموثوقة في الصحة النفسية والتربية الخاصة والتوحد وصعوبات التعلم وسرطان الأطفال والتعافي، مع أدلة عملية ومختصين ومراكز.';
 
-const HOME_TITLE = 'روافد | الصحة النفسية والتربية الخاصة وسرطان الأطفال';
+const HOME_TITLE = 'منصة روافد | الصحة النفسية والتربية الخاصة وسرطان الأطفال';
 const HOME_DESCRIPTION = DEFAULT_DESCRIPTION;
 
 export function absoluteSiteUrl(pathOrUrl: string) {
@@ -125,7 +125,7 @@ export function buildSeoMetadata(input: SeoMetadataInput): Metadata {
       url: canonical,
       title,
       description,
-      siteName: BRAND_SHORT,
+      siteName: BRAND_NAME,
       locale: DEFAULT_LOCALE,
       images: openGraphImages,
       ...(input.type === 'article'
@@ -167,7 +167,7 @@ export function organizationJsonLd() {
         '@type': 'Organization',
         '@id': `${SITE_URL}/#organization`,
         name: BRAND_NAME,
-        alternateName: BRAND_SHORT,
+        alternateName: [BRAND_SHORT, 'Rawafid'],
         url: `${SITE_URL}/`,
         description: DEFAULT_DESCRIPTION,
         logo: {
@@ -177,7 +177,7 @@ export function organizationJsonLd() {
           contentUrl: logoUrl,
           width: 512,
           height: 512,
-          caption: BRAND_SHORT,
+          caption: BRAND_NAME,
         },
         image: { '@id': `${SITE_URL}/#logo` },
         knowsAbout: topics,
@@ -185,8 +185,8 @@ export function organizationJsonLd() {
       {
         '@type': 'WebSite',
         '@id': `${SITE_URL}/#website`,
-        name: BRAND_SHORT,
-        alternateName: BRAND_NAME,
+        name: BRAND_NAME,
+        alternateName: [BRAND_SHORT, 'Rawafid', SITE_HOSTNAME],
         url: `${SITE_URL}/`,
         description: DEFAULT_DESCRIPTION,
         inLanguage: 'ar',

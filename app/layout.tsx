@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import Script from 'next/script';
 import { Noto_Sans_Arabic } from 'next/font/google';
-import { BRAND_NAME, BRAND_SHORT, DEFAULT_DESCRIPTION, INDEXING_ENABLED, SITE_URL, organizationJsonLd } from '@/lib/seo';
+import { BRAND_NAME, DEFAULT_DESCRIPTION, INDEXING_ENABLED, SITE_URL, organizationJsonLd } from '@/lib/seo';
 import './rawafid-theme.css';
 
 /* Compatibility modules now live behind the central entry point:
@@ -62,7 +62,7 @@ export const metadata: Metadata = {
     : { index: false, follow: false, noarchive: true, nosnippet: true },
   openGraph: {
     type: 'website',
-    siteName: BRAND_SHORT,
+    siteName: BRAND_NAME,
     locale: 'ar_AR',
     title: BRAND_NAME,
     description: DEFAULT_DESCRIPTION,
@@ -71,7 +71,7 @@ export const metadata: Metadata = {
       url: DEFAULT_SOCIAL_IMAGE,
       width: 1200,
       height: 630,
-      alt: 'روافد — منصة عربية للمعرفة الصحية والنفسية الموثوقة',
+      alt: 'منصة روافد — معرفة عربية موثوقة للصحة النفسية والتربية الخاصة',
     }],
   },
   twitter: {
