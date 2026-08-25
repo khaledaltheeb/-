@@ -32,7 +32,7 @@ export default async function SectionsIndex() {
     '@type': 'CollectionPage',
     '@id': `${SITE_URL}/sections#collection`,
     url: `${SITE_URL}/sections`,
-    name: 'أقسام روافد',
+    name: 'أقسام منصة روافد',
     description: 'الخريطة الموضوعية لأقسام منصة روافد تحت القطاعات الرئيسية.',
     inLanguage: 'ar',
     isAccessibleForFree: true,
@@ -58,7 +58,7 @@ export default async function SectionsIndex() {
 
       <section className="public-index-hero" aria-labelledby="sections-title">
         <span className="eyebrow"><PlatformIcon name="knowledge" size={18} /> دليل الموضوعات</span>
-        <h1 id="sections-title">أقسام روافد</h1>
+        <h1 id="sections-title">أقسام منصة روافد</h1>
         <p>خريطة موضوعية مرتبة حسب القطاعات الرئيسية، من الصحة النفسية وذوي الاحتياجات الخاصة والدمج إلى الأسرة والتعافي والمعرفة. ابدأ بالمجال الأقرب لاحتياجك، ثم انتقل إلى القسم المتخصص أو أحد موضوعاته الفرعية.</p>
         <div className="public-stat-strip"><span>{sectorRows.length.toLocaleString('ar')} قطاعات</span><span>{categoryRows.length.toLocaleString('ar')} قسمًا وقسمًا فرعيًا</span><span>تنقل هرمي واضح</span></div>
         <form className="sector-search" action="/search" method="get" role="search"><label className="sr-only" htmlFor="sections-search">البحث في روافد</label><input id="sections-search" name="q" placeholder="ابحث عن موضوع أو حالة أو سؤال" maxLength={160} /><button type="submit">بحث</button></form>
