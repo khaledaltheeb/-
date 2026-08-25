@@ -82,7 +82,11 @@ for(const marker of [
   'published public route unexpectedly emitted noindex',
   "requiresPreservedBanner&&!body.includes('صفحة منشورة ومحفوظة')"
 ]) if(!preservationSmoke.includes(marker)) fail(`modern/fallback preservation smoke marker missing: ${marker}`);
-for(const marker of ['const heldPublished = [','expected robots noindex,follow','const reviewedPublished = [','expected robots index,follow']) if(!wave004Smoke.includes(marker)) fail(`Wave 004 review-gated indexing smoke marker missing: ${marker}`);
+for(const marker of [
+  'const reviewedPublished = [',
+  'reviewed publication must render index,follow without noindex/nofollow',
+  'reviewed, publication-ready, indexable pages'
+]) if(!wave004Smoke.includes(marker)) fail(`Wave 004 reviewed-release indexing smoke marker missing: ${marker}`);
 const catchAll=read('app/[...legacyPath]/page.tsx');
 if(!catchAll.includes('notFound()')) fail('unknown routes must still reach the branded 404');
 for(const path of [
@@ -96,4 +100,4 @@ for(const path of [
 ]) if(!fs.existsSync(path)) fail(`deployed migration history not mirrored: ${path}`);
 
 if(failed)process.exit(1);
-console.log('Legacy preservation contract passed: general published production fallbacks remain eligible for indexing under the current Rawafid identity, explicit review-gated Care/Evidence Guide fallbacks remain noindex,follow until release criteria are met, reviewed modern takeovers keep priority, unknown routes remain true 404s, and centralized SEO controls canonical robots behavior.');
+console.log('Legacy preservation contract passed: general published production fallbacks remain eligible for indexing under the current Rawafid identity; Care/Evidence Guide legacy fallbacks remain conservative noindex,follow until first-class release criteria are met; reviewed first-class guide releases are verified indexable by the Wave 004 smoke; reviewed modern takeovers keep priority; unknown routes remain true 404s; and centralized SEO controls canonical robots behavior.');
