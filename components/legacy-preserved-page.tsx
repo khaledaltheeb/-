@@ -4,7 +4,9 @@ import SiteFooter from '@/components/site-footer';
 import ContentRenderer from '@/components/content-renderer';
 import {
   legacyCanonicalPath,
+  legacyDisplayTitle,
   legacyInternalLinks,
+  legacyPreservedCanIndex,
   legacyReferences,
   type LegacyPreservedPage,
 } from '@/lib/legacy-preserved-page';
@@ -12,15 +14,16 @@ import {
 type Props = { page: LegacyPreservedPage; route: string };
 
 function familyLabel(value: string | null): string {
-  if (!value) return 'المحتوى التاريخي';
-  return value.replace(/[-_]+/g, ' ').trim() || 'المحتوى التاريخي';
+  if (!value) return 'مكتبة روافد';
+  return value.replace(/[-_]+/g, ' ').trim() || 'مكتبة روافد';
 }
 
 export default function LegacyPreservedPageView({ page, route }: Props) {
   const canonical = legacyCanonicalPath(route);
-  const title = page.h1 || page.title || 'محتوى محفوظ';
+  const title = legacyDisplayTitle(page);
   const internalLinks = legacyInternalLinks(page.internal_links_json);
   const references = legacyReferences(page.references_json);
+  const canIndex = legacyPreservedCanIndex(route);
 
   return <><SiteHeader /><main className="article-shell">
     <nav className="breadcrumbs" aria-label="مسار الصفحة">
@@ -28,7 +31,7 @@ export default function LegacyPreservedPageView({ page, route }: Props) {
     </nav>
     <article>
       <header className="article-hero">
-        <span className="eyebrow">نسخة إنتاجية محفوظة</span>
+        <span className="eyebrow">من مكتبة منصة روافد</span>
         <h1>{title}</h1>
         {page.meta_description ? <p>{page.meta_description}</p> : null}
         <div className="article-meta">
@@ -36,19 +39,21 @@ export default function LegacyPreservedPageView({ page, route }: Props) {
           {page.word_count ? <span>{page.word_count.toLocaleString('ar')} كلمة في النسخة المصدرية</span> : null}
         </div>
       </header>
-      <aside className="content-callout info" aria-label="حالة المراجعة">
-        <strong>حالة هذه النسخة</strong>
-        <p>هذا هو المحتوى الذي كان منشورًا على المسار التاريخي نفسه. لم تُمنح هذه النسخة اعتماد دورة المراجعة العلمية الحالية بعد، لذلك تبقى غير مفهرسة إلى أن تكتمل مراجعتها.</p>
+      <aside className="content-callout info" aria-label="حالة الصفحة">
+        <strong>{canIndex ? 'صفحة منشورة ومحفوظة' : 'صفحة منشورة تحت مراجعة الفهرسة'}</strong>
+        <p>{canIndex
+          ? 'تحافظ منصة روافد على هذا المسار المنشور ومحتواه مع مواصلة المراجعة والترقية التحريرية. تبقى الصفحة قابلة للوصول والفهرسة، ولا يعني استمرار الترقية سحبها أو إخفاءها من البحث.'
+          : 'تحافظ منصة روافد على هذا المسار المنشور ومحتواه، لكنه يبقى خارج الفهرسة مؤقتًا إلى حين استيفاء متطلبات المراجعة والجودة الخاصة بهذا النوع من المحتوى. لا يعني ذلك حذف الصفحة أو تغيير مسارها.'}</p>
       </aside>
       <div className="article-body">
         <ContentRenderer bodyJson={page.body_json} bodyText={page.body_text} recordId={page.source_path} />
       </div>
       {internalLinks.length ? <section className="article-related" aria-labelledby="legacy-related-title">
-        <h2 id="legacy-related-title">روابط المسار الأصلي</h2>
+        <h2 id="legacy-related-title">روابط ذات صلة في منصة روافد</h2>
         <ul>{internalLinks.map((item) => <li key={item.href}><Link href={item.href}>{item.title}</Link></li>)}</ul>
       </section> : null}
       {references.length ? <section className="article-references" aria-labelledby="legacy-references-title">
-        <h2 id="legacy-references-title">المصادر والمراجع في النسخة الأصلية</h2>
+        <h2 id="legacy-references-title">المصادر والمراجع</h2>
         <ol>{references.map((reference) => <li key={reference.url}>
           <a href={reference.url} target="_blank" rel="noopener noreferrer">{reference.title}</a>
           {reference.publisher ? <small>{reference.publisher}</small> : null}

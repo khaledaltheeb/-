@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { createClient } from '@/lib/supabase/server';
-import { buildSeoMetadata } from '@/lib/seo';
+import { BRAND_NAME, buildSeoMetadata } from '@/lib/seo';
 
 type UnknownRecord = Record<string, unknown>;
 
@@ -29,6 +29,26 @@ function cleanText(value: unknown, max = 20000): string {
   return typeof value === 'string' ? value.trim().slice(0, max) : '';
 }
 
+const LEGACY_BRAND_REPLACEMENTS: ReadonlyArray<readonly [string, string]> = [
+  ['منصة الصحة النفسية', BRAND_NAME],
+  ['منصة علم النفس والصحة النفسية', BRAND_NAME],
+  ['Mental Health Knowledge Platform', BRAND_NAME],
+];
+
+const REVIEW_GATED_PRESERVED_PREFIXES = ['/care-guides/', '/evidence-guides/'] as const;
+
+export function normalizeLegacyBrandText(value: unknown, max = 20000): string {
+  let normalized = cleanText(value, max);
+  for (const [legacy, current] of LEGACY_BRAND_REPLACEMENTS) {
+    normalized = normalized.split(legacy).join(current);
+  }
+  return normalized.replace(/\s+/g, ' ').trim();
+}
+
+export function legacyDisplayTitle(page: LegacyPreservedPage): string {
+  return normalizeLegacyBrandText(page.h1 || page.title || 'محتوى من مكتبة منصة روافد', 1000);
+}
+
 function decodedRoute(value: string) {
   try { return decodeURIComponent(value).normalize('NFC'); } catch { return value.normalize('NFC'); }
 }
@@ -43,6 +63,11 @@ function safeRoute(route: string): string | null {
 
 export function legacyCanonicalPath(route: string): string {
   return safeRoute(route) ?? '/';
+}
+
+export function legacyPreservedCanIndex(route: string): boolean {
+  const canonical = legacyCanonicalPath(route);
+  return !REVIEW_GATED_PRESERVED_PREFIXES.some((prefix) => canonical.startsWith(prefix));
 }
 
 export function normalizeLegacyInternalHref(value: unknown): string | null {
@@ -66,7 +91,7 @@ export function legacyInternalLinks(value: unknown): LegacyPreservedLink[] {
     const entry = asRecord(item);
     if (!entry) continue;
     const href = normalizeLegacyInternalHref(entry.url ?? entry.href);
-    const title = cleanText(entry.title ?? entry.label, 500);
+    const title = normalizeLegacyBrandText(entry.title ?? entry.label, 500);
     if (!href || !title || seen.has(href)) continue;
     seen.add(href);
     links.push({ title, href });
@@ -81,11 +106,11 @@ export function legacyReferences(value: unknown): LegacyPreservedReference[] {
   for (const item of value.slice(0, 100)) {
     const entry = asRecord(item);
     if (!entry) continue;
-    const title = cleanText(entry.title ?? entry.label ?? entry.publisher, 600);
+    const title = normalizeLegacyBrandText(entry.title ?? entry.label ?? entry.publisher, 600);
     const url = cleanText(entry.url, 2000);
     if (!title || !/^https:\/\//i.test(url) || seen.has(url)) continue;
     seen.add(url);
-    const publisher = cleanText(entry.publisher, 300);
+    const publisher = normalizeLegacyBrandText(entry.publisher, 300);
     const year = cleanText(entry.year, 40);
     references.push({ title, url, ...(publisher ? { publisher } : {}), ...(year ? { year } : {}) });
   }
@@ -101,9 +126,9 @@ function normalizePage(value: unknown): LegacyPreservedPage | null {
   return {
     source_family: cleanText(row.source_family, 120) || null,
     source_path: sourcePath,
-    title: cleanText(row.title, 1000) || null,
-    h1: cleanText(row.h1, 1000) || null,
-    meta_description: cleanText(row.meta_description, 2000) || null,
+    title: normalizeLegacyBrandText(row.title, 1000) || null,
+    h1: normalizeLegacyBrandText(row.h1, 1000) || null,
+    meta_description: normalizeLegacyBrandText(row.meta_description, 2000) || null,
     word_count: Number.isFinite(wordCount) && wordCount >= 0 ? Math.round(wordCount) : null,
     body_text: cleanText(row.body_text, 500000) || null,
     body_json: row.body_json ?? {},
@@ -127,11 +152,16 @@ export async function getLegacyPreservedPage(route: string): Promise<LegacyPrese
 
 export function legacyPreservedMetadata(page: LegacyPreservedPage | null, route: string): Metadata {
   if (!page) return {};
+  const title = legacyDisplayTitle(page);
+  const description = normalizeLegacyBrandText(
+    page.meta_description || page.body_text?.slice(0, 220) || 'صفحة منشورة من مكتبة منصة روافد، محفوظة على مسارها الأصلي وتخضع للترقية التحريرية المستمرة.',
+    2000,
+  );
   return buildSeoMetadata({
-    title: page.title || page.h1 || 'محتوى محفوظ',
-    description: page.meta_description || page.body_text?.slice(0, 220) || 'صفحة محفوظة من مكتبة روافد قيد المراجعة والترقية التحريرية.',
+    title,
+    description,
     path: legacyCanonicalPath(route),
-    index: false,
+    index: legacyPreservedCanIndex(route),
     follow: true,
     type: 'website',
   });

@@ -33,7 +33,7 @@ export default async function SectorsIndex() {
     '@type': 'CollectionPage',
     '@id': `${SITE_URL}/sectors#collection`,
     url: `${SITE_URL}/sectors`,
-    name: 'قطاعات روافد',
+    name: 'قطاعات منصة روافد',
     description: 'الخريطة الرئيسية لقطاعات المعرفة والخدمات العامة في منصة روافد.',
     inLanguage: 'ar',
     isAccessibleForFree: true,
@@ -59,7 +59,7 @@ export default async function SectorsIndex() {
 
       <section className="public-index-hero" aria-labelledby="sectors-title">
         <span className="eyebrow">الخريطة الرئيسية للمنصة</span>
-        <h1 id="sectors-title">قطاعات روافد</h1>
+        <h1 id="sectors-title">قطاعات منصة روافد</h1>
         <p>بوابات رئيسية تجمع المعرفة والأدلة والخدمات في مجالات واضحة. يبدأ كل قطاع بموضوعاته الأساسية، ثم يتفرع إلى أقسام أكثر تخصصًا لتسهيل الوصول وبناء رحلة تصفح مترابطة.</p>
         <div className="public-stat-strip"><span>{rows.length.toLocaleString('ar')} قطاعات رئيسية</span><span>{categoryRows.length.toLocaleString('ar')} قسمًا وقسمًا فرعيًا</span><span>تصنيف موحد للمحتوى المنشور</span></div>
       </section>

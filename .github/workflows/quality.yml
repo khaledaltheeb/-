@@ -84,8 +84,18 @@ jobs:
             exit 1
           fi
           VISUAL_CHROME_PATH="$CHROME_BIN" node scripts/visual-regression.mjs
-      - name: Production HTTP smoke
-        run: npm run smoke
+      - name: Core production HTTP smoke
+        run: node scripts/smoke.mjs
+      - name: Legacy preservation HTTP smoke
+        run: node scripts/legacy-preservation-smoke.mjs
+      - name: Legacy landing integration HTTP smoke
+        run: node scripts/legacy-landing-integration-smoke.mjs
+      - name: Historical functional parity HTTP smoke
+        run: node scripts/historical-functional-parity-smoke.mjs
+      - name: Care guides wave 004 HTTP smoke
+        run: node scripts/care-guides-wave-004-smoke.mjs
+      - name: V7 critical guide rewrites HTTP smoke
+        run: node scripts/v7-critical-guide-rewrites-001-smoke.mjs
       - name: Full sitemap SEO gate
         run: node scripts/seo-gate.mjs
       - name: Rich results and discovery gate
