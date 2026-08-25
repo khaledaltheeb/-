@@ -1,5 +1,6 @@
 import { sitemapResponse } from '@/lib/sitemap-xml';
 import { infographics } from '@/lib/practical-resources';
+import { assessmentSlugs } from '@/lib/assessment-lab/catalog';
 
 export async function GET() {
   return sitemapResponse([
@@ -20,6 +21,7 @@ export async function GET() {
     { path:'/start-here', changeFrequency:'monthly', priority:.78 },
     { path:'/guided-assessment', changeFrequency:'monthly', priority:.68 },
     { path:'/assessment-lab', changeFrequency:'monthly', priority:.68 },
+    ...assessmentSlugs.map((slug) => ({ path:`/assessment-lab/${slug}`, changeFrequency:'monthly' as const, priority:.64 })),
     { path:'/resources', changeFrequency:'weekly', priority:.68 },
     { path:'/resources/worksheets', changeFrequency:'monthly', priority:.66 },
     { path:'/resources/infographics', changeFrequency:'monthly', priority:.7 },
