@@ -1,0 +1,110 @@
+name: Deploy RTL Review Lab
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/deploy-rtl-review-lab.yml
+  workflow_dispatch:
+
+concurrency:
+  group: rawafid-rtl-review-lab-deploy
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: 1910e1ad3c793fd568ba1caafe34f964
+      TOOLKIT_REPOSITORY: https://github.com/khaledaltheeb/rawafid-arabic-rtl-a11y-toolkit.git
+      TOOLKIT_COMMIT: 60338f509826fdb001f9f871ae01b7d15f63192b
+      REVIEW_BASE_URL: https://rawafid-rtl-review-lab.khaledaltheeb.workers.dev/
+    steps:
+      - name: Require Cloudflare credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${CLOUDFLARE_API_TOKEN:-}" || { echo '::error::CLOUDFLARE_API_TOKEN is unavailable.'; exit 1; }
+          test -n "${CLOUDFLARE_ACCOUNT_ID:-}" || { echo '::error::CLOUDFLARE_ACCOUNT_ID is unavailable.'; exit 1; }
+
+      - name: Checkout pinned toolkit source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --filter=blob:none --no-checkout "$TOOLKIT_REPOSITORY" toolkit
+          cd toolkit
+          git fetch --depth=1 origin "$TOOLKIT_COMMIT"
+          git checkout --detach "$TOOLKIT_COMMIT"
+          test "$(git rev-parse HEAD)" = "$TOOLKIT_COMMIT"
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: toolkit/package-lock.json
+
+      - name: Install and verify toolkit
+        working-directory: toolkit
+        run: |
+          npm ci --no-audit --no-fund
+          npm run check
+          npm run site:build
+
+      - name: Create isolated assets-only Worker config
+        working-directory: toolkit
+        shell: bash
+        run: |
+          cat > wrangler.review-lab.jsonc <<'JSON'
+          {
+            "$schema": "./node_modules/wrangler/config-schema.json",
+            "name": "rawafid-rtl-review-lab",
+            "compatibility_date": "2026-08-26",
+            "workers_dev": true,
+            "preview_urls": false,
+            "assets": {
+              "directory": "./review-site"
+            }
+          }
+          JSON
+
+      - name: Verify Cloudflare authentication
+        working-directory: toolkit
+        run: npx --yes wrangler@latest whoami
+
+      - name: Deploy exact static artifact
+        working-directory: toolkit
+        run: npx --yes wrangler@latest deploy --config wrangler.review-lab.jsonc
+
+      - name: Verify hosted deployment byte-for-byte
+        working-directory: toolkit
+        shell: bash
+        run: |
+          set -euo pipefail
+          ready=0
+          for attempt in $(seq 1 20); do
+            if curl -fsS --retry 2 --retry-delay 2 "${REVIEW_BASE_URL}artifact-manifest.json" >/dev/null; then
+              ready=1
+              break
+            fi
+            sleep 3
+          done
+          test "$ready" -eq 1 || { echo '::error::Hosted review artifact did not become reachable.'; exit 1; }
+          node scripts/verify-review-site-deployment.mjs \
+            --base-url "$REVIEW_BASE_URL" \
+            --manifest review-site/artifact-manifest.json
+
+      - name: Verify public entrypoint and CSP
+        shell: bash
+        run: |
+          set -euo pipefail
+          html="$(curl -fsS "${REVIEW_BASE_URL}review-lab/")"
+          printf '%s' "$html" | grep -q 'data-review-surface="v1"'
+          printf '%s' "$html" | grep -q "Content-Security-Policy"
+          printf '%s' "$html" | grep -q "default-src 'none'"
+          printf 'Verified public review lab: %sreview-lab/\n' "$REVIEW_BASE_URL"
