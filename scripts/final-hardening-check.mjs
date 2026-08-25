@@ -28,7 +28,7 @@ requireText('app/sitemaps/content.xml/route.ts',[
   'const PAGE_SIZE = 5000',
   'const DB_BATCH_SIZE = 1000',
   '.range(batchStart, batchEnd)',
-  ".order('id', { ascending: false })",
+  ".order('id', { ascending: true })",
 ]);
 requireText('app/sitemaps/quick-info.xml/route.ts',[
   'const PAGE_SIZE = 5000',
