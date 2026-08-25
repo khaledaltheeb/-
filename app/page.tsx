@@ -11,8 +11,8 @@ import { buildSeoMetadata, SITE_URL } from '@/lib/seo';
 export const revalidate = 300;
 
 export const metadata = buildSeoMetadata({
-  title: 'روافد: الصحة النفسية والتربية الخاصة وسرطان الأطفال',
-  description: 'روافد منصة عربية للمعرفة الموثوقة في الصحة النفسية والتربية الخاصة والتوحد وصعوبات التعلم وسرطان الأطفال والتعافي، مع أدلة عملية ومختصين ومراكز.',
+  title: 'منصة روافد: الصحة النفسية والتربية الخاصة وسرطان الأطفال',
+  description: 'منصة روافد منصة عربية مؤسسية للمعرفة الموثوقة في الصحة النفسية والتربية الخاصة والتوحد وصعوبات التعلم وسرطان الأطفال والتعافي، مع أدلة عملية ومختصين ومراكز.',
   path: '/',
   index: true,
   keywords: ['روافد', 'منصة روافد', 'الصحة النفسية', 'التربية الخاصة', 'التوحد', 'صعوبات التعلم', 'سرطان الأطفال', 'التربية الدامجة', 'الإدمان والتعافي', 'دعم الأسرة'],
@@ -32,8 +32,8 @@ const homepageJsonLd = {
   '@type': 'WebPage',
   '@id': `${SITE_URL}/#homepage`,
   url: `${SITE_URL}/`,
-  name: 'روافد | الصحة النفسية والتربية الخاصة وسرطان الأطفال',
-  description: 'روافد منصة عربية للمعرفة الموثوقة في الصحة النفسية والتربية الخاصة والتوحد وصعوبات التعلم وسرطان الأطفال والتعافي، مع أدلة عملية ومختصين ومراكز.',
+  name: 'منصة روافد | الصحة النفسية والتربية الخاصة وسرطان الأطفال',
+  description: 'منصة روافد منصة عربية مؤسسية للمعرفة الموثوقة في الصحة النفسية والتربية الخاصة والتوحد وصعوبات التعلم وسرطان الأطفال والتعافي، مع أدلة عملية ومختصين ومراكز.',
   inLanguage: 'ar',
   isPartOf: { '@id': `${SITE_URL}/#website` },
   about: [
@@ -68,8 +68,8 @@ export default async function HomePage() {
       <main className="site-shell rawafid-home">
         <section className="rawafid-hero" aria-labelledby="home-title">
           <div className="rawafid-hero-copy">
-            <span className="rawafid-kicker">روافد — معرفة عربية موثوقة تقودك إلى الخطوة التالية</span>
-            <h1 id="home-title">روافد: <em>الصحة النفسية والتربية الخاصة</em> في منصة معرفية مترابطة.</h1>
+            <span className="rawafid-kicker">منصة روافد — معرفة عربية موثوقة تقودك إلى الخطوة التالية</span>
+            <h1 id="home-title">منصة روافد: <em>الصحة النفسية والتربية الخاصة</em> في منظومة معرفية مترابطة.</h1>
             <p>استكشف محتوى عربيًا موثوقًا في الصحة النفسية، التوحد، صعوبات التعلم، التربية الخاصة والدامجة، سرطان الأطفال، الإدمان والتعافي ودعم الأسرة؛ مع أدلة عملية ودليل للمختصين والمراكز.</p>
 
             <form className="search rawafid-search" action="/search" method="get" role="search">
@@ -78,7 +78,7 @@ export default async function HomePage() {
               <button type="submit">ابحث في روافد</button>
             </form>
 
-            <div className="rawafid-quick-links" aria-label="موضوعات شائعة في روافد">
+            <div className="rawafid-quick-links" aria-label="موضوعات شائعة في منصة روافد">
               {quickLinks.map(([label, href]) => <Link prefetch={false} key={label} href={href}>{label}</Link>)}
             </div>
           </div>
@@ -108,7 +108,7 @@ export default async function HomePage() {
 
         <section className="rawafid-section" id="sectors" aria-labelledby="sectors-title">
           <div className="rawafid-section-head">
-            <div className="rawafid-section-title"><span>مجالات روافد</span><h2 id="sectors-title">استكشف المعرفة حسب المجال</h2><p>قطاعات مترابطة تشمل الصحة النفسية، التوحد وصعوبات التعلم، التربية الخاصة والدامجة، سرطان الأطفال، التعافي ودعم الأسرة؛ لتسهيل الانتقال من السؤال إلى المعرفة المناسبة.</p></div>
+            <div className="rawafid-section-title"><span>مجالات منصة روافد</span><h2 id="sectors-title">استكشف المعرفة حسب المجال</h2><p>قطاعات مترابطة تشمل الصحة النفسية، التوحد وصعوبات التعلم، التربية الخاصة والدامجة، سرطان الأطفال، التعافي ودعم الأسرة؛ لتسهيل الانتقال من السؤال إلى المعرفة المناسبة.</p></div>
             <Link prefetch={false} className="section-text-link" href="/sectors">عرض جميع القطاعات ←</Link>
           </div>
 
@@ -147,7 +147,7 @@ export default async function HomePage() {
 
         {latestContent.length > 0 && <section className="rawafid-section rawafid-editorial-section" aria-labelledby="latest-content-title">
           <div className="rawafid-section-head">
-            <div className="rawafid-section-title"><span>مختارات المعرفة</span><h2 id="latest-content-title">محتوى حديث من مكتبة روافد</h2><p>صفحات منشورة من قاعدة المعرفة، تظهر هنا تلقائيًا عند تحديثها واعتمادها.</p></div>
+            <div className="rawafid-section-title"><span>مختارات المعرفة</span><h2 id="latest-content-title">محتوى حديث من مكتبة منصة روافد</h2><p>صفحات منشورة من قاعدة المعرفة، تظهر هنا تلقائيًا عند تحديثها واعتمادها.</p></div>
             <Link prefetch={false} className="section-text-link" href="/search">استكشف كل المعرفة ←</Link>
           </div>
           <div className="rawafid-editorial-grid">
@@ -183,7 +183,7 @@ export default async function HomePage() {
         <section className="rawafid-section rawafid-professional-callout" aria-labelledby="professional-title">
           <div>
             <span className="rawafid-kicker">للمختصين والجهات والمجتمع المهني</span>
-            <h2 id="professional-title">ساهم بمعرفة موثوقة أو انضم إلى دليل روافد.</h2>
+            <h2 id="professional-title">ساهم بمعرفة موثوقة أو انضم إلى دليل منصة روافد.</h2>
             <p>مسار تقديم واضح، مستندات خاصة، مراجعة إدارية، ومحرر منظم يتيح للمختص إنشاء محتواه ومتابعة مراحله.</p>
           </div>
           <div><Link prefetch={false} className="primary-link" href="/join">ابدأ طلب الانضمام</Link><Link prefetch={false} className="button" href="/editorial-policy">تعرف على معايير النشر</Link></div>
