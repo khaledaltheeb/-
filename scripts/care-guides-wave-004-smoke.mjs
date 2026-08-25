@@ -1,7 +1,7 @@
 const base = (process.env.SMOKE_BASE_URL || 'http://127.0.0.1:3000').replace(/\/$/, '');
 const canonicalOrigin = (process.env.NEXT_PUBLIC_SITE_URL || 'https://healthrenewal.org').replace(/\/$/, '');
 
-const heldPublished = [
+const reviewedPublished = [
   ['/care-guides/cognitive-flexibility-switching-plan/', 'المرونة المعرفية وتبديل المهام'],
   ['/care-guides/cognitive-load-instruction-audit/', 'الحمل المعرفي في التعليمات'],
   ['/care-guides/inhibitory-control-pause-plan/', 'التوقف قبل الاستجابة'],
@@ -13,9 +13,6 @@ const heldPublished = [
   ['/care-guides/spaced-practice-study-calendar/', 'الممارسة المتباعدة'],
   ['/care-guides/sustained-attention-work-interval/', 'الانتباه المستمر'],
   ['/care-guides/working-memory-task-breakdown/', 'الذاكرة العاملة والمهام الطويلة'],
-];
-
-const reviewedPublished = [
   ['/care-guides/care-guide-dual-task-attention-limit/', 'تعدد المهام وحدود الانتباه'],
 ];
 
@@ -86,6 +83,10 @@ async function verifyPublishedRoute(route, titleMarker, expectedIndex) {
       console.error(`WAVE004 ${route}: references section missing`);
       failed = true;
     }
+    if (expectedIndex && !html.includes('تمت المراجعة بواسطة')) {
+      console.error(`WAVE004 ${route}: indexable page must expose recorded human review provenance`);
+      failed = true;
+    }
 
     console.log(`WAVE004 ${route}: 200 + ${expectedIndex ? 'index,follow' : 'noindex,follow'} + canonical + disclaimer + references checked`);
   } catch (error) {
@@ -94,13 +95,9 @@ async function verifyPublishedRoute(route, titleMarker, expectedIndex) {
   }
 }
 
-for (const [route, titleMarker] of heldPublished) {
-  await verifyPublishedRoute(route, titleMarker, false);
-}
-
 for (const [route, titleMarker] of reviewedPublished) {
   await verifyPublishedRoute(route, titleMarker, true);
 }
 
 if (failed) process.exit(1);
-console.log(`Wave 004 rendered smoke passed for ${heldPublished.length} held published pages + ${reviewedPublished.length} reviewed indexable page.`);
+console.log(`Wave 004 rendered smoke passed for ${reviewedPublished.length} reviewed indexable pages with visible review provenance.`);
