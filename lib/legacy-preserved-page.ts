@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { createClient } from '@/lib/supabase/server';
 import { buildSeoMetadata } from '@/lib/seo';
+import { shouldIndexPreservedPublishedPage } from '@/lib/public-indexability';
 
 type UnknownRecord = Record<string, unknown>;
 
@@ -127,11 +128,12 @@ export async function getLegacyPreservedPage(route: string): Promise<LegacyPrese
 
 export function legacyPreservedMetadata(page: LegacyPreservedPage | null, route: string): Metadata {
   if (!page) return {};
+  const canonicalPath = legacyCanonicalPath(route);
   return buildSeoMetadata({
     title: page.title || page.h1 || 'محتوى محفوظ',
     description: page.meta_description || page.body_text?.slice(0, 220) || 'صفحة محفوظة من مكتبة روافد قيد المراجعة والترقية التحريرية.',
-    path: legacyCanonicalPath(route),
-    index: false,
+    path: canonicalPath,
+    index: shouldIndexPreservedPublishedPage({ sourceFamily: page.source_family, route: canonicalPath }),
     follow: true,
     type: 'website',
   });
