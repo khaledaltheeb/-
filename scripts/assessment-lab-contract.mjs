@@ -68,24 +68,27 @@ for (const instrument of instruments) {
 for (const forbidden of ['localStorage', 'sessionStorage', 'fetch(', 'XMLHttpRequest', 'navigator.sendBeacon', 'document.cookie']) {
   if (runner.includes(forbidden)) fail('runner must not persist or transmit answers: ' + forbidden);
 }
-for (const required of ['النتيجة استرشادية', 'لا توجد درجة كلية', '/specialists', '/centers', '/guided-assessment', 'لا ترسل روافد إجاباتك']) {
+for (const required of ['النتيجة استرشادية', 'لا توجد درجة كلية', 'من دون تحويلها إلى نسبة', '/specialists', '/centers', '/guided-assessment', 'لا ترسل روافد إجاباتك', 'لا يدخل في أي حساب أو استنتاج']) {
   if (!runner.includes(required)) fail('runner boundary or next step missing: ' + required);
 }
-if (!runner.includes("entry.item.direction === 'concern' ? entry.answer : 4 - entry.answer")) fail('resource items must be reverse-oriented at domain level');
-if (!runner.includes('answer: answers[') || !runner.includes("entry.answer === 'number'")) fail('not-applicable answers must be excluded from calculations');
+for (const forbiddenScoring of ['patternLabel(', 'focusDomains', 'domain.score', '${domain.score}%', "entry.item.direction === 'concern' ? entry.answer : 4 - entry.answer", 'score >= 25', 'score < 25', 'score < 50', 'score < 75']) {
+  if (runner.includes(forbiddenScoring)) fail('developmental runner must not imply unvalidated numeric interpretation: ' + forbiddenScoring);
+}
+if (!runner.includes("entry.answer === 'na'")) fail('not-applicable answers must remain explicit and outside inference');
 
 if (!catalog.includes('monitors.v2.json') || !catalog.includes("'developmental'")) fail('catalog must use the explicit developmental item bank');
 if (!directory.includes('type="search"') || !directory.includes('aria-pressed')) fail('directory must support accessible search and category filtering');
-for (const required of ['اختبر نفسك', '432', 'إصدار تطويري 1.0 غير مقنن', 'برنامج روافد للتطوير السيكومتري', 'لا ننسخها']) {
+for (const required of ['اختبر نفسك', '432', 'إصدار تطويري 1.0 غير مقنن', 'برنامج روافد للتطوير السيكومتري', 'لا ننسخها', 'لا توجد درجة كلية أو نسبة شدة']) {
   if (!hub.includes(required)) fail('hub publication boundary missing: ' + required);
 }
 if (detail.includes('index: false')) fail('reviewed, content-rich detail pages must not be hard-coded noindex');
 if (!detail.includes('/assessment-lab/${slug}') || !detail.includes('index: true')) fail('detail pages need self-canonical indexable metadata');
 if (!detail.includes("'@type': 'WebApplication'")) fail('original interactive tools need accurate WebApplication structured data');
+if (!detail.includes('من دون نسبة أو ترتيب أو فئة شدة أو مقارنة معيارية')) fail('detail page must prohibit unvalidated numeric interpretation');
 if (!sitemap.includes('assessmentSlugs.map')) fail('all 40 reviewed routes must be present in the static sitemap');
 if (!header.includes("{ href: '/assessment-lab', label: 'اختبر نفسك'")) fail('section must be discoverable from the services navigation');
 
-for (const required of ['الغاية النهائية', 'لا ادعاء بالتقنين', '432 بندًا', 'المراحل المتبقية ميدانيًا', 'المسارات التاريخية']) {
+for (const required of ['الغاية النهائية', 'لا ادعاء بالتقنين', '432 بندًا', 'المراحل المتبقية ميدانيًا', 'المسارات التاريخية', 'لا نسبة شدة']) {
   if (!plan.includes(required)) fail('continuity plan missing: ' + required);
 }
 
@@ -94,4 +97,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log('Assessment lab contract passed: 36 original developmental tools / 432 explicit Arabic items / 4 source-only guides / no persistence / self-canonical discovery.');
+console.log('Assessment lab contract passed: 36 original developmental tools / 432 explicit Arabic items / 4 source-only guides / no persistence / no unvalidated numeric interpretation / self-canonical discovery.');
