@@ -34,7 +34,9 @@ const forgotPassword = read('app/forgot-password/actions.ts');
 requireAll(seo, [
   "'@type': 'Organization'",
   "'@type': 'WebSite'",
-  'alternateName: BRAND_SHORT',
+  "alternateName: [BRAND_SHORT, 'Rawafid']",
+  "alternateName: [BRAND_SHORT, 'Rawafid', SITE_HOSTNAME]",
+  "name: BRAND_NAME",
   "'@type': 'ImageObject'",
   "publisher: { '@id': `${SITE_URL}/#organization` }",
   "PRODUCTION_SITE_URL = 'https://healthrenewal.org'",
@@ -56,6 +58,7 @@ requireAll(layout, [
   "url: '/pwa-icon-180'",
   'applicationName: BRAND_NAME',
   'INDEXING_ENABLED',
+  'siteName: BRAND_NAME',
 ], 'root metadata');
 if (/rawafid-app\.svg\?v=|pwa-icon-(?:180|192)\?v=/.test(layout)) {
   throw new Error('root metadata: search-facing icon URLs must remain stable');
