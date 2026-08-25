@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   return buildSeoMetadata({
     title,
     description: monitor
-      ? `${monitor.summary} أداة روافد عربية بنتيجة وصفية غير تشخيصية، تعمل دون إرسال الإجابات أو حفظها.`
+      ? `${monitor.summary} أداة روافد عربية بملخص وصفي غير تشخيصي، تعمل دون إرسال الإجابات أو حفظها.`
       : `${instrument!.summary} تعرّف إلى الغرض والمصدر وحدود التفسير وحالة النسخة العربية وحقوق الاستخدام.`,
     path: `/assessment-lab/${slug}`,
     index: true,
@@ -64,7 +64,7 @@ export default async function AssessmentLabDetail({ params }: { params: Params }
     </div></section>
 
     {monitor ? <>
-      <section className={`${styles.shell} ${styles.toolOverview}`} aria-labelledby="overview-title"><div className={styles.sectionHeading}><span className={styles.eyebrow}>خريطة الأداة</span><h2 id="overview-title">أربعة مجالات منفصلة، بلا مجموع كلي</h2><p>تتضمن كل منطقة بندين يصفان صعوبة وبندًا يصف موردًا داعمًا. يُعكس اتجاه بند المورد عند تكوين الملخص حتى يبقى معنى النسبة واحدًا: مقدار الحاجة إلى المراجعة في إجاباتك.</p></div><div className={styles.domainGrid}>{monitor.domains.map((domain, index) => <article key={domain.id}><span>{String(index + 1).padStart(2, '0')}</span><h3>{domain.title}</h3><p>{domain.action}</p></article>)}</div></section>
+      <section className={`${styles.shell} ${styles.toolOverview}`} aria-labelledby="overview-title"><div className={styles.sectionHeading}><span className={styles.eyebrow}>خريطة الأداة</span><h2 id="overview-title">أربعة مجالات منفصلة، بلا مجموع كلي</h2><p>تتضمن كل منطقة بنودًا تصف صعوبات محتملة وبندًا يصف موردًا داعمًا. بعد الإكمال تُعرض إجاباتك كما اخترتها داخل كل مجال، من دون نسبة أو ترتيب أو فئة شدة أو مقارنة معيارية.</p></div><div className={styles.domainGrid}>{monitor.domains.map((domain, index) => <article key={domain.id}><span>{String(index + 1).padStart(2, '0')}</span><h3>{domain.title}</h3><p>{domain.action}</p></article>)}</div></section>
       <div className={styles.shell}><AssessmentMonitorRunner monitor={monitor} /></div>
       <section className={`${styles.shell} ${styles.evidence}`} aria-labelledby="evidence-title"><div className={styles.sectionHeading}><span className={styles.eyebrow}>مصادر البناء والسياق</span><h2 id="evidence-title">ماذا تثبت هذه المراجع؟</h2><p>ساعدت المراجع في تحديد المفاهيم وحدود السلامة وطريق التطوير. لا تجعل البنود مقننة ولا تثبت صدق نتيجتها؛ ذلك يحتاج دراسات مباشرة على الأداة نفسها.</p></div><div className={styles.referenceGrid}>{getAssessmentReferences(monitor.referenceIds).map((reference) => <article key={reference.id}><span>{reference.organization}</span><h3><a href={reference.url} target="_blank" rel="noreferrer">{reference.title}</a></h3><p>{reference.role}</p></article>)}</div></section>
     </> : <>
