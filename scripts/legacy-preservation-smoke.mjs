@@ -1,17 +1,17 @@
 const base=process.env.SMOKE_BASE_URL||'http://127.0.0.1:3000';
 const preservedRoutes=[
-  ['/hubs/','من السؤال إلى مسار معرفة وخدمة متكامل',true],
-  ['/hubs/angle-001/','القلق: التعريف والمفهوم',true],
-  ['/encyclopedia/concept-0001/','القلق: ما هو؟ ومتى يتحول من استجابة طبيعية إلى مشكلة تحتاج تقييمًا؟',true],
-  ['/addiction/','منظومة عربية مؤسسية للإدمان: من الطوارئ إلى التعافي الوظيفي',false],
-  ['/addiction/protocol-atlas/','أطلس علاج اضطرابات الإدمان: كيف تُبنى الخطة من التقييم إلى التعافي؟',true],
-  ['/family-guide/tools/behavior-log/','سجل السلوك والسياق الوظيفي',true],
+  ['/hubs/','من السؤال إلى مسار معرفة وخدمة متكامل',true,true],
+  ['/hubs/angle-001/','القلق: التعريف والمفهوم',true,true],
+  ['/encyclopedia/concept-0001/','القلق: ما هو؟ ومتى يتحول من استجابة طبيعية إلى مشكلة تحتاج تقييمًا؟',true,true],
+  ['/addiction/','منظومة عربية مؤسسية للإدمان: من الطوارئ إلى التعافي الوظيفي',false,false],
+  ['/addiction/protocol-atlas/','أطلس علاج اضطرابات الإدمان: كيف تُبنى الخطة من التقييم إلى التعافي؟',true,true],
+  ['/family-guide/tools/behavior-log/','سجل السلوك والسياق الوظيفي',true,true],
 ];
 const upgradedRoutes=[
   ['/quick-info/accountability-vs-self-blame/','تحمل مسؤولية أم جلد ذات'],
 ];
 let failed=false;
-for(const [route,marker,requiresPreservedBanner] of preservedRoutes){
+for(const [route,marker,requiresPreservedBanner,requiresNoindex] of preservedRoutes){
   try{
     const response=await fetch(`${base}${route}`,{redirect:'manual'});
     const location=response.headers.get('location')||'';
@@ -19,8 +19,10 @@ for(const [route,marker,requiresPreservedBanner] of preservedRoutes){
     if(response.status!==200||location){console.error(`LEGACY_PRESERVED ${route}: expected real 200 without Location, got ${response.status} ${location}`);failed=true;continue;}
     if(!body.includes(marker)){console.error(`LEGACY_PRESERVED ${route}: original production marker missing`);failed=true;continue;}
     if(requiresPreservedBanner&&!body.includes('نسخة إنتاجية محفوظة')){console.error(`LEGACY_PRESERVED ${route}: fallback preservation status missing`);failed=true;continue;}
-    if(!/noindex/i.test(body)){console.error(`LEGACY_PRESERVED ${route}: migrated route must remain noindex until its current review permits indexing`);failed=true;continue;}
-    console.log(`LEGACY_PRESERVED ${route}: real content 200 + noindex verified`);
+    const noindex=/noindex/i.test(body);
+    if(requiresNoindex&&!noindex){console.error(`LEGACY_PRESERVED ${route}: fallback migrated route must remain noindex until its current review permits indexing`);failed=true;continue;}
+    if(!requiresNoindex&&noindex){console.error(`LEGACY_PRESERVED ${route}: published reviewed route unexpectedly remained noindex`);failed=true;continue;}
+    console.log(`LEGACY_PRESERVED ${route}: real content 200 + ${requiresNoindex?'noindex fallback':'indexable published route'} verified`);
   }catch(error){console.error(`LEGACY_PRESERVED ${route}:`,error);failed=true;}
 }
 for(const [route,marker] of upgradedRoutes){
