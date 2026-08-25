@@ -68,7 +68,9 @@ jobs:
             "workers_dev": true,
             "preview_urls": false,
             "assets": {
-              "directory": "./review-site"
+              "directory": "./review-site",
+              "html_handling": "none",
+              "not_found_handling": "none"
             }
           }
           JSON
@@ -103,8 +105,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          html="$(curl -fsS "${REVIEW_BASE_URL}review-lab/")"
+          html="$(curl -fsS "${REVIEW_BASE_URL}review-lab/index.html")"
           printf '%s' "$html" | grep -q 'data-review-surface="v1"'
           printf '%s' "$html" | grep -q "Content-Security-Policy"
           printf '%s' "$html" | grep -q "default-src 'none'"
-          printf 'Verified public review lab: %sreview-lab/\n' "$REVIEW_BASE_URL"
+          printf 'Verified public review lab: %sreview-lab/index.html\n' "$REVIEW_BASE_URL"
