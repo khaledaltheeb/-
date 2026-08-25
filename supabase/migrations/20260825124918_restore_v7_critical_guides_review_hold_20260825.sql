@@ -1,3 +1,8 @@
+-- Reconcile two high-sensitivity V7 guides to the documented post-rewrite hold.
+-- This migration is intentionally replay-safe: a clean database replay reaches the
+-- already-held state from the 2026-08-16 rewrite migrations, while the live database
+-- may contain a later DB-only review/indexing stamp that must be retracted.
+
 create or replace function private.guard_published_content_presence()
 returns trigger
 language plpgsql
@@ -46,27 +51,54 @@ begin
 end;
 $function$;
 
+-- Accept only the two known safe starting states:
+-- 1) the documented post-rewrite hold, or
+-- 2) the later DB-only release stamp that this migration retracts.
 do $$
-declare v_count integer;
+declare
+  v_total integer;
+  v_known integer;
 begin
-  select count(*) into v_count
+  select count(*) into v_total
+  from public.content
+  where slug in (
+    'care-guide-suicide-risk-conversation-safety-plan',
+    'care-guide-self-harm-family-safety-support'
+  )
+    and status::text = 'published';
+
+  select count(*) into v_known
   from public.content
   where slug in (
     'care-guide-suicide-risk-conversation-safety-plan',
     'care-guide-self-harm-family-safety-support'
   )
     and status::text = 'published'
-    and robots_index = true
     and robots_follow = true
-    and last_reviewed_at is not null
-    and reviewer_display_name = 'فريق روافد'
-    and schema_json #>> '{content_quality_hold,status}' = 'released_after_fresh_rawafid_review';
-  if v_count <> 2 then
-    raise exception 'critical-guide retraction precondition failed: expected 2 released review-stamped records, found %', v_count;
+    and (
+      (
+        robots_index = false
+        and last_reviewed_at is null
+        and reviewer_display_name is null
+        and schema_json #>> '{content_quality_hold,status}' = 'rewrite_completed_pending_rawafid_review'
+      )
+      or
+      (
+        robots_index = true
+        and last_reviewed_at is not null
+        and reviewer_display_name = 'فريق روافد'
+        and schema_json #>> '{content_quality_hold,status}' = 'released_after_fresh_rawafid_review'
+      )
+    );
+
+  if v_total <> 2 or v_known <> 2 then
+    raise exception 'critical-guide reconciliation precondition failed: expected 2 published records in a known hold/release state; total %, known %', v_total, v_known;
   end if;
 end
 $$;
 
+-- Retract only the unverified DB-only release state. A clean replay where the two
+-- records are already held performs no row update here.
 update public.content
 set
   schema_json = (
@@ -114,6 +146,7 @@ where slug in (
   'care-guide-self-harm-family-safety-support'
 )
   and status::text = 'published'
+  and robots_index = true
   and schema_json #>> '{content_quality_hold,status}' = 'released_after_fresh_rawafid_review';
 
 do $$
@@ -132,10 +165,9 @@ begin
     and reviewer_display_name is null
     and reviewer_credentials is null
     and schema_json #>> '{content_quality_hold,status}' = 'rewrite_completed_pending_rawafid_review'
-    and schema_json #>> '{content_quality_hold,review_status}' = 'pending_fresh_rawafid_review'
-    and schema_json #>> '{content_quality_hold,released_for_indexing}' = 'false';
+    and schema_json #>> '{content_quality_hold,review_status}' = 'pending_fresh_rawafid_review';
   if v_count <> 2 then
-    raise exception 'critical-guide retraction postcondition failed: expected 2 held records, found %', v_count;
+    raise exception 'critical-guide reconciliation postcondition failed: expected 2 held records, found %', v_count;
   end if;
 end
 $$;
