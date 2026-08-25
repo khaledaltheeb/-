@@ -22,8 +22,9 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: 1910e1ad3c793fd568ba1caafe34f964
       TOOLKIT_REPOSITORY: https://github.com/khaledaltheeb/rawafid-arabic-rtl-a11y-toolkit.git
-      TOOLKIT_COMMIT: 60338f509826fdb001f9f871ae01b7d15f63192b
+      TOOLKIT_COMMIT: d55426327df49f6c7753083e3692a343d7a4d75c
       REVIEW_BASE_URL: https://rawafid-rtl-review-lab.khaledaltheeb.workers.dev/
+      WRANGLER_VERSION: 4.126.0
     steps:
       - name: Require Cloudflare credentials
         shell: bash
@@ -43,7 +44,7 @@ jobs:
           test "$(git rev-parse HEAD)" = "$TOOLKIT_COMMIT"
 
       - name: Setup Node
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
           cache: npm
@@ -68,18 +69,20 @@ jobs:
             "workers_dev": true,
             "preview_urls": false,
             "assets": {
-              "directory": "./review-site"
+              "directory": "./review-site",
+              "html_handling": "none",
+              "not_found_handling": "none"
             }
           }
           JSON
 
       - name: Verify Cloudflare authentication
         working-directory: toolkit
-        run: npx --yes wrangler@latest whoami
+        run: npx --yes "wrangler@${WRANGLER_VERSION}" whoami
 
       - name: Deploy exact static artifact
         working-directory: toolkit
-        run: npx --yes wrangler@latest deploy --config wrangler.review-lab.jsonc
+        run: npx --yes "wrangler@${WRANGLER_VERSION}" deploy --config wrangler.review-lab.jsonc
 
       - name: Verify hosted deployment byte-for-byte
         working-directory: toolkit
@@ -103,8 +106,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          html="$(curl -fsS "${REVIEW_BASE_URL}review-lab/")"
+          entrypoint="${REVIEW_BASE_URL}review-lab/index.html"
+          html="$(curl -fsS "$entrypoint")"
           printf '%s' "$html" | grep -q 'data-review-surface="v1"'
           printf '%s' "$html" | grep -q "Content-Security-Policy"
           printf '%s' "$html" | grep -q "default-src 'none'"
-          printf 'Verified public review lab: %sreview-lab/\n' "$REVIEW_BASE_URL"
+          printf 'Verified public review lab: %s\n' "$entrypoint"
