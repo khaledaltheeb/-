@@ -26,7 +26,7 @@ type Props = {
 
 type JsonRecord = Record<string, unknown>;
 
-function asRecord(value: unknown): JsonRecord | null {
+function asRecord(value: unknown) {
   return value && typeof value === 'object' && !Array.isArray(value) ? value as JsonRecord : null;
 }
 
@@ -88,6 +88,10 @@ export default function CareGuidePage({ record, items = [], related = [], routeS
   const faqItems = visibleCareGuideFaq(record.body_json);
   const centralDisclaimer = careGuideDisclaimer(record.schema_json);
   const review = contentReviewProvenance(record);
+  const reviewMetadataOnly = asRecord(record.schema_json)?.review_visibility === 'metadata_only';
+  const visibleReview = reviewMetadataOnly
+    ? { lastReviewedAt: null, reviewerName: null, reviewerCredentials: null }
+    : review;
   const canonical = record.canonical_url || (routeSegments.length ? `/care-guides/${routeSegments.join('/')}/` : '/care-guides/');
   const url = canonical.startsWith('https://') ? canonical : `${SITE_URL}${canonical}`;
   const audiences = Array.isArray(record.audience) ? record.audience.map(String) : [];
@@ -161,13 +165,13 @@ export default function CareGuidePage({ record, items = [], related = [], routeS
           <span><strong>{readingMinutes}</strong> دقائق قراءة تقريبًا</span>
           {references.length ? <span><strong>{references.length}</strong> مصادر ومراجع</span> : null}
           {faqItems.length ? <span><strong>{faqItems.length}</strong> أسئلة شائعة</span> : null}
-          {review.lastReviewedAt ? <span><strong>مراجع</strong> من فريق روافد</span> : null}
+          {visibleReview.lastReviewedAt ? <span><strong>مراجع</strong> من فريق روافد</span> : null}
         </div>
         <div className="article-meta">
           {record.author_display_name ? <span>إعداد: {record.author_display_name}</span> : null}
-          {review.reviewerName ? <span>تمت المراجعة بواسطة {review.reviewerName}{review.reviewerCredentials ? ` — ${review.reviewerCredentials}` : ''}</span> : null}
+          {visibleReview.reviewerName ? <span>تمت المراجعة بواسطة {visibleReview.reviewerName}{visibleReview.reviewerCredentials ? ` — ${visibleReview.reviewerCredentials}` : ''}</span> : null}
           {record.published_at ? <span>نُشر {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(record.published_at))}</span> : null}
-          {review.lastReviewedAt ? <span>آخر مراجعة {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(review.lastReviewedAt))}</span> : null}
+          {visibleReview.lastReviewedAt ? <span>آخر مراجعة {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(visibleReview.lastReviewedAt))}</span> : null}
         </div>
         {audiences.length ? <div className="tag-list">{audiences.map((audience) => <span key={audience}>{audience}</span>)}</div> : null}
       </header>
