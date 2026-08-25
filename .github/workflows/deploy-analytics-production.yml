@@ -123,23 +123,32 @@ jobs:
         run: |
           set -euo pipefail
           base='https://healthrenewal.org'
+          last_home=''
+          last_robots=''
           for attempt in $(seq 1 24); do
             stamp="${GITHUB_SHA}-${attempt}-$(date +%s)"
             home="$(curl -fsSL --compressed --max-time 25 -H 'Cache-Control: no-cache, no-store, max-age=0' "${base}/?production-deploy=${stamp}" 2>/dev/null || true)"
             robots="$(curl -fsSL --compressed --max-time 25 -H 'Cache-Control: no-cache, no-store, max-age=0' "${base}/robots.txt?production-deploy=${stamp}" 2>/dev/null || true)"
-            if printf '%s' "$home" | grep -q '<title>منصة روافد' \
-              && printf '%s' "$home" | grep -q 'GTM-WBLQVBG4' \
-              && printf '%s' "$home" | grep -q 'G-VLZMV8Y4JP' \
-              && printf '%s' "$home" | grep -q 'rel="canonical" href="https://healthrenewal.org/' \
-              && printf '%s' "$home" | grep -q 'منصة روافد' \
-              && ! printf '%s' "$home" | grep -qi 'noindex' \
-              && printf '%s' "$robots" | grep -q 'Sitemap: https://healthrenewal.org/sitemap.xml'; then
+            last_home="${home}"
+            last_robots="${robots}"
+            lower_home="${home,,}"
+            if [[ "${home}" == *'<title>منصة روافد'* ]] \
+              && [[ "${home}" == *'GTM-WBLQVBG4'* ]] \
+              && [[ "${home}" == *'G-VLZMV8Y4JP'* ]] \
+              && [[ "${home}" == *'rel="canonical" href="https://healthrenewal.org/'* ]] \
+              && [[ "${home}" == *'منصة روافد'* ]] \
+              && [[ "${lower_home}" != *'noindex'* ]] \
+              && [[ "${robots}" == *'Sitemap: https://healthrenewal.org/sitemap.xml'* ]]; then
               echo 'Production deployment verified: site name, canonical, indexability and analytics are live.'
               exit 0
             fi
             sleep 5
           done
           echo 'Production metadata deployment was not fully visible after deployment.' >&2
+          if [[ "${last_home}" =~ \<title\>([^\<]+)\<\/title\> ]]; then
+            echo "Observed title: ${BASH_REMATCH[1]}" >&2
+          fi
+          echo "Observed homepage bytes: ${#last_home}; robots bytes: ${#last_robots}" >&2
           exit 1
 
       - name: Mark deployment success
