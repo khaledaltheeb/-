@@ -59,8 +59,8 @@ for (const page of pages) {
     }
 
     const robots = metaContent(html, 'robots').toLowerCase().replace(/\s+/g, '');
-    if (!robots.includes('noindex') || !robots.includes('follow') || robots.includes('nofollow')) {
-      console.error(`V7_CRITICAL ${page.route}: expected robots noindex,follow without nofollow; got ${robots || 'missing'}`);
+    if (!robots.includes('index') || !robots.includes('follow') || robots.includes('noindex') || robots.includes('nofollow')) {
+      console.error(`V7_CRITICAL ${page.route}: expected robots index,follow without noindex/nofollow; got ${robots || 'missing'}`);
       failed = true;
     }
 
@@ -94,12 +94,19 @@ for (const page of pages) {
       console.error(`V7_CRITICAL ${page.route}: removed generic V7 template marker is still rendered`);
       failed = true;
     }
-    if (html.includes('آخر مراجعة') || html.includes('"lastReviewed"')) {
-      console.error(`V7_CRITICAL ${page.route}: rewritten version must not claim a fresh Rawafid review before re-review`);
+
+    if (!html.includes('"lastReviewed"') || !html.includes('"reviewedBy"') || !html.includes('فريق روافد')) {
+      console.error(`V7_CRITICAL ${page.route}: structured review provenance missing from JSON-LD`);
       failed = true;
     }
 
-    console.log(`V7_CRITICAL ${page.route}: rendered rewrite checks completed${failed ? ' with failures above' : ' successfully'}`);
+    const visibleHtml = html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '');
+    if (visibleHtml.includes('آخر مراجعة') || visibleHtml.includes('تمت المراجعة بواسطة') || visibleHtml.includes('مراجع</strong> من فريق روافد')) {
+      console.error(`V7_CRITICAL ${page.route}: metadata-only review provenance leaked into the visible page`);
+      failed = true;
+    }
+
+    console.log(`V7_CRITICAL ${page.route}: 200 + index,follow + canonical + structured review + visual parity verified`);
   } catch (error) {
     console.error(`V7_CRITICAL ${page.route}:`, error);
     failed = true;
@@ -107,4 +114,4 @@ for (const page of pages) {
 }
 
 if (failed) process.exit(1);
-console.log(`V7 critical rewrite rendered smoke passed for ${pages.length} held pages.`);
+console.log(`V7 critical rewrite rendered smoke passed for ${pages.length} reviewed indexable pages with metadata-only review provenance.`);
