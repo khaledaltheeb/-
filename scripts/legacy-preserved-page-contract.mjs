@@ -12,6 +12,7 @@ const seo=read('lib/seo.ts');
 const view=read('components/legacy-preserved-page.tsx');
 const proxy=read('lib/supabase/proxy.ts');
 const preservationSmoke=read('scripts/legacy-preservation-smoke.mjs');
+const wave004Smoke=read('scripts/care-guides-wave-004-smoke.mjs');
 const routes=[
  'app/[...legacyPath]/page.tsx','app/hubs/page.tsx','app/hubs/[slug]/page.tsx','app/encyclopedia/[slug]/page.tsx',
  'app/quick-info/[slug]/page.tsx','app/sections/[slug]/page.tsx','app/sectors/[slug]/page.tsx','app/capabilities/[slug]/page.tsx',
@@ -50,10 +51,17 @@ for(const fn of ['get_legacy_preserved_page','legacy_preserved_route_exists']){
 }
 
 for(const forbidden of ['service_role','secret_key']) if(helper.toLowerCase().includes(forbidden)||view.toLowerCase().includes(forbidden)||proxy.toLowerCase().includes(forbidden)) fail(`forbidden preservation secret pattern: ${forbidden}`);
-for(const marker of ['get_legacy_preserved_page','legacyPreservedMetadata','buildSeoMetadata','index: true','follow: true','healthrenewal.org','decodeURIComponent',"normalize('NFC')",'normalizeLegacyBrandText','legacyDisplayTitle']) if(!helper.includes(marker)) fail(`helper marker missing: ${marker}`);
-for(const stale of ["index: false",'صفحة محفوظة من مكتبة روافد قيد المراجعة والترقية التحريرية.']) if(helper.includes(stale)) fail(`stale noindex preservation policy returned: ${stale}`);
+for(const marker of [
+  'get_legacy_preserved_page','legacyPreservedMetadata','buildSeoMetadata','follow: true','healthrenewal.org','decodeURIComponent',"normalize('NFC')",
+  'normalizeLegacyBrandText','legacyDisplayTitle','legacyPreservedCanIndex','REVIEW_GATED_PRESERVED_PREFIXES',"'/care-guides/'","'/evidence-guides/'",
+  'index: legacyPreservedCanIndex(route)'
+]) if(!helper.includes(marker)) fail(`helper marker missing: ${marker}`);
+if(helper.includes('index: true')) fail('legacy fallback metadata must not blanket-index review-gated YMYL guide surfaces');
 for(const marker of ['const canIndex = INDEXING_ENABLED && input.index !== false','noarchive: !canIndex','nosnippet: !canIndex']) if(!seo.includes(marker)) fail(`central SEO indexing marker missing: ${marker}`);
-for(const marker of ['من مكتبة منصة روافد','صفحة منشورة ومحفوظة','تبقى الصفحة قابلة للوصول والفهرسة','ContentRenderer','legacyInternalLinks','legacyReferences']) if(!view.includes(marker)) fail(`preserved view marker missing: ${marker}`);
+for(const marker of [
+  'من مكتبة منصة روافد','صفحة منشورة ومحفوظة','صفحة منشورة تحت مراجعة الفهرسة','legacyPreservedCanIndex',
+  'تبقى الصفحة قابلة للوصول والفهرسة','يبقى خارج الفهرسة مؤقتًا','ContentRenderer','legacyInternalLinks','legacyReferences'
+]) if(!view.includes(marker)) fail(`preserved view marker missing: ${marker}`);
 for(const stale of ['نسخة إنتاجية محفوظة','تبقى غير مفهرسة']) if(view.includes(stale)) fail(`stale preservation UI returned: ${stale}`);
 for(const marker of ['NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY',"rpc('legacy_preserved_route_exists'",'isLegacyProductionRoute']) if(!proxy.includes(marker)) fail(`proxy must document its public preservation RPC dependency: ${marker}`);
 for(const path of routes){
@@ -74,6 +82,7 @@ for(const marker of [
   'published public route unexpectedly emitted noindex',
   "requiresPreservedBanner&&!body.includes('صفحة منشورة ومحفوظة')"
 ]) if(!preservationSmoke.includes(marker)) fail(`modern/fallback preservation smoke marker missing: ${marker}`);
+for(const marker of ['const heldPublished = [','expected robots noindex,follow','const reviewedPublished = [','expected robots index,follow']) if(!wave004Smoke.includes(marker)) fail(`Wave 004 review-gated indexing smoke marker missing: ${marker}`);
 const catchAll=read('app/[...legacyPath]/page.tsx');
 if(!catchAll.includes('notFound()')) fail('unknown routes must still reach the branded 404');
 for(const path of [
@@ -87,4 +96,4 @@ for(const path of [
 ]) if(!fs.existsSync(path)) fail(`deployed migration history not mirrored: ${path}`);
 
 if(failed)process.exit(1);
-console.log('Legacy preservation contract passed: published production routes remain publicly readable and indexable under the current Rawafid identity, reviewed modern takeovers keep priority over fallback rendering, unknown routes remain true 404s, and centralized SEO controls canonical robots behavior.');
+console.log('Legacy preservation contract passed: general published production fallbacks remain eligible for indexing under the current Rawafid identity, explicit review-gated Care/Evidence Guide fallbacks remain noindex,follow until release criteria are met, reviewed modern takeovers keep priority, unknown routes remain true 404s, and centralized SEO controls canonical robots behavior.');
