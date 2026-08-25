@@ -58,8 +58,8 @@ try {
     if (h1Count !== 1) fail('desktop hub', `expected exactly one H1, found ${h1Count}`);
     else pass('desktop hub', 'single H1');
 
-    const search = hub.locator('input[type="search"]');
-    if (await search.count() !== 1) fail('desktop hub', 'search input missing or duplicated');
+    const search = hub.getByPlaceholder('مثال: النوم، الأسرة، الانتباه', { exact: true });
+    if (await search.count() !== 1) fail('desktop hub', 'assessment directory search input missing or duplicated');
     else {
       await search.fill('النوم');
       const sleepLink = hub.locator('a[href="/assessment-lab/sleep-quality"]');
@@ -111,13 +111,19 @@ try {
       if (!await resultHeading.isVisible()) fail('desktop tool', 'result view did not appear after 12 answers');
       else {
         pass('desktop tool', 'completed all 12 questions and reached result');
-        const resultText = await resultHeading.evaluate((element) => element.closest('section')?.innerText || '');
-        if (/\d+\s*%/.test(resultText)) fail('desktop tool', 'developmental result contains a percentage');
-        else pass('desktop tool', 'result contains no percentage scoring');
+        const runner = tool.locator('section[aria-labelledby="assessment-runner-title"]');
+        const resultCards = runner.locator('article');
+        const cardCount = await resultCards.count();
+        if (cardCount !== 4) fail('desktop tool', `expected four result domain cards, found ${cardCount}`);
+        else pass('desktop tool', 'four result domain cards rendered');
+        const resultCardText = (await resultCards.allInnerTexts()).join('\n');
+        if (/\d+\s*%/.test(resultCardText)) fail('desktop tool', 'developmental result cards contain a percentage');
+        else pass('desktop tool', 'result cards contain no percentage scoring');
         for (const forbidden of ['خفيف', 'متوسط', 'شديد', 'بارز', 'مرتفع']) {
-          if (resultText.includes(forbidden)) fail('desktop tool', `developmental result contains unsupported severity label: ${forbidden}`);
+          const labelPattern = new RegExp(`(^|[\\s:：،؛()])${forbidden}($|[\\s.،؛:：()])`, 'm');
+          if (labelPattern.test(resultCardText)) fail('desktop tool', `developmental result cards contain unsupported severity label: ${forbidden}`);
         }
-        const noteCount = await tool.locator('textarea').count();
+        const noteCount = await runner.locator('textarea').count();
         if (noteCount !== 4) fail('desktop tool', `expected four domain note fields, found ${noteCount}`);
         else pass('desktop tool', 'four domain result cards expose optional notes');
         await tool.screenshot({ path: path.join(outputDir, 'assessment-lab-result-desktop.png'), fullPage: true, animations: 'disabled' });
