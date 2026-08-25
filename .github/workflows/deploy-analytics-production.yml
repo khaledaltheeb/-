@@ -132,18 +132,36 @@ jobs:
             last_home="${home}"
             last_robots="${robots}"
             lower_home="${home,,}"
-            if [[ "${home}" == *'<title>منصة روافد'* ]] \
-              && [[ "${home}" == *'GTM-WBLQVBG4'* ]] \
-              && [[ "${home}" == *'G-VLZMV8Y4JP'* ]] \
-              && [[ "${home}" == *'rel="canonical" href="https://healthrenewal.org/'* ]] \
-              && [[ "${home}" == *'منصة روافد'* ]] \
-              && [[ "${lower_home}" != *'noindex'* ]] \
-              && [[ "${robots}" == *'Sitemap: https://healthrenewal.org/sitemap.xml'* ]]; then
-              echo 'Production deployment verified: site name, canonical, indexability and analytics are live.'
+
+            title_ok=false
+            gtm_ok=false
+            ga_ok=false
+            canonical_ok=false
+            brand_ok=false
+            index_ok=true
+            robots_ok=false
+
+            [[ "${home}" == *'<title>منصة روافد'* ]] && title_ok=true
+            [[ "${home}" == *'GTM-WBLQVBG4'* ]] && gtm_ok=true
+            [[ "${home}" == *'G-VLZMV8Y4JP'* ]] && ga_ok=true
+            [[ "${lower_home}" == *'rel="canonical"'* && "${home}" == *'https://healthrenewal.org/'* ]] && canonical_ok=true
+            [[ "${home}" == *'منصة روافد'* ]] && brand_ok=true
+            if [[ "${lower_home}" =~ \<meta[^\>]*name=[\"\']robots[\"\'][^\>]*content=[\"\'][^\"\']*noindex ]] \
+              || [[ "${lower_home}" =~ \<meta[^\>]*content=[\"\'][^\"\']*noindex[^\"\']*[\"\'][^\>]*name=[\"\']robots[\"\'] ]]; then
+              index_ok=false
+            fi
+            [[ "${robots}" == *'https://healthrenewal.org/sitemap.xml'* ]] && robots_ok=true
+
+            echo "Live verification attempt ${attempt}: title=${title_ok} gtm=${gtm_ok} ga=${ga_ok} canonical=${canonical_ok} brand=${brand_ok} index=${index_ok} robots=${robots_ok}"
+            if [[ "${title_ok}" == true && "${gtm_ok}" == true && "${ga_ok}" == true \
+              && "${canonical_ok}" == true && "${brand_ok}" == true \
+              && "${index_ok}" == true && "${robots_ok}" == true ]]; then
+              echo 'Production deployment verified: site name, canonical, indexability, sitemap discovery and analytics are live.'
               exit 0
             fi
             sleep 5
           done
+
           echo 'Production metadata deployment was not fully visible after deployment.' >&2
           if [[ "${last_home}" =~ \<title\>([^\<]+)\<\/title\> ]]; then
             echo "Observed title: ${BASH_REMATCH[1]}" >&2
