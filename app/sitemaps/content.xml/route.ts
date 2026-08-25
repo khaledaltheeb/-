@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { sitemapResponse } from '@/lib/sitemap-xml';
 import { getCognitivePageIndex } from '@/lib/cognitive-program';
 import { getExpandedEncyclopediaIndex } from '@/lib/expanded-encyclopedia';
+import { isExplicitNoindexPath } from '@/lib/public-indexability';
 
 export const dynamic = 'force-dynamic';
 const PAGE_SIZE = 5000;
@@ -35,6 +36,8 @@ export async function GET(request: Request) {
   // No-loss rule: every live, indexable database record that is not a condition belongs
   // to this sitemap safety net. Dedicated maps such as quick-info may repeat the same
   // canonical URL; overlap is preferable to silently dropping an indexable published page.
+  // A small centralized deny-list is applied after collection for routes whose current public
+  // surface intentionally remains noindex even if a legacy database row still says indexable.
   // Conditions remain in the encyclopedia sitemap, whose public route is canonicalized there.
   // Pagination is intentionally ordered by the immutable row id rather than updated_at:
   // content edits must change <lastmod> without moving URLs between sitemap pages while
@@ -91,6 +94,7 @@ export async function GET(request: Request) {
 
   const unique = new Map<string, SitemapRow>();
   for (const item of [...databaseRows, ...generatedRows]) {
+    if (isExplicitNoindexPath(item.path)) continue;
     if (!unique.has(item.path)) unique.set(item.path, item);
   }
 
