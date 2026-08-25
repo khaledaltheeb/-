@@ -87,7 +87,10 @@ jobs:
       - name: Production HTTP smoke
         run: npm run smoke
       - name: Sitewide hidden SEO agent
-        run: node scripts/hidden-seo-sitewide-agent.mjs
+        shell: bash
+        run: |
+          set -o pipefail
+          node scripts/hidden-seo-sitewide-agent.mjs 2>&1 | tee /tmp/rawafid-hidden-seo-agent.log
       - name: Content richness and duplicate-body gate
         run: node scripts/content-richness-gate.mjs
       - name: YMYL editorial SEO readiness report
@@ -149,6 +152,7 @@ jobs:
           name: rawafid-quality-diagnostics-${{ github.run_id }}
           path: |
             /tmp/rawafid-server.log
+            /tmp/rawafid-hidden-seo-agent.log
             /tmp/rawafid-lighthouse-*.json
           if-no-files-found: ignore
           retention-days: 7
