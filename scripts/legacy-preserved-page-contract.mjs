@@ -50,11 +50,11 @@ for(const fn of ['get_legacy_preserved_page','legacy_preserved_route_exists']){
 }
 
 for(const forbidden of ['service_role','secret_key']) if(helper.toLowerCase().includes(forbidden)||view.toLowerCase().includes(forbidden)||proxy.toLowerCase().includes(forbidden)) fail(`forbidden preservation secret pattern: ${forbidden}`);
-for(const marker of ['get_legacy_preserved_page','legacyPreservedMetadata','buildSeoMetadata','index: false','follow: true','healthrenewal.org','decodeURIComponent',"normalize('NFC')"]) if(!helper.includes(marker)) fail(`helper marker missing: ${marker}`);
-// The preserved helper now delegates robots directives to the centralized SEO generator.
-// Keep the historical noarchive behavior without duplicating a second metadata implementation.
-for(const marker of ['const canIndex = INDEXING_ENABLED && input.index !== false','noarchive: !canIndex','nosnippet: !canIndex']) if(!seo.includes(marker)) fail(`central SEO noindex preservation marker missing: ${marker}`);
-for(const marker of ['نسخة إنتاجية محفوظة','لم تُمنح هذه النسخة اعتماد دورة المراجعة العلمية الحالية','ContentRenderer','legacyInternalLinks','legacyReferences']) if(!view.includes(marker)) fail(`preserved view marker missing: ${marker}`);
+for(const marker of ['get_legacy_preserved_page','legacyPreservedMetadata','buildSeoMetadata','index: true','follow: true','healthrenewal.org','decodeURIComponent',"normalize('NFC')",'normalizeLegacyBrandText','legacyDisplayTitle']) if(!helper.includes(marker)) fail(`helper marker missing: ${marker}`);
+for(const stale of ["index: false",'صفحة محفوظة من مكتبة روافد قيد المراجعة والترقية التحريرية.']) if(helper.includes(stale)) fail(`stale noindex preservation policy returned: ${stale}`);
+for(const marker of ['const canIndex = INDEXING_ENABLED && input.index !== false','noarchive: !canIndex','nosnippet: !canIndex']) if(!seo.includes(marker)) fail(`central SEO indexing marker missing: ${marker}`);
+for(const marker of ['من مكتبة منصة روافد','صفحة منشورة ومحفوظة','تبقى الصفحة قابلة للوصول والفهرسة','ContentRenderer','legacyInternalLinks','legacyReferences']) if(!view.includes(marker)) fail(`preserved view marker missing: ${marker}`);
+for(const stale of ['نسخة إنتاجية محفوظة','تبقى غير مفهرسة']) if(view.includes(stale)) fail(`stale preservation UI returned: ${stale}`);
 for(const marker of ['NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY',"rpc('legacy_preserved_route_exists'",'isLegacyProductionRoute']) if(!proxy.includes(marker)) fail(`proxy must document its public preservation RPC dependency: ${marker}`);
 for(const path of routes){
  if(!fs.existsSync(path)){fail(`preserved route missing: ${path}`);continue;}
@@ -71,7 +71,8 @@ for(const marker of [
   "['/quick-info/accountability-vs-self-blame/','تحمل مسؤولية أم جلد ذات']",
   'stale fallback preservation banner rendered after reviewed migration',
   'reviewed published route unexpectedly remained noindex',
-  "requiresPreservedBanner&&!body.includes('نسخة إنتاجية محفوظة')"
+  'published public route unexpectedly emitted noindex',
+  "requiresPreservedBanner&&!body.includes('صفحة منشورة ومحفوظة')"
 ]) if(!preservationSmoke.includes(marker)) fail(`modern/fallback preservation smoke marker missing: ${marker}`);
 const catchAll=read('app/[...legacyPath]/page.tsx');
 if(!catchAll.includes('notFound()')) fail('unknown routes must still reach the branded 404');
@@ -86,4 +87,4 @@ for(const path of [
 ]) if(!fs.existsSync(path)) fail(`deployed migration history not mirrored: ${path}`);
 
 if(failed)process.exit(1);
-console.log('Legacy preservation contract passed: production HTML remains available through a Unicode-safe public read-only noindex boundary, reviewed modern takeovers keep priority over fallback rendering, and centralized SEO preserves the historical noarchive/nosnippet behavior without duplicating metadata logic.');
+console.log('Legacy preservation contract passed: published production routes remain publicly readable and indexable under the current Rawafid identity, reviewed modern takeovers keep priority over fallback rendering, unknown routes remain true 404s, and centralized SEO controls canonical robots behavior.');
