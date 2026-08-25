@@ -20,7 +20,7 @@ for(const [route,marker,requiresPreservedBanner] of preservedRoutes){
     if(!body.includes(marker)){console.error(`LEGACY_PRESERVED ${route}: original production marker missing`);failed=true;continue;}
     if(requiresPreservedBanner&&!body.includes('صفحة منشورة ومحفوظة')){console.error(`LEGACY_PRESERVED ${route}: published preservation status missing`);failed=true;continue;}
     if(/noindex/i.test(body)){console.error(`LEGACY_PRESERVED ${route}: published public route unexpectedly emitted noindex`);failed=true;continue;}
-    if(/منصة الصحة النفسية|Mental Health Knowledge Platform/i.test(body)){console.error(`LEGACY_PRESERVED ${route}: stale legacy brand identity still rendered`);failed=true;continue;}
+    if(!body.includes('منصة روافد')){console.error(`LEGACY_PRESERVED ${route}: current institutional Rawafid identity missing from rendered response`);failed=true;continue;}
     console.log(`LEGACY_PRESERVED ${route}: real content 200 + indexable Rawafid identity verified`);
   }catch(error){console.error(`LEGACY_PRESERVED ${route}:`,error);failed=true;}
 }
@@ -33,6 +33,7 @@ for(const [route,marker] of upgradedRoutes){
     if(!body.includes(marker)){console.error(`LEGACY_UPGRADED ${route}: reviewed current-content marker missing`);failed=true;continue;}
     if(body.includes('صفحة منشورة ومحفوظة')){console.error(`LEGACY_UPGRADED ${route}: stale fallback preservation banner rendered after reviewed migration`);failed=true;continue;}
     if(/noindex/i.test(body)){console.error(`LEGACY_UPGRADED ${route}: reviewed published route unexpectedly remained noindex`);failed=true;continue;}
+    if(!body.includes('منصة روافد')){console.error(`LEGACY_UPGRADED ${route}: current institutional Rawafid identity missing`);failed=true;continue;}
     console.log(`LEGACY_UPGRADED ${route}: reviewed current content 200 + indexable verified`);
   }catch(error){console.error(`LEGACY_UPGRADED ${route}:`,error);failed=true;}
 }
@@ -46,4 +47,4 @@ for(const unknownPath of ['/__legacy_preservation_route_that_never_existed__','/
   }catch(error){console.error(`LEGACY_PRESERVED_UNKNOWN ${unknownPath}:`,error);failed=true;}
 }
 if(failed)process.exit(1);
-console.log('Legacy preservation runtime smoke passed: published preserved routes remain indexable with current Rawafid identity, upgraded routes take priority, and invented routes return true 404 responses.');
+console.log('Legacy preservation runtime smoke passed: published preserved routes remain indexable under current Rawafid chrome/metadata while historical body content stays intact, upgraded routes take priority, and invented routes return true 404 responses.');
