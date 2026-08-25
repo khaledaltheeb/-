@@ -57,6 +57,11 @@ jobs:
       - name: Install locked dependencies
         run: npm ci --no-audit --no-fund
 
+      - name: Materialize release-pinned OSS Public Review Lab
+        env:
+          RAWAFID_OSS_REVIEW_SHA: d55426327df49f6c7753083e3692a343d7a4d75c
+        run: bash scripts/materialize-oss-review-lab.sh
+
       - name: Materialize Daily Tools route and content assets
         run: node scripts/build-daily-tools-route-manifest.mjs
 
