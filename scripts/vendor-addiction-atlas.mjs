@@ -17,6 +17,9 @@ const FILES = {
   'substances-v3.json': 'c5b9368ff51b33dee1384feb0a4937f7e7ac50fd',
   'substances-v4.json': 'e5290b25ff5bfe1d2d25668df652db1fe6dda0e9',
   'substances-v5.json': 'ccdc5ce763fe9fb6a1236e6aa97df366c80fd2cf',
+  'epidemiology-v1.json': '689dd4ccae674d0b69b1b7a72d9ad90a6586da53',
+  'mortality-v1.json': '813e1f09b272fbbed38b95612848d5c061ec959b',
+  'source-registry-v1.json': 'c777bcae96307a4d3afa953b298134beb6d70935',
 };
 
 function gitBlobSha(buffer) {
