@@ -16,6 +16,12 @@ const layout = read('app/layout.tsx');
 const robots = read('app/robots.ts');
 const sitemapXml = read('lib/sitemap-xml.ts');
 const staticSitemap = read('app/sitemaps/static.xml/route.ts');
+const quickInfoSitemap = read('app/sitemaps/quick-info.xml/route.ts');
+const encyclopediaSitemap = read('app/sitemaps/encyclopedia.xml/route.ts');
+const cognitiveSitemap = read('app/sitemaps/cognitive-lab.xml/route.ts');
+const specialistsSitemap = read('app/sitemaps/specialists.xml/route.ts');
+const centersSitemap = read('app/sitemaps/centers.xml/route.ts');
+const communitySitemap = read('app/sitemaps/community.xml/route.ts');
 const sitemapIndex = read('app/sitemap.xml/route.ts');
 const header = read('components/site-header.tsx');
 const footer = read('components/site-footer.tsx');
@@ -103,15 +109,15 @@ requireAll(staticSitemap, [
   "path:'/'",
   "path:'/sectors'",
   "path:'/sections'",
-  "path:'/quick-info/'",
   "path:'/magazine/'",
-  "path:'/care-guides/'",
-  "path:'/evidence-guides/'",
-  "path:'/encyclopedia/'",
-  "path:'/cognitive-lab'",
-  "path:'/specialists'",
-  "path:'/centers'",
-], 'primary search hubs');
+  "path:'/addiction'",
+], 'static-owned primary search hubs');
+requireAll(quickInfoSitemap, ["path: '/quick-info/'"], 'Quick Info sitemap hub ownership');
+requireAll(encyclopediaSitemap, ["path: '/encyclopedia/'"], 'encyclopedia sitemap hub ownership');
+requireAll(cognitiveSitemap, ["path: '/cognitive-lab'"], 'cognitive sitemap hub ownership');
+requireAll(specialistsSitemap, ["path: '/specialists'"], 'specialists sitemap hub ownership');
+requireAll(centersSitemap, ["path: '/centers'"], 'centers sitemap hub ownership');
+requireAll(communitySitemap, ["path: '/community'"], 'community sitemap hub ownership');
 
 requireAll(header, [
   "href: '/sectors'",
