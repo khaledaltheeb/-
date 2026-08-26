@@ -131,8 +131,15 @@ export default async function SectorPage({ params, searchParams }: { params: Par
     <main className="site-shell sector-page" style={accentStyle}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify([breadcrumbs, collectionSchema]).replace(/</g, '\\u003c') }} />
       <nav className="breadcrumbs" aria-label="مسار الصفحة"><Link href="/">الرئيسية</Link><span>/</span><Link href="/sectors">القطاعات</Link><span>/</span><span aria-current="page">{sector.name_ar}</span></nav>
-      <section className="sector-hero"><span className="eyebrow">قطاع رئيسي</span><h1>{sector.name_ar}</h1><p>{sector.description || 'قطاع رئيسي يجمع موضوعات مترابطة ضمن منصة روافد.'}</p><div className="public-stat-strip"><span>{roots.length.toLocaleString('ar')} أقسام رئيسية</span><span>{categoryRows.length.toLocaleString('ar')} قسمًا وقسمًا فرعيًا</span>{totalContent > 0 && <span>{totalContent.toLocaleString('ar')} صفحة منشورة</span>}</div><form className="sector-search" action="/search" method="get"><label className="sr-only" htmlFor="sector-search">ابحث في منصة روافد</label><input id="sector-search" name="q" defaultValue={sector.name_ar} aria-label={`ابحث عن موضوع مرتبط بـ ${sector.name_ar}`} /><button type="submit">بحث</button></form></section>
+      <section className="sector-hero"><span className="eyebrow">قطاع رئيسي</span><h1>{sector.name_ar}</h1><p>{sector.description || 'قطاع رئيسي يجمع موضوعات مترابطة ضمن منصة روافد.'}</p><div className="public-stat-strip"><span>{roots.length.toLocaleString('ar')} أقسام رئيسية</span><span>{categoryRows.length.toLocaleString('ar')} قسمًا وقسمًا فرعيًا</span>{totalContent > 0 && <span>{totalContent.toLocaleString('ar')} صفحة منشورة</span>}{sector.slug === 'addiction-recovery' && <span>موسوعة تفاعلية مستقلة</span>}</div><form className="sector-search" action="/search" method="get"><label className="sr-only" htmlFor="sector-search">ابحث في منصة روافد</label><input id="sector-search" name="q" defaultValue={sector.name_ar} aria-label={`ابحث عن موضوع مرتبط بـ ${sector.name_ar}`} /><button type="submit">بحث</button></form></section>
       <nav className="sector-quick-nav" aria-label={`وصول سريع داخل ${sector.name_ar}`}>
+        {sector.slug === 'addiction-recovery' && <Link href="/addiction/">موسوعة الإدمان التفاعلية</Link>}
+        {sector.slug === 'addiction-recovery' && <Link href="/addiction/substances/">أطلس المواد</Link>}
+        {sector.slug === 'addiction-recovery' && <Link href="/addiction/compare/">المقارنات</Link>}
+        {sector.slug === 'addiction-recovery' && <Link href="/addiction/interactions/">التفاعلات</Link>}
+        {sector.slug === 'addiction-recovery' && <Link href="/addiction/prevalence/">الانتشار</Link>}
+        {sector.slug === 'addiction-recovery' && <Link href="/addiction/mortality/">الوفيات</Link>}
+        {sector.slug === 'addiction-recovery' && <Link href="/addiction/methodology/">المنهجية</Link>}
         <a href="#sector-categories">الأقسام الرئيسية</a>
         {totalContent > 0 && <a href="#sector-content">كل محتوى القطاع</a>}
         <Link href={`/search?q=${sectorQuery}`}>البحث في القطاع</Link>
