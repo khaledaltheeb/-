@@ -148,8 +148,8 @@ requireAll(footer, [
 requireAll(wrangler, [
   '"NEXT_PUBLIC_SITE_URL": "https://rawafid-platform-staging.khaledaltheeb.workers.dev"',
   '"NEXT_PUBLIC_ALLOW_INDEXING": "false"',
-  '"pattern": "healthrenewal.org"',
-  '"pattern": "www.healthrenewal.org"',
+  '"pattern": "healthrenewal.org/*"',
+  '"pattern": "www.healthrenewal.org/*"',
 ], 'staging and production host contract');
 requireAll(middleware, [
   "hostname === 'www.healthrenewal.org'",
