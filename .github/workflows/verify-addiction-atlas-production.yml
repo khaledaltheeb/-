@@ -1,0 +1,82 @@
+name: Verify Addiction Atlas Production
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/verify-addiction-atlas-production.yml'
+  workflow_run:
+    workflows:
+      - 'Deploy Analytics Production'
+      - 'Deploy Production'
+    types: [completed]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rawafid-addiction-atlas-production-verify
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    if: >-
+      github.event_name == 'push' ||
+      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Verify live production addiction atlas
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://healthrenewal.org'
+          cache_header='Cache-Control: no-cache, no-store, max-age=0'
+
+          for attempt in $(seq 1 18); do
+            stamp="${GITHUB_SHA}-${attempt}-$(date +%s)"
+            atlas="$(curl -fsSL --compressed --max-time 25 -H "$cache_header" "${base}/addiction/substances/?atlas-verify=${stamp}" 2>/dev/null || true)"
+            fentanyl="$(curl -fsSL --compressed --max-time 25 -H "$cache_header" "${base}/addiction/substances/fentanyl/?atlas-verify=${stamp}" 2>/dev/null || true)"
+            comparison="$(curl -fsSL --compressed --max-time 25 -H "$cache_header" "${base}/addiction/compare/fentanyl-vs-heroin/?atlas-verify=${stamp}" 2>/dev/null || true)"
+            methodology="$(curl -fsSL --compressed --max-time 25 -H "$cache_header" "${base}/addiction/methodology/?atlas-verify=${stamp}" 2>/dev/null || true)"
+            root_sitemap="$(curl -fsSL --compressed --max-time 25 -H "$cache_header" "${base}/sitemap.xml?atlas-verify=${stamp}" 2>/dev/null || true)"
+            atlas_sitemap="$(curl -fsSL --compressed --max-time 25 -H "$cache_header" "${base}/sitemaps/addiction-atlas.xml?atlas-verify=${stamp}" 2>/dev/null || true)"
+
+            atlas_ok=false
+            fentanyl_ok=false
+            comparison_ok=false
+            methodology_ok=false
+            sitemap_ok=false
+            index_ok=true
+
+            [[ "$atlas" == *'Fentanyl'* && "$atlas" == *'Heroin'* && "$atlas" == *'54'* ]] && atlas_ok=true
+            [[ "$fentanyl" == *'Fentanyl'* && "$fentanyl" == *'MedicalWebPage'* ]] && fentanyl_ok=true
+            [[ "$comparison" == *'Fentanyl'* && "$comparison" == *'Heroin'* && "$comparison" == *'Article'* ]] && comparison_ok=true
+            [[ "$methodology" == *'قوة الدليل'* ]] && methodology_ok=true
+            if [[ "$root_sitemap" == *'/sitemaps/addiction-atlas.xml'* \
+              && "$atlas_sitemap" == *'/addiction/substances/fentanyl/'* \
+              && "$atlas_sitemap" == *'/addiction/compare/fentanyl-vs-heroin/'* \
+              && "$atlas_sitemap" == *'/addiction/methodology/'* \
+              && "$atlas_sitemap" != *'workers.dev'* ]]; then
+              sitemap_ok=true
+            fi
+
+            for page in "$atlas" "$fentanyl" "$comparison" "$methodology"; do
+              lower_page="${page,,}"
+              if [[ "$lower_page" =~ \<meta[^\>]*name=[\"\']robots[\"\'][^\>]*content=[\"\'][^\"\']*noindex ]] \
+                || [[ "$lower_page" =~ \<meta[^\>]*content=[\"\'][^\"\']*noindex[^\"\']*[\"\'][^\>]*name=[\"\']robots[\"\'] ]]; then
+                index_ok=false
+              fi
+            done
+
+            echo "Production atlas verification attempt ${attempt}: atlas=${atlas_ok} fentanyl=${fentanyl_ok} comparison=${comparison_ok} methodology=${methodology_ok} sitemap=${sitemap_ok} index=${index_ok}"
+            if [[ "$atlas_ok" == true && "$fentanyl_ok" == true && "$comparison_ok" == true \
+              && "$methodology_ok" == true && "$sitemap_ok" == true && "$index_ok" == true ]]; then
+              echo 'Production addiction atlas is live, indexable, and represented in the production sitemap.'
+              exit 0
+            fi
+            sleep 5
+          done
+
+          echo 'Production addiction atlas verification failed.' >&2
+          exit 1
