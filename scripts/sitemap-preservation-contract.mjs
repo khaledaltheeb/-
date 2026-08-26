@@ -12,7 +12,7 @@ if (!url || !key) {
 const contentRoute = fs.readFileSync('app/sitemaps/content.xml/route.ts', 'utf8');
 const quickInfoRoute = fs.readFileSync('app/sitemaps/quick-info.xml/route.ts', 'utf8');
 const dailyToolsRoute = fs.readFileSync('app/sitemaps/daily-tools.xml/route.ts', 'utf8');
-const dailyToolRoutes = JSON.parse(fs.readFileSync('generated/daily-tools-routes.json', 'utf8'));
+const dailyToolsSource = JSON.parse(fs.readFileSync('data/legacy-production-batches/daily-tools/001.json', 'utf8'));
 const indexRoute = fs.readFileSync('app/sitemap.xml/route.ts', 'utf8');
 const encyclopediaRoute = fs.readFileSync('app/sitemaps/encyclopedia.xml/route.ts', 'utf8');
 const staticRoute = fs.readFileSync('app/sitemaps/static.xml/route.ts', 'utf8');
@@ -31,16 +31,26 @@ function normalizePath(value) {
   }
 }
 
-const normalizedDailyToolRoutes = Array.isArray(dailyToolRoutes) ? dailyToolRoutes.map(normalizePath) : [];
-const dailyToolRouteSet = new Set(normalizedDailyToolRoutes);
-if (!Array.isArray(dailyToolRoutes) || dailyToolRoutes.length !== 151) {
-  fail(`Daily Tools sitemap manifest must contain exactly 151 routes, found ${Array.isArray(dailyToolRoutes) ? dailyToolRoutes.length : 'invalid manifest'}`);
+function dailyToolSourcePathToRoute(sourcePath) {
+  if (sourcePath === 'daily-tools/index.html') return '/daily-tools/';
+  const match = /^daily-tools\/([a-z0-9][a-z0-9-]{0,119})\/index\.html$/i.exec(sourcePath);
+  return match ? `/daily-tools/${match[1].toLowerCase()}/` : null;
 }
-if (normalizedDailyToolRoutes[0] !== '/daily-tools/') {
-  fail('Daily Tools sitemap manifest must begin with /daily-tools/');
+
+const dailyToolSourceRecords = Array.isArray(dailyToolsSource?.records) ? dailyToolsSource.records : [];
+const normalizedDailyToolRoutes = dailyToolSourceRecords
+  .map((record) => typeof record?.source_path === 'string' ? dailyToolSourcePathToRoute(record.source_path.trim()) : null)
+  .filter(Boolean)
+  .map(normalizePath);
+const dailyToolRouteSet = new Set(normalizedDailyToolRoutes);
+if (normalizedDailyToolRoutes.length !== 151) {
+  fail(`Daily Tools source corpus must resolve to exactly 151 routes, found ${normalizedDailyToolRoutes.length}`);
+}
+if (!dailyToolRouteSet.has('/daily-tools/')) {
+  fail('Daily Tools source corpus must contain /daily-tools/');
 }
 if (dailyToolRouteSet.size !== normalizedDailyToolRoutes.length) {
-  fail('Daily Tools sitemap manifest contains duplicate canonical routes');
+  fail('Daily Tools source corpus contains duplicate public routes');
 }
 if (!dailyToolsRoute.includes('EXPECTED_ROUTES = 151') || !dailyToolsRoute.includes("dailyToolRoutes[0] !== '/daily-tools/'")) {
   fail('Daily Tools sitemap route must retain its immutable 151-route integrity guard');
@@ -185,7 +195,7 @@ function dailyToolsOwned(row) {
   if (!canonical.startsWith('/daily-tools/')) return false;
   const normalized = normalizePath(canonical);
   if (!normalized || !dailyToolRouteSet.has(normalized)) {
-    fail(`indexable Daily Tools canonical ${canonical || row.id} is excluded from content sitemap but absent from immutable Daily Tools sitemap`);
+    fail(`indexable Daily Tools canonical ${canonical || row.id} is excluded from content sitemap but absent from the authoritative 151-route Daily Tools source corpus`);
   }
   return true;
 }
@@ -263,7 +273,7 @@ try {
     process.exit(1);
   }
 
-  console.log(`Sitemap preservation contract passed: ${total} indexable published DB pages = ${conditions} encyclopedia conditions + ${dedicatedOwned} dedicated-map DB pages + ${contentOwned} content-sitemap safety-net pages; canonical URLs are unique production HTTPS URLs with updated_at, and paginated sitemap boundaries are stable.`);
+  console.log(`Sitemap preservation contract passed: ${total} indexable published DB pages = ${conditions} encyclopedia conditions + ${dedicatedOwned} dedicated-map DB pages + ${contentOwned} content-sitemap safety-net pages; Daily Tools ownership is proven from the same immutable source corpus used to generate its 151-route sitemap; canonical URLs are unique production HTTPS URLs with updated_at, and paginated sitemap boundaries are stable.`);
 } catch (error) {
   console.error(`SITEMAP PRESERVATION CONTRACT FAILED: ${error instanceof Error ? error.message : String(error)}`);
   process.exit(1);
