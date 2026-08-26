@@ -51,6 +51,17 @@ const questionBanks = {
 export const assessmentSlugs = [...assessmentMonitors.map((row) => row.slug), ...sourceInstruments.map((row) => row.slug)];
 export const assessmentCategories = [...new Set(assessmentMonitors.map((row) => row.category))];
 
+const sourceStatusLabels: Record<string, string> = {
+  'official-arabic-source-required': 'نسخة عربية مدرجة في مصدر رسمي — التحقق من النسخة وشروط إعادة الاستخدام جارٍ قبل التفعيل',
+  'source-guided-only': 'مرجعي فقط — يُحال إلى المصدر الرسمي ولا تُعاد صياغة الأداة أو درجتها',
+  'permission-and-arabic-version-review': 'مراجعة الإذن والنسخة العربية مطلوبة قبل أي نشر تفاعلي',
+  'licensed-restricted': 'أداة مرخّصة ومقيّدة — لا تُعرض البنود أو مفاتيح التصحيح على الويب المفتوح',
+  'permission-required-for-modification-integration': 'يتطلب إذنًا للتعديل أو الترجمة أو التكامل — صفحة مصدرية فقط حاليًا',
+  'arabic-version-and-attribution-review': 'النسخة العربية وشروط النسبة قيد المطابقة قبل أي تفعيل تفاعلي',
+  'conditions-of-use-and-arabic-version-review': 'شروط الاستخدام والنسخة العربية تحتاجان تحققًا قبل نشر البنود أو الدرجة',
+  'distributed-by-mapi-rights-review': 'موزّع عبر جهة حقوق مختصة — تُراجع شروط الاستخدام والترجمة قبل أي تفعيل',
+};
+
 const protectiveAxes = new Set([
   'الشعور بالسيطرة','الاستعادة','الدعم العملي','الراحة','الدعم','إصلاح الخلاف','وضوح الطلب','الاحترام','الحدود','حرية التعبير','الأمان','الروتين','استعادة الذات','الوظيفة اليومية','حمل الذكرى','العودة للحياة','التهدئة','تسمية الشعور','اختيار السلوك','لغة الذات','تقبل النقص','الرعاية','المرونة','الانتماء','شخص آمن','جودة التواصل','المبادرة','دعم عاطفي','معلومات','طلب المساعدة','الفاعلية','العناية الذاتية','العمل أو الدراسة','العلاقات','المنزل','الاستراحة الحسية','الأمان المدرسي','طلب المساعدة','التعزيز','التعاون المدرسي','فرص التواصل','تقليل الضغط','البدائل','التعاون العلاجي','الاستقلال','المهارات التكيفية','المشاركة','الصحة','التعلم','الحركة','التواصل','الوصول للتواصل','البيئة السمعية','اللغة','التنقل','الوصول للمعلومات','احتياجات الأسرة','القرب الآمن','استعادة النشاط','العودة للحاضر','الأشخاص الداعمون','خطوات السلامة'
 ]);
@@ -67,6 +78,10 @@ export function getAssessmentMonitor(slug: string) {
 
 export function getSourceInstrument(slug: string) {
   return sourceInstruments.find((row) => row.slug === slug) ?? null;
+}
+
+export function getSourceInstrumentStatusLabel(status: string) {
+  return sourceStatusLabels[status] ?? 'حالة الحقوق أو النسخة تحتاج مراجعة موثقة قبل أي تفعيل تفاعلي';
 }
 
 function questionsForAxis(axis: string): string[] {
