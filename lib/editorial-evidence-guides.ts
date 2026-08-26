@@ -12,7 +12,7 @@ const h=(text:string,level=2)=>({type:'heading',level,text});
 const p=(text:string)=>({type:'paragraph',text});
 const list=(items:string[])=>({type:'list',items});
 const callout=(title:string,text:string,tone:'info'|'warning'|'success'='info')=>({type:'callout',title,text,tone});
-const table=(caption:string,headers:string[],rows:string[][])=>({type:'table',caption,headers,rows});
+const table=(caption:string,headers:string[]|string,rows:string[][])=>({type:'table',caption,headers:Array.isArray(headers)?headers:[caption,headers],rows});
 const resource=(label:string,url:string,description:string)=>({type:'resource',label,url,description});
 const faq=(items:Array<{question:string;answer:string}>)=>({type:'faq',items});
 
