@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import PrintPageButton from '@/components/print-page-button';
-import { getAddictionAtlas, getAtlasComparison, getAtlasSource, RISK_KEYS, type RiskKey } from '@/lib/addiction-atlas';
+import { getAddictionAtlas, getAtlasComparison, getAtlasSource, RISK_KEYS } from '@/lib/addiction-atlas';
 import { breadcrumbJsonLd, buildSeoMetadata, SITE_URL } from '@/lib/seo';
 import styles from '@/components/addiction-atlas.module.css';
 
@@ -22,11 +22,6 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   if (!result) return buildSeoMetadata({ title: 'المقارنة غير موجودة', path: `/addiction/compare/${slug}/`, index: false, follow: true });
   const { comparison, a, b, atlas } = result;
   return buildSeoMetadata({ title: comparison.title_ar, description: `${comparison.intent_ar}. مقارنة متعددة المحاور بين ${a.display_name_ar} و${b.display_name_ar} تشمل المخاطر، الضرر من تعرض واحد، الانسحاب، العلاج والمصادر.`, path: `/addiction/compare/${comparison.slug}/`, index: true, follow: true, type: 'article', keywords: [a.display_name_ar, a.display_name_en, b.display_name_ar, b.display_name_en, comparison.title_ar], relatedTerms: [...(a.search_aliases_ar ?? []), ...(b.search_aliases_ar ?? [])], searchIntents: [comparison.title_ar, `الفرق بين ${a.display_name_ar} و${b.display_name_ar}`], modifiedTime: atlas.updatedOn });
-}
-
-function axisSynthesis(key: RiskKey, a: Awaited<ReturnType<typeof getAtlasComparison>> extends infer T ? never : never) {
-  void key; void a;
-  return '';
 }
 
 export default async function ComparisonPage({ params }: { params: Params }) {
