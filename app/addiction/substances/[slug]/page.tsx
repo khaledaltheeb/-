@@ -1,0 +1,53 @@
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
+import SiteHeader from '@/components/site-header';
+import SiteFooter from '@/components/site-footer';
+import { getAddictionAtlas, getAtlasSubstance, RISK_KEYS } from '@/lib/addiction-atlas';
+import { breadcrumbJsonLd, buildSeoMetadata, SITE_URL } from '@/lib/seo';
+import styles from '@/components/addiction-atlas.module.css';
+
+type Params = Promise<{ slug: string }>;
+export const revalidate = 86400;
+
+export async function generateStaticParams() {
+  const atlas = await getAddictionAtlas();
+  return atlas.substances.map((item) => ({ slug: item.slug }));
+}
+
+export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
+  const { slug } = await params;
+  const item = await getAtlasSubstance(slug);
+  if (!item) return buildSeoMetadata({ title: 'المادة غير موجودة', path: `/addiction/substances/${slug}/`, index: false, follow: true });
+  const aliases = [...(item.english_name_ar_transliteration ?? []), ...(item.search_aliases_ar ?? []), ...(item.search_aliases_en ?? []), ...(item.common_misspellings_ar ?? [])];
+  return buildSeoMetadata({
+    title: `${item.display_name_ar} (${item.display_name_en}): الأضرار والانسحاب والعلاج`,
+    description: item.summary_ar,
+    path: `/addiction/substances/${item.slug}/`, index: true, follow: true, type: 'article',
+    keywords: [item.display_name_ar, item.display_name_en, item.class_ar, item.common_name_ar || '', item.common_name_en || ''].filter(Boolean),
+    relatedTerms: aliases,
+    searchIntents: [`ما هو ${item.display_name_ar}`, `أضرار ${item.display_name_ar}`, `انسحاب ${item.display_name_ar}`, `علاج إدمان ${item.display_name_ar}`],
+    modifiedTime: (await getAddictionAtlas()).updatedOn,
+  });
+}
+
+export default async function SubstancePage({ params }: { params: Params }) {
+  const { slug } = await params;
+  const [item, atlas] = await Promise.all([getAtlasSubstance(slug), getAddictionAtlas()]);
+  if (!item) notFound();
+  const url = `${SITE_URL}/addiction/substances/${item.slug}/`;
+  const schemas = [
+    breadcrumbJsonLd([{ name: 'الرئيسية', path: '/' }, { name: 'الإدمان والتعافي', path: '/addiction/' }, { name: 'أطلس المواد', path: '/addiction/substances/' }, { name: item.display_name_ar, path: `/addiction/substances/${item.slug}/` }]),
+    { '@context': 'https://schema.org', '@type': 'MedicalWebPage', '@id': `${url}#medical-page`, url, name: `${item.display_name_ar} — ${item.display_name_en}`, headline: `${item.display_name_ar} (${item.display_name_en})`, description: item.summary_ar, inLanguage: 'ar', dateModified: atlas.updatedOn, lastReviewed: atlas.updatedOn, reviewedBy: { '@id': `${SITE_URL}/#organization` }, publisher: { '@id': `${SITE_URL}/#organization` }, about: { '@type': 'Thing', name: item.display_name_en, alternateName: [item.display_name_ar, item.common_name_ar, item.common_name_en].filter(Boolean) }, citation: item.source_urls },
+  ];
+  return <><SiteHeader /><main className={styles.shell}>
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schemas).replace(/</g, '\\u003c') }} />
+    <nav className="breadcrumbs" aria-label="مسار الصفحة"><Link href="/">الرئيسية</Link><span>/</span><Link href="/addiction/">الإدمان والتعافي</Link><span>/</span><Link href="/addiction/substances/">أطلس المواد</Link><span>/</span><span aria-current="page">{item.display_name_ar}</span></nav>
+    <header className={styles.hero}><span className={styles.eyebrow}>تمت المراجعة من قبل فريق روافد · قوة الدليل {item.evidence_grade}</span><h1>{item.display_name_ar} <small dir="ltr">({item.display_name_en})</small></h1><p>{item.summary_ar}</p><div className={styles.actions}><Link href="/addiction/substances/">كل المواد</Link><Link href="/addiction/compare/">المقارنات</Link><Link href="/addiction/methodology/">المنهجية</Link>{item.related_condition ? <Link href={item.related_condition}>المسار العلاجي المرتبط</Link> : null}</div></header>
+    <aside className={styles.notice}><strong>السلامة أولًا</strong><p>{item.emergency_response_ar}</p></aside>
+    <section className={styles.section}><h2>بطاقة تعريف علمية</h2><div className={styles.detailGrid}><article className={styles.card}><h3>التصنيف</h3><p>{item.class_ar} <span dir="ltr">({item.class_en})</span></p>{item.scientific_name ? <p><strong>الاسم العلمي:</strong> <span dir="ltr">{item.scientific_name}</span></p> : null}{item.medical_use_ar ? <><h3>الاستخدام الطبي</h3><p>{item.medical_use_ar}</p></> : null}</article><article className={styles.card}><h3>الآلية</h3><p>{item.mechanism_ar}</p>{item.forms_ar?.length ? <><h3>أشكال قد توجد فيها المادة</h3><ul>{item.forms_ar.map((value) => <li key={value}>{value}</li>)}</ul></> : null}</article></div></section>
+    <section className={styles.section}><h2>محاور الخطر الثمانية</h2><div className={styles.riskGrid}>{RISK_KEYS.map((key) => <article className={styles.riskCard} key={key}><strong><span>{atlas.methodology.risk_dimensions[key].label_ar}</span><span>{item.risk[key] == null ? 'غير محسوم' : `${item.risk[key]}/5`}</span></strong><p>{atlas.methodology.risk_dimensions[key].definition_ar}</p></article>)}</div><p>الدرجة ترتيبية داخل المحور وليست احتمالًا شخصيًا ولا يجوز جمع المحاور في «درجة خطر كلية».</p></section>
+    <section className={styles.section}><div className={styles.grid}><article className={styles.card}><h2>التأثيرات الحادة</h2><ul>{item.acute_effects_ar.map((value) => <li key={value}>{value}</li>)}</ul></article><article className={styles.card}><h2>الأضرار مع الاستخدام المتكرر</h2><ul>{item.long_term_harms_ar.map((value) => <li key={value}>{value}</li>)}</ul></article><article className={styles.card}><h2>هل يمكن أن يحدث ضرر من تعرض واحد؟</h2><p>{item.single_exposure_harm_ar}</p></article><article className={styles.card}><h2>الانسحاب</h2><p>{item.withdrawal_ar}</p></article><article className={styles.card}><h2>العلاج والرعاية</h2><p>{item.treatment_ar}</p></article><article className={styles.card}><h2>متى تكون الحالة طارئة؟</h2><p>{item.emergency_response_ar}</p></article></div></section>
+    <section className={styles.section}><h2>المصادر المباشرة</h2><ol className={styles.sources}>{item.source_urls.map((source) => <li key={source}><a href={source} target="_blank" rel="noopener noreferrer">{source}</a></li>)}</ol><p>قوة الدليل: <strong>{item.evidence_grade} — {atlas.methodology.evidence_grades[item.evidence_grade].label_ar}</strong>. {atlas.methodology.evidence_grades[item.evidence_grade].definition_ar}</p></section>
+  </main><SiteFooter /></>;
+}
