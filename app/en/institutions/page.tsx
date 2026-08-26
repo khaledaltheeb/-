@@ -59,7 +59,7 @@ export default function EnglishInstitutionsPage() {
       </section>
 
       <section className={`${styles.shell} ${styles.section}`}>
-        <div className={styles.sectionHeader}><p className={styles.kicker}>Capabilities</p><h2>Evidence-first institutional support</h2><p>We prefer a small verified contribution over a broad partnership pitch. The generic engine can remain open source while organization-specific terminology profiles and authorized content remain under the institution's own governance.</p></div>
+        <div className={styles.sectionHeader}><p className={styles.kicker}>Capabilities</p><h2>Evidence-first institutional support</h2><p>We prefer a small verified contribution over a broad partnership pitch. The generic engine can remain open source while organization-specific terminology profiles and authorized content remain under the institution&apos;s own governance.</p></div>
         <div className={styles.grid}>{offers.map(([title, description, href]) => <article className={styles.card} key={title}><h3>{title}</h3><p>{description}</p><Link className={styles.cardLink} href={href}>Technical details →</Link></article>)}</div>
       </section>
 
