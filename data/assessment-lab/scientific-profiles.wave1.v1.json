@@ -50,7 +50,7 @@
       "intended_use": "كشف أنماط الحمل الدراسي القابل للتعديل وتنظيم الأولويات وطلب الدعم.",
       "not_for": ["تشخيص الاحتراق الأكاديمي", "تحديد القدرة الأكاديمية"],
       "reference_period": "الأسبوع الماضي",
-      "domains": ["تراكم المتطلبات", "وضوح الخطة", "الاستراحة", "الأثر على الأداء"],
+      "domains": ["تراكم المتطلبات", "وضوح الخطة", "الاستراحة", "الأثر على النوم"],
       "interpretation_boundary": "الحمل الدراسي يعتمد على السياق والموارد والدعم، لذلك لا يفسر العدد الخام للمهام وحده بوصفه مشكلة.",
       "scientific_references": [
         {"title":"Academic stress and student wellbeing systematic review","url":"https://pubmed.ncbi.nlm.nih.gov/?term=academic+stress+students+systematic+review"},
@@ -64,7 +64,7 @@
       "intended_use": "تحديد مواطن تسرب العمل إلى وقت الاستعادة وما إذا كانت الحدود الحالية قابلة للتنفيذ.",
       "not_for": ["تشخيص الاحتراق المهني", "تقييم أداء الموظف"],
       "reference_period": "الأسبوع الماضي",
-      "domains": ["امتداد العمل", "الانفصال النفسي", "حماية وقت الاستعادة", "قابلية الحدود للتنفيذ"],
+      "domains": ["وقت التوقف", "التوفر خارج الدوام", "الاستعادة", "حماية الوقت الشخصي"],
       "interpretation_boundary": "الحدود المفضلة تختلف بين الأفراد والثقافات والوظائف؛ التفسير يركز على التوافق والضيق والاستعادة لا على نموذج واحد مثالي.",
       "scientific_references": [
         {"title":"Psychological detachment from work and recovery meta-analysis","url":"https://pubmed.ncbi.nlm.nih.gov/?term=psychological+detachment+work+recovery+meta-analysis"},
@@ -78,7 +78,7 @@
       "intended_use": "تنظيم النقاش حول التدرج والتعديلات والدعم قبل العودة.",
       "not_for": ["إقرار اللياقة الطبية", "تحديد صلاحية قانونية أو مهنية للعمل", "استبدال طب العمل"],
       "reference_period": "الأسبوعان الماضيان مع توقعات الأسبوعين القادمين",
-      "domains": ["الطاقة والقدرة", "الثقة بالعودة", "مطابقة المتطلبات", "الدعم والتدرج"],
+      "domains": ["الطاقة الوظيفية", "تحمل المهام", "الدعم المتوقع", "التدرج في العودة"],
       "interpretation_boundary": "الاستعداد الذاتي لا يساوي الجاهزية الطبية أو المهنية الرسمية، ويجب فصل التقييم الذاتي عن قرارات الطبيب أو جهة العمل.",
       "scientific_references": [
         {"title":"Return-to-work self-efficacy systematic review","url":"https://pubmed.ncbi.nlm.nih.gov/?term=return+to+work+self-efficacy+systematic+review"},
@@ -92,7 +92,7 @@
       "intended_use": "تحديد أنماط الحمل الرقمي القابلة للتعديل في البيئة والسلوك.",
       "not_for": ["تشخيص إدمان", "الحكم على مقدار شاشة ثابت باعتباره ضارًا للجميع"],
       "reference_period": "الأسبوع الماضي",
-      "domains": ["كثافة المعلومات", "التنقل والمقاطعات", "الانفصال", "الأثر الوظيفي"],
+      "domains": ["تعدد المنصات", "تشتت الانتباه", "الإرهاق البصري", "وقت الانفصال"],
       "interpretation_boundary": "الضرر لا يُستنتج من زمن الاستخدام وحده؛ السياق ونوع النشاط والإجبارية والأثر الوظيفي أكثر أهمية.",
       "scientific_references": [
         {"title":"Technostress and information overload literature","url":"https://pubmed.ncbi.nlm.nih.gov/?term=technostress+information+overload+systematic+review"},
@@ -106,7 +106,7 @@
       "intended_use": "التمييز بين استخدام عادي واستخدام يرتبط بضيق أو تعطيل وظيفي أو فقدان سيطرة.",
       "not_for": ["تشخيص إدمان وسائل التواصل", "اعتبار كل استخدام مرتفع الوقت مرضيًا"],
       "reference_period": "الأسبوع الماضي",
-      "domains": ["المزاج بعد الاستخدام", "المقارنة الاجتماعية", "التحكم بالاستخدام", "الأثر على النوم والعلاقات"],
+      "domains": ["المقارنة الاجتماعية", "المزاج بعد الاستخدام", "الوقت المستهلك", "التحكم بالاختيار"],
       "interpretation_boundary": "الروابط بين الاستخدام والصحة النفسية تعتمد على نوع الاستخدام والفرد والسياق، وكثير من الأدلة رصدية ولا تثبت السببية.",
       "scientific_references": [
         {"title":"Problematic social media use and mental health systematic review","url":"https://pubmed.ncbi.nlm.nih.gov/?term=problematic+social+media+use+mental+health+systematic+review"},
@@ -120,7 +120,7 @@
       "intended_use": "تحديد الحلقة السلوكية بين القلق والبحث المتكرر عن المعلومات والضيق اللاحق.",
       "not_for": ["تشخيص اضطراب قلق", "منع متابعة الأخبار المهمة"],
       "reference_period": "الأسبوع الماضي",
-      "domains": ["الاندفاع للأخبار", "صعوبة التوقف", "الأثر الانفعالي", "الأثر على النوم والانتباه"],
+      "domains": ["الاندفاع للمتابعة", "صعوبة التوقف", "القلق بعد التصفح", "العودة للنشاط"],
       "interpretation_boundary": "مصطلح doomscrolling حديث نسبيًا وأدلته أقل نضجًا من بناءات نفسية أقدم؛ لذلك تبقى الأداة وصفية/سلوكية.",
       "scientific_references": [
         {"title":"Doomscrolling and mental health literature","url":"https://pubmed.ncbi.nlm.nih.gov/?term=doomscrolling+mental+health"},
@@ -134,7 +134,7 @@
       "intended_use": "رصد الأثر الوظيفي وفقدان السيطرة والأولويات المتزاحمة.",
       "not_for": ["تشخيص gaming disorder", "وصم اللعب الترفيهي"],
       "reference_period": "الأسبوعان الماضيان",
-      "domains": ["التحكم", "الأولوية", "الاستمرار رغم الأثر", "توازن الوظائف اليومية"],
+      "domains": ["مدة اللعب", "التحكم بالتوقف", "تأثير اللعب على الالتزامات", "التعافي بعد اللعب"],
       "interpretation_boundary": "التشخيص الرسمي لاضطراب الألعاب يتطلب نمطًا مستمرًا واختلالًا وظيفيًا ملحوظًا وتقييمًا مناسبًا؛ هذه الأداة لا تطبق معايير تشخيصية.",
       "scientific_references": [
         {"title":"WHO Gaming disorder","url":"https://www.who.int/standards/classifications/frequently-asked-questions/gaming-disorder"},
@@ -148,7 +148,7 @@
       "intended_use": "تحديد سلوكيات رقمية مسائية قابلة للتجربة والتعديل ومراقبة علاقتها بالنوم.",
       "not_for": ["تشخيص الأرق", "إرجاع كل مشكلات النوم للشاشات"],
       "reference_period": "الأسبوع الماضي",
-      "domains": ["تأخير وقت النوم", "الاستثارة بالمحتوى", "المقاطعات الليلية", "روتين الإغلاق"],
+      "domains": ["الشاشة قبل النوم", "تأخير موعد النوم", "الاستيقاظ للشاشة", "النشاط الصباحي"],
       "interpretation_boundary": "العلاقة بين الشاشات والنوم متعددة الآليات وتشمل إزاحة الوقت والاستثارة والمحتوى والإشعارات إضافة إلى الضوء؛ الأداة لا تحدد السببية.",
       "scientific_references": [
         {"title":"Portable screen media use and sleep systematic review/meta-analysis","url":"https://pubmed.ncbi.nlm.nih.gov/?term=screen+media+sleep+systematic+review+meta-analysis"},
@@ -162,7 +162,7 @@
       "intended_use": "تحديد أنواع الإشعارات والسياقات التي ترفع تكلفة المقاطعة وتجربة سياسات إشعار أكثر ملاءمة.",
       "not_for": ["تشخيص اضطراب انتباه", "اعتبار كل إشعار ضارًا"],
       "reference_period": "الأسبوع الماضي",
-      "domains": ["المقاطعة", "توقع الإشعار", "استعادة التركيز", "ضغط الاستجابة"],
+      "domains": ["تواتر المقاطعة", "الاستجابة التلقائية", "التوتر عند التنبيه", "إدارة الإشعارات"],
       "interpretation_boundary": "تكلفة المقاطعة تتغير بحسب المهمة والسياق ونوع الإشعار؛ الأداة تراقب النمط الشخصي ولا تقيس قدرة انتباه سريرية.",
       "scientific_references": [
         {"title":"Attentional cost of cell phone notifications","url":"https://pubmed.ncbi.nlm.nih.gov/?term=cell+phone+notifications+attention"},
