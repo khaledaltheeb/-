@@ -4,10 +4,13 @@ const standard = JSON.parse(fs.readFileSync('data/assessment-lab/scientific-qual
 const monitors = JSON.parse(fs.readFileSync('data/assessment-lab/monitors.v1.json', 'utf8'));
 const banksBase = JSON.parse(fs.readFileSync('data/assessment-lab/question-banks.v1.json', 'utf8'));
 const banksCore = JSON.parse(fs.readFileSync('data/assessment-lab/question-banks.core-1-12.v1.json', 'utf8'));
+const banksCore13to24 = JSON.parse(fs.readFileSync('data/assessment-lab/question-banks.core-13-24.v1.json', 'utf8'));
 const profilesWave1 = JSON.parse(fs.readFileSync('data/assessment-lab/scientific-profiles.wave1.v1.json', 'utf8')).profiles;
 const profilesCoreList = JSON.parse(fs.readFileSync('data/assessment-lab/scientific-profiles.core-1-12.v1.json', 'utf8')).profiles;
+const profilesCore13to24List = JSON.parse(fs.readFileSync('data/assessment-lab/scientific-profiles.core-13-24.v1.json', 'utf8')).profiles;
 const profilesCore = Object.fromEntries(profilesCoreList.map((row) => [row.slug, row]));
-const banks = { ...banksBase, ...banksCore };
+const profilesCore13to24 = Object.fromEntries(profilesCore13to24List.map((row) => [row.slug, row]));
+const banks = { ...banksBase, ...banksCore, ...banksCore13to24 };
 const runner = fs.readFileSync('components/assessment-monitor-runner.tsx', 'utf8');
 const catalog = fs.readFileSync('lib/assessment-lab/catalog.ts', 'utf8');
 const fail = (message) => { console.error(`ASSESSMENT SCIENTIFIC QUALITY FAILED: ${message}`); process.exitCode = 1; };
@@ -20,6 +23,7 @@ if (standard.publication_rules?.validated_label_requires_empirical_validation !=
 if (standard.publication_rules?.mixed_response_semantics_forbidden !== true) fail('mixed response semantics must remain forbidden');
 if (!catalog.includes("AssessmentResponseKind = 'frequency' | 'degree' | 'yes-no'")) fail('catalog must expose explicit response semantics');
 if (!catalog.includes('question-banks.core-1-12.v1.json')) fail('core reviewed question bank must be loaded before generic fallback');
+if (!catalog.includes('question-banks.core-13-24.v1.json')) fail('tools 13-24 reviewed question bank must be loaded before generic fallback');
 if (!runner.includes("frequency: ['أبدًا', 'نادرًا', 'أحيانًا', 'غالبًا', 'دائمًا تقريبًا']")) fail('frequency response scale missing');
 if (!runner.includes("degree: ['إطلاقًا', 'بدرجة بسيطة', 'بدرجة متوسطة', 'بدرجة كبيرة', 'بدرجة كبيرة جدًا']")) fail('degree response scale missing');
 if (!runner.includes("'yes-no': ['لا', 'إلى حد ما', 'نعم']")) fail('yes/no response scale missing');
@@ -40,28 +44,39 @@ for (const [slug, questions] of Object.entries(banks)) {
   }
 }
 
-const coreSlugs = ['mood-daily','sleep-quality','stress-load','caregiver-strain','parenting-stress','family-communication','relationship-safety','breakup-recovery','grief-adjustment','trauma-recovery','emotional-regulation','self-compassion'];
-if (Object.keys(banksCore).length !== coreSlugs.length) fail(`expected ${coreSlugs.length} tailored core banks, found ${Object.keys(banksCore).length}`);
-if (profilesCoreList.length !== coreSlugs.length) fail(`expected ${coreSlugs.length} scientific core profiles, found ${profilesCoreList.length}`);
-for (const slug of coreSlugs) {
-  const monitor = monitors.find((row) => row.slug === slug);
-  const profile = profilesCore[slug];
-  if (!profile) { fail(`missing scientific core profile ${slug}`); continue; }
-  if (!banksCore[slug]) fail(`missing tailored core question bank ${slug}`);
-  if (!profile.construct || profile.construct.trim().length < 35) fail(`${slug} construct definition is too weak`);
-  if (!profile.intended_population || !profile.intended_use) fail(`${slug} intended population/use missing`);
-  if (!Array.isArray(profile.prohibited_uses) || profile.prohibited_uses.length < 3) fail(`${slug} prohibited uses incomplete`);
-  if (!profile.reference_period) fail(`${slug} reference period missing`);
-  if (JSON.stringify(profile.domains) !== JSON.stringify(monitor.axes)) fail(`${slug} scientific domains drift from published axes`);
-  if (!profile.item_rationale || profile.item_rationale.trim().length < 45) fail(`${slug} item rationale is too weak`);
-  if (!profile.interpretation_boundary || profile.interpretation_boundary.trim().length < 45) fail(`${slug} interpretation boundary is too weak`);
-  if (!profile.safety || profile.safety.trim().length < 35) fail(`${slug} safety guidance is too weak`);
-  if (!Array.isArray(profile.references) || profile.references.length < 2 || profile.references.some((ref) => !ref.url?.startsWith('https://'))) fail(`${slug} requires at least two traceable scientific references`);
-  if (profile.validation_stage === 'validated') fail(`${slug} cannot be marked validated without empirical psychometric evidence`);
+function validateProfileSet(slugs, profiles, bankSet, label) {
+  if (Object.keys(bankSet).length !== slugs.length) fail(`expected ${slugs.length} tailored ${label} banks, found ${Object.keys(bankSet).length}`);
+  if (Object.keys(profiles).length !== slugs.length) fail(`expected ${slugs.length} scientific ${label} profiles, found ${Object.keys(profiles).length}`);
+  for (const slug of slugs) {
+    const monitor = monitors.find((row) => row.slug === slug);
+    const profile = profiles[slug];
+    if (!profile) { fail(`missing scientific ${label} profile ${slug}`); continue; }
+    if (!bankSet[slug]) fail(`missing tailored ${label} question bank ${slug}`);
+    const construct = profile.construct ?? profile.construct_definition;
+    if (!construct || construct.trim().length < 35) fail(`${slug} construct definition is too weak`);
+    if (!profile.intended_population || !profile.intended_use) fail(`${slug} intended population/use missing`);
+    const prohibited = profile.prohibited_uses ?? profile.not_for;
+    if (!Array.isArray(prohibited) || prohibited.length < 3) fail(`${slug} prohibited uses incomplete`);
+    if (!profile.reference_period) fail(`${slug} reference period missing`);
+    const domains = profile.domains ?? profile.domain_map;
+    if (JSON.stringify(domains) !== JSON.stringify(monitor.axes)) fail(`${slug} scientific domains drift from published axes`);
+    if (!profile.item_rationale || profile.item_rationale.trim().length < 45) fail(`${slug} item rationale is too weak`);
+    if (!profile.interpretation_boundary || profile.interpretation_boundary.trim().length < 45) fail(`${slug} interpretation boundary is too weak`);
+    if (!profile.safety || profile.safety.trim().length < 35) fail(`${slug} safety guidance is too weak`);
+    const refs = profile.references ?? profile.scientific_references;
+    if (!Array.isArray(refs) || refs.length < 2 || refs.some((ref) => !ref.url?.startsWith('https://'))) fail(`${slug} requires at least two traceable scientific references`);
+    if (profile.validation_stage === 'validated') fail(`${slug} cannot be marked validated without empirical psychometric evidence`);
+  }
 }
+
+const coreSlugs = ['mood-daily','sleep-quality','stress-load','caregiver-strain','parenting-stress','family-communication','relationship-safety','breakup-recovery','grief-adjustment','trauma-recovery','emotional-regulation','self-compassion'];
+validateProfileSet(coreSlugs, profilesCore, banksCore, 'core-1-12');
+
+const core13to24Slugs = ['loneliness','social-support','burnout-risk','daily-function','sensory-overload','executive-function','attention-daily','school-wellbeing','postpartum-support','recovery-safety','autism-family-load','adhd-family-support'];
+validateProfileSet(core13to24Slugs, profilesCore13to24, banksCore13to24, 'core-13-24');
 
 for (const [slug, profile] of Object.entries(profilesWave1)) {
   if (profile.validation_stage === 'validated') fail(`${slug} cannot be marked validated without empirical psychometric evidence`);
 }
 
-if (!process.exitCode) console.log(`Assessment scientific quality gate passed: ${Object.keys(banks).length} custom-reviewed banks, including ${coreSlugs.length} rebuilt core tools with scientific dossiers; validated labels remain forbidden without empirical evidence.`);
+if (!process.exitCode) console.log(`Assessment scientific quality gate passed: ${Object.keys(banks).length} custom-reviewed banks, including ${coreSlugs.length + core13to24Slugs.length} scientifically rebuilt core tools; validated labels remain forbidden without empirical evidence.`);

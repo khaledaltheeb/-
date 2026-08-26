@@ -2,6 +2,7 @@ import monitorData from '@/data/assessment-lab/monitors.v1.json';
 import instrumentData from '@/data/assessment-lab/instruments.v1.json';
 import questionBankData from '@/data/assessment-lab/question-banks.v1.json';
 import coreQuestionBankData from '@/data/assessment-lab/question-banks.core-1-12.v1.json';
+import coreQuestionBankData13to24 from '@/data/assessment-lab/question-banks.core-13-24.v1.json';
 
 export type AssessmentMonitor = {
   slug: string;
@@ -35,6 +36,7 @@ export const sourceInstruments = instrumentData as SourceInstrument[];
 const questionBanks = {
   ...(questionBankData as Record<string, RawAssessmentQuestion[]>),
   ...(coreQuestionBankData as Record<string, RawAssessmentQuestion[]>),
+  ...(coreQuestionBankData13to24 as Record<string, RawAssessmentQuestion[]>),
 };
 export const assessmentSlugs = [...assessmentMonitors.map((row) => row.slug), ...sourceInstruments.map((row) => row.slug)];
 export const assessmentCategories = [...new Set(assessmentMonitors.map((row) => row.category))];
