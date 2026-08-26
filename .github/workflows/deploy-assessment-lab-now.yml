@@ -79,12 +79,12 @@ jobs:
           if [ "$ready" -ne 1 ]; then cat /tmp/rawafid-assessment-release.log >&2 || true; exit 1; fi
           for path in assessment-lab assessment-lab/anger-escalation assessment-lab/performance-anxiety assessment-lab/phq-9-plus; do
             html="$(curl -fsS "http://127.0.0.1:3000/${path}")"
-            printf '%s' "$html" | grep -qi '<html'
-            if printf '%s' "$html" | grep -qi 'noindex'; then echo "Unexpected noindex on /${path}" >&2; exit 1; fi
+            grep -qi '<html' <<< "$html"
+            if grep -qi 'noindex' <<< "$html"; then echo "Unexpected noindex on /${path}" >&2; exit 1; fi
           done
           static_sitemap="$(curl -fsS http://127.0.0.1:3000/sitemaps/static.xml)"
-          printf '%s' "$static_sitemap" | grep -q '/assessment-lab/anger-escalation'
-          printf '%s' "$static_sitemap" | grep -q '/assessment-lab/performance-anxiety'
+          grep -q '/assessment-lab/anger-escalation' <<< "$static_sitemap"
+          grep -q '/assessment-lab/performance-anxiety' <<< "$static_sitemap"
 
       - name: Build Cloudflare Worker
         env:
@@ -106,14 +106,14 @@ jobs:
           base='https://healthrenewal.org'
           stamp="${GITHUB_SHA}"
           robots="$(curl -fsS --retry 10 --retry-delay 3 --retry-all-errors "${base}/robots.txt?deploy=${stamp}")"
-          printf '%s' "$robots" | grep -q "Sitemap: ${base}/sitemap.xml"
+          grep -q "Sitemap: ${base}/sitemap.xml" <<< "$robots"
           for slug in anger-escalation performance-anxiety; do
             html="$(curl -fsS --retry 10 --retry-delay 3 --retry-all-errors "${base}/assessment-lab/${slug}?deploy=${stamp}")"
-            printf '%s' "$html" | grep -q "rel=\"canonical\" href=\"${base}/assessment-lab/${slug}/\""
-            if printf '%s' "$html" | grep -qi 'noindex'; then echo "Live /assessment-lab/${slug} is noindex" >&2; exit 1; fi
+            grep -q "rel=\"canonical\" href=\"${base}/assessment-lab/${slug}/\"" <<< "$html"
+            if grep -qi 'noindex' <<< "$html"; then echo "Live /assessment-lab/${slug} is noindex" >&2; exit 1; fi
           done
           hub="$(curl -fsS --retry 10 --retry-delay 3 --retry-all-errors "${base}/assessment-lab?deploy=${stamp}")"
-          if printf '%s' "$hub" | grep -qi 'noindex'; then echo 'Live Assessment Lab hub is noindex' >&2; exit 1; fi
+          if grep -qi 'noindex' <<< "$hub"; then echo 'Live Assessment Lab hub is noindex' >&2; exit 1; fi
           static_sitemap="$(curl -fsS --retry 10 --retry-delay 3 --retry-all-errors "${base}/sitemaps/static.xml?deploy=${stamp}")"
-          printf '%s' "$static_sitemap" | grep -q '/assessment-lab/anger-escalation'
-          printf '%s' "$static_sitemap" | grep -q '/assessment-lab/performance-anxiety'
+          grep -q '/assessment-lab/anger-escalation' <<< "$static_sitemap"
+          grep -q '/assessment-lab/performance-anxiety' <<< "$static_sitemap"
