@@ -7,8 +7,32 @@ const PAGE_SIZE = 5000;
 const QUICK_INFO_PAGE_SIZE = 5000;
 const ENCYCLOPEDIA_PAGE_SIZE = 5000;
 
+const ATLAS_OWNED_CANONICALS = [
+  '/addiction/substances/',
+  '/addiction/compare/',
+  '/addiction/interactions/',
+  '/addiction/prevalence/',
+  '/addiction/mortality/',
+  '/addiction/methodology/',
+] as const;
+
 function inFilter(values: string[]) {
   return `(${values.join(',')})`;
+}
+
+function applyDedicatedSitemapExclusions<T extends {
+  not: (column: string, operator: string, value: string) => T;
+  neq: (column: string, value: string) => T;
+}>(query: T): T {
+  let owned = query
+    .not('slug', 'like', 'quick-info-%')
+    .not('canonical_url', 'like', '/daily-tools/%')
+    .not('canonical_url', 'like', '/addiction/substances/%')
+    .not('canonical_url', 'like', '/addiction/compare/%');
+  for (const canonical of ATLAS_OWNED_CANONICALS) {
+    owned = owned.neq('canonical_url', canonical);
+  }
+  return owned;
 }
 
 export async function GET() {
@@ -29,14 +53,17 @@ export async function GET() {
     encyclopediaQuery = encyclopediaQuery.not('slug', 'in', inFilter(releasedSlugs));
   }
 
+  let contentQuery = supabase
+    .from('content')
+    .select('id', { count: 'exact', head: true })
+    .eq('status', 'published')
+    .neq('content_type', 'condition')
+    .lte('published_at', now)
+    .eq('robots_index', true);
+  contentQuery = applyDedicatedSitemapExclusions(contentQuery);
+
   const [contentResult, quickInfoResult, encyclopediaResult] = await Promise.all([
-    supabase
-      .from('content')
-      .select('id', { count: 'exact', head: true })
-      .eq('status', 'published')
-      .neq('content_type', 'condition')
-      .lte('published_at', now)
-      .eq('robots_index', true),
+    contentQuery,
     supabase
       .from('content')
       .select('id', { count: 'exact', head: true })
