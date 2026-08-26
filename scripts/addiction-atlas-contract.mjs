@@ -12,7 +12,7 @@ function assert(condition, message) { if (!condition) throw new Error(`addiction
 async function json(file) { return JSON.parse(await readFile(path.join(ROOT, file), 'utf8')); }
 function filename(value) { return value.split('/').filter(Boolean).pop(); }
 
-const [manifest, methodology, comparisonFile, interactions, epidemiology, mortality, sourceRegistry] = await Promise.all([
+const [manifest, methodology, comparisonFile, interactions, epidemiology, mortality, sourceRegistry, riskEvidenceV4, riskEvidenceV5] = await Promise.all([
   json('substance-waves.json'),
   json('methodology-v1.json'),
   json('comparison-intents-v2.json'),
@@ -20,6 +20,8 @@ const [manifest, methodology, comparisonFile, interactions, epidemiology, mortal
   json('epidemiology-v1.json'),
   json('mortality-v1.json'),
   json('source-registry-v1.json'),
+  json('risk-evidence-v4.json'),
+  json('risk-evidence-v5.json'),
 ]);
 
 assert(Array.isArray(manifest.waves) && manifest.waves.length === 5, `expected 5 waves, got ${manifest.waves?.length}`);
@@ -72,6 +74,27 @@ for (const source of sourceRegistry.sources || []) {
   assert(new URL(source.url).protocol === 'https:', `${source.id}: source URL must be https`);
 }
 
+const axisEvidence = [...(riskEvidenceV4.records || []), ...(riskEvidenceV5.records || [])];
+const evidenceSlugs = new Set();
+for (const record of axisEvidence) {
+  assert(record.substance_slug && slugs.has(record.substance_slug), `axis evidence references unknown substance ${record.substance_slug}`);
+  assert(!evidenceSlugs.has(record.substance_slug), `duplicate axis evidence for ${record.substance_slug}`); evidenceSlugs.add(record.substance_slug);
+  const substance = substances.find((item) => item.slug === record.substance_slug);
+  for (const key of RISK_KEYS) {
+    const evidence = record.dimensions?.[key];
+    assert(evidence, `${record.substance_slug}: missing axis evidence ${key}`);
+    assert(EVIDENCE.has(evidence.evidence_grade), `${record.substance_slug}/${key}: invalid evidence grade`);
+    assert(evidence.score === null || (Number.isInteger(evidence.score) && evidence.score >= 1 && evidence.score <= 5), `${record.substance_slug}/${key}: invalid evidence score`);
+    assert(evidence.score === substance.risk[key], `${record.substance_slug}/${key}: evidence score must equal published risk score`);
+    assert(evidence.evidence_grade === 'U' ? evidence.score === null : true, `${record.substance_slug}/${key}: U evidence must stay null`);
+    assert(evidence.context_ar && evidence.rationale_ar, `${record.substance_slug}/${key}: context and rationale required`);
+    assert(Array.isArray(evidence.source_ids) && evidence.source_ids.length, `${record.substance_slug}/${key}: source ids required`);
+    for (const sourceId of evidence.source_ids) assert(sourceIds.has(sourceId), `${record.substance_slug}/${key}: unknown source ${sourceId}`);
+  }
+}
+assert(axisEvidence.length === 18, `expected 18 axis-evidence substances, got ${axisEvidence.length}`);
+assert(axisEvidence.length * RISK_KEYS.length === 144, 'expected 144 axis-evidence cells');
+
 function validateStatistic(record, kind) {
   assert(record.id && record.definition_ar, `${kind}: missing id/definition`);
   assert(Number.isFinite(record.value) && record.value >= 0, `${record.id}: invalid value`);
@@ -84,4 +107,4 @@ for (const record of mortality.records || []) validateStatistic(record, 'mortali
 assert((epidemiology.records || []).length >= 7, 'epidemiology regression');
 assert((mortality.records || []).length >= 6, 'mortality regression');
 
-console.log(`addiction-atlas-contract: PASS | local immutable snapshot | ${substances.length} substances | ${comparisons.length} comparisons | ${(interactions.records || []).length} interactions | ${RISK_KEYS.length} risk dimensions | ${(epidemiology.records || []).length} epidemiology | ${(mortality.records || []).length} mortality | source ${SOURCE_COMMIT.slice(0, 12)}`);
+console.log(`addiction-atlas-contract: PASS | local immutable snapshot | ${substances.length} substances | ${comparisons.length} comparisons | ${(interactions.records || []).length} interactions | ${axisEvidence.length} axis-evidence substances / ${axisEvidence.length * RISK_KEYS.length} cells | ${RISK_KEYS.length} risk dimensions | ${(epidemiology.records || []).length} epidemiology | ${(mortality.records || []).length} mortality | source ${SOURCE_COMMIT.slice(0, 12)}`);
