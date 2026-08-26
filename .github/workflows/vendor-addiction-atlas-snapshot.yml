@@ -32,7 +32,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if git diff --quiet -- data/addiction-atlas; then
+          if [ -z "$(git status --porcelain -- data/addiction-atlas)" ]; then
             echo 'Verified addiction atlas snapshot is already current.'
             exit 0
           fi
