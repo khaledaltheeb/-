@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
+// One-shot vendoring is intentionally pinned and hash-verified before local persistence.
 const SOURCE_REPO = 'khaledaltheeb/healthrenewal.org';
 const SOURCE_COMMIT = '00014486191027349cc083e824e545da186d74d1';
 const SOURCE_ROOT = `https://raw.githubusercontent.com/${SOURCE_REPO}/${SOURCE_COMMIT}/data/addiction-atlas`;
