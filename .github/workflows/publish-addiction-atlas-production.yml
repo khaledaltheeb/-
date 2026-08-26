@@ -1,0 +1,160 @@
+name: Publish Addiction Atlas Production
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-addiction-atlas-production.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: rawafid-production-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
+      NEXT_PUBLIC_SITE_URL: https://healthrenewal.org
+      NEXT_PUBLIC_ALLOW_INDEXING: 'true'
+      NEXT_PUBLIC_ENABLE_ANALYTICS: 'true'
+      NEXT_PUBLIC_GTM_ID: GTM-WBLQVBG4
+      NEXT_PUBLIC_GA_MEASUREMENT_ID: G-VLZMV8Y4JP
+      NEXT_PUBLIC_ENABLE_DIRECT_GA: 'true'
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: 1910e1ad3c793fd568ba1caafe34f964
+    steps:
+      - name: Require Cloudflare API token
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${CLOUDFLARE_API_TOKEN:-}"
+
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Validate application and addiction atlas contracts
+        run: |
+          npm run typecheck
+          npm run lint
+          npm run addiction-atlas:validate
+          node scripts/addiction-atlas-product-contract.mjs
+
+      - name: Verify Cloudflare credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx wrangler whoami
+
+      - name: Build production application
+        run: npm run build
+
+      - name: Verify local addiction atlas release candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          nohup npm run start -- --hostname 127.0.0.1 --port 3000 > /tmp/rawafid-addiction-atlas-release.log 2>&1 &
+          server_pid=$!
+          cleanup() { kill "$server_pid" 2>/dev/null || true; }
+          trap cleanup EXIT
+          ready=0
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:3000/addiction/ >/dev/null; then ready=1; break; fi
+            sleep 1
+          done
+          if [ "$ready" -ne 1 ]; then cat /tmp/rawafid-addiction-atlas-release.log >&2 || true; exit 1; fi
+
+          hub="$(curl -fsS http://127.0.0.1:3000/addiction/)"
+          sector="$(curl -fsS http://127.0.0.1:3000/sectors/addiction-recovery/)"
+          atlas="$(curl -fsS http://127.0.0.1:3000/addiction/substances/)"
+          compare_hub="$(curl -fsS http://127.0.0.1:3000/addiction/compare/)"
+          interactions="$(curl -fsS http://127.0.0.1:3000/addiction/interactions/)"
+          atlas_sitemap="$(curl -fsS http://127.0.0.1:3000/sitemaps/addiction-atlas.xml)"
+
+          grep -q 'موسوعة روافد التفاعلية' <<< "$hub"
+          grep -q '/addiction/substances/' <<< "$hub"
+          grep -q 'موسوعة الإدمان التفاعلية' <<< "$sector"
+          grep -q '/addiction/compare/' <<< "$sector"
+          grep -q 'Fentanyl' <<< "$atlas"
+          grep -q 'Heroin' <<< "$atlas"
+          grep -q 'قارن مادتين تفاعليًا' <<< "$compare_hub"
+          grep -q 'افحص تفاعلاً تمت مراجعته' <<< "$interactions"
+          grep -q '/addiction/substances/fentanyl/' <<< "$atlas_sitemap"
+          grep -q '/addiction/compare/fentanyl-vs-heroin/' <<< "$atlas_sitemap"
+
+          for html in "$hub" "$sector" "$atlas" "$compare_hub" "$interactions"; do
+            if grep -qi 'noindex' <<< "$html"; then echo 'Unexpected noindex in addiction atlas release candidate.' >&2; exit 1; fi
+          done
+
+      - name: Build Cloudflare Worker
+        run: npx opennextjs-cloudflare build --env production
+
+      - name: Deploy Cloudflare Worker
+        run: npx opennextjs-cloudflare deploy --env production
+
+      - name: Verify live addiction atlas product release
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://healthrenewal.org'
+          stamp="${GITHUB_SHA}-$(date +%s)"
+          cache_header='Cache-Control: no-cache, no-store, max-age=0'
+
+          fetch() { curl -fsSL --compressed --retry 10 --retry-delay 3 --retry-all-errors --max-time 30 -H "$cache_header" "$1"; }
+
+          hub="$(fetch "${base}/addiction/?release=${stamp}")"
+          sector="$(fetch "${base}/sectors/addiction-recovery/?release=${stamp}")"
+          atlas="$(fetch "${base}/addiction/substances/?release=${stamp}")"
+          compare_hub="$(fetch "${base}/addiction/compare/?release=${stamp}")"
+          interactions="$(fetch "${base}/addiction/interactions/?release=${stamp}")"
+          fentanyl="$(fetch "${base}/addiction/substances/fentanyl/?release=${stamp}")"
+          comparison="$(fetch "${base}/addiction/compare/fentanyl-vs-heroin/?release=${stamp}")"
+          methodology="$(fetch "${base}/addiction/methodology/?release=${stamp}")"
+          root_sitemap="$(fetch "${base}/sitemap.xml?release=${stamp}")"
+          atlas_sitemap="$(fetch "${base}/sitemaps/addiction-atlas.xml?release=${stamp}")"
+
+          grep -q 'موسوعة روافد التفاعلية' <<< "$hub"
+          grep -q '/addiction/substances/' <<< "$hub"
+          grep -q '/addiction/compare/' <<< "$hub"
+          grep -q '/addiction/interactions/' <<< "$hub"
+          grep -q 'موسوعة الإدمان التفاعلية' <<< "$sector"
+          grep -q '/addiction/substances/' <<< "$sector"
+          grep -q '/addiction/compare/' <<< "$sector"
+          grep -q 'Fentanyl' <<< "$atlas"
+          grep -q 'Heroin' <<< "$atlas"
+          grep -q '54' <<< "$atlas"
+          grep -q 'قارن مادتين تفاعليًا' <<< "$compare_hub"
+          grep -q 'فنتانيل' <<< "$compare_hub"
+          grep -q 'هيروين' <<< "$compare_hub"
+          grep -q 'افحص تفاعلاً تمت مراجعته' <<< "$interactions"
+          grep -q 'Fentanyl' <<< "$fentanyl"
+          grep -q 'MedicalWebPage' <<< "$fentanyl"
+          grep -q 'Fentanyl' <<< "$comparison"
+          grep -q 'Heroin' <<< "$comparison"
+          grep -q 'Article' <<< "$comparison"
+          grep -q 'قوة الدليل' <<< "$methodology"
+          grep -q '/sitemaps/addiction-atlas.xml' <<< "$root_sitemap"
+          grep -q '/addiction/substances/fentanyl/' <<< "$atlas_sitemap"
+          grep -q '/addiction/compare/fentanyl-vs-heroin/' <<< "$atlas_sitemap"
+          grep -q '/addiction/methodology/' <<< "$atlas_sitemap"
+          if grep -q 'workers.dev' <<< "$atlas_sitemap"; then echo 'Temporary-domain leakage in addiction atlas sitemap.' >&2; exit 1; fi
+
+          for html in "$hub" "$sector" "$atlas" "$compare_hub" "$interactions" "$fentanyl" "$comparison" "$methodology"; do
+            if grep -qi 'noindex' <<< "$html"; then echo 'Unexpected noindex on production addiction atlas route.' >&2; exit 1; fi
+          done
+
+          echo 'Addiction atlas production release verified successfully.'
