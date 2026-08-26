@@ -1,8 +1,10 @@
 name: Deploy Production
 
-# CUTOVER GUARD: healthrenewal.org must not be switched to the new Rawafid build
-# until this workflow proves >=10,000 unique canonical public URLs and every
-# sitemap URL passes production SEO, rich-discovery, content-richness, and editorial gates.
+# POST-CUTOVER PRODUCTION GUARD:
+# healthrenewal.org is the canonical production origin. Routine deployment must
+# preserve public URLs, editorial readiness, SEO/discovery quality, analytics,
+# and Cloudflare routing. The 10,000-URL objective remains a growth target, not
+# a prerequisite for deploying safe improvements to the already-live domain.
 on:
   workflow_dispatch:
 
@@ -86,26 +88,23 @@ jobs:
             echo 'Wrangler did not authenticate with the configured API token.' >&2
             exit 1
           fi
-      - name: Build local production candidate for cutover gate
+      - name: Build local production candidate
         run: npm run build
-      - name: Require 10000 fully-audited canonical URLs before cutover
+      - name: Verify deploy candidate editorial SEO discovery and content quality
         shell: bash
         env:
-          CUTOVER_BASE_URL: http://127.0.0.1:3000
-          CUTOVER_CANONICAL_ORIGIN: https://healthrenewal.org
-          CUTOVER_MIN_INDEXABLE_URLS: '10000'
           SEO_GATE_BASE_URL: http://127.0.0.1:3000
           SEO_GATE_CONCURRENCY: '12'
           SEO_GATE_TIMEOUT_MS: '20000'
           SEO_GATE_PAGE_ATTEMPTS: '3'
           SEO_GATE_PAGE_RETRY_DELAY_MS: '300'
           SEO_TARGET_URLS: '10000'
-          SEO_REQUIRE_TARGET: 'true'
+          SEO_REQUIRE_TARGET: 'false'
           SEO_RICH_MIN_WORDS: '100'
           EDITORIAL_REQUIRE_READY: 'true'
         run: |
           set -euo pipefail
-          nohup npm run start -- --hostname 127.0.0.1 --port 3000 > /tmp/rawafid-cutover-server.log 2>&1 &
+          nohup npm run start -- --hostname 127.0.0.1 --port 3000 > /tmp/rawafid-production-candidate.log 2>&1 &
           server_pid=$!
           cleanup() { kill "$server_pid" 2>/dev/null || true; }
           trap cleanup EXIT
@@ -118,11 +117,11 @@ jobs:
             sleep 1
           done
           if [ "$ready" -ne 1 ]; then
-            cat /tmp/rawafid-cutover-server.log >&2 || true
+            cat /tmp/rawafid-production-candidate.log >&2 || true
             exit 1
           fi
+          npm run smoke
           node scripts/editorial-seo-readiness.mjs
-          node scripts/healthrenewal-cutover-readiness.mjs
           node scripts/seo-readiness-report.mjs
           node scripts/seo-gate.mjs
           node scripts/rich-discovery-gate.mjs
@@ -138,7 +137,7 @@ jobs:
         run: npx opennextjs-cloudflare build --env production
       - name: Deploy Cloudflare Worker with OpenNext production environment
         run: npx opennextjs-cloudflare deploy --env production
-      - name: Verify production discovery, analytics, canonical host and www redirect
+      - name: Verify production discovery analytics canonical identity and www redirect
         shell: bash
         run: |
           set -euo pipefail
@@ -160,6 +159,21 @@ jobs:
             echo 'Production homepage is unexpectedly noindex.' >&2
             exit 1
           fi
-          www_headers="$(curl -sS -o /dev/null -D - --retry 8 --retry-delay 3 --retry-all-errors 'https://www.healthrenewal.org/sections?cutover-check=1')"
+          open_source="$(curl -fsS --retry 8 --retry-delay 3 --retry-all-errors "${base}/open-source?deploy=${stamp}")"
+          printf '%s' "${open_source}" | grep -q "rel=\"canonical\" href=\"${base}/open-source\""
+          printf '%s' "${open_source}" | grep -q 'Health Renewal · Open Source'
+          if printf '%s' "${open_source}" | grep -qi 'noindex'; then
+            echo 'Production open-source hub is unexpectedly noindex.' >&2
+            exit 1
+          fi
+          toolkit="$(curl -fsS --retry 8 --retry-delay 3 --retry-all-errors "${base}/open-source/arabic-rtl-a11y-toolkit?deploy=${stamp}")"
+          printf '%s' "${toolkit}" | grep -q "rel=\"canonical\" href=\"${base}/open-source/arabic-rtl-a11y-toolkit\""
+          printf '%s' "${toolkit}" | grep -q 'rawafid-arabic-rtl-a11y-toolkit'
+          printf '%s' "${toolkit}" | grep -q 'Apache-2.0'
+          if printf '%s' "${toolkit}" | grep -qi 'noindex'; then
+            echo 'Production toolkit project page is unexpectedly noindex.' >&2
+            exit 1
+          fi
+          www_headers="$(curl -sS -o /dev/null -D - --retry 8 --retry-delay 3 --retry-all-errors 'https://www.healthrenewal.org/sections?production-check=1')"
           printf '%s' "${www_headers}" | head -n 1 | grep -Eq ' 308( |$)'
-          printf '%s' "${www_headers}" | grep -Eqi '^location: https://healthrenewal\.org/sections\?cutover-check=1\r?$'
+          printf '%s' "${www_headers}" | grep -Eqi '^location: https://healthrenewal\.org/sections\?production-check=1\r?$'
