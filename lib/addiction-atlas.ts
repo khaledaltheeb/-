@@ -1,5 +1,17 @@
+import manifestJson from '@/data/addiction-atlas/substance-waves.json';
+import methodologyJson from '@/data/addiction-atlas/methodology-v1.json';
+import comparisonJson from '@/data/addiction-atlas/comparison-intents-v2.json';
+import substancesV1Json from '@/data/addiction-atlas/substances-v1.json';
+import substancesV2Json from '@/data/addiction-atlas/substances-v2.json';
+import substancesV3Json from '@/data/addiction-atlas/substances-v3.json';
+import substancesV4Json from '@/data/addiction-atlas/substances-v4.json';
+import substancesV5Json from '@/data/addiction-atlas/substances-v5.json';
+import epidemiologyJson from '@/data/addiction-atlas/epidemiology-v1.json';
+import mortalityJson from '@/data/addiction-atlas/mortality-v1.json';
+import sourceRegistryJson from '@/data/addiction-atlas/source-registry-v1.json';
+
 export const ADDICTION_ATLAS_SOURCE_COMMIT = '00014486191027349cc083e824e545da186d74d1';
-const SOURCE_ROOT = `https://raw.githubusercontent.com/khaledaltheeb/healthrenewal.org/${ADDICTION_ATLAS_SOURCE_COMMIT}/data/addiction-atlas`;
+export const ADDICTION_ATLAS_SNAPSHOT_KIND = 'vendored-immutable' as const;
 
 export const RISK_KEYS = [
   'acute_toxicity',
@@ -70,24 +82,71 @@ export type AtlasComparison = {
   indexable: boolean;
 };
 
+export type AtlasEpidemiologyRecord = {
+  id: string;
+  scope_type: string;
+  scope_slug?: string;
+  metric: string;
+  value: number;
+  qualifier?: string;
+  unit: string;
+  geography: string;
+  population?: string;
+  year: number;
+  estimate_type?: string;
+  definition_ar: string;
+  source_id: string;
+};
+
+export type AtlasMortalityRecord = {
+  id: string;
+  scope_type: string;
+  scope_slug?: string;
+  metric_type: string;
+  value: number;
+  qualifier?: string;
+  unit: string;
+  geography: string;
+  year: number;
+  status?: string;
+  definition_ar: string;
+  source_id: string;
+};
+
+export type AtlasSource = {
+  id: string;
+  organization: string;
+  title: string;
+  publication_year: number | null;
+  data_years: number[];
+  source_type: string;
+  geography: string;
+  url: string;
+  verified_on: string;
+  notes_ar: string;
+};
+
 type WaveManifest = { updated_on: string; waves: string[] };
 type SubstanceWave = { updated_on: string; substances: AtlasSubstance[] };
 type ComparisonFile = { updated_on: string; policy_ar: string; comparisons: AtlasComparison[] };
+type EpidemiologyFile = { updated_on: string; rules_ar: string[]; records: AtlasEpidemiologyRecord[] };
+type MortalityFile = { updated_on: string; rules_ar: string[]; records: AtlasMortalityRecord[] };
+type SourceRegistry = { updated_on: string; sources: AtlasSource[] };
 
 export type AddictionAtlas = {
   substances: AtlasSubstance[];
   methodology: AtlasMethodology;
   comparisons: AtlasComparison[];
   comparisonPolicy: string;
+  epidemiology: AtlasEpidemiologyRecord[];
+  epidemiologyRules: string[];
+  mortality: AtlasMortalityRecord[];
+  mortalityRules: string[];
+  sources: AtlasSource[];
   updatedOn: string;
   sourceCommit: string;
+  snapshotKind: typeof ADDICTION_ATLAS_SNAPSHOT_KIND;
 };
-
-async function fetchJson<T>(file: string): Promise<T> {
-  const response = await fetch(`${SOURCE_ROOT}/${file}`, { cache: 'force-cache' });
-  if (!response.ok) throw new Error(`addiction atlas source failed: ${file} (${response.status})`);
-  return response.json() as Promise<T>;
-}
 
 function fileName(path: string) {
   const value = path.split('/').filter(Boolean).pop();
@@ -108,13 +167,35 @@ function assertSubstance(record: AtlasSubstance) {
   }
 }
 
+function assertStatistic(record: AtlasEpidemiologyRecord | AtlasMortalityRecord, sourceIds: Set<string>) {
+  if (!record.id || !record.definition_ar || !record.geography || !Number.isInteger(record.year)) {
+    throw new Error(`invalid addiction atlas statistic: ${record.id || 'unknown'}`);
+  }
+  if (!Number.isFinite(record.value) || record.value < 0) throw new Error(`invalid addiction atlas statistic value: ${record.id}`);
+  if (!sourceIds.has(record.source_id)) throw new Error(`missing addiction atlas statistic source: ${record.source_id}`);
+}
+
 async function loadAtlas(): Promise<AddictionAtlas> {
-  const [manifest, methodology, comparisonFile] = await Promise.all([
-    fetchJson<WaveManifest>('substance-waves.json'),
-    fetchJson<AtlasMethodology>('methodology-v1.json'),
-    fetchJson<ComparisonFile>('comparison-intents-v2.json'),
-  ]);
-  const waves = await Promise.all(manifest.waves.map((path) => fetchJson<SubstanceWave>(fileName(path))));
+  const manifest = manifestJson as unknown as WaveManifest;
+  const methodology = methodologyJson as unknown as AtlasMethodology;
+  const comparisonFile = comparisonJson as unknown as ComparisonFile;
+  const epidemiologyFile = epidemiologyJson as unknown as EpidemiologyFile;
+  const mortalityFile = mortalityJson as unknown as MortalityFile;
+  const sourceRegistry = sourceRegistryJson as unknown as SourceRegistry;
+  const waveByFile: Record<string, SubstanceWave> = {
+    'substances-v1.json': substancesV1Json as unknown as SubstanceWave,
+    'substances-v2.json': substancesV2Json as unknown as SubstanceWave,
+    'substances-v3.json': substancesV3Json as unknown as SubstanceWave,
+    'substances-v4.json': substancesV4Json as unknown as SubstanceWave,
+    'substances-v5.json': substancesV5Json as unknown as SubstanceWave,
+  };
+  const waves = manifest.waves.map((path) => {
+    const name = fileName(path);
+    const wave = waveByFile[name];
+    if (!wave) throw new Error(`missing vendored addiction atlas wave: ${name}`);
+    return wave;
+  });
+
   const bySlug = new Map<string, AtlasSubstance>();
   for (const wave of waves) {
     for (const substance of wave.substances) {
@@ -125,20 +206,41 @@ async function loadAtlas(): Promise<AddictionAtlas> {
   }
   const substances = [...bySlug.values()];
   if (substances.length < 54) throw new Error(`addiction atlas regression: expected at least 54 substances, got ${substances.length}`);
+
   const comparisonSlugs = new Set<string>();
   for (const comparison of comparisonFile.comparisons) {
     if (comparisonSlugs.has(comparison.slug)) throw new Error(`duplicate addiction comparison slug: ${comparison.slug}`);
     comparisonSlugs.add(comparison.slug);
     if (!bySlug.has(comparison.a) || !bySlug.has(comparison.b)) throw new Error(`comparison references missing substance: ${comparison.slug}`);
   }
-  const dates = [manifest.updated_on, comparisonFile.updated_on, methodology.published_on, ...waves.map((wave) => wave.updated_on)].filter(Boolean).sort();
+
+  const sourceIds = new Set(sourceRegistry.sources.map((source) => source.id));
+  for (const record of epidemiologyFile.records) assertStatistic(record, sourceIds);
+  for (const record of mortalityFile.records) assertStatistic(record, sourceIds);
+
+  const dates = [
+    manifest.updated_on,
+    comparisonFile.updated_on,
+    methodology.published_on,
+    epidemiologyFile.updated_on,
+    mortalityFile.updated_on,
+    sourceRegistry.updated_on,
+    ...waves.map((wave) => wave.updated_on),
+  ].filter(Boolean).sort();
+
   return {
     substances,
     methodology,
     comparisons: comparisonFile.comparisons,
     comparisonPolicy: comparisonFile.policy_ar,
+    epidemiology: epidemiologyFile.records,
+    epidemiologyRules: epidemiologyFile.rules_ar,
+    mortality: mortalityFile.records,
+    mortalityRules: mortalityFile.rules_ar,
+    sources: sourceRegistry.sources,
     updatedOn: dates.at(-1) || methodology.published_on,
     sourceCommit: ADDICTION_ATLAS_SOURCE_COMMIT,
+    snapshotKind: ADDICTION_ATLAS_SNAPSHOT_KIND,
   };
 }
 
@@ -161,6 +263,10 @@ export async function getAtlasComparison(slug: string) {
   const b = atlas.substances.find((item) => item.slug === comparison.b) ?? null;
   if (!a || !b) return null;
   return { comparison, a, b, atlas };
+}
+
+export function getAtlasSource(atlas: AddictionAtlas, sourceId: string) {
+  return atlas.sources.find((source) => source.id === sourceId) ?? null;
 }
 
 export function atlasSearchText(item: AtlasSubstance) {
