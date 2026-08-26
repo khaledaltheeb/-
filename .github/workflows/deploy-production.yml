@@ -7,11 +7,6 @@ name: Deploy Production
 # target, not a prerequisite for deploying safe improvements to the live domain.
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-    paths:
-      - '.github/production-deploy-trigger'
 
 concurrency:
   group: rawafid-production-deploy
