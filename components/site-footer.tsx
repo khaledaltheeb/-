@@ -46,6 +46,7 @@ const groups = [
       { href: '/about', label: 'من نحن' },
       { href: '/medical-review-policy', label: 'المراجعة العلمية' },
       { href: '/editorial-policy', label: 'السياسة التحريرية' },
+      { href: '/open-source', label: 'المصدر المفتوح' },
       { href: '/privacy', label: 'الخصوصية' },
       { href: '/terms', label: 'شروط الاستخدام' },
       { href: '/disclaimer', label: 'إخلاء المسؤولية والتنبيهات' },
