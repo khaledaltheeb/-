@@ -1,0 +1,222 @@
+{
+  "schema_version": 1,
+  "wave": "core-13-24",
+  "profiles": [
+    {
+      "slug":"loneliness",
+      "construct":"مراقبة الخبرة الذاتية لنقص الاتصال الاجتماعي المُرضي أو الانتماء، مع التمييز بين عدد العلاقات وبين جودتها ومدى شعور الشخص بالقرب والأمان داخلها.",
+      "construct_confidence":"established-domain-original-monitor",
+      "intended_population":"المراهقون الأكبر سنًا والبالغون القادرون على الإبلاغ الذاتي.",
+      "intended_use":"تنظيم ملاحظة الانتماء والقرب وجودة التواصل والمبادرة، وربط الوحدة بسياق قابل للمناقشة أو التعديل.",
+      "prohibited_uses":["تشخيص اضطراب نفسي","استبدال مقاييس الوحدة المقننة","اعتبار العيش منفردًا دليلًا بحد ذاته على الوحدة"],
+      "reference_period":"الأسبوع الماضي",
+      "domains":["الانتماء","شخص آمن","جودة التواصل","المبادرة"],
+      "item_rationale":"تغطي البنود الفرق بين الإدراك الذاتي للانتماء، توافر علاقة آمنة، جودة الاتصال الفعلي، والسلوك المبادر؛ لأن الوحدة لا تختزل في عدد الأشخاص أو تواتر اللقاءات.",
+      "interpretation_boundary":"ارتفاع صعوبة محور ما لا يثبت سبب الوحدة ولا اضطرابًا محددًا. قد تتأثر الوحدة بالاكتئاب أو القلق الاجتماعي أو الانتقال أو الفقد أو البيئة، ويجب تفسيرها مع الوظيفة والسياق.",
+      "safety":"إذا رافقت الوحدة أفكار إيذاء النفس أو فقدان الأمل أو انقطاع شديد عن الوظائف الأساسية، يجب تجاوز الأداة وطلب تقييم مهني عاجل وفق مستوى الخطر.",
+      "references":[
+        {"title":"Loneliness and social isolation evidence base — PubMed search","url":"https://pubmed.ncbi.nlm.nih.gov/?term=loneliness+social+isolation+systematic+review+meta-analysis"},
+        {"title":"WHO social connection and health","url":"https://www.who.int/groups/commission-on-social-connection"}
+      ],
+      "validation_stage":"item-development"
+    },
+    {
+      "slug":"social-support",
+      "construct":"مراقبة الدعم الاجتماعي المدرك والمتاح عمليًا عبر الدعم العاطفي والعملي والمعلوماتي والقدرة على طلب المساعدة.",
+      "construct_confidence":"established-domain-original-monitor",
+      "intended_population":"المراهقون الأكبر سنًا والبالغون.",
+      "intended_use":"تحديد أنواع الدعم الموجودة والمفقودة ومن يمكن الرجوع إليه لكل احتياج بدل استخدام مفهوم دعم اجتماعي عام وغير محدد.",
+      "prohibited_uses":["قياس قيمة العلاقات أخلاقيًا","تشخيص العزلة أو الاكتئاب","نسخ أو إعادة تسمية مقاييس دعم اجتماعي مملوكة"],
+      "reference_period":"الأسبوع الماضي",
+      "domains":["دعم عاطفي","دعم عملي","معلومات","طلب المساعدة"],
+      "item_rationale":"تفصل البنود بين وظائف الدعم المختلفة لأن وجود شخص قريب لا يعني بالضرورة توافر المساعدة العملية أو المعلومات الموثوقة أو القدرة على طلبها.",
+      "interpretation_boundary":"لا توجد درجة كلية معيارية؛ يستخدم الملف لرسم خريطة موارد ونواقص. نوع الدعم المناسب يختلف بحسب المشكلة والثقافة والعلاقة.",
+      "safety":"عند وجود عنف أو سيطرة أو تهديد، لا يُفترض أن الشخص الأقرب هو مصدر دعم آمن، ويجب إعطاء أولوية لمسار أمان مستقل.",
+      "references":[
+        {"title":"Social support and health systematic review literature","url":"https://pubmed.ncbi.nlm.nih.gov/?term=social+support+health+systematic+review"},
+        {"title":"WHO social connection","url":"https://www.who.int/groups/commission-on-social-connection"}
+      ],
+      "validation_stage":"item-development"
+    },
+    {
+      "slug":"burnout-risk",
+      "construct":"مراقبة أنماط مرتبطة بالاحتراق في سياق العمل عبر الإنهاك، التبلد/الابتعاد النفسي، الشعور بالفاعلية، وحدود الاستعادة، دون الادعاء بأنها تطبيق لمقياس احتراق مملوك.",
+      "construct_confidence":"established-occupational-domain-clean-original-wording",
+      "intended_population":"العاملون البالغون.",
+      "intended_use":"تنظيم ملاحظة أثر ضغط العمل المزمن وما إذا كانت المشكلة تتعلق بالحمل أو الاستعادة أو الابتعاد النفسي أو الموارد.",
+      "prohibited_uses":["تشخيص اضطراب طبي أو نفسي","نسخ MBI أو أي مقياس احتراق مملوك","استخدام النتائج لتقييم الموظف أو اتخاذ قرار إداري ضده"],
+      "reference_period":"الأسبوع الماضي",
+      "domains":["الإنهاك","التبلد","الفاعلية","الحدود"],
+      "item_rationale":"تغطي البنود السمات المهنية الأساسية المرتبطة بالاحتراق وتضيف الحدود كعامل سياقي قابل للتعديل، مع إبقاء النتائج منفصلة بدل جمعها في درجة تشخيصية.",
+      "interpretation_boundary":"الاحتراق وفق ICD-11 ظاهرة مهنية وليس حالة طبية عامة، ولا ينبغي تعميمه على جميع مجالات الحياة. أعراض مشابهة قد تتطلب تقييمًا للاكتئاب أو اضطرابات النوم أو أسباب طبية.",
+      "safety":"إذا كان الإنهاك شديدًا مع تدهور سريع، أخطاء سلامة، أفكار إيذاء النفس، أو أعراض طبية مهمة، يلزم تقييم مناسب بدل الاكتفاء بالمتابعة.",
+      "references":[
+        {"title":"WHO ICD-11: Burn-out as an occupational phenomenon","url":"https://www.who.int/news/item/28-05-2019-burn-out-an-occupational-phenomenon-international-classification-of-diseases"},
+        {"title":"Burnout systematic review literature","url":"https://pubmed.ncbi.nlm.nih.gov/?term=occupational+burnout+systematic+review"}
+      ],
+      "validation_stage":"item-development"
+    },
+    {
+      "slug":"daily-function",
+      "construct":"مراقبة الأداء الوظيفي اليومي عبر العناية الذاتية والعمل أو الدراسة والعلاقات وإدارة المنزل، مع التركيز على التغير عن المستوى المعتاد والاحتياج للتعديل أو الدعم.",
+      "construct_confidence":"established-function-domain-original-monitor",
+      "intended_population":"البالغون والمراهقون الأكبر سنًا مع تكييف سياق العمل أو الدراسة.",
+      "intended_use":"رصد أثر أي أعراض أو ضغوط على مجالات الحياة الأساسية وتجهيز أمثلة عملية للتقييم.",
+      "prohibited_uses":["تحديد الإعاقة قانونيًا","قياس القدرة العقلية","استخدام درجة كلية للحكم على الاستقلال أو الأهلية"],
+      "reference_period":"الأسبوع الماضي",
+      "domains":["العناية الذاتية","العمل أو الدراسة","العلاقات","المنزل"],
+      "item_rationale":"اختيرت المجالات لتغطي أنشطة ومشاركة يومية مهمة بدل قياس الأعراض وحدها، لأن شدة العرض لا تساوي دائمًا مقدار تأثيره على الحياة.",
+      "interpretation_boundary":"الأداء يعتمد على البيئة والدعم والتكييفات والصحة الجسدية والنفسية؛ لذلك لا يُنسب الانخفاض تلقائيًا إلى سبب واحد.",
+      "safety":"تدهور مفاجئ أو فقد القدرة على الأكل أو الشرب أو العناية الأساسية أو الخروج من السرير أو أداء مهام السلامة يستدعي تقييمًا مهنيًا مناسبًا.",
+      "references":[
+        {"title":"WHO International Classification of Functioning, Disability and Health","url":"https://www.who.int/standards/classifications/international-classification-of-functioning-disability-and-health"},
+        {"title":"Functioning and disability measurement literature","url":"https://pubmed.ncbi.nlm.nih.gov/?term=functioning+activities+participation+measurement+systematic+review"}
+      ],
+      "validation_stage":"item-development"
+    },
+    {
+      "slug":"sensory-overload",
+      "construct":"مراقبة الأثر الوظيفي للمثيرات الحسية البيئية مثل الصوت والضوء والازدحام، ومدى فاعلية الاستراحة أو التعديل الحسي، دون افتراض تشخيص أو نمط عصبي محدد.",
+      "construct_confidence":"emerging-cross-diagnostic-domain",
+      "intended_population":"المراهقون الأكبر سنًا والبالغون، ويمكن استخدامه بمساعدة مقدم رعاية عند الحاجة.",
+      "intended_use":"تحديد المثيرات والسياقات والتعديلات التي تساعد الشخص على المشاركة بأقل ضيق ممكن.",
+      "prohibited_uses":["تشخيص التوحد أو ADHD أو اضطراب معالجة حسية","نسخ Sensory Profile أو غيره من المقاييس المملوكة","الاستنتاج أن كل تجنب حسي مرضي"],
+      "reference_period":"الأسبوع الماضي",
+      "domains":["الصوت","الضوء","الازدحام","الاستراحة الحسية"],
+      "item_rationale":"تركز البنود على أثر المثير في المشاركة والوظيفة وعلى استجابة البيئة والتعديل، لا على مجرد وجود تفضيل أو حساسية حسية.",
+      "interpretation_boundary":"الحساسية الحسية تظهر في سياقات وتشخيصات متعددة وكذلك لدى غير المشخصين، ولا يمكن لهذه الأداة تحديد السبب أو الاضطراب.",
+      "safety":"إذا كانت الاستجابة الحسية مرتبطة بألم أو دوار أو صداع شديد جديد أو فقد سمع/بصر أو أعراض عصبية، يلزم تقييم طبي مناسب.",
+      "references":[
+        {"title":"Sensory processing and autism systematic review literature","url":"https://pubmed.ncbi.nlm.nih.gov/?term=sensory+processing+autism+systematic+review"},
+        {"title":"Sensory reactivity transdiagnostic literature","url":"https://pubmed.ncbi.nlm.nih.gov/?term=sensory+reactivity+transdiagnostic+review"}
+      ],
+      "validation_stage":"item-development"
+    },
+    {
+      "slug":"executive-function",
+      "construct":"مراقبة مظاهر تنفيذية يومية مرتبطة ببدء المهمة والتنظيم وتذكر الخطوات والانتقال بين الأنشطة، بوصفها وظائف قابلة للتأثر بالسياق والنوم والضغط والصحة.",
+      "construct_confidence":"established-domain-original-monitor",
+      "intended_population":"المراهقون الأكبر سنًا والبالغون.",
+      "intended_use":"تحويل الشكوى العامة من سوء التنظيم إلى مواقف محددة يمكن تعديلها أو مناقشتها في تقييم مهني.",
+      "prohibited_uses":["تشخيص ADHD أو الخرف أو إصابة دماغية","قياس الذكاء","نسخ BRIEF أو أدوات وظائف تنفيذية مملوكة"],
+      "reference_period":"الأسبوع الماضي",
+      "domains":["بدء المهمة","التنظيم","تذكر الخطوات","الانتقال"],
+      "item_rationale":"تركز البنود على سلوكيات تنفيذية يومية قابلة للملاحظة وعلى الأدوات المساعدة، لأن الاختبارات المعملية والوظيفة الواقعية ليستا الشيء نفسه دائمًا.",
+      "interpretation_boundary":"الصعوبة التنفيذية غير نوعية وقد ترتبط بالنوم أو المزاج أو القلق أو ADHD أو أسباب عصبية أو بيئية؛ لا تسمح الأداة بتحديد السبب.",
+      "safety":"تغير تنفيذي حاد ومفاجئ مع ارتباك أو ضعف عصبي أو تغير وعي يحتاج تقييمًا طبيًا عاجلًا.",
+      "references":[
+        {"title":"Executive function and everyday functioning review literature","url":"https://pubmed.ncbi.nlm.nih.gov/?term=executive+function+everyday+functioning+systematic+review"},
+        {"title":"Executive functions conceptual review","url":"https://pubmed.ncbi.nlm.nih.gov/?term=executive+functions+review+Diamond"}
+      ],
+      "validation_stage":"item-development"
+    },
+    {
+      "slug":"attention-daily",
+      "construct":"مراقبة الانتباه في الحياة اليومية عبر الاستمرار في المهمة، مقاومة المشتتات، استعادة التركيز، وإنهاء المهمة، دون افتراض أن الصعوبة تعني ADHD.",
+      "construct_confidence":"established-domain-original-monitor",
+      "intended_population":"المراهقون الأكبر سنًا والبالغون.",
+      "intended_use":"تحديد نمط صعوبات الانتباه وما إذا كان يتغير حسب البيئة أو نوع المهمة أو المقاطعات.",
+      "prohibited_uses":["تشخيص ADHD","تحديد القدرة الدراسية أو المهنية","استخدامه كبديل لتقييم عصبي أو نفسي شامل"],
+      "reference_period":"الأسبوع الماضي",
+      "domains":["الاستمرار","المشتتات","استعادة التركيز","إنهاء المهمة"],
+      "item_rationale":"تفصل البنود بين الحفاظ على الانتباه والتحكم بالمشتتات والعودة بعد المقاطعة وإغلاق المهمة، لأن هذه العمليات قد تختلف داخل الشخص نفسه.",
+      "interpretation_boundary":"الانتباه يتأثر بالنوم والقلق والاكتئاب والألم والأدوية والبيئة والاهتمام بالمهمة، لذلك لا تعني الصعوبة سببًا تشخيصيًا محددًا.",
+      "safety":"ظهور اضطراب انتباه حاد مع ارتباك أو أعراض عصبية أو تسمم أو إصابة رأس يحتاج تقييمًا طبيًا بدل المتابعة الذاتية.",
+      "references":[
+        {"title":"Attention and ADHD review literature","url":"https://pubmed.ncbi.nlm.nih.gov/?term=sustained+attention+distractibility+ADHD+systematic+review"},
+        {"title":"Attention and everyday functioning literature","url":"https://pubmed.ncbi.nlm.nih.gov/?term=attention+everyday+functioning+review"}
+      ],
+      "validation_stage":"item-development"
+    },
+    {
+      "slug":"school-wellbeing",
+      "construct":"مراقبة العافية المدرسية عبر الأمان والانتماء والضغط الدراسي والقدرة على طلب المساعدة، مع النظر إلى المدرسة كبيئة اجتماعية وتعليمية لا كمصدر درجات فقط.",
+      "construct_confidence":"established-multidomain-school-wellbeing",
+      "intended_population":"طلاب المدارس، ويفضل استخدام صياغة مناسبة للعمر ومشاركة ولي الأمر أو المدرسة عند الحاجة.",
+      "intended_use":"كشف مجالات مدرسية تحتاج تدخلًا أو دعمًا مثل التنمر أو الاستبعاد أو الحمل الدراسي أو ضعف الوصول إلى بالغ داعم.",
+      "prohibited_uses":["تشخيص اضطراب نفسي لدى الطفل","تقييم المدرسة رسميًا من استجابة طفل واحد","استخدام الأداة لمعاقبة الطالب أو التشكيك في شكواه"],
+      "reference_period":"الأسبوع الدراسي الماضي",
+      "domains":["الأمان","الانتماء","الضغط الدراسي","طلب المساعدة"],
+      "item_rationale":"المحاور تجمع بين السلامة والعلاقات والمتطلبات والوصول للدعم لأن العافية المدرسية تتشكل من تفاعل هذه العوامل وليس من التحصيل وحده.",
+      "interpretation_boundary":"وجود مشكلة في محور واحد قد يكون مهمًا حتى دون ارتفاع باقي المحاور؛ خصوصًا التنمر أو التهديد. لا تُجمع البنود في نسبة عامة تخفي ذلك.",
+      "safety":"أي تهديد أو عنف أو تنمر شديد أو إيذاء ذاتي أو خوف يمنع الحضور يحتاج استجابة حماية وتقييمًا مناسبًا وليس مجرد إعادة الاختبار.",
+      "references":[
+        {"title":"School belonging and adolescent wellbeing systematic review literature","url":"https://pubmed.ncbi.nlm.nih.gov/?term=school+belonging+adolescent+wellbeing+systematic+review"},
+        {"title":"UNESCO school violence and bullying resources","url":"https://www.unesco.org/en/health-education/safe-learning-environments"}
+      ],
+      "validation_stage":"item-development"
+    },
+    {
+      "slug":"postpartum-support",
+      "construct":"مراقبة احتياجات الدعم في فترة ما بعد الولادة عبر المزاج والنوم والدعم والعناية بالنفس، مع بوابة سلامة واضحة للأعراض النفسية والطبية الخطرة.",
+      "construct_confidence":"established-postpartum-support-domain-original-monitor",
+      "intended_population":"الأمهات في فترة ما بعد الولادة؛ لا يحدد هذا الملف مدة تشخيصية ثابتة ويستخدم بحسب سياق الرعاية.",
+      "intended_use":"تنظيم الملاحظة وتحديد الاحتياجات التي تستحق مناقشة مع طبيب أو قابلة أو مختص نفسي أو شبكة الدعم.",
+      "prohibited_uses":["تشخيص اكتئاب ما بعد الولادة","استبدال فحص طبي أو نفسي بعد الولادة","تفسير كل تعب على أنه نفسي"],
+      "reference_period":"الأسبوع الماضي",
+      "domains":["المزاج","النوم","الدعم","العناية بالنفس"],
+      "item_rationale":"توازن البنود بين الأعراض والسياق والدعم والاحتياجات الأساسية لأن اضطرابات ما بعد الولادة لا يمكن فهمها من المزاج وحده.",
+      "interpretation_boundary":"قلة النوم المرتبطة برعاية الرضيع تختلف عن الأرق رغم وجود فرصة للنوم، كما أن أعراضًا جسدية بعد الولادة قد تحتاج تقييمًا طبيًا مستقلًا.",
+      "safety":"أفكار إيذاء النفس أو الطفل، ارتباك شديد، هلاوس، أو فقدان واضح للاتصال بالواقع بعد الولادة تستدعي تقييمًا طارئًا. كما أن النزف الشديد أو ألم الصدر أو ضيق النفس أو أعراض جسدية حادة تتطلب رعاية طبية عاجلة.",
+      "references":[
+        {"title":"WHO maternal mental health","url":"https://www.who.int/teams/mental-health-and-substance-use/promotion-prevention/maternal-mental-health"},
+        {"title":"Postpartum mental health systematic review literature","url":"https://pubmed.ncbi.nlm.nih.gov/?term=postpartum+mental+health+systematic+review"}
+      ],
+      "validation_stage":"item-development"
+    },
+    {
+      "slug":"recovery-safety",
+      "construct":"ورقة أمان للتعافي تنظّم المحفزات والإشارات المبكرة والأشخاص الداعمين وخطوات السلامة عند احتمال العودة لسلوك ضار أو انتكاس، دون تحويلها إلى درجة خطر رقمية.",
+      "construct_confidence":"safety-planning-framework-original-monitor",
+      "intended_population":"أشخاص في مسار تعافٍ من سلوك أو استخدام ضار ولديهم خطة علاج أو دعم، مع تكييف المحتوى للسياق.",
+      "intended_use":"إبقاء خطة الاستجابة المبكرة عملية وسهلة الوصول وتحديد متى يجب الانتقال مباشرة إلى دعم شخصي أو مهني أو طارئ.",
+      "prohibited_uses":["التنبؤ بالانتكاس بدقة","استبدال خطة علاج أو أمان سريرية","تأخير طلب المساعدة في خطر فوري"],
+      "reference_period":"الأسبوع الماضي والحالة الحالية",
+      "domains":["المحفزات","الإشارات المبكرة","الأشخاص الداعمون","خطوات السلامة"],
+      "item_rationale":"تنتقل البنود من عوامل الخطر المبكرة إلى الاكتشاف ثم الدعم ثم الإجراء، لأن خطة الأمان يجب أن تكون تشغيلية لا وصفية فقط.",
+      "interpretation_boundary":"لا توجد درجة إجمالية ولا عتبة؛ قد تكون علامة خطر واحدة كافية لتفعيل خطة المساعدة. معنى الانتكاس يختلف باختلاف السلوك والسياق العلاجي.",
+      "safety":"إذا كان هناك خطر وشيك على النفس أو الآخرين أو جرعة زائدة محتملة أو تسمم أو فقدان وعي أو أعراض انسحاب خطرة، يجب استخدام خدمات الطوارئ أو الرعاية الطبية فورًا.",
+      "references":[
+        {"title":"SAMHSA recovery resources","url":"https://www.samhsa.gov/find-support/recovery"},
+        {"title":"Relapse prevention systematic review literature","url":"https://pubmed.ncbi.nlm.nih.gov/?term=relapse+prevention+systematic+review"}
+      ],
+      "validation_stage":"item-development"
+    },
+    {
+      "slug":"autism-family-load",
+      "construct":"مراقبة احتياجات أسرة طفل متوحد عبر الحمل الحسي والتواصل والروتين وراحة الأسرة، مع نهج داعم لا يفترض أن خصائص التوحد سلوكيات يجب إزالتها.",
+      "construct_confidence":"evidence-informed-family-support-domain",
+      "intended_population":"أسر الأطفال والمراهقين المتوحدين مع مراعاة العمر واللغة ووسيلة التواصل ومستوى الدعم المطلوب.",
+      "intended_use":"تحديد تعديلات بيئية وتواصلية وروتينية واحتياجات دعم للأسرة يمكن مناقشتها مع الفريق المختص والمدرسة.",
+      "prohibited_uses":["تشخيص التوحد","قياس شدة التوحد","الحكم على قيمة الطفل أو الأسرة","نسخ أدوات حسية أو تواصلية مملوكة"],
+      "reference_period":"الأسبوع الماضي",
+      "domains":["الحمل الحسي","التواصل","الروتين","راحة الأسرة"],
+      "item_rationale":"تغطي البنود تفاعل الطفل مع البيئة وملاءمة التواصل وقابلية التنبؤ بالتغييرات وقدرة الأسرة على الاستمرار، بدل تحميل الطفل وحده مسؤولية الصعوبة.",
+      "interpretation_boundary":"الاحتياجات تختلف بشدة بين الأفراد ولا تسمح الأداة باستنتاج مستوى التوحد أو نوع التدخل العلاجي المطلوب دون تقييم فردي.",
+      "safety":"ألم غير مفسر أو تغير مفاجئ في السلوك أو فقد مهارات أو إيذاء ذاتي أو هروب أو خطر جسدي يحتاج تقييمًا متخصصًا مناسبًا بدل افتراض أنه سلوك مرتبط بالتوحد.",
+      "references":[
+        {"title":"NICE autism spectrum disorder in under 19s: support and management","url":"https://www.nice.org.uk/guidance/cg170"},
+        {"title":"WHO autism fact sheet","url":"https://www.who.int/news-room/fact-sheets/detail/autism-spectrum-disorders"}
+      ],
+      "validation_stage":"item-development"
+    },
+    {
+      "slug":"adhd-family-support",
+      "construct":"مراقبة مدى ملاءمة الدعم البيئي والتعليمي والانتقالي والتعزيزي لطفل لديه ADHD أو صعوبات انتباه/اندفاع معروفة، دون استخدام الورقة لتشخيص الحالة.",
+      "construct_confidence":"guideline-informed-family-support-domain",
+      "intended_population":"أسر الأطفال والمراهقين ذوي ADHD المشخص أو الذين يتلقون تقييمًا مهنيًا لصعوبات الانتباه والتنظيم.",
+      "intended_use":"تنظيم تعديلات عملية في البيئة وطريقة إعطاء التعليمات والانتقالات والتعزيز، ومشاركة الملاحظات مع المدرسة أو المختص.",
+      "prohibited_uses":["تشخيص ADHD","استبدال التقييم الطبي أو النفسي","استخدامها كبرنامج عقاب أو ضبط سلوكي قاسٍ"],
+      "reference_period":"الأسبوع الماضي",
+      "domains":["البيئة","التعليمات","الانتقال","التعزيز"],
+      "item_rationale":"تركز البنود على تعديل البيئة وسلوك البالغين والتوقعات القابلة للتنفيذ، لا على عدّ أخطاء الطفل فقط، بما يتسق مع مبدأ الدعم السياقي والتدخلات السلوكية الداعمة.",
+      "interpretation_boundary":"التحسن أو الصعوبة لا يحددان وجود ADHD أو شدته؛ النوم والقلق وصعوبات التعلم والبيئة وأسباب أخرى قد تؤثر في السلوك نفسه.",
+      "safety":"تغير سلوكي حاد، أفكار إيذاء، عدوان خطير، أعراض دوائية شديدة أو مخاوف طبية تحتاج تواصلًا مهنيًا مباشرًا وليس تعديل الخطة المنزلية فقط.",
+      "references":[
+        {"title":"NICE attention deficit hyperactivity disorder guideline NG87","url":"https://www.nice.org.uk/guidance/ng87"},
+        {"title":"ADHD parent training and environmental interventions review literature","url":"https://pubmed.ncbi.nlm.nih.gov/?term=ADHD+parent+training+environmental+interventions+systematic+review"}
+      ],
+      "validation_stage":"item-development"
+    }
+  ]
+}
