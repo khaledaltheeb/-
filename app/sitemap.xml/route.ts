@@ -25,8 +25,7 @@ function applyDedicatedSitemapExclusions<T extends {
   neq: (column: string, value: string) => T;
 }>(query: T): T {
   let owned = query
-    .not('slug', 'like', 'quick-info-%')
-    .not('canonical_url', 'like', '/daily-tools/%')
+    .not('canonical_url', 'like', '/quick-info/%')
     .not('canonical_url', 'like', '/addiction/substances/%')
     .not('canonical_url', 'like', '/addiction/compare/%');
   for (const canonical of ATLAS_OWNED_CANONICALS) {
@@ -67,7 +66,7 @@ export async function GET() {
     supabase
       .from('content')
       .select('id', { count: 'exact', head: true })
-      .like('slug', 'quick-info-%')
+      .like('canonical_url', '/quick-info/%')
       .eq('status', 'published')
       .lte('published_at', now)
       .eq('robots_index', true),
