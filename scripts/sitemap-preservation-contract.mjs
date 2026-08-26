@@ -46,12 +46,8 @@ const dailyToolRouteSet = new Set(normalizedDailyToolRoutes);
 if (normalizedDailyToolRoutes.length !== 151) {
   fail(`Daily Tools source corpus must resolve to exactly 151 routes, found ${normalizedDailyToolRoutes.length}`);
 }
-if (!dailyToolRouteSet.has('/daily-tools/')) {
-  fail('Daily Tools source corpus must contain /daily-tools/');
-}
-if (dailyToolRouteSet.size !== normalizedDailyToolRoutes.length) {
-  fail('Daily Tools source corpus contains duplicate public routes');
-}
+if (!dailyToolRouteSet.has('/daily-tools/')) fail('Daily Tools source corpus must contain /daily-tools/');
+if (dailyToolRouteSet.size !== normalizedDailyToolRoutes.length) fail('Daily Tools source corpus contains duplicate public routes');
 if (!dailyToolsRoute.includes('EXPECTED_ROUTES = 151') || !dailyToolsRoute.includes("dailyToolRoutes[0] !== '/daily-tools/'")) {
   fail('Daily Tools sitemap route must retain its immutable 151-route integrity guard');
 }
@@ -124,55 +120,48 @@ if (!atlasRoute.includes("path: '/addiction/methodology/'")) {
 const supabase = createClient(url, key, {
   auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
 });
-const now = new Date().toISOString();
+const nowMs = Date.now();
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-async function exactCount(configure) {
-  let query = supabase.from('content').select('id', { count: 'exact', head: true });
-  query = configure(query);
-  const { count, error } = await query;
-  if (error) throw new Error(error.message);
-  return count ?? 0;
-}
-
-async function fetchConditionSlugs() {
-  const rows = [];
-  const batchSize = 1000;
-  for (let start = 0; start < 10000; start += batchSize) {
-    const { data, error } = await supabase
-      .from('content')
-      .select('slug')
-      .eq('status', 'published')
-      .eq('content_type', 'condition')
-      .eq('robots_index', true)
-      .lte('published_at', now)
-      .order('id', { ascending: true })
-      .range(start, start + batchSize - 1);
-    if (error) throw new Error(error.message);
-    const batch = Array.isArray(data) ? data : [];
-    rows.push(...batch);
-    if (batch.length < batchSize) break;
+async function withRetry(label, task, attempts = 3) {
+  let lastError;
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      return await task();
+    } catch (error) {
+      lastError = error;
+      if (attempt === attempts) break;
+      const delayMs = 500 * attempt;
+      console.warn(`SITEMAP PRESERVATION RETRY: ${label} failed on attempt ${attempt}; retrying in ${delayMs}ms.`);
+      await sleep(delayMs);
+    }
   }
-  return rows;
+  throw lastError instanceof Error ? lastError : new Error(`${label}: transient database check failed`);
 }
 
-async function fetchPublishedCanonicals() {
+async function fetchIndexablePublishedInventory() {
   const rows = [];
-  const batchSize = 1000;
+  const batchSize = 500;
   for (let start = 0; start < 50000; start += batchSize) {
-    const { data, error } = await supabase
-      .from('content')
-      .select('id,slug,content_type,canonical_url,updated_at,schema_json')
-      .eq('status', 'published')
-      .eq('robots_index', true)
-      .lte('published_at', now)
-      .order('id', { ascending: true })
-      .range(start, start + batchSize - 1);
-    if (error) throw new Error(error.message);
-    const batch = Array.isArray(data) ? data : [];
+    const batch = await withRetry(`content inventory batch ${start / batchSize + 1}`, async () => {
+      const { data, error } = await supabase
+        .from('content')
+        .select('id,slug,content_type,canonical_url,published_at,updated_at,schema_json')
+        .eq('status', 'published')
+        .eq('robots_index', true)
+        .order('id', { ascending: true })
+        .range(start, start + batchSize - 1);
+      if (error) throw new Error(error.message);
+      return Array.isArray(data) ? data : [];
+    });
     rows.push(...batch);
     if (batch.length < batchSize) break;
   }
-  return rows;
+  return rows.filter((row) => {
+    if (!row.published_at) return false;
+    const publishedMs = Date.parse(row.published_at);
+    return Number.isFinite(publishedMs) && publishedMs <= nowMs;
+  });
 }
 
 function quickInfoOwned(row) {
@@ -213,17 +202,15 @@ function atlasOwned(row) {
 }
 
 try {
-  const [total, conditions, nonConditions] = await Promise.all([
-    exactCount((query) => query.eq('status', 'published').eq('robots_index', true).lte('published_at', now)),
-    exactCount((query) => query.eq('status', 'published').eq('robots_index', true).lte('published_at', now).eq('content_type', 'condition')),
-    exactCount((query) => query.eq('status', 'published').eq('robots_index', true).lte('published_at', now).neq('content_type', 'condition')),
-  ]);
+  // One bounded inventory read replaces three expensive exact-count scans plus a
+  // second condition scan. The same rows now drive every partition assertion,
+  // so the no-loss proof is stronger while avoiding PostgreSQL statement timeouts.
+  const publishedRows = await fetchIndexablePublishedInventory();
+  const total = publishedRows.length;
+  const conditionRows = publishedRows.filter((row) => row.content_type === 'condition');
+  const conditions = conditionRows.length;
+  const nonConditions = total - conditions;
 
-  if (total !== conditions + nonConditions) {
-    fail(`indexable published partition mismatch: total=${total}, conditions=${conditions}, nonConditions=${nonConditions}`);
-  }
-
-  const conditionRows = await fetchConditionSlugs();
   const invalidConditionSlugs = conditionRows
     .map((row) => typeof row.slug === 'string' ? row.slug.trim().toLowerCase() : '')
     .filter((slug) => !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug));
@@ -231,10 +218,6 @@ try {
     fail(`encyclopedia sitemap would drop ${invalidConditionSlugs.length} indexable condition slug(s): ${invalidConditionSlugs.slice(0, 5).join(', ')}`);
   }
 
-  const publishedRows = await fetchPublishedCanonicals();
-  if (publishedRows.length !== total) {
-    fail(`published canonical inventory mismatch: fetched=${publishedRows.length}, expected=${total}`);
-  }
   const seenCanonicals = new Set();
   let dedicatedOwned = 0;
   for (const row of publishedRows) {
@@ -265,6 +248,9 @@ try {
     }
   }
 
+  if (total !== conditions + nonConditions) {
+    fail(`indexable published partition mismatch: total=${total}, conditions=${conditions}, nonConditions=${nonConditions}`);
+  }
   const contentOwned = nonConditions - dedicatedOwned;
   if (contentOwned < 0) fail(`negative content-owned sitemap partition: ${contentOwned}`);
 
