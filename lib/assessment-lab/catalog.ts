@@ -18,10 +18,25 @@ export type SourceInstrument = {
   note: string;
 };
 
+export type AssessmentQuestion = {
+  axis: string;
+  text: string;
+};
+
 export const assessmentMonitors = monitorData as AssessmentMonitor[];
 export const sourceInstruments = instrumentData as SourceInstrument[];
 export const assessmentSlugs = [...assessmentMonitors.map((row) => row.slug), ...sourceInstruments.map((row) => row.slug)];
 export const assessmentCategories = [...new Set(assessmentMonitors.map((row) => row.category))];
+
+const protectiveAxes = new Set([
+  'الشعور بالسيطرة','الاستعادة','الدعم العملي','الراحة','الدعم','إصلاح الخلاف','وضوح الطلب','الاحترام','الحدود','حرية التعبير','الأمان','الروتين','استعادة الذات','الوظيفة اليومية','حمل الذكرى','العودة للحياة','التهدئة','تسمية الشعور','اختيار السلوك','لغة الذات','تقبل النقص','الرعاية','المرونة','الانتماء','شخص آمن','جودة التواصل','المبادرة','دعم عاطفي','معلومات','طلب المساعدة','الفاعلية','العناية الذاتية','العمل أو الدراسة','العلاقات','المنزل','الاستراحة الحسية','الأمان المدرسي','طلب المساعدة','التعزيز','التعاون المدرسي','فرص التواصل','تقليل الضغط','البدائل','التعاون العلاجي','الاستقلال','المهارات التكيفية','المشاركة','الصحة','التعلم','الحركة','التواصل','الوصول للتواصل','البيئة السمعية','اللغة','التنقل','الوصول للمعلومات','احتياجات الأسرة','القرب الآمن','استعادة النشاط','العودة للحاضر','الأشخاص الداعمون','خطوات السلامة'
+]);
+
+const behaviorAxes = new Set([
+  'بدء المهمة','التنظيم','تذكر الخطوات','الانتقال','الاستمرار','استعادة التركيز','إنهاء المهمة','النشاط النهاري','العناية بالنفس','وقت الاستعادة','إصلاح الخلاف','المبادرة','طلب المساعدة','التعليمات','التكييف','التعاون المدرسي','التعزيز','الاستقلال','المشاركة','التواصل','التنقل','الوصول للمعلومات','العودة للحاضر','استعادة النشاط'
+]);
+
+const safetyAxes = new Set(['الأمان','الأمان المدرسي','الأشخاص الداعمون','خطوات السلامة','المحفزات','الإشارات المبكرة','الحدود','حرية التعبير']);
 
 export function getAssessmentMonitor(slug: string) {
   return assessmentMonitors.find((row) => row.slug === slug) ?? null;
@@ -31,10 +46,48 @@ export function getSourceInstrument(slug: string) {
   return sourceInstruments.find((row) => row.slug === slug) ?? null;
 }
 
-export function buildMonitorQuestions(monitor: AssessmentMonitor) {
-  return monitor.axes.flatMap((axis) => [
-    { axis, text: `${axis}: كان هذا الجانب صعبًا أو أثر في يومي` },
-    { axis, text: `${axis}: احتجت إلى دعم إضافي في هذا الجانب` },
-    { axis, text: `${axis}: أريد متابعة تغير هذا الجانب` },
-  ]);
+function questionsForAxis(axis: string): string[] {
+  if (safetyAxes.has(axis)) {
+    return [
+      `خلال الأسبوع الماضي، إلى أي حد شعرت أن ${axis} كان واضحًا ومتوافرًا عندما احتجته؟`,
+      `هل وجدت موقفًا واحدًا على الأقل عرفت فيه ما الذي يحافظ على ${axis} أو ما الذي يهدده؟`,
+      `إلى أي حد استطعت الوصول إلى خطوة عملية أو شخص مناسب عندما احتجت إلى تعزيز ${axis}؟`,
+      `هل تغيّر مستوى ${axis} بسرعة أو بصورة جعلتك تؤجل نشاطًا مهمًا أو تتجنب موقفًا معتادًا؟`,
+    ];
+  }
+
+  if (protectiveAxes.has(axis) || behaviorAxes.has(axis)) {
+    return [
+      `خلال الأسبوع الماضي، إلى أي حد كان ${axis} متاحًا لك عندما احتجته؟`,
+      `إلى أي حد استطعت استخدام ${axis} بصورة ساعدتك على إكمال ما تريد فعله؟`,
+      `هل لاحظت سياقًا محددًا أصبح فيه ${axis} أسهل أو أصعب من المعتاد؟`,
+      `إلى أي حد احتجت إلى تعديل البيئة أو طلب مساعدة حتى يصبح ${axis} ممكنًا أو أكثر استقرارًا؟`,
+    ];
+  }
+
+  return [
+    `خلال الأسبوع الماضي، إلى أي حد كان ${axis} حاضرًا بصورة أثرت في يومك؟`,
+    `إلى أي حد غيّر ${axis} قدرتك على أداء مهمة أو الاستمرار في نشاط مهم؟`,
+    `هل استطعت تحديد موقف أو وقت أصبح فيه ${axis} أكثر وضوحًا أو شدة من المعتاد؟`,
+    `إلى أي حد احتجت إلى راحة أو تعديل أو دعم بسبب ما لاحظته في ${axis}؟`,
+  ];
+}
+
+export function buildMonitorQuestions(monitor: AssessmentMonitor): AssessmentQuestion[] {
+  return monitor.axes.flatMap((axis) => questionsForAxis(axis).map((text) => ({ axis, text })));
+}
+
+export function getMonitorReadingTime(monitor: AssessmentMonitor) {
+  return Math.max(4, Math.ceil(buildMonitorQuestions(monitor).length * 0.35));
+}
+
+export function getRelatedMonitors(monitor: AssessmentMonitor, limit = 4) {
+  const sameCategory = assessmentMonitors.filter((row) => row.slug !== monitor.slug && row.category === monitor.category);
+  const sharedAxes = assessmentMonitors
+    .filter((row) => row.slug !== monitor.slug && row.category !== monitor.category)
+    .map((row) => ({ row, overlap: row.axes.filter((axis) => monitor.axes.includes(axis)).length }))
+    .filter(({ overlap }) => overlap > 0)
+    .sort((a, b) => b.overlap - a.overlap)
+    .map(({ row }) => row);
+  return [...sameCategory, ...sharedAxes].slice(0, limit);
 }
