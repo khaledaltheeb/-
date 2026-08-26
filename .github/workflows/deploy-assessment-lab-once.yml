@@ -1,0 +1,103 @@
+name: Deploy Assessment Lab Once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/deploy-assessment-lab-once.yml'
+
+concurrency:
+  group: rawafid-production-deploy
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    if: startsWith(github.event.head_commit.message, 'deploy: assessment lab 49-60 production once')
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
+      NEXT_PUBLIC_SITE_URL: https://healthrenewal.org
+      NEXT_PUBLIC_ALLOW_INDEXING: 'true'
+      NEXT_PUBLIC_ENABLE_ANALYTICS: 'true'
+      NEXT_PUBLIC_GTM_ID: GTM-WBLQVBG4
+      NEXT_PUBLIC_GA_MEASUREMENT_ID: G-VLZMV8Y4JP
+      NEXT_PUBLIC_ENABLE_DIRECT_GA: 'true'
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: 1910e1ad3c793fd568ba1caafe34f964
+    steps:
+      - name: Require Cloudflare API token
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${CLOUDFLARE_API_TOKEN:-}"
+
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Type check
+        run: npm run typecheck
+      - name: Lint
+        run: npm run lint
+      - name: Architecture contracts
+        run: npm run architecture-check
+      - name: Public preservation
+        run: npm run public-preservation:validate
+      - name: Sitemap preservation
+        run: npm run sitemap-preservation:validate
+      - name: Static sitemap coverage
+        run: npm run static-sitemap:validate
+      - name: Assessment Lab contract
+        run: npm run assessment-lab:validate
+
+      - name: Build local production candidate
+        run: npm run build
+
+      - name: Build Cloudflare Worker
+        run: npx opennextjs-cloudflare build --env production
+      - name: Verify Cloudflare credentials
+        run: npx wrangler whoami
+      - name: Deploy Cloudflare Worker
+        run: npx opennextjs-cloudflare deploy --env production
+
+      - name: Verify live Assessment Lab publication
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://healthrenewal.org'
+          stamp="${GITHUB_SHA}"
+          robots="$(curl -fsS --retry 8 --retry-delay 3 --retry-all-errors "${base}/robots.txt?deploy=${stamp}")"
+          printf '%s' "$robots" | grep -q "Sitemap: ${base}/sitemap.xml"
+
+          hub="$(curl -fsS --retry 8 --retry-delay 3 --retry-all-errors "${base}/assessment-lab/?deploy=${stamp}")"
+          printf '%s' "$hub" | grep -q '60'
+          printf '%s' "$hub" | grep -q '70'
+          if printf '%s' "$hub" | grep -qi 'noindex'; then
+            echo 'Assessment Lab hub unexpectedly noindex.' >&2
+            exit 1
+          fi
+
+          anger="$(curl -fsS --retry 8 --retry-delay 3 --retry-all-errors "${base}/assessment-lab/anger-escalation/?deploy=${stamp}")"
+          printf '%s' "$anger" | grep -q 'تصاعد الغضب'
+          if printf '%s' "$anger" | grep -qi 'noindex'; then
+            echo 'anger-escalation unexpectedly noindex.' >&2
+            exit 1
+          fi
+
+          performance="$(curl -fsS --retry 8 --retry-delay 3 --retry-all-errors "${base}/assessment-lab/performance-anxiety/?deploy=${stamp}")"
+          printf '%s' "$performance" | grep -q 'قلق الأداء'
+          if printf '%s' "$performance" | grep -qi 'noindex'; then
+            echo 'performance-anxiety unexpectedly noindex.' >&2
+            exit 1
+          fi
