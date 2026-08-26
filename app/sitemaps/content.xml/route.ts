@@ -8,6 +8,15 @@ const PAGE_SIZE = 5000;
 const DB_BATCH_SIZE = 1000;
 const RELEASE = '2026-08-14T00:00:00.000Z';
 
+const ATLAS_OWNED_CANONICALS = [
+  '/addiction/substances/',
+  '/addiction/compare/',
+  '/addiction/interactions/',
+  '/addiction/prevalence/',
+  '/addiction/mortality/',
+  '/addiction/methodology/',
+] as const;
+
 type SitemapRow = {
   path: string;
   lastModified: string | null;
@@ -22,6 +31,21 @@ type ContentSitemapRecord = {
   canonical_url: string | null;
 };
 
+function applyDedicatedSitemapExclusions<T extends {
+  not: (column: string, operator: string, value: string) => T;
+  neq: (column: string, value: string) => T;
+}>(query: T): T {
+  let owned = query
+    .not('slug', 'like', 'quick-info-%')
+    .not('canonical_url', 'like', '/daily-tools/%')
+    .not('canonical_url', 'like', '/addiction/substances/%')
+    .not('canonical_url', 'like', '/addiction/compare/%');
+  for (const canonical of ATLAS_OWNED_CANONICALS) {
+    owned = owned.neq('canonical_url', canonical);
+  }
+  return owned;
+}
+
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const raw = Number(url.searchParams.get('page') ?? '0');
@@ -32,23 +56,23 @@ export async function GET(request: Request) {
   const now = new Date().toISOString();
   const data: ContentSitemapRecord[] = [];
 
-  // No-loss rule: every live, indexable database record that is not a condition belongs
-  // to this sitemap safety net. Dedicated maps such as quick-info may repeat the same
-  // canonical URL; overlap is preferable to silently dropping an indexable published page.
-  // Conditions remain in the encyclopedia sitemap, whose public route is canonicalized there.
-  // Pagination is intentionally ordered by the immutable row id rather than updated_at:
-  // content edits must change <lastmod> without moving URLs between sitemap pages while
-  // crawlers are fetching page=0, page=1, ... on a continuously updated 10k+ URL site.
+  // Canonical ownership is exclusive across child sitemaps. Quick Info, Daily Tools,
+  // and current Addiction Atlas routes are emitted by their dedicated sitemaps. CI
+  // verifies every excluded live DB route is actually represented there before deploy.
+  // All other live, indexable non-condition records remain in this no-loss safety net.
+  // Pagination is intentionally ordered by immutable row id; updated_at only feeds lastmod.
   for (let batchStart = pageStart; batchStart < pageEndExclusive; batchStart += DB_BATCH_SIZE) {
     const batchEnd = Math.min(batchStart + DB_BATCH_SIZE - 1, pageEndExclusive - 1);
     const requestedRows = batchEnd - batchStart + 1;
-    const { data: batch, error } = await supabase
+    let query = supabase
       .from('content')
       .select('id,slug,updated_at,canonical_url')
       .eq('status', 'published')
       .neq('content_type', 'condition')
       .lte('published_at', now)
-      .eq('robots_index', true)
+      .eq('robots_index', true);
+    query = applyDedicatedSitemapExclusions(query);
+    const { data: batch, error } = await query
       .order('id', { ascending: true })
       .range(batchStart, batchEnd);
 
