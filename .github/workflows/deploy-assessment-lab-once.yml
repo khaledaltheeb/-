@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   deploy:
-    if: startsWith(github.event.head_commit.message, 'deploy: assessment lab 49-60 production once')
+    if: "${{ startsWith(github.event.head_commit.message, 'deploy: assessment lab 49-60 production once') }}"
     runs-on: ubuntu-latest
     timeout-minutes: 90
     env:
