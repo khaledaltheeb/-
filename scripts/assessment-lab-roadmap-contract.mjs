@@ -48,8 +48,8 @@ if (roadmap.rules?.no_unvalidated_diagnostic_claims !== true) fail('no_unvalidat
 if (roadmap.rules?.answers_persisted !== false) fail('answers_persisted must remain false');
 if (roadmap.rules?.aggregate_score_default !== false) fail('aggregate_score_default must remain false');
 
-if (publication.published_routes !== 58) fail(`publication snapshot must declare 58 routes, found ${publication.published_routes}`);
-if (publication.published_rawafid_originals !== 48) fail(`publication snapshot must declare 48 Rawafid originals`);
+if (publication.published_routes !== 70) fail(`publication snapshot must declare 70 routes, found ${publication.published_routes}`);
+if (publication.published_rawafid_originals !== 60) fail(`publication snapshot must declare 60 Rawafid originals`);
 if (publication.published_source_rights !== 10) fail(`publication snapshot must declare 10 source-rights pages`);
 if (monitors.length !== publication.published_rawafid_originals) fail(`monitor data/publication snapshot mismatch`);
 if (instruments.length !== publication.published_source_rights) fail(`instrument data/publication snapshot mismatch`);
@@ -62,4 +62,4 @@ if (JSON.stringify([...publication.source_rights_slugs].sort()) !== JSON.stringi
 for (const slug of monitorSlugs) if (portfolioBySlug.get(slug) !== 'rawafid-original') fail(`published monitor ${slug} is not classified as rawafid-original in roadmap`);
 for (const slug of sourceSlugs) if (portfolioBySlug.get(slug) !== 'source-rights') fail(`published source route ${slug} is not classified as source-rights in roadmap`);
 
-if (!process.exitCode) console.log('Assessment roadmap contract passed: target portfolio remains 150 (90/30/20/10); authoritative publication state is 58 routes = 48 Rawafid originals + 10 source/rights pages.');
+if (!process.exitCode) console.log('Assessment roadmap contract passed: target portfolio remains 150 (90/30/20/10); authoritative publication state is 70 routes = 60 Rawafid originals + 10 source/rights pages.');
