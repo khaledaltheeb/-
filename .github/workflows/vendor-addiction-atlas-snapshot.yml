@@ -1,0 +1,43 @@
+name: Vendor Addiction Atlas Snapshot
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/vendor-addiction-atlas-snapshot.yml'
+      - 'scripts/vendor-addiction-atlas.mjs'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: rawafid-addiction-atlas-vendor
+  cancel-in-progress: false
+
+jobs:
+  vendor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Vendor immutable reviewed atlas snapshot
+        run: node scripts/vendor-addiction-atlas.mjs
+      - name: Commit exact verified snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- data/addiction-atlas; then
+            echo 'Verified addiction atlas snapshot is already current.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/addiction-atlas
+          git commit -m 'data(addiction-atlas): vendor reviewed immutable snapshot'
+          git push origin HEAD:main
