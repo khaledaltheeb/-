@@ -1,41 +1,14 @@
-import { ImageResponse } from 'next/og';
-
 export const CAPABILITY_OG_SIZE = { width: 1200, height: 675 } as const;
 const ARABIC_TEXT = /[\u0600-\u06ff]/;
+
+function escapeXml(value: string) {
+  return value.replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;' }[char] || char));
+}
 
 export function capabilityOgImage(title: string, kicker = 'Capability development') {
   const safeKicker = ARABIC_TEXT.test(kicker) ? 'Capability development · RAWAFID' : kicker;
   const candidate = ARABIC_TEXT.test(title) ? 'Capability development and inclusive support' : title;
   const safeTitle = candidate.length > 110 ? `${candidate.slice(0, 107).trim()}…` : candidate;
-  return new ImageResponse(
-    (
-      <div
-        style={{
-          width: '100%',
-          height: '100%',
-          display: 'flex',
-          position: 'relative',
-          overflow: 'hidden',
-          background: 'linear-gradient(135deg,#f5fffb 0%,#ffffff 48%,#fff6e9 100%)',
-          color: '#143b42',
-          fontFamily: 'Arial, sans-serif',
-        }}
-      >
-        <div style={{position:'absolute',width:470,height:470,borderRadius:999,left:-120,top:-150,background:'radial-gradient(circle,#6dd6c2 0%,#0f8f88 42%,#075e5d 72%,rgba(7,94,93,0) 73%)',opacity:.92}} />
-        <div style={{position:'absolute',width:310,height:310,borderRadius:999,left:115,bottom:-140,border:'38px solid rgba(231,172,60,.32)'}} />
-        <div style={{position:'absolute',width:190,height:190,borderRadius:999,right:-55,bottom:38,background:'rgba(141,123,216,.11)'}} />
-        <div style={{width:'100%',padding:'76px 82px',display:'flex',flexDirection:'column',justifyContent:'space-between',zIndex:2}}>
-          <div style={{display:'flex',flexDirection:'column',alignItems:'flex-start',width:820}}>
-            <div style={{display:'flex',padding:'10px 18px',borderRadius:999,background:'#e5f6f1',color:'#075e5d',fontSize:23,fontWeight:800}}>{safeKicker}</div>
-            <div style={{display:'flex',marginTop:30,fontSize:safeTitle.length>72?48:58,lineHeight:1.42,fontWeight:900,letterSpacing:-1,maxWidth:850}}>{safeTitle}</div>
-          </div>
-          <div style={{display:'flex',alignItems:'center',gap:16}}>
-            <div style={{width:54,height:54,borderRadius:18,display:'flex',alignItems:'center',justifyContent:'center',background:'linear-gradient(135deg,#0f8f88,#3ec7ad)',color:'#fff',fontWeight:900,fontSize:30}}>R</div>
-            <div style={{display:'flex',flexDirection:'column'}}><div style={{display:'flex',fontSize:25,fontWeight:900}}>RAWAFID</div><div style={{display:'flex',fontSize:17,color:'#657d82'}}>Wellbeing · Inclusion · Empowerment</div></div>
-          </div>
-        </div>
-      </div>
-    ),
-    CAPABILITY_OG_SIZE,
-  );
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675"><defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f5fffb"/><stop offset=".52" stop-color="#fff"/><stop offset="1" stop-color="#fff6e9"/></linearGradient></defs><rect width="1200" height="675" fill="url(#bg)"/><circle cx="70" cy="20" r="250" fill="#0f8f88" opacity=".9"/><circle cx="180" cy="650" r="135" fill="none" stroke="#e7ac3c" stroke-width="34" opacity=".32"/><rect x="80" y="80" width="420" height="54" rx="27" fill="#e5f6f1"/><text x="105" y="116" font-family="Arial,sans-serif" font-size="24" font-weight="700" fill="#075e5d">${escapeXml(safeKicker)}</text><text x="82" y="245" font-family="Arial,sans-serif" font-size="52" font-weight="800" fill="#143b42">${escapeXml(safeTitle.slice(0, 42))}</text><text x="82" y="315" font-family="Arial,sans-serif" font-size="52" font-weight="800" fill="#143b42">${escapeXml(safeTitle.slice(42, 84))}</text><text x="82" y="385" font-family="Arial,sans-serif" font-size="52" font-weight="800" fill="#143b42">${escapeXml(safeTitle.slice(84))}</text><rect x="82" y="545" width="58" height="58" rx="18" fill="#0f8f88"/><text x="101" y="586" font-family="Arial,sans-serif" font-size="34" font-weight="800" fill="#fff">R</text><text x="158" y="573" font-family="Arial,sans-serif" font-size="27" font-weight="800" fill="#143b42">RAWAFID</text><text x="158" y="603" font-family="Arial,sans-serif" font-size="17" fill="#657d82">Wellbeing · Inclusion · Empowerment</text></svg>`;
+  return new Response(svg, { headers: { 'Content-Type': 'image/svg+xml; charset=utf-8', 'Cache-Control': 'public, max-age=86400, stale-while-revalidate=604800' } });
 }
