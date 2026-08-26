@@ -24,7 +24,7 @@
     "live-preservation:validate": "npm run public-preservation:validate && npm run sitemap-preservation:validate && npm run static-sitemap:validate",
     "cognitive-lab:validate": "node scripts/cognitive-lab-contract.mjs",
     "guided-assessment:validate": "node scripts/guided-assessment-contract.mjs",
-    "assessment-lab:validate": "node scripts/assessment-lab-contract.mjs && node scripts/assessment-lab-roadmap-contract.mjs && node scripts/assessment-lab-scientific-quality-contract.mjs",
+    "assessment-lab:validate": "node scripts/assessment-lab-contract.mjs && node scripts/assessment-lab-roadmap-contract.mjs && node scripts/assessment-lab-scientific-quality-contract.mjs && node scripts/assessment-lab-scientific-profiles-contract.mjs",
     "daily-tools:validate": "node scripts/daily-tools-contract.mjs",
     "historical-parity:validate": "node scripts/historical-functional-parity-contract.mjs",
     "legacy-landings:validate": "node scripts/legacy-landing-integration-contract.mjs",
