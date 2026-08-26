@@ -1,0 +1,28 @@
+name: Assessment Scientific Hardening PR
+
+on:
+  push:
+    branches:
+      - feat/assessment-lab-scientific-hardening-v2
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Type check
+        run: npm run typecheck
+      - name: Assessment Lab scientific contracts
+        run: npm run assessment-lab:validate
+      - name: Build
+        run: npm run build
