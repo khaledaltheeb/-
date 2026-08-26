@@ -110,7 +110,7 @@ jobs:
           grep -q "Sitemap: ${base}/sitemap.xml" <<< "$robots"
           for slug in anger-escalation performance-anxiety; do
             html="$(curl -fsS --retry 10 --retry-delay 3 --retry-all-errors "${base}/assessment-lab/${slug}?deploy=${stamp}")"
-            grep -q "rel=\"canonical\" href=\"${base}/assessment-lab/${slug}/\"" <<< "$html"
+            grep -q "rel=\"canonical\" href=\"${base}/assessment-lab/${slug}\"" <<< "$html"
             if grep -qi 'noindex' <<< "$html"; then echo "Live /assessment-lab/${slug} is noindex" >&2; exit 1; fi
           done
           hub="$(curl -fsS --retry 10 --retry-delay 3 --retry-all-errors "${base}/assessment-lab?deploy=${stamp}")"
