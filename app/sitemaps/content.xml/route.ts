@@ -36,8 +36,7 @@ function applyDedicatedSitemapExclusions<T extends {
   neq: (column: string, value: string) => T;
 }>(query: T): T {
   let owned = query
-    .not('slug', 'like', 'quick-info-%')
-    .not('canonical_url', 'like', '/daily-tools/%')
+    .not('canonical_url', 'like', '/quick-info/%')
     .not('canonical_url', 'like', '/addiction/substances/%')
     .not('canonical_url', 'like', '/addiction/compare/%');
   for (const canonical of ATLAS_OWNED_CANONICALS) {
@@ -56,10 +55,9 @@ export async function GET(request: Request) {
   const now = new Date().toISOString();
   const data: ContentSitemapRecord[] = [];
 
-  // Canonical ownership is exclusive across child sitemaps. Quick Info, Daily Tools,
-  // and current Addiction Atlas routes are emitted by their dedicated sitemaps. CI
-  // verifies every excluded live DB route is actually represented there before deploy.
-  // All other live, indexable non-condition records remain in this no-loss safety net.
+  // Canonical ownership is exclusive across child sitemaps. Only canonicals actually
+  // owned by Quick Info and the Addiction Atlas are excluded here. Other records may
+  // have legacy-looking slugs or namespaces but remain in this no-loss safety net.
   // Pagination is intentionally ordered by immutable row id; updated_at only feeds lastmod.
   for (let batchStart = pageStart; batchStart < pageEndExclusive; batchStart += DB_BATCH_SIZE) {
     const batchEnd = Math.min(batchStart + DB_BATCH_SIZE - 1, pageEndExclusive - 1);
