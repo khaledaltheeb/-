@@ -58,7 +58,7 @@ export default function AddictionArticlePage({ record, items = [] }: Props) {
           <Link href="/addiction/withdrawal-safety/">دليل سلامة الانسحاب والطوارئ</Link>
         </aside>
         <nav className={styles.sectionNav} aria-label="التنقل في قطاع الإدمان والتعافي">
-          <Link href="/addiction/">المركز</Link><Link href="/addiction/withdrawal-safety/">سلامة الانسحاب</Link><Link href="/addiction/recovery-roadmap/">خريطة التعافي</Link><Link href="/addiction/family-guide/">للأسرة</Link><Link href="/addiction/sources/">المراجع</Link>
+          <Link href="/addiction/">المركز</Link><Link href="/addiction/substances/">أطلس المواد</Link><Link href="/addiction/compare/">المقارنات</Link><Link href="/addiction/methodology/">منهجية الأطلس</Link><Link href="/addiction/withdrawal-safety/">سلامة الانسحاب</Link><Link href="/addiction/recovery-roadmap/">خريطة التعافي</Link><Link href="/addiction/family-guide/">للأسرة</Link><Link href="/addiction/sources/">المراجع</Link>
         </nav>
         {role === 'hub' && items.length ? <AddictionBrowser items={items} /> : null}
         <div className="article-body">

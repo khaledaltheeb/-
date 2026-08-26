@@ -30,9 +30,6 @@ export async function GET() {
   }
 
   const [contentResult, quickInfoResult, encyclopediaResult] = await Promise.all([
-    // This is deliberately a no-loss superset. Quick Info URLs may also appear in their
-    // dedicated sitemap, but no published/indexable non-condition row may disappear merely
-    // because it originated in a migration or has a specialized slug family.
     supabase
       .from('content')
       .select('id', { count: 'exact', head: true })
@@ -50,15 +47,9 @@ export async function GET() {
     encyclopediaQuery,
   ]);
 
-  if (contentResult.error) {
-    throw new Error(`sitemap content count failed: ${contentResult.error.message}`);
-  }
-  if (quickInfoResult.error) {
-    throw new Error(`sitemap quick-info count failed: ${quickInfoResult.error.message}`);
-  }
-  if (encyclopediaResult.error) {
-    throw new Error(`sitemap encyclopedia count failed: ${encyclopediaResult.error.message}`);
-  }
+  if (contentResult.error) throw new Error(`sitemap content count failed: ${contentResult.error.message}`);
+  if (quickInfoResult.error) throw new Error(`sitemap quick-info count failed: ${quickInfoResult.error.message}`);
+  if (encyclopediaResult.error) throw new Error(`sitemap encyclopedia count failed: ${encyclopediaResult.error.message}`);
 
   const contentPages = Math.max(1, Math.ceil((contentResult.count ?? 0) / PAGE_SIZE));
   const quickInfoPages = Math.max(1, Math.ceil((quickInfoResult.count ?? 0) / QUICK_INFO_PAGE_SIZE));
@@ -69,6 +60,7 @@ export async function GET() {
     '/sitemaps/daily-tools.xml',
     '/sitemaps/taxonomy.xml',
     '/sitemaps/cognitive-lab.xml',
+    '/sitemaps/addiction-atlas.xml',
     '/sitemaps/specialists.xml',
     '/sitemaps/centers.xml',
     '/sitemaps/community.xml',
