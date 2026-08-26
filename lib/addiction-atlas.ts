@@ -9,6 +9,7 @@ import substancesV5Json from '@/data/addiction-atlas/substances-v5.json';
 import epidemiologyJson from '@/data/addiction-atlas/epidemiology-v1.json';
 import mortalityJson from '@/data/addiction-atlas/mortality-v1.json';
 import sourceRegistryJson from '@/data/addiction-atlas/source-registry-v1.json';
+import interactionsJson from '@/data/addiction-atlas/interactions-v1.json';
 
 export const ADDICTION_ATLAS_SOURCE_COMMIT = '00014486191027349cc083e824e545da186d74d1';
 export const ADDICTION_ATLAS_SNAPSHOT_KIND = 'vendored-immutable' as const;
@@ -27,6 +28,8 @@ export const RISK_KEYS = [
 export type RiskKey = (typeof RISK_KEYS)[number];
 export type RiskValue = 1 | 2 | 3 | 4 | 5 | null;
 export type EvidenceGrade = 'A' | 'B' | 'C' | 'U';
+export type InteractionSeverity = 'moderate' | 'high' | 'critical';
+export type InteractionEvidenceScope = 'direct-pair' | 'class-to-substance' | 'class-to-class';
 
 export type AtlasSubstance = {
   id: string;
@@ -82,6 +85,19 @@ export type AtlasComparison = {
   indexable: boolean;
 };
 
+export type AtlasInteraction = {
+  id: string;
+  a: string;
+  b: string;
+  severity: InteractionSeverity;
+  evidence_grade: EvidenceGrade;
+  evidence_scope: InteractionEvidenceScope;
+  mechanism_ar: string;
+  risk_ar: string;
+  emergency_ar: string;
+  source_urls: string[];
+};
+
 export type AtlasEpidemiologyRecord = {
   id: string;
   scope_type: string;
@@ -129,6 +145,7 @@ export type AtlasSource = {
 type WaveManifest = { updated_on: string; waves: string[] };
 type SubstanceWave = { updated_on: string; substances: AtlasSubstance[] };
 type ComparisonFile = { updated_on: string; policy_ar: string; comparisons: AtlasComparison[] };
+type InteractionFile = { updated_on: string; policy_ar: string; records: AtlasInteraction[] };
 type EpidemiologyFile = { updated_on: string; rules_ar: string[]; records: AtlasEpidemiologyRecord[] };
 type MortalityFile = { updated_on: string; rules_ar: string[]; records: AtlasMortalityRecord[] };
 type SourceRegistry = { updated_on: string; sources: AtlasSource[] };
@@ -138,6 +155,8 @@ export type AddictionAtlas = {
   methodology: AtlasMethodology;
   comparisons: AtlasComparison[];
   comparisonPolicy: string;
+  interactions: AtlasInteraction[];
+  interactionPolicy: string;
   epidemiology: AtlasEpidemiologyRecord[];
   epidemiologyRules: string[];
   mortality: AtlasMortalityRecord[];
@@ -167,6 +186,17 @@ function assertSubstance(record: AtlasSubstance) {
   }
 }
 
+function assertInteraction(record: AtlasInteraction, substanceSlugs: Set<string>) {
+  if (!record.id || !substanceSlugs.has(record.a) || !substanceSlugs.has(record.b) || record.a === record.b) {
+    throw new Error(`invalid addiction atlas interaction: ${record.id || 'unknown'}`);
+  }
+  if (!['moderate', 'high', 'critical'].includes(record.severity)) throw new Error(`invalid interaction severity: ${record.id}`);
+  if (!['A', 'B', 'C', 'U'].includes(record.evidence_grade)) throw new Error(`invalid interaction evidence grade: ${record.id}`);
+  if (!['direct-pair', 'class-to-substance', 'class-to-class'].includes(record.evidence_scope)) throw new Error(`invalid interaction evidence scope: ${record.id}`);
+  if (!record.mechanism_ar || !record.risk_ar || !record.emergency_ar || !record.source_urls.length) throw new Error(`incomplete interaction: ${record.id}`);
+  for (const url of record.source_urls) if (!url.startsWith('https://')) throw new Error(`invalid interaction source URL: ${record.id}`);
+}
+
 function assertStatistic(record: AtlasEpidemiologyRecord | AtlasMortalityRecord, sourceIds: Set<string>) {
   if (!record.id || !record.definition_ar || !record.geography || !Number.isInteger(record.year)) {
     throw new Error(`invalid addiction atlas statistic: ${record.id || 'unknown'}`);
@@ -179,6 +209,7 @@ async function loadAtlas(): Promise<AddictionAtlas> {
   const manifest = manifestJson as unknown as WaveManifest;
   const methodology = methodologyJson as unknown as AtlasMethodology;
   const comparisonFile = comparisonJson as unknown as ComparisonFile;
+  const interactionFile = interactionsJson as unknown as InteractionFile;
   const epidemiologyFile = epidemiologyJson as unknown as EpidemiologyFile;
   const mortalityFile = mortalityJson as unknown as MortalityFile;
   const sourceRegistry = sourceRegistryJson as unknown as SourceRegistry;
@@ -214,6 +245,18 @@ async function loadAtlas(): Promise<AddictionAtlas> {
     if (!bySlug.has(comparison.a) || !bySlug.has(comparison.b)) throw new Error(`comparison references missing substance: ${comparison.slug}`);
   }
 
+  const interactionIds = new Set<string>();
+  const interactionPairs = new Set<string>();
+  const substanceSlugs = new Set(bySlug.keys());
+  for (const interaction of interactionFile.records) {
+    assertInteraction(interaction, substanceSlugs);
+    if (interactionIds.has(interaction.id)) throw new Error(`duplicate addiction interaction id: ${interaction.id}`);
+    interactionIds.add(interaction.id);
+    const pair = [interaction.a, interaction.b].sort().join('::');
+    if (interactionPairs.has(pair)) throw new Error(`duplicate addiction interaction pair: ${pair}`);
+    interactionPairs.add(pair);
+  }
+
   const sourceIds = new Set(sourceRegistry.sources.map((source) => source.id));
   for (const record of epidemiologyFile.records) assertStatistic(record, sourceIds);
   for (const record of mortalityFile.records) assertStatistic(record, sourceIds);
@@ -221,6 +264,7 @@ async function loadAtlas(): Promise<AddictionAtlas> {
   const dates = [
     manifest.updated_on,
     comparisonFile.updated_on,
+    interactionFile.updated_on,
     methodology.published_on,
     epidemiologyFile.updated_on,
     mortalityFile.updated_on,
@@ -233,6 +277,8 @@ async function loadAtlas(): Promise<AddictionAtlas> {
     methodology,
     comparisons: comparisonFile.comparisons,
     comparisonPolicy: comparisonFile.policy_ar,
+    interactions: interactionFile.records,
+    interactionPolicy: interactionFile.policy_ar,
     epidemiology: epidemiologyFile.records,
     epidemiologyRules: epidemiologyFile.rules_ar,
     mortality: mortalityFile.records,
@@ -263,6 +309,16 @@ export async function getAtlasComparison(slug: string) {
   const b = atlas.substances.find((item) => item.slug === comparison.b) ?? null;
   if (!a || !b) return null;
   return { comparison, a, b, atlas };
+}
+
+export async function getAtlasInteraction(aSlug: string, bSlug: string) {
+  const atlas = await getAddictionAtlas();
+  const interaction = atlas.interactions.find((item) => (item.a === aSlug && item.b === bSlug) || (item.a === bSlug && item.b === aSlug)) ?? null;
+  if (!interaction) return null;
+  const a = atlas.substances.find((item) => item.slug === interaction.a) ?? null;
+  const b = atlas.substances.find((item) => item.slug === interaction.b) ?? null;
+  if (!a || !b) return null;
+  return { interaction, a, b, atlas };
 }
 
 export function getAtlasSource(atlas: AddictionAtlas, sourceId: string) {
