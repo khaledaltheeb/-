@@ -3,10 +3,15 @@
 import { useMemo, useState } from 'react';
 import styles from '@/app/assessment-lab/assessment-lab.module.css';
 
-type Question = { axis: string; text: string };
+type ResponseKind = 'frequency' | 'degree' | 'yes-no';
+type Question = { axis: string; text: string; responseKind: ResponseKind };
 type Props = { title: string; questions: Question[] };
 
-const options = ['لا ينطبق', 'قليلًا', 'أحيانًا', 'غالبًا', 'بدرجة شديدة'] as const;
+const responseOptions: Record<ResponseKind, readonly string[]> = {
+  frequency: ['أبدًا', 'نادرًا', 'أحيانًا', 'غالبًا', 'دائمًا تقريبًا'],
+  degree: ['إطلاقًا', 'بدرجة بسيطة', 'بدرجة متوسطة', 'بدرجة كبيرة', 'بدرجة كبيرة جدًا'],
+  'yes-no': ['لا', 'إلى حد ما', 'نعم'],
+};
 
 export default function AssessmentMonitorRunner({ title, questions }: Props) {
   const [answers, setAnswers] = useState<Record<number, string>>({});
@@ -26,7 +31,7 @@ export default function AssessmentMonitorRunner({ title, questions }: Props) {
       <div>
         <span className={styles.eyebrow}>متابعة ذاتية غير تشخيصية</span>
         <h2 id="monitor-runner-title">{title}</h2>
-        <p>الفترة المرجعية: الأسبوع الماضي. اقرأ كل بند بوصفه سؤال ملاحظة، لا اختبار نجاح أو فشل. اختر الوصف الأقرب، ثم أضف مثالًا واقعيًا إذا كان سيساعدك على تذكر السياق.</p>
+        <p>الفترة المرجعية: الأسبوع الماضي. اقرأ كل بند كما هو؛ خيارات الإجابة تتغير تلقائيًا بحسب ما إذا كان السؤال عن التكرار أو الدرجة أو وجود تجربة محددة. لا توجد إجابة صحيحة أو خاطئة.</p>
       </div>
       <div className={styles.progress} aria-live="polite">
         <strong>{completion}%</strong>
@@ -45,15 +50,18 @@ export default function AssessmentMonitorRunner({ title, questions }: Props) {
         return <fieldset className={styles.axisCard} key={axis}>
           <legend>{axis}</legend>
           <div className={styles.axisMeta}>{axisAnswered} من {indexed.length} بنود مكتملة</div>
-          {indexed.map(({ question, index }) => <div className={styles.question} key={question.text}>
-            <p>{question.text}</p>
-            <div className={styles.options} role="radiogroup" aria-label={question.text}>
-              {options.map((option) => <label key={option}>
-                <input type="radio" name={`assessment-q-${index}`} value={option} checked={answers[index] === option} onChange={() => setAnswers((current) => ({ ...current, [index]: option }))}/>
-                <span>{option}</span>
-              </label>)}
-            </div>
-          </div>)}
+          {indexed.map(({ question, index }) => {
+            const options = responseOptions[question.responseKind];
+            return <div className={styles.question} key={question.text}>
+              <p>{question.text}</p>
+              <div className={styles.options} role="radiogroup" aria-label={question.text}>
+                {options.map((option) => <label key={option}>
+                  <input type="radio" name={`assessment-q-${index}`} value={option} checked={answers[index] === option} onChange={() => setAnswers((current) => ({ ...current, [index]: option }))}/>
+                  <span>{option}</span>
+                </label>)}
+              </div>
+            </div>;
+          })}
           <label className={styles.note}>
             <span>ملاحظة اختيارية لهذا المحور</span>
             <textarea rows={3} maxLength={900} value={notes[axis] ?? ''} onChange={(event) => setNotes((current) => ({ ...current, [axis]: event.target.value }))} placeholder="مثال محدد: ماذا حدث؟ متى؟ ما الذي زاد الصعوبة أو خففها؟"/>
