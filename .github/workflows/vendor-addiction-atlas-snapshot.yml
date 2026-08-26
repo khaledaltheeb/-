@@ -1,11 +1,7 @@
 name: Vendor Addiction Atlas Snapshot
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/vendor-addiction-atlas-snapshot.yml'
-      - 'scripts/vendor-addiction-atlas.mjs'
+  workflow_dispatch:
 
 permissions:
   contents: write

@@ -1,5 +1,13 @@
+import manifestJson from '@/data/addiction-atlas/substance-waves.json';
+import methodologyJson from '@/data/addiction-atlas/methodology-v1.json';
+import comparisonJson from '@/data/addiction-atlas/comparison-intents-v2.json';
+import substancesV1Json from '@/data/addiction-atlas/substances-v1.json';
+import substancesV2Json from '@/data/addiction-atlas/substances-v2.json';
+import substancesV3Json from '@/data/addiction-atlas/substances-v3.json';
+import substancesV4Json from '@/data/addiction-atlas/substances-v4.json';
+import substancesV5Json from '@/data/addiction-atlas/substances-v5.json';
+
 export const ADDICTION_ATLAS_SOURCE_COMMIT = '00014486191027349cc083e824e545da186d74d1';
-const SOURCE_ROOT = `https://raw.githubusercontent.com/khaledaltheeb/healthrenewal.org/${ADDICTION_ATLAS_SOURCE_COMMIT}/data/addiction-atlas`;
 
 export const RISK_KEYS = [
   'acute_toxicity',
@@ -83,11 +91,10 @@ export type AddictionAtlas = {
   sourceCommit: string;
 };
 
-async function fetchJson<T>(file: string): Promise<T> {
-  const response = await fetch(`${SOURCE_ROOT}/${file}`, { cache: 'force-cache' });
-  if (!response.ok) throw new Error(`addiction atlas source failed: ${file} (${response.status})`);
-  return response.json() as Promise<T>;
-}
+const manifest = manifestJson as WaveManifest;
+const methodology = methodologyJson as unknown as AtlasMethodology;
+const comparisonFile = comparisonJson as unknown as ComparisonFile;
+const waves = [substancesV1Json, substancesV2Json, substancesV3Json, substancesV4Json, substancesV5Json] as unknown as SubstanceWave[];
 
 function fileName(path: string) {
   const value = path.split('/').filter(Boolean).pop();
@@ -108,13 +115,13 @@ function assertSubstance(record: AtlasSubstance) {
   }
 }
 
-async function loadAtlas(): Promise<AddictionAtlas> {
-  const [manifest, methodology, comparisonFile] = await Promise.all([
-    fetchJson<WaveManifest>('substance-waves.json'),
-    fetchJson<AtlasMethodology>('methodology-v1.json'),
-    fetchJson<ComparisonFile>('comparison-intents-v2.json'),
-  ]);
-  const waves = await Promise.all(manifest.waves.map((path) => fetchJson<SubstanceWave>(fileName(path))));
+function loadAtlas(): AddictionAtlas {
+  const expectedWaveFiles = manifest.waves.map(fileName);
+  const localWaveFiles = ['substances-v1.json', 'substances-v2.json', 'substances-v3.json', 'substances-v4.json', 'substances-v5.json'];
+  if (expectedWaveFiles.length !== localWaveFiles.length || expectedWaveFiles.some((file, index) => file !== localWaveFiles[index])) {
+    throw new Error('addiction atlas manifest does not match the vendored local wave set');
+  }
+
   const bySlug = new Map<string, AtlasSubstance>();
   for (const wave of waves) {
     for (const substance of wave.substances) {
@@ -125,12 +132,14 @@ async function loadAtlas(): Promise<AddictionAtlas> {
   }
   const substances = [...bySlug.values()];
   if (substances.length < 54) throw new Error(`addiction atlas regression: expected at least 54 substances, got ${substances.length}`);
+
   const comparisonSlugs = new Set<string>();
   for (const comparison of comparisonFile.comparisons) {
     if (comparisonSlugs.has(comparison.slug)) throw new Error(`duplicate addiction comparison slug: ${comparison.slug}`);
     comparisonSlugs.add(comparison.slug);
     if (!bySlug.has(comparison.a) || !bySlug.has(comparison.b)) throw new Error(`comparison references missing substance: ${comparison.slug}`);
   }
+
   const dates = [manifest.updated_on, comparisonFile.updated_on, methodology.published_on, ...waves.map((wave) => wave.updated_on)].filter(Boolean).sort();
   return {
     substances,
@@ -142,10 +151,10 @@ async function loadAtlas(): Promise<AddictionAtlas> {
   };
 }
 
-let atlasPromise: Promise<AddictionAtlas> | null = null;
-export function getAddictionAtlas() {
-  if (!atlasPromise) atlasPromise = loadAtlas().catch((error) => { atlasPromise = null; throw error; });
-  return atlasPromise;
+const ATLAS = loadAtlas();
+
+export async function getAddictionAtlas() {
+  return ATLAS;
 }
 
 export async function getAtlasSubstance(slug: string) {

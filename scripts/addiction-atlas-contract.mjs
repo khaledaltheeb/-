@@ -1,16 +1,20 @@
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
 const SOURCE_COMMIT = '00014486191027349cc083e824e545da186d74d1';
-const ROOT = `https://raw.githubusercontent.com/khaledaltheeb/healthrenewal.org/${SOURCE_COMMIT}/data/addiction-atlas`;
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../data/addiction-atlas');
 const RISK_KEYS = ['acute_toxicity','overdose_risk','dependence','withdrawal_medical_risk','neuro_harm','cardio_harm','respiratory_harm','polysubstance_risk'];
 const EVIDENCE = new Set(['A','B','C','U']);
 
 function assert(condition, message) { if (!condition) throw new Error(`addiction-atlas-contract: ${message}`); }
-async function json(file) { const response = await fetch(`${ROOT}/${file}`); assert(response.ok, `${file} returned ${response.status}`); return response.json(); }
-function filename(path) { return path.split('/').filter(Boolean).pop(); }
+async function json(file) { return JSON.parse(await readFile(path.join(ROOT, file), 'utf8')); }
+function filename(value) { return value.split('/').filter(Boolean).pop(); }
 
 const [manifest, methodology, comparisonFile] = await Promise.all([json('substance-waves.json'), json('methodology-v1.json'), json('comparison-intents-v2.json')]);
 assert(Array.isArray(manifest.waves) && manifest.waves.length === 5, `expected 5 waves, got ${manifest.waves?.length}`);
 for (const key of RISK_KEYS) assert(methodology.risk_dimensions?.[key]?.label_ar && methodology.risk_dimensions?.[key]?.definition_ar, `methodology missing ${key}`);
-const waves = await Promise.all(manifest.waves.map((path) => json(filename(path))));
+const waves = await Promise.all(manifest.waves.map((value) => json(filename(value))));
 const substances = waves.flatMap((wave) => wave.substances || []);
 assert(substances.length === 54, `expected 54 substances, got ${substances.length}`);
 const slugs = new Set();
@@ -31,4 +35,4 @@ assert(comparisons.length === 34, `expected 34 indexable comparisons, got ${comp
 const comparisonSlugs = new Set();
 for (const item of comparisons) { assert(item.slug && !comparisonSlugs.has(item.slug), `duplicate comparison ${item.slug}`); comparisonSlugs.add(item.slug); assert(slugs.has(item.a) && slugs.has(item.b), `${item.slug}: missing compared substance`); assert(item.title_ar && item.intent_ar, `${item.slug}: title/intent required`); }
 for (const required of ['fentanyl-vs-heroin','cocaine-vs-methamphetamine','tramadol-vs-morphine','cannabis-vs-synthetic-cannabinoids']) assert(comparisonSlugs.has(required), `required high-intent comparison missing: ${required}`);
-console.log(`addiction-atlas-contract: PASS | ${substances.length} substances | ${comparisons.length} comparisons | ${RISK_KEYS.length} risk dimensions | source ${SOURCE_COMMIT.slice(0, 12)}`);
+console.log(`addiction-atlas-contract: PASS | ${substances.length} substances | ${comparisons.length} comparisons | ${RISK_KEYS.length} risk dimensions | local snapshot provenance ${SOURCE_COMMIT.slice(0, 12)}`);
