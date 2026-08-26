@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import CareGuidePage from '@/components/care-guide-page';
 import LegacyPreservedPageView from '@/components/legacy-preserved-page';
-import { getCareGuideRecord, getRelatedCareGuideContent } from '@/lib/care-guides';
+import { careGuideCanIndex, getCareGuideRecord, getRelatedCareGuideContent } from '@/lib/care-guides';
 import { getLegacyPreservedPage, legacyPreservedMetadata } from '@/lib/legacy-preserved-page';
 import { buildSeoMetadata } from '@/lib/seo';
 
@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     title: record.seo_title || record.title,
     description: record.seo_description || record.excerpt,
     path: record.canonical_url || `/care-guides/${slug.join('/')}/`,
-    index: record.robots_index,
+    index: careGuideCanIndex(record),
     follow: record.robots_follow,
     type: 'article',
     image: record.featured_image_url,
