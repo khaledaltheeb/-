@@ -69,8 +69,8 @@ jobs:
           test "${NEXT_PUBLIC_ENABLE_DIRECT_GA}" = "true"
           grep -q "PRODUCTION_SITE_URL = 'https://healthrenewal.org'" lib/seo.ts
           grep -q '"production"' wrangler.jsonc
-          grep -q '"pattern": "healthrenewal.org"' wrangler.jsonc
-          grep -q '"pattern": "www.healthrenewal.org"' wrangler.jsonc
+          grep -Fq '"pattern": "healthrenewal.org/*"' wrangler.jsonc
+          grep -Fq '"pattern": "www.healthrenewal.org/*"' wrangler.jsonc
           grep -q '"custom_domain": true' wrangler.jsonc
           grep -q '"NEXT_PUBLIC_ENABLE_ANALYTICS": "true"' wrangler.jsonc
           grep -q '"NEXT_PUBLIC_GTM_ID": "GTM-WBLQVBG4"' wrangler.jsonc
