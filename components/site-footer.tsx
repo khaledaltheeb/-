@@ -44,6 +44,7 @@ const groups = [
     title: 'الثقة والحقوق',
     links: [
       { href: '/about', label: 'من نحن' },
+      { href: '/open-source', label: 'المصدر المفتوح' },
       { href: '/medical-review-policy', label: 'المراجعة العلمية' },
       { href: '/editorial-policy', label: 'السياسة التحريرية' },
       { href: '/privacy', label: 'الخصوصية' },
