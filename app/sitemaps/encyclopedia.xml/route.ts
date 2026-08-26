@@ -8,6 +8,7 @@ const DB_BATCH_SIZE = 1000;
 
 type RawItem = Record<string, unknown>;
 type SitemapItem = { slug: string; canonicalUrl: string; updatedAt: string | null };
+type IndexabilityRow = { slug: string; robots_index: boolean | null; status: string | null; published_at: string | null };
 
 function normalizeItem(row: RawItem): SitemapItem | null {
   const slug = typeof row.slug === 'string' ? row.slug.trim().toLowerCase() : '';
@@ -30,10 +31,35 @@ export async function GET(request: Request) {
   const supabase = await createClient();
   const now = new Date().toISOString();
   const releaseRows = await getPsychEncyclopediaReleaseIndex();
-  const releaseItems = releaseRows.flatMap((row) => {
+  const normalizedReleaseItems = releaseRows.flatMap((row) => {
     const item = normalizeItem(row as unknown as RawItem);
     return item ? [item] : [];
   });
+  const normalizedReleaseSlugs = normalizedReleaseItems.map((item) => item.slug);
+
+  const indexableReleaseSlugs = new Set<string>();
+  for (let start = 0; start < normalizedReleaseSlugs.length; start += DB_BATCH_SIZE) {
+    const slugBatch = normalizedReleaseSlugs.slice(start, start + DB_BATCH_SIZE);
+    if (slugBatch.length === 0) continue;
+    const { data, error } = await supabase
+      .from('content')
+      .select('slug,robots_index,status,published_at')
+      .eq('content_type', 'condition')
+      .in('slug', slugBatch);
+
+    if (error) {
+      throw new Error(`encyclopedia release indexability query failed at rows ${start}-${start + slugBatch.length - 1}: ${error.message}`);
+    }
+
+    for (const row of (data ?? []) as IndexabilityRow[]) {
+      const slug = typeof row.slug === 'string' ? row.slug.trim().toLowerCase() : '';
+      const publishedAt = typeof row.published_at === 'string' ? row.published_at : null;
+      const isPublishedNow = row.status === 'published' && (!publishedAt || publishedAt <= now);
+      if (slug && row.robots_index === true && isPublishedNow) indexableReleaseSlugs.add(slug);
+    }
+  }
+
+  const releaseItems = normalizedReleaseItems.filter((item) => indexableReleaseSlugs.has(item.slug));
   const releaseSlugs = releaseItems.map((item) => item.slug);
   const releaseSlots = page === 0 ? releaseItems.length : 0;
   const databaseCapacity = Math.max(0, PAGE_SIZE - releaseSlots);
