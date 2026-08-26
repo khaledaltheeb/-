@@ -54,9 +54,6 @@ for(const fn of ['get_legacy_preserved_page','legacy_preserved_route_exists']){
 for(const forbidden of ['service_role','secret_key']) if(helper.toLowerCase().includes(forbidden)||view.toLowerCase().includes(forbidden)||proxy.toLowerCase().includes(forbidden)) fail(`forbidden preservation secret pattern: ${forbidden}`);
 for(const marker of ['get_legacy_preserved_page','legacyPreservedMetadata','buildSeoMetadata','shouldIndexPreservedPublishedPage','follow: true','healthrenewal.org','decodeURIComponent',"normalize('NFC')"]) if(!helper.includes(marker)) fail(`helper marker missing: ${marker}`);
 
-// One indexability policy must govern both fallback metadata and sitemap discovery. Published
-// database content may be indexable through the preservation renderer, while explicitly
-// archival/language surfaces remain noindex and must never leak into content.xml.
 for(const marker of [
   "'/assessments/'",
   "'/en/'",
@@ -66,11 +63,9 @@ for(const marker of [
 ]) if(!publicIndexability.includes(marker)) fail(`public indexability marker missing: ${marker}`);
 for(const marker of ['isExplicitNoindexPath', 'if (isExplicitNoindexPath(normalizedPath)) continue', 'activeRedirectSources.has(normalizedPath)']) if(!contentSitemap.includes(marker)) fail(`content sitemap indexability exclusion marker missing: ${marker}`);
 
-// Historic preserved-link inventories can contain destinations that disappeared during the
-// migration. They must be repaired to a semantically appropriate published destination rather
-// than emitted as crawlable 404s or replaced with fabricated placeholder pages.
 for(const marker of [
   'STALE_PRESERVED_LINK_REPLACEMENTS',
+  'CONFIRMED_DEAD_PRESERVED_LINKS',
   "'/autism/'",
   "'/family-guide/conditions/autism/'",
   "'/content/adhd/'",
@@ -82,10 +77,10 @@ for(const marker of [
   "'/special-ed-encyclopedia/learning-disabilities/'",
   "'/care-guides/specific-learning-disorder-home-school/'",
   'repairPreservedInternalLink',
+  'if (CONFIRMED_DEAD_PRESERVED_LINKS.has(route)) return null',
+  'if (!repaired || seen.has(repaired.href)) continue',
 ]) if(!helper.includes(marker)) fail(`preserved stale-link repair marker missing: ${marker}`);
 
-// The preserved helper delegates robots directives to the centralized SEO generator.
-// Keep noarchive/nosnippet for every page that remains noindex without duplicating metadata logic.
 for(const marker of ['const canIndex = INDEXING_ENABLED && input.index !== false','noarchive: !canIndex','nosnippet: !canIndex']) if(!seo.includes(marker)) fail(`central SEO noindex preservation marker missing: ${marker}`);
 for(const marker of [
   'نسخة إنتاجية محفوظة',
@@ -125,4 +120,4 @@ for(const path of [
 ]) if(!fs.existsSync(path)) fail(`deployed migration history not mirrored: ${path}`);
 
 if(failed)process.exit(1);
-console.log('Legacy preservation contract passed: Unicode-safe read-only fallback rendering is preserved, published-content pages recover indexability through the centralized policy, active redirect sources and explicit archive/language noindex routes stay out of sitemaps, stale preserved internal links are repaired to real published destinations, and reviewed modern takeovers keep priority.');
+console.log('Legacy preservation contract passed: Unicode-safe read-only fallback rendering is preserved, published-content pages recover indexability through the centralized policy, active redirect sources and explicit archive/language noindex routes stay out of sitemaps, stale preserved links are repaired or suppressed only when their destination is confirmed dead, and reviewed modern takeovers keep priority.');
