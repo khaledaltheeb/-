@@ -3,11 +3,14 @@ const preservedRoutes=[
   ['/hubs/','من السؤال إلى مسار معرفة وخدمة متكامل',true],
   ['/hubs/angle-001/','القلق: التعريف والمفهوم',true],
   ['/encyclopedia/concept-0001/','القلق: ما هو؟ ومتى يتحول من استجابة طبيعية إلى مشكلة تحتاج تقييمًا؟',true],
-  ['/addiction/','منظومة عربية مؤسسية للإدمان: من الطوارئ إلى التعافي الوظيفي',false],
   ['/addiction/protocol-atlas/','أطلس علاج اضطرابات الإدمان: كيف تُبنى الخطة من التقييم إلى التعافي؟',true],
   ['/family-guide/tools/behavior-log/','سجل السلوك والسياق الوظيفي',true],
 ];
 const upgradedRoutes=[
+  // The addiction hub is now a real published database-backed route whose robots policy
+  // comes from the reviewed content record. Treat it like other upgraded canonicals:
+  // no legacy preservation banner and no noindex regression is allowed.
+  ['/addiction/','منظومة عربية مؤسسية للإدمان: من الطوارئ إلى التعافي الوظيفي'],
   ['/quick-info/accountability-vs-self-blame/','تحمل مسؤولية أم جلد ذات'],
 ];
 let failed=false;
