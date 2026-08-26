@@ -1,4 +1,4 @@
-name: Assessment Lab 150 Contract
+name: Assessment Lab 70 Release Scope
 
 on:
   pull_request:
@@ -20,7 +20,7 @@ permissions:
   contents: read
 
 jobs:
-  portfolio-contract:
+  release-scope-contract:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -29,5 +29,5 @@ jobs:
         with:
           node-version: 24
           package-manager-cache: false
-      - name: Verify 150-route assessment portfolio
+      - name: Verify active 70-route scope and deferred backlog integrity
         run: node scripts/assessment-lab-roadmap-contract.mjs
