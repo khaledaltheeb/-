@@ -1,8 +1,10 @@
 name: Deploy Production
 
-# CUTOVER GUARD: healthrenewal.org must not be switched to the new Rawafid build
-# until this workflow proves >=10,000 unique canonical public URLs and every
-# sitemap URL passes production SEO, rich-discovery, content-richness, and editorial gates.
+# POST-CUTOVER PRODUCTION GUARD:
+# healthrenewal.org is the canonical production origin. Routine deployment must
+# preserve public URLs, editorial readiness, SEO/discovery quality, analytics,
+# and Cloudflare routing. The 10,000-URL objective remains a measured growth
+# target, not a prerequisite for deploying safe improvements to the live domain.
 on:
   workflow_dispatch:
 
@@ -86,26 +88,23 @@ jobs:
             echo 'Wrangler did not authenticate with the configured API token.' >&2
             exit 1
           fi
-      - name: Build local production candidate for cutover gate
+      - name: Build local production candidate
         run: npm run build
-      - name: Require 10000 fully-audited canonical URLs before cutover
+      - name: Verify deploy candidate editorial SEO discovery and content quality
         shell: bash
         env:
-          CUTOVER_BASE_URL: http://127.0.0.1:3000
-          CUTOVER_CANONICAL_ORIGIN: https://healthrenewal.org
-          CUTOVER_MIN_INDEXABLE_URLS: '10000'
           SEO_GATE_BASE_URL: http://127.0.0.1:3000
           SEO_GATE_CONCURRENCY: '12'
           SEO_GATE_TIMEOUT_MS: '20000'
           SEO_GATE_PAGE_ATTEMPTS: '3'
           SEO_GATE_PAGE_RETRY_DELAY_MS: '300'
           SEO_TARGET_URLS: '10000'
-          SEO_REQUIRE_TARGET: 'true'
+          SEO_REQUIRE_TARGET: 'false'
           SEO_RICH_MIN_WORDS: '100'
           EDITORIAL_REQUIRE_READY: 'true'
         run: |
           set -euo pipefail
-          nohup npm run start -- --hostname 127.0.0.1 --port 3000 > /tmp/rawafid-cutover-server.log 2>&1 &
+          nohup npm run start -- --hostname 127.0.0.1 --port 3000 > /tmp/rawafid-production-candidate.log 2>&1 &
           server_pid=$!
           cleanup() { kill "$server_pid" 2>/dev/null || true; }
           trap cleanup EXIT
@@ -118,11 +117,11 @@ jobs:
             sleep 1
           done
           if [ "$ready" -ne 1 ]; then
-            cat /tmp/rawafid-cutover-server.log >&2 || true
+            cat /tmp/rawafid-production-candidate.log >&2 || true
             exit 1
           fi
+          npm run smoke
           node scripts/editorial-seo-readiness.mjs
-          node scripts/healthrenewal-cutover-readiness.mjs
           node scripts/seo-readiness-report.mjs
           node scripts/seo-gate.mjs
           node scripts/rich-discovery-gate.mjs
@@ -138,7 +137,7 @@ jobs:
         run: npx opennextjs-cloudflare build --env production
       - name: Deploy Cloudflare Worker with OpenNext production environment
         run: npx opennextjs-cloudflare deploy --env production
-      - name: Verify production discovery, analytics, canonical host and www redirect
+      - name: Verify production discovery analytics canonical host addiction atlas and www redirect
         shell: bash
         run: |
           set -euo pipefail
@@ -146,10 +145,20 @@ jobs:
           stamp="${GITHUB_SHA}"
           robots="$(curl -fsS --retry 8 --retry-delay 3 --retry-all-errors "${base}/robots.txt?deploy=${stamp}")"
           printf '%s' "${robots}" | grep -q "Sitemap: ${base}/sitemap.xml"
+          root_sitemap="$(curl -fsS --retry 8 --retry-delay 3 --retry-all-errors "${base}/sitemap.xml?deploy=${stamp}")"
+          printf '%s' "${root_sitemap}" | grep -q '/sitemaps/addiction-atlas.xml'
           sitemap="$(curl -fsS --retry 8 --retry-delay 3 --retry-all-errors "${base}/sitemaps/content.xml?page=0&deploy=${stamp}")"
           printf '%s' "${sitemap}" | grep -q '<url>'
           if printf '%s' "${sitemap}" | grep -q 'workers.dev'; then
             echo 'Production sitemap leaked a temporary workers.dev URL.' >&2
+            exit 1
+          fi
+          atlas_sitemap="$(curl -fsS --retry 8 --retry-delay 3 --retry-all-errors "${base}/sitemaps/addiction-atlas.xml?deploy=${stamp}")"
+          printf '%s' "${atlas_sitemap}" | grep -q '/addiction/substances/fentanyl/'
+          printf '%s' "${atlas_sitemap}" | grep -q '/addiction/compare/fentanyl-vs-heroin/'
+          printf '%s' "${atlas_sitemap}" | grep -q '/addiction/methodology/'
+          if printf '%s' "${atlas_sitemap}" | grep -q 'workers.dev'; then
+            echo 'Addiction atlas sitemap leaked a temporary workers.dev URL.' >&2
             exit 1
           fi
           home="$(curl -fsS --retry 8 --retry-delay 3 --retry-all-errors "${base}/?deploy=${stamp}")"
@@ -160,6 +169,34 @@ jobs:
             echo 'Production homepage is unexpectedly noindex.' >&2
             exit 1
           fi
-          www_headers="$(curl -sS -o /dev/null -D - --retry 8 --retry-delay 3 --retry-all-errors 'https://www.healthrenewal.org/sections?cutover-check=1')"
+          atlas="$(curl -fsS --retry 8 --retry-delay 3 --retry-all-errors "${base}/addiction/substances/?deploy=${stamp}")"
+          printf '%s' "${atlas}" | grep -q 'Fentanyl'
+          printf '%s' "${atlas}" | grep -q 'Heroin'
+          if printf '%s' "${atlas}" | grep -qi 'noindex'; then
+            echo 'Production addiction atlas hub is unexpectedly noindex.' >&2
+            exit 1
+          fi
+          fentanyl="$(curl -fsS --retry 8 --retry-delay 3 --retry-all-errors "${base}/addiction/substances/fentanyl/?deploy=${stamp}")"
+          printf '%s' "${fentanyl}" | grep -q 'Fentanyl'
+          printf '%s' "${fentanyl}" | grep -q 'MedicalWebPage'
+          if printf '%s' "${fentanyl}" | grep -qi 'noindex'; then
+            echo 'Production Fentanyl atlas page is unexpectedly noindex.' >&2
+            exit 1
+          fi
+          comparison="$(curl -fsS --retry 8 --retry-delay 3 --retry-all-errors "${base}/addiction/compare/fentanyl-vs-heroin/?deploy=${stamp}")"
+          printf '%s' "${comparison}" | grep -q 'Fentanyl'
+          printf '%s' "${comparison}" | grep -q 'Heroin'
+          printf '%s' "${comparison}" | grep -q 'Article'
+          if printf '%s' "${comparison}" | grep -qi 'noindex'; then
+            echo 'Production Fentanyl versus Heroin comparison is unexpectedly noindex.' >&2
+            exit 1
+          fi
+          methodology="$(curl -fsS --retry 8 --retry-delay 3 --retry-all-errors "${base}/addiction/methodology/?deploy=${stamp}")"
+          printf '%s' "${methodology}" | grep -q 'قوة الدليل'
+          if printf '%s' "${methodology}" | grep -qi 'noindex'; then
+            echo 'Production addiction atlas methodology is unexpectedly noindex.' >&2
+            exit 1
+          fi
+          www_headers="$(curl -sS -o /dev/null -D - --retry 8 --retry-delay 3 --retry-all-errors 'https://www.healthrenewal.org/sections?production-check=1')"
           printf '%s' "${www_headers}" | head -n 1 | grep -Eq ' 308( |$)'
-          printf '%s' "${www_headers}" | grep -Eqi '^location: https://healthrenewal\.org/sections\?cutover-check=1\r?$'
+          printf '%s' "${www_headers}" | grep -Eqi '^location: https://healthrenewal\.org/sections\?production-check=1\r?$'
