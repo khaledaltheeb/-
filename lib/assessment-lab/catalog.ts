@@ -6,6 +6,8 @@ import coreQuestionBankData13to24 from '@/data/assessment-lab/question-banks.cor
 import coreQuestionBankData25to28 from '@/data/assessment-lab/question-banks.core-25-28.v1.json';
 import coreQuestionBankData29to32 from '@/data/assessment-lab/question-banks.core-29-32.v1.json';
 import coreQuestionBankData33to36 from '@/data/assessment-lab/question-banks.core-33-36.v1.json';
+import originalQuestionBankData49to54 from '@/data/assessment-lab/question-banks.originals-49-54.v1.json';
+import originalQuestionBankData55to60 from '@/data/assessment-lab/question-banks.originals-55-60.v1.json';
 
 export type AssessmentMonitor = {
   slug: string;
@@ -43,6 +45,8 @@ const questionBanks = {
   ...(coreQuestionBankData25to28 as Record<string, RawAssessmentQuestion[]>),
   ...(coreQuestionBankData29to32 as Record<string, RawAssessmentQuestion[]>),
   ...(coreQuestionBankData33to36 as Record<string, RawAssessmentQuestion[]>),
+  ...(originalQuestionBankData49to54 as Record<string, RawAssessmentQuestion[]>),
+  ...(originalQuestionBankData55to60 as Record<string, RawAssessmentQuestion[]>),
 };
 export const assessmentSlugs = [...assessmentMonitors.map((row) => row.slug), ...sourceInstruments.map((row) => row.slug)];
 export const assessmentCategories = [...new Set(assessmentMonitors.map((row) => row.category))];

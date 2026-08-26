@@ -44,8 +44,12 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Architecture privacy PWA and theme contract
         run: npm run architecture-check
-      - name: Live public and sitemap preservation gate
-        run: npm run live-preservation:validate
+      - name: Public presentation preservation gate
+        run: npm run public-preservation:validate
+      - name: Sitemap partition preservation gate
+        run: npm run sitemap-preservation:validate
+      - name: Static sitemap coverage gate
+        run: npm run static-sitemap:validate
       - name: Final content-readiness hardening contract
         run: node scripts/final-hardening-check.mjs
       - name: Type check
