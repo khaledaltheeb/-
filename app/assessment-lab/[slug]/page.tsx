@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 import AssessmentMonitorRunner from '@/components/assessment-monitor-runner';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
-import { assessmentSlugs, buildMonitorQuestions, getAssessmentMonitor, getMonitorReadingTime, getRelatedMonitors, getSourceInstrument } from '@/lib/assessment-lab/catalog';
+import { assessmentSlugs, buildMonitorQuestions, getAssessmentMonitor, getMonitorReadingTime, getRelatedMonitors, getSourceInstrument, getSourceInstrumentStatusLabel } from '@/lib/assessment-lab/catalog';
 import { getAssessmentScientificProfile } from '@/lib/assessment-lab/scientific-profiles';
 import { breadcrumbJsonLd, buildSeoMetadata } from '@/lib/seo';
 import styles from '../assessment-lab.module.css';
@@ -102,7 +102,7 @@ export default async function AssessmentLabDetail({ params }: { params: Params }
       {related.length > 0 && <section className={`${styles.shell} ${styles.related}`} aria-labelledby="related-title"><h2 id="related-title">متابعات مرتبطة</h2><div className={styles.grid}>{related.map((row) => <Link className={styles.card} href={`/assessment-lab/${row.slug}`} key={row.slug}><h3>{row.title}</h3><p>{row.axes.join(' · ')}</p><span>فتح المتابعة ←</span></Link>)}</div></section>}
     </> : <section className={`${styles.shell} ${styles.sourceCard}`}>
       <span className={styles.eyebrow}>صفحة مصدر لا أداة تسجيل درجات</span><h2>{instrument!.source}</h2><p>{instrument!.note}</p>
-      <dl><div><dt>الفترة المرجعية</dt><dd>{instrument!.period}</dd></div><div><dt>حالة الاستعادة</dt><dd>{instrument!.status}</dd></div></dl>
+      <dl><div><dt>الفترة المرجعية</dt><dd>{instrument!.period}</dd></div><div><dt>حالة النسخة والحقوق</dt><dd>{getSourceInstrumentStatusLabel(instrument!.status)}</dd></div></dl>
       <a href={instrument!.sourceUrl} target="_blank" rel="noreferrer">فتح المصدر الرسمي</a>
       <p className={styles.boundary}>عدم عرض البنود أو الدرجة هنا قرار جودة مقصود. لن تعاد الوظيفة التفاعلية إلا عندما تكون النسخة العربية، طريقة الحساب، حقوق إعادة الاستخدام وحدود التفسير مثبتة بمصدر مناسب.</p>
     </section>}
