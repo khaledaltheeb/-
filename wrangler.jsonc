@@ -22,12 +22,12 @@
       "preview_urls": false,
       "routes": [
         {
-          "pattern": "healthrenewal.org",
-          "custom_domain": true
+          "pattern": "healthrenewal.org/*",
+          "zone_name": "healthrenewal.org"
         },
         {
-          "pattern": "www.healthrenewal.org",
-          "custom_domain": true
+          "pattern": "www.healthrenewal.org/*",
+          "zone_name": "healthrenewal.org"
         }
       ],
       "vars": {
