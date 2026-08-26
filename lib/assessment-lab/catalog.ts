@@ -19,14 +19,19 @@ export type SourceInstrument = {
   note: string;
 };
 
+export type AssessmentResponseKind = 'frequency' | 'degree' | 'yes-no';
+
 export type AssessmentQuestion = {
   axis: string;
   text: string;
+  responseKind: AssessmentResponseKind;
 };
+
+type RawAssessmentQuestion = Omit<AssessmentQuestion, 'responseKind'> & { responseKind?: AssessmentResponseKind };
 
 export const assessmentMonitors = monitorData as AssessmentMonitor[];
 export const sourceInstruments = instrumentData as SourceInstrument[];
-const questionBanks = questionBankData as Record<string, AssessmentQuestion[]>;
+const questionBanks = questionBankData as Record<string, RawAssessmentQuestion[]>;
 export const assessmentSlugs = [...assessmentMonitors.map((row) => row.slug), ...sourceInstruments.map((row) => row.slug)];
 export const assessmentCategories = [...new Set(assessmentMonitors.map((row) => row.category))];
 
@@ -75,10 +80,25 @@ function questionsForAxis(axis: string): string[] {
   ];
 }
 
+function inferResponseKind(text: string): AssessmentResponseKind {
+  const normalized = text.trim();
+  if (normalized.includes('كم مرة') || normalized.includes('كم مرّة')) return 'frequency';
+  if (normalized.startsWith('هل ') || normalized.startsWith('هل؟')) return 'yes-no';
+  return 'degree';
+}
+
+function normalizeQuestion(question: RawAssessmentQuestion): AssessmentQuestion {
+  return {
+    axis: question.axis,
+    text: question.text,
+    responseKind: question.responseKind ?? inferResponseKind(question.text),
+  };
+}
+
 export function buildMonitorQuestions(monitor: AssessmentMonitor): AssessmentQuestion[] {
   const custom = questionBanks[monitor.slug];
-  if (custom?.length) return custom;
-  return monitor.axes.flatMap((axis) => questionsForAxis(axis).map((text) => ({ axis, text })));
+  if (custom?.length) return custom.map(normalizeQuestion);
+  return monitor.axes.flatMap((axis) => questionsForAxis(axis).map((text) => normalizeQuestion({ axis, text })));
 }
 
 export function getMonitorReadingTime(monitor: AssessmentMonitor) {
