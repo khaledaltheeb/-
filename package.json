@@ -49,7 +49,7 @@
     "encyclopedia:coverage": "python scripts/encyclopedia_coverage_report.py",
     "encyclopedia:import:dry": "node scripts/import_psych_encyclopedia.mjs",
     "encyclopedia:import": "node scripts/import_psych_encyclopedia.mjs --apply",
-    "smoke": "node scripts/smoke.mjs && node scripts/legacy-preservation-smoke.mjs && node scripts/legacy-landing-integration-smoke.mjs && node scripts/historical-functional-parity-smoke.mjs && node scripts/care-guides-wave-004-smoke.mjs && node scripts/v7-critical-guide-rewrites-001-smoke.mjs",
+    "smoke": "node scripts/smoke.mjs && node scripts/legacy-preservation-smoke.mjs && node scripts/legacy-landing-integration-smoke.mjs && node scripts/historical-functional-parity-smoke.mjs && node scripts/care-guides-wave-004-smoke.mjs && node scripts/v7-critical-guide-rewrites-001-smoke.mjs && node scripts/open-source-identity-smoke.mjs",
     "encyclopedia:assets": "node scripts/build_psych_encyclopedia_assets.mjs",
     "encyclopedia:assets:check": "node scripts/psych-encyclopedia-assets-contract.mjs",
     "expanded-encyclopedia:assets": "node scripts/build_expanded_encyclopedia_assets.mjs",
