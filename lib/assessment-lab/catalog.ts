@@ -52,12 +52,13 @@ export const assessmentSlugs = [...assessmentMonitors.map((row) => row.slug), ..
 export const assessmentCategories = [...new Set(assessmentMonitors.map((row) => row.category))];
 
 const sourceStatusLabels: Record<string, string> = {
-  'official-arabic-source-required': 'نسخة عربية مدرجة في مصدر رسمي — التحقق من النسخة وشروط إعادة الاستخدام جارٍ قبل التفعيل',
+  'official-arabic-no-copyright-listed': 'نسخة عربية مدرجة رسميًا، والمصدر الرسمي يسجل Copyright: No — المطابقة العلمية والتشغيلية مطلوبة قبل التفعيل',
+  'who-cc-license-arabic-not-listed': 'ترخيص WHO يسمح بإعادة الاستخدام غير التجاري بشروطه، لكن العربية غير مدرجة حاليًا ضمن النسخ الرسمية المنشورة',
   'source-guided-only': 'مرجعي فقط — يُحال إلى المصدر الرسمي ولا تُعاد صياغة الأداة أو درجتها',
   'permission-and-arabic-version-review': 'مراجعة الإذن والنسخة العربية مطلوبة قبل أي نشر تفاعلي',
   'licensed-restricted': 'أداة مرخّصة ومقيّدة — لا تُعرض البنود أو مفاتيح التصحيح على الويب المفتوح',
   'permission-required-for-modification-integration': 'يتطلب إذنًا للتعديل أو الترجمة أو التكامل — صفحة مصدرية فقط حاليًا',
-  'arabic-version-and-attribution-review': 'النسخة العربية وشروط النسبة قيد المطابقة قبل أي تفعيل تفاعلي',
+  'arabic-available-rights-note-review': 'العربية متاحة من المصدر، لكن إشعارات الحقوق تحتاج مطابقة نهائية قبل النشر التفاعلي المفتوح',
   'conditions-of-use-and-arabic-version-review': 'شروط الاستخدام والنسخة العربية تحتاجان تحققًا قبل نشر البنود أو الدرجة',
   'distributed-by-mapi-rights-review': 'موزّع عبر جهة حقوق مختصة — تُراجع شروط الاستخدام والترجمة قبل أي تفعيل',
 };
