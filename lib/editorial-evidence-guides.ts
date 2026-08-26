@@ -260,7 +260,7 @@ export const editorialEvidenceGuides:EditorialEvidenceGuide[]=[
   excerpt:'إطار غير تشخيصي يساعد الأسرة على تنظيم المصادر والسجلات والإحالات والأسئلة في الأمراض النادرة، مع الاستفادة من شبكات المرضى العالمية دون وعود علاجية أو قوائم خدمات غير موثقة.',category:'الأمراض النادرة وتمكين الأسرة',keyword:'الأمراض النادرة دعم الأسرة',secondary:['Rare Diseases International','مرض نادر ماذا أفعل','rare disease Arabic'],terms:['الأمراض النادرة','الأسرة','التشخيص','الإحالة','السجل الصحي','المنظمات المرضية','البحث السريري'],
   refs:[
    {title:'Rare Diseases International',publisher:'Rare Diseases International',url:'https://www.rarediseasesinternational.org/'},
-   {title:'Rare Diseases',publisher:'World Health Organization',url:'https://www.who.int/health-topics/rare-diseases'}
+   {title:'Rare Diseases',publisher:'World Health Organization',url:'https://www.who.int/standards/classifications/frequently-asked-questions/rare-diseases/'}
   ],blocks:[
    p('في المرض النادر، قد تكون الصعوبة الأولى هي تجزؤ المعرفة: اسم غير مألوف، مختصون في مدن مختلفة، فحوص تتكرر، ومعلومات إنترنت غير متساوية الجودة. الهدف من هذا الدليل هو بناء «ملف تنقل» يحفظ ما نعرفه وما لا نعرفه وما السؤال التالي، ويربط الأسرة بمصادر مؤسسية وشبكات مرضى دون أن يحول أي منظمة إلى بديل عن الفريق المعالج.'),
    h('ابنِ ملخصًا طبيًا من صفحة واحدة'),
