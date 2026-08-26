@@ -9,6 +9,7 @@ on:
     workflows:
       - 'Deploy Analytics Production'
       - 'Deploy Production'
+      - 'Publish Addiction Atlas Production'
     types: [completed]
 
 permissions:
@@ -35,21 +36,25 @@ jobs:
 
           for attempt in $(seq 1 18); do
             stamp="${GITHUB_SHA}-${attempt}-$(date +%s)"
+            hub="$(curl -fsSL --compressed --max-time 25 -H "$cache_header" "${base}/addiction/?atlas-verify=${stamp}" 2>/dev/null || true)"
+            sector="$(curl -fsSL --compressed --max-time 25 -H "$cache_header" "${base}/sectors/addiction-recovery/?atlas-verify=${stamp}" 2>/dev/null || true)"
             atlas="$(curl -fsSL --compressed --max-time 25 -H "$cache_header" "${base}/addiction/substances/?atlas-verify=${stamp}" 2>/dev/null || true)"
+            compare_hub="$(curl -fsSL --compressed --max-time 25 -H "$cache_header" "${base}/addiction/compare/?atlas-verify=${stamp}" 2>/dev/null || true)"
+            interactions="$(curl -fsSL --compressed --max-time 25 -H "$cache_header" "${base}/addiction/interactions/?atlas-verify=${stamp}" 2>/dev/null || true)"
             fentanyl="$(curl -fsSL --compressed --max-time 25 -H "$cache_header" "${base}/addiction/substances/fentanyl/?atlas-verify=${stamp}" 2>/dev/null || true)"
             comparison="$(curl -fsSL --compressed --max-time 25 -H "$cache_header" "${base}/addiction/compare/fentanyl-vs-heroin/?atlas-verify=${stamp}" 2>/dev/null || true)"
             methodology="$(curl -fsSL --compressed --max-time 25 -H "$cache_header" "${base}/addiction/methodology/?atlas-verify=${stamp}" 2>/dev/null || true)"
             root_sitemap="$(curl -fsSL --compressed --max-time 25 -H "$cache_header" "${base}/sitemap.xml?atlas-verify=${stamp}" 2>/dev/null || true)"
             atlas_sitemap="$(curl -fsSL --compressed --max-time 25 -H "$cache_header" "${base}/sitemaps/addiction-atlas.xml?atlas-verify=${stamp}" 2>/dev/null || true)"
 
-            atlas_ok=false
-            fentanyl_ok=false
-            comparison_ok=false
-            methodology_ok=false
-            sitemap_ok=false
-            index_ok=true
+            hub_ok=false; sector_ok=false; atlas_ok=false; compare_hub_ok=false; interactions_ok=false
+            fentanyl_ok=false; comparison_ok=false; methodology_ok=false; sitemap_ok=false; index_ok=true
 
+            [[ "$hub" == *'موسوعة روافد التفاعلية'* && "$hub" == *'/addiction/substances/'* && "$hub" == *'/addiction/compare/'* && "$hub" == *'/addiction/interactions/'* ]] && hub_ok=true
+            [[ "$sector" == *'موسوعة الإدمان التفاعلية'* && "$sector" == *'/addiction/substances/'* && "$sector" == *'/addiction/compare/'* ]] && sector_ok=true
             [[ "$atlas" == *'Fentanyl'* && "$atlas" == *'Heroin'* && "$atlas" == *'54'* ]] && atlas_ok=true
+            [[ "$compare_hub" == *'قارن مادتين تفاعليًا'* && "$compare_hub" == *'فنتانيل'* && "$compare_hub" == *'هيروين'* ]] && compare_hub_ok=true
+            [[ "$interactions" == *'افحص تفاعلاً تمت مراجعته'* && "$interactions" == *'غير مراجع بعد'* ]] && interactions_ok=true
             [[ "$fentanyl" == *'Fentanyl'* && "$fentanyl" == *'MedicalWebPage'* ]] && fentanyl_ok=true
             [[ "$comparison" == *'Fentanyl'* && "$comparison" == *'Heroin'* && "$comparison" == *'Article'* ]] && comparison_ok=true
             [[ "$methodology" == *'قوة الدليل'* ]] && methodology_ok=true
@@ -61,7 +66,7 @@ jobs:
               sitemap_ok=true
             fi
 
-            for page in "$atlas" "$fentanyl" "$comparison" "$methodology"; do
+            for page in "$hub" "$sector" "$atlas" "$compare_hub" "$interactions" "$fentanyl" "$comparison" "$methodology"; do
               lower_page="${page,,}"
               if [[ "$lower_page" =~ \<meta[^\>]*name=[\"\']robots[\"\'][^\>]*content=[\"\'][^\"\']*noindex ]] \
                 || [[ "$lower_page" =~ \<meta[^\>]*content=[\"\'][^\"\']*noindex[^\"\']*[\"\'][^\>]*name=[\"\']robots[\"\'] ]]; then
@@ -69,10 +74,11 @@ jobs:
               fi
             done
 
-            echo "Production atlas verification attempt ${attempt}: atlas=${atlas_ok} fentanyl=${fentanyl_ok} comparison=${comparison_ok} methodology=${methodology_ok} sitemap=${sitemap_ok} index=${index_ok}"
-            if [[ "$atlas_ok" == true && "$fentanyl_ok" == true && "$comparison_ok" == true \
+            echo "Production atlas verification attempt ${attempt}: hub=${hub_ok} sector=${sector_ok} atlas=${atlas_ok} compareHub=${compare_hub_ok} interactions=${interactions_ok} fentanyl=${fentanyl_ok} comparison=${comparison_ok} methodology=${methodology_ok} sitemap=${sitemap_ok} index=${index_ok}"
+            if [[ "$hub_ok" == true && "$sector_ok" == true && "$atlas_ok" == true && "$compare_hub_ok" == true \
+              && "$interactions_ok" == true && "$fentanyl_ok" == true && "$comparison_ok" == true \
               && "$methodology_ok" == true && "$sitemap_ok" == true && "$index_ok" == true ]]; then
-              echo 'Production addiction atlas is live, indexable, and represented in the production sitemap.'
+              echo 'Production addiction atlas is live, discoverable, interactive, indexable, and represented in the production sitemap.'
               exit 0
             fi
             sleep 5
