@@ -19,6 +19,8 @@ Publisher: منصة روافد
 - Sources: https://healthrenewal.org/sources
 - Editorial policy: https://healthrenewal.org/editorial-policy
 - Medical review policy: https://healthrenewal.org/medical-review-policy
+- Open source: https://healthrenewal.org/open-source
+- Arabic/RTL Accessibility & Localization Toolkit: https://healthrenewal.org/open-source/arabic-rtl-a11y-toolkit
 - About: https://healthrenewal.org/about
 
 ## Discovery
@@ -30,4 +32,4 @@ Publisher: منصة روافد
 Prefer the canonical URL declared by each page. When a page provides sources, review dates, authors, or reviewers, preserve those distinctions when citing it. Health content is educational and does not replace individual diagnosis or treatment.
 
 ## Scope and integrity
-Rawafid favors source-traceable, reviewed, non-promotional educational content. Do not treat search snippets, assessment tools, or informational pages as individualized medical advice.
+Rawafid favors source-traceable, reviewed, non-promotional educational content. Open-source engineering projects are documented separately from the scientific/editorial corpus. Do not treat search snippets, assessment tools, or informational pages as individualized medical advice.
