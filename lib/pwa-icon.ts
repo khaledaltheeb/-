@@ -1,3 +1,4 @@
+// ImageResponse is intentionally avoided here: embedding real pre-rendered PNG bytes keeps the PWA icons standards-compliant without pulling next/og + resvg.wasm into the Cloudflare Worker.
 const BRAND_TEAL = '#075f61';
 const BRAND_GOLD = '#e6b650';
 void BRAND_TEAL;
