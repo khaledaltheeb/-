@@ -317,3 +317,39 @@ export async function getRelatedCareGuideContent(contentId: string): Promise<Car
   const seen = new Set(editorialItems.map((item) => item.id));
   return [...editorialItems, ...fallbackItems.filter((item) => !seen.has(item.id))].slice(0, 6);
 }
+
+export function safeCareGuideReferences(value: unknown): CareGuideReference[] {
+  if (!Array.isArray(value)) return [];
+  return value.slice(0, 100).flatMap((item) => {
+    const row = asRecord(item);
+    if (!row) return [];
+    const url = asString(row.url);
+    const title = asString(row.title);
+    const publisher = asString(row.publisher);
+    const year = typeof row.year === 'string' || typeof row.year === 'number' ? row.year : undefined;
+    if (!title && !/^https:\/\//i.test(url)) return [];
+    return [{
+      title: title || undefined,
+      url: /^https:\/\//i.test(url) ? url : undefined,
+      publisher: publisher || undefined,
+      year,
+    }];
+  });
+}
+
+export function visibleCareGuideFaq(value: unknown): CareGuideFaq[] {
+  const root = asRecord(value);
+  const blocks = Array.isArray(root?.blocks) ? root.blocks : [];
+  return blocks
+    .flatMap((block) => {
+      const row = asRecord(block);
+      if (!row || row.type !== 'faq' || !Array.isArray(row.items)) return [];
+      return row.items.flatMap((item) => {
+        const faq = asRecord(item);
+        const question = asString(faq?.question).slice(0, 500);
+        const answer = asString(faq?.answer).slice(0, 6000);
+        return question.length >= 3 && answer.length >= 3 ? [{ question, answer }] : [];
+      });
+    })
+    .slice(0, 40);
+}
