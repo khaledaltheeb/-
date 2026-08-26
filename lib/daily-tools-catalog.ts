@@ -42,6 +42,7 @@ function pageFromRecord(value: unknown): LegacyPreservedPage | null {
     references_json: row.references_json ?? [],
     internal_links_json: row.internal_links_json ?? [],
     images_json: row.images_json ?? [],
+    current_content: null,
   };
 }
 
@@ -66,9 +67,6 @@ function assetPathForRoute(route: string): string | null {
 
 async function readCloudflareAsset(pathname: string): Promise<unknown | null> {
   try {
-    // OpenNext requires async context access from statically generated routes.
-    // The synchronous API can fail inside SSG/ISR execution even though the
-    // same binding is valid at runtime.
     const context = await getCloudflareContext({ async: true });
     const assets = (context.env as unknown as AssetEnvironment).ASSETS;
     if (!assets) return null;
