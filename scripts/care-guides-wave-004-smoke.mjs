@@ -1,6 +1,9 @@
 const base = (process.env.SMOKE_BASE_URL || 'http://127.0.0.1:3000').replace(/\/$/, '');
 const canonicalOrigin = (process.env.NEXT_PUBLIC_SITE_URL || 'https://healthrenewal.org').replace(/\/$/, '');
 
+// Wave 004 has no publication authorization or completed human review yet.
+// All currently materialized routes must therefore stay directly accessible
+// but non-indexable until an explicit per-page release decision is recorded.
 const heldPublished = [
   ['/care-guides/cognitive-flexibility-switching-plan/', 'المرونة المعرفية وتبديل المهام'],
   ['/care-guides/cognitive-load-instruction-audit/', 'الحمل المعرفي في التعليمات'],
@@ -13,9 +16,6 @@ const heldPublished = [
   ['/care-guides/spaced-practice-study-calendar/', 'الممارسة المتباعدة'],
   ['/care-guides/sustained-attention-work-interval/', 'الانتباه المستمر'],
   ['/care-guides/working-memory-task-breakdown/', 'الذاكرة العاملة والمهام الطويلة'],
-];
-
-const reviewedPublished = [
   ['/care-guides/care-guide-dual-task-attention-limit/', 'تعدد المهام وحدود الانتباه'],
 ];
 
@@ -39,7 +39,7 @@ function canonicalHref(html) {
   return tag ? attr(tag, 'href') : '';
 }
 
-async function verifyPublishedRoute(route, titleMarker, expectedIndex) {
+async function verifyHeldRoute(route, titleMarker) {
   try {
     const response = await fetch(`${base}${route}`, { redirect: 'manual' });
     const location = response.headers.get('location') || '';
@@ -56,12 +56,7 @@ async function verifyPublishedRoute(route, titleMarker, expectedIndex) {
     }
 
     const robots = metaContent(html, 'robots').toLowerCase().replace(/\s+/g, '');
-    if (expectedIndex) {
-      if (!robots.includes('index') || !robots.includes('follow') || robots.includes('noindex') || robots.includes('nofollow')) {
-        console.error(`WAVE004 ${route}: expected robots index,follow without noindex/nofollow; got ${robots || 'missing'}`);
-        failed = true;
-      }
-    } else if (!robots.includes('noindex') || !robots.includes('follow') || robots.includes('nofollow')) {
+    if (!robots.includes('noindex') || !robots.includes('follow') || robots.includes('nofollow')) {
       console.error(`WAVE004 ${route}: expected robots noindex,follow without nofollow; got ${robots || 'missing'}`);
       failed = true;
     }
@@ -87,7 +82,7 @@ async function verifyPublishedRoute(route, titleMarker, expectedIndex) {
       failed = true;
     }
 
-    console.log(`WAVE004 ${route}: 200 + ${expectedIndex ? 'index,follow' : 'noindex,follow'} + canonical + disclaimer + references checked`);
+    console.log(`WAVE004 ${route}: 200 + noindex,follow + canonical + disclaimer + references checked`);
   } catch (error) {
     console.error(`WAVE004 ${route}:`, error);
     failed = true;
@@ -95,12 +90,8 @@ async function verifyPublishedRoute(route, titleMarker, expectedIndex) {
 }
 
 for (const [route, titleMarker] of heldPublished) {
-  await verifyPublishedRoute(route, titleMarker, false);
-}
-
-for (const [route, titleMarker] of reviewedPublished) {
-  await verifyPublishedRoute(route, titleMarker, true);
+  await verifyHeldRoute(route, titleMarker);
 }
 
 if (failed) process.exit(1);
-console.log(`Wave 004 rendered smoke passed for ${heldPublished.length} held published pages + ${reviewedPublished.length} reviewed indexable page.`);
+console.log(`Wave 004 rendered smoke passed for ${heldPublished.length} held materialized pages.`);

@@ -64,6 +64,7 @@ export type CareGuideRecord = {
 };
 
 const CARE_GUIDE_DETAIL_FIELDS = 'id,slug,title,excerpt,body_json,body_text,content_type,audience,seo_title,seo_description,canonical_url,robots_index,robots_follow,published_at,updated_at,featured_image_url,featured_image_alt,primary_keyword,secondary_keywords,semantic_terms,author_display_name,reviewer_display_name,reviewer_credentials,last_reviewed_at,references_json,medical_disclaimer,schema_json';
+const WAVE_004_BATCH_ID = 'care-guides-rich-wave-004';
 
 function asRecord(value: unknown): JsonRecord | null {
   return value && typeof value === 'object' && !Array.isArray(value) ? (value as JsonRecord) : null;
@@ -77,10 +78,53 @@ function asStringArray(value: unknown, limit = 50) {
   return Array.isArray(value) ? value.slice(0, limit).map((item) => asString(item)).filter(Boolean) : [];
 }
 
+function isTrue(value: unknown) {
+  return value === true || value === 'true';
+}
+
+function usefulArabicWordCount(value: string | null) {
+  return (value ?? '').split(/\s+/).filter((token) => /[ء-ي]/.test(token)).length;
+}
+
+function arrayLength(value: unknown) {
+  return Array.isArray(value) ? value.length : 0;
+}
+
 function normalizePathSegments(segments: string[]) {
   return segments
     .map((segment) => segment.trim().toLowerCase())
     .filter((segment) => /^[a-z0-9][a-z0-9-]*$/.test(segment));
+}
+
+/**
+ * Runtime counterpart to the database Wave 004 release guard.
+ *
+ * Wave 004 has an explicit quality hold: database drift must never make an
+ * unreleased YMYL-adjacent guide indexable. Pages remain directly accessible
+ * and followable, but indexability is granted only after the recorded release
+ * evidence required by the repository policy is present.
+ */
+export function careGuideCanIndex(record: Pick<CareGuideRecord,
+  'robots_index' | 'schema_json' | 'body_text' | 'references_json' |
+  'author_display_name' | 'reviewer_display_name' | 'reviewer_credentials' | 'last_reviewed_at'
+>) {
+  if (!record.robots_index) return false;
+
+  const schema = asRecord(record.schema_json);
+  if (asString(schema?.batch_id) !== WAVE_004_BATCH_ID) return true;
+  if (!isTrue(schema?.publication_ready)) return false;
+
+  const reviewer = asString(record.reviewer_display_name);
+  const credentials = asString(record.reviewer_credentials);
+  const author = asString(record.author_display_name);
+  const reviewedAt = record.last_reviewed_at ? new Date(record.last_reviewed_at) : null;
+  if (!reviewer || !credentials || !reviewedAt || Number.isNaN(reviewedAt.getTime()) || reviewedAt.getTime() > Date.now()) return false;
+  if (author && author.localeCompare(reviewer, undefined, { sensitivity: 'accent' }) === 0) return false;
+  if (usefulArabicWordCount(record.body_text) < 3000) return false;
+  if (arrayLength(record.references_json) < 5) return false;
+  if (arrayLength(schema?.claim_source_map) < 5) return false;
+
+  return true;
 }
 
 function relatedItemFromRow(row: JsonRecord): CareGuideRelatedItem | null {
@@ -264,19 +308,14 @@ export async function getRelatedCareGuideContent(contentId: string): Promise<Car
   }
 
   const rows = Array.isArray(data) ? data : [];
-  const byId = new Map(rows.map((row) => [String(row.id), row as JsonRecord]));
-  const semanticItems = orderedIds.flatMap((id) => {
+  const byId = new Map(rows.map((row) => [asString(row.id), row as JsonRecord]));
+  const fallbackItems = orderedIds.flatMap((id) => {
     const item = relatedItemFromRow(byId.get(id) ?? {});
     return item ? [item] : [];
   });
 
-  const combined = [...editorialItems, ...semanticItems];
-  const seen = new Set<string>();
-  return combined.filter((item) => {
-    if (seen.has(item.id)) return false;
-    seen.add(item.id);
-    return true;
-  }).slice(0, 6);
+  const seen = new Set(editorialItems.map((item) => item.id));
+  return [...editorialItems, ...fallbackItems.filter((item) => !seen.has(item.id))].slice(0, 6);
 }
 
 export function safeCareGuideReferences(value: unknown): CareGuideReference[] {

@@ -1,5 +1,6 @@
 import { sitemapResponse } from '@/lib/sitemap-xml';
 import { infographics } from '@/lib/practical-resources';
+import { editorialEvidenceGuides } from '@/lib/editorial-evidence-guides';
 
 export async function GET() {
   return sitemapResponse([
@@ -11,6 +12,9 @@ export async function GET() {
     { path:'/magazine/', changeFrequency:'daily', priority:.84 },
     { path:'/care-guides/', changeFrequency:'weekly', priority:.86 },
     { path:'/evidence-guides/', changeFrequency:'weekly', priority:.86 },
+    ...editorialEvidenceGuides.map((item) => ({ path:item.canonical_url, changeFrequency:'monthly' as const, priority:.78 })),
+    { path:'/media/', changeFrequency:'weekly', priority:.78 },
+    { path:'/external-review/', changeFrequency:'monthly', priority:.62 },
     { path:'/addiction', changeFrequency:'weekly', priority:.82 },
     { path:'/specialists', changeFrequency:'weekly', priority:.78 },
     { path:'/centers', changeFrequency:'weekly', priority:.78 },

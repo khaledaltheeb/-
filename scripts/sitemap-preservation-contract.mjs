@@ -34,8 +34,8 @@ for (const marker of [".eq('content_type', 'condition')", ".eq('status', 'publis
 if (!contentRoute.includes('DB_BATCH_SIZE = 1000') || !contentRoute.includes('PAGE_SIZE = 5000')) {
   fail('content sitemap must retain bounded database batching and 5000-URL paging');
 }
-if (!contentRoute.includes(".order('id', { ascending: true })") || contentRoute.includes(".order('updated_at'")) {
-  fail('content sitemap page boundaries must use stable id ordering; updated_at may only feed <lastmod>');
+if (!contentRoute.includes(".order('id', { ascending: false })") || contentRoute.includes(".order('updated_at'")) {
+  fail('content sitemap page boundaries must use stable descending id ordering; updated_at may only feed <lastmod>');
 }
 if (!quickInfoRoute.includes(".order('id', { ascending: true })") || quickInfoRoute.includes(".order('title'")) {
   fail('quick-info sitemap page boundaries must use stable id ordering so edits cannot move URLs between pages');

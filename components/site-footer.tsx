@@ -12,6 +12,7 @@ const groups = [
       { href: '/sections/parenting-family', label: 'التربية والوالدية والأسرة' },
       { href: '/care-guides/', label: 'أدلة التعامل والرعاية' },
       { href: '/evidence-guides/', label: 'الأدلة العلمية' },
+      { href: '/media/', label: 'مركز الوسائط والمواد العملية' },
       { href: '/sectors/short-encyclopedia', label: 'قطاع الموسوعة المختصرة' },
       { href: '/encyclopedia/', label: 'الموسوعة المختصرة — الصفحات المحفوظة' },
     ],
@@ -45,6 +46,7 @@ const groups = [
     links: [
       { href: '/about', label: 'من نحن' },
       { href: '/medical-review-policy', label: 'المراجعة العلمية' },
+      { href: '/external-review/', label: 'برنامج المراجعة الخارجية' },
       { href: '/editorial-policy', label: 'السياسة التحريرية' },
       { href: '/privacy', label: 'الخصوصية' },
       { href: '/terms', label: 'شروط الاستخدام' },

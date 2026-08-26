@@ -8,6 +8,26 @@ const PAGE_SIZE = 5000;
 const DB_BATCH_SIZE = 1000;
 const RELEASE = '2026-08-14T00:00:00.000Z';
 
+// Wave 004 has an explicit repository release hold. These currently
+// materialized pages remain available in place with noindex,follow until an
+// explicit per-page release decision records genuine human review. Keeping the
+// hold here prevents an accidental database robots_index drift from leaking an
+// unreleased page into XML sitemaps.
+const WAVE_004_HELD_PATHS = new Set([
+  '/care-guides/cognitive-flexibility-switching-plan/',
+  '/care-guides/cognitive-load-instruction-audit/',
+  '/care-guides/inhibitory-control-pause-plan/',
+  '/care-guides/metacognition-study-review-card/',
+  '/care-guides/processing-speed-accuracy-balance/',
+  '/care-guides/prospective-memory-external-cues/',
+  '/care-guides/retrieval-practice-study-plan/',
+  '/care-guides/selective-attention-distraction-audit/',
+  '/care-guides/spaced-practice-study-calendar/',
+  '/care-guides/sustained-attention-work-interval/',
+  '/care-guides/working-memory-task-breakdown/',
+  '/care-guides/care-guide-dual-task-attention-limit/',
+]);
+
 type SitemapRow = {
   path: string;
   lastModified: string | null;
@@ -36,9 +56,8 @@ export async function GET(request: Request) {
   // to this sitemap safety net. Dedicated maps such as quick-info may repeat the same
   // canonical URL; overlap is preferable to silently dropping an indexable published page.
   // Conditions remain in the encyclopedia sitemap, whose public route is canonicalized there.
-  // Pagination is intentionally ordered by the immutable row id rather than updated_at:
-  // content edits must change <lastmod> without moving URLs between sitemap pages while
-  // crawlers are fetching page=0, page=1, ... on a continuously updated 10k+ URL site.
+  // Pagination is intentionally ordered by immutable id rather than updated_at: content edits
+  // must change <lastmod> without moving URLs between sitemap pages while crawlers fetch them.
   for (let batchStart = pageStart; batchStart < pageEndExclusive; batchStart += DB_BATCH_SIZE) {
     const batchEnd = Math.min(batchStart + DB_BATCH_SIZE - 1, pageEndExclusive - 1);
     const requestedRows = batchEnd - batchStart + 1;
@@ -49,7 +68,7 @@ export async function GET(request: Request) {
       .neq('content_type', 'condition')
       .lte('published_at', now)
       .eq('robots_index', true)
-      .order('id', { ascending: true })
+      .order('id', { ascending: false })
       .range(batchStart, batchEnd);
 
     if (error) {
@@ -63,12 +82,16 @@ export async function GET(request: Request) {
     if (batch.length < requestedRows) break;
   }
 
-  const databaseRows: SitemapRow[] = data.map((item) => ({
-    path: item.canonical_url || `/content/${item.slug}`,
-    lastModified: item.updated_at,
-    changeFrequency: 'monthly',
-    priority: .7,
-  }));
+  const databaseRows: SitemapRow[] = data.flatMap((item) => {
+    const path = item.canonical_url || `/content/${item.slug}`;
+    if (WAVE_004_HELD_PATHS.has(path)) return [];
+    return [{
+      path,
+      lastModified: item.updated_at,
+      changeFrequency: 'monthly',
+      priority: .7,
+    }];
+  });
 
   let generatedRows: SitemapRow[] = [];
   if (page === 0) {
