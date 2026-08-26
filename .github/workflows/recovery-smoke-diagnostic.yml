@@ -1,0 +1,66 @@
+name: Recovery Smoke Diagnostic
+
+on:
+  push:
+    branches:
+      - agent/complete-recovery-program-20260826
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
+      NEXT_PUBLIC_SITE_URL: https://healthrenewal.org
+      NEXT_PUBLIC_ALLOW_INDEXING: 'true'
+      SMOKE_BASE_URL: http://127.0.0.1:3000
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Build
+        run: npm run build
+      - name: Start production server
+        shell: bash
+        run: |
+          set -euo pipefail
+          nohup npm run start -- --hostname 127.0.0.1 --port 3000 > /tmp/rawafid-server.log 2>&1 &
+          echo $! > /tmp/rawafid-server.pid
+          for i in $(seq 1 40); do
+            if curl -fsS http://127.0.0.1:3000/ >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/rawafid-server.log >&2 || true
+          exit 1
+      - name: Capture production HTTP smoke
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run smoke 2>&1 | tee /tmp/rawafid-smoke.log
+      - name: Upload diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: recovery-smoke-diagnostics-${{ github.run_id }}
+          path: |
+            /tmp/rawafid-smoke.log
+            /tmp/rawafid-server.log
+          if-no-files-found: ignore
+          retention-days: 2
+      - name: Stop production server
+        if: always()
+        shell: bash
+        run: |
+          if [ -f /tmp/rawafid-server.pid ]; then
+            kill "$(cat /tmp/rawafid-server.pid)" 2>/dev/null || true
+          fi
