@@ -8,6 +8,7 @@ import {
   legacyReferences,
   type LegacyPreservedPage,
 } from '@/lib/legacy-preserved-page';
+import { shouldIndexPreservedPublishedPage } from '@/lib/public-indexability';
 
 type Props = { page: LegacyPreservedPage; route: string };
 
@@ -21,6 +22,10 @@ export default function LegacyPreservedPageView({ page, route }: Props) {
   const title = page.h1 || page.title || 'محتوى محفوظ';
   const internalLinks = legacyInternalLinks(page.internal_links_json);
   const references = legacyReferences(page.references_json);
+  const isIndexablePublished = shouldIndexPreservedPublishedPage({
+    sourceFamily: page.source_family,
+    route: canonical,
+  });
 
   return <><SiteHeader /><main className="article-shell">
     <nav className="breadcrumbs" aria-label="مسار الصفحة">
@@ -38,7 +43,9 @@ export default function LegacyPreservedPageView({ page, route }: Props) {
       </header>
       <aside className="content-callout info" aria-label="حالة المراجعة">
         <strong>حالة هذه النسخة</strong>
-        <p>هذا هو المحتوى الذي كان منشورًا على المسار التاريخي نفسه. لم تُمنح هذه النسخة اعتماد دورة المراجعة العلمية الحالية بعد، لذلك تبقى غير مفهرسة إلى أن تكتمل مراجعتها.</p>
+        {isIndexablePublished
+          ? <p>هذه صفحة منشورة ضمن قاعدة محتوى روافد، وقد حُفظ مسارها العام ومحتواها أثناء الانتقال إلى البنية الجديدة. تظهر للمستخدم ومحركات البحث على عنوانها الأساسي نفسه، مع استمرار التحسين التحريري الدوري.</p>
+          : <p>هذا هو المحتوى الذي كان منشورًا على المسار التاريخي نفسه. لم تُمنح هذه النسخة اعتماد دورة المراجعة العلمية الحالية بعد، لذلك تبقى خارج الفهرسة العامة إلى أن تكتمل مراجعتها.</p>}
       </aside>
       <div className="article-body">
         <ContentRenderer bodyJson={page.body_json} bodyText={page.body_text} recordId={page.source_path} />
