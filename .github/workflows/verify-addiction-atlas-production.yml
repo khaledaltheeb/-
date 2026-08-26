@@ -9,8 +9,6 @@ on:
     workflows:
       - 'Deploy Analytics Production'
       - 'Deploy Production'
-      - 'Publish Addiction Atlas Production'
-      - 'Publish Addiction Atlas Retry'
     types: [completed]
 
 permissions:
