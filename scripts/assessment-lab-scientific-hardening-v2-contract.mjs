@@ -31,7 +31,7 @@ const registryRequirements = [
   'constructDefinition','intendedPopulation','intendedUse','prohibitedUses','referencePeriod','domains',
   'itemRationale','interpretationBoundary','safetyEscalation','scientificReferences','validationStage',
   'responseScaleSemantics','privacyStatement','functionalImpactGuidance','professionalReferralPath',
-  'languageClarityReview','contentValidityReview','versioning',
+  'languageClarityReview','contentValidityReview','versioning','documentationStatus',
 ];
 for (const field of registryRequirements) {
   if (!registry.includes(field)) fail(`normalized scientific dossier missing ${field}`);
@@ -51,12 +51,16 @@ const sourceFiles = [
 const slugs = [];
 for (const path of sourceFiles) {
   const parsed = JSON.parse(fs.readFileSync(path, 'utf8'));
-  const profiles = Array.isArray(parsed.profiles) ? parsed.profiles : Object.values(parsed.profiles ?? {});
-  for (const profile of profiles) {
-    slugs.push(profile.slug);
-    if (!profile.reference_period?.trim()) fail(`${profile.slug} missing reference period`);
-    if (!profile.validation_stage?.trim()) fail(`${profile.slug} missing validation stage`);
-    if (profile.validation_stage === 'validated') fail(`${profile.slug} cannot be validated without an empirical dossier`);
+  const entries = Array.isArray(parsed.profiles)
+    ? parsed.profiles.map((profile) => [profile.slug, profile])
+    : Object.entries(parsed.profiles ?? {});
+  for (const [key, profile] of entries) {
+    const slug = profile.slug ?? key;
+    slugs.push(slug);
+    if (!slug) fail(`${path} contains a profile without a slug or keyed identifier`);
+    if (!profile.reference_period?.trim()) fail(`${slug} missing reference period`);
+    if (!profile.validation_stage?.trim()) fail(`${slug} missing validation stage`);
+    if (profile.validation_stage === 'validated') fail(`${slug} cannot be validated without an empirical dossier`);
   }
 }
 const uniqueSlugs = new Set(slugs);
