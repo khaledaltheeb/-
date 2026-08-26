@@ -1,5 +1,6 @@
 name: Publish Assessment Lab Now
 
+# One-off production release path for the verified Assessment Lab wave.
 on:
   push:
     branches: [main]
