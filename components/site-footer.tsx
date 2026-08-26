@@ -37,6 +37,7 @@ const groups = [
       { href: '/search', label: 'البحث المتقدم' },
       { href: '/community', label: 'المجتمع' },
       { href: '/join', label: 'الانضمام إلى روافد' },
+      { href: '/institutions', label: 'بوابة المؤسسات والتعاون التقني' },
     ],
   },
   {

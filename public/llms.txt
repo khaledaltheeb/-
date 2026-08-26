@@ -21,6 +21,17 @@ Publisher: منصة روافد
 - Medical review policy: https://healthrenewal.org/medical-review-policy
 - About: https://healthrenewal.org/about
 
+## Institutional and open-source engineering
+Rawafid also maintains a separate public engineering toolkit for reusable Arabic, RTL, localization and accessibility utilities. This engineering work is separate from Rawafid's scientific/editorial corpus.
+- Institutional gateway (Arabic): https://healthrenewal.org/institutions
+- Institutional gateway (English): https://healthrenewal.org/en/institutions
+- Arabic & RTL assurance: https://healthrenewal.org/institutions/arabic-rtl-assurance
+- Terminology & translation QA: https://healthrenewal.org/institutions/terminology-qa
+- Open-source engineering: https://healthrenewal.org/institutions/open-source
+- Public source repository: https://github.com/khaledaltheeb/rawafid-arabic-rtl-a11y-toolkit
+
+The institutional pages describe capabilities and review methods. They do not imply that any named external organization endorses, accredits, sponsors, or partners with Rawafid unless a relationship is explicitly confirmed in writing.
+
 ## Discovery
 - Sitemap index: https://healthrenewal.org/sitemap.xml
 - Robots: https://healthrenewal.org/robots.txt
