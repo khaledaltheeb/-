@@ -36,6 +36,102 @@ const STALE_PRESERVED_LINK_REPLACEMENTS = new Map<string, PreservedLinkReplaceme
   ['/special-ed-encyclopedia/learning-disabilities/', { href: '/care-guides/specific-learning-disorder-home-school/', title: 'دليل صعوبات التعلم بين المنزل والمدرسة' }],
 ]);
 
+// These routes were emitted only by legacy navigation metadata and were verified by the
+// full sitemap crawler to return 404 with no published or preserved route behind them.
+// Suppressing them prevents publishing broken internal navigation without deleting or
+// mutating any article body, scientific content, or valid historical URL.
+const CONFIRMED_DEAD_PRESERVED_LINKS = new Set<string>([
+  '/care-guides/communication-disorders-differential/',
+  '/care-guides/family-crisis-plan/',
+  '/care-guides/ocd-assessment/',
+  '/care-guides/older-adult-digital-safety/',
+  '/care-guides/safe-response-behavior-escalation/',
+  '/care-guides/safety-plan/',
+  '/comparisons/attachment-styles/',
+  '/comparisons/body-image-vs-body-dysmorphia/',
+  '/comparisons/grief-vs-depression/',
+  '/comparisons/high-gaming-vs-gaming-disorder/',
+  '/comparisons/ocd-vs-anxiety/',
+  '/comparisons/psychosis-vs-dissociation/',
+  '/comparisons/secure-vs-anxious-attachment/',
+  '/comparisons/social-anxiety-vs-shyness/',
+  '/content/adolescent-identity/',
+  '/content/anger-management/',
+  '/content/attachment-styles/',
+  '/content/autism-spectrum-disorder/',
+  '/content/binge-eating-disorder/',
+  '/content/body-dysmorphic-disorder/',
+  '/content/body-image/',
+  '/content/borderline-personality-disorder/',
+  '/content/breakup-recovery/',
+  '/content/bulimia-nervosa/',
+  '/content/caregiver-support/',
+  '/content/cbt/',
+  '/content/child-anxiety/',
+  '/content/cognitive-rehabilitation/',
+  '/content/decision-fatigue/',
+  '/content/dialectical-behavior-therapy/',
+  '/content/emotion-regulation/',
+  '/content/family-school-collaboration-meeting/',
+  '/content/fear/',
+  '/content/grief/',
+  '/content/identity/',
+  '/content/insomnia/',
+  '/content/internet-addiction/',
+  '/content/panic-disorder/',
+  '/content/personality/',
+  '/content/positive-parenting/',
+  '/content/procrastination/',
+  '/content/psychological-boundaries/',
+  '/content/psychological-safety/',
+  '/content/psychotherapy/',
+  '/content/ptsd/',
+  '/content/quality-of-life/',
+  '/content/relationship-boundaries/',
+  '/content/schizophrenia/',
+  '/content/shared-decision-making/',
+  '/content/sleep-deprivation/',
+  '/content/sleep-habits/',
+  '/content/sleep-problems/',
+  '/content/social-anxiety/',
+  '/content/social-anxiety-child/',
+  '/content/social-anxiety-disorder/',
+  '/content/social-comparison/',
+  '/content/social-psychology/',
+  '/content/social-support/',
+  '/content/stress-management/',
+  '/content/substance-use-disorders/',
+  '/content/teen-depression/',
+  '/content/tic-disorders/',
+  '/content/tourette-syndrome/',
+  '/content/treatment-outcome-monitoring/',
+  '/content/workplace-mental-health/',
+  '/content/workplace-stress/',
+  '/encyclopedia/panic-disorder-coping-strategies/',
+  '/evidence-guides/trauma-safe-guide/',
+  '/health/brain-health/',
+  '/library/branches/branches-clinical-psychology/',
+  '/library/therapies/erp/',
+  '/mental-health-at-work/',
+  '/mental-health/anger-management/',
+  '/mental-health/cognitive-aging/',
+  '/mental-health/mental-health-at-work/',
+  '/mental-health/ptsd/',
+  '/mental-health/sleep/',
+  '/quick-info/five-reasons-hard-to-say-no/',
+  '/quick-info/reassurance-seeking-vs-support/',
+  '/special-needs/aac-readiness-and-assessment/',
+  '/special-needs/aac-selecting-aac-system-device/',
+  '/special-needs/autism/sensory-profile-overload/',
+  '/special-needs/fba/',
+  '/special-needs/guides/inclusive-schooling/',
+  '/special-needs/motor-mobility/',
+  '/special-needs/practical/communication-language-aac/',
+  '/special-needs/school-accommodations/',
+  '/special-needs/self-advocacy-consent/',
+  '/special-needs/udl/',
+]);
+
 function asRecord(value: unknown): UnknownRecord | null {
   return value !== null && typeof value === 'object' && !Array.isArray(value) ? value as UnknownRecord : null;
 }
@@ -73,13 +169,14 @@ export function normalizeLegacyInternalHref(value: unknown): string | null {
   }
 }
 
-function repairPreservedInternalLink(href: string, title: string): LegacyPreservedLink {
+function repairPreservedInternalLink(href: string, title: string): LegacyPreservedLink | null {
   const url = new URL(href, 'https://healthrenewal.org');
   const route = safeRoute(url.pathname);
   if (!route) return { title, href };
   const replacement = STALE_PRESERVED_LINK_REPLACEMENTS.get(route);
-  if (!replacement) return { title, href };
-  return { title: replacement.title || title, href: replacement.href };
+  if (replacement) return { title: replacement.title || title, href: replacement.href };
+  if (CONFIRMED_DEAD_PRESERVED_LINKS.has(route)) return null;
+  return { title, href };
 }
 
 export function legacyInternalLinks(value: unknown): LegacyPreservedLink[] {
@@ -93,7 +190,7 @@ export function legacyInternalLinks(value: unknown): LegacyPreservedLink[] {
     const title = cleanText(entry.title ?? entry.label, 500);
     if (!href || !title) continue;
     const repaired = repairPreservedInternalLink(href, title);
-    if (seen.has(repaired.href)) continue;
+    if (!repaired || seen.has(repaired.href)) continue;
     seen.add(repaired.href);
     links.push(repaired);
   }
