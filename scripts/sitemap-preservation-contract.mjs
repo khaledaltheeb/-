@@ -13,6 +13,9 @@ const contentRoute = fs.readFileSync('app/sitemaps/content.xml/route.ts', 'utf8'
 const quickInfoRoute = fs.readFileSync('app/sitemaps/quick-info.xml/route.ts', 'utf8');
 const indexRoute = fs.readFileSync('app/sitemap.xml/route.ts', 'utf8');
 const encyclopediaRoute = fs.readFileSync('app/sitemaps/encyclopedia.xml/route.ts', 'utf8');
+const staticRoute = fs.readFileSync('app/sitemaps/static.xml/route.ts', 'utf8');
+const atlasRoute = fs.readFileSync('app/sitemaps/addiction-atlas.xml/route.ts', 'utf8');
+const dailyToolRoutes = new Set(JSON.parse(fs.readFileSync('generated/daily-tools-routes.json', 'utf8')));
 const failures = [];
 const fail = (message) => failures.push(message);
 
@@ -20,11 +23,17 @@ for (const [label, source] of [['content sitemap', contentRoute], ['sitemap inde
   if (source.includes(".is('schema_json->legacy_migration', null)")) {
     fail(`${label} must not exclude an indexable published page merely because legacy_migration metadata exists`);
   }
-  if (source.includes(".not('slug', 'like', 'quick-info-%')")) {
-    fail(`${label} must not exclude all quick-info slugs from the no-loss content safety net`);
-  }
   for (const marker of [".eq('status', 'published')", ".neq('content_type', 'condition')", ".eq('robots_index', true)"]) {
     if (!source.includes(marker)) fail(`${label} missing coverage marker: ${marker}`);
+  }
+  for (const marker of [
+    ".not('slug', 'like', 'quick-info-%')",
+    ".not('canonical_url', 'like', '/daily-tools/%')",
+    ".not('canonical_url', 'like', '/addiction/substances/%')",
+    ".not('canonical_url', 'like', '/addiction/compare/%')",
+    "'/addiction/methodology/'",
+  ]) {
+    if (!source.includes(marker)) fail(`${label} missing exclusive ownership filter: ${marker}`);
   }
 }
 
@@ -45,6 +54,7 @@ for (const marker of [
   "'/sitemaps/daily-tools.xml'",
   "'/sitemaps/taxonomy.xml'",
   "'/sitemaps/cognitive-lab.xml'",
+  "'/sitemaps/addiction-atlas.xml'",
   "'/sitemaps/specialists.xml'",
   "'/sitemaps/centers.xml'",
   "'/sitemaps/community.xml'",
@@ -53,6 +63,22 @@ for (const marker of [
   '/sitemaps/content.xml?page=${page}',
 ]) {
   if (!indexRoute.includes(marker)) fail(`sitemap index missing child sitemap marker: ${marker}`);
+}
+
+for (const duplicateHub of [
+  "path:'/quick-info/'",
+  "path:'/encyclopedia/'",
+  "path:'/care-guides/'",
+  "path:'/evidence-guides/'",
+  "path:'/specialists'",
+  "path:'/centers'",
+  "path:'/cognitive-lab'",
+  "path:'/community'",
+]) {
+  if (staticRoute.includes(duplicateHub)) fail(`static sitemap must not duplicate child/content-owned canonical: ${duplicateHub}`);
+}
+if (!atlasRoute.includes("path: '/addiction/methodology/'")) {
+  fail('addiction atlas sitemap must own /addiction/methodology/ before content sitemap excludes it');
 }
 
 const supabase = createClient(url, key, {
@@ -95,7 +121,7 @@ async function fetchPublishedCanonicals() {
   for (let start = 0; start < 50000; start += batchSize) {
     const { data, error } = await supabase
       .from('content')
-      .select('id,slug,canonical_url,updated_at')
+      .select('id,slug,content_type,canonical_url,updated_at,schema_json')
       .eq('status', 'published')
       .eq('robots_index', true)
       .lte('published_at', now)
@@ -107,6 +133,41 @@ async function fetchPublishedCanonicals() {
     if (batch.length < batchSize) break;
   }
   return rows;
+}
+
+function quickInfoOwned(row) {
+  const slug = typeof row.slug === 'string' ? row.slug.trim() : '';
+  if (!slug.startsWith('quick-info-')) return false;
+  const routeSlug = slug.slice('quick-info-'.length);
+  const canonical = typeof row.canonical_url === 'string' ? row.canonical_url.trim() : '';
+  const schema = row.schema_json && typeof row.schema_json === 'object' && !Array.isArray(row.schema_json) ? row.schema_json : null;
+  const eligible = /^[a-z0-9][a-z0-9-]*$/.test(routeSlug)
+    && canonical === `/quick-info/${routeSlug}/`
+    && schema?.page_role === 'quick-info'
+    && schema?.publication_ready === true
+    && schema?.editorial_review_required === false;
+  if (!eligible) fail(`indexable Quick Info row ${row.id} is excluded from content sitemap but is not eligible for its dedicated sitemap`);
+  return true;
+}
+
+function dailyToolOwned(row) {
+  const canonical = typeof row.canonical_url === 'string' ? row.canonical_url.trim() : '';
+  if (!canonical.startsWith('/daily-tools/')) return false;
+  if (!dailyToolRoutes.has(canonical)) fail(`indexable Daily Tools row ${row.id} is excluded from content sitemap but missing from generated daily-tools sitemap: ${canonical}`);
+  return true;
+}
+
+function atlasOwned(row) {
+  const canonical = typeof row.canonical_url === 'string' ? row.canonical_url.trim() : '';
+  const owned = canonical === '/addiction/methodology/'
+    || canonical === '/addiction/substances/'
+    || canonical === '/addiction/compare/'
+    || canonical === '/addiction/interactions/'
+    || canonical === '/addiction/prevalence/'
+    || canonical === '/addiction/mortality/'
+    || canonical.startsWith('/addiction/substances/')
+    || canonical.startsWith('/addiction/compare/');
+  return owned;
 }
 
 try {
@@ -133,6 +194,7 @@ try {
     fail(`published canonical inventory mismatch: fetched=${publishedRows.length}, expected=${total}`);
   }
   const seenCanonicals = new Set();
+  let dedicatedOwned = 0;
   for (const row of publishedRows) {
     const canonical = typeof row.canonical_url === 'string' ? row.canonical_url.trim() : '';
     const slug = typeof row.slug === 'string' ? row.slug.trim() : '';
@@ -155,14 +217,21 @@ try {
     const normalized = parsed.href;
     if (seenCanonicals.has(normalized)) fail(`duplicate published canonical_url: ${canonical}`);
     seenCanonicals.add(normalized);
+
+    if (row.content_type !== 'condition' && (quickInfoOwned(row) || dailyToolOwned(row) || atlasOwned(row))) {
+      dedicatedOwned += 1;
+    }
   }
+
+  const contentOwned = nonConditions - dedicatedOwned;
+  if (contentOwned < 0) fail(`negative content-owned sitemap partition: ${contentOwned}`);
 
   if (failures.length) {
     for (const message of failures) console.error(`SITEMAP PRESERVATION CONTRACT FAILED: ${message}`);
     process.exit(1);
   }
 
-  console.log(`Sitemap preservation contract passed: ${total} indexable published DB pages = ${nonConditions} content-sitemap pages + ${conditions} encyclopedia conditions; canonical URLs are unique production HTTPS URLs with updated_at, and paginated sitemap boundaries are stable.`);
+  console.log(`Sitemap preservation contract passed: ${total} indexable published DB pages = ${conditions} encyclopedia conditions + ${dedicatedOwned} dedicated-map DB pages + ${contentOwned} content-sitemap safety-net pages; canonical URLs are unique production HTTPS URLs with updated_at, and paginated sitemap boundaries are stable.`);
 } catch (error) {
   console.error(`SITEMAP PRESERVATION CONTRACT FAILED: ${error instanceof Error ? error.message : String(error)}`);
   process.exit(1);
