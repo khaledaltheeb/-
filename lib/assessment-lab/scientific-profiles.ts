@@ -30,6 +30,7 @@ export type AssessmentScientificProfile = {
   languageClarityReview: { status: 'internal-editorial-review'; note: string };
   contentValidityReview: { status: 'not-yet-empirically-completed'; note: string };
   versioning: { schemaVersion: 2; instrumentVersion: '1.0-item-development' };
+  documentationStatus: 'complete-v1-source' | 'legacy-source-normalized';
 };
 
 type RawReference = { title?: string; name?: string; url: string };
@@ -44,17 +45,20 @@ type RawProfile = {
   reference_period: string;
   domains?: string[];
   domain_map?: string[];
-  item_rationale: string;
+  item_rationale?: string;
   interpretation_boundary: string;
   safety?: string;
   safety_escalation?: string;
   references?: RawReference[];
   scientific_references?: RawReference[];
   validation_stage: string;
+  legacy_source?: boolean;
 };
 
 function normalizeProfile(profile: RawProfile): AssessmentScientificProfile {
   const references = profile.references ?? profile.scientific_references ?? [];
+  const domains = profile.domains ?? profile.domain_map ?? [];
+  const legacy = profile.legacy_source === true || !profile.item_rationale || !(profile.safety ?? profile.safety_escalation);
   return {
     slug: profile.slug,
     constructDefinition: profile.construct ?? profile.construct_definition ?? '',
@@ -62,10 +66,10 @@ function normalizeProfile(profile: RawProfile): AssessmentScientificProfile {
     intendedUse: profile.intended_use,
     prohibitedUses: profile.prohibited_uses ?? profile.not_for ?? [],
     referencePeriod: profile.reference_period,
-    domains: profile.domains ?? profile.domain_map ?? [],
-    itemRationale: profile.item_rationale,
+    domains,
+    itemRationale: profile.item_rationale ?? `يوثق المصدر الحالي البناء والمجالات (${domains.join('، ')}) والمراجع، لكنه لا يحتوي بعد على مبرر بندي تفصيلي مستقل؛ لذلك تُعرض هذه الفجوة صراحة ضمن مرحلة تطوير البنود ولا تُعامل كصلاحية محتوى مكتملة.`,
     interpretationBoundary: profile.interpretation_boundary,
-    safetyEscalation: profile.safety ?? profile.safety_escalation ?? '',
+    safetyEscalation: profile.safety ?? profile.safety_escalation ?? 'لا يحتوي ملف المصدر الأقدم على بروتوكول سلامة نوعي مكتمل لهذه الأداة حتى الآن. أي خطر فوري، أعراض طبية حادة، عنف أو إيذاء للنفس/الآخرين يتجاوز المتابعة الذاتية ويحتاج مسار مساعدة مناسبًا.',
     scientificReferences: references.map((reference) => ({
       title: reference.title ?? reference.name ?? 'مرجع علمي',
       url: reference.url,
@@ -84,17 +88,19 @@ function normalizeProfile(profile: RawProfile): AssessmentScientificProfile {
       note: 'تم بناء المحاور والبنود من الأدلة والمراجع، لكن دراسة صلاحية المحتوى مع خبراء ومستخدمين مستهدفين لم تكتمل بعد؛ لذلك تبقى الأداة في مرحلة تطوير البنود.',
     },
     versioning: { schemaVersion: 2, instrumentVersion: '1.0-item-development' },
+    documentationStatus: legacy ? 'legacy-source-normalized' : 'complete-v1-source',
   };
 }
 
-const wave1Profiles = Object.values((profilesWave1 as { profiles: Record<string, RawProfile> }).profiles);
-const allProfiles = [
-  ...(profilesCore1to12 as { profiles: RawProfile[] }).profiles,
-  ...(profilesCore13to24 as { profiles: RawProfile[] }).profiles,
-  ...(profilesCore25to36 as { profiles: RawProfile[] }).profiles,
+const wave1Profiles = Object.entries((profilesWave1 as unknown as { profiles: Record<string, Omit<RawProfile, 'slug'>> }).profiles)
+  .map(([slug, profile]) => ({ ...profile, slug, legacy_source: true } satisfies RawProfile));
+const allProfiles: RawProfile[] = [
+  ...((profilesCore1to12 as unknown as { profiles: RawProfile[] }).profiles),
+  ...((profilesCore13to24 as unknown as { profiles: RawProfile[] }).profiles),
+  ...((profilesCore25to36 as unknown as { profiles: RawProfile[] }).profiles),
   ...wave1Profiles,
-  ...(profiles49to54 as { profiles: RawProfile[] }).profiles,
-  ...(profiles55to60 as { profiles: RawProfile[] }).profiles,
+  ...((profiles49to54 as unknown as { profiles: RawProfile[] }).profiles),
+  ...((profiles55to60 as unknown as { profiles: RawProfile[] }).profiles),
 ];
 
 const profileMap = new Map(allProfiles.map((profile) => [profile.slug, normalizeProfile(profile)]));
