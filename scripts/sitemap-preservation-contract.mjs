@@ -15,7 +15,6 @@ const indexRoute = fs.readFileSync('app/sitemap.xml/route.ts', 'utf8');
 const encyclopediaRoute = fs.readFileSync('app/sitemaps/encyclopedia.xml/route.ts', 'utf8');
 const staticRoute = fs.readFileSync('app/sitemaps/static.xml/route.ts', 'utf8');
 const atlasRoute = fs.readFileSync('app/sitemaps/addiction-atlas.xml/route.ts', 'utf8');
-const dailyToolRoutes = new Set(JSON.parse(fs.readFileSync('generated/daily-tools-routes.json', 'utf8')));
 const failures = [];
 const fail = (message) => failures.push(message);
 
@@ -27,13 +26,18 @@ for (const [label, source] of [['content sitemap', contentRoute], ['sitemap inde
     if (!source.includes(marker)) fail(`${label} missing coverage marker: ${marker}`);
   }
   for (const marker of [
-    ".not('slug', 'like', 'quick-info-%')",
-    ".not('canonical_url', 'like', '/daily-tools/%')",
+    ".not('canonical_url', 'like', '/quick-info/%')",
     ".not('canonical_url', 'like', '/addiction/substances/%')",
     ".not('canonical_url', 'like', '/addiction/compare/%')",
     "'/addiction/methodology/'",
   ]) {
     if (!source.includes(marker)) fail(`${label} missing exclusive ownership filter: ${marker}`);
+  }
+  if (source.includes(".not('canonical_url', 'like', '/daily-tools/%')")) {
+    fail(`${label} must not exclude database Daily Tools canonicals that are not owned by the immutable 150-tool sitemap`);
+  }
+  if (source.includes(".not('slug', 'like', 'quick-info-%')")) {
+    fail(`${label} must partition Quick Info by canonical ownership, not by an internal slug prefix`);
   }
 }
 
@@ -136,30 +140,23 @@ async function fetchPublishedCanonicals() {
 }
 
 function quickInfoOwned(row) {
-  const slug = typeof row.slug === 'string' ? row.slug.trim() : '';
-  if (!slug.startsWith('quick-info-')) return false;
-  const routeSlug = slug.slice('quick-info-'.length);
   const canonical = typeof row.canonical_url === 'string' ? row.canonical_url.trim() : '';
+  if (!canonical.startsWith('/quick-info/')) return false;
+  const slug = typeof row.slug === 'string' ? row.slug.trim() : '';
+  const routeSlug = slug.startsWith('quick-info-') ? slug.slice('quick-info-'.length) : '';
   const schema = row.schema_json && typeof row.schema_json === 'object' && !Array.isArray(row.schema_json) ? row.schema_json : null;
   const eligible = /^[a-z0-9][a-z0-9-]*$/.test(routeSlug)
     && canonical === `/quick-info/${routeSlug}/`
     && schema?.page_role === 'quick-info'
     && schema?.publication_ready === true
     && schema?.editorial_review_required === false;
-  if (!eligible) fail(`indexable Quick Info row ${row.id} is excluded from content sitemap but is not eligible for its dedicated sitemap`);
-  return true;
-}
-
-function dailyToolOwned(row) {
-  const canonical = typeof row.canonical_url === 'string' ? row.canonical_url.trim() : '';
-  if (!canonical.startsWith('/daily-tools/')) return false;
-  if (!dailyToolRoutes.has(canonical)) fail(`indexable Daily Tools row ${row.id} is excluded from content sitemap but missing from generated daily-tools sitemap: ${canonical}`);
+  if (!eligible) fail(`indexable canonical Quick Info row ${row.id} is excluded from content sitemap but is not eligible for its dedicated sitemap`);
   return true;
 }
 
 function atlasOwned(row) {
   const canonical = typeof row.canonical_url === 'string' ? row.canonical_url.trim() : '';
-  const owned = canonical === '/addiction/methodology/'
+  return canonical === '/addiction/methodology/'
     || canonical === '/addiction/substances/'
     || canonical === '/addiction/compare/'
     || canonical === '/addiction/interactions/'
@@ -167,7 +164,6 @@ function atlasOwned(row) {
     || canonical === '/addiction/mortality/'
     || canonical.startsWith('/addiction/substances/')
     || canonical.startsWith('/addiction/compare/');
-  return owned;
 }
 
 try {
@@ -218,7 +214,7 @@ try {
     if (seenCanonicals.has(normalized)) fail(`duplicate published canonical_url: ${canonical}`);
     seenCanonicals.add(normalized);
 
-    if (row.content_type !== 'condition' && (quickInfoOwned(row) || dailyToolOwned(row) || atlasOwned(row))) {
+    if (row.content_type !== 'condition' && (quickInfoOwned(row) || atlasOwned(row))) {
       dedicatedOwned += 1;
     }
   }
