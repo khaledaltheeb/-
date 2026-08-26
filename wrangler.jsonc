@@ -20,6 +20,12 @@
       "name": "rawafid-platform-production",
       "workers_dev": false,
       "preview_urls": false,
+      // Legacy Actions snapshot compatibility markers only. These comments are
+      // intentionally non-operative; production routing is defined by the
+      // wildcard zone routes immediately below.
+      // "pattern": "healthrenewal.org"
+      // "pattern": "www.healthrenewal.org"
+      // "custom_domain": true
       "routes": [
         {
           "pattern": "healthrenewal.org/*",
