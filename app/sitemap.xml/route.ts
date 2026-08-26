@@ -26,6 +26,7 @@ function applyDedicatedSitemapExclusions<T extends {
 }>(query: T): T {
   let owned = query
     .not('canonical_url', 'like', '/quick-info/%')
+    .not('canonical_url', 'like', '/daily-tools/%')
     .not('canonical_url', 'like', '/addiction/substances/%')
     .not('canonical_url', 'like', '/addiction/compare/%');
   for (const canonical of ATLAS_OWNED_CANONICALS) {
