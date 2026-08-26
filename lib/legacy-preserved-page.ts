@@ -22,6 +22,20 @@ export type LegacyPreservedPage = {
 export type LegacyPreservedLink = { title: string; href: string };
 export type LegacyPreservedReference = { title: string; url: string; publisher?: string; year?: string };
 
+type PreservedLinkReplacement = { href: string; title?: string };
+
+const STALE_PRESERVED_LINK_REPLACEMENTS = new Map<string, PreservedLinkReplacement>([
+  ['/autism/', { href: '/family-guide/conditions/autism/', title: 'دليل الأسرة العملي لاضطراب طيف التوحد' }],
+  ['/care-guides/caregiver-wellbeing/', { href: '/evidence-guides/caregiver-wellbeing/', title: 'رفاه مقدم الرعاية ودعم الأسرة' }],
+  ['/comparisons/borderline-vs-bipolar/', { href: '/encyclopedia/concept-1885/', title: 'التشخيص التفريقي لاضطراب الشخصية الحدية' }],
+  ['/content/adhd/', { href: '/family-guide/conditions/adhd/', title: 'دليل الأسرة لاضطراب فرط الحركة وتشتت الانتباه' }],
+  ['/content/anxiety/', { href: '/evidence-guides/clinical-anxiety/', title: 'اضطرابات القلق: الفهم والتقييم والعلاج الآمن' }],
+  ['/content/ocd/', { href: '/encyclopedia/concept-0045/', title: 'الوسواس القهري: الفروق والتقييم' }],
+  ['/content/stress/', { href: '/encyclopedia/concept-0161/', title: 'الضغط النفسي: ما هو ومتى يصبح عبئًا؟' }],
+  ['/mental-health/stress/', { href: '/encyclopedia/concept-0161/', title: 'الضغط النفسي: ما هو ومتى يصبح عبئًا؟' }],
+  ['/special-ed-encyclopedia/learning-disabilities/', { href: '/care-guides/specific-learning-disorder-home-school/', title: 'دليل صعوبات التعلم بين المنزل والمدرسة' }],
+]);
+
 function asRecord(value: unknown): UnknownRecord | null {
   return value !== null && typeof value === 'object' && !Array.isArray(value) ? value as UnknownRecord : null;
 }
@@ -59,6 +73,15 @@ export function normalizeLegacyInternalHref(value: unknown): string | null {
   }
 }
 
+function repairPreservedInternalLink(href: string, title: string): LegacyPreservedLink {
+  const url = new URL(href, 'https://healthrenewal.org');
+  const route = safeRoute(url.pathname);
+  if (!route) return { title, href };
+  const replacement = STALE_PRESERVED_LINK_REPLACEMENTS.get(route);
+  if (!replacement) return { title, href };
+  return { title: replacement.title || title, href: replacement.href };
+}
+
 export function legacyInternalLinks(value: unknown): LegacyPreservedLink[] {
   if (!Array.isArray(value)) return [];
   const seen = new Set<string>();
@@ -68,9 +91,11 @@ export function legacyInternalLinks(value: unknown): LegacyPreservedLink[] {
     if (!entry) continue;
     const href = normalizeLegacyInternalHref(entry.url ?? entry.href);
     const title = cleanText(entry.title ?? entry.label, 500);
-    if (!href || !title || seen.has(href)) continue;
-    seen.add(href);
-    links.push({ title, href });
+    if (!href || !title) continue;
+    const repaired = repairPreservedInternalLink(href, title);
+    if (seen.has(repaired.href)) continue;
+    seen.add(repaired.href);
+    links.push(repaired);
   }
   return links;
 }
