@@ -16,6 +16,8 @@ Publisher: منصة روافد
 - Evidence guides: https://healthrenewal.org/evidence-guides/
 - Pediatric oncology: https://healthrenewal.org/sectors/pediatric-oncology
 - Cognitive lab: https://healthrenewal.org/cognitive-lab
+- Open source: https://healthrenewal.org/open-source
+- Arabic/RTL toolkit: https://healthrenewal.org/open-source/arabic-rtl-a11y-toolkit
 - Sources: https://healthrenewal.org/sources
 - Editorial policy: https://healthrenewal.org/editorial-policy
 - Medical review policy: https://healthrenewal.org/medical-review-policy
