@@ -49,7 +49,7 @@ export async function GET(request: Request) {
       .neq('content_type', 'condition')
       .lte('published_at', now)
       .eq('robots_index', true)
-      .order('id', { ascending: true })
+      .order('id', { ascending: false })
       .range(batchStart, batchEnd);
 
     if (error) {
