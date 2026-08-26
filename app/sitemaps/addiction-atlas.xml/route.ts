@@ -8,6 +8,7 @@ export async function GET() {
   const entries = [
     { path: '/addiction/substances/', lastModified: atlas.updatedOn, changeFrequency: 'monthly', priority: 0.9 },
     { path: '/addiction/compare/', lastModified: atlas.updatedOn, changeFrequency: 'monthly', priority: 0.8 },
+    { path: '/addiction/interactions/', lastModified: atlas.updatedOn, changeFrequency: 'monthly', priority: 0.8 },
     { path: '/addiction/prevalence/', lastModified: atlas.updatedOn, changeFrequency: 'monthly', priority: 0.75 },
     { path: '/addiction/mortality/', lastModified: atlas.updatedOn, changeFrequency: 'monthly', priority: 0.75 },
     { path: '/addiction/methodology/', lastModified: atlas.updatedOn, changeFrequency: 'yearly', priority: 0.6 },
