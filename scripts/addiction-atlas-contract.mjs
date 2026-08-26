@@ -5,15 +5,18 @@ const SOURCE_COMMIT = '00014486191027349cc083e824e545da186d74d1';
 const ROOT = path.resolve('data/addiction-atlas');
 const RISK_KEYS = ['acute_toxicity','overdose_risk','dependence','withdrawal_medical_risk','neuro_harm','cardio_harm','respiratory_harm','polysubstance_risk'];
 const EVIDENCE = new Set(['A','B','C','U']);
+const INTERACTION_SEVERITY = new Set(['moderate','high','critical']);
+const INTERACTION_SCOPE = new Set(['direct-pair','class-to-substance','class-to-class']);
 
 function assert(condition, message) { if (!condition) throw new Error(`addiction-atlas-contract: ${message}`); }
 async function json(file) { return JSON.parse(await readFile(path.join(ROOT, file), 'utf8')); }
 function filename(value) { return value.split('/').filter(Boolean).pop(); }
 
-const [manifest, methodology, comparisonFile, epidemiology, mortality, sourceRegistry] = await Promise.all([
+const [manifest, methodology, comparisonFile, interactions, epidemiology, mortality, sourceRegistry] = await Promise.all([
   json('substance-waves.json'),
   json('methodology-v1.json'),
   json('comparison-intents-v2.json'),
+  json('interactions-v1.json'),
   json('epidemiology-v1.json'),
   json('mortality-v1.json'),
   json('source-registry-v1.json'),
@@ -44,6 +47,23 @@ const comparisonSlugs = new Set();
 for (const item of comparisons) { assert(item.slug && !comparisonSlugs.has(item.slug), `duplicate comparison ${item.slug}`); comparisonSlugs.add(item.slug); assert(slugs.has(item.a) && slugs.has(item.b), `${item.slug}: missing compared substance`); assert(item.title_ar && item.intent_ar, `${item.slug}: title/intent required`); }
 for (const required of ['fentanyl-vs-heroin','cocaine-vs-methamphetamine','tramadol-vs-morphine','cannabis-vs-synthetic-cannabinoids']) assert(comparisonSlugs.has(required), `required high-intent comparison missing: ${required}`);
 
+const interactionIds = new Set();
+const interactionPairs = new Set();
+for (const item of interactions.records || []) {
+  assert(item.id && !interactionIds.has(item.id), `duplicate interaction ${item.id}`); interactionIds.add(item.id);
+  assert(slugs.has(item.a) && slugs.has(item.b) && item.a !== item.b, `${item.id}: invalid interaction pair`);
+  const pair = [item.a, item.b].sort().join('::'); assert(!interactionPairs.has(pair), `${item.id}: duplicate interaction pair ${pair}`); interactionPairs.add(pair);
+  assert(INTERACTION_SEVERITY.has(item.severity), `${item.id}: invalid severity`);
+  assert(EVIDENCE.has(item.evidence_grade), `${item.id}: invalid evidence grade`);
+  assert(INTERACTION_SCOPE.has(item.evidence_scope), `${item.id}: invalid evidence scope`);
+  assert(item.mechanism_ar && item.risk_ar && item.emergency_ar, `${item.id}: incomplete clinical content`);
+  assert(Array.isArray(item.source_urls) && item.source_urls.length, `${item.id}: interaction source required`);
+  for (const source of item.source_urls) assert(new URL(source).protocol === 'https:', `${item.id}: source must be https`);
+}
+assert((interactions.records || []).length >= 6, 'interaction evidence regression');
+assert((interactions.records || []).some((item) => item.evidence_scope === 'direct-pair'), 'at least one direct-pair interaction required');
+assert((interactions.records || []).some((item) => item.id === 'fentanyl-xylazine'), 'required fentanyl-xylazine interaction missing');
+
 const sourceIds = new Set();
 for (const source of sourceRegistry.sources || []) {
   assert(source.id && !sourceIds.has(source.id), `duplicate source id ${source.id}`);
@@ -64,4 +84,4 @@ for (const record of mortality.records || []) validateStatistic(record, 'mortali
 assert((epidemiology.records || []).length >= 7, 'epidemiology regression');
 assert((mortality.records || []).length >= 6, 'mortality regression');
 
-console.log(`addiction-atlas-contract: PASS | local immutable snapshot | ${substances.length} substances | ${comparisons.length} comparisons | ${RISK_KEYS.length} risk dimensions | ${(epidemiology.records || []).length} epidemiology | ${(mortality.records || []).length} mortality | source ${SOURCE_COMMIT.slice(0, 12)}`);
+console.log(`addiction-atlas-contract: PASS | local immutable snapshot | ${substances.length} substances | ${comparisons.length} comparisons | ${(interactions.records || []).length} interactions | ${RISK_KEYS.length} risk dimensions | ${(epidemiology.records || []).length} epidemiology | ${(mortality.records || []).length} mortality | source ${SOURCE_COMMIT.slice(0, 12)}`);
