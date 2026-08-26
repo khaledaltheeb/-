@@ -37,7 +37,7 @@ export type LegacyPreservedPage = {
   references_json: unknown;
   internal_links_json: unknown;
   images_json: unknown;
-  current_content: PublishedCanonicalContent | null;
+  current_content?: PublishedCanonicalContent | null;
 };
 
 export type LegacyPreservedLink = { title: string; href: string };
