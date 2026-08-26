@@ -8,6 +8,8 @@ const migration=read('supabase/migrations/20260816040102_fix_legacy_preserved_pa
 const routeExistsMigration=read('supabase/migrations/20260816100619_align_legacy_route_exists_public_filter.sql');
 const grantFix=read('supabase/migrations/20260816102121_restore_legacy_preservation_public_execute_grants.sql');
 const helper=read('lib/legacy-preserved-page.ts');
+const publicIndexability=read('lib/public-indexability.ts');
+const contentSitemap=read('app/sitemaps/content.xml/route.ts');
 const seo=read('lib/seo.ts');
 const view=read('components/legacy-preserved-page.tsx');
 const proxy=read('lib/supabase/proxy.ts');
@@ -50,11 +52,43 @@ for(const fn of ['get_legacy_preserved_page','legacy_preserved_route_exists']){
 }
 
 for(const forbidden of ['service_role','secret_key']) if(helper.toLowerCase().includes(forbidden)||view.toLowerCase().includes(forbidden)||proxy.toLowerCase().includes(forbidden)) fail(`forbidden preservation secret pattern: ${forbidden}`);
-for(const marker of ['get_legacy_preserved_page','legacyPreservedMetadata','buildSeoMetadata','index: false','follow: true','healthrenewal.org','decodeURIComponent',"normalize('NFC')"]) if(!helper.includes(marker)) fail(`helper marker missing: ${marker}`);
-// The preserved helper now delegates robots directives to the centralized SEO generator.
-// Keep the historical noarchive behavior without duplicating a second metadata implementation.
+for(const marker of ['get_legacy_preserved_page','legacyPreservedMetadata','buildSeoMetadata','shouldIndexPreservedPublishedPage','follow: true','healthrenewal.org','decodeURIComponent',"normalize('NFC')"]) if(!helper.includes(marker)) fail(`helper marker missing: ${marker}`);
+
+for(const marker of [
+  "'/assessments/'",
+  "'/en/'",
+  "input.sourceFamily === 'published-content'",
+  'isExplicitNoindexPath(input.route)',
+  'normalizePublicPath',
+]) if(!publicIndexability.includes(marker)) fail(`public indexability marker missing: ${marker}`);
+for(const marker of ['isExplicitNoindexPath', 'if (isExplicitNoindexPath(normalizedPath)) continue', 'activeRedirectSources.has(normalizedPath)']) if(!contentSitemap.includes(marker)) fail(`content sitemap indexability exclusion marker missing: ${marker}`);
+
+for(const marker of [
+  'STALE_PRESERVED_LINK_REPLACEMENTS',
+  'CONFIRMED_DEAD_PRESERVED_LINKS',
+  "'/autism/'",
+  "'/family-guide/conditions/autism/'",
+  "'/content/adhd/'",
+  "'/family-guide/conditions/adhd/'",
+  "'/care-guides/caregiver-wellbeing/'",
+  "'/evidence-guides/caregiver-wellbeing/'",
+  "'/comparisons/borderline-vs-bipolar/'",
+  "'/encyclopedia/concept-1885/'",
+  "'/special-ed-encyclopedia/learning-disabilities/'",
+  "'/care-guides/specific-learning-disorder-home-school/'",
+  'repairPreservedInternalLink',
+  'if (CONFIRMED_DEAD_PRESERVED_LINKS.has(route)) return null',
+  'if (!repaired || seen.has(repaired.href)) continue',
+]) if(!helper.includes(marker)) fail(`preserved stale-link repair marker missing: ${marker}`);
+
 for(const marker of ['const canIndex = INDEXING_ENABLED && input.index !== false','noarchive: !canIndex','nosnippet: !canIndex']) if(!seo.includes(marker)) fail(`central SEO noindex preservation marker missing: ${marker}`);
-for(const marker of ['نسخة إنتاجية محفوظة','لم تُمنح هذه النسخة اعتماد دورة المراجعة العلمية الحالية','ContentRenderer','legacyInternalLinks','legacyReferences']) if(!view.includes(marker)) fail(`preserved view marker missing: ${marker}`);
+for(const marker of [
+  'نسخة إنتاجية محفوظة',
+  'هذه صفحة منشورة ضمن قاعدة محتوى روافد',
+  'تبقى خارج الفهرسة العامة إلى أن تكتمل مراجعتها',
+  'shouldIndexPreservedPublishedPage',
+  'ContentRenderer','legacyInternalLinks','legacyReferences'
+]) if(!view.includes(marker)) fail(`preserved view marker missing: ${marker}`);
 for(const marker of ['NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY',"rpc('legacy_preserved_route_exists'",'isLegacyProductionRoute']) if(!proxy.includes(marker)) fail(`proxy must document its public preservation RPC dependency: ${marker}`);
 for(const path of routes){
  if(!fs.existsSync(path)){fail(`preserved route missing: ${path}`);continue;}
@@ -86,4 +120,4 @@ for(const path of [
 ]) if(!fs.existsSync(path)) fail(`deployed migration history not mirrored: ${path}`);
 
 if(failed)process.exit(1);
-console.log('Legacy preservation contract passed: production HTML remains available through a Unicode-safe public read-only noindex boundary, reviewed modern takeovers keep priority over fallback rendering, and centralized SEO preserves the historical noarchive/nosnippet behavior without duplicating metadata logic.');
+console.log('Legacy preservation contract passed: Unicode-safe read-only fallback rendering is preserved, published-content pages recover indexability through the centralized policy, active redirect sources and explicit archive/language noindex routes stay out of sitemaps, stale preserved links are repaired or suppressed only when their destination is confirmed dead, and reviewed modern takeovers keep priority.');
