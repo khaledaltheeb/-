@@ -18,6 +18,8 @@ export async function GET() {
     { path:'/resources/worksheets', changeFrequency:'monthly', priority:.66 },
     { path:'/resources/infographics', changeFrequency:'monthly', priority:.7 },
     ...infographics.map((item) => ({ path:`/resources/infographics/${item.slug}`, changeFrequency:'monthly' as const, priority:.68 })),
+    { path:'/open-source', changeFrequency:'monthly', priority:.62 },
+    { path:'/open-source/arabic-rtl-a11y-toolkit', changeFrequency:'monthly', priority:.64 },
     { path:'/tools', changeFrequency:'weekly', priority:.7 },
     { path:'/tools/compare', changeFrequency:'monthly', priority:.64 },
     { path:'/tools/quiz', changeFrequency:'monthly', priority:.64 },
