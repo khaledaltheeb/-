@@ -41,6 +41,14 @@ if (!quickInfoRoute.includes(".order('id', { ascending: true })") || quickInfoRo
   fail('quick-info sitemap page boundaries must use stable id ordering so edits cannot move URLs between pages');
 }
 for (const marker of [
+  ".from('redirects')",
+  ".eq('is_active', true)",
+  'normalizePublicPath',
+  'activeRedirectSources.has(normalizedPath)',
+]) {
+  if (!contentRoute.includes(marker)) fail(`content sitemap missing active-redirect exclusion marker: ${marker}`);
+}
+for (const marker of [
   "'/sitemaps/static.xml'",
   "'/sitemaps/daily-tools.xml'",
   "'/sitemaps/taxonomy.xml'",
@@ -109,11 +117,21 @@ async function fetchPublishedCanonicals() {
   return rows;
 }
 
+async function countActiveRedirectSources() {
+  const { count, error } = await supabase
+    .from('redirects')
+    .select('source_path', { count: 'exact', head: true })
+    .eq('is_active', true);
+  if (error) throw new Error(error.message);
+  return count ?? 0;
+}
+
 try {
-  const [total, conditions, nonConditions] = await Promise.all([
+  const [total, conditions, nonConditions, activeRedirects] = await Promise.all([
     exactCount((query) => query.eq('status', 'published').eq('robots_index', true).lte('published_at', now)),
     exactCount((query) => query.eq('status', 'published').eq('robots_index', true).lte('published_at', now).eq('content_type', 'condition')),
     exactCount((query) => query.eq('status', 'published').eq('robots_index', true).lte('published_at', now).neq('content_type', 'condition')),
+    countActiveRedirectSources(),
   ]);
 
   if (total !== conditions + nonConditions) {
@@ -162,7 +180,7 @@ try {
     process.exit(1);
   }
 
-  console.log(`Sitemap preservation contract passed: ${total} indexable published DB pages = ${nonConditions} content-sitemap pages + ${conditions} encyclopedia conditions; canonical URLs are unique production HTTPS URLs with updated_at, and paginated sitemap boundaries are stable.`);
+  console.log(`Sitemap preservation contract passed: validated ${total} indexable published DB pages (${nonConditions} non-condition records + ${conditions} encyclopedia conditions), ${activeRedirects} active redirect source(s) are explicitly excluded from canonical sitemap advertising, canonical URLs are unique production HTTPS URLs with updated_at, and paginated sitemap boundaries are stable.`);
 } catch (error) {
   console.error(`SITEMAP PRESERVATION CONTRACT FAILED: ${error instanceof Error ? error.message : String(error)}`);
   process.exit(1);
