@@ -11,12 +11,40 @@ if (!url || !key) {
 
 const contentRoute = fs.readFileSync('app/sitemaps/content.xml/route.ts', 'utf8');
 const quickInfoRoute = fs.readFileSync('app/sitemaps/quick-info.xml/route.ts', 'utf8');
+const dailyToolsRoute = fs.readFileSync('app/sitemaps/daily-tools.xml/route.ts', 'utf8');
+const dailyToolRoutes = JSON.parse(fs.readFileSync('generated/daily-tools-routes.json', 'utf8'));
 const indexRoute = fs.readFileSync('app/sitemap.xml/route.ts', 'utf8');
 const encyclopediaRoute = fs.readFileSync('app/sitemaps/encyclopedia.xml/route.ts', 'utf8');
 const staticRoute = fs.readFileSync('app/sitemaps/static.xml/route.ts', 'utf8');
 const atlasRoute = fs.readFileSync('app/sitemaps/addiction-atlas.xml/route.ts', 'utf8');
 const failures = [];
 const fail = (message) => failures.push(message);
+
+function normalizePath(value) {
+  try {
+    const parsed = new URL(String(value || ''), 'https://healthrenewal.org');
+    let path = parsed.pathname || '/';
+    if (path !== '/' && !path.endsWith('/')) path += '/';
+    return path;
+  } catch {
+    return '';
+  }
+}
+
+const normalizedDailyToolRoutes = Array.isArray(dailyToolRoutes) ? dailyToolRoutes.map(normalizePath) : [];
+const dailyToolRouteSet = new Set(normalizedDailyToolRoutes);
+if (!Array.isArray(dailyToolRoutes) || dailyToolRoutes.length !== 151) {
+  fail(`Daily Tools sitemap manifest must contain exactly 151 routes, found ${Array.isArray(dailyToolRoutes) ? dailyToolRoutes.length : 'invalid manifest'}`);
+}
+if (normalizedDailyToolRoutes[0] !== '/daily-tools/') {
+  fail('Daily Tools sitemap manifest must begin with /daily-tools/');
+}
+if (dailyToolRouteSet.size !== normalizedDailyToolRoutes.length) {
+  fail('Daily Tools sitemap manifest contains duplicate canonical routes');
+}
+if (!dailyToolsRoute.includes('EXPECTED_ROUTES = 151') || !dailyToolsRoute.includes("dailyToolRoutes[0] !== '/daily-tools/'")) {
+  fail('Daily Tools sitemap route must retain its immutable 151-route integrity guard');
+}
 
 for (const [label, source] of [['content sitemap', contentRoute], ['sitemap index', indexRoute]]) {
   if (source.includes(".is('schema_json->legacy_migration', null)")) {
@@ -27,14 +55,12 @@ for (const [label, source] of [['content sitemap', contentRoute], ['sitemap inde
   }
   for (const marker of [
     ".not('canonical_url', 'like', '/quick-info/%')",
+    ".not('canonical_url', 'like', '/daily-tools/%')",
     ".not('canonical_url', 'like', '/addiction/substances/%')",
     ".not('canonical_url', 'like', '/addiction/compare/%')",
     "'/addiction/methodology/'",
   ]) {
     if (!source.includes(marker)) fail(`${label} missing exclusive ownership filter: ${marker}`);
-  }
-  if (source.includes(".not('canonical_url', 'like', '/daily-tools/%')")) {
-    fail(`${label} must not exclude database Daily Tools canonicals that are not owned by the immutable 150-tool sitemap`);
   }
   if (source.includes(".not('slug', 'like', 'quick-info-%')")) {
     fail(`${label} must partition Quick Info by canonical ownership, not by an internal slug prefix`);
@@ -146,11 +172,21 @@ function quickInfoOwned(row) {
   const routeSlug = slug.startsWith('quick-info-') ? slug.slice('quick-info-'.length) : '';
   const schema = row.schema_json && typeof row.schema_json === 'object' && !Array.isArray(row.schema_json) ? row.schema_json : null;
   const eligible = /^[a-z0-9][a-z0-9-]*$/.test(routeSlug)
-    && canonical === `/quick-info/${routeSlug}/`
+    && normalizePath(canonical) === normalizePath(`/quick-info/${routeSlug}/`)
     && schema?.page_role === 'quick-info'
     && schema?.publication_ready === true
     && schema?.editorial_review_required === false;
   if (!eligible) fail(`indexable canonical Quick Info row ${row.id} is excluded from content sitemap but is not eligible for its dedicated sitemap`);
+  return true;
+}
+
+function dailyToolsOwned(row) {
+  const canonical = typeof row.canonical_url === 'string' ? row.canonical_url.trim() : '';
+  if (!canonical.startsWith('/daily-tools/')) return false;
+  const normalized = normalizePath(canonical);
+  if (!normalized || !dailyToolRouteSet.has(normalized)) {
+    fail(`indexable Daily Tools canonical ${canonical || row.id} is excluded from content sitemap but absent from immutable Daily Tools sitemap`);
+  }
   return true;
 }
 
@@ -214,7 +250,7 @@ try {
     if (seenCanonicals.has(normalized)) fail(`duplicate published canonical_url: ${canonical}`);
     seenCanonicals.add(normalized);
 
-    if (row.content_type !== 'condition' && (quickInfoOwned(row) || atlasOwned(row))) {
+    if (row.content_type !== 'condition' && (quickInfoOwned(row) || dailyToolsOwned(row) || atlasOwned(row))) {
       dedicatedOwned += 1;
     }
   }
