@@ -12,6 +12,7 @@ export const metadata: Metadata = buildSeoMetadata({
   index: true,
   follow: true,
   keywords: ['تدقيق العربية', 'RTL', 'الوصولية', 'ضمان الترجمة', 'المصطلحات العربية', 'Arabic localization QA'],
+  hreflang: { ar: '/institutions', en: '/en/institutions', 'x-default': '/institutions' },
 });
 
 const services = [
@@ -40,7 +41,7 @@ export default function InstitutionsPage() {
     url: absoluteSiteUrl('/institutions'),
     description: 'Institutional gateway for Arabic, RTL, accessibility, localization and terminology quality assurance.',
     inLanguage: ['ar', 'en'],
-    isPartOf: { '@id': `${absoluteSiteUrl('/') }#website` },
+    isPartOf: { '@id': `${absoluteSiteUrl('/')}#website` },
   };
 
   return <div className={styles.page}>
