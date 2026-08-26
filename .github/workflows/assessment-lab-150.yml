@@ -1,0 +1,33 @@
+name: Assessment Lab 150 Contract
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'data/assessment-lab/**'
+      - 'scripts/assessment-lab-roadmap-contract.mjs'
+      - '.assessment-lab-plan.md'
+      - '.github/workflows/assessment-lab-150.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'data/assessment-lab/**'
+      - 'scripts/assessment-lab-roadmap-contract.mjs'
+      - '.assessment-lab-plan.md'
+      - '.github/workflows/assessment-lab-150.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  portfolio-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Verify 150-route assessment portfolio
+        run: node scripts/assessment-lab-roadmap-contract.mjs
