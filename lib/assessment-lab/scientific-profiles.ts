@@ -1,0 +1,114 @@
+import profilesCore1to12 from '@/data/assessment-lab/scientific-profiles.core-1-12.v1.json';
+import profilesCore13to24 from '@/data/assessment-lab/scientific-profiles.core-13-24.v1.json';
+import profilesCore25to36 from '@/data/assessment-lab/scientific-profiles.core-25-36.v1.json';
+import profilesWave1 from '@/data/assessment-lab/scientific-profiles.wave1.v1.json';
+import profiles49to54 from '@/data/assessment-lab/scientific-profiles.originals-49-54.v1.json';
+import profiles55to60 from '@/data/assessment-lab/scientific-profiles.originals-55-60.v1.json';
+
+export type AssessmentScientificReference = {
+  title: string;
+  url: string;
+};
+
+export type AssessmentScientificProfile = {
+  slug: string;
+  constructDefinition: string;
+  intendedPopulation: string;
+  intendedUse: string;
+  prohibitedUses: string[];
+  referencePeriod: string;
+  domains: string[];
+  itemRationale: string;
+  interpretationBoundary: string;
+  safetyEscalation: string;
+  scientificReferences: AssessmentScientificReference[];
+  validationStage: string;
+  responseScaleSemantics: 'item-specific';
+  privacyStatement: string;
+  functionalImpactGuidance: string;
+  professionalReferralPath: string;
+  languageClarityReview: { status: 'internal-editorial-review'; note: string };
+  contentValidityReview: { status: 'not-yet-empirically-completed'; note: string };
+  versioning: { schemaVersion: 2; instrumentVersion: '1.0-item-development' };
+  documentationStatus: 'complete-v1-source' | 'legacy-source-normalized';
+};
+
+type RawReference = { title?: string; name?: string; url: string };
+type RawProfile = {
+  slug: string;
+  construct?: string;
+  construct_definition?: string;
+  intended_population: string;
+  intended_use: string;
+  prohibited_uses?: string[];
+  not_for?: string[];
+  reference_period: string;
+  domains?: string[];
+  domain_map?: string[];
+  item_rationale?: string;
+  interpretation_boundary: string;
+  safety?: string;
+  safety_escalation?: string;
+  references?: RawReference[];
+  scientific_references?: RawReference[];
+  validation_stage: string;
+  legacy_source?: boolean;
+};
+
+function normalizeProfile(profile: RawProfile): AssessmentScientificProfile {
+  const references = profile.references ?? profile.scientific_references ?? [];
+  const domains = profile.domains ?? profile.domain_map ?? [];
+  const legacy = profile.legacy_source === true || !profile.item_rationale || !(profile.safety ?? profile.safety_escalation);
+  return {
+    slug: profile.slug,
+    constructDefinition: profile.construct ?? profile.construct_definition ?? '',
+    intendedPopulation: profile.intended_population,
+    intendedUse: profile.intended_use,
+    prohibitedUses: profile.prohibited_uses ?? profile.not_for ?? [],
+    referencePeriod: profile.reference_period,
+    domains,
+    itemRationale: profile.item_rationale ?? `يوثق المصدر الحالي البناء والمجالات (${domains.join('، ')}) والمراجع، لكنه لا يحتوي بعد على مبرر بندي تفصيلي مستقل؛ لذلك تُعرض هذه الفجوة صراحة ضمن مرحلة تطوير البنود ولا تُعامل كصلاحية محتوى مكتملة.`,
+    interpretationBoundary: profile.interpretation_boundary,
+    safetyEscalation: profile.safety ?? profile.safety_escalation ?? 'لا يحتوي ملف المصدر الأقدم على بروتوكول سلامة نوعي مكتمل لهذه الأداة حتى الآن. أي خطر فوري، أعراض طبية حادة، عنف أو إيذاء للنفس/الآخرين يتجاوز المتابعة الذاتية ويحتاج مسار مساعدة مناسبًا.',
+    scientificReferences: references.map((reference) => ({
+      title: reference.title ?? reference.name ?? 'مرجع علمي',
+      url: reference.url,
+    })),
+    validationStage: profile.validation_stage,
+    responseScaleSemantics: 'item-specific',
+    privacyStatement: 'لا تُرسل الإجابات إلى الخادم ولا تُحفظ في الحساب أو Local Storage أو Session Storage؛ تحديث الصفحة أو إغلاقها يزيل الإجابات المحلية.',
+    functionalImpactGuidance: 'يُفسَّر النمط في ضوء أثره على الدراسة أو العمل أو العلاقات أو العناية بالنفس أو المشاركة أو السلامة، لا من شدة إجابة منفردة.',
+    professionalReferralPath: 'إذا كان النمط مستمرًا أو معطلًا أو مقلقًا، استخدم الملاحظات والأمثلة لمناقشتها مع مختص مؤهل. مؤشرات الخطر أو الأعراض الطبية الحادة تتجاوز الأداة وتحتاج مسارًا مناسبًا فورًا.',
+    languageClarityReview: {
+      status: 'internal-editorial-review',
+      note: 'خضعت الصياغة لمراجعة تحريرية داخلية للوضوح العربي، ولا يُعد ذلك بديلًا عن المقابلات المعرفية مع عينة من الفئة المستهدفة.',
+    },
+    contentValidityReview: {
+      status: 'not-yet-empirically-completed',
+      note: 'تم بناء المحاور والبنود من الأدلة والمراجع، لكن دراسة صلاحية المحتوى مع خبراء ومستخدمين مستهدفين لم تكتمل بعد؛ لذلك تبقى الأداة في مرحلة تطوير البنود.',
+    },
+    versioning: { schemaVersion: 2, instrumentVersion: '1.0-item-development' },
+    documentationStatus: legacy ? 'legacy-source-normalized' : 'complete-v1-source',
+  };
+}
+
+const wave1Profiles = Object.entries((profilesWave1 as unknown as { profiles: Record<string, Omit<RawProfile, 'slug'>> }).profiles)
+  .map(([slug, profile]) => ({ ...profile, slug, legacy_source: true } satisfies RawProfile));
+const allProfiles: RawProfile[] = [
+  ...((profilesCore1to12 as unknown as { profiles: RawProfile[] }).profiles),
+  ...((profilesCore13to24 as unknown as { profiles: RawProfile[] }).profiles),
+  ...((profilesCore25to36 as unknown as { profiles: RawProfile[] }).profiles),
+  ...wave1Profiles,
+  ...((profiles49to54 as unknown as { profiles: RawProfile[] }).profiles),
+  ...((profiles55to60 as unknown as { profiles: RawProfile[] }).profiles),
+];
+
+const profileMap = new Map(allProfiles.map((profile) => [profile.slug, normalizeProfile(profile)]));
+
+export function getAssessmentScientificProfile(slug: string) {
+  return profileMap.get(slug) ?? null;
+}
+
+export function getAllAssessmentScientificProfiles() {
+  return [...profileMap.values()];
+}

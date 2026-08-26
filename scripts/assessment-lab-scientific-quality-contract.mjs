@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import { execFileSync } from 'node:child_process';
 
 const standard = JSON.parse(fs.readFileSync('data/assessment-lab/scientific-quality-standard.v1.json', 'utf8'));
 const monitors = JSON.parse(fs.readFileSync('data/assessment-lab/monitors.v1.json', 'utf8'));
@@ -97,4 +98,7 @@ if (allLegacyCoreSlugs.length !== 36 || new Set(allLegacyCoreSlugs).size !== 36)
 for (const slug of [...allLegacyCoreSlugs, ...originals49to60Slugs]) if (!banks[slug]) fail(`${slug} cannot fall back to generic question generation`);
 for (const [slug, profile] of Object.entries(profilesWave1)) if (profile.validation_stage === 'validated') fail(`${slug} cannot be marked validated without empirical psychometric evidence`);
 
-if (!process.exitCode) console.log(`Assessment scientific quality gate passed: ${Object.keys(banks).length} custom-reviewed banks; originals 49-60 have tailored banks and scientific dossiers; validated labels remain forbidden without empirical evidence.`);
+if (!process.exitCode) {
+  console.log(`Assessment scientific quality gate passed: ${Object.keys(banks).length} custom-reviewed banks; originals 49-60 have tailored banks and scientific dossiers; validated labels remain forbidden without empirical evidence.`);
+  execFileSync(process.execPath, ['scripts/assessment-lab-scientific-hardening-v2-contract.mjs'], { stdio: 'inherit' });
+}
