@@ -1,5 +1,6 @@
 import monitorData from '@/data/assessment-lab/monitors.v1.json';
 import instrumentData from '@/data/assessment-lab/instruments.v1.json';
+import questionBankData from '@/data/assessment-lab/question-banks.v1.json';
 
 export type AssessmentMonitor = {
   slug: string;
@@ -25,6 +26,7 @@ export type AssessmentQuestion = {
 
 export const assessmentMonitors = monitorData as AssessmentMonitor[];
 export const sourceInstruments = instrumentData as SourceInstrument[];
+const questionBanks = questionBankData as Record<string, AssessmentQuestion[]>;
 export const assessmentSlugs = [...assessmentMonitors.map((row) => row.slug), ...sourceInstruments.map((row) => row.slug)];
 export const assessmentCategories = [...new Set(assessmentMonitors.map((row) => row.category))];
 
@@ -74,6 +76,8 @@ function questionsForAxis(axis: string): string[] {
 }
 
 export function buildMonitorQuestions(monitor: AssessmentMonitor): AssessmentQuestion[] {
+  const custom = questionBanks[monitor.slug];
+  if (custom?.length) return custom;
   return monitor.axes.flatMap((axis) => questionsForAxis(axis).map((text) => ({ axis, text })));
 }
 
