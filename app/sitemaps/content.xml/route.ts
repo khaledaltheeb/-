@@ -39,6 +39,7 @@ export async function GET(request: Request) {
   // Pagination is intentionally ordered by the immutable row id rather than updated_at:
   // content edits must change <lastmod> without moving URLs between sitemap pages while
   // crawlers are fetching page=0, page=1, ... on a continuously updated 10k+ URL site.
+  // Descending id order also keeps the newest immutable rows in the earliest sitemap page.
   for (let batchStart = pageStart; batchStart < pageEndExclusive; batchStart += DB_BATCH_SIZE) {
     const batchEnd = Math.min(batchStart + DB_BATCH_SIZE - 1, pageEndExclusive - 1);
     const requestedRows = batchEnd - batchStart + 1;
@@ -49,7 +50,7 @@ export async function GET(request: Request) {
       .neq('content_type', 'condition')
       .lte('published_at', now)
       .eq('robots_index', true)
-      .order('id', { ascending: true })
+      .order('id', { ascending: false })
       .range(batchStart, batchEnd);
 
     if (error) {
