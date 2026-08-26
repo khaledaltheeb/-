@@ -5,12 +5,18 @@ const monitors = JSON.parse(fs.readFileSync('data/assessment-lab/monitors.v1.jso
 const banksBase = JSON.parse(fs.readFileSync('data/assessment-lab/question-banks.v1.json', 'utf8'));
 const banksCore = JSON.parse(fs.readFileSync('data/assessment-lab/question-banks.core-1-12.v1.json', 'utf8'));
 const banksCore13to24 = JSON.parse(fs.readFileSync('data/assessment-lab/question-banks.core-13-24.v1.json', 'utf8'));
+const banksCore25to28 = JSON.parse(fs.readFileSync('data/assessment-lab/question-banks.core-25-28.v1.json', 'utf8'));
+const banksCore29to32 = JSON.parse(fs.readFileSync('data/assessment-lab/question-banks.core-29-32.v1.json', 'utf8'));
+const banksCore33to36 = JSON.parse(fs.readFileSync('data/assessment-lab/question-banks.core-33-36.v1.json', 'utf8'));
 const profilesWave1 = JSON.parse(fs.readFileSync('data/assessment-lab/scientific-profiles.wave1.v1.json', 'utf8')).profiles;
 const profilesCoreList = JSON.parse(fs.readFileSync('data/assessment-lab/scientific-profiles.core-1-12.v1.json', 'utf8')).profiles;
 const profilesCore13to24List = JSON.parse(fs.readFileSync('data/assessment-lab/scientific-profiles.core-13-24.v1.json', 'utf8')).profiles;
+const profilesCore25to36List = JSON.parse(fs.readFileSync('data/assessment-lab/scientific-profiles.core-25-36.v1.json', 'utf8')).profiles;
 const profilesCore = Object.fromEntries(profilesCoreList.map((row) => [row.slug, row]));
 const profilesCore13to24 = Object.fromEntries(profilesCore13to24List.map((row) => [row.slug, row]));
-const banks = { ...banksBase, ...banksCore, ...banksCore13to24 };
+const profilesCore25to36 = Object.fromEntries(profilesCore25to36List.map((row) => [row.slug, row]));
+const banksCore25to36 = { ...banksCore25to28, ...banksCore29to32, ...banksCore33to36 };
+const banks = { ...banksBase, ...banksCore, ...banksCore13to24, ...banksCore25to36 };
 const runner = fs.readFileSync('components/assessment-monitor-runner.tsx', 'utf8');
 const catalog = fs.readFileSync('lib/assessment-lab/catalog.ts', 'utf8');
 const fail = (message) => { console.error(`ASSESSMENT SCIENTIFIC QUALITY FAILED: ${message}`); process.exitCode = 1; };
@@ -22,8 +28,9 @@ for (const key of ['construct_definition','intended_population','intended_use','
 if (standard.publication_rules?.validated_label_requires_empirical_validation !== true) fail('validated label must require empirical validation');
 if (standard.publication_rules?.mixed_response_semantics_forbidden !== true) fail('mixed response semantics must remain forbidden');
 if (!catalog.includes("AssessmentResponseKind = 'frequency' | 'degree' | 'yes-no'")) fail('catalog must expose explicit response semantics');
-if (!catalog.includes('question-banks.core-1-12.v1.json')) fail('core reviewed question bank must be loaded before generic fallback');
-if (!catalog.includes('question-banks.core-13-24.v1.json')) fail('tools 13-24 reviewed question bank must be loaded before generic fallback');
+for (const path of ['question-banks.core-1-12.v1.json','question-banks.core-13-24.v1.json','question-banks.core-25-28.v1.json','question-banks.core-29-32.v1.json','question-banks.core-33-36.v1.json']) {
+  if (!catalog.includes(path)) fail(`${path} must be loaded before generic fallback`);
+}
 if (!runner.includes("frequency: ['أبدًا', 'نادرًا', 'أحيانًا', 'غالبًا', 'دائمًا تقريبًا']")) fail('frequency response scale missing');
 if (!runner.includes("degree: ['إطلاقًا', 'بدرجة بسيطة', 'بدرجة متوسطة', 'بدرجة كبيرة', 'بدرجة كبيرة جدًا']")) fail('degree response scale missing');
 if (!runner.includes("'yes-no': ['لا', 'إلى حد ما', 'نعم']")) fail('yes/no response scale missing');
@@ -37,6 +44,7 @@ for (const [slug, questions] of Object.entries(banks)) {
   for (const question of questions) {
     if (!question.text || question.text.trim().length < 18) fail(`${slug} contains an underspecified item`);
     if (!monitor.axes.includes(question.axis)) fail(`${slug} question axis ${question.axis} is outside its domain map`);
+    if (!['frequency','degree','yes-no'].includes(question.responseKind ?? 'degree')) fail(`${slug} contains an invalid response semantic`);
   }
   for (const axis of monitor.axes) {
     const count = questions.filter((q) => q.axis === axis).length;
@@ -75,8 +83,17 @@ validateProfileSet(coreSlugs, profilesCore, banksCore, 'core-1-12');
 const core13to24Slugs = ['loneliness','social-support','burnout-risk','daily-function','sensory-overload','executive-function','attention-daily','school-wellbeing','postpartum-support','recovery-safety','autism-family-load','adhd-family-support'];
 validateProfileSet(core13to24Slugs, profilesCore13to24, banksCore13to24, 'core-13-24');
 
+const core25to36Slugs = ['learning-difficulty-support','speech-language-support','intellectual-disability-support','down-syndrome-family','cerebral-palsy-family','hearing-support-family','visual-support-family','chronic-illness-family','emotionally-detached','panic-pattern','worry-cycle','compulsive-pattern'];
+validateProfileSet(core25to36Slugs, profilesCore25to36, banksCore25to36, 'core-25-36');
+
+const allLegacyCoreSlugs = [...coreSlugs, ...core13to24Slugs, ...core25to36Slugs];
+if (allLegacyCoreSlugs.length !== 36 || new Set(allLegacyCoreSlugs).size !== 36) fail('all 36 legacy tools must be uniquely covered by scientific dossiers and tailored banks');
+for (const slug of allLegacyCoreSlugs) {
+  if (!banks[slug]) fail(`legacy tool ${slug} cannot fall back to generic question generation`);
+}
+
 for (const [slug, profile] of Object.entries(profilesWave1)) {
   if (profile.validation_stage === 'validated') fail(`${slug} cannot be marked validated without empirical psychometric evidence`);
 }
 
-if (!process.exitCode) console.log(`Assessment scientific quality gate passed: ${Object.keys(banks).length} custom-reviewed banks, including ${coreSlugs.length + core13to24Slugs.length} scientifically rebuilt core tools; validated labels remain forbidden without empirical evidence.`);
+if (!process.exitCode) console.log(`Assessment scientific quality gate passed: ${Object.keys(banks).length} custom-reviewed banks; all 36 legacy tools have tailored banks and scientific dossiers; validated labels remain forbidden without empirical evidence.`);

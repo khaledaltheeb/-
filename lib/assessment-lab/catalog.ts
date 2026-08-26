@@ -3,6 +3,9 @@ import instrumentData from '@/data/assessment-lab/instruments.v1.json';
 import questionBankData from '@/data/assessment-lab/question-banks.v1.json';
 import coreQuestionBankData from '@/data/assessment-lab/question-banks.core-1-12.v1.json';
 import coreQuestionBankData13to24 from '@/data/assessment-lab/question-banks.core-13-24.v1.json';
+import coreQuestionBankData25to28 from '@/data/assessment-lab/question-banks.core-25-28.v1.json';
+import coreQuestionBankData29to32 from '@/data/assessment-lab/question-banks.core-29-32.v1.json';
+import coreQuestionBankData33to36 from '@/data/assessment-lab/question-banks.core-33-36.v1.json';
 
 export type AssessmentMonitor = {
   slug: string;
@@ -37,6 +40,9 @@ const questionBanks = {
   ...(questionBankData as Record<string, RawAssessmentQuestion[]>),
   ...(coreQuestionBankData as Record<string, RawAssessmentQuestion[]>),
   ...(coreQuestionBankData13to24 as Record<string, RawAssessmentQuestion[]>),
+  ...(coreQuestionBankData25to28 as Record<string, RawAssessmentQuestion[]>),
+  ...(coreQuestionBankData29to32 as Record<string, RawAssessmentQuestion[]>),
+  ...(coreQuestionBankData33to36 as Record<string, RawAssessmentQuestion[]>),
 };
 export const assessmentSlugs = [...assessmentMonitors.map((row) => row.slug), ...sourceInstruments.map((row) => row.slug)];
 export const assessmentCategories = [...new Set(assessmentMonitors.map((row) => row.category))];
@@ -65,7 +71,7 @@ function questionsForAxis(axis: string): string[] {
       `خلال الأسبوع الماضي، إلى أي حد شعرت أن ${axis} كان واضحًا ومتوافرًا عندما احتجته؟`,
       `هل وجدت موقفًا واحدًا على الأقل عرفت فيه ما الذي يحافظ على ${axis} أو ما الذي يهدده؟`,
       `إلى أي حد استطعت الوصول إلى خطوة عملية أو شخص مناسب عندما احتجت إلى تعزيز ${axis}؟`,
-      `هل تغيّر مستوى ${axis} بسرعة أو بصورة جعلتك تؤجل نشاطًا مهمًا أو تتجنب موقفًا معتادًا؟`,
+      `هل تغير مستوى ${axis} بسرعة أو بصورة جعلتك تؤجل نشاطًا مهمًا أو تتجنب موقفًا معتادًا؟`,
     ];
   }
 
@@ -80,7 +86,7 @@ function questionsForAxis(axis: string): string[] {
 
   return [
     `خلال الأسبوع الماضي، إلى أي حد كان ${axis} حاضرًا بصورة أثرت في يومك؟`,
-    `إلى أي حد غيّر ${axis} قدرتك على أداء مهمة أو الاستمرار في نشاط مهم؟`,
+    `إلى أي حد غير ${axis} قدرتك على أداء مهمة أو الاستمرار في نشاط مهم؟`,
     `هل استطعت تحديد موقف أو وقت أصبح فيه ${axis} أكثر وضوحًا أو شدة من المعتاد؟`,
     `إلى أي حد احتجت إلى راحة أو تعديل أو دعم بسبب ما لاحظته في ${axis}؟`,
   ];
