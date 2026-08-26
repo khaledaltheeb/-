@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "name": "Rawafid Assessment Scientific Completeness Standard",
+  "status": "mandatory",
+  "minimum_requirements": [
+    "construct_definition",
+    "intended_population",
+    "intended_use",
+    "reference_period",
+    "response_scale_semantics",
+    "domain_map",
+    "item_rationale",
+    "language_clarity_review",
+    "content_validity_review",
+    "privacy_statement",
+    "interpretation_boundary",
+    "functional_impact_guidance",
+    "safety_escalation",
+    "professional_referral_path",
+    "scientific_references",
+    "versioning",
+    "validation_stage"
+  ],
+  "publication_rules": {
+    "validated_label_requires_empirical_validation": true,
+    "diagnostic_claims_without_validation_forbidden": true,
+    "cutoffs_without_criterion_study_forbidden": true,
+    "generic_template_only_tools_are_complete": false,
+    "mixed_response_semantics_forbidden": true,
+    "proprietary_item_copying_forbidden": true
+  },
+  "validation_stages": [
+    "concept",
+    "item-development",
+    "expert-review",
+    "cognitive-interview",
+    "pilot-ready",
+    "pilot",
+    "psychometric-analysis",
+    "validated"
+  ],
+  "empirical_validation_expectations": [
+    "content validity",
+    "comprehensibility and cognitive interviewing",
+    "dimensionality/factor structure where applicable",
+    "internal consistency where applicable",
+    "test-retest reliability where applicable",
+    "convergent/discriminant or criterion validity where applicable",
+    "differential item functioning or measurement invariance where relevant",
+    "cutoff calibration only with suitable external criterion"
+  ],
+  "authoritative_methodology_sources": [
+    {
+      "name": "COSMIN",
+      "url": "https://www.cosmin.nl/"
+    },
+    {
+      "name": "FDA Patient-Reported Outcome Measures Guidance",
+      "url": "https://www.fda.gov/regulatory-information/search-fda-guidance-documents/patient-reported-outcome-measures-use-medical-product-development-support-labeling-claims"
+    },
+    {
+      "name": "HealthMeasures / PROMIS methodology",
+      "url": "https://www.healthmeasures.net/"
+    }
+  ]
+}
