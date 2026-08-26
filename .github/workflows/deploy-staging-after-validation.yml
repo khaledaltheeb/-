@@ -109,11 +109,15 @@ jobs:
             if [[ "$atlas" == *"Fentanyl"* && "$atlas" == *"Heroin"* && "$atlas" == *"54"* ]]; then atlas_ready=true; fi
             if [[ "$fentanyl" == *"Fentanyl"* && "$fentanyl" == *"MedicalWebPage"* ]]; then fentanyl_ready=true; fi
             if [[ "$comparison" == *"Fentanyl"* && "$comparison" == *"Heroin"* && "$comparison" == *"Article"* ]]; then comparison_ready=true; fi
-            if [[ "$methodology" == *"8"* && "$methodology" == *"evidence"* || "$methodology" == *"قوة الدليل"* ]]; then methodology_ready=true; fi
-            if [[ "$root_sitemap" == *"/sitemaps/addiction-atlas.xml"* \
-              && "$atlas_sitemap" == *"/addiction/substances/fentanyl/"* \
-              && "$atlas_sitemap" == *"/addiction/compare/fentanyl-vs-heroin/"* \
-              && "$atlas_sitemap" == *"/addiction/methodology/"* ]]; then sitemap_ready=true; fi
+            if [[ "$methodology" == *"قوة الدليل"* ]]; then methodology_ready=true; fi
+
+            # Staging is intentionally noindex. sitemap-xml.ts therefore emits valid,
+            # deliberately empty XML containers instead of indexable production URLs.
+            # Production URL coverage remains enforced by addiction-atlas-contract.mjs.
+            if [[ "$root_sitemap" == *"<sitemapindex"* \
+              && "$atlas_sitemap" == *"<urlset"* \
+              && "$root_sitemap" != *"<sitemap><loc>"* \
+              && "$atlas_sitemap" != *"<url><loc>"* ]]; then sitemap_ready=true; fi
 
             if [ "$home_has_noindex" = 'true' ] \
               && [ "$article_has_full_body" = 'true' ] \
@@ -137,7 +141,7 @@ jobs:
               && [ "$comparison_ready" = 'true' ] \
               && [ "$methodology_ready" = 'true' ] \
               && [ "$sitemap_ready" = 'true' ]; then
-              echo 'Validated noindex staging is live; preserved routes, search, full-body renderer, addiction atlas pages, and atlas sitemap checks passed.'
+              echo 'Validated noindex staging is live; preserved routes, search, full-body renderer, addiction atlas pages, and intentionally empty noindex sitemap containers passed.'
               exit 0
             fi
             echo "Staging verification attempt ${attempt}: noindex=${home_has_noindex}, full_body=${article_has_full_body}, about=${about_code:-none}, search=${search_code:-none}, atlas_noindex=${atlas_has_noindex}, atlas=${atlas_ready}, fentanyl=${fentanyl_ready}, comparison=${comparison_ready}, methodology=${methodology_ready}, sitemap=${sitemap_ready}."
