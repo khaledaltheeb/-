@@ -64,12 +64,36 @@ for(const marker of [
   'isExplicitNoindexPath(input.route)',
   'normalizePublicPath',
 ]) if(!publicIndexability.includes(marker)) fail(`public indexability marker missing: ${marker}`);
-for(const marker of ['isExplicitNoindexPath', 'if (isExplicitNoindexPath(item.path)) continue']) if(!contentSitemap.includes(marker)) fail(`content sitemap noindex exclusion marker missing: ${marker}`);
+for(const marker of ['isExplicitNoindexPath', 'if (isExplicitNoindexPath(normalizedPath)) continue', 'activeRedirectSources.has(normalizedPath)']) if(!contentSitemap.includes(marker)) fail(`content sitemap indexability exclusion marker missing: ${marker}`);
+
+// Historic preserved-link inventories can contain destinations that disappeared during the
+// migration. They must be repaired to a semantically appropriate published destination rather
+// than emitted as crawlable 404s or replaced with fabricated placeholder pages.
+for(const marker of [
+  'STALE_PRESERVED_LINK_REPLACEMENTS',
+  "'/autism/'",
+  "'/family-guide/conditions/autism/'",
+  "'/content/adhd/'",
+  "'/family-guide/conditions/adhd/'",
+  "'/care-guides/caregiver-wellbeing/'",
+  "'/evidence-guides/caregiver-wellbeing/'",
+  "'/comparisons/borderline-vs-bipolar/'",
+  "'/encyclopedia/concept-1885/'",
+  "'/special-ed-encyclopedia/learning-disabilities/'",
+  "'/care-guides/specific-learning-disorder-home-school/'",
+  'repairPreservedInternalLink',
+]) if(!helper.includes(marker)) fail(`preserved stale-link repair marker missing: ${marker}`);
 
 // The preserved helper delegates robots directives to the centralized SEO generator.
 // Keep noarchive/nosnippet for every page that remains noindex without duplicating metadata logic.
 for(const marker of ['const canIndex = INDEXING_ENABLED && input.index !== false','noarchive: !canIndex','nosnippet: !canIndex']) if(!seo.includes(marker)) fail(`central SEO noindex preservation marker missing: ${marker}`);
-for(const marker of ['نسخة إنتاجية محفوظة','لم تُمنح هذه النسخة اعتماد دورة المراجعة العلمية الحالية','ContentRenderer','legacyInternalLinks','legacyReferences']) if(!view.includes(marker)) fail(`preserved view marker missing: ${marker}`);
+for(const marker of [
+  'نسخة إنتاجية محفوظة',
+  'هذه صفحة منشورة ضمن قاعدة محتوى روافد',
+  'تبقى خارج الفهرسة العامة إلى أن تكتمل مراجعتها',
+  'shouldIndexPreservedPublishedPage',
+  'ContentRenderer','legacyInternalLinks','legacyReferences'
+]) if(!view.includes(marker)) fail(`preserved view marker missing: ${marker}`);
 for(const marker of ['NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY',"rpc('legacy_preserved_route_exists'",'isLegacyProductionRoute']) if(!proxy.includes(marker)) fail(`proxy must document its public preservation RPC dependency: ${marker}`);
 for(const path of routes){
  if(!fs.existsSync(path)){fail(`preserved route missing: ${path}`);continue;}
@@ -101,4 +125,4 @@ for(const path of [
 ]) if(!fs.existsSync(path)) fail(`deployed migration history not mirrored: ${path}`);
 
 if(failed)process.exit(1);
-console.log('Legacy preservation contract passed: Unicode-safe read-only fallback rendering is preserved, published-content pages recover indexability through the centralized policy, explicit archive/language noindex routes stay out of sitemaps, and reviewed modern takeovers keep priority.');
+console.log('Legacy preservation contract passed: Unicode-safe read-only fallback rendering is preserved, published-content pages recover indexability through the centralized policy, active redirect sources and explicit archive/language noindex routes stay out of sitemaps, stale preserved internal links are repaired to real published destinations, and reviewed modern takeovers keep priority.');
