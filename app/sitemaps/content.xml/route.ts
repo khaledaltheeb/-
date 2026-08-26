@@ -2,11 +2,12 @@ import { createClient } from '@/lib/supabase/server';
 import { sitemapResponse } from '@/lib/sitemap-xml';
 import { getCognitivePageIndex } from '@/lib/cognitive-program';
 import { getExpandedEncyclopediaIndex } from '@/lib/expanded-encyclopedia';
-import { isExplicitNoindexPath } from '@/lib/public-indexability';
+import { isExplicitNoindexPath, normalizePublicPath } from '@/lib/public-indexability';
 
 export const dynamic = 'force-dynamic';
 const PAGE_SIZE = 5000;
 const DB_BATCH_SIZE = 1000;
+const REDIRECT_BATCH_SIZE = 1000;
 const RELEASE = '2026-08-14T00:00:00.000Z';
 
 type SitemapRow = {
@@ -23,6 +24,32 @@ type ContentSitemapRecord = {
   canonical_url: string | null;
 };
 
+type RedirectRecord = {
+  source_path: string | null;
+};
+
+async function getActiveRedirectSources(supabase: Awaited<ReturnType<typeof createClient>>) {
+  const sources = new Set<string>();
+  for (let start = 0; start < 50000; start += REDIRECT_BATCH_SIZE) {
+    const { data, error } = await supabase
+      .from('redirects')
+      .select('source_path')
+      .eq('is_active', true)
+      .order('source_path', { ascending: true })
+      .range(start, start + REDIRECT_BATCH_SIZE - 1);
+
+    if (error) throw new Error(`content sitemap redirect query failed at rows ${start}-${start + REDIRECT_BATCH_SIZE - 1}: ${error.message}`);
+    const batch = Array.isArray(data) ? data as RedirectRecord[] : [];
+    for (const row of batch) {
+      if (typeof row.source_path === 'string' && row.source_path.trim()) {
+        sources.add(normalizePublicPath(row.source_path));
+      }
+    }
+    if (batch.length < REDIRECT_BATCH_SIZE) break;
+  }
+  return sources;
+}
+
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const raw = Number(url.searchParams.get('page') ?? '0');
@@ -34,10 +61,8 @@ export async function GET(request: Request) {
   const data: ContentSitemapRecord[] = [];
 
   // No-loss rule: every live, indexable database record that is not a condition belongs
-  // to this sitemap safety net. Dedicated maps such as quick-info may repeat the same
-  // canonical URL; overlap is preferable to silently dropping an indexable published page.
-  // A small centralized deny-list is applied after collection for routes whose current public
-  // surface intentionally remains noindex even if a legacy database row still says indexable.
+  // to this sitemap safety net unless its public URL is intentionally noindex or is an
+  // active redirect source. Redirect sources must never be advertised as canonical URLs.
   // Conditions remain in the encyclopedia sitemap, whose public route is canonicalized there.
   // Pagination is intentionally ordered by the immutable row id rather than updated_at:
   // content edits must change <lastmod> without moving URLs between sitemap pages while
@@ -92,10 +117,13 @@ export async function GET(request: Request) {
     ];
   }
 
+  const activeRedirectSources = await getActiveRedirectSources(supabase);
   const unique = new Map<string, SitemapRow>();
   for (const item of [...databaseRows, ...generatedRows]) {
-    if (isExplicitNoindexPath(item.path)) continue;
-    if (!unique.has(item.path)) unique.set(item.path, item);
+    const normalizedPath = normalizePublicPath(item.path);
+    if (isExplicitNoindexPath(normalizedPath)) continue;
+    if (activeRedirectSources.has(normalizedPath)) continue;
+    if (!unique.has(normalizedPath)) unique.set(normalizedPath, { ...item, path: normalizedPath });
   }
 
   return sitemapResponse([...unique.values()]);
