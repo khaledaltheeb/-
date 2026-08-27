@@ -5,6 +5,7 @@ import profilesWave1 from '@/data/assessment-lab/scientific-profiles.wave1.v1.js
 import profiles49to54 from '@/data/assessment-lab/scientific-profiles.originals-49-54.v1.json';
 import profiles55to60 from '@/data/assessment-lab/scientific-profiles.originals-55-60.v1.json';
 import safetyCriticalProfiles from '@/data/assessment-lab/scientific-profiles.safety-critical.v1.json';
+import priorityWave2Profiles from '@/data/assessment-lab/scientific-profiles.priority-wave2.v1.json';
 
 export type AssessmentScientificReference = {
   title: string;
@@ -106,6 +107,9 @@ const allProfiles: RawProfile[] = [
 
 const profileMap = new Map(allProfiles.map((profile) => [profile.slug, normalizeProfile(profile)]));
 for (const profile of (safetyCriticalProfiles as unknown as { profiles: RawProfile[] }).profiles) {
+  profileMap.set(profile.slug, normalizeProfile(profile));
+}
+for (const profile of (priorityWave2Profiles as unknown as { profiles: RawProfile[] }).profiles) {
   profileMap.set(profile.slug, normalizeProfile(profile));
 }
 
