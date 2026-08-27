@@ -9,6 +9,7 @@ import coreQuestionBankData33to36 from '@/data/assessment-lab/question-banks.cor
 import originalQuestionBankData49to54 from '@/data/assessment-lab/question-banks.originals-49-54.v1.json';
 import originalQuestionBankData55to60 from '@/data/assessment-lab/question-banks.originals-55-60.v1.json';
 import clarityWave2QuestionBankData from '@/data/assessment-lab/question-banks.clarity-wave2.v1.json';
+import clarityWave3QuestionBankData from '@/data/assessment-lab/question-banks.clarity-wave3.v1.json';
 import safetyHardenedQuestionBankData from '@/data/assessment-lab/question-banks.safety-hardening.v1.json';
 
 export type AssessmentMonitor = {
@@ -50,6 +51,7 @@ const questionBanks = {
   ...(originalQuestionBankData49to54 as Record<string, RawAssessmentQuestion[]>),
   ...(originalQuestionBankData55to60 as Record<string, RawAssessmentQuestion[]>),
   ...(clarityWave2QuestionBankData as Record<string, RawAssessmentQuestion[]>),
+  ...(clarityWave3QuestionBankData as Record<string, RawAssessmentQuestion[]>),
   ...(safetyHardenedQuestionBankData as Record<string, RawAssessmentQuestion[]>),
 };
 export const assessmentSlugs = [...assessmentMonitors.map((row) => row.slug), ...sourceInstruments.map((row) => row.slug)];
