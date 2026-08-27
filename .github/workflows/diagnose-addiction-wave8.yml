@@ -18,7 +18,7 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 24
-      - name: Print substances missing axis evidence
+      - name: Print Wave 8 evidence gaps and source registry
         shell: bash
         run: |
           node --input-type=module <<'NODE'
@@ -43,5 +43,17 @@ jobs:
             sources: s.source_urls
           }));
           console.log(`TOTAL=${substances.length} COVERED=${covered.size} MISSING=${missing.length}`);
-          for (const row of missing) console.log(JSON.stringify(row));
+          for (const row of missing) console.log(`MISSING ${JSON.stringify(row)}`);
+
+          const sourceFiles = ['source-registry-v1.json','source-registry-v2.json','source-registry-v3.json'];
+          const sourceWaves = await Promise.all(sourceFiles.map(j));
+          const sources = sourceWaves.flatMap((w) => w.sources || []);
+          console.log(`SOURCES=${sources.length}`);
+          for (const source of sources) console.log(`SOURCE ${JSON.stringify({id:source.id,organization:source.organization,title:source.title,url:source.url,verified_on:source.verified_on})}`);
+
+          const interactionFiles = ['interactions-v1.json','interactions-v2.json','interactions-v3.json'];
+          const interactionWaves = await Promise.all(interactionFiles.map(j));
+          const interactions = interactionWaves.flatMap((w) => w.records || []);
+          console.log(`INTERACTIONS=${interactions.length}`);
+          for (const item of interactions) console.log(`INTERACTION ${item.id} ${item.a} ${item.b} ${item.evidence_scope} ${item.severity}`);
           NODE
