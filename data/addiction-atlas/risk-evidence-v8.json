@@ -1,0 +1,1674 @@
+{
+  "schema_version": "rawafid-addiction-atlas-risk-evidence-v8",
+  "wave": "wave-8-core-evidence-coverage",
+  "updated_on": "2026-08-27",
+  "policy_ar": "الموجة الثامنة توسع التتبع محوراً بمحور للمواد المركزية الموجودة بالفعل، ولا تضيف أرقام خطر جديدة ولا تغير الدرجات المنشورة. الدليل الفئوي موسوم بوضوح كدليل فئوي، والدليل الخاص بالمادة يرفع اليقين فقط في المحور الذي يدعمه. كل score ترتيب تحريري داخل المحور وليس احتمالاً شخصياً أو جرعة أو نسبة قوة. أي U يبقى null، ولا يستنتج الأمان من انخفاض الدرجة أو غياب تفاعل مراجع.",
+  "records": [
+    {
+      "substance_slug": "fentanyl",
+      "dimensions": {
+        "acute_toxicity": {
+          "score": 5,
+          "evidence_grade": "A",
+          "source_ids": [
+            "nida-fentanyl-2025",
+            "who-opioid-overdose-2025-v2",
+            "fda-opioid-labeling-2023"
+          ],
+          "context_ar": "دليل فئوي للأفيونات يركز على التسمم الحاد وتدهور الوعي وكبت التنفس، ويُقرأ مع خصائص المادة نفسها.",
+          "rationale_ar": "السمية الحادة في الأفيونات مرتبطة أساساً بتثبيط الجهاز العصبي والتنفس. الدرجة ترتيبية تحريرية داخل هذا المحور وليست احتمالاً فردياً أو جرعة فاصلة."
+        },
+        "overdose_risk": {
+          "score": 5,
+          "evidence_grade": "A",
+          "source_ids": [
+            "nida-fentanyl-2025",
+            "who-opioid-overdose-2025-v2",
+            "fda-opioid-labeling-2023"
+          ],
+          "context_ar": "WHO وFDA يصفان الجرعة الزائدة الأفيونية كحالة قد تهدد الحياة، ويبرزان كبت التنفس كآلية مركزية.",
+          "rationale_ar": "وجود مسار جرعة زائدة واضح وقابل للوفاة يبرر ارتفاع هذا المحور. الرقم لا يحول بيانات السكان أو الملصقات الدوائية إلى احتمال شخصي."
+        },
+        "dependence": {
+          "score": 5,
+          "evidence_grade": "A",
+          "source_ids": [
+            "nida-fentanyl-2025",
+            "nida-opioids-current",
+            "fda-opioid-labeling-2023"
+          ],
+          "context_ar": "دليل فئوي على قابلية الأفيونات للاعتماد واضطراب الاستخدام؛ قوة الدليل الخاصة بالمادة قد تختلف حسب السياق العلاجي وغير الطبي.",
+          "rationale_ar": "يوثق المصدر الفئوي الاعتماد والإدمان كخطر جوهري للأفيونات. لا يعني ذلك أن كل تعرض يؤدي إلى اعتماد."
+        },
+        "withdrawal_medical_risk": {
+          "score": 3,
+          "evidence_grade": "B",
+          "source_ids": [
+            "nida-fentanyl-2025",
+            "nida-opioids-current",
+            "who-drug-withdrawal-mhgap"
+          ],
+          "context_ar": "المحور يقيّم الحاجة الطبية أثناء الانسحاب ولا يساوي شدة الانزعاج الذاتي، ولا يقدم خطة فطام منزلية.",
+          "rationale_ar": "الانسحاب الأفيوني قد يكون شديداً ويتطلب دعماً وعلاجاً منظماً، لكن نمط الخطر الطبي يختلف عن انسحاب الكحول أو البنزوديازيبينات؛ لذلك تبقى الدرجة محوراً مستقلاً."
+        },
+        "neuro_harm": {
+          "score": 4,
+          "evidence_grade": "B",
+          "source_ids": [
+            "nida-fentanyl-2025",
+            "nida-opioids-current",
+            "who-opioid-overdose-2025-v2"
+          ],
+          "context_ar": "دليل فئوي غير مباشر: تغير الوعي ونقص الأكسجة في التسمم قد يسببان أذى عصبياً؛ لا يفترض سمية عصبية نوعية لكل أفيون.",
+          "rationale_ar": "هذا المحور أكثر عدم يقين من كبت التنفس. الدرجة المنشورة تُحفظ مع خفض قوة الدليل كي لا تُعرض كقياس مباشر لسمية عصبية نوعية."
+        },
+        "cardio_harm": {
+          "score": 2,
+          "evidence_grade": "C",
+          "source_ids": [
+            "nida-fentanyl-2025",
+            "fda-opioid-labeling-2023"
+          ],
+          "context_ar": "دليل فئوي محدود للأثر القلبي مقارنة بمحور التنفس؛ لا تُفسر الدرجة المنخفضة كغياب للخطر أو كحماية قلبية.",
+          "rationale_ar": "المخاطر القلبية ليست النمط المسيطر لجميع الأفيونات وفق هذا المصدر الفئوي. لهذا تبقى قوة الدليل منخفضة ما لم توجد وثيقة خاصة بالمادة."
+        },
+        "respiratory_harm": {
+          "score": 5,
+          "evidence_grade": "A",
+          "source_ids": [
+            "nida-fentanyl-2025",
+            "who-opioid-overdose-2025-v2",
+            "fda-opioid-labeling-2023"
+          ],
+          "context_ar": "كبت التنفس هو آلية مركزية مثبتة في الجرعة الزائدة الأفيونية ويُعامل كمحور مستقل عن بقية الأضرار.",
+          "rationale_ar": "الربط المباشر بين الأفيونات وكبت التنفس المهدد للحياة يجعل هذا المحور من أقوى المحاور توثيقاً."
+        },
+        "polysubstance_risk": {
+          "score": 5,
+          "evidence_grade": "A",
+          "source_ids": [
+            "nida-fentanyl-2025",
+            "fda-opioid-labeling-2023",
+            "fda-opioid-cns-depressant-warning-2016"
+          ],
+          "context_ar": "FDA يحذر من الأفيونات مع البنزوديازيبينات ومثبطات الجهاز العصبي المركزي بسبب التهدئة العميقة وكبت التنفس والوفاة.",
+          "rationale_ar": "خطر الخلط هنا مبني على تحذير فئوي مؤسسي. لا يعني ذلك أن الأزواج غير الموجودة في سجل التفاعلات آمنة."
+        }
+      }
+    },
+    {
+      "substance_slug": "heroin",
+      "dimensions": {
+        "acute_toxicity": {
+          "score": 5,
+          "evidence_grade": "A",
+          "source_ids": [
+            "nida-heroin-current",
+            "who-opioid-overdose-2025-v2",
+            "fda-opioid-labeling-2023"
+          ],
+          "context_ar": "دليل فئوي للأفيونات يركز على التسمم الحاد وتدهور الوعي وكبت التنفس، ويُقرأ مع خصائص المادة نفسها.",
+          "rationale_ar": "السمية الحادة في الأفيونات مرتبطة أساساً بتثبيط الجهاز العصبي والتنفس. الدرجة ترتيبية تحريرية داخل هذا المحور وليست احتمالاً فردياً أو جرعة فاصلة."
+        },
+        "overdose_risk": {
+          "score": 5,
+          "evidence_grade": "A",
+          "source_ids": [
+            "nida-heroin-current",
+            "who-opioid-overdose-2025-v2",
+            "fda-opioid-labeling-2023"
+          ],
+          "context_ar": "WHO وFDA يصفان الجرعة الزائدة الأفيونية كحالة قد تهدد الحياة، ويبرزان كبت التنفس كآلية مركزية.",
+          "rationale_ar": "وجود مسار جرعة زائدة واضح وقابل للوفاة يبرر ارتفاع هذا المحور. الرقم لا يحول بيانات السكان أو الملصقات الدوائية إلى احتمال شخصي."
+        },
+        "dependence": {
+          "score": 5,
+          "evidence_grade": "A",
+          "source_ids": [
+            "nida-heroin-current",
+            "nida-opioids-current",
+            "fda-opioid-labeling-2023"
+          ],
+          "context_ar": "دليل فئوي على قابلية الأفيونات للاعتماد واضطراب الاستخدام؛ قوة الدليل الخاصة بالمادة قد تختلف حسب السياق العلاجي وغير الطبي.",
+          "rationale_ar": "يوثق المصدر الفئوي الاعتماد والإدمان كخطر جوهري للأفيونات. لا يعني ذلك أن كل تعرض يؤدي إلى اعتماد."
+        },
+        "withdrawal_medical_risk": {
+          "score": 3,
+          "evidence_grade": "B",
+          "source_ids": [
+            "nida-heroin-current",
+            "nida-opioids-current",
+            "who-drug-withdrawal-mhgap"
+          ],
+          "context_ar": "المحور يقيّم الحاجة الطبية أثناء الانسحاب ولا يساوي شدة الانزعاج الذاتي، ولا يقدم خطة فطام منزلية.",
+          "rationale_ar": "الانسحاب الأفيوني قد يكون شديداً ويتطلب دعماً وعلاجاً منظماً، لكن نمط الخطر الطبي يختلف عن انسحاب الكحول أو البنزوديازيبينات؛ لذلك تبقى الدرجة محوراً مستقلاً."
+        },
+        "neuro_harm": {
+          "score": 4,
+          "evidence_grade": "B",
+          "source_ids": [
+            "nida-heroin-current",
+            "nida-opioids-current",
+            "who-opioid-overdose-2025-v2"
+          ],
+          "context_ar": "دليل فئوي غير مباشر: تغير الوعي ونقص الأكسجة في التسمم قد يسببان أذى عصبياً؛ لا يفترض سمية عصبية نوعية لكل أفيون.",
+          "rationale_ar": "هذا المحور أكثر عدم يقين من كبت التنفس. الدرجة المنشورة تُحفظ مع خفض قوة الدليل كي لا تُعرض كقياس مباشر لسمية عصبية نوعية."
+        },
+        "cardio_harm": {
+          "score": 2,
+          "evidence_grade": "C",
+          "source_ids": [
+            "nida-heroin-current",
+            "fda-opioid-labeling-2023"
+          ],
+          "context_ar": "دليل فئوي محدود للأثر القلبي مقارنة بمحور التنفس؛ لا تُفسر الدرجة المنخفضة كغياب للخطر أو كحماية قلبية.",
+          "rationale_ar": "المخاطر القلبية ليست النمط المسيطر لجميع الأفيونات وفق هذا المصدر الفئوي. لهذا تبقى قوة الدليل منخفضة ما لم توجد وثيقة خاصة بالمادة."
+        },
+        "respiratory_harm": {
+          "score": 5,
+          "evidence_grade": "A",
+          "source_ids": [
+            "nida-heroin-current",
+            "who-opioid-overdose-2025-v2",
+            "fda-opioid-labeling-2023"
+          ],
+          "context_ar": "كبت التنفس هو آلية مركزية مثبتة في الجرعة الزائدة الأفيونية ويُعامل كمحور مستقل عن بقية الأضرار.",
+          "rationale_ar": "الربط المباشر بين الأفيونات وكبت التنفس المهدد للحياة يجعل هذا المحور من أقوى المحاور توثيقاً."
+        },
+        "polysubstance_risk": {
+          "score": 5,
+          "evidence_grade": "A",
+          "source_ids": [
+            "nida-heroin-current",
+            "fda-opioid-labeling-2023",
+            "fda-opioid-cns-depressant-warning-2016"
+          ],
+          "context_ar": "FDA يحذر من الأفيونات مع البنزوديازيبينات ومثبطات الجهاز العصبي المركزي بسبب التهدئة العميقة وكبت التنفس والوفاة.",
+          "rationale_ar": "خطر الخلط هنا مبني على تحذير فئوي مؤسسي. لا يعني ذلك أن الأزواج غير الموجودة في سجل التفاعلات آمنة."
+        }
+      }
+    },
+    {
+      "substance_slug": "morphine",
+      "dimensions": {
+        "acute_toxicity": {
+          "score": 4,
+          "evidence_grade": "B",
+          "source_ids": [
+            "nida-prescription-medicines-current",
+            "who-opioid-overdose-2025-v2",
+            "fda-opioid-labeling-2023"
+          ],
+          "context_ar": "دليل فئوي للأفيونات يركز على التسمم الحاد وتدهور الوعي وكبت التنفس، ويُقرأ مع خصائص المادة نفسها.",
+          "rationale_ar": "السمية الحادة في الأفيونات مرتبطة أساساً بتثبيط الجهاز العصبي والتنفس. الدرجة ترتيبية تحريرية داخل هذا المحور وليست احتمالاً فردياً أو جرعة فاصلة."
+        },
+        "overdose_risk": {
+          "score": 4,
+          "evidence_grade": "A",
+          "source_ids": [
+            "nida-prescription-medicines-current",
+            "who-opioid-overdose-2025-v2",
+            "fda-opioid-labeling-2023"
+          ],
+          "context_ar": "WHO وFDA يصفان الجرعة الزائدة الأفيونية كحالة قد تهدد الحياة، ويبرزان كبت التنفس كآلية مركزية.",
+          "rationale_ar": "وجود مسار جرعة زائدة واضح وقابل للوفاة يبرر ارتفاع هذا المحور. الرقم لا يحول بيانات السكان أو الملصقات الدوائية إلى احتمال شخصي."
+        },
+        "dependence": {
+          "score": 4,
+          "evidence_grade": "B",
+          "source_ids": [
+            "nida-prescription-medicines-current",
+            "nida-opioids-current",
+            "fda-opioid-labeling-2023"
+          ],
+          "context_ar": "دليل فئوي على قابلية الأفيونات للاعتماد واضطراب الاستخدام؛ قوة الدليل الخاصة بالمادة قد تختلف حسب السياق العلاجي وغير الطبي.",
+          "rationale_ar": "يوثق المصدر الفئوي الاعتماد والإدمان كخطر جوهري للأفيونات. لا يعني ذلك أن كل تعرض يؤدي إلى اعتماد."
+        },
+        "withdrawal_medical_risk": {
+          "score": 3,
+          "evidence_grade": "B",
+          "source_ids": [
+            "nida-prescription-medicines-current",
+            "nida-opioids-current",
+            "who-drug-withdrawal-mhgap"
+          ],
+          "context_ar": "المحور يقيّم الحاجة الطبية أثناء الانسحاب ولا يساوي شدة الانزعاج الذاتي، ولا يقدم خطة فطام منزلية.",
+          "rationale_ar": "الانسحاب الأفيوني قد يكون شديداً ويتطلب دعماً وعلاجاً منظماً، لكن نمط الخطر الطبي يختلف عن انسحاب الكحول أو البنزوديازيبينات؛ لذلك تبقى الدرجة محوراً مستقلاً."
+        },
+        "neuro_harm": {
+          "score": 3,
+          "evidence_grade": "C",
+          "source_ids": [
+            "nida-prescription-medicines-current",
+            "nida-opioids-current",
+            "who-opioid-overdose-2025-v2"
+          ],
+          "context_ar": "دليل فئوي غير مباشر: تغير الوعي ونقص الأكسجة في التسمم قد يسببان أذى عصبياً؛ لا يفترض سمية عصبية نوعية لكل أفيون.",
+          "rationale_ar": "هذا المحور أكثر عدم يقين من كبت التنفس. الدرجة المنشورة تُحفظ مع خفض قوة الدليل كي لا تُعرض كقياس مباشر لسمية عصبية نوعية."
+        },
+        "cardio_harm": {
+          "score": 2,
+          "evidence_grade": "C",
+          "source_ids": [
+            "nida-prescription-medicines-current",
+            "fda-opioid-labeling-2023"
+          ],
+          "context_ar": "دليل فئوي محدود للأثر القلبي مقارنة بمحور التنفس؛ لا تُفسر الدرجة المنخفضة كغياب للخطر أو كحماية قلبية.",
+          "rationale_ar": "المخاطر القلبية ليست النمط المسيطر لجميع الأفيونات وفق هذا المصدر الفئوي. لهذا تبقى قوة الدليل منخفضة ما لم توجد وثيقة خاصة بالمادة."
+        },
+        "respiratory_harm": {
+          "score": 5,
+          "evidence_grade": "A",
+          "source_ids": [
+            "nida-prescription-medicines-current",
+            "who-opioid-overdose-2025-v2",
+            "fda-opioid-labeling-2023"
+          ],
+          "context_ar": "كبت التنفس هو آلية مركزية مثبتة في الجرعة الزائدة الأفيونية ويُعامل كمحور مستقل عن بقية الأضرار.",
+          "rationale_ar": "الربط المباشر بين الأفيونات وكبت التنفس المهدد للحياة يجعل هذا المحور من أقوى المحاور توثيقاً."
+        },
+        "polysubstance_risk": {
+          "score": 5,
+          "evidence_grade": "A",
+          "source_ids": [
+            "nida-prescription-medicines-current",
+            "fda-opioid-labeling-2023",
+            "fda-opioid-cns-depressant-warning-2016"
+          ],
+          "context_ar": "FDA يحذر من الأفيونات مع البنزوديازيبينات ومثبطات الجهاز العصبي المركزي بسبب التهدئة العميقة وكبت التنفس والوفاة.",
+          "rationale_ar": "خطر الخلط هنا مبني على تحذير فئوي مؤسسي. لا يعني ذلك أن الأزواج غير الموجودة في سجل التفاعلات آمنة."
+        }
+      }
+    },
+    {
+      "substance_slug": "oxycodone",
+      "dimensions": {
+        "acute_toxicity": {
+          "score": 4,
+          "evidence_grade": "B",
+          "source_ids": [
+            "nida-prescription-medicines-current",
+            "who-opioid-overdose-2025-v2",
+            "fda-opioid-labeling-2023"
+          ],
+          "context_ar": "دليل فئوي للأفيونات يركز على التسمم الحاد وتدهور الوعي وكبت التنفس، ويُقرأ مع خصائص المادة نفسها.",
+          "rationale_ar": "السمية الحادة في الأفيونات مرتبطة أساساً بتثبيط الجهاز العصبي والتنفس. الدرجة ترتيبية تحريرية داخل هذا المحور وليست احتمالاً فردياً أو جرعة فاصلة."
+        },
+        "overdose_risk": {
+          "score": 4,
+          "evidence_grade": "A",
+          "source_ids": [
+            "nida-prescription-medicines-current",
+            "who-opioid-overdose-2025-v2",
+            "fda-opioid-labeling-2023"
+          ],
+          "context_ar": "WHO وFDA يصفان الجرعة الزائدة الأفيونية كحالة قد تهدد الحياة، ويبرزان كبت التنفس كآلية مركزية.",
+          "rationale_ar": "وجود مسار جرعة زائدة واضح وقابل للوفاة يبرر ارتفاع هذا المحور. الرقم لا يحول بيانات السكان أو الملصقات الدوائية إلى احتمال شخصي."
+        },
+        "dependence": {
+          "score": 4,
+          "evidence_grade": "B",
+          "source_ids": [
+            "nida-prescription-medicines-current",
+            "nida-opioids-current",
+            "fda-opioid-labeling-2023"
+          ],
+          "context_ar": "دليل فئوي على قابلية الأفيونات للاعتماد واضطراب الاستخدام؛ قوة الدليل الخاصة بالمادة قد تختلف حسب السياق العلاجي وغير الطبي.",
+          "rationale_ar": "يوثق المصدر الفئوي الاعتماد والإدمان كخطر جوهري للأفيونات. لا يعني ذلك أن كل تعرض يؤدي إلى اعتماد."
+        },
+        "withdrawal_medical_risk": {
+          "score": 3,
+          "evidence_grade": "B",
+          "source_ids": [
+            "nida-prescription-medicines-current",
+            "nida-opioids-current",
+            "who-drug-withdrawal-mhgap"
+          ],
+          "context_ar": "المحور يقيّم الحاجة الطبية أثناء الانسحاب ولا يساوي شدة الانزعاج الذاتي، ولا يقدم خطة فطام منزلية.",
+          "rationale_ar": "الانسحاب الأفيوني قد يكون شديداً ويتطلب دعماً وعلاجاً منظماً، لكن نمط الخطر الطبي يختلف عن انسحاب الكحول أو البنزوديازيبينات؛ لذلك تبقى الدرجة محوراً مستقلاً."
+        },
+        "neuro_harm": {
+          "score": 3,
+          "evidence_grade": "C",
+          "source_ids": [
+            "nida-prescription-medicines-current",
+            "nida-opioids-current",
+            "who-opioid-overdose-2025-v2"
+          ],
+          "context_ar": "دليل فئوي غير مباشر: تغير الوعي ونقص الأكسجة في التسمم قد يسببان أذى عصبياً؛ لا يفترض سمية عصبية نوعية لكل أفيون.",
+          "rationale_ar": "هذا المحور أكثر عدم يقين من كبت التنفس. الدرجة المنشورة تُحفظ مع خفض قوة الدليل كي لا تُعرض كقياس مباشر لسمية عصبية نوعية."
+        },
+        "cardio_harm": {
+          "score": 2,
+          "evidence_grade": "C",
+          "source_ids": [
+            "nida-prescription-medicines-current",
+            "fda-opioid-labeling-2023"
+          ],
+          "context_ar": "دليل فئوي محدود للأثر القلبي مقارنة بمحور التنفس؛ لا تُفسر الدرجة المنخفضة كغياب للخطر أو كحماية قلبية.",
+          "rationale_ar": "المخاطر القلبية ليست النمط المسيطر لجميع الأفيونات وفق هذا المصدر الفئوي. لهذا تبقى قوة الدليل منخفضة ما لم توجد وثيقة خاصة بالمادة."
+        },
+        "respiratory_harm": {
+          "score": 5,
+          "evidence_grade": "A",
+          "source_ids": [
+            "nida-prescription-medicines-current",
+            "who-opioid-overdose-2025-v2",
+            "fda-opioid-labeling-2023"
+          ],
+          "context_ar": "كبت التنفس هو آلية مركزية مثبتة في الجرعة الزائدة الأفيونية ويُعامل كمحور مستقل عن بقية الأضرار.",
+          "rationale_ar": "الربط المباشر بين الأفيونات وكبت التنفس المهدد للحياة يجعل هذا المحور من أقوى المحاور توثيقاً."
+        },
+        "polysubstance_risk": {
+          "score": 5,
+          "evidence_grade": "A",
+          "source_ids": [
+            "nida-prescription-medicines-current",
+            "fda-opioid-labeling-2023",
+            "fda-opioid-cns-depressant-warning-2016"
+          ],
+          "context_ar": "FDA يحذر من الأفيونات مع البنزوديازيبينات ومثبطات الجهاز العصبي المركزي بسبب التهدئة العميقة وكبت التنفس والوفاة.",
+          "rationale_ar": "خطر الخلط هنا مبني على تحذير فئوي مؤسسي. لا يعني ذلك أن الأزواج غير الموجودة في سجل التفاعلات آمنة."
+        }
+      }
+    },
+    {
+      "substance_slug": "tramadol",
+      "dimensions": {
+        "acute_toxicity": {
+          "score": 4,
+          "evidence_grade": "B",
+          "source_ids": [
+            "nida-prescription-medicines-current",
+            "who-opioid-overdose-2025-v2",
+            "fda-opioid-labeling-2023"
+          ],
+          "context_ar": "دليل فئوي للأفيونات يركز على التسمم الحاد وتدهور الوعي وكبت التنفس، ويُقرأ مع خصائص المادة نفسها.",
+          "rationale_ar": "السمية الحادة في الأفيونات مرتبطة أساساً بتثبيط الجهاز العصبي والتنفس. الدرجة ترتيبية تحريرية داخل هذا المحور وليست احتمالاً فردياً أو جرعة فاصلة."
+        },
+        "overdose_risk": {
+          "score": 4,
+          "evidence_grade": "A",
+          "source_ids": [
+            "nida-prescription-medicines-current",
+            "who-opioid-overdose-2025-v2",
+            "fda-opioid-labeling-2023"
+          ],
+          "context_ar": "WHO وFDA يصفان الجرعة الزائدة الأفيونية كحالة قد تهدد الحياة، ويبرزان كبت التنفس كآلية مركزية.",
+          "rationale_ar": "وجود مسار جرعة زائدة واضح وقابل للوفاة يبرر ارتفاع هذا المحور. الرقم لا يحول بيانات السكان أو الملصقات الدوائية إلى احتمال شخصي."
+        },
+        "dependence": {
+          "score": 4,
+          "evidence_grade": "B",
+          "source_ids": [
+            "nida-prescription-medicines-current",
+            "nida-opioids-current",
+            "fda-opioid-labeling-2023"
+          ],
+          "context_ar": "دليل فئوي على قابلية الأفيونات للاعتماد واضطراب الاستخدام؛ قوة الدليل الخاصة بالمادة قد تختلف حسب السياق العلاجي وغير الطبي.",
+          "rationale_ar": "يوثق المصدر الفئوي الاعتماد والإدمان كخطر جوهري للأفيونات. لا يعني ذلك أن كل تعرض يؤدي إلى اعتماد."
+        },
+        "withdrawal_medical_risk": {
+          "score": 3,
+          "evidence_grade": "B",
+          "source_ids": [
+            "nida-prescription-medicines-current",
+            "nida-opioids-current",
+            "who-drug-withdrawal-mhgap"
+          ],
+          "context_ar": "المحور يقيّم الحاجة الطبية أثناء الانسحاب ولا يساوي شدة الانزعاج الذاتي، ولا يقدم خطة فطام منزلية.",
+          "rationale_ar": "الانسحاب الأفيوني قد يكون شديداً ويتطلب دعماً وعلاجاً منظماً، لكن نمط الخطر الطبي يختلف عن انسحاب الكحول أو البنزوديازيبينات؛ لذلك تبقى الدرجة محوراً مستقلاً."
+        },
+        "neuro_harm": {
+          "score": 4,
+          "evidence_grade": "A",
+          "source_ids": [
+            "fda-tramadol-label-2023"
+          ],
+          "context_ar": "الملصق الرسمي لـtramadol يوثق اختلاجات يمكن أن تحدث حتى ضمن الجرعات الموصوفة ومتلازمة السيروتونين كخطر عصبي نوعي.",
+          "rationale_ar": "وجود خطر اختلاجات نوعي يبرر رفع يقين هذا المحور مقارنة بتعميم أفيوني فقط."
+        },
+        "cardio_harm": {
+          "score": 2,
+          "evidence_grade": "C",
+          "source_ids": [
+            "nida-prescription-medicines-current",
+            "fda-opioid-labeling-2023"
+          ],
+          "context_ar": "دليل فئوي محدود للأثر القلبي مقارنة بمحور التنفس؛ لا تُفسر الدرجة المنخفضة كغياب للخطر أو كحماية قلبية.",
+          "rationale_ar": "المخاطر القلبية ليست النمط المسيطر لجميع الأفيونات وفق هذا المصدر الفئوي. لهذا تبقى قوة الدليل منخفضة ما لم توجد وثيقة خاصة بالمادة."
+        },
+        "respiratory_harm": {
+          "score": 4,
+          "evidence_grade": "A",
+          "source_ids": [
+            "fda-tramadol-label-2023",
+            "who-opioid-overdose-2025-v2"
+          ],
+          "context_ar": "الملصق الرسمي يذكر كبت التنفس المهدد للحياة ضمن التحذيرات الأفيونية.",
+          "rationale_ar": "الخطر التنفسي مثبت مباشرة، مع حظر تحويل الملصق إلى إرشادات جرعة."
+        },
+        "polysubstance_risk": {
+          "score": 5,
+          "evidence_grade": "A",
+          "source_ids": [
+            "fda-tramadol-label-2023",
+            "fda-opioid-cns-depressant-warning-2016"
+          ],
+          "context_ar": "التداخل مع مثبطات CNS والمواد التي تخفض عتبة الاختلاج قد يزيد الخطر.",
+          "rationale_ar": "يظل كل زوج بحاجة إلى مراجعة مستقلة قبل إضافته لسجل التفاعلات."
+        }
+      }
+    },
+    {
+      "substance_slug": "methadone",
+      "dimensions": {
+        "acute_toxicity": {
+          "score": 4,
+          "evidence_grade": "A",
+          "source_ids": [
+            "fda-methadone-label-2025",
+            "samhsa-methadone-2026"
+          ],
+          "context_ar": "Methadone ناهض أفيوني طويل المفعول وعلاج معتمد، لكن الملصق الرسمي يبرز مخاطر السمية التنفسية عند التعرض غير الآمن.",
+          "rationale_ar": "الفائدة العلاجية لا تلغي خطر السمية، كما أن الخطر لا يبرر وصم العلاج المنضبط."
+        },
+        "overdose_risk": {
+          "score": 4,
+          "evidence_grade": "A",
+          "source_ids": [
+            "fda-methadone-label-2025"
+          ],
+          "context_ar": "الملصق الرسمي يتضمن تحذيراً من كبت التنفس المهدد للحياة والجرعة الزائدة.",
+          "rationale_ar": "المحور مرتفع مع ضرورة التمييز بين وصف علاجي مضبوط وإساءة الاستخدام."
+        },
+        "dependence": {
+          "score": 4,
+          "evidence_grade": "B",
+          "source_ids": [
+            "samhsa-methadone-2026",
+            "nida-opioids-current",
+            "fda-opioid-labeling-2023"
+          ],
+          "context_ar": "دليل فئوي على قابلية الأفيونات للاعتماد واضطراب الاستخدام؛ قوة الدليل الخاصة بالمادة قد تختلف حسب السياق العلاجي وغير الطبي.",
+          "rationale_ar": "يوثق المصدر الفئوي الاعتماد والإدمان كخطر جوهري للأفيونات. لا يعني ذلك أن كل تعرض يؤدي إلى اعتماد."
+        },
+        "withdrawal_medical_risk": {
+          "score": 3,
+          "evidence_grade": "B",
+          "source_ids": [
+            "samhsa-methadone-2026",
+            "nida-opioids-current",
+            "who-drug-withdrawal-mhgap"
+          ],
+          "context_ar": "المحور يقيّم الحاجة الطبية أثناء الانسحاب ولا يساوي شدة الانزعاج الذاتي، ولا يقدم خطة فطام منزلية.",
+          "rationale_ar": "الانسحاب الأفيوني قد يكون شديداً ويتطلب دعماً وعلاجاً منظماً، لكن نمط الخطر الطبي يختلف عن انسحاب الكحول أو البنزوديازيبينات؛ لذلك تبقى الدرجة محوراً مستقلاً."
+        },
+        "neuro_harm": {
+          "score": 3,
+          "evidence_grade": "C",
+          "source_ids": [
+            "samhsa-methadone-2026",
+            "nida-opioids-current",
+            "who-opioid-overdose-2025-v2"
+          ],
+          "context_ar": "دليل فئوي غير مباشر: تغير الوعي ونقص الأكسجة في التسمم قد يسببان أذى عصبياً؛ لا يفترض سمية عصبية نوعية لكل أفيون.",
+          "rationale_ar": "هذا المحور أكثر عدم يقين من كبت التنفس. الدرجة المنشورة تُحفظ مع خفض قوة الدليل كي لا تُعرض كقياس مباشر لسمية عصبية نوعية."
+        },
+        "cardio_harm": {
+          "score": 4,
+          "evidence_grade": "A",
+          "source_ids": [
+            "fda-methadone-label-2025"
+          ],
+          "context_ar": "الملصق الرسمي الحديث يتضمن تحذيراً صريحاً من إطالة QT واضطرابات نظم خطرة.",
+          "rationale_ar": "هذا دليل خاص بالمادة يبرر يقيناً عالياً للمحور القلبي، لا تعميماً على كل الأفيونات."
+        },
+        "respiratory_harm": {
+          "score": 5,
+          "evidence_grade": "A",
+          "source_ids": [
+            "fda-methadone-label-2025"
+          ],
+          "context_ar": "كبت التنفس المهدد للحياة تحذير رسمي خاص بـmethadone.",
+          "rationale_ar": "يُعرض كخطر سريري لا كتعليمات جرعة."
+        },
+        "polysubstance_risk": {
+          "score": 5,
+          "evidence_grade": "A",
+          "source_ids": [
+            "fda-methadone-label-2025",
+            "fda-benzodiazepine-boxed-warning-2020"
+          ],
+          "context_ar": "الجمع مع البنزوديازيبينات أو مثبطات CNS قد يؤدي إلى تهدئة عميقة وكبت تنفس ووفاة.",
+          "rationale_ar": "لا يعني التحذير حجب MOUD تلقائياً؛ بل إدارة الخطر طبياً."
+        }
+      }
+    },
+    {
+      "substance_slug": "buprenorphine",
+      "dimensions": {
+        "acute_toxicity": {
+          "score": 3,
+          "evidence_grade": "C",
+          "source_ids": [
+            "samhsa-buprenorphine-2026",
+            "who-opioid-overdose-2025-v2"
+          ],
+          "context_ar": "Buprenorphine دواء علاجي أفيوني جزئي؛ تقييم الخطر يجب أن يفصل الاستخدام العلاجي المراقب عن سوء الاستخدام أو الخلط.",
+          "rationale_ar": "تحفظ الدرجة المنشورة مع يقين منخفض للمقارنة، ولا تُستخدم لتقويض فائدته المثبتة في علاج OUD."
+        },
+        "overdose_risk": {
+          "score": 3,
+          "evidence_grade": "C",
+          "source_ids": [
+            "samhsa-buprenorphine-2026",
+            "who-opioid-overdose-2025-v2"
+          ],
+          "context_ar": "الخطر الأفيوني موجود، ويتغير بقوة مع السياق والخلط، بينما الدواء علاج قائم على الدليل عند استخدامه كما وُصف.",
+          "rationale_ar": "المحور لا يقارن مباشرةً معدل الوفاة مع نواهض كاملة ولا يساوي علاج OUD بإساءة الاستخدام."
+        },
+        "dependence": {
+          "score": 4,
+          "evidence_grade": "B",
+          "source_ids": [
+            "samhsa-buprenorphine-2026",
+            "nida-opioids-current"
+          ],
+          "context_ar": "بوبرينورفين ناهض جزئي أفيوني وقد يحدث اعتماد جسدي، مع كونه دواءً علاجياً معتمداً لـOUD.",
+          "rationale_ar": "الاعتماد الجسدي على دواء علاجي ليس مرادفاً تلقائياً للإدمان أو فشل العلاج."
+        },
+        "withdrawal_medical_risk": {
+          "score": 3,
+          "evidence_grade": "B",
+          "source_ids": [
+            "samhsa-buprenorphine-2026",
+            "nida-opioids-current"
+          ],
+          "context_ar": "التوقف يجب أن يكون ضمن قرار علاجي، ولا يُحوّل الأطلس إلى خطة خفض ذاتية.",
+          "rationale_ar": "المحور يحفظ خطر الانسحاب مع التأكيد أن استمرارية العلاج قد تكون مفيدة وضرورية."
+        },
+        "neuro_harm": {
+          "score": 2,
+          "evidence_grade": "C",
+          "source_ids": [
+            "samhsa-buprenorphine-2026"
+          ],
+          "context_ar": "لا يدعم المرجع العلاجي ادعاء سمية عصبية عالية مباشرة؛ الدرجة المنخفضة تحفظ عدم اليقين.",
+          "rationale_ar": "لا تُستعمل القيمة المنخفضة كإثبات أمان مطلق أو غياب تأثيرات عصبية."
+        },
+        "cardio_harm": {
+          "score": 2,
+          "evidence_grade": "C",
+          "source_ids": [
+            "samhsa-buprenorphine-2026"
+          ],
+          "context_ar": "الأذى القلبي المباشر ليس محور الدليل العلاجي الرئيسي في هذا المرجع.",
+          "rationale_ar": "تبقى قوة الدليل منخفضة للدرجة الترتيبية المنشورة."
+        },
+        "respiratory_harm": {
+          "score": 4,
+          "evidence_grade": "B",
+          "source_ids": [
+            "who-opioid-overdose-2025-v2",
+            "fda-opioid-cns-depressant-warning-2016"
+          ],
+          "context_ar": "كدواء أفيوني يظل كبت التنفس مهماً، خصوصاً مع مثبطات CNS، رغم اختلاف ملفه عن النواهض الكاملة.",
+          "rationale_ar": "الدرجة لا تلغي فائدة العلاج ولا تبرر خفض الإشراف عند الخلط."
+        },
+        "polysubstance_risk": {
+          "score": 5,
+          "evidence_grade": "A",
+          "source_ids": [
+            "fda-opioid-cns-depressant-warning-2016",
+            "fda-benzodiazepine-boxed-warning-2020"
+          ],
+          "context_ar": "FDA يحذر من المخاطر عند الجمع بين أدوية علاج OUD والبنزوديازيبينات/مثبطات CNS، مع التأكيد على الإدارة الطبية بدلاً من حجب العلاج تلقائياً.",
+          "rationale_ar": "الخطر المرتفع للخلط يجب أن يقود إلى إدارة سريرية، لا إلى وصم الدواء العلاجي أو إيقافه عشوائياً."
+        }
+      }
+    },
+    {
+      "substance_slug": "cocaine",
+      "dimensions": {
+        "acute_toxicity": {
+          "score": 4,
+          "evidence_grade": "A",
+          "source_ids": [
+            "nida-cocaine-current",
+            "fda-prescription-stimulants-warning-2023"
+          ],
+          "context_ar": "دليل فئوي للمنبهات يركز على السمية الحادة وفرط التنبيه، مع اختلاف شدة الصورة حسب المادة والسوق وطريق التعرض.",
+          "rationale_ar": "الدرجة ترتيبية تعكس إمكانية حدوث سمية حادة مهمة، وليست عتبة استخدام أو نسبة إصابة."
+        },
+        "overdose_risk": {
+          "score": 4,
+          "evidence_grade": "B",
+          "source_ids": [
+            "nida-cocaine-current",
+            "fda-prescription-stimulants-warning-2023"
+          ],
+          "context_ar": "FDA يبرز خطر الجرعة الزائدة عند إساءة استخدام المنبهات الموصوفة؛ المواد غير الموصوفة تحتاج أيضاً مرجعها الخاص.",
+          "rationale_ar": "وجود جرعات زائدة خطرة يبرر محوراً مرتفعاً، مع تجنب نقل أرقام من منبه إلى آخر."
+        },
+        "dependence": {
+          "score": 4,
+          "evidence_grade": "A",
+          "source_ids": [
+            "nida-cocaine-current",
+            "fda-prescription-stimulants-warning-2023"
+          ],
+          "context_ar": "الدليل الفئوي يثبت قابلية سوء الاستخدام والإدمان للمنبهات، وتضاف المراجع الخاصة بكل مادة عند توفرها.",
+          "rationale_ar": "الاعتماد واضطراب الاستخدام مخاطر مستقلة عن التسمم الحاد ولا يُشتق احتمال شخصي من الدرجة."
+        },
+        "withdrawal_medical_risk": {
+          "score": 2,
+          "evidence_grade": "B",
+          "source_ids": [
+            "nida-cocaine-current",
+            "who-drug-withdrawal-mhgap"
+          ],
+          "context_ar": "WHO توصي ببيئة داعمة لانسحاب الكوكايين والأمفيتامينات وتذكر احتمال الاكتئاب أو الذهان الذي يستلزم المراقبة المتخصصة.",
+          "rationale_ar": "هذا يميز الانسحاب المنبه عن الانسحابات التي قد تكون مهددة للحياة بصورة أوضح، مع بقاء المتابعة النفسية مهمة."
+        },
+        "neuro_harm": {
+          "score": 4,
+          "evidence_grade": "A",
+          "source_ids": [
+            "nida-cocaine-current",
+            "fda-prescription-stimulants-warning-2023"
+          ],
+          "context_ar": "يشمل المحور الاضطرابات العصبية والنفسية المرتبطة بفرط التنبيه، مع إضافة دليل المادة المباشر حيث يتوفر.",
+          "rationale_ar": "الدرجة لا تعني تلفاً عصبياً دائماً في كل مستخدم؛ هي تلخيص ترتيبي لنطاق أذى موثق."
+        },
+        "cardio_harm": {
+          "score": 5,
+          "evidence_grade": "A",
+          "source_ids": [
+            "nida-cocaine-current",
+            "fda-prescription-stimulants-warning-2023"
+          ],
+          "context_ar": "المنبهات ترفع عبء القلب والأوعية، لكن شدة الخطر تختلف بين الكوكايين والميثامفيتامين والمنبهات الموصوفة.",
+          "rationale_ar": "المحور مرتفع لأن القلب والأوعية من أنظمة الضرر المهمة للمنبهات، مع الاعتماد على المرجع الخاص بالمادة لرفع اليقين."
+        },
+        "respiratory_harm": {
+          "score": 2,
+          "evidence_grade": "C",
+          "source_ids": [
+            "nida-cocaine-current",
+            "fda-prescription-stimulants-warning-2023"
+          ],
+          "context_ar": "التنفس ليس نمط السمية المسيطر للمنبهات كما هو في الأفيونات؛ الدرجة المنخفضة لا تعني الأمان.",
+          "rationale_ar": "قوة الدليل منخفضة لهذا الترتيب لأنه مقارن داخل المحور ولا يمثل غياب مضاعفات تنفسية في حالات التسمم."
+        },
+        "polysubstance_risk": {
+          "score": 5,
+          "evidence_grade": "B",
+          "source_ids": [
+            "nida-cocaine-current",
+            "nida-fentanyl-2025"
+          ],
+          "context_ar": "NIDA توثق أن تعدد المواد، بما فيه وجود الفنتانيل مع منبهات، يزيد خطر الأذى الخطير والوفاة.",
+          "rationale_ar": "الخطر هنا لا يفترض أن كل عينة ملوثة أو كل خلط متساوٍ؛ إنما يمنع تفسير المنبه منفرداً بمعزل عن سوق متعدد المواد."
+        }
+      }
+    },
+    {
+      "substance_slug": "methamphetamine",
+      "dimensions": {
+        "acute_toxicity": {
+          "score": 4,
+          "evidence_grade": "A",
+          "source_ids": [
+            "nida-methamphetamine-current",
+            "fda-prescription-stimulants-warning-2023"
+          ],
+          "context_ar": "دليل فئوي للمنبهات يركز على السمية الحادة وفرط التنبيه، مع اختلاف شدة الصورة حسب المادة والسوق وطريق التعرض.",
+          "rationale_ar": "الدرجة ترتيبية تعكس إمكانية حدوث سمية حادة مهمة، وليست عتبة استخدام أو نسبة إصابة."
+        },
+        "overdose_risk": {
+          "score": 4,
+          "evidence_grade": "B",
+          "source_ids": [
+            "nida-methamphetamine-current",
+            "fda-prescription-stimulants-warning-2023"
+          ],
+          "context_ar": "FDA يبرز خطر الجرعة الزائدة عند إساءة استخدام المنبهات الموصوفة؛ المواد غير الموصوفة تحتاج أيضاً مرجعها الخاص.",
+          "rationale_ar": "وجود جرعات زائدة خطرة يبرر محوراً مرتفعاً، مع تجنب نقل أرقام من منبه إلى آخر."
+        },
+        "dependence": {
+          "score": 5,
+          "evidence_grade": "A",
+          "source_ids": [
+            "nida-methamphetamine-current",
+            "fda-prescription-stimulants-warning-2023"
+          ],
+          "context_ar": "الدليل الفئوي يثبت قابلية سوء الاستخدام والإدمان للمنبهات، وتضاف المراجع الخاصة بكل مادة عند توفرها.",
+          "rationale_ar": "الاعتماد واضطراب الاستخدام مخاطر مستقلة عن التسمم الحاد ولا يُشتق احتمال شخصي من الدرجة."
+        },
+        "withdrawal_medical_risk": {
+          "score": 2,
+          "evidence_grade": "B",
+          "source_ids": [
+            "nida-methamphetamine-current",
+            "who-drug-withdrawal-mhgap"
+          ],
+          "context_ar": "WHO توصي ببيئة داعمة لانسحاب الكوكايين والأمفيتامينات وتذكر احتمال الاكتئاب أو الذهان الذي يستلزم المراقبة المتخصصة.",
+          "rationale_ar": "هذا يميز الانسحاب المنبه عن الانسحابات التي قد تكون مهددة للحياة بصورة أوضح، مع بقاء المتابعة النفسية مهمة."
+        },
+        "neuro_harm": {
+          "score": 5,
+          "evidence_grade": "A",
+          "source_ids": [
+            "nida-methamphetamine-current",
+            "fda-prescription-stimulants-warning-2023"
+          ],
+          "context_ar": "يشمل المحور الاضطرابات العصبية والنفسية المرتبطة بفرط التنبيه، مع إضافة دليل المادة المباشر حيث يتوفر.",
+          "rationale_ar": "الدرجة لا تعني تلفاً عصبياً دائماً في كل مستخدم؛ هي تلخيص ترتيبي لنطاق أذى موثق."
+        },
+        "cardio_harm": {
+          "score": 5,
+          "evidence_grade": "A",
+          "source_ids": [
+            "nida-methamphetamine-current",
+            "fda-prescription-stimulants-warning-2023"
+          ],
+          "context_ar": "المنبهات ترفع عبء القلب والأوعية، لكن شدة الخطر تختلف بين الكوكايين والميثامفيتامين والمنبهات الموصوفة.",
+          "rationale_ar": "المحور مرتفع لأن القلب والأوعية من أنظمة الضرر المهمة للمنبهات، مع الاعتماد على المرجع الخاص بالمادة لرفع اليقين."
+        },
+        "respiratory_harm": {
+          "score": 2,
+          "evidence_grade": "C",
+          "source_ids": [
+            "nida-methamphetamine-current",
+            "fda-prescription-stimulants-warning-2023"
+          ],
+          "context_ar": "التنفس ليس نمط السمية المسيطر للمنبهات كما هو في الأفيونات؛ الدرجة المنخفضة لا تعني الأمان.",
+          "rationale_ar": "قوة الدليل منخفضة لهذا الترتيب لأنه مقارن داخل المحور ولا يمثل غياب مضاعفات تنفسية في حالات التسمم."
+        },
+        "polysubstance_risk": {
+          "score": 4,
+          "evidence_grade": "B",
+          "source_ids": [
+            "nida-methamphetamine-current",
+            "nida-fentanyl-2025"
+          ],
+          "context_ar": "NIDA توثق أن تعدد المواد، بما فيه وجود الفنتانيل مع منبهات، يزيد خطر الأذى الخطير والوفاة.",
+          "rationale_ar": "الخطر هنا لا يفترض أن كل عينة ملوثة أو كل خلط متساوٍ؛ إنما يمنع تفسير المنبه منفرداً بمعزل عن سوق متعدد المواد."
+        }
+      }
+    },
+    {
+      "substance_slug": "amphetamine",
+      "dimensions": {
+        "acute_toxicity": {
+          "score": 4,
+          "evidence_grade": "B",
+          "source_ids": [
+            "euda-edr-2026-synthetic-stimulants",
+            "fda-prescription-stimulants-warning-2023"
+          ],
+          "context_ar": "دليل فئوي للمنبهات يركز على السمية الحادة وفرط التنبيه، مع اختلاف شدة الصورة حسب المادة والسوق وطريق التعرض.",
+          "rationale_ar": "الدرجة ترتيبية تعكس إمكانية حدوث سمية حادة مهمة، وليست عتبة استخدام أو نسبة إصابة."
+        },
+        "overdose_risk": {
+          "score": 4,
+          "evidence_grade": "B",
+          "source_ids": [
+            "euda-edr-2026-synthetic-stimulants",
+            "fda-prescription-stimulants-warning-2023"
+          ],
+          "context_ar": "FDA يبرز خطر الجرعة الزائدة عند إساءة استخدام المنبهات الموصوفة؛ المواد غير الموصوفة تحتاج أيضاً مرجعها الخاص.",
+          "rationale_ar": "وجود جرعات زائدة خطرة يبرر محوراً مرتفعاً، مع تجنب نقل أرقام من منبه إلى آخر."
+        },
+        "dependence": {
+          "score": 4,
+          "evidence_grade": "B",
+          "source_ids": [
+            "euda-edr-2026-synthetic-stimulants",
+            "fda-prescription-stimulants-warning-2023"
+          ],
+          "context_ar": "الدليل الفئوي يثبت قابلية سوء الاستخدام والإدمان للمنبهات، وتضاف المراجع الخاصة بكل مادة عند توفرها.",
+          "rationale_ar": "الاعتماد واضطراب الاستخدام مخاطر مستقلة عن التسمم الحاد ولا يُشتق احتمال شخصي من الدرجة."
+        },
+        "withdrawal_medical_risk": {
+          "score": 2,
+          "evidence_grade": "B",
+          "source_ids": [
+            "euda-edr-2026-synthetic-stimulants",
+            "who-drug-withdrawal-mhgap"
+          ],
+          "context_ar": "WHO توصي ببيئة داعمة لانسحاب الكوكايين والأمفيتامينات وتذكر احتمال الاكتئاب أو الذهان الذي يستلزم المراقبة المتخصصة.",
+          "rationale_ar": "هذا يميز الانسحاب المنبه عن الانسحابات التي قد تكون مهددة للحياة بصورة أوضح، مع بقاء المتابعة النفسية مهمة."
+        },
+        "neuro_harm": {
+          "score": 4,
+          "evidence_grade": "B",
+          "source_ids": [
+            "euda-edr-2026-synthetic-stimulants",
+            "fda-prescription-stimulants-warning-2023"
+          ],
+          "context_ar": "يشمل المحور الاضطرابات العصبية والنفسية المرتبطة بفرط التنبيه، مع إضافة دليل المادة المباشر حيث يتوفر.",
+          "rationale_ar": "الدرجة لا تعني تلفاً عصبياً دائماً في كل مستخدم؛ هي تلخيص ترتيبي لنطاق أذى موثق."
+        },
+        "cardio_harm": {
+          "score": 4,
+          "evidence_grade": "B",
+          "source_ids": [
+            "euda-edr-2026-synthetic-stimulants",
+            "fda-prescription-stimulants-warning-2023"
+          ],
+          "context_ar": "المنبهات ترفع عبء القلب والأوعية، لكن شدة الخطر تختلف بين الكوكايين والميثامفيتامين والمنبهات الموصوفة.",
+          "rationale_ar": "المحور مرتفع لأن القلب والأوعية من أنظمة الضرر المهمة للمنبهات، مع الاعتماد على المرجع الخاص بالمادة لرفع اليقين."
+        },
+        "respiratory_harm": {
+          "score": 2,
+          "evidence_grade": "C",
+          "source_ids": [
+            "euda-edr-2026-synthetic-stimulants",
+            "fda-prescription-stimulants-warning-2023"
+          ],
+          "context_ar": "التنفس ليس نمط السمية المسيطر للمنبهات كما هو في الأفيونات؛ الدرجة المنخفضة لا تعني الأمان.",
+          "rationale_ar": "قوة الدليل منخفضة لهذا الترتيب لأنه مقارن داخل المحور ولا يمثل غياب مضاعفات تنفسية في حالات التسمم."
+        },
+        "polysubstance_risk": {
+          "score": 4,
+          "evidence_grade": "B",
+          "source_ids": [
+            "euda-edr-2026-synthetic-stimulants",
+            "nida-fentanyl-2025"
+          ],
+          "context_ar": "NIDA توثق أن تعدد المواد، بما فيه وجود الفنتانيل مع منبهات، يزيد خطر الأذى الخطير والوفاة.",
+          "rationale_ar": "الخطر هنا لا يفترض أن كل عينة ملوثة أو كل خلط متساوٍ؛ إنما يمنع تفسير المنبه منفرداً بمعزل عن سوق متعدد المواد."
+        }
+      }
+    },
+    {
+      "substance_slug": "cannabis",
+      "dimensions": {
+        "acute_toxicity": {
+          "score": 2,
+          "evidence_grade": "B",
+          "source_ids": [
+            "nida-cannabis-current"
+          ],
+          "context_ar": "مراجعة NIDA المباشرة للقنب تشمل الاضطراب الحاد في الإدراك والتنسيق والآثار النفسية والجسدية.",
+          "rationale_ar": "الدرجة المنخفضة نسبياً مقارنة بمواد أخرى لا تعني أن التعرض الحاد آمن أو متوقع النتائج."
+        },
+        "overdose_risk": {
+          "score": 1,
+          "evidence_grade": "C",
+          "source_ids": [
+            "nida-cannabis-current"
+          ],
+          "context_ar": "المحور يميز بين التسمم الحاد وبين نمط الجرعة الزائدة المميتة الشائع في الأفيونات؛ الدليل لا يبرر تفسير الصفر أو الأمان.",
+          "rationale_ar": "تُحفظ الدرجة المنشورة كترتيب منخفض مع يقين أقل، وليس كاحتمال وفاة أو حد جرعة."
+        },
+        "dependence": {
+          "score": 3,
+          "evidence_grade": "A",
+          "source_ids": [
+            "nida-cannabis-current"
+          ],
+          "context_ar": "NIDA توثق اضطراب استخدام القنب والاعتماد لدى جزء من المستخدمين.",
+          "rationale_ar": "وجود قابلية للاعتماد يبرر محوراً مستقلاً، دون تعميمه على جميع المستخدمين."
+        },
+        "withdrawal_medical_risk": {
+          "score": 1,
+          "evidence_grade": "B",
+          "source_ids": [
+            "who-drug-withdrawal-mhgap"
+          ],
+          "context_ar": "WHO توصي ببيئة داعمة لانسحاب القنب ولا تصفه بنمط الاختلاجات والهذيان المميز للانسحابات الأعلى خطراً طبياً.",
+          "rationale_ar": "الدرجة تعكس الخطر الطبي النسبي للانسحاب ولا تنفي الأعراض أو الحاجة للدعم."
+        },
+        "neuro_harm": {
+          "score": 3,
+          "evidence_grade": "B",
+          "source_ids": [
+            "nida-cannabis-current"
+          ],
+          "context_ar": "الدليل المباشر يتناول الذاكرة والتعلم والانتباه والتنسيق ومخاطر نفسية لدى فئات معرضة.",
+          "rationale_ar": "المحور لا يساوي تشخيصاً عصبياً دائماً؛ هو ترتيب لنطاق التأثير العصبي/المعرفي الموثق."
+        },
+        "cardio_harm": {
+          "score": 2,
+          "evidence_grade": "B",
+          "source_ids": [
+            "nida-cannabis-current"
+          ],
+          "context_ar": "توجد تأثيرات قلبية وعائية موثقة، لكن قوة الاستدلال تختلف باختلاف المنتج والعمر والأمراض المصاحبة.",
+          "rationale_ar": "تبقى الدرجة متوسطة/منخفضة نسبياً ولا تعني الأمان القلبي."
+        },
+        "respiratory_harm": {
+          "score": 2,
+          "evidence_grade": "B",
+          "source_ids": [
+            "nida-cannabis-current"
+          ],
+          "context_ar": "تتعامل المراجعة مع آثار تدخين القنب على الرئة؛ لا تُنسب هذه المخاطر تلقائياً لكل شكل غير مدخن.",
+          "rationale_ar": "السياق مهم لأن طريق التعرض يغيّر الخطر التنفسي؛ لذلك لا يُعمم أثر الاحتراق على كل المنتجات."
+        },
+        "polysubstance_risk": {
+          "score": 3,
+          "evidence_grade": "C",
+          "source_ids": [
+            "nida-cannabis-current"
+          ],
+          "context_ar": "تعدد المواد قد يغير الأداء والإدراك والسمية، لكن الدرجة لا تُستخدم كحاسبة خلط.",
+          "rationale_ar": "قوة الدليل منخفضة لهذا الترتيب العام؛ لا تُستنتج سلامة أي زوج غير مراجع."
+        }
+      }
+    },
+    {
+      "substance_slug": "alcohol",
+      "dimensions": {
+        "acute_toxicity": {
+          "score": 4,
+          "evidence_grade": "A",
+          "source_ids": [
+            "who-alcohol-fact-sheet-2024"
+          ],
+          "context_ar": "WHO تصف الإيثانول كمادة سامة نفسية التأثير ومسببة للاعتماد، مع أذى حاد وإصابات وتسمم.",
+          "rationale_ar": "السمية الحادة قد تكون شديدة وتختلف مع السياق؛ الدرجة لا تحدد كمية آمنة."
+        },
+        "overdose_risk": {
+          "score": 4,
+          "evidence_grade": "A",
+          "source_ids": [
+            "who-alcohol-fact-sheet-2024"
+          ],
+          "context_ar": "التسمم بالكحول قد يهدد الحياة، وتزداد الخطورة مع مثبطات الجهاز العصبي الأخرى.",
+          "rationale_ar": "المحور مرتفع لأن فقدان الوعي والتثبيط المركزي قد يصبحان قاتلين، دون تحويل ذلك إلى جرعة تشغيلية."
+        },
+        "dependence": {
+          "score": 4,
+          "evidence_grade": "A",
+          "source_ids": [
+            "who-alcohol-fact-sheet-2024"
+          ],
+          "context_ar": "WHO توثق اضطراب استخدام الكحول والاعتماد كعبء صحي عالمي.",
+          "rationale_ar": "الاعتماد خطر مثبت على مستوى السكان لكنه لا يعني أن كل مستخدم سيصاب به."
+        },
+        "withdrawal_medical_risk": {
+          "score": 5,
+          "evidence_grade": "A",
+          "source_ids": [
+            "who-alcohol-withdrawal-mhgap"
+          ],
+          "context_ar": "WHO توثق اختلاجات وهذيان الانسحاب وتوصي بإدارة طبية للحالات المعرضة للانسحاب الشديد.",
+          "rationale_ar": "هذا يبرر أعلى فئة في خطر الانسحاب الطبي، مع حظر تحويل الإرشاد المهني إلى خطة منزلية."
+        },
+        "neuro_harm": {
+          "score": 4,
+          "evidence_grade": "A",
+          "source_ids": [
+            "who-alcohol-fact-sheet-2024"
+          ],
+          "context_ar": "يشمل عبء الكحول اضطرابات عصبية ونفسية وإصابات مرتبطة بضعف الوظائف.",
+          "rationale_ar": "المحور يجمع الضرر العصبي الموثق دون اختزال الآليات المتعددة في نتيجة واحدة."
+        },
+        "cardio_harm": {
+          "score": 4,
+          "evidence_grade": "A",
+          "source_ids": [
+            "who-alcohol-fact-sheet-2024"
+          ],
+          "context_ar": "WHO تربط الكحول بأمراض القلب والأوعية ضمن أكثر من 200 حالة صحية مرتبطة به.",
+          "rationale_ar": "وجود عبء قلبي وعائي سببي/منسوب يدعم محوراً مرتفعاً، لا مقارنة شخصية بين الأفراد."
+        },
+        "respiratory_harm": {
+          "score": 4,
+          "evidence_grade": "B",
+          "source_ids": [
+            "who-alcohol-fact-sheet-2024"
+          ],
+          "context_ar": "الخطر التنفسي يظهر خصوصاً في التسمم الشديد والشفط والخلط مع مثبطات CNS، وليس كأثر رئوي واحد بسيط.",
+          "rationale_ar": "الدرجة المرتفعة نسبياً تعكس التثبيط المركزي ومضاعفات التسمم، مع يقين أقل من محور الانسحاب."
+        },
+        "polysubstance_risk": {
+          "score": 5,
+          "evidence_grade": "A",
+          "source_ids": [
+            "fda-opioid-cns-depressant-warning-2016",
+            "fda-benzodiazepine-boxed-warning-2020"
+          ],
+          "context_ar": "الكحول مثبط CNS ويظهر صراحة في تحذيرات الجمع مع الأفيونات والبنزوديازيبينات.",
+          "rationale_ar": "الخطر المرتفع للخلط موثق مؤسسياً، ولا يحوّل الصفحة إلى وصفة تفاعل أو تقدير جرعة."
+        }
+      }
+    },
+    {
+      "substance_slug": "nicotine",
+      "dimensions": {
+        "acute_toxicity": {
+          "score": 3,
+          "evidence_grade": "C",
+          "source_ids": [
+            "who-tobacco-nicotine-2026"
+          ],
+          "context_ar": "WHO تثبت ضرر النيكوتين والتبغ، لكن عبء التبغ المزمن لا يساوي تلقائياً سمية النيكوتين الحادة منفرداً.",
+          "rationale_ar": "تُحفظ الدرجة الحالية مع خفض اليقين كي لا ننسب كل أذى منتج التبغ إلى النيكوتين وحده."
+        },
+        "overdose_risk": {
+          "score": 2,
+          "evidence_grade": "C",
+          "source_ids": [
+            "who-tobacco-nicotine-2026"
+          ],
+          "context_ar": "المصدر العام لا يقدم مقياساً شخصياً للجرعة الزائدة من النيكوتين؛ المحور هنا ترتيب محافظ.",
+          "rationale_ar": "الدرجة ليست حد سمية ولا ضمان أمان للمنتجات عالية التركيز."
+        },
+        "dependence": {
+          "score": 5,
+          "evidence_grade": "A",
+          "source_ids": [
+            "who-tobacco-nicotine-2026",
+            "who-nicotine-dependence-quit"
+          ],
+          "context_ar": "WHO تصف النيكوتين بأنه شديد الإدمان وتربط استخدام التبغ بالاعتماد والانسحاب.",
+          "rationale_ar": "الاعتماد هو أكثر محاور النيكوتين ثباتاً في الأدلة المؤسسية."
+        },
+        "withdrawal_medical_risk": {
+          "score": 1,
+          "evidence_grade": "B",
+          "source_ids": [
+            "who-nicotine-dependence-quit"
+          ],
+          "context_ar": "WHO تصف أعراض انسحاب النيكوتين وصعوبة الإقلاع، دون نمط الانسحاب المهدد للحياة كالكحول والبنزوديازيبينات.",
+          "rationale_ar": "الدرجة المنخفضة تقيس الخطر الطبي لا شدة الرغبة أو صعوبة الإقلاع."
+        },
+        "neuro_harm": {
+          "score": 2,
+          "evidence_grade": "B",
+          "source_ids": [
+            "who-tobacco-nicotine-2026"
+          ],
+          "context_ar": "WHO تنبه خصوصاً إلى ضرر النيكوتين على الأطفال والمراهقين والشباب مع استمرار نمو الدماغ.",
+          "rationale_ar": "المحور حساس للعمر والسياق ولا يساوي ادعاء تلف عصبي موحد لدى جميع البالغين."
+        },
+        "cardio_harm": {
+          "score": 3,
+          "evidence_grade": "C",
+          "source_ids": [
+            "who-tobacco-nicotine-2026"
+          ],
+          "context_ar": "WHO توثق عبئاً قلبياً وعائياً كبيراً للتبغ؛ نسبة هذا العبء إلى النيكوتين منفرداً محدودة في هذا المرجع.",
+          "rationale_ar": "يُعرض score المنشور مع درجة C منعاً للخلط بين النيكوتين كجزيء ومنتجات التبغ كتعرض مركب."
+        },
+        "respiratory_harm": {
+          "score": 1,
+          "evidence_grade": "C",
+          "source_ids": [
+            "who-tobacco-nicotine-2026"
+          ],
+          "context_ar": "الأمراض التنفسية المثبتة مرتبطة بقوة بمنتجات التبغ والاحتراق، ولا يجوز مساواتها تلقائياً بالنيكوتين منفرداً.",
+          "rationale_ar": "الدرجة المنخفضة لا تعني سلامة التدخين أو الاستنشاق؛ إنها تفصل هوية المادة عن أضرار وسيط التعرض."
+        },
+        "polysubstance_risk": {
+          "score": 2,
+          "evidence_grade": "C",
+          "source_ids": [
+            "who-tobacco-nicotine-2026"
+          ],
+          "context_ar": "لا يقدم المرجع العام أساساً لتوليد تفاعلات دوائية ثنائية آلياً للنيكوتين.",
+          "rationale_ar": "تبقى الدرجة منخفضة الثقة، وأي زوج محدد يحتاج مراجعة مستقلة قبل إظهاره كتفاعل."
+        }
+      }
+    },
+    {
+      "substance_slug": "synthetic-cannabinoids",
+      "dimensions": {
+        "acute_toxicity": {
+          "score": 4,
+          "evidence_grade": "B",
+          "source_ids": [
+            "nida-synthetic-cannabinoids-current",
+            "euda-edr-2026-nps"
+          ],
+          "context_ar": "الفئة غير متجانسة وقد تنتج تأثيرات قوية وغير متوقعة وحالات تسمم حادة.",
+          "rationale_ar": "الدرجة المرتفعة تعكس عدم قابلية التنبؤ والسمية الموثقة على مستوى الفئة، لا كل مركب منفرد."
+        },
+        "overdose_risk": {
+          "score": 4,
+          "evidence_grade": "B",
+          "source_ids": [
+            "nida-synthetic-cannabinoids-current",
+            "euda-edr-2026-nps"
+          ],
+          "context_ar": "تقارير الفئة تشمل حالات خطرة ومهددة للحياة، مع تفاوت كبير بين المركبات والمنتجات.",
+          "rationale_ar": "لا تُنقل خطورة أقوى مركب إلى كل الفئة؛ لذلك يبقى الدليل فئوياً."
+        },
+        "dependence": {
+          "score": 4,
+          "evidence_grade": "B",
+          "source_ids": [
+            "nida-synthetic-cannabinoids-current"
+          ],
+          "context_ar": "توجد قابلية لسوء الاستخدام والاعتماد ضمن الفئة مع اختلاف بين النواهض الصناعية.",
+          "rationale_ar": "الدرجة تعكس الفئة ولا تعني تساوي كل مركب في قابلية الاعتماد."
+        },
+        "withdrawal_medical_risk": {
+          "score": 2,
+          "evidence_grade": "C",
+          "source_ids": [
+            "nida-synthetic-cannabinoids-current"
+          ],
+          "context_ar": "الانسحاب موصوف لكن قاعدة الدليل أقل اتساقاً من البنزوديازيبينات أو الكحول.",
+          "rationale_ar": "تبقى الدرجة المنشورة مع يقين منخفض ولا تُشتق منها خطة انسحاب ذاتي."
+        },
+        "neuro_harm": {
+          "score": 4,
+          "evidence_grade": "B",
+          "source_ids": [
+            "nida-synthetic-cannabinoids-current",
+            "euda-edr-2026-nps"
+          ],
+          "context_ar": "الارتباك والهلوسة والاختلاجات واضطرابات عصبية/نفسية حادة موثقة ضمن الفئة.",
+          "rationale_ar": "التباين الكيميائي يمنع تحويل هذا إلى توقع موحد لكل منتج."
+        },
+        "cardio_harm": {
+          "score": 4,
+          "evidence_grade": "B",
+          "source_ids": [
+            "nida-synthetic-cannabinoids-current"
+          ],
+          "context_ar": "توجد حالات تسرع قلب وارتفاع ضغط ونقص تروية ومضاعفات قلبية ضمن تقارير الفئة.",
+          "rationale_ar": "المحور مرتفع نسبياً لكن لا يساوي خطراً ثابتاً لكل مركب."
+        },
+        "respiratory_harm": {
+          "score": 3,
+          "evidence_grade": "C",
+          "source_ids": [
+            "nida-synthetic-cannabinoids-current"
+          ],
+          "context_ar": "المضاعفات التنفسية ممكنة في التسمم الشديد لكن قاعدة الدليل الفئوية أقل مباشرة من الأفيونات.",
+          "rationale_ar": "الدرجة تحفظ الخطر دون ادعاء آلية تنفسية موحدة."
+        },
+        "polysubstance_risk": {
+          "score": 4,
+          "evidence_grade": "B",
+          "source_ids": [
+            "euda-edr-2026-nps"
+          ],
+          "context_ar": "سوق NPS متعدد المواد والتكوين المتغير يجعل تفسير التعرض والخلط أكثر صعوبة.",
+          "rationale_ar": "لا يعني ذلك أن كل منتج متعدد المواد؛ المحور يمنع استنتاج الأمان من هوية اسمية غير مؤكدة."
+        }
+      }
+    },
+    {
+      "substance_slug": "alprazolam",
+      "dimensions": {
+        "acute_toxicity": {
+          "score": 3,
+          "evidence_grade": "B",
+          "source_ids": [
+            "fda-benzodiazepine-boxed-warning-2020"
+          ],
+          "context_ar": "دليل فئوي للبنزوديازيبينات؛ التهدئة واضطراب الوعي مهمان، وتتصاعد الخطورة مع مثبطات CNS الأخرى.",
+          "rationale_ar": "الدرجة المتوسطة تحفظ الفرق بين السمية منفردة وبين الخطر المضاعف عند الخلط."
+        },
+        "overdose_risk": {
+          "score": 3,
+          "evidence_grade": "B",
+          "source_ids": [
+            "fda-benzodiazepine-boxed-warning-2020"
+          ],
+          "context_ar": "FDA يبرز مخاطر إساءة الاستخدام والجرعة الزائدة، ولا سيما مع الأفيونات أو مثبطات CNS.",
+          "rationale_ar": "المحور لا يُفسر كاحتمال وفاة منفرد ولا يلغي أثر الخلط الذي يعالج في محور مستقل."
+        },
+        "dependence": {
+          "score": 4,
+          "evidence_grade": "A",
+          "source_ids": [
+            "fda-benzodiazepine-boxed-warning-2020"
+          ],
+          "context_ar": "التحذير الصندوقي المحدث يذكر الإدمان والاعتماد الجسدي بوضوح على مستوى الفئة.",
+          "rationale_ar": "الاعتماد خطر مثبت حتى عند وجود استعمال طبي مشروع؛ التقدير لا يعني أن كل وصفة تؤدي إلى اضطراب استخدام."
+        },
+        "withdrawal_medical_risk": {
+          "score": 5,
+          "evidence_grade": "A",
+          "source_ids": [
+            "who-drug-withdrawal-mhgap",
+            "fda-benzodiazepine-boxed-warning-2020"
+          ],
+          "context_ar": "WHO وFDA يؤكدان أن الانسحاب غير المنضبط قد يكون شديداً، وقد تستلزم الحالات الشديدة رعاية تخصصية أو دخول المستشفى.",
+          "rationale_ar": "هذا محور مرتفع لأن الخطر الطبي للانسحاب مستقل عن خطر الجرعة الزائدة، ولا تُنشر منه خطة فطام ذاتي."
+        },
+        "neuro_harm": {
+          "score": 3,
+          "evidence_grade": "B",
+          "source_ids": [
+            "fda-benzodiazepine-boxed-warning-2020"
+          ],
+          "context_ar": "يشمل المحور التهدئة والاضطراب المعرفي ومضاعفات الانسحاب العصبية؛ لا يفترض سمية عصبية دائمة في كل حالة.",
+          "rationale_ar": "الدرجة تحفظ نطاق الأذى العصبي الوظيفي والمضاعفات دون تحويله إلى ادعاء تلف دائم شامل."
+        },
+        "cardio_harm": {
+          "score": 1,
+          "evidence_grade": "C",
+          "source_ids": [
+            "fda-benzodiazepine-boxed-warning-2020"
+          ],
+          "context_ar": "الأذى القلبي المباشر ليس محور التحذير الرئيسي لهذه الفئة مقارنة بالتهدئة والتنفس والانسحاب.",
+          "rationale_ar": "الدرجة المنخفضة حكم ترتيبي منخفض الثقة ولا تعني غياب المضاعفات القلبية في تسمم متعدد العوامل."
+        },
+        "respiratory_harm": {
+          "score": 3,
+          "evidence_grade": "B",
+          "source_ids": [
+            "fda-benzodiazepine-boxed-warning-2020"
+          ],
+          "context_ar": "كبت التنفس يصبح بارزاً خصوصاً مع الأفيونات ومثبطات CNS الأخرى.",
+          "rationale_ar": "المحور يحفظ الفرق بين الخطر التنفسي منفرداً وبين الارتفاع الشديد عند الخلط."
+        },
+        "polysubstance_risk": {
+          "score": 5,
+          "evidence_grade": "A",
+          "source_ids": [
+            "fda-benzodiazepine-boxed-warning-2020",
+            "fda-opioid-cns-depressant-warning-2016"
+          ],
+          "context_ar": "التحذيرات المؤسسية تربط الجمع مع الأفيونات ومثبطات CNS بالتهدئة العميقة وكبت التنفس والوفاة.",
+          "rationale_ar": "هذا من أقوى محاور الفئة توثيقاً، مع بقاء سجل التفاعلات مقصوراً على الأزواج التي تمت مراجعتها."
+        }
+      }
+    },
+    {
+      "substance_slug": "diazepam",
+      "dimensions": {
+        "acute_toxicity": {
+          "score": 3,
+          "evidence_grade": "B",
+          "source_ids": [
+            "fda-benzodiazepine-boxed-warning-2020"
+          ],
+          "context_ar": "دليل فئوي للبنزوديازيبينات؛ التهدئة واضطراب الوعي مهمان، وتتصاعد الخطورة مع مثبطات CNS الأخرى.",
+          "rationale_ar": "الدرجة المتوسطة تحفظ الفرق بين السمية منفردة وبين الخطر المضاعف عند الخلط."
+        },
+        "overdose_risk": {
+          "score": 3,
+          "evidence_grade": "B",
+          "source_ids": [
+            "fda-benzodiazepine-boxed-warning-2020"
+          ],
+          "context_ar": "FDA يبرز مخاطر إساءة الاستخدام والجرعة الزائدة، ولا سيما مع الأفيونات أو مثبطات CNS.",
+          "rationale_ar": "المحور لا يُفسر كاحتمال وفاة منفرد ولا يلغي أثر الخلط الذي يعالج في محور مستقل."
+        },
+        "dependence": {
+          "score": 4,
+          "evidence_grade": "A",
+          "source_ids": [
+            "fda-benzodiazepine-boxed-warning-2020"
+          ],
+          "context_ar": "التحذير الصندوقي المحدث يذكر الإدمان والاعتماد الجسدي بوضوح على مستوى الفئة.",
+          "rationale_ar": "الاعتماد خطر مثبت حتى عند وجود استعمال طبي مشروع؛ التقدير لا يعني أن كل وصفة تؤدي إلى اضطراب استخدام."
+        },
+        "withdrawal_medical_risk": {
+          "score": 5,
+          "evidence_grade": "A",
+          "source_ids": [
+            "who-drug-withdrawal-mhgap",
+            "fda-benzodiazepine-boxed-warning-2020"
+          ],
+          "context_ar": "WHO وFDA يؤكدان أن الانسحاب غير المنضبط قد يكون شديداً، وقد تستلزم الحالات الشديدة رعاية تخصصية أو دخول المستشفى.",
+          "rationale_ar": "هذا محور مرتفع لأن الخطر الطبي للانسحاب مستقل عن خطر الجرعة الزائدة، ولا تُنشر منه خطة فطام ذاتي."
+        },
+        "neuro_harm": {
+          "score": 3,
+          "evidence_grade": "B",
+          "source_ids": [
+            "fda-benzodiazepine-boxed-warning-2020"
+          ],
+          "context_ar": "يشمل المحور التهدئة والاضطراب المعرفي ومضاعفات الانسحاب العصبية؛ لا يفترض سمية عصبية دائمة في كل حالة.",
+          "rationale_ar": "الدرجة تحفظ نطاق الأذى العصبي الوظيفي والمضاعفات دون تحويله إلى ادعاء تلف دائم شامل."
+        },
+        "cardio_harm": {
+          "score": 1,
+          "evidence_grade": "C",
+          "source_ids": [
+            "fda-benzodiazepine-boxed-warning-2020"
+          ],
+          "context_ar": "الأذى القلبي المباشر ليس محور التحذير الرئيسي لهذه الفئة مقارنة بالتهدئة والتنفس والانسحاب.",
+          "rationale_ar": "الدرجة المنخفضة حكم ترتيبي منخفض الثقة ولا تعني غياب المضاعفات القلبية في تسمم متعدد العوامل."
+        },
+        "respiratory_harm": {
+          "score": 3,
+          "evidence_grade": "B",
+          "source_ids": [
+            "fda-benzodiazepine-boxed-warning-2020"
+          ],
+          "context_ar": "كبت التنفس يصبح بارزاً خصوصاً مع الأفيونات ومثبطات CNS الأخرى.",
+          "rationale_ar": "المحور يحفظ الفرق بين الخطر التنفسي منفرداً وبين الارتفاع الشديد عند الخلط."
+        },
+        "polysubstance_risk": {
+          "score": 5,
+          "evidence_grade": "A",
+          "source_ids": [
+            "fda-benzodiazepine-boxed-warning-2020",
+            "fda-opioid-cns-depressant-warning-2016"
+          ],
+          "context_ar": "التحذيرات المؤسسية تربط الجمع مع الأفيونات ومثبطات CNS بالتهدئة العميقة وكبت التنفس والوفاة.",
+          "rationale_ar": "هذا من أقوى محاور الفئة توثيقاً، مع بقاء سجل التفاعلات مقصوراً على الأزواج التي تمت مراجعتها."
+        }
+      }
+    },
+    {
+      "substance_slug": "mdma",
+      "dimensions": {
+        "acute_toxicity": {
+          "score": 4,
+          "evidence_grade": "A",
+          "source_ids": [
+            "nida-mdma-current",
+            "euda-edr-2026-mdma"
+          ],
+          "context_ar": "NIDA وEUDA توثقان تأثيرات حادة قد تكون خطرة، مع تفاوت في محتوى المنتجات غير المشروعة.",
+          "rationale_ar": "السمية الحادة تشمل فرط الحرارة واضطراب السوائل والتأثيرات القلبية/العصبية؛ الدرجة لا تحدد عتبة جرعة."
+        },
+        "overdose_risk": {
+          "score": 3,
+          "evidence_grade": "B",
+          "source_ids": [
+            "nida-mdma-current",
+            "euda-edr-2026-mdma"
+          ],
+          "context_ar": "يمكن أن تحدث حالات شديدة ومهددة للحياة، لكن نمط الجرعة الزائدة يختلف عن الأفيونات.",
+          "rationale_ar": "الدرجة ترتيبية ولا تُستخدم لتقدير احتمال وفاة شخص أو مقارنة كمية استعمال."
+        },
+        "dependence": {
+          "score": 3,
+          "evidence_grade": "B",
+          "source_ids": [
+            "nida-mdma-current"
+          ],
+          "context_ar": "NIDA تناقش قابلية اضطراب الاستخدام والاعتماد مع MDMA.",
+          "rationale_ar": "القابلية موجودة لكنها لا تُعرض كحتمية لكل استخدام."
+        },
+        "withdrawal_medical_risk": {
+          "score": 2,
+          "evidence_grade": "C",
+          "source_ids": [
+            "nida-mdma-current"
+          ],
+          "context_ar": "قد تحدث أعراض ما بعد الاستخدام أو التوقف، لكن الخطر الطبي للانسحاب أقل وضوحاً من الكحول والبنزوديازيبينات.",
+          "rationale_ar": "الدرجة المنخفضة نسبياً لا تنفي الأعراض النفسية أو الحاجة للتقييم عند الشدة."
+        },
+        "neuro_harm": {
+          "score": 3,
+          "evidence_grade": "B",
+          "source_ids": [
+            "nida-mdma-current"
+          ],
+          "context_ar": "التأثيرات السيروتونينية والعصبية والنفسية جزء أساسي من مراجعة MDMA.",
+          "rationale_ar": "المحور لا يدعي تلفاً دائماً موحداً؛ يصف نطاق أذى عصبي موثق."
+        },
+        "cardio_harm": {
+          "score": 4,
+          "evidence_grade": "B",
+          "source_ids": [
+            "nida-mdma-current",
+            "euda-edr-2026-mdma"
+          ],
+          "context_ar": "التسارع القلبي وارتفاع الضغط وفرط الحرارة قد ترفع العبء القلبي الوعائي.",
+          "rationale_ar": "الدرجة المرتفعة نسبياً تعكس الخطر الفيزيولوجي الحاد لا نتيجة ثابتة لكل تعرض."
+        },
+        "respiratory_harm": {
+          "score": 2,
+          "evidence_grade": "C",
+          "source_ids": [
+            "nida-mdma-current"
+          ],
+          "context_ar": "التنفس ليس الآلية السمية الأساسية في معظم مراجعات MDMA، مع إمكانية مضاعفات في الحالات الشديدة.",
+          "rationale_ar": "تبقى قوة الدليل منخفضة لهذا الترتيب ولا تعني الأمان التنفسي."
+        },
+        "polysubstance_risk": {
+          "score": 5,
+          "evidence_grade": "B",
+          "source_ids": [
+            "euda-edr-2026-mdma"
+          ],
+          "context_ar": "EUDA تبرز تباين قوة ومحتوى منتجات MDMA والسياق متعدد المواد في السوق.",
+          "rationale_ar": "عدم اليقين في المحتوى والخلط يرفع الخطر، لكن لا تُولد استنتاجات لزوج غير مراجع."
+        }
+      }
+    },
+    {
+      "substance_slug": "ketamine",
+      "dimensions": {
+        "acute_toxicity": {
+          "score": 3,
+          "evidence_grade": "B",
+          "source_ids": [
+            "nida-ketamine-current",
+            "euda-edr-2026-other-drugs"
+          ],
+          "context_ar": "التسمم الحاد قد يتضمن انفصالاً شديداً واضطراب الوعي والحوادث ومضاعفات جسدية.",
+          "rationale_ar": "الدرجة تفرق بين استخدام طبي مراقب وبين استخدام غير طبي أو تعرض غير معلوم المحتوى."
+        },
+        "overdose_risk": {
+          "score": 3,
+          "evidence_grade": "B",
+          "source_ids": [
+            "nida-ketamine-current"
+          ],
+          "context_ar": "الجرعة الزائدة والمضاعفات الشديدة ممكنة، وتتأثر بشدة عند الجمع مع مثبطات أخرى.",
+          "rationale_ar": "الدرجة لا تحدد كمية ولا تساوي احتمالاً شخصياً."
+        },
+        "dependence": {
+          "score": 3,
+          "evidence_grade": "B",
+          "source_ids": [
+            "nida-ketamine-current",
+            "euda-edr-2026-other-drugs"
+          ],
+          "context_ar": "الاعتماد واضطراب الاستخدام موثقان مع الاستخدام المتكرر غير الطبي.",
+          "rationale_ar": "وجود استعمال طبي مشروع لا يلغي قابلية اضطراب الاستخدام خارج الإشراف."
+        },
+        "withdrawal_medical_risk": {
+          "score": 2,
+          "evidence_grade": "C",
+          "source_ids": [
+            "nida-ketamine-current"
+          ],
+          "context_ar": "الأدلة على الانسحاب الطبي الحاد أقل من مواد مثل الكحول/GHB/البنزوديازيبينات.",
+          "rationale_ar": "تُحفظ الدرجة المتوسطة المنخفضة مع يقين محدود، ولا تُستنتج منها خطة توقف."
+        },
+        "neuro_harm": {
+          "score": 3,
+          "evidence_grade": "B",
+          "source_ids": [
+            "nida-ketamine-current"
+          ],
+          "context_ar": "التأثيرات الانفصالية والمعرفية والعصبية جزء مباشر من ملف الكيتامين.",
+          "rationale_ar": "المحور يصف أذى وظيفياً وعصبياً محتملاً ولا يساوي تلفاً دائماً في كل مستخدم."
+        },
+        "cardio_harm": {
+          "score": 3,
+          "evidence_grade": "B",
+          "source_ids": [
+            "nida-ketamine-current"
+          ],
+          "context_ar": "التغيرات القلبية الوعائية ممكنة أثناء التعرض، خاصة مع عوامل خطر أو خلط.",
+          "rationale_ar": "الدرجة متوسطة ولا تُفسر كخطر ثابت لدى كل شخص."
+        },
+        "respiratory_harm": {
+          "score": 3,
+          "evidence_grade": "B",
+          "source_ids": [
+            "nida-ketamine-current"
+          ],
+          "context_ar": "قد تحدث مضاعفات تنفسية ووعي خصوصاً في التسمم والخلط، مع اختلاف السياق الطبي عن غير الطبي.",
+          "rationale_ar": "الخطر ليس مساوياً لكبت التنفس الأفيوني لكنه يظل مهماً سريرياً."
+        },
+        "polysubstance_risk": {
+          "score": 5,
+          "evidence_grade": "A",
+          "source_ids": [
+            "nida-ketamine-current"
+          ],
+          "context_ar": "الجمع مع الكحول أو مثبطات CNS يزيد مخاطر التهدئة وفقد الوعي والمضاعفات.",
+          "rationale_ar": "هذا المحور مرتفع لتأثير الجمع، دون تحويل الأطلس إلى حاسبة خلط."
+        }
+      }
+    },
+    {
+      "substance_slug": "ghb",
+      "dimensions": {
+        "acute_toxicity": {
+          "score": 5,
+          "evidence_grade": "A",
+          "source_ids": [
+            "who-ghb-ecdd-2013",
+            "euda-edr-2026-other-drugs"
+          ],
+          "context_ar": "WHO تصف GHB كمثبط للجهاز العصبي المركزي ذي هامش أمان ضيق.",
+          "rationale_ar": "الهامش الضيق والتثبيط المركزي يبرران خطراً حاداً مرتفعاً، دون نشر جرعات أو حدود تشغيلية."
+        },
+        "overdose_risk": {
+          "score": 5,
+          "evidence_grade": "A",
+          "source_ids": [
+            "who-ghb-ecdd-2013"
+          ],
+          "context_ar": "تقييم WHO يوثق هامش الأمان الضيق وتقارير السمية الشديدة.",
+          "rationale_ar": "التغير السريع بين التأثير والتسمم الشديد يبرر أعلى فئة للجرعة الزائدة."
+        },
+        "dependence": {
+          "score": 4,
+          "evidence_grade": "A",
+          "source_ids": [
+            "who-ghb-ecdd-2013"
+          ],
+          "context_ar": "WHO تشير إلى دليل مقنع على وجود الاعتماد على GHB لدى البشر.",
+          "rationale_ar": "الاعتماد مثبت ولا يعني أن كل تعرض منفرد يؤدي إليه."
+        },
+        "withdrawal_medical_risk": {
+          "score": 5,
+          "evidence_grade": "A",
+          "source_ids": [
+            "who-ghb-ecdd-2013"
+          ],
+          "context_ar": "تقييم WHO يذكر متلازمات انسحاب واختلاجات انسحابية.",
+          "rationale_ar": "هذه المضاعفات تبرر أعلى فئة للانسحاب الطبي وتحظر تفسير الصفحة كدليل انسحاب منزلي."
+        },
+        "neuro_harm": {
+          "score": 3,
+          "evidence_grade": "B",
+          "source_ids": [
+            "who-ghb-ecdd-2013"
+          ],
+          "context_ar": "التثبيط المركزي وفقد الوعي والاختلاجات في الانسحاب تمثل عبئاً عصبياً مهماً.",
+          "rationale_ar": "المحور لا يدعي سمية عصبية مزمنة موحدة؛ يلتقط الخطر العصبي الحاد والانسحابي."
+        },
+        "cardio_harm": {
+          "score": 2,
+          "evidence_grade": "C",
+          "source_ids": [
+            "who-ghb-ecdd-2013"
+          ],
+          "context_ar": "الخطر القلبي ليس محور الدليل الرئيسي مقارنة بالوعي والتنفس والانسحاب.",
+          "rationale_ar": "تبقى الدرجة المنخفضة مع يقين محدود ولا تعني غياب المضاعفات القلبية."
+        },
+        "respiratory_harm": {
+          "score": 5,
+          "evidence_grade": "A",
+          "source_ids": [
+            "who-ghb-ecdd-2013"
+          ],
+          "context_ar": "كمثبط CNS ذي هامش أمان ضيق، يشكل التثبيط التنفسي جزءاً من السمية الشديدة.",
+          "rationale_ar": "المحور مرتفع سريرياً، خاصة عند وجود مثبطات أخرى."
+        },
+        "polysubstance_risk": {
+          "score": 5,
+          "evidence_grade": "A",
+          "source_ids": [
+            "who-ghb-ecdd-2013"
+          ],
+          "context_ar": "خلط مثبطات CNS يزيد التهدئة وفقد الوعي وخطر التنفس.",
+          "rationale_ar": "الدرجة المرتفعة لا تنشئ تلقائياً استنتاجاً لزوج لم تتم مراجعته."
+        }
+      }
+    },
+    {
+      "substance_slug": "nitazenes",
+      "dimensions": {
+        "acute_toxicity": {
+          "score": 5,
+          "evidence_grade": "B",
+          "source_ids": [
+            "who-cnd-nps-control-2026",
+            "euda-edr-2026-nps"
+          ],
+          "context_ar": "النيتازينات فئة أفيونية صناعية جديدة عالية الخطورة مع تقارير تسمم ووفيات؛ التباين بين المركبات يمنع تعميم رقم قوة واحد.",
+          "rationale_ar": "المحور مرتفع بسبب السمية الأفيونية الشديدة الموثقة على مستوى الفئة، دون تحويل ذلك إلى نسبة قوة أو جرعة."
+        },
+        "overdose_risk": {
+          "score": 5,
+          "evidence_grade": "A",
+          "source_ids": [
+            "who-cnd-nps-control-2026",
+            "euda-edr-2026-nps"
+          ],
+          "context_ar": "تقارير WHO/EUDA تربط نيتازينات حديثة بجرعات زائدة قاتلة وغير قاتلة.",
+          "rationale_ar": "هذا يدعم أعلى فئة لخطر الجرعة الزائدة مع إبقاء المقارنة نوعية لا تشغيلية."
+        },
+        "dependence": {
+          "score": 5,
+          "evidence_grade": "B",
+          "source_ids": [
+            "who-cnd-nps-control-2026"
+          ],
+          "context_ar": "الآلية الأفيونية وإشارات سوء الاستخدام تدعم قابلية اعتماد مرتفعة على مستوى الفئة.",
+          "rationale_ar": "قوة الدليل أقل من مواد أقدم ذات تاريخ سريري طويل، لذلك لا تُرفع إلى A تلقائياً."
+        },
+        "withdrawal_medical_risk": {
+          "score": null,
+          "evidence_grade": "U",
+          "source_ids": [],
+          "context_ar": "لا توجد في الطبقة الحالية قاعدة دليل كافية لتثبيت درجة ترتيبية مسؤولة للانسحاب الطبي على مستوى فئة النيتازينات.",
+          "rationale_ar": "يبقى المحور غير محسوم ولا يجوز استنتاج درجة من كون المادة أفيونية فقط."
+        },
+        "neuro_harm": {
+          "score": 4,
+          "evidence_grade": "C",
+          "source_ids": [
+            "who-cnd-nps-control-2026"
+          ],
+          "context_ar": "الأذى العصبي قد ينتج من نقص الأكسجة وفقد الوعي في التسمم؛ لا توجد هنا قاعدة كافية لسمية عصبية نوعية لكل مركب.",
+          "rationale_ar": "الدرجة المنشورة تُحفظ مع دليل منخفض الثقة وفصل صريح عن السمّية العصبية المباشرة."
+        },
+        "cardio_harm": {
+          "score": 2,
+          "evidence_grade": "C",
+          "source_ids": [
+            "who-cnd-nps-control-2026"
+          ],
+          "context_ar": "لا يتيح الدليل الفئوي الحالي توصيفاً قلبياً دقيقاً لكل نيتازين.",
+          "rationale_ar": "تُحفظ الدرجة المنخفضة مع يقين C ولا تُفهم كغياب خطر قلبي."
+        },
+        "respiratory_harm": {
+          "score": 5,
+          "evidence_grade": "A",
+          "source_ids": [
+            "who-cnd-nps-control-2026",
+            "who-opioid-overdose-2025-v2"
+          ],
+          "context_ar": "بوصفها أفيونات صناعية قوية، كبت التنفس هو آلية مركزية للجرعة الزائدة.",
+          "rationale_ar": "هذا من أقوى المحاور المدعومة فئوياً ويبرر أعلى فئة."
+        },
+        "polysubstance_risk": {
+          "score": 5,
+          "evidence_grade": "B",
+          "source_ids": [
+            "euda-edr-2026-nps",
+            "who-opioid-overdose-2025-v2"
+          ],
+          "context_ar": "الظهور في سوق مواد غير منظمة وتعدد المواد يزيد صعوبة تحديد التعرض ومخاطر التسمم.",
+          "rationale_ar": "لا يفترض أن كل عينة مختلطة؛ إنما يمنع استنتاج الأمان في غياب تحليل أو مراجعة زوجية."
+        }
+      }
+    }
+  ]
+}
