@@ -1,0 +1,139 @@
+{
+  "schema_version": "rawafid-addiction-atlas-source-registry-v2",
+  "version": "2.0.0",
+  "updated_on": "2026-08-27",
+  "sources": [
+    {
+      "id": "fda-tianeptine-2025",
+      "organization": "U.S. Food and Drug Administration (FDA)",
+      "title": "Tianeptine Products Linked to Serious Harm, Overdoses, Death",
+      "publication_year": 2025,
+      "data_years": [2013, 2024],
+      "source_type": "regulatory-health-advisory",
+      "geography": "United States",
+      "url": "https://www.fda.gov/consumers/consumer-updates/tianeptine-products-linked-serious-harm-overdoses-death",
+      "verified_on": "2026-08-27",
+      "notes_ar": "تحذير تنظيمي/صحي مباشر يصف إساءة الاستخدام والانسحاب والتسمم التنفسي والغيبوبة والوفاة، ويذكر ارتفاع بلاغات مراكز السموم إلى نحو 350 حالة في 2024."
+    },
+    {
+      "id": "cdc-phenibut-mmwr-2020",
+      "organization": "U.S. Centers for Disease Control and Prevention (CDC)",
+      "title": "Phenibut Exposures Reported to Poison Centers — United States, 2009–2019",
+      "publication_year": 2020,
+      "data_years": [2009, 2019],
+      "source_type": "public-health-surveillance",
+      "geography": "United States",
+      "url": "https://www.cdc.gov/mmwr/volumes/69/wr/mm6935a5.htm",
+      "verified_on": "2026-08-27",
+      "notes_ar": "بيانات مراكز السموم الوطنية؛ 1320 تعرضاً مبلغاً عنه خلال 2009–2019، مع وصف التهدئة وكبت التنفس وانخفاض الوعي وأعراض الانسحاب."
+    },
+    {
+      "id": "cdc-carfentanil-mmwr-2024",
+      "organization": "U.S. Centers for Disease Control and Prevention (CDC)",
+      "title": "Detection of Illegally Manufactured Fentanyls and Carfentanil in Drug Overdose Deaths — United States, 2021–2024",
+      "publication_year": 2024,
+      "data_years": [2021, 2022, 2023, 2024],
+      "source_type": "mortality-surveillance",
+      "geography": "United States",
+      "url": "https://www.cdc.gov/mmwr/volumes/73/wr/mm7348a2.htm",
+      "verified_on": "2026-08-27",
+      "notes_ar": "تحليل SUDORS؛ رصد عودة الكارفنتانيل وارتفاع الوفيات التي كُشف فيها من 29 في النصف الأول 2023 إلى ما لا يقل عن 238 في النصف الأول 2024، مع التنبيه إلى أن بيانات 2024 أولية وغير مكتملة."
+    },
+    {
+      "id": "who-opioid-overdose-2025-v2",
+      "organization": "World Health Organization (WHO)",
+      "title": "Opioid overdose",
+      "publication_year": 2025,
+      "data_years": [2019, 2021],
+      "source_type": "fact-sheet",
+      "geography": "Global",
+      "url": "https://www.who.int/news-room/fact-sheets/detail/opioid-overdose/",
+      "verified_on": "2026-08-27",
+      "notes_ar": "مرجع فئوي للأفيونات يثبت آلية كبت التنفس وخطر الاعتماد والجرعة الزائدة ودور النالوكسون؛ يستخدم فقط عندما يصرح سياق المحور بأنه استدلال من الفئة الأفيونية."
+    },
+    {
+      "id": "fda-7oh-2025",
+      "organization": "U.S. Food and Drug Administration (FDA)",
+      "title": "Products Containing 7-OH Can Cause Serious Harm",
+      "publication_year": 2025,
+      "data_years": [2025],
+      "source_type": "regulatory-health-advisory",
+      "geography": "United States",
+      "url": "https://www.fda.gov/consumers/consumer-updates/products-containing-7-oh-can-cause-serious-harm",
+      "verified_on": "2026-08-27",
+      "notes_ar": "يتناول المنتجات ذات 7-hydroxymitragynine المضاف أو المرتفع التركيز، ويفصلها صراحة عن ورق الكراتوم الطبيعي الذي يحتوي آثاراً ضئيلة؛ يصفها كمنتجات أفيونية قوية ويرصد الإدمان والاختلاجات وأعراض الانسحاب."
+    },
+    {
+      "id": "cdc-medetomidine-han-2026",
+      "organization": "U.S. Centers for Disease Control and Prevention (CDC)",
+      "title": "Medetomidine in the U.S. Illegal Fentanyl Supply Increasing Risk for Overdose and Severe Withdrawal Syndrome",
+      "publication_year": 2026,
+      "data_years": [2021, 2024, 2025, 2026],
+      "source_type": "health-alert-network-advisory",
+      "geography": "United States",
+      "url": "https://www.cdc.gov/han/php/notices/han00527.html",
+      "verified_on": "2026-08-27",
+      "notes_ar": "تحذير HAN رسمي حديث يصف التهدئة العميقة وبطء القلب وانخفاض الضغط والانسحاب الشديد، ووجود medetomidine غالباً مع الفنتانيل، وأن النالوكسون يعكس المكوّن الأفيوني لا medetomidine."
+    },
+    {
+      "id": "who-hhc-ecdd47-2024",
+      "organization": "World Health Organization (WHO) Expert Committee on Drug Dependence",
+      "title": "Annex 1. 47th WHO ECDD summary assessments and recommendations — Hexahydrocannabinol",
+      "publication_year": 2024,
+      "data_years": [2024],
+      "source_type": "expert-committee-review",
+      "geography": "Global",
+      "url": "https://www.who.int/publications/m/item/annex-1.-47th-who-ecdd-summary-assessments-and-recommendations",
+      "verified_on": "2026-08-27",
+      "notes_ar": "مراجعة خبراء WHO لـ HHC: ناهض جزئي CB1 شبه صناعي، مع تقارير تسمم غير قاتل واضطراب وعي وذهان وقلق وارتفاع ضغط، ومع محدودية واضحة في دراسات الاعتماد."
+    },
+    {
+      "id": "who-cnd-hhc-carisoprodol-2025",
+      "organization": "World Health Organization (WHO)",
+      "title": "UN Commission approves WHO recommendations to place psychoactive substances under international control",
+      "publication_year": 2025,
+      "data_years": [2024, 2025],
+      "source_type": "international-control-decision",
+      "geography": "Global",
+      "url": "https://www.who.int/news/item/13-03-2025-un-commission-approves-who-recommendations-to-place-psychoactive-substances-under-international-control",
+      "verified_on": "2026-08-27",
+      "notes_ar": "يوثق قرار لجنة المخدرات الدولية في 2025 بوضع HHC في الجدول II وcarisoprodol في الجدول IV من اتفاقية 1971 بناء على توصيات WHO."
+    },
+    {
+      "id": "who-isotonitazepyne-cnd-2026",
+      "organization": "World Health Organization (WHO)",
+      "title": "UN drug policy body acts on WHO recommendations to control new psychoactive substances and considers coca leaf review",
+      "publication_year": 2026,
+      "data_years": [2025, 2026],
+      "source_type": "international-control-decision",
+      "geography": "Global",
+      "url": "https://www.who.int/news/item/23-04-2026-un-drug-policy-body-acts-on-who-recommendations-to-control-new-psychoactive-substances-and-considers-coca-leaf-review",
+      "verified_on": "2026-08-27",
+      "notes_ar": "يوثق وضع N-pyrrolidino isotonitazene (isotonitazepyne) تحت الرقابة الدولية في 2026، ويصفه كأفيون صناعي قوي مرتبط بجرعات زائدة قاتلة وغير قاتلة وبمنتجات دوائية مزيفة."
+    },
+    {
+      "id": "who-carisoprodol-ecdd47-2024",
+      "organization": "World Health Organization (WHO) Expert Committee on Drug Dependence",
+      "title": "Annex 1. 47th WHO ECDD summary assessments and recommendations — Carisoprodol",
+      "publication_year": 2024,
+      "data_years": [2024],
+      "source_type": "expert-committee-review",
+      "geography": "Global",
+      "url": "https://www.who.int/publications/m/item/annex-1.-47th-who-ecdd-summary-assessments-and-recommendations",
+      "verified_on": "2026-08-27",
+      "notes_ar": "تقييم WHO يصف تأثيرات مثبطة مركزية واعتماداً وتحملًا وانسحاباً، وتسممات قاتلة وغير قاتلة، وتفاقم التهدئة مع الأفيونات والبنزوديازيبينات والكحول."
+    },
+    {
+      "id": "who-bromazolam-ecdd45-2023",
+      "organization": "World Health Organization (WHO) Expert Committee on Drug Dependence",
+      "title": "WHO Expert Committee on Drug Dependence: forty-fifth report — Bromazolam",
+      "publication_year": 2023,
+      "data_years": [2022, 2023],
+      "source_type": "expert-committee-review",
+      "geography": "Global",
+      "url": "https://www.who.int/publications/i/item/9789240068735",
+      "verified_on": "2026-08-27",
+      "notes_ar": "مراجعة WHO لمادة bromazolam غير الطبية؛ أوصت بإبقائها تحت المراقبة بسبب محدودية المعلومات وعدم كفاية الدليل حينها للجدولة الدولية، لذلك تُعرض المحاور غير المحسومة كـ null/U."
+    }
+  ]
+}

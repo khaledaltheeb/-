@@ -1,0 +1,32 @@
+{
+  "schema_version": "rawafid-addiction-atlas-interactions-v2",
+  "version": "2.0.0",
+  "updated_on": "2026-08-27",
+  "policy_ar": "هذه الإضافة لا تستنتج التفاعل من درجات المخاطر. لا يضاف زوج إلا بوجود مصدر مباشر أو تحذير مؤسسي ينطبق على الزوج أو الفئتين. غياب سجل لزوج آخر يعني غير مراجع بعد، لا يعني الأمان.",
+  "records": [
+    {
+      "id": "fentanyl-medetomidine",
+      "a": "fentanyl",
+      "b": "medetomidine",
+      "severity": "critical",
+      "evidence_grade": "A",
+      "evidence_scope": "direct-pair",
+      "mechanism_ar": "تحذر CDC من medetomidine في إمدادات الفنتانيل غير المشروعة. الفنتانيل قد يثبط التنفس، بينما medetomidine قد يسبب تهدئة عميقة وبطء القلب وانخفاض الضغط؛ لذلك قد تستمر سمية غير أفيونية حتى بعد عكس المكوّن الأفيوني.",
+      "risk_ar": "قد يزيد التعرض المختلط خطر فقدان الوعي والجرعة الزائدة واضطراب الدورة الدموية، وقد تستمر التهدئة بعد النالوكسون لأن النالوكسون لا يعكس medetomidine نفسه.",
+      "emergency_ar": "عند الاشتباه بجرعة زائدة: اطلب الطوارئ، وأعطِ النالوكسون إذا كان الأفيون محتملاً وفق الإرشادات المحلية، وادعم التنفس. تحسن التنفس بعد النالوكسون لا يلغي الحاجة للرعاية لأن تأثير medetomidine قد يستمر.",
+      "source_urls": ["https://www.cdc.gov/han/php/notices/han00527.html"]
+    },
+    {
+      "id": "carfentanil-alcohol",
+      "a": "carfentanil",
+      "b": "alcohol",
+      "severity": "critical",
+      "evidence_grade": "B",
+      "evidence_scope": "class-to-substance",
+      "mechanism_ar": "الكارفنتانيل أفيون صناعي شديد الفعالية والكحول مثبط للجهاز العصبي المركزي. ينطبق تحذير المشاركة بين الأفيونات والكحول على هذا الزوج على مستوى الفئة، مع بقاء الدليل المباشر الخاص بالكارفنتانيل محدوداً.",
+      "risk_ar": "يمكن أن تتفاقم التهدئة وكبت التنفس وفقدان الوعي، ولذلك لا توجد كمية يمكن للأطلس أن يصف بها هذا الجمع بأنه آمن.",
+      "emergency_ar": "فقدان الوعي أو التنفس البطيء أو المتوقف حالة طارئة. عند الاشتباه بمكوّن أفيوني يستخدم النالوكسون وفق الإرشادات المحلية مع استمرار طلب الرعاية؛ النالوكسون لا يعالج تسمم الكحول.",
+      "source_urls": ["https://www.fda.gov/drugs/information-drug-class/new-safety-measures-announced-opioid-analgesics-prescription-opioid-cough-products-and-benzodiazepines", "https://www.who.int/news-room/fact-sheets/detail/opioid-overdose/"]
+    }
+  ]
+}

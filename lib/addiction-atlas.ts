@@ -6,10 +6,14 @@ import substancesV2Json from '@/data/addiction-atlas/substances-v2.json';
 import substancesV3Json from '@/data/addiction-atlas/substances-v3.json';
 import substancesV4Json from '@/data/addiction-atlas/substances-v4.json';
 import substancesV5Json from '@/data/addiction-atlas/substances-v5.json';
+import substancesV6Json from '@/data/addiction-atlas/substances-v6.json';
 import epidemiologyJson from '@/data/addiction-atlas/epidemiology-v1.json';
-import mortalityJson from '@/data/addiction-atlas/mortality-v1.json';
-import sourceRegistryJson from '@/data/addiction-atlas/source-registry-v1.json';
-import interactionsJson from '@/data/addiction-atlas/interactions-v1.json';
+import mortalityV1Json from '@/data/addiction-atlas/mortality-v1.json';
+import mortalityV2Json from '@/data/addiction-atlas/mortality-v2.json';
+import sourceRegistryV1Json from '@/data/addiction-atlas/source-registry-v1.json';
+import sourceRegistryV2Json from '@/data/addiction-atlas/source-registry-v2.json';
+import interactionsV1Json from '@/data/addiction-atlas/interactions-v1.json';
+import interactionsV2Json from '@/data/addiction-atlas/interactions-v2.json';
 
 export const ADDICTION_ATLAS_SOURCE_COMMIT = '00014486191027349cc083e824e545da186d74d1';
 export const ADDICTION_ATLAS_SNAPSHOT_KIND = 'vendored-immutable' as const;
@@ -209,16 +213,17 @@ async function loadAtlas(): Promise<AddictionAtlas> {
   const manifest = manifestJson as unknown as WaveManifest;
   const methodology = methodologyJson as unknown as AtlasMethodology;
   const comparisonFile = comparisonJson as unknown as ComparisonFile;
-  const interactionFile = interactionsJson as unknown as InteractionFile;
+  const interactionFiles = [interactionsV1Json, interactionsV2Json] as unknown as InteractionFile[];
   const epidemiologyFile = epidemiologyJson as unknown as EpidemiologyFile;
-  const mortalityFile = mortalityJson as unknown as MortalityFile;
-  const sourceRegistry = sourceRegistryJson as unknown as SourceRegistry;
+  const mortalityFiles = [mortalityV1Json, mortalityV2Json] as unknown as MortalityFile[];
+  const sourceRegistries = [sourceRegistryV1Json, sourceRegistryV2Json] as unknown as SourceRegistry[];
   const waveByFile: Record<string, SubstanceWave> = {
     'substances-v1.json': substancesV1Json as unknown as SubstanceWave,
     'substances-v2.json': substancesV2Json as unknown as SubstanceWave,
     'substances-v3.json': substancesV3Json as unknown as SubstanceWave,
     'substances-v4.json': substancesV4Json as unknown as SubstanceWave,
     'substances-v5.json': substancesV5Json as unknown as SubstanceWave,
+    'substances-v6.json': substancesV6Json as unknown as SubstanceWave,
   };
   const waves = manifest.waves.map((path) => {
     const name = fileName(path);
@@ -236,7 +241,7 @@ async function loadAtlas(): Promise<AddictionAtlas> {
     }
   }
   const substances = [...bySlug.values()];
-  if (substances.length < 54) throw new Error(`addiction atlas regression: expected at least 54 substances, got ${substances.length}`);
+  if (substances.length < 57) throw new Error(`addiction atlas regression: expected at least 57 substances, got ${substances.length}`);
 
   const comparisonSlugs = new Set<string>();
   for (const comparison of comparisonFile.comparisons) {
@@ -245,10 +250,11 @@ async function loadAtlas(): Promise<AddictionAtlas> {
     if (!bySlug.has(comparison.a) || !bySlug.has(comparison.b)) throw new Error(`comparison references missing substance: ${comparison.slug}`);
   }
 
+  const interactions = interactionFiles.flatMap((file) => file.records);
   const interactionIds = new Set<string>();
   const interactionPairs = new Set<string>();
   const substanceSlugs = new Set(bySlug.keys());
-  for (const interaction of interactionFile.records) {
+  for (const interaction of interactions) {
     assertInteraction(interaction, substanceSlugs);
     if (interactionIds.has(interaction.id)) throw new Error(`duplicate addiction interaction id: ${interaction.id}`);
     interactionIds.add(interaction.id);
@@ -257,18 +263,24 @@ async function loadAtlas(): Promise<AddictionAtlas> {
     interactionPairs.add(pair);
   }
 
-  const sourceIds = new Set(sourceRegistry.sources.map((source) => source.id));
+  const sources = sourceRegistries.flatMap((registry) => registry.sources);
+  const sourceIds = new Set<string>();
+  for (const source of sources) {
+    if (!source.id || sourceIds.has(source.id)) throw new Error(`duplicate addiction atlas source id: ${source.id || 'unknown'}`);
+    sourceIds.add(source.id);
+  }
+  const mortality = mortalityFiles.flatMap((file) => file.records);
   for (const record of epidemiologyFile.records) assertStatistic(record, sourceIds);
-  for (const record of mortalityFile.records) assertStatistic(record, sourceIds);
+  for (const record of mortality) assertStatistic(record, sourceIds);
 
   const dates = [
     manifest.updated_on,
     comparisonFile.updated_on,
-    interactionFile.updated_on,
+    ...interactionFiles.map((file) => file.updated_on),
     methodology.published_on,
     epidemiologyFile.updated_on,
-    mortalityFile.updated_on,
-    sourceRegistry.updated_on,
+    ...mortalityFiles.map((file) => file.updated_on),
+    ...sourceRegistries.map((registry) => registry.updated_on),
     ...waves.map((wave) => wave.updated_on),
   ].filter(Boolean).sort();
 
@@ -277,13 +289,13 @@ async function loadAtlas(): Promise<AddictionAtlas> {
     methodology,
     comparisons: comparisonFile.comparisons,
     comparisonPolicy: comparisonFile.policy_ar,
-    interactions: interactionFile.records,
-    interactionPolicy: interactionFile.policy_ar,
+    interactions,
+    interactionPolicy: interactionFiles.map((file) => file.policy_ar).join(' '),
     epidemiology: epidemiologyFile.records,
     epidemiologyRules: epidemiologyFile.rules_ar,
-    mortality: mortalityFile.records,
-    mortalityRules: mortalityFile.rules_ar,
-    sources: sourceRegistry.sources,
+    mortality,
+    mortalityRules: mortalityFiles.flatMap((file) => file.rules_ar),
+    sources,
     updatedOn: dates.at(-1) || methodology.published_on,
     sourceCommit: ADDICTION_ATLAS_SOURCE_COMMIT,
     snapshotKind: ADDICTION_ATLAS_SNAPSHOT_KIND,
