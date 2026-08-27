@@ -67,7 +67,7 @@ for (const field of registryRequirements) {
   if (!registry.includes(field)) fail(`normalized scientific dossier missing ${field}`);
 }
 if (!registry.includes("status: 'not-yet-empirically-completed'")) fail('content-validity status must remain explicit until empirical review is actually completed');
-if (!registry.includes("instrumentVersion: '1.0-item-development'")) fail('instrument version must disclose item-development status');
+if (!registry.includes('instrumentVersion:') || !registry.includes('item-development')) fail('instrument versioning must disclose item-development status without freezing a specific revision number');
 if (!registry.includes('getAllAssessmentScientificProfiles')) fail('registry must expose complete scientific profile set for contract testing');
 
 const sourceFiles = [
