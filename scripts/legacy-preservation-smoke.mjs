@@ -14,6 +14,7 @@ const exactCanonicalRoutes=[
   ['/sections/research-evidence-learning/diagnostic-accuracy-advanced/','قراءة متقدمة: دقة الاختبارات التشخيصية'],
   ['/sections/research-evidence-learning/reliability-application/','التطبيق في الواقع: الثبات'],
   ['/sections/research-evidence-learning/validity-advanced/','قراءة متقدمة: الصدق'],
+  ['/specialists-partners/verification.html','سياسة التحقق من المختصين والمراكز'],
 ];
 const linkAttr=(html,rel)=>{
   for(const tag of html.match(/<link\b[^>]*>/gi)||[]){
@@ -24,7 +25,7 @@ const linkAttr=(html,rel)=>{
   }
   return '';
 };
-const normalizedPath=(value)=>{try{const url=new URL(value,base);return url.pathname==='/'?'/':`${url.pathname.replace(/\/+$/,'')}/`;}catch{return '';}};
+const normalizedPath=(value)=>{try{const url=new URL(value,base);if(url.pathname==='/')return '/';return url.pathname.toLowerCase().endsWith('.html')?url.pathname:`${url.pathname.replace(/\/+$/,'')}/`;}catch{return '';}};
 let failed=false;
 for(const [route,marker,requiresPreservedBanner] of preservedRoutes){
   try{
