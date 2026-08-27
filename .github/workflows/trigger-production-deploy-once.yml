@@ -1,0 +1,21 @@
+name: Trigger Production Deploy Once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/production-deploy-trigger'
+      - '.github/workflows/trigger-production-deploy-once.yml'
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  dispatch-production:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispatch existing production workflow on current main
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy-production.yml --repo "${{ github.repository }}" --ref main
