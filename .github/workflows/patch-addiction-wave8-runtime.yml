@@ -1,0 +1,33 @@
+name: Patch Addiction Atlas Wave 8 Runtime
+
+on:
+  push:
+    branches:
+      - addiction-atlas-wave8-20260827
+    paths:
+      - '.github/workflows/patch-addiction-wave8-runtime.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: addiction-atlas-wave8-20260827
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Patch runtime and scientific contract
+        run: node scripts/patch-addiction-wave8-runtime.mjs
+      - name: Commit runtime wiring
+        shell: bash
+        run: |
+          git config user.name 'rawafid-wave8-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add lib/addiction-atlas.ts lib/addiction-atlas-evidence.ts scripts/addiction-atlas-contract.mjs
+          git diff --cached --check
+          git commit -m 'Wire Wave 8 evidence into atlas runtime'
+          git push origin HEAD:addiction-atlas-wave8-20260827
