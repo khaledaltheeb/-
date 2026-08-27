@@ -1,0 +1,190 @@
+{
+  "schema_version": "rawafid-addiction-risk-evidence-v1",
+  "wave": "v7",
+  "updated_on": "2026-08-27",
+  "policy_ar": "الموجة السابعة توسع الرصد للمواد الناشئة. كل محور يرتبط بمصدر ودرجة دليل وسياق. الاستدلال من الفئة الدوائية يصرح به ولا يتحول إلى ادعاء خاص بالمادة. U يعني عدم كفاية الدليل ويبقى معه score=null.",
+  "records": [
+    {
+      "substance_slug": "7-hydroxymitragynine",
+      "dimensions": {
+        "acute_toxicity": {"score":4,"evidence_grade":"A","source_ids":["fda-7oh-2025","fda-7oh-update-2026"],"context_ar":"المنتجات التي تحتوي 7-OH مضافاً أو بتركيز مرتفع، لا آثار القلويد الضئيلة في ورق الكراتوم الطبيعي.","rationale_ar":"FDA تصف هذه المنتجات بأنها أفيونية قوية وتوثق آثاراً ضارة خطرة، لذلك يدعم الدليل خطراً حاداً مرتفعاً دون نسبة فردية."},
+        "overdose_risk": {"score":4,"evidence_grade":"B","source_ids":["fda-7oh-2025","who-opioid-overdose-2025-v2"],"context_ar":"المنتجات المركزة أو المضافة مع فصل الدليل المباشر عن الاستدلال الأفيوني الفئوي.","rationale_ar":"طبيعة المنتج الأفيونية القوية مع تحذير FDA من الأذى الشديد تدعم تقديراً مرتفعاً، لكن المعايرة الخاصة بجرعة زائدة بشرية ما تزال أقل اكتمالاً من الأفيونات الراسخة."},
+        "dependence": {"score":4,"evidence_grade":"A","source_ids":["fda-7oh-2025"],"context_ar":"الاستخدام المتكرر للمنتجات المركزة.","rationale_ar":"FDA تسجل الإدمان ضمن الآثار الضارة المرتبطة بمنتجات 7-OH، ما يدعم قابلية اعتماد مرتفعة."},
+        "withdrawal_medical_risk": {"score":4,"evidence_grade":"B","source_ids":["fda-7oh-2025"],"context_ar":"التوقف بعد الاستخدام المتكرر أو المكثف.","rationale_ar":"أعراض الانسحاب مبلّغ عنها مباشرة، لكن الشدة الطبية وتوزيعها السكاني أقل معايرة من الأفيونات التقليدية."},
+        "neuro_harm": {"score":4,"evidence_grade":"B","source_ids":["fda-7oh-2025"],"context_ar":"السمية الحادة والاختلاجات والاضطرابات النفسية المبلغ عنها.","rationale_ar":"وجود اختلاجات وآثار عصبية ونفسية في البلاغات يدعم خطراً عصبياً مهماً، مع محدودية بيانات الضرر العصبي المزمن."},
+        "cardio_harm": {"score":null,"evidence_grade":"U","source_ids":["fda-7oh-2025"],"context_ar":"السمية القلبية المباشرة الخاصة بـ7-OH.","rationale_ar":"المصدر الحالي لا يكفي لمعايرة محور قلبي وعائي خاص بالمادة، لذلك يبقى غير محسوم."},
+        "respiratory_harm": {"score":4,"evidence_grade":"B","source_ids":["fda-7oh-2025","who-opioid-overdose-2025-v2"],"context_ar":"الاستدلال الفئوي من النشاط الأفيوني مع منتجات 7-OH المركزة.","rationale_ar":"WHO تثبت كبت التنفس كآلية أفيونية رئيسية وFDA تصف 7-OH كمنتج أفيوني قوي؛ التقدير مرتفع لكن أقل مباشرة من أفيونات ذات بيانات بشرية أوسع."},
+        "polysubstance_risk": {"score":null,"evidence_grade":"U","source_ids":["fda-7oh-2025"],"context_ar":"الجمع مع مواد أخرى.","rationale_ar":"لا توجد في المصادر الحالية معايرة كافية لتقدير رقمي مستقل لخطر الخلط الخاص بـ7-OH."}
+      }
+    },
+    {
+      "substance_slug": "phenibut",
+      "dimensions": {
+        "acute_toxicity": {"score":4,"evidence_grade":"A","source_ids":["cdc-phenibut-mmwr-2020"],"context_ar":"تعرضات مراكز السموم الأمريكية 2009–2019.","rationale_ar":"CDC وثقت آثاراً كبرى مهددة للحياة وغيبوبة ووفيات في بلاغات التعرض، ما يدعم خطراً حاداً مرتفعاً."},
+        "overdose_risk": {"score":4,"evidence_grade":"B","source_ids":["cdc-phenibut-mmwr-2020"],"context_ar":"حالات التعرض المبلغ عنها لمراكز السموم، بما فيها تعرّضات متعددة المواد.","rationale_ar":"وجود غيبوبة وكبت تنفس وآثار كبرى ووفيات يدعم الخطر، لكن سجلات التعرض لا تمثل معدل جرعة زائدة سكاني مباشر."},
+        "dependence": {"score":4,"evidence_grade":"B","source_ids":["cdc-phenibut-mmwr-2020","fda-phenibut-dietary-status-2023"],"context_ar":"الاستخدام المتكرر وسوء الاستخدام.","rationale_ar":"CDC تشير إلى قابلية الاعتماد والإدمان وتوثق أعراض انسحاب، ما يدعم تقديراً مرتفعاً مع بقاء البيانات الوبائية محدودة."},
+        "withdrawal_medical_risk": {"score":4,"evidence_grade":"B","source_ids":["cdc-phenibut-mmwr-2020"],"context_ar":"التوقف بعد الاستخدام المتكرر.","rationale_ar":"CDC تصف القلق والهياج والذهان الحاد ضمن الانسحاب، ما يجعل المحور ذا أهمية طبية واضحة."},
+        "neuro_harm": {"score":4,"evidence_grade":"A","source_ids":["cdc-phenibut-mmwr-2020"],"context_ar":"اضطراب الوعي والهياج والارتباك والغيبوبة.","rationale_ar":"الآثار العصبية المركزية موثقة مباشرة في بيانات مراكز السموم."},
+        "cardio_harm": {"score":3,"evidence_grade":"B","source_ids":["cdc-phenibut-mmwr-2020"],"context_ar":"التعرضات الحادة المبلغ عنها.","rationale_ar":"تسرع القلب كان من الآثار الشائعة المبلغ عنها، لكن المصدر لا يثبت عبئاً قلبياً مزمناً كبيراً."},
+        "respiratory_harm": {"score":4,"evidence_grade":"A","source_ids":["cdc-phenibut-mmwr-2020"],"context_ar":"التسمم الحاد.","rationale_ar":"CDC تذكر كبت التنفس ضمن سمية الفينيبيوت، ما يدعم خطراً تنفسياً مرتفعاً."},
+        "polysubstance_risk": {"score":null,"evidence_grade":"U","source_ids":["cdc-phenibut-mmwr-2020"],"context_ar":"المشاركة مع مواد أخرى.","rationale_ar":"كثرة التعرضات متعددة المواد لا تكفي وحدها لعزل أثر تفاعلي أو إعطاء درجة خلط خاصة بالفينيبيوت."}
+      }
+    },
+    {
+      "substance_slug": "hexahydrocannabinol-hhc",
+      "dimensions": {
+        "acute_toxicity": {"score":3,"evidence_grade":"B","source_ids":["who-hhc-ecdd47-2024","who-cnd-nps-control-2025"],"context_ar":"حالات التسمم ومنتجات HHC شبه الصناعية.","rationale_ar":"WHO وثقت تسممات غير قاتلة وآثاراً حادة مهمة، مع عدم كفاية الدليل لرفع المحور إلى فئات أشد."},
+        "overdose_risk": {"score":null,"evidence_grade":"U","source_ids":["who-hhc-ecdd47-2024"],"context_ar":"التسمم الشديد أو القاتل الخاص بـHHC.","rationale_ar":"لا توجد معايرة كافية لخطر جرعة زائدة خاص بالمادة في المصدر الحالي."},
+        "dependence": {"score":null,"evidence_grade":"U","source_ids":["who-hhc-ecdd47-2024"],"context_ar":"الاعتماد مع الاستخدام المتكرر.","rationale_ar":"WHO تشير إلى محدودية بيانات الاعتماد، لذا لا يجوز تحويل التشابه القنبي إلى درجة رقمية."},
+        "withdrawal_medical_risk": {"score":null,"evidence_grade":"U","source_ids":["who-hhc-ecdd47-2024"],"context_ar":"الانسحاب الخاص بـHHC.","rationale_ar":"الدليل غير كاف لتقدير خطورة انسحاب مسؤولة."},
+        "neuro_harm": {"score":4,"evidence_grade":"B","source_ids":["who-hhc-ecdd47-2024"],"context_ar":"اضطراب الوعي والقلق والذهان في حالات التسمم.","rationale_ar":"وجود آثار إدراكية ونفسية وعصبية مهمة يدعم تقديراً مرتفعاً للمحور العصبي الحاد، دون ادعاء ضرر مزمن ثابت."},
+        "cardio_harm": {"score":3,"evidence_grade":"B","source_ids":["who-hhc-ecdd47-2024"],"context_ar":"التغيرات القلبية الوعائية المبلغ عنها في التسمم.","rationale_ar":"ارتفاع الضغط وآثار قلبية وعائية مبلّغ عنها تدعم تقديراً متوسطاً، مع محدودية المعايرة طويلة الأمد."},
+        "respiratory_harm": {"score":null,"evidence_grade":"U","source_ids":["who-hhc-ecdd47-2024"],"context_ar":"السمية التنفسية المباشرة.","rationale_ar":"لا توجد بيانات كافية لتقدير مستقل مسؤول."},
+        "polysubstance_risk": {"score":null,"evidence_grade":"U","source_ids":["who-hhc-ecdd47-2024"],"context_ar":"الخلط مع مواد أخرى.","rationale_ar":"الدليل الحالي لا يبرر درجة تفاعل رقمية خاصة بـHHC."}
+      }
+    },
+    {
+      "substance_slug": "carisoprodol",
+      "dimensions": {
+        "acute_toxicity": {"score":4,"evidence_grade":"A","source_ids":["who-carisoprodol-ecdd47-2024","who-cnd-nps-control-2025"],"context_ar":"الاستخدام الطبي وغير الطبي والتسمم الحاد.","rationale_ar":"WHO تصف تأثيرات مثبطة مركزية وتسممات قاتلة وغير قاتلة، ما يدعم خطراً حاداً مرتفعاً."},
+        "overdose_risk": {"score":4,"evidence_grade":"A","source_ids":["who-carisoprodol-ecdd47-2024"],"context_ar":"التسمم الحاد خاصة مع مثبطات أخرى.","rationale_ar":"وجود تسممات قاتلة وغير قاتلة يدعم خطراً مرتفعاً دون تحديد عتبة كمية."},
+        "dependence": {"score":4,"evidence_grade":"A","source_ids":["who-carisoprodol-ecdd47-2024"],"context_ar":"الاستخدام المتكرر وغير الطبي.","rationale_ar":"مراجعة WHO توثق الاعتماد والتحمل، ما يدعم تقديراً مرتفعاً."},
+        "withdrawal_medical_risk": {"score":4,"evidence_grade":"A","source_ids":["who-carisoprodol-ecdd47-2024"],"context_ar":"الإيقاف بعد الاعتماد.","rationale_ar":"WHO توثق متلازمة انسحاب، ما يجعل المحور مهماً طبياً ويبرر درجة مرتفعة."},
+        "neuro_harm": {"score":4,"evidence_grade":"B","source_ids":["who-carisoprodol-ecdd47-2024"],"context_ar":"تثبيط الجهاز العصبي المركزي واضطراب الوعي والتنسيق.","rationale_ar":"السمية المركزية واضحة، بينما الضرر العصبي المزمن أقل تحديداً، لذا الثقة متوسطة."},
+        "cardio_harm": {"score":null,"evidence_grade":"U","source_ids":["who-carisoprodol-ecdd47-2024"],"context_ar":"السمية القلبية المباشرة.","rationale_ar":"المصدر لا يكفي لمعايرة خطر قلبي مباشر مستقل."},
+        "respiratory_harm": {"score":3,"evidence_grade":"B","source_ids":["who-carisoprodol-ecdd47-2024"],"context_ar":"التثبيط المركزي وخاصة في التسمم المختلط.","rationale_ar":"الخطر التنفسي مهم في سياق التهدئة والتسمم، لكنه أقل مباشرة من الأفيونات القوية."},
+        "polysubstance_risk": {"score":5,"evidence_grade":"A","source_ids":["who-carisoprodol-ecdd47-2024","fda-opioid-cns-depressant-warning-2016"],"context_ar":"المشاركة مع الأفيونات أو البنزوديازيبينات أو الكحول ومثبطات أخرى.","rationale_ar":"WHO تصف تفاقم التهدئة مع هذه الفئات، ما يدعم أعلى فئة ترتيبية لخطر الخلط."}
+      }
+    },
+    {
+      "substance_slug": "protonitazepyne",
+      "dimensions": {
+        "acute_toxicity": {"score":5,"evidence_grade":"A","source_ids":["who-cnd-nps-control-2025"],"context_ar":"التعرض غير الطبي لمادة أفيونية صناعية جديدة.","rationale_ar":"WHO توثق ضرراً بالغاً يشمل الوفاة، ما يدعم أعلى فئة للسمية الحادة."},
+        "overdose_risk": {"score":5,"evidence_grade":"A","source_ids":["who-cnd-nps-control-2025","who-opioid-overdose-2025-v2"],"context_ar":"الجرعة الزائدة الأفيونية في سوق غير منظم.","rationale_ar":"الدليل الخاص بالمادة على الوفاة مع آلية الأفيونات المهددة للحياة يدعم أعلى فئة."},
+        "dependence": {"score":4,"evidence_grade":"B","source_ids":["who-cnd-nps-control-2025","who-opioid-overdose-2025-v2"],"context_ar":"استدلال فئوي من كونها أفيوناً صناعياً مع نقص دراسات اعتماد خاصة.","rationale_ar":"قابلية الاعتماد متوقعة من الفئة الأفيونية، لكن البيانات الخاصة بالمادة أقل اكتمالاً، لذلك الدرجة مرتفعة بثقة متوسطة."},
+        "withdrawal_medical_risk": {"score":3,"evidence_grade":"C","source_ids":["who-opioid-overdose-2025-v2"],"context_ar":"استدلال فئوي بعد تطور الاعتماد.","rationale_ar":"الانسحاب الأفيوني ممكن، لكن لا توجد معايرة خاصة كافية لهذه المادة، لذا الثقة محدودة."},
+        "neuro_harm": {"score":4,"evidence_grade":"B","source_ids":["who-cnd-nps-control-2025","who-opioid-overdose-2025-v2"],"context_ar":"الأذى العصبي الثانوي لنقص الأكسجة في التسمم الشديد.","rationale_ar":"الوفاة وكبت التنفس يبرران خطراً عصبياً ثانوياً مهماً دون ادعاء سمية عصبية مباشرة مزمنة."},
+        "cardio_harm": {"score":null,"evidence_grade":"U","source_ids":["who-cnd-nps-control-2025"],"context_ar":"السمية القلبية المباشرة الخاصة بالمادة.","rationale_ar":"الدليل غير كاف لتقدير مستقل."},
+        "respiratory_harm": {"score":5,"evidence_grade":"A","source_ids":["who-cnd-nps-control-2025","who-opioid-overdose-2025-v2"],"context_ar":"كبت التنفس الأفيوني.","rationale_ar":"كونها أفيوناً صناعيًا مرتبطاً بالوفاة مع آلية أفيونية معروفة يدعم أعلى فئة."},
+        "polysubstance_risk": {"score":5,"evidence_grade":"B","source_ids":["fda-opioid-cns-depressant-warning-2016","who-opioid-overdose-2025-v2"],"context_ar":"الاستدلال الفئوي عند الجمع مع مثبطات الجهاز العصبي المركزي.","rationale_ar":"تحذيرات الفئة الأفيونية تدعم خطراً شديداً عند الخلط، مع بقاء الدليل الخاص بهذه المادة محدوداً."}
+      }
+    },
+    {
+      "substance_slug": "metonitazepyne",
+      "dimensions": {
+        "acute_toxicity": {"score":5,"evidence_grade":"A","source_ids":["who-cnd-nps-control-2025"],"context_ar":"التعرض غير الطبي.","rationale_ar":"WHO تشير إلى ضرر بالغ يشمل الوفاة."},
+        "overdose_risk": {"score":5,"evidence_grade":"A","source_ids":["who-cnd-nps-control-2025","who-opioid-overdose-2025-v2"],"context_ar":"الجرعة الزائدة الأفيونية.","rationale_ar":"الوفاة الموثقة مع الخطر الأفيوني يدعمان أعلى فئة."},
+        "dependence": {"score":4,"evidence_grade":"B","source_ids":["who-cnd-nps-control-2025","who-opioid-overdose-2025-v2"],"context_ar":"استدلال فئوي من الأفيونات الصناعية.","rationale_ar":"قابلية الاعتماد مرتفعة فئوياً مع محدودية الدليل الخاص بالمادة."},
+        "withdrawal_medical_risk": {"score":3,"evidence_grade":"C","source_ids":["who-opioid-overdose-2025-v2"],"context_ar":"بعد تطور الاعتماد.","rationale_ar":"استدلال أفيوني محافظ يحتاج بيانات خاصة بالمادة."},
+        "neuro_harm": {"score":4,"evidence_grade":"B","source_ids":["who-cnd-nps-control-2025","who-opioid-overdose-2025-v2"],"context_ar":"الأذى الثانوي لنقص الأكسجة.","rationale_ar":"التسمم الأفيوني الشديد قد يسبب أذية عصبية بنقص الأكسجة."},
+        "cardio_harm": {"score":null,"evidence_grade":"U","source_ids":["who-cnd-nps-control-2025"],"context_ar":"السمية القلبية المباشرة.","rationale_ar":"غير محسومة في الدليل الحالي."},
+        "respiratory_harm": {"score":5,"evidence_grade":"A","source_ids":["who-cnd-nps-control-2025","who-opioid-overdose-2025-v2"],"context_ar":"كبت التنفس.","rationale_ar":"الخطر التنفسي محور أساسي للأفيونات القوية المرتبطة بالوفاة."},
+        "polysubstance_risk": {"score":5,"evidence_grade":"B","source_ids":["fda-opioid-cns-depressant-warning-2016"],"context_ar":"الجمع مع مثبطات أخرى.","rationale_ar":"استدلال فئوي قوي من تحذيرات الأفيونات ومثبطات الجهاز العصبي المركزي."}
+      }
+    },
+    {
+      "substance_slug": "etonitazepipne",
+      "dimensions": {
+        "acute_toxicity": {"score":5,"evidence_grade":"A","source_ids":["who-cnd-nps-control-2025"],"context_ar":"التعرض غير الطبي.","rationale_ar":"WHO توثق ضرراً بالغاً يشمل الوفاة."},
+        "overdose_risk": {"score":5,"evidence_grade":"A","source_ids":["who-cnd-nps-control-2025","who-opioid-overdose-2025-v2"],"context_ar":"تسمم أفيوني حاد.","rationale_ar":"الضرر القاتل مع آلية الأفيونات يدعم أعلى فئة."},
+        "dependence": {"score":4,"evidence_grade":"B","source_ids":["who-cnd-nps-control-2025","who-opioid-overdose-2025-v2"],"context_ar":"استدلال من الفئة الأفيونية.","rationale_ar":"خطر الاعتماد مرتفع فئوياً مع نقص بيانات خاصة واسعة."},
+        "withdrawal_medical_risk": {"score":3,"evidence_grade":"C","source_ids":["who-opioid-overdose-2025-v2"],"context_ar":"بعد الاعتماد.","rationale_ar":"استدلال أفيوني محافظ منخفض الثقة."},
+        "neuro_harm": {"score":4,"evidence_grade":"B","source_ids":["who-cnd-nps-control-2025","who-opioid-overdose-2025-v2"],"context_ar":"نقص الأكسجة في الجرعة الزائدة.","rationale_ar":"الأذى العصبي الثانوي ممكن في التسمم التنفسي الشديد."},
+        "cardio_harm": {"score":null,"evidence_grade":"U","source_ids":["who-cnd-nps-control-2025"],"context_ar":"الضرر القلبي المباشر.","rationale_ar":"لا دليل كاف لمعايرة مستقلة."},
+        "respiratory_harm": {"score":5,"evidence_grade":"A","source_ids":["who-cnd-nps-control-2025","who-opioid-overdose-2025-v2"],"context_ar":"كبت التنفس الأفيوني.","rationale_ar":"الآلية والوفيات تدعمان أعلى فئة."},
+        "polysubstance_risk": {"score":5,"evidence_grade":"B","source_ids":["fda-opioid-cns-depressant-warning-2016"],"context_ar":"الجمع مع المثبطات.","rationale_ar":"تحذير الفئة الأفيونية يدعم خطراً شديداً عند الخلط."}
+      }
+    },
+    {
+      "substance_slug": "n-desethyl-isotonitazene",
+      "dimensions": {
+        "acute_toxicity": {"score":5,"evidence_grade":"A","source_ids":["who-cnd-nps-control-2025"],"context_ar":"تعرضات غير طبية ومنتجات مزيفة.","rationale_ar":"WHO توثق وفيات متعددة ودخول مستشفيات وضرراً بالغاً."},
+        "overdose_risk": {"score":5,"evidence_grade":"A","source_ids":["who-cnd-nps-control-2025","who-opioid-overdose-2025-v2"],"context_ar":"التسمم الأفيوني الحاد.","rationale_ar":"الوفيات ودخول المستشفى مع آلية الأفيونات يدعمون أعلى فئة."},
+        "dependence": {"score":4,"evidence_grade":"B","source_ids":["who-cnd-nps-control-2025","who-opioid-overdose-2025-v2"],"context_ar":"استدلال فئوي من الأفيونات.","rationale_ar":"خطر الاعتماد مرتفع مع نقص دراسات خاصة طويلة الأمد."},
+        "withdrawal_medical_risk": {"score":3,"evidence_grade":"C","source_ids":["who-opioid-overdose-2025-v2"],"context_ar":"بعد الاعتماد.","rationale_ar":"استدلال محافظ من الفئة الأفيونية."},
+        "neuro_harm": {"score":4,"evidence_grade":"B","source_ids":["who-cnd-nps-control-2025","who-opioid-overdose-2025-v2"],"context_ar":"الأذى الثانوي لنقص الأكسجة.","rationale_ar":"الجرعة الزائدة التنفسية قد تسبب أذية دماغية بنقص الأكسجة."},
+        "cardio_harm": {"score":null,"evidence_grade":"U","source_ids":["who-cnd-nps-control-2025"],"context_ar":"السمية القلبية المباشرة.","rationale_ar":"غير محسومة."},
+        "respiratory_harm": {"score":5,"evidence_grade":"A","source_ids":["who-cnd-nps-control-2025","who-opioid-overdose-2025-v2"],"context_ar":"كبت التنفس.","rationale_ar":"الخطر التنفسي المهدد للحياة مدعوم بفئة الأفيونات والنتائج الشديدة الخاصة بالمادة."},
+        "polysubstance_risk": {"score":5,"evidence_grade":"B","source_ids":["fda-opioid-cns-depressant-warning-2016"],"context_ar":"الجمع مع مثبطات أخرى.","rationale_ar":"استدلال فئوي قوي، لا دراسة زوجية خاصة."}
+      }
+    },
+    {
+      "substance_slug": "3-oh-pcp",
+      "dimensions": {
+        "acute_toxicity": {"score":3,"evidence_grade":"C","source_ids":["who-ecdd47-report-2025"],"context_ar":"حالات محدودة وغالباً متعددة المواد.","rationale_ar":"توجد تسممات خطرة وتأثيرات شبيهة بـPCP، لكن السببية الخاصة بالمادة محدودة، لذلك التقدير متوسط بثقة محدودة."},
+        "overdose_risk": {"score":null,"evidence_grade":"U","source_ids":["who-ecdd47-report-2025"],"context_ar":"التسمم الشديد الخاص بالمادة منفردة.","rationale_ar":"الدليل غير كاف لفصل أثر المادة عن التعرضات المشتركة."},
+        "dependence": {"score":null,"evidence_grade":"U","source_ids":["who-ecdd47-report-2025"],"context_ar":"الاعتماد لدى البشر.","rationale_ar":"WHO لم تجد دراسات بشرية كافية على الاعتماد."},
+        "withdrawal_medical_risk": {"score":null,"evidence_grade":"U","source_ids":["who-ecdd47-report-2025"],"context_ar":"الانسحاب.","rationale_ar":"لا توجد بيانات كافية."},
+        "neuro_harm": {"score":4,"evidence_grade":"B","source_ids":["who-ecdd47-report-2025"],"context_ar":"الهلوسة والانفصال واضطراب الوعي.","rationale_ar":"التأثيرات العصبية والنفسية المركزية موثقة كجزء رئيسي من الملف الحاد."},
+        "cardio_harm": {"score":3,"evidence_grade":"C","source_ids":["who-ecdd47-report-2025"],"context_ar":"تقارير محدودة عن تسرع قلب وارتفاع ضغط.","rationale_ar":"توجد إشارة قلبية وعائية، لكنها مبنية على حالات قليلة ومع تعرضات مشتركة."},
+        "respiratory_harm": {"score":null,"evidence_grade":"U","source_ids":["who-ecdd47-report-2025"],"context_ar":"السمية التنفسية المباشرة.","rationale_ar":"غير محسومة."},
+        "polysubstance_risk": {"score":null,"evidence_grade":"U","source_ids":["who-ecdd47-report-2025"],"context_ar":"التعرض المشترك.","rationale_ar":"كثرة المواد المصاحبة في الحالات تمنع عزل درجة تفاعل مسؤولة."}
+      }
+    },
+    {
+      "substance_slug": "n-ethylheptedrone",
+      "dimensions": {
+        "acute_toxicity": {"score":3,"evidence_grade":"C","source_ids":["who-ecdd47-report-2025"],"context_ar":"بلاغات سريرية محدودة ومادة كاثينون ناشئة.","rationale_ar":"الهياج والتسرع القلبي وحالات طبية محدودة تدعم خطراً متوسطاً، لكن حجم الدليل صغير."},
+        "overdose_risk": {"score":null,"evidence_grade":"U","source_ids":["who-ecdd47-report-2025"],"context_ar":"الجرعة الزائدة الخاصة بالمادة.","rationale_ar":"لا توجد بيانات كافية لمعايرة احتمال أو شدة مستقلة."},
+        "dependence": {"score":null,"evidence_grade":"U","source_ids":["who-ecdd47-report-2025"],"context_ar":"الاعتماد البشري.","rationale_ar":"WHO لم تجد دراسات بشرية كافية؛ التشابه مع كاثينونات أخرى لا يكفي لرقم خاص."},
+        "withdrawal_medical_risk": {"score":null,"evidence_grade":"U","source_ids":["who-ecdd47-report-2025"],"context_ar":"الانسحاب.","rationale_ar":"غير محسوم."},
+        "neuro_harm": {"score":3,"evidence_grade":"C","source_ids":["who-ecdd47-report-2025"],"context_ar":"الهياج والتأثيرات المنبهة المركزية.","rationale_ar":"الدليل يشير إلى فرط تنبيه وأعراض نفسية، لكن البيانات البشرية محدودة."},
+        "cardio_harm": {"score":4,"evidence_grade":"B","source_ids":["who-ecdd47-report-2025"],"context_ar":"تسرع القلب واضطراب النظم المبلغ عنهما مع خصائص منبهة.","rationale_ar":"الإشارة القلبية واضحة نسبياً ضمن المعلومات المتاحة وتستحق تقديراً مرتفعاً مع ثقة متوسطة."},
+        "respiratory_harm": {"score":null,"evidence_grade":"U","source_ids":["who-ecdd47-report-2025"],"context_ar":"الضرر التنفسي المباشر.","rationale_ar":"غير محسوم."},
+        "polysubstance_risk": {"score":null,"evidence_grade":"U","source_ids":["who-ecdd47-report-2025"],"context_ar":"الخلط.","rationale_ar":"لا توجد بيانات كافية لدرجة تفاعل مستقلة."}
+      }
+    },
+    {
+      "substance_slug": "isotonitazepyne",
+      "dimensions": {
+        "acute_toxicity": {"score":5,"evidence_grade":"A","source_ids":["who-cnd-nps-control-2026"],"context_ar":"التعرض غير الطبي ومنتجات مزيفة.","rationale_ar":"WHO تصف المادة كأفيون صناعي قوي مرتبط بجرعات زائدة قاتلة وغير قاتلة."},
+        "overdose_risk": {"score":5,"evidence_grade":"A","source_ids":["who-cnd-nps-control-2026","who-opioid-overdose-2025-v2"],"context_ar":"الجرعة الزائدة الأفيونية.","rationale_ar":"الارتباط المباشر بجرعات زائدة قاتلة وغير قاتلة يدعم أعلى فئة."},
+        "dependence": {"score":4,"evidence_grade":"B","source_ids":["who-cnd-nps-control-2026","who-opioid-overdose-2025-v2"],"context_ar":"استدلال فئوي من الأفيونات القوية.","rationale_ar":"خطر الاعتماد مرتفع فئوياً مع نقص دراسات خاصة واسعة."},
+        "withdrawal_medical_risk": {"score":3,"evidence_grade":"C","source_ids":["who-opioid-overdose-2025-v2"],"context_ar":"بعد الاعتماد.","rationale_ar":"استدلال أفيوني محافظ."},
+        "neuro_harm": {"score":4,"evidence_grade":"B","source_ids":["who-cnd-nps-control-2026","who-opioid-overdose-2025-v2"],"context_ar":"الأذى الثانوي لنقص الأكسجة.","rationale_ar":"التسمم التنفسي الشديد يرفع خطر الأذية الدماغية بنقص الأكسجة."},
+        "cardio_harm": {"score":null,"evidence_grade":"U","source_ids":["who-cnd-nps-control-2026"],"context_ar":"سمية قلبية مباشرة.","rationale_ar":"غير محسومة."},
+        "respiratory_harm": {"score":5,"evidence_grade":"A","source_ids":["who-cnd-nps-control-2026","who-opioid-overdose-2025-v2"],"context_ar":"كبت التنفس.","rationale_ar":"الآلية الأفيونية والجرعات الزائدة القاتلة يدعمان أعلى فئة."},
+        "polysubstance_risk": {"score":5,"evidence_grade":"B","source_ids":["fda-opioid-cns-depressant-warning-2016"],"context_ar":"الجمع مع مثبطات الجهاز العصبي المركزي.","rationale_ar":"استدلال فئوي قوي من تحذيرات الأفيونات."}
+      }
+    },
+    {
+      "substance_slug": "n-desethyl-etonitazene",
+      "dimensions": {
+        "acute_toxicity": {"score":5,"evidence_grade":"A","source_ids":["who-cnd-nps-control-2026"],"context_ar":"التعرض غير الطبي ومنتجات مزيفة.","rationale_ar":"WHO تصفها كأفيون صناعي شديد الفعالية مرتبط بوفيات جرعة زائدة."},
+        "overdose_risk": {"score":5,"evidence_grade":"A","source_ids":["who-cnd-nps-control-2026","who-opioid-overdose-2025-v2"],"context_ar":"الجرعة الزائدة.","rationale_ar":"الارتباط بوفيات جرعة زائدة يدعم أعلى فئة."},
+        "dependence": {"score":4,"evidence_grade":"B","source_ids":["who-cnd-nps-control-2026","who-opioid-overdose-2025-v2"],"context_ar":"استدلال فئوي.","rationale_ar":"قابلية الاعتماد مرتفعة بحسب الفئة الأفيونية مع نقص بيانات خاصة."},
+        "withdrawal_medical_risk": {"score":3,"evidence_grade":"C","source_ids":["who-opioid-overdose-2025-v2"],"context_ar":"بعد الاعتماد.","rationale_ar":"استدلال محافظ من الفئة الأفيونية."},
+        "neuro_harm": {"score":4,"evidence_grade":"B","source_ids":["who-cnd-nps-control-2026","who-opioid-overdose-2025-v2"],"context_ar":"نقص الأكسجة.","rationale_ar":"الجرعة الزائدة التنفسية قد تسبب أذية دماغية ثانوية."},
+        "cardio_harm": {"score":null,"evidence_grade":"U","source_ids":["who-cnd-nps-control-2026"],"context_ar":"الضرر القلبي المباشر.","rationale_ar":"غير محسوم."},
+        "respiratory_harm": {"score":5,"evidence_grade":"A","source_ids":["who-cnd-nps-control-2026","who-opioid-overdose-2025-v2"],"context_ar":"كبت التنفس الأفيوني.","rationale_ar":"الخطر المهدد للحياة مدعوم بوضوح."},
+        "polysubstance_risk": {"score":5,"evidence_grade":"B","source_ids":["fda-opioid-cns-depressant-warning-2016"],"context_ar":"الجمع مع المثبطات.","rationale_ar":"استدلال فئوي قوي."}
+      }
+    },
+    {
+      "substance_slug": "mdmb-fubinaca",
+      "dimensions": {
+        "acute_toxicity": {"score":4,"evidence_grade":"A","source_ids":["who-cnd-nps-control-2026"],"context_ar":"حالات التسمم والآثار الضارة الشديدة.","rationale_ar":"WHO تربط المادة بآثار شديدة وحالات تسمم متعددة، ما يدعم خطراً حاداً مرتفعاً."},
+        "overdose_risk": {"score":null,"evidence_grade":"U","source_ids":["who-cnd-nps-control-2026"],"context_ar":"الجرعة الزائدة الخاصة بالمادة.","rationale_ar":"الخبر المتاح لا يقدم معايرة كافية لدرجة جرعة زائدة مستقلة."},
+        "dependence": {"score":null,"evidence_grade":"U","source_ids":["who-cnd-nps-control-2026"],"context_ar":"الاعتماد.","rationale_ar":"غير محسوم في المصدر المستخدم."},
+        "withdrawal_medical_risk": {"score":null,"evidence_grade":"U","source_ids":["who-cnd-nps-control-2026"],"context_ar":"الانسحاب.","rationale_ar":"غير محسوم."},
+        "neuro_harm": {"score":4,"evidence_grade":"B","source_ids":["who-cnd-nps-control-2026"],"context_ar":"التسمم الحاد لقنبي صناعي قوي.","rationale_ar":"الآثار الشديدة وحالات التسمم تدعم خطراً عصبياً مهماً، مع نقص تفصيل المحاور في المصدر المختصر."},
+        "cardio_harm": {"score":null,"evidence_grade":"U","source_ids":["who-cnd-nps-control-2026"],"context_ar":"الخطر القلبي المباشر.","rationale_ar":"لا توجد معايرة كافية في المصدر الحالي."},
+        "respiratory_harm": {"score":null,"evidence_grade":"U","source_ids":["who-cnd-nps-control-2026"],"context_ar":"الضرر التنفسي المباشر.","rationale_ar":"غير محسوم."},
+        "polysubstance_risk": {"score":null,"evidence_grade":"U","source_ids":["who-cnd-nps-control-2026"],"context_ar":"الخلط مع مواد أخرى.","rationale_ar":"غير محسوم."}
+      }
+    },
+    {
+      "substance_slug": "cychlorphine",
+      "dimensions": {
+        "acute_toxicity": {"score":null,"evidence_grade":"U","source_ids":["euda-cychlorphine-initial-2026"],"context_ar":"تقرير إنذار مبكر أولي.","rationale_ar":"تصنيف المادة كأفيون ناشئ وإعداد تقرير أولي لا يكفيان وحدهما لإعطاء درجة سمية خاصة بها."},
+        "overdose_risk": {"score":null,"evidence_grade":"U","source_ids":["euda-cychlorphine-initial-2026"],"context_ar":"الجرعة الزائدة الخاصة بالمادة.","rationale_ar":"لا توجد في الصفحة العامة بيانات كافية للمعايرة."},
+        "dependence": {"score":null,"evidence_grade":"U","source_ids":["euda-cychlorphine-initial-2026"],"context_ar":"الاعتماد.","rationale_ar":"غير محسوم على مستوى المادة."},
+        "withdrawal_medical_risk": {"score":null,"evidence_grade":"U","source_ids":["euda-cychlorphine-initial-2026"],"context_ar":"الانسحاب.","rationale_ar":"غير محسوم."},
+        "neuro_harm": {"score":null,"evidence_grade":"U","source_ids":["euda-cychlorphine-initial-2026"],"context_ar":"الضرر العصبي.","rationale_ar":"غير محسوم."},
+        "cardio_harm": {"score":null,"evidence_grade":"U","source_ids":["euda-cychlorphine-initial-2026"],"context_ar":"الضرر القلبي.","rationale_ar":"غير محسوم."},
+        "respiratory_harm": {"score":null,"evidence_grade":"U","source_ids":["euda-cychlorphine-initial-2026"],"context_ar":"كبت التنفس الخاص بالمادة.","rationale_ar":"رغم انتمائها إلى فئة أفيونية، لا تحول الموجة التصنيف وحده إلى درجة رقمية قبل اكتمال التقييم."},
+        "polysubstance_risk": {"score":null,"evidence_grade":"U","source_ids":["euda-cychlorphine-initial-2026"],"context_ar":"الخلط.","rationale_ar":"غير محسوم."}
+      }
+    }
+  ]
+}

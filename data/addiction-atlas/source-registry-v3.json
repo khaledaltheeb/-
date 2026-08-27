@@ -1,0 +1,91 @@
+{
+  "schema_version": "rawafid-addiction-atlas-source-registry-v3",
+  "version": "3.1.0",
+  "updated_on": "2026-08-27",
+  "sources": [
+    {
+      "id": "who-ecdd47-report-2025",
+      "organization": "World Health Organization (WHO) Expert Committee on Drug Dependence",
+      "title": "WHO Expert Committee on Drug Dependence: Forty-seventh report",
+      "publication_year": 2025,
+      "data_years": [2024],
+      "source_type": "expert-committee-technical-report",
+      "geography": "Global",
+      "url": "https://www.who.int/publications/i/item/9789240107649",
+      "verified_on": "2026-08-27",
+      "notes_ar": "المراجعة الرسمية لـ HHC وcarisoprodol وأربعة أفيونات nitazene ناشئة و3-OH-PCP وN-ethylheptedrone. يستخدم المرجع لتوصيف الدليل والرقابة والمخاطر العامة، ولا يستعمل لاشتقاق جرعات أو مقارنات قوة تشغيلية."
+    },
+    {
+      "id": "who-cnd-nps-control-2025",
+      "organization": "World Health Organization (WHO)",
+      "title": "UN Commission approves WHO recommendations to place psychoactive substances under international control",
+      "publication_year": 2025,
+      "data_years": [2024, 2025],
+      "source_type": "international-control-decision",
+      "geography": "Global",
+      "url": "https://www.who.int/news/item/13-03-2025-un-commission-approves-who-recommendations-to-place-psychoactive-substances-under-international-control",
+      "verified_on": "2026-08-27",
+      "notes_ar": "يوثق الرقابة الدولية في 2025 على protonitazepyne وmetonitazepyne وetonitazepipne وN-desethyl isotonitazene وHHC وcarisoprodol، ويذكر الضرر الجسيم والوفاة للأفيونات الأربعة وعدم وجود استخدام علاجي معروف لها."
+    },
+    {
+      "id": "who-cnd-nps-control-2026",
+      "organization": "World Health Organization (WHO)",
+      "title": "UN drug policy body acts on WHO recommendations to control new psychoactive substances and considers coca leaf review",
+      "publication_year": 2026,
+      "data_years": [2025, 2026],
+      "source_type": "international-control-decision",
+      "geography": "Global",
+      "url": "https://www.who.int/news/item/23-04-2026-un-drug-policy-body-acts-on-who-recommendations-to-control-new-psychoactive-substances-and-considers-coca-leaf-review",
+      "verified_on": "2026-08-27",
+      "notes_ar": "يوثق الرقابة الدولية في 2026 على isotonitazepyne وN-desethyl etonitazene وMDMB-FUBINACA، مع وصف الأفيونين بأنهما شديدا الفعالية ومرتبطان بجرعات زائدة أو وفيات، والقنبي الصناعي بآثار شديدة وحالات تسمم متعددة."
+    },
+    {
+      "id": "fda-phenibut-dietary-status-2023",
+      "organization": "U.S. Food and Drug Administration (FDA)",
+      "title": "Phenibut in Dietary Supplements",
+      "publication_year": 2023,
+      "data_years": [2019, 2023],
+      "source_type": "regulatory-ingredient-status",
+      "geography": "United States",
+      "url": "https://www.fda.gov/food/information-select-dietary-supplement-ingredients-and-other-substances/phenibut-dietary-supplements",
+      "verified_on": "2026-08-27",
+      "notes_ar": "يوضح أن phenibut لا يطابق التعريف القانوني للمكوّن الغذائي في الولايات المتحدة ويعرض أسماءه البديلة وإجراءات FDA؛ لا يستخدم هذا المصدر وحده لتقدير السمية، التي تستند في الأطلس إلى بيانات CDC."
+    },
+    {
+      "id": "fda-7oh-update-2026",
+      "organization": "U.S. Food and Drug Administration (FDA)",
+      "title": "Hiding in Plain Sight: 7-OH Products",
+      "publication_year": 2026,
+      "data_years": [2025, 2026],
+      "source_type": "public-health-regulatory-update",
+      "geography": "United States",
+      "url": "https://www.fda.gov/news-events/public-health-focus/hiding-plain-sight-7-oh-products",
+      "verified_on": "2026-08-27",
+      "notes_ar": "تحديث 2026 عن 7-hydroxymitragynine والمنتجات المركزة والمشتقات الصناعية ذات الصلة وإجراءات الجدولة المؤقتة المقترحة؛ لا يساوي بين أوراق الكراتوم الطبيعية والمنتجات المركزة أو الاصطناعية."
+    },
+    {
+      "id": "euda-cychlorphine-initial-2026",
+      "organization": "European Union Drugs Agency (EUDA)",
+      "title": "EUDA initial report on the new psychoactive substance cychlorphine",
+      "publication_year": 2026,
+      "data_years": [2025, 2026],
+      "source_type": "early-warning-initial-report",
+      "geography": "European Union",
+      "url": "https://www.euda.europa.eu/publications/initial-reports/initial-report-cychlorphine_en",
+      "verified_on": "2026-08-27",
+      "notes_ar": "تقرير إنذار مبكر أولي عن cychlorphine كأفيون صناعي من مجموعة orphine opioids. وجوده في الأطلس يهدف للرصد المبكر، ولذلك تبقى المحاور غير المدعومة مباشرة غير محسومة."
+    },
+    {
+      "id": "fda-opioid-cns-depressant-warning-2016",
+      "organization": "U.S. Food and Drug Administration (FDA)",
+      "title": "New safety measures announced for opioid analgesics, prescription opioid cough products, and benzodiazepines",
+      "publication_year": 2016,
+      "data_years": [],
+      "source_type": "regulatory-drug-safety-communication",
+      "geography": "United States / class-level safety evidence",
+      "url": "https://www.fda.gov/drugs/information-drug-class/new-safety-measures-announced-opioid-analgesics-prescription-opioid-cough-products-and-benzodiazepines",
+      "verified_on": "2026-08-27",
+      "notes_ar": "مصدر فئوي لخطر الجمع بين الأفيونات والبنزوديازيبينات أو مثبطات الجهاز العصبي المركزي، بما في ذلك كبت التنفس والتهدئة الشديدة. يستخدم فقط عندما يصرح السياق بأنه استدلال فئوي."
+    }
+  ]
+}

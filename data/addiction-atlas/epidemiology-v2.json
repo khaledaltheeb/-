@@ -1,0 +1,42 @@
+{
+  "schema_version": "rawafid-addiction-atlas-epidemiology-v2",
+  "version": "2.0.0",
+  "updated_on": "2026-08-27",
+  "rules_ar": [
+    "سجلات مراكز السموم هي بلاغات تعرض وليست تقديراً لانتشار الاستخدام في السكان.",
+    "الأرقام التراكمية تحفظ فترة الرصد صراحة ولا تحول إلى معدل سنوي دون بيانات مناسبة.",
+    "التعرض المبلغ عنه لا يعني بالضرورة تسمماً مؤكداً أو جرعة زائدة، وقد تكون هناك حالات غير مبلغ عنها."
+  ],
+  "records": [
+    {
+      "id": "us-phenibut-poison-center-exposures-2009-2019",
+      "scope_type": "substance",
+      "scope_slug": "phenibut",
+      "metric": "poison_center_exposure_reports",
+      "value": 1320,
+      "qualifier": "cumulative_2009_2019",
+      "unit": "reported_exposures",
+      "geography": "United States",
+      "population": "human exposure calls to U.S. poison centers",
+      "year": 2019,
+      "estimate_type": "reported_surveillance_count",
+      "definition_ar": "بلغت مراكز السموم الأمريكية عن 1320 تعرضاً بشرياً مرتبطاً بالفينيبيوت خلال الفترة 2009–2019. هذا عدّ لبلاغات التعرض وليس تقديراً لعدد المستخدمين أو لمعدل الانتشار أو لمجموع كل التعرضات الفعلية.",
+      "source_id": "cdc-phenibut-mmwr-2020"
+    },
+    {
+      "id": "us-phenibut-major-effects-share-2009-2019",
+      "scope_type": "substance",
+      "scope_slug": "phenibut",
+      "metric": "major_effects_share_among_reported_exposures",
+      "value": 12.6,
+      "qualifier": "cumulative_2009_2019",
+      "unit": "percent",
+      "geography": "United States",
+      "population": "phenibut exposure reports with outcomes in poison-center surveillance",
+      "year": 2019,
+      "estimate_type": "reported_case_outcome_share",
+      "definition_ar": "صنفت آثار كبرى، أي مهددة للحياة أو ذات عجز/تشوه مهم وفق تعريف نظام مراكز السموم، في 12.6% من بلاغات التعرض للفينيبيوت خلال 2009–2019. لا تمثل هذه النسبة احتمالاً فردياً لأي استخدام ولا معدل خطر في عموم السكان.",
+      "source_id": "cdc-phenibut-mmwr-2020"
+    }
+  ]
+}

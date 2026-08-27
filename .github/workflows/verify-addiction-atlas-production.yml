@@ -9,7 +9,6 @@ on:
     workflows:
       - 'Deploy Analytics Production'
       - 'Deploy Production'
-      - 'Publish Addiction Atlas Wave 6'
     types: [completed]
 
 permissions:
@@ -36,46 +35,81 @@ jobs:
 
           for attempt in $(seq 1 18); do
             stamp="${GITHUB_SHA}-${attempt}-$(date +%s)"
-            hub="$(curl -fsSL --compressed --max-time 25 -H "$cache_header" "${base}/addiction/?atlas-verify=${stamp}" 2>/dev/null || true)"
-            sector="$(curl -fsSL --compressed --max-time 25 -H "$cache_header" "${base}/sectors/addiction-recovery/?atlas-verify=${stamp}" 2>/dev/null || true)"
-            atlas="$(curl -fsSL --compressed --max-time 25 -H "$cache_header" "${base}/addiction/substances/?atlas-verify=${stamp}" 2>/dev/null || true)"
-            compare_hub="$(curl -fsSL --compressed --max-time 25 -H "$cache_header" "${base}/addiction/compare/?atlas-verify=${stamp}" 2>/dev/null || true)"
-            interactions="$(curl -fsSL --compressed --max-time 25 -H "$cache_header" "${base}/addiction/interactions/?atlas-verify=${stamp}" 2>/dev/null || true)"
-            fentanyl="$(curl -fsSL --compressed --max-time 25 -H "$cache_header" "${base}/addiction/substances/fentanyl/?atlas-verify=${stamp}" 2>/dev/null || true)"
-            tianeptine="$(curl -fsSL --compressed --max-time 25 -H "$cache_header" "${base}/addiction/substances/tianeptine/?atlas-verify=${stamp}" 2>/dev/null || true)"
-            carfentanil="$(curl -fsSL --compressed --max-time 25 -H "$cache_header" "${base}/addiction/substances/carfentanil/?atlas-verify=${stamp}" 2>/dev/null || true)"
-            medetomidine="$(curl -fsSL --compressed --max-time 25 -H "$cache_header" "${base}/addiction/substances/medetomidine/?atlas-verify=${stamp}" 2>/dev/null || true)"
-            comparison="$(curl -fsSL --compressed --max-time 25 -H "$cache_header" "${base}/addiction/compare/fentanyl-vs-heroin/?atlas-verify=${stamp}" 2>/dev/null || true)"
-            methodology="$(curl -fsSL --compressed --max-time 25 -H "$cache_header" "${base}/addiction/methodology/?atlas-verify=${stamp}" 2>/dev/null || true)"
-            mortality="$(curl -fsSL --compressed --max-time 25 -H "$cache_header" "${base}/addiction/mortality/?atlas-verify=${stamp}" 2>/dev/null || true)"
-            root_sitemap="$(curl -fsSL --compressed --max-time 25 -H "$cache_header" "${base}/sitemap.xml?atlas-verify=${stamp}" 2>/dev/null || true)"
-            atlas_sitemap="$(curl -fsSL --compressed --max-time 25 -H "$cache_header" "${base}/sitemaps/addiction-atlas.xml?atlas-verify=${stamp}" 2>/dev/null || true)"
+            fetch_page() { curl -fsSL --compressed --max-time 25 -H "$cache_header" "$1" 2>/dev/null || true; }
+
+            hub="$(fetch_page "${base}/addiction/?atlas-verify=${stamp}")"
+            sector="$(fetch_page "${base}/sectors/addiction-recovery/?atlas-verify=${stamp}")"
+            atlas="$(fetch_page "${base}/addiction/substances/?atlas-verify=${stamp}")"
+            compare_hub="$(fetch_page "${base}/addiction/compare/?atlas-verify=${stamp}")"
+            interactions="$(fetch_page "${base}/addiction/interactions/?atlas-verify=${stamp}")"
+            prevalence="$(fetch_page "${base}/addiction/prevalence/?atlas-verify=${stamp}")"
+            mortality="$(fetch_page "${base}/addiction/mortality/?atlas-verify=${stamp}")"
+            methodology="$(fetch_page "${base}/addiction/methodology/?atlas-verify=${stamp}")"
+
+            fentanyl="$(fetch_page "${base}/addiction/substances/fentanyl/?atlas-verify=${stamp}")"
+            tianeptine="$(fetch_page "${base}/addiction/substances/tianeptine/?atlas-verify=${stamp}")"
+            carfentanil="$(fetch_page "${base}/addiction/substances/carfentanil/?atlas-verify=${stamp}")"
+            medetomidine="$(fetch_page "${base}/addiction/substances/medetomidine/?atlas-verify=${stamp}")"
+            seven_oh="$(fetch_page "${base}/addiction/substances/7-hydroxymitragynine/?atlas-verify=${stamp}")"
+            phenibut="$(fetch_page "${base}/addiction/substances/phenibut/?atlas-verify=${stamp}")"
+            hhc="$(fetch_page "${base}/addiction/substances/hexahydrocannabinol-hhc/?atlas-verify=${stamp}")"
+            carisoprodol="$(fetch_page "${base}/addiction/substances/carisoprodol/?atlas-verify=${stamp}")"
+            cychlorphine="$(fetch_page "${base}/addiction/substances/cychlorphine/?atlas-verify=${stamp}")"
+
+            comparison="$(fetch_page "${base}/addiction/compare/fentanyl-vs-heroin/?atlas-verify=${stamp}")"
+            wave7_comparison="$(fetch_page "${base}/addiction/compare/kratom-vs-7-oh/?atlas-verify=${stamp}")"
+            root_sitemap="$(fetch_page "${base}/sitemap.xml?atlas-verify=${stamp}")"
+            atlas_sitemap="$(fetch_page "${base}/sitemaps/addiction-atlas.xml?atlas-verify=${stamp}")"
 
             hub_ok=false; sector_ok=false; atlas_ok=false; compare_hub_ok=false; interactions_ok=false
-            fentanyl_ok=false; wave6_ok=false; comparison_ok=false; methodology_ok=false; mortality_ok=false; sitemap_ok=false; index_ok=true
+            wave6_ok=false; wave7_ok=false; comparison_ok=false; wave7_comparison_ok=false
+            prevalence_ok=false; mortality_ok=false; methodology_ok=false; sitemap_ok=false; index_ok=true
 
             [[ "$hub" == *'موسوعة روافد التفاعلية'* && "$hub" == *'/addiction/substances/'* && "$hub" == *'/addiction/compare/'* && "$hub" == *'/addiction/interactions/'* ]] && hub_ok=true
             [[ "$sector" == *'موسوعة الإدمان التفاعلية'* && "$sector" == *'/addiction/substances/'* && "$sector" == *'/addiction/compare/'* ]] && sector_ok=true
-            [[ "$atlas" == *'Fentanyl'* && "$atlas" == *'Heroin'* && "$atlas" == *'57'* && "$atlas" == *'Tianeptine'* && "$atlas" == *'Carfentanil'* && "$atlas" == *'Medetomidine'* ]] && atlas_ok=true
+            [[ "$atlas" == *'Fentanyl'* && "$atlas" == *'Heroin'* && "$atlas" == *'71'* && "$atlas" == *'Phenibut'* && "$atlas" == *'Hexahydrocannabinol'* && "$atlas" == *'Cychlorphine'* ]] && atlas_ok=true
             [[ "$compare_hub" == *'قارن مادتين تفاعليًا'* && "$compare_hub" == *'فنتانيل'* && "$compare_hub" == *'هيروين'* ]] && compare_hub_ok=true
             [[ "$interactions" == *'افحص تفاعلاً تمت مراجعته'* && "$interactions" == *'غير مراجع بعد'* ]] && interactions_ok=true
-            [[ "$fentanyl" == *'Fentanyl'* && "$fentanyl" == *'MedicalWebPage'* ]] && fentanyl_ok=true
+
             [[ "$tianeptine" == *'Tianeptine'* && "$tianeptine" == *'MedicalWebPage'* && "$carfentanil" == *'Carfentanil'* && "$carfentanil" == *'MedicalWebPage'* && "$medetomidine" == *'Medetomidine'* && "$medetomidine" == *'MedicalWebPage'* ]] && wave6_ok=true
-            [[ "$comparison" == *'Fentanyl'* && "$comparison" == *'Heroin'* && "$comparison" == *'Article'* ]] && comparison_ok=true
+            [[ "$seven_oh" == *'7-Hydroxymitragynine'* && "$seven_oh" == *'MedicalWebPage'* \
+              && "$phenibut" == *'Phenibut'* && "$phenibut" == *'MedicalWebPage'* \
+              && "$hhc" == *'Hexahydrocannabinol'* && "$hhc" == *'MedicalWebPage'* \
+              && "$carisoprodol" == *'Carisoprodol'* && "$carisoprodol" == *'MedicalWebPage'* \
+              && "$cychlorphine" == *'Cychlorphine'* && "$cychlorphine" == *'MedicalWebPage'* && "$cychlorphine" == *'غير محسوم'* ]] && wave7_ok=true
+
+            [[ "$fentanyl" == *'Fentanyl'* && "$fentanyl" == *'MedicalWebPage'* && "$comparison" == *'Fentanyl'* && "$comparison" == *'Heroin'* && "$comparison" == *'Article'* ]] && comparison_ok=true
+            [[ "$wave7_comparison" == *'7-Hydroxymitragynine'* && "$wave7_comparison" == *'Kratom'* && "$wave7_comparison" == *'Article'* ]] && wave7_comparison_ok=true
+            [[ "$prevalence" == *'1320'* && "$prevalence" == *'فينيبيوت'* ]] && prevalence_ok=true
+            [[ "$mortality" == *'238'* && "$mortality" == *'كارفنتانيل'* && "$mortality" == *'فينيبيوت'* ]] && mortality_ok=true
             [[ "$methodology" == *'قوة الدليل'* ]] && methodology_ok=true
-            [[ "$mortality" == *'238'* && "$mortality" == *'كارفنتانيل'* ]] && mortality_ok=true
+
             if [[ "$root_sitemap" == *'/sitemaps/addiction-atlas.xml'* \
               && "$atlas_sitemap" == *'/addiction/substances/fentanyl/'* \
               && "$atlas_sitemap" == *'/addiction/substances/tianeptine/'* \
-              && "$atlas_sitemap" == *'/addiction/substances/carfentanil/'* \
-              && "$atlas_sitemap" == *'/addiction/substances/medetomidine/'* \
-              && "$atlas_sitemap" == *'/addiction/compare/fentanyl-vs-heroin/'* \
+              && "$atlas_sitemap" == *'/addiction/substances/7-hydroxymitragynine/'* \
+              && "$atlas_sitemap" == *'/addiction/substances/phenibut/'* \
+              && "$atlas_sitemap" == *'/addiction/substances/hexahydrocannabinol-hhc/'* \
+              && "$atlas_sitemap" == *'/addiction/substances/carisoprodol/'* \
+              && "$atlas_sitemap" == *'/addiction/substances/protonitazepyne/'* \
+              && "$atlas_sitemap" == *'/addiction/substances/metonitazepyne/'* \
+              && "$atlas_sitemap" == *'/addiction/substances/etonitazepipne/'* \
+              && "$atlas_sitemap" == *'/addiction/substances/n-desethyl-isotonitazene/'* \
+              && "$atlas_sitemap" == *'/addiction/substances/3-oh-pcp/'* \
+              && "$atlas_sitemap" == *'/addiction/substances/n-ethylheptedrone/'* \
+              && "$atlas_sitemap" == *'/addiction/substances/isotonitazepyne/'* \
+              && "$atlas_sitemap" == *'/addiction/substances/n-desethyl-etonitazene/'* \
+              && "$atlas_sitemap" == *'/addiction/substances/mdmb-fubinaca/'* \
+              && "$atlas_sitemap" == *'/addiction/substances/cychlorphine/'* \
+              && "$atlas_sitemap" == *'/addiction/compare/kratom-vs-7-oh/'* \
+              && "$atlas_sitemap" == *'/addiction/compare/cannabis-vs-hhc/'* \
+              && "$atlas_sitemap" == *'/addiction/compare/phenibut-vs-gabapentin/'* \
               && "$atlas_sitemap" == *'/addiction/methodology/'* \
               && "$atlas_sitemap" != *'workers.dev'* ]]; then
               sitemap_ok=true
             fi
 
-            for page in "$hub" "$sector" "$atlas" "$compare_hub" "$interactions" "$fentanyl" "$tianeptine" "$carfentanil" "$medetomidine" "$comparison" "$methodology" "$mortality"; do
+            for page in "$hub" "$sector" "$atlas" "$compare_hub" "$interactions" "$prevalence" "$mortality" "$methodology" "$fentanyl" "$tianeptine" "$carfentanil" "$medetomidine" "$seven_oh" "$phenibut" "$hhc" "$carisoprodol" "$cychlorphine" "$comparison" "$wave7_comparison"; do
               lower_page="${page,,}"
               if [[ "$lower_page" =~ \<meta[^\>]*name=[\"\']robots[\"\'][^\>]*content=[\"\'][^\"\']*noindex ]] \
                 || [[ "$lower_page" =~ \<meta[^\>]*content=[\"\'][^\"\']*noindex[^\"\']*[\"\'][^\>]*name=[\"\']robots[\"\'] ]]; then
@@ -83,11 +117,12 @@ jobs:
               fi
             done
 
-            echo "Production atlas verification attempt ${attempt}: hub=${hub_ok} sector=${sector_ok} atlas=${atlas_ok} compareHub=${compare_hub_ok} interactions=${interactions_ok} fentanyl=${fentanyl_ok} wave6=${wave6_ok} comparison=${comparison_ok} methodology=${methodology_ok} mortality=${mortality_ok} sitemap=${sitemap_ok} index=${index_ok}"
+            echo "Production atlas verification attempt ${attempt}: hub=${hub_ok} sector=${sector_ok} atlas=${atlas_ok} compareHub=${compare_hub_ok} interactions=${interactions_ok} wave6=${wave6_ok} wave7=${wave7_ok} comparison=${comparison_ok} wave7Comparison=${wave7_comparison_ok} prevalence=${prevalence_ok} mortality=${mortality_ok} methodology=${methodology_ok} sitemap=${sitemap_ok} index=${index_ok}"
             if [[ "$hub_ok" == true && "$sector_ok" == true && "$atlas_ok" == true && "$compare_hub_ok" == true \
-              && "$interactions_ok" == true && "$fentanyl_ok" == true && "$wave6_ok" == true && "$comparison_ok" == true \
-              && "$methodology_ok" == true && "$mortality_ok" == true && "$sitemap_ok" == true && "$index_ok" == true ]]; then
-              echo 'Production addiction atlas wave 6 is live, discoverable, interactive, indexable, and represented in the production sitemap.'
+              && "$interactions_ok" == true && "$wave6_ok" == true && "$wave7_ok" == true \
+              && "$comparison_ok" == true && "$wave7_comparison_ok" == true && "$prevalence_ok" == true \
+              && "$mortality_ok" == true && "$methodology_ok" == true && "$sitemap_ok" == true && "$index_ok" == true ]]; then
+              echo 'Production addiction atlas wave 7 is live, discoverable, evidence-bounded, interactive, indexable, and represented in the production sitemap.'
               exit 0
             fi
             sleep 5

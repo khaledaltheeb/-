@@ -1,19 +1,25 @@
 import manifestJson from '@/data/addiction-atlas/substance-waves.json';
 import methodologyJson from '@/data/addiction-atlas/methodology-v1.json';
-import comparisonJson from '@/data/addiction-atlas/comparison-intents-v2.json';
+import comparisonV2Json from '@/data/addiction-atlas/comparison-intents-v2.json';
+import comparisonV3Json from '@/data/addiction-atlas/comparison-intents-v3.json';
 import substancesV1Json from '@/data/addiction-atlas/substances-v1.json';
 import substancesV2Json from '@/data/addiction-atlas/substances-v2.json';
 import substancesV3Json from '@/data/addiction-atlas/substances-v3.json';
 import substancesV4Json from '@/data/addiction-atlas/substances-v4.json';
 import substancesV5Json from '@/data/addiction-atlas/substances-v5.json';
 import substancesV6Json from '@/data/addiction-atlas/substances-v6.json';
-import epidemiologyJson from '@/data/addiction-atlas/epidemiology-v1.json';
+import substancesV7Json from '@/data/addiction-atlas/substances-v7.json';
+import epidemiologyV1Json from '@/data/addiction-atlas/epidemiology-v1.json';
+import epidemiologyV2Json from '@/data/addiction-atlas/epidemiology-v2.json';
 import mortalityV1Json from '@/data/addiction-atlas/mortality-v1.json';
 import mortalityV2Json from '@/data/addiction-atlas/mortality-v2.json';
+import mortalityV3Json from '@/data/addiction-atlas/mortality-v3.json';
 import sourceRegistryV1Json from '@/data/addiction-atlas/source-registry-v1.json';
 import sourceRegistryV2Json from '@/data/addiction-atlas/source-registry-v2.json';
+import sourceRegistryV3Json from '@/data/addiction-atlas/source-registry-v3.json';
 import interactionsV1Json from '@/data/addiction-atlas/interactions-v1.json';
 import interactionsV2Json from '@/data/addiction-atlas/interactions-v2.json';
+import interactionsV3Json from '@/data/addiction-atlas/interactions-v3.json';
 
 export const ADDICTION_ATLAS_SOURCE_COMMIT = '00014486191027349cc083e824e545da186d74d1';
 export const ADDICTION_ATLAS_SNAPSHOT_KIND = 'vendored-immutable' as const;
@@ -212,11 +218,11 @@ function assertStatistic(record: AtlasEpidemiologyRecord | AtlasMortalityRecord,
 async function loadAtlas(): Promise<AddictionAtlas> {
   const manifest = manifestJson as unknown as WaveManifest;
   const methodology = methodologyJson as unknown as AtlasMethodology;
-  const comparisonFile = comparisonJson as unknown as ComparisonFile;
-  const interactionFiles = [interactionsV1Json, interactionsV2Json] as unknown as InteractionFile[];
-  const epidemiologyFile = epidemiologyJson as unknown as EpidemiologyFile;
-  const mortalityFiles = [mortalityV1Json, mortalityV2Json] as unknown as MortalityFile[];
-  const sourceRegistries = [sourceRegistryV1Json, sourceRegistryV2Json] as unknown as SourceRegistry[];
+  const comparisonFiles = [comparisonV2Json, comparisonV3Json] as unknown as ComparisonFile[];
+  const interactionFiles = [interactionsV1Json, interactionsV2Json, interactionsV3Json] as unknown as InteractionFile[];
+  const epidemiologyFiles = [epidemiologyV1Json, epidemiologyV2Json] as unknown as EpidemiologyFile[];
+  const mortalityFiles = [mortalityV1Json, mortalityV2Json, mortalityV3Json] as unknown as MortalityFile[];
+  const sourceRegistries = [sourceRegistryV1Json, sourceRegistryV2Json, sourceRegistryV3Json] as unknown as SourceRegistry[];
   const waveByFile: Record<string, SubstanceWave> = {
     'substances-v1.json': substancesV1Json as unknown as SubstanceWave,
     'substances-v2.json': substancesV2Json as unknown as SubstanceWave,
@@ -224,6 +230,7 @@ async function loadAtlas(): Promise<AddictionAtlas> {
     'substances-v4.json': substancesV4Json as unknown as SubstanceWave,
     'substances-v5.json': substancesV5Json as unknown as SubstanceWave,
     'substances-v6.json': substancesV6Json as unknown as SubstanceWave,
+    'substances-v7.json': substancesV7Json as unknown as SubstanceWave,
   };
   const waves = manifest.waves.map((path) => {
     const name = fileName(path);
@@ -241,10 +248,11 @@ async function loadAtlas(): Promise<AddictionAtlas> {
     }
   }
   const substances = [...bySlug.values()];
-  if (substances.length < 57) throw new Error(`addiction atlas regression: expected at least 57 substances, got ${substances.length}`);
+  if (substances.length < 71) throw new Error(`addiction atlas regression: expected at least 71 substances, got ${substances.length}`);
 
+  const comparisons = comparisonFiles.flatMap((file) => file.comparisons);
   const comparisonSlugs = new Set<string>();
-  for (const comparison of comparisonFile.comparisons) {
+  for (const comparison of comparisons) {
     if (comparisonSlugs.has(comparison.slug)) throw new Error(`duplicate addiction comparison slug: ${comparison.slug}`);
     comparisonSlugs.add(comparison.slug);
     if (!bySlug.has(comparison.a) || !bySlug.has(comparison.b)) throw new Error(`comparison references missing substance: ${comparison.slug}`);
@@ -269,16 +277,18 @@ async function loadAtlas(): Promise<AddictionAtlas> {
     if (!source.id || sourceIds.has(source.id)) throw new Error(`duplicate addiction atlas source id: ${source.id || 'unknown'}`);
     sourceIds.add(source.id);
   }
+
+  const epidemiology = epidemiologyFiles.flatMap((file) => file.records);
   const mortality = mortalityFiles.flatMap((file) => file.records);
-  for (const record of epidemiologyFile.records) assertStatistic(record, sourceIds);
+  for (const record of epidemiology) assertStatistic(record, sourceIds);
   for (const record of mortality) assertStatistic(record, sourceIds);
 
   const dates = [
     manifest.updated_on,
-    comparisonFile.updated_on,
+    ...comparisonFiles.map((file) => file.updated_on),
     ...interactionFiles.map((file) => file.updated_on),
     methodology.published_on,
-    epidemiologyFile.updated_on,
+    ...epidemiologyFiles.map((file) => file.updated_on),
     ...mortalityFiles.map((file) => file.updated_on),
     ...sourceRegistries.map((registry) => registry.updated_on),
     ...waves.map((wave) => wave.updated_on),
@@ -287,12 +297,12 @@ async function loadAtlas(): Promise<AddictionAtlas> {
   return {
     substances,
     methodology,
-    comparisons: comparisonFile.comparisons,
-    comparisonPolicy: comparisonFile.policy_ar,
+    comparisons,
+    comparisonPolicy: comparisonFiles.map((file) => file.policy_ar).join(' '),
     interactions,
     interactionPolicy: interactionFiles.map((file) => file.policy_ar).join(' '),
-    epidemiology: epidemiologyFile.records,
-    epidemiologyRules: epidemiologyFile.rules_ar,
+    epidemiology,
+    epidemiologyRules: epidemiologyFiles.flatMap((file) => file.rules_ar),
     mortality,
     mortalityRules: mortalityFiles.flatMap((file) => file.rules_ar),
     sources,

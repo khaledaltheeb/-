@@ -5,6 +5,7 @@
   "waves": [
     "/data/addiction-atlas/risk-evidence-v4.json",
     "/data/addiction-atlas/risk-evidence-v5.json",
-    "/data/addiction-atlas/risk-evidence-v6.json"
+    "/data/addiction-atlas/risk-evidence-v6.json",
+    "/data/addiction-atlas/risk-evidence-v7.json"
   ]
 }
