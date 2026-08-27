@@ -24,7 +24,7 @@ const fail = (message) => {
 };
 
 if (!catalog.includes('question-banks.clarity-wave4.v1.json')) fail('catalog must import clarity wave 4');
-if (!catalog.includes('...(clarityWave4QuestionBankData as Record<string, RawAssessmentQuestion[]>)')) fail('clarity wave 4 must be loaded into effective question banks');
+if (!catalog.includes('...(clarityWave4QuestionBankData as Record<string, AssessmentQuestion[]>)')) fail('clarity wave 4 must be loaded into final runtime question banks');
 
 const actualSlugs = Object.keys(wave);
 if (actualSlugs.length !== expectedSlugs.length) fail(`expected ${expectedSlugs.length} tools, found ${actualSlugs.length}`);
@@ -43,7 +43,6 @@ for (const slug of expectedSlugs) {
     if (!monitor.axes.includes(question.axis)) fail(`${slug}: axis ${question.axis} is outside the published domain map`);
     if (!question.text || question.text.trim().length < 18) fail(`${slug}: underspecified item`);
     if (!allowedResponseKinds.has(question.responseKind)) fail(`${slug}: every item must declare an explicit valid responseKind`);
-
     const normalized = question.text.trim().replace(/\s+/g, ' ');
     if (seen.has(normalized)) fail(`${slug}: duplicate item text`);
     seen.add(normalized);
@@ -51,13 +50,10 @@ for (const slug of expectedSlugs) {
     if (previous && previous !== slug) fail(`exact cross-tool duplicate: ${previous} and ${slug}`);
     globalText.set(normalized, slug);
   }
-
   for (const axis of monitor.axes) {
     const count = questions.filter((question) => question.axis === axis).length;
     if (count !== 4) fail(`${slug}/${axis} must retain exactly four items`);
   }
 }
 
-if (!process.exitCode) {
-  console.log('Assessment clarity wave 4 passed: 10 tools, 160 manually reviewed items, explicit response semantics, four items per published axis, no exact duplicates.');
-}
+if (!process.exitCode) console.log('Assessment clarity wave 4 passed: 10 tools, 160 manually reviewed items, explicit response semantics, four items per published axis, no exact duplicates.');
