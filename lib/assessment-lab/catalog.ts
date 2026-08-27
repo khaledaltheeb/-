@@ -1,13 +1,5 @@
 import monitorData from '@/data/assessment-lab/monitors.v1.json';
 import instrumentData from '@/data/assessment-lab/instruments.v1.json';
-import questionBankData from '@/data/assessment-lab/question-banks.v1.json';
-import coreQuestionBankData from '@/data/assessment-lab/question-banks.core-1-12.v1.json';
-import coreQuestionBankData13to24 from '@/data/assessment-lab/question-banks.core-13-24.v1.json';
-import coreQuestionBankData25to28 from '@/data/assessment-lab/question-banks.core-25-28.v1.json';
-import coreQuestionBankData29to32 from '@/data/assessment-lab/question-banks.core-29-32.v1.json';
-import coreQuestionBankData33to36 from '@/data/assessment-lab/question-banks.core-33-36.v1.json';
-import originalQuestionBankData49to54 from '@/data/assessment-lab/question-banks.originals-49-54.v1.json';
-import originalQuestionBankData55to60 from '@/data/assessment-lab/question-banks.originals-55-60.v1.json';
 import clarityWave2QuestionBankData from '@/data/assessment-lab/question-banks.clarity-wave2.v1.json';
 import clarityWave3QuestionBankData from '@/data/assessment-lab/question-banks.clarity-wave3.v1.json';
 import clarityWave4QuestionBankData from '@/data/assessment-lab/question-banks.clarity-wave4.v1.json';
@@ -43,15 +35,10 @@ export type AssessmentQuestion = {
 
 export const assessmentMonitors = monitorData as AssessmentMonitor[];
 export const sourceInstruments = instrumentData as SourceInstrument[];
+
+// Runtime uses only the final manually reviewed banks. Historical/base banks stay in
+// the repository for traceability and scientific comparison but cannot ship as live items.
 const questionBanks = {
-  ...(questionBankData as Record<string, AssessmentQuestion[]>),
-  ...(coreQuestionBankData as Record<string, AssessmentQuestion[]>),
-  ...(coreQuestionBankData13to24 as Record<string, AssessmentQuestion[]>),
-  ...(coreQuestionBankData25to28 as Record<string, AssessmentQuestion[]>),
-  ...(coreQuestionBankData29to32 as Record<string, AssessmentQuestion[]>),
-  ...(coreQuestionBankData33to36 as Record<string, AssessmentQuestion[]>),
-  ...(originalQuestionBankData49to54 as Record<string, AssessmentQuestion[]>),
-  ...(originalQuestionBankData55to60 as Record<string, AssessmentQuestion[]>),
   ...(clarityWave2QuestionBankData as Record<string, AssessmentQuestion[]>),
   ...(clarityWave3QuestionBankData as Record<string, AssessmentQuestion[]>),
   ...(clarityWave4QuestionBankData as Record<string, AssessmentQuestion[]>),
@@ -60,6 +47,7 @@ const questionBanks = {
   ...(clarityWave7QuestionBankData as Record<string, AssessmentQuestion[]>),
   ...(safetyHardenedQuestionBankData as Record<string, AssessmentQuestion[]>),
 };
+
 export const assessmentSlugs = [...assessmentMonitors.map((row) => row.slug), ...sourceInstruments.map((row) => row.slug)];
 export const assessmentCategories = [...new Set(assessmentMonitors.map((row) => row.category))];
 
