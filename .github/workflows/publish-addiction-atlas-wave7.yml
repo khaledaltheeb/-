@@ -1,0 +1,138 @@
+name: Publish Addiction Atlas Wave 7
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-addiction-atlas-wave7.yml'
+
+concurrency:
+  group: rawafid-production-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
+      NEXT_PUBLIC_SITE_URL: https://healthrenewal.org
+      NEXT_PUBLIC_ALLOW_INDEXING: 'true'
+      NEXT_PUBLIC_ENABLE_ANALYTICS: 'true'
+      NEXT_PUBLIC_GTM_ID: GTM-WBLQVBG4
+      NEXT_PUBLIC_GA_MEASUREMENT_ID: G-VLZMV8Y4JP
+      NEXT_PUBLIC_ENABLE_DIRECT_GA: 'true'
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: 1910e1ad3c793fd568ba1caafe34f964
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: 0ecec5dc702d8679aa8b510e6da5660948bcf9cc
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Validate release
+        run: |
+          npm run typecheck
+          npm run lint
+          npm run addiction-atlas:validate
+          node scripts/addiction-atlas-product-contract.mjs
+          npm run public-preservation:validate
+          npm run sitemap-preservation:validate
+          npm run static-sitemap:validate
+      - name: Verify Cloudflare credentials
+        run: npx wrangler whoami
+      - name: Build Cloudflare Worker
+        run: npx opennextjs-cloudflare build --env production
+      - name: Deploy Cloudflare Worker
+        run: npx opennextjs-cloudflare deploy --env production
+      - name: Verify live release
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://healthrenewal.org'
+          cache_header='Cache-Control: no-cache, no-store, max-age=0'
+
+          fetch_page() {
+            curl -fsSL --compressed --retry 12 --retry-delay 3 --retry-all-errors --max-time 30 -H "$cache_header" "$1"
+          }
+
+          stamp="${GITHUB_SHA}-$(date +%s)"
+          atlas="$(fetch_page "${base}/addiction/substances/?wave7-release=${stamp}")"
+          interactions="$(fetch_page "${base}/addiction/interactions/?wave7-release=${stamp}")"
+          prevalence="$(fetch_page "${base}/addiction/prevalence/?wave7-release=${stamp}")"
+          mortality="$(fetch_page "${base}/addiction/mortality/?wave7-release=${stamp}")"
+          methodology="$(fetch_page "${base}/addiction/methodology/?wave7-release=${stamp}")"
+          comparison="$(fetch_page "${base}/addiction/compare/kratom-vs-7-oh/?wave7-release=${stamp}")"
+          seven_oh="$(fetch_page "${base}/addiction/substances/7-hydroxymitragynine/?wave7-release=${stamp}")"
+          phenibut="$(fetch_page "${base}/addiction/substances/phenibut/?wave7-release=${stamp}")"
+          hhc="$(fetch_page "${base}/addiction/substances/hexahydrocannabinol-hhc/?wave7-release=${stamp}")"
+          carisoprodol="$(fetch_page "${base}/addiction/substances/carisoprodol/?wave7-release=${stamp}")"
+          cychlorphine="$(fetch_page "${base}/addiction/substances/cychlorphine/?wave7-release=${stamp}")"
+          rootmap="$(fetch_page "${base}/sitemap.xml?wave7-release=${stamp}")"
+          atlasmap="$(fetch_page "${base}/sitemaps/addiction-atlas.xml?wave7-release=${stamp}")"
+
+          grep -q '71' <<< "$atlas"
+          grep -q 'Phenibut' <<< "$atlas"
+          grep -q 'Hexahydrocannabinol' <<< "$atlas"
+          grep -q 'Cychlorphine' <<< "$atlas"
+          grep -q 'افحص تفاعلاً تمت مراجعته' <<< "$interactions"
+          grep -q 'غير مراجع بعد' <<< "$interactions"
+          grep -q '1320' <<< "$prevalence"
+          grep -q 'فينيبيوت' <<< "$prevalence"
+          grep -q '238' <<< "$mortality"
+          grep -q 'كارفنتانيل' <<< "$mortality"
+          grep -q 'فينيبيوت' <<< "$mortality"
+          grep -q 'قوة الدليل' <<< "$methodology"
+          grep -q '7-Hydroxymitragynine' <<< "$comparison"
+          grep -q 'Kratom' <<< "$comparison"
+          grep -q 'Article' <<< "$comparison"
+
+          for page in "$seven_oh" "$phenibut" "$hhc" "$carisoprodol" "$cychlorphine"; do
+            grep -q 'MedicalWebPage' <<< "$page"
+          done
+          grep -q '7-Hydroxymitragynine' <<< "$seven_oh"
+          grep -q 'Phenibut' <<< "$phenibut"
+          grep -q 'Hexahydrocannabinol' <<< "$hhc"
+          grep -q 'Carisoprodol' <<< "$carisoprodol"
+          grep -q 'Cychlorphine' <<< "$cychlorphine"
+          grep -q 'غير محسوم' <<< "$cychlorphine"
+
+          grep -q '/sitemaps/addiction-atlas.xml' <<< "$rootmap"
+          for route in \
+            '/addiction/substances/7-hydroxymitragynine/' \
+            '/addiction/substances/phenibut/' \
+            '/addiction/substances/hexahydrocannabinol-hhc/' \
+            '/addiction/substances/carisoprodol/' \
+            '/addiction/substances/protonitazepyne/' \
+            '/addiction/substances/metonitazepyne/' \
+            '/addiction/substances/etonitazepipne/' \
+            '/addiction/substances/n-desethyl-isotonitazene/' \
+            '/addiction/substances/3-oh-pcp/' \
+            '/addiction/substances/n-ethylheptedrone/' \
+            '/addiction/substances/isotonitazepyne/' \
+            '/addiction/substances/n-desethyl-etonitazene/' \
+            '/addiction/substances/mdmb-fubinaca/' \
+            '/addiction/substances/cychlorphine/' \
+            '/addiction/compare/kratom-vs-7-oh/' \
+            '/addiction/compare/cannabis-vs-hhc/' \
+            '/addiction/compare/phenibut-vs-gabapentin/'; do
+            grep -q "$route" <<< "$atlasmap"
+          done
+          if grep -q 'workers.dev' <<< "$atlasmap"; then exit 1; fi
+
+          for html in "$atlas" "$interactions" "$prevalence" "$mortality" "$methodology" "$comparison" "$seven_oh" "$phenibut" "$hhc" "$carisoprodol" "$cychlorphine"; do
+            lower="${html,,}"
+            if [[ "$lower" =~ \<meta[^\>]*name=[\"\']robots[\"\'][^\>]*content=[\"\'][^\"\']*noindex ]] || [[ "$lower" =~ \<meta[^\>]*content=[\"\'][^\"\']*noindex[^\"\']*[\"\'][^\>]*name=[\"\']robots[\"\'] ]]; then
+              echo 'Found noindex on wave 7 production surface.' >&2
+              exit 1
+            fi
+          done
+
+          echo 'Production addiction atlas wave 7 verified successfully.'
