@@ -41,26 +41,24 @@ export type AssessmentQuestion = {
   responseKind: AssessmentResponseKind;
 };
 
-type RawAssessmentQuestion = Omit<AssessmentQuestion, 'responseKind'> & { responseKind?: AssessmentResponseKind };
-
 export const assessmentMonitors = monitorData as AssessmentMonitor[];
 export const sourceInstruments = instrumentData as SourceInstrument[];
 const questionBanks = {
-  ...(questionBankData as Record<string, RawAssessmentQuestion[]>),
-  ...(coreQuestionBankData as Record<string, RawAssessmentQuestion[]>),
-  ...(coreQuestionBankData13to24 as Record<string, RawAssessmentQuestion[]>),
-  ...(coreQuestionBankData25to28 as Record<string, RawAssessmentQuestion[]>),
-  ...(coreQuestionBankData29to32 as Record<string, RawAssessmentQuestion[]>),
-  ...(coreQuestionBankData33to36 as Record<string, RawAssessmentQuestion[]>),
-  ...(originalQuestionBankData49to54 as Record<string, RawAssessmentQuestion[]>),
-  ...(originalQuestionBankData55to60 as Record<string, RawAssessmentQuestion[]>),
-  ...(clarityWave2QuestionBankData as Record<string, RawAssessmentQuestion[]>),
-  ...(clarityWave3QuestionBankData as Record<string, RawAssessmentQuestion[]>),
-  ...(clarityWave4QuestionBankData as Record<string, RawAssessmentQuestion[]>),
-  ...(clarityWave5QuestionBankData as Record<string, RawAssessmentQuestion[]>),
-  ...(clarityWave6QuestionBankData as Record<string, RawAssessmentQuestion[]>),
-  ...(clarityWave7QuestionBankData as Record<string, RawAssessmentQuestion[]>),
-  ...(safetyHardenedQuestionBankData as Record<string, RawAssessmentQuestion[]>),
+  ...(questionBankData as Record<string, AssessmentQuestion[]>),
+  ...(coreQuestionBankData as Record<string, AssessmentQuestion[]>),
+  ...(coreQuestionBankData13to24 as Record<string, AssessmentQuestion[]>),
+  ...(coreQuestionBankData25to28 as Record<string, AssessmentQuestion[]>),
+  ...(coreQuestionBankData29to32 as Record<string, AssessmentQuestion[]>),
+  ...(coreQuestionBankData33to36 as Record<string, AssessmentQuestion[]>),
+  ...(originalQuestionBankData49to54 as Record<string, AssessmentQuestion[]>),
+  ...(originalQuestionBankData55to60 as Record<string, AssessmentQuestion[]>),
+  ...(clarityWave2QuestionBankData as Record<string, AssessmentQuestion[]>),
+  ...(clarityWave3QuestionBankData as Record<string, AssessmentQuestion[]>),
+  ...(clarityWave4QuestionBankData as Record<string, AssessmentQuestion[]>),
+  ...(clarityWave5QuestionBankData as Record<string, AssessmentQuestion[]>),
+  ...(clarityWave6QuestionBankData as Record<string, AssessmentQuestion[]>),
+  ...(clarityWave7QuestionBankData as Record<string, AssessmentQuestion[]>),
+  ...(safetyHardenedQuestionBankData as Record<string, AssessmentQuestion[]>),
 };
 export const assessmentSlugs = [...assessmentMonitors.map((row) => row.slug), ...sourceInstruments.map((row) => row.slug)];
 export const assessmentCategories = [...new Set(assessmentMonitors.map((row) => row.category))];
@@ -77,16 +75,6 @@ const sourceStatusLabels: Record<string, string> = {
   'distributed-by-mapi-rights-review': 'موزّع عبر جهة حقوق مختصة — تُراجع شروط الاستخدام والترجمة قبل أي تفعيل',
 };
 
-const protectiveAxes = new Set([
-  'الشعور بالسيطرة','الاستعادة','الدعم العملي','الراحة','الدعم','إصلاح الخلاف','وضوح الطلب','الاحترام','الحدود','حرية التعبير','الأمان','الروتين','استعادة الذات','الوظيفة اليومية','حمل الذكرى','العودة للحياة','التهدئة','تسمية الشعور','اختيار السلوك','لغة الذات','تقبل النقص','الرعاية','المرونة','الانتماء','شخص آمن','جودة التواصل','المبادرة','دعم عاطفي','معلومات','طلب المساعدة','الفاعلية','العناية الذاتية','العمل أو الدراسة','العلاقات','المنزل','الاستراحة الحسية','الأمان المدرسي','طلب المساعدة','التعزيز','التعاون المدرسي','فرص التواصل','تقليل الضغط','البدائل','التعاون العلاجي','الاستقلال','المهارات التكيفية','المشاركة','الصحة','التعلم','الحركة','التواصل','الوصول للتواصل','البيئة السمعية','اللغة','التنقل','الوصول للمعلومات','احتياجات الأسرة','القرب الآمن','استعادة النشاط','العودة للحاضر','الأشخاص الداعمون','خطوات السلامة'
-]);
-
-const behaviorAxes = new Set([
-  'بدء المهمة','التنظيم','تذكر الخطوات','الانتقال','الاستمرار','استعادة التركيز','إنهاء المهمة','النشاط النهاري','العناية بالنفس','وقت الاستعادة','إصلاح الخلاف','المبادرة','طلب المساعدة','التعليمات','التكييف','التعاون المدرسي','التعزيز','الاستقلال','المشاركة','التواصل','التنقل','الوصول للمعلومات','العودة للحاضر','استعادة النشاط'
-]);
-
-const safetyAxes = new Set(['الأمان','الأمان المدرسي','الأشخاص الداعمون','خطوات السلامة','المحفزات','الإشارات المبكرة','الحدود','حرية التعبير']);
-
 export function getAssessmentMonitor(slug: string) {
   return assessmentMonitors.find((row) => row.slug === slug) ?? null;
 }
@@ -99,52 +87,12 @@ export function getSourceInstrumentStatusLabel(status: string) {
   return sourceStatusLabels[status] ?? 'حالة الحقوق أو النسخة تحتاج مراجعة موثقة قبل أي تفعيل تفاعلي';
 }
 
-function questionsForAxis(axis: string): string[] {
-  if (safetyAxes.has(axis)) {
-    return [
-      `خلال الأسبوع الماضي، إلى أي حد شعرت أن ${axis} كان واضحًا ومتوافرًا عندما احتجته؟`,
-      `هل وجدت موقفًا واحدًا على الأقل عرفت فيه ما الذي يحافظ على ${axis} أو ما الذي يهدده؟`,
-      `إلى أي حد استطعت الوصول إلى خطوة عملية أو شخص مناسب عندما احتجت إلى تعزيز ${axis}؟`,
-      `هل تغير مستوى ${axis} بسرعة أو بصورة جعلتك تؤجل نشاطًا مهمًا أو تتجنب موقفًا معتادًا؟`,
-    ];
-  }
-
-  if (protectiveAxes.has(axis) || behaviorAxes.has(axis)) {
-    return [
-      `خلال الأسبوع الماضي، إلى أي حد كان ${axis} متاحًا لك عندما احتجته؟`,
-      `إلى أي حد استطعت استخدام ${axis} بصورة ساعدتك على إكمال ما تريد فعله؟`,
-      `هل لاحظت سياقًا محددًا أصبح فيه ${axis} أسهل أو أصعب من المعتاد؟`,
-      `إلى أي حد احتجت إلى تعديل البيئة أو طلب مساعدة حتى يصبح ${axis} ممكنًا أو أكثر استقرارًا؟`,
-    ];
-  }
-
-  return [
-    `خلال الأسبوع الماضي، إلى أي حد كان ${axis} حاضرًا بصورة أثرت في يومك؟`,
-    `إلى أي حد غير ${axis} قدرتك على أداء مهمة أو الاستمرار في نشاط مهم؟`,
-    `هل استطعت تحديد موقف أو وقت أصبح فيه ${axis} أكثر وضوحًا أو شدة من المعتاد؟`,
-    `إلى أي حد احتجت إلى راحة أو تعديل أو دعم بسبب ما لاحظته في ${axis}؟`,
-  ];
-}
-
-function inferResponseKind(text: string): AssessmentResponseKind {
-  const normalized = text.trim();
-  if (normalized.includes('كم مرة') || normalized.includes('كم مرّة')) return 'frequency';
-  if (normalized.startsWith('هل ') || normalized.startsWith('هل؟')) return 'yes-no';
-  return 'degree';
-}
-
-function normalizeQuestion(question: RawAssessmentQuestion): AssessmentQuestion {
-  return {
-    axis: question.axis,
-    text: question.text,
-    responseKind: question.responseKind ?? inferResponseKind(question.text),
-  };
-}
-
 export function buildMonitorQuestions(monitor: AssessmentMonitor): AssessmentQuestion[] {
   const custom = questionBanks[monitor.slug];
-  if (custom?.length) return custom.map(normalizeQuestion);
-  return monitor.axes.flatMap((axis) => questionsForAxis(axis).map((text) => normalizeQuestion({ axis, text })));
+  if (!custom?.length) {
+    throw new Error(`Missing tailored Assessment Lab question bank for ${monitor.slug}`);
+  }
+  return custom;
 }
 
 export function getMonitorReadingTime(monitor: AssessmentMonitor) {
