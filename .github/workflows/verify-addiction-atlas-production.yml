@@ -1,5 +1,6 @@
 name: Verify Addiction Atlas Production
 
+# Wave 7 stabilized-production checkpoint: 2026-08-27.
 on:
   push:
     branches: [main]
