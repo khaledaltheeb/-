@@ -26,11 +26,22 @@ export type SourceInstrument = {
 };
 
 export type AssessmentResponseKind = 'frequency' | 'degree' | 'yes-no';
+export type AssessmentSafetyLevel = 'urgent' | 'priority';
+export type AssessmentSafetyKind = 'personal-safety' | 'postpartum-urgent' | 'health-evaluation' | 'recovery-support';
+
+export type AssessmentSafetySignal = {
+  triggerValues: string[];
+  level: AssessmentSafetyLevel;
+  kind: AssessmentSafetyKind;
+  title: string;
+  message: string;
+};
 
 export type AssessmentQuestion = {
   axis: string;
   text: string;
   responseKind: AssessmentResponseKind;
+  safetySignal?: AssessmentSafetySignal;
 };
 
 export const assessmentMonitors = monitorData as AssessmentMonitor[];

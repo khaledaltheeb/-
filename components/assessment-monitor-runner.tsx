@@ -2,12 +2,12 @@
 
 import { useMemo, useState } from 'react';
 import styles from '@/app/assessment-lab/assessment-lab.module.css';
+import safetyStyles from '@/components/assessment-safety-alert.module.css';
+import type { AssessmentQuestion, AssessmentResponseKind } from '@/lib/assessment-lab/catalog';
 
-type ResponseKind = 'frequency' | 'degree' | 'yes-no';
-type Question = { axis: string; text: string; responseKind: ResponseKind };
-type Props = { title: string; referencePeriod: string; questions: Question[] };
+type Props = { title: string; referencePeriod: string; questions: AssessmentQuestion[] };
 
-const responseOptions: Record<ResponseKind, readonly string[]> = {
+const responseOptions: Record<AssessmentResponseKind, readonly string[]> = {
   frequency: ['أبدًا', 'نادرًا', 'أحيانًا', 'غالبًا', 'دائمًا تقريبًا'],
   degree: ['إطلاقًا', 'بدرجة بسيطة', 'بدرجة متوسطة', 'بدرجة كبيرة', 'بدرجة كبيرة جدًا'],
   'yes-no': ['لا', 'إلى حد ما', 'نعم'],
@@ -39,9 +39,9 @@ export default function AssessmentMonitorRunner({ title, referencePeriod, questi
       </div>
     </div>
 
-    <div className={styles.privacy}><strong>خصوصية:</strong> الإجابات والملاحظات تبقى في ذاكرة هذه الصفحة فقط. لا يوجد إرسال للخادم، ولا حفظ في الحساب أو Local Storage أو Session Storage. عند إغلاق الصفحة أو تحديثها تضيع الإجابات.</div>
+    <div className={styles.privacy}><strong>خصوصية:</strong> الإجابات والملاحظات تبقى في ذاكرة هذه الصفحة فقط. لا يوجد إرسال للخادم، ولا حفظ في الحساب أو Local Storage أو Session Storage. تنبيهات السلامة — عندما توجد في بند صريح — تُحدد محليًا من الإجابة نفسها ولا تُرسل إلى روافد. عند إغلاق الصفحة أو تحديثها تضيع الإجابات.</div>
 
-    <div className={styles.boundary}><strong>مهم:</strong> هذه الأداة ليست مقياسًا نفسيًا مقننًا ولا تحسب درجة تشخيصية. فائدتها في تنظيم الملاحظة ضمن الفترة المرجعية المحددة، وتجهيز أمثلة محددة لمناقشتها مع مختص عند الحاجة.</div>
+    <div className={styles.boundary}><strong>مهم:</strong> هذه الأداة ليست مقياسًا نفسيًا مقننًا ولا تحسب درجة تشخيصية أو درجة خطر. فائدتها في تنظيم الملاحظة ضمن الفترة المرجعية المحددة، وتجهيز أمثلة محددة لمناقشتها مع مختص عند الحاجة. تنبيه السلامة لا يعني أن الموقع أجرى تقييمًا سريريًا للخطر.</div>
 
     <div className={styles.axisList}>
       {axes.map((axis) => {
@@ -52,14 +52,28 @@ export default function AssessmentMonitorRunner({ title, referencePeriod, questi
           <div className={styles.axisMeta}>{axisAnswered} من {indexed.length} بنود مكتملة</div>
           {indexed.map(({ question, index }) => {
             const options = responseOptions[question.responseKind];
+            const selectedAnswer = answers[index];
+            const activeSafetySignal = question.safetySignal && selectedAnswer
+              ? question.safetySignal.triggerValues.includes(selectedAnswer)
+              : false;
             return <div className={styles.question} key={question.text}>
               <p>{question.text}</p>
               <div className={styles.options} role="radiogroup" aria-label={question.text}>
                 {options.map((option) => <label key={option}>
-                  <input type="radio" name={`assessment-q-${index}`} value={option} checked={answers[index] === option} onChange={() => setAnswers((current) => ({ ...current, [index]: option }))}/>
+                  <input type="radio" name={`assessment-q-${index}`} value={option} checked={selectedAnswer === option} onChange={() => setAnswers((current) => ({ ...current, [index]: option }))}/>
                   <span>{option}</span>
                 </label>)}
               </div>
+              {activeSafetySignal && question.safetySignal ? <div
+                className={`${safetyStyles.signal} ${question.safetySignal.level === 'urgent' ? safetyStyles.urgent : safetyStyles.priority}`}
+                role="alert"
+                aria-atomic="true"
+                data-safety-kind={question.safetySignal.kind}
+              >
+                <strong>{question.safetySignal.title}</strong>
+                <p>{question.safetySignal.message}</p>
+                <small>تنبيه احترازي محلي فقط: لا تُرسل هذه الإجابة إلى الخادم ولا تعني أن روافد أجرى تقييمًا سريريًا أو تشخيصيًا للخطر.</small>
+              </div> : null}
             </div>;
           })}
           <label className={styles.note}>

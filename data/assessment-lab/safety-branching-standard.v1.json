@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "name": "Rawafid Assessment Lab Local Safety Branching Standard",
+  "status": "mandatory",
+  "purpose": "عرض تنبيه احترازي فوري عندما تشير إجابة صريحة إلى موقف يتجاوز المتابعة الذاتية، دون تحويل الأداة إلى تقييم خطر سريري أو تشخيص أو نظام مراقبة.",
+  "privacy": {
+    "processing": "client-memory-only",
+    "server_transmission": false,
+    "persistent_storage": false,
+    "analytics_payload_from_answers": false
+  },
+  "interpretation_rules": {
+    "risk_score": false,
+    "diagnostic_claim": false,
+    "validated_risk_assessment_claim": false,
+    "infer_risk_from_total_score": false,
+    "infer_risk_from_unspecified_negative_answers": false,
+    "exact_item_trigger_required": true,
+    "trigger_values_must_be_explicit": true,
+    "alert_disappears_when_trigger_answer_is_removed": true
+  },
+  "clinical_safety_rules": [
+    "لا تستخدم النتيجة لتشجيع مواجهة شخص عنيف أو مسيطر.",
+    "الخطر الحقيقي القائم يسبق التعرض الذاتي أو العمل على ذكريات الصدمة.",
+    "أفكار إيذاء النفس أو الطفل بعد الولادة تتجاوز المتابعة الذاتية وتحتاج مساعدة عاجلة.",
+    "الأعراض الجسدية الجديدة أو المختلفة لا تُنسب تلقائيًا إلى الهلع أو القلق.",
+    "في التعافي، لا يُستنتج وجود خطر فوري من سؤال افتراضي؛ إذا كان الخطر فوريًا بالفعل تُعطى الأولوية للمساعدة المباشرة.",
+    "لا تعرض عتبة رقمية أو درجة خطر أو احتمالًا مئويًا.",
+    "لا ترسل إجابات السلامة إلى الخادم ولا تخزنها في Local Storage أو Session Storage.",
+    "يجب أن يكون التنبيه قابلًا للوصول عبر role=alert وأن يظهر بجوار البند الذي فعّله."
+  ],
+  "initial_signal_scope": {
+    "relationship-safety": 3,
+    "trauma-recovery": 1,
+    "postpartum-support": 2,
+    "recovery-safety": 1,
+    "panic-pattern": 1,
+    "total": 8
+  },
+  "authoritative_sources": [
+    {
+      "name": "WHO — Health care for women subjected to intimate partner violence or sexual violence: a clinical handbook",
+      "url": "https://www.who.int/publications/i/item/WHO-RHR-14.26",
+      "supports": "first-line support, immediate health needs, safety needs and ongoing support"
+    },
+    {
+      "name": "WHO — Clinical management of rape and intimate partner violence in emergencies, training curriculum for health workers (2025)",
+      "url": "https://www.who.int/publications/b/75547",
+      "supports": "survivor-centred LIVES response, safety planning and referral"
+    },
+    {
+      "name": "ACOG — Postpartum Pain Management",
+      "url": "https://www.acog.org/womens-health/faqs/postpartum-pain-management",
+      "supports": "postpartum emergency help for thoughts of hurting self or baby and serious postpartum symptoms"
+    }
+  ],
+  "reviewed": "2026-08-27"
+}
