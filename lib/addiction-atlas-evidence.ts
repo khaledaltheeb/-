@@ -2,6 +2,7 @@ import riskEvidenceV4Json from '@/data/addiction-atlas/risk-evidence-v4.json';
 import riskEvidenceV5Json from '@/data/addiction-atlas/risk-evidence-v5.json';
 import riskEvidenceV6Json from '@/data/addiction-atlas/risk-evidence-v6.json';
 import riskEvidenceV7Json from '@/data/addiction-atlas/risk-evidence-v7.json';
+import riskEvidenceV8Json from '@/data/addiction-atlas/risk-evidence-v8.json';
 import type { EvidenceGrade, RiskKey, RiskValue } from '@/lib/addiction-atlas';
 
 export type AtlasRiskEvidenceDimension = {
@@ -25,7 +26,7 @@ type RiskEvidenceFile = {
   records: AtlasRiskEvidenceRecord[];
 };
 
-const files = [riskEvidenceV4Json, riskEvidenceV5Json, riskEvidenceV6Json, riskEvidenceV7Json] as unknown as RiskEvidenceFile[];
+const files = [riskEvidenceV4Json, riskEvidenceV5Json, riskEvidenceV6Json, riskEvidenceV7Json, riskEvidenceV8Json] as unknown as RiskEvidenceFile[];
 const bySlug = new Map<string, AtlasRiskEvidenceRecord>();
 
 for (const file of files) {
