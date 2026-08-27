@@ -1,0 +1,55 @@
+{
+  "schema_version": "rawafid-addiction-atlas-source-registry-v5",
+  "version": "5.0.0",
+  "updated_on": "2026-08-27",
+  "sources": [
+    {
+      "id": "fda-tramadol-label-2023",
+      "organization": "U.S. Food and Drug Administration (FDA)",
+      "title": "ULTRAM (tramadol hydrochloride) — prescribing information",
+      "publication_year": 2023,
+      "data_years": [2023],
+      "source_type": "official-prescribing-information",
+      "geography": "United States",
+      "url": "https://www.accessdata.fda.gov/drugsatfda_docs/label/2023/020281s040lbl.pdf",
+      "verified_on": "2026-08-27",
+      "notes_ar": "يوثق مخاطر الاختلاجات ومتلازمة السيروتونين وكبت التنفس ومخاطر الأفيونات في tramadol. لا تستخدم معلومات الجرعات التشغيلية في المحتوى العام."
+    },
+    {
+      "id": "samhsa-buprenorphine-2026",
+      "organization": "Substance Abuse and Mental Health Services Administration (SAMHSA)",
+      "title": "What is Buprenorphine? Side Effects, Treatment & Use",
+      "publication_year": 2026,
+      "data_years": [2026],
+      "source_type": "federal-treatment-guidance",
+      "geography": "United States",
+      "url": "https://www.samhsa.gov/substance-use/treatment/options/buprenorphine",
+      "verified_on": "2026-08-27",
+      "notes_ar": "مرجع علاجي رسمي يثبت دور buprenorphine في علاج اضطراب استخدام الأفيونات. يجب فصل مخاطر الدواء نفسه عن فائدته العلاجية عند استخدامه تحت إشراف طبي."
+    },
+    {
+      "id": "samhsa-methadone-2026",
+      "organization": "Substance Abuse and Mental Health Services Administration (SAMHSA)",
+      "title": "What is Methadone? Side Effects, Treatment & Use",
+      "publication_year": 2026,
+      "data_years": [2026],
+      "source_type": "federal-treatment-guidance",
+      "geography": "United States",
+      "url": "https://www.samhsa.gov/substance-use/treatment/options/methadone",
+      "verified_on": "2026-08-27",
+      "notes_ar": "مرجع علاجي رسمي يصف methadone كناهض أفيوني طويل المفعول وعلاج قائم على الدليل لاضطراب استخدام الأفيونات، ويجب ألا تخلط صفحة الخطر بين الاستخدام العلاجي المنضبط وإساءة الاستخدام."
+    },
+    {
+      "id": "nida-synthetic-cannabinoids-current",
+      "organization": "National Institute on Drug Abuse (NIDA)",
+      "title": "Synthetic Cannabinoids (K2/Spice)",
+      "publication_year": null,
+      "data_years": [],
+      "source_type": "federal-scientific-topic-review",
+      "geography": "United States / general clinical science",
+      "url": "https://nida.nih.gov/research-topics/synthetic-cannabinoids-k2spice",
+      "verified_on": "2026-08-27",
+      "notes_ar": "مرجع NIDA للقنبيات الصناعية، يستخدم مع EUDA لإظهار أن تأثيراتها قد تكون أقوى وأقل قابلية للتنبؤ من القنب الطبيعي، دون تعميم خصائص مركب واحد على كل الفئة."
+    }
+  ]
+}
