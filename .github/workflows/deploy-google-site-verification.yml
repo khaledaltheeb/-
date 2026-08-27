@@ -52,7 +52,7 @@ jobs:
             "preview_urls": false,
             "routes": [
               {
-                "pattern": "healthrenewal.org/google644f1f7a8b7aaa2b.html",
+                "pattern": "healthrenewal.org/google644f1f7a8b7aaa2b.html*",
                 "zone_name": "healthrenewal.org"
               }
             ]
