@@ -13,6 +13,10 @@ const banks49to54 = JSON.parse(fs.readFileSync('data/assessment-lab/question-ban
 const banks55to60 = JSON.parse(fs.readFileSync('data/assessment-lab/question-banks.originals-55-60.v1.json', 'utf8'));
 const clarityWave2Banks = JSON.parse(fs.readFileSync('data/assessment-lab/question-banks.clarity-wave2.v1.json', 'utf8'));
 const clarityWave3Banks = JSON.parse(fs.readFileSync('data/assessment-lab/question-banks.clarity-wave3.v1.json', 'utf8'));
+const clarityWave4Banks = JSON.parse(fs.readFileSync('data/assessment-lab/question-banks.clarity-wave4.v1.json', 'utf8'));
+const clarityWave5Banks = JSON.parse(fs.readFileSync('data/assessment-lab/question-banks.clarity-wave5.v1.json', 'utf8'));
+const clarityWave6Banks = JSON.parse(fs.readFileSync('data/assessment-lab/question-banks.clarity-wave6.v1.json', 'utf8'));
+const clarityWave7Banks = JSON.parse(fs.readFileSync('data/assessment-lab/question-banks.clarity-wave7.v1.json', 'utf8'));
 const safetyHardenedBanks = JSON.parse(fs.readFileSync('data/assessment-lab/question-banks.safety-hardening.v1.json', 'utf8'));
 const profilesWave1 = JSON.parse(fs.readFileSync('data/assessment-lab/scientific-profiles.wave1.v1.json', 'utf8')).profiles;
 const profilesCoreList = JSON.parse(fs.readFileSync('data/assessment-lab/scientific-profiles.core-1-12.v1.json', 'utf8')).profiles;
@@ -26,7 +30,20 @@ const profilesCore25to36 = Object.fromEntries(profilesCore25to36List.map((row) =
 const profiles49to60 = Object.fromEntries([...profiles49to54List, ...profiles55to60List].map((row) => [row.slug, row]));
 const banksCore25to36 = { ...banksCore25to28, ...banksCore29to32, ...banksCore33to36 };
 const banks49to60 = { ...banks49to54, ...banks55to60 };
-const banks = { ...banksBase, ...banksCore, ...banksCore13to24, ...banksCore25to36, ...banks49to60, ...clarityWave2Banks, ...clarityWave3Banks, ...safetyHardenedBanks };
+const banks = {
+  ...banksBase,
+  ...banksCore,
+  ...banksCore13to24,
+  ...banksCore25to36,
+  ...banks49to60,
+  ...clarityWave2Banks,
+  ...clarityWave3Banks,
+  ...clarityWave4Banks,
+  ...clarityWave5Banks,
+  ...clarityWave6Banks,
+  ...clarityWave7Banks,
+  ...safetyHardenedBanks,
+};
 const runner = fs.readFileSync('components/assessment-monitor-runner.tsx', 'utf8');
 const catalog = fs.readFileSync('lib/assessment-lab/catalog.ts', 'utf8');
 const fail = (message) => { console.error(`ASSESSMENT SCIENTIFIC QUALITY FAILED: ${message}`); process.exitCode = 1; };
@@ -38,7 +55,13 @@ for (const key of ['construct_definition','intended_population','intended_use','
 if (standard.publication_rules?.validated_label_requires_empirical_validation !== true) fail('validated label must require empirical validation');
 if (standard.publication_rules?.mixed_response_semantics_forbidden !== true) fail('mixed response semantics must remain forbidden');
 if (!catalog.includes("AssessmentResponseKind = 'frequency' | 'degree' | 'yes-no'")) fail('catalog must expose explicit response semantics');
-for (const path of ['question-banks.core-1-12.v1.json','question-banks.core-13-24.v1.json','question-banks.core-25-28.v1.json','question-banks.core-29-32.v1.json','question-banks.core-33-36.v1.json','question-banks.originals-49-54.v1.json','question-banks.originals-55-60.v1.json','question-banks.clarity-wave2.v1.json','question-banks.clarity-wave3.v1.json','question-banks.safety-hardening.v1.json']) {
+for (const path of [
+  'question-banks.core-1-12.v1.json','question-banks.core-13-24.v1.json','question-banks.core-25-28.v1.json',
+  'question-banks.core-29-32.v1.json','question-banks.core-33-36.v1.json','question-banks.originals-49-54.v1.json',
+  'question-banks.originals-55-60.v1.json','question-banks.clarity-wave2.v1.json','question-banks.clarity-wave3.v1.json',
+  'question-banks.clarity-wave4.v1.json','question-banks.clarity-wave5.v1.json','question-banks.clarity-wave6.v1.json',
+  'question-banks.clarity-wave7.v1.json','question-banks.safety-hardening.v1.json',
+]) {
   if (!catalog.includes(path)) fail(`${path} must be loaded before generic fallback`);
 }
 if (!runner.includes("frequency: ['أبدًا', 'نادرًا', 'أحيانًا', 'غالبًا', 'دائمًا تقريبًا']")) fail('frequency response scale missing');
@@ -61,7 +84,8 @@ for (const [slug, questions] of Object.entries(banks)) {
     const question = questions[index];
     if (!question.text || question.text.trim().length < 18) fail(`${slug} contains an underspecified item`);
     if (!monitor.axes.includes(question.axis)) fail(`${slug} question axis ${question.axis} is outside its domain map`);
-    if (!['frequency','degree','yes-no'].includes(question.responseKind ?? 'degree')) fail(`${slug} contains an invalid response semantic`);
+    if (!question.responseKind) fail(`${slug} item ${index + 1} must declare responseKind explicitly`);
+    if (!['frequency','degree','yes-no'].includes(question.responseKind)) fail(`${slug} contains an invalid response semantic`);
     const key = normalized[index];
     const previousOwner = globalQuestionOwners.get(key);
     if (previousOwner && previousOwner !== slug) fail(`exact item duplication across tools: ${previousOwner} and ${slug}`);
@@ -87,11 +111,23 @@ function validateExplicitOverride(overrideBanks, expectedSlugs, label) {
 }
 
 const clarityWave2Slugs = ['mood-daily','sleep-quality','stress-load','caregiver-strain','parenting-stress','family-communication'];
-validateExplicitOverride(clarityWave2Banks, clarityWave2Slugs, 'clarity wave 2');
 const clarityWave3Slugs = ['breakup-recovery','grief-adjustment','emotional-regulation','self-compassion'];
-validateExplicitOverride(clarityWave3Banks, clarityWave3Slugs, 'clarity wave 3');
+const clarityWave4Slugs = ['loneliness','social-support','burnout-risk','daily-function','sensory-overload','executive-function','attention-daily','school-wellbeing','autism-family-load','adhd-family-support'];
+const clarityWave5Slugs = ['learning-difficulty-support','speech-language-support','intellectual-disability-support','down-syndrome-family','cerebral-palsy-family','hearing-support-family','visual-support-family','chronic-illness-family','emotionally-detached','worry-cycle'];
+const clarityWave6Slugs = ['decision-fatigue','procrastination-cycle','perfectionism-pressure','study-overload','work-boundaries','return-to-work-readiness','digital-overload','social-media-impact','doomscrolling-pattern','gaming-balance','screen-sleep-interference','notification-stress'];
+const clarityWave7Slugs = ['anger-escalation','conflict-repair','assertiveness','boundary-setting','help-seeking','problem-solving','rumination-pattern','uncertainty-tolerance','avoidance-cycle','health-worry','social-anxiety-pattern','performance-anxiety'];
 const safetyHardenedSlugs = ['relationship-safety','trauma-recovery','postpartum-support','recovery-safety','panic-pattern','compulsive-pattern'];
+validateExplicitOverride(clarityWave2Banks, clarityWave2Slugs, 'clarity wave 2');
+validateExplicitOverride(clarityWave3Banks, clarityWave3Slugs, 'clarity wave 3');
+validateExplicitOverride(clarityWave4Banks, clarityWave4Slugs, 'clarity wave 4');
+validateExplicitOverride(clarityWave5Banks, clarityWave5Slugs, 'clarity wave 5');
+validateExplicitOverride(clarityWave6Banks, clarityWave6Slugs, 'clarity wave 6');
+validateExplicitOverride(clarityWave7Banks, clarityWave7Slugs, 'clarity wave 7');
 validateExplicitOverride(safetyHardenedBanks, safetyHardenedSlugs, 'safety hardening');
+
+const reviewedSlugs = [...clarityWave2Slugs, ...clarityWave3Slugs, ...clarityWave4Slugs, ...clarityWave5Slugs, ...clarityWave6Slugs, ...clarityWave7Slugs, ...safetyHardenedSlugs];
+if (reviewedSlugs.length !== monitors.length || new Set(reviewedSlugs).size !== monitors.length) fail('all 60 active Rawafid monitors must be covered exactly once by a clarity/safety review layer');
+for (const monitor of monitors) if (!reviewedSlugs.includes(monitor.slug)) fail(`${monitor.slug} lacks final manual item review coverage`);
 
 function validateProfileSet(slugs, profiles, bankSet, label) {
   if (Object.keys(bankSet).length !== slugs.length) fail(`expected ${slugs.length} tailored ${label} banks, found ${Object.keys(bankSet).length}`);
@@ -133,6 +169,6 @@ for (const slug of [...allLegacyCoreSlugs, ...originals49to60Slugs]) if (!banks[
 for (const [slug, profile] of Object.entries(profilesWave1)) if (profile.validation_stage === 'validated') fail(`${slug} cannot be marked validated without empirical psychometric evidence`);
 
 if (!process.exitCode) {
-  console.log(`Assessment scientific quality gate passed: ${Object.keys(banks).length} custom-reviewed banks; sixteen tools now use explicit clarity/safety override banks; exact cross-tool duplicates are forbidden; validated labels remain forbidden without empirical evidence.`);
+  console.log(`Assessment scientific quality gate passed: ${Object.keys(banks).length} effective custom-reviewed banks; all 60 Rawafid monitors have explicit response semantics and final manual clarity/safety review coverage; exact cross-tool duplicates are forbidden; validated labels remain forbidden without empirical evidence.`);
   execFileSync(process.execPath, ['scripts/assessment-lab-scientific-hardening-v2-contract.mjs'], { stdio: 'inherit' });
 }
