@@ -16,13 +16,12 @@ const fail = (message) => {
 };
 
 if (!catalog.includes('question-banks.clarity-wave6.v1.json')) fail('catalog must import clarity wave 6');
-if (!catalog.includes('...(clarityWave6QuestionBankData as Record<string, RawAssessmentQuestion[]>)')) fail('clarity wave 6 must be loaded into effective question banks');
+if (!catalog.includes('...(clarityWave6QuestionBankData as Record<string, AssessmentQuestion[]>)')) fail('clarity wave 6 must be loaded into final runtime question banks');
 
 const actualSlugs = Object.keys(wave);
 if (actualSlugs.length !== expectedSlugs.length) fail(`expected ${expectedSlugs.length} tools, found ${actualSlugs.length}`);
 for (const slug of actualSlugs) if (!expectedSlugs.includes(slug)) fail(`unexpected tool in wave 6: ${slug}`);
 for (const slug of expectedSlugs) if (!wave[slug]) fail(`missing wave 6 tool: ${slug}`);
-
 const globalText = new Map();
 for (const slug of expectedSlugs) {
   const monitor = monitors.find((row) => row.slug === slug);
@@ -41,12 +40,6 @@ for (const slug of expectedSlugs) {
     if (previous && previous !== slug) fail(`exact cross-tool duplicate: ${previous} and ${slug}`);
     globalText.set(normalized, slug);
   }
-  for (const axis of monitor.axes) {
-    const count = questions.filter((question) => question.axis === axis).length;
-    if (count !== 4) fail(`${slug}/${axis} must retain exactly four items`);
-  }
+  for (const axis of monitor.axes) if (questions.filter((question) => question.axis === axis).length !== 4) fail(`${slug}/${axis} must retain exactly four items`);
 }
-
-if (!process.exitCode) {
-  console.log('Assessment clarity wave 6 passed: 12 tools, 192 manually reviewed items, explicit response semantics, four items per published axis, no exact duplicates.');
-}
+if (!process.exitCode) console.log('Assessment clarity wave 6 passed: 12 tools, 192 manually reviewed items, explicit response semantics, four items per published axis, no exact duplicates.');
