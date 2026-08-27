@@ -3,7 +3,7 @@
 > **INTERNAL AGENT DOCUMENT — NOT SITE CONTENT**
 > Repository: `khaledaltheeb/-`
 > Sector: Addiction / الإدمان
-> Status: authoritative handoff brief. Preserve this document and `docs/.addiction-atlas-continuity.md` when extending the atlas.
+> Status: authoritative handoff brief. Preserve this document, `docs/.addiction-atlas-continuity.md`, and `docs/.addiction-atlas-production-state.md` when extending the atlas. The production-state file is authoritative for the latest proven counts and release evidence.
 
 ## 1. Mission
 Build the **الأطلس العربي التفاعلي للمواد ذات التأثير النفساني والإدمان** as a world-class Arabic public-health, clinical-education and research knowledge system. It is not a shallow list or a single danger score. It must function as a structured evidence database, interactive search/filter/sort interface, substance encyclopedia, compare-two-substances tool, curated SEO comparison library, reviewed interaction registry, epidemiology/mortality evidence surface and printable professional reference.
@@ -56,7 +56,7 @@ The atlas must progressively maintain evidence at the **risk-axis level**, not o
 
 `U` means the evidence is insufficient for a responsible ordinal estimate and therefore the score must stay `null`.
 
-Production-proven minimum after wave 6: **21 substances × 8 axes = 168 reviewed evidence cells**. Wave 7 release target: **35 substances × 8 axes = 280 reviewed evidence cells**. Do not regress the production-proven floor, and do not claim the wave 7 target is live before deployment verification succeeds.
+Current production-proven minimum after wave 7: **35 substances × 8 axes = 280 reviewed evidence cells**. Do not regress this floor. Historical wave 6 counts of 21 substances / 168 cells remain release history only.
 
 Substance pages with reviewed axis evidence must expose the evidence behind each axis, including named source links. Pages without claim-level review must state that clearly rather than silently inheriting stronger certainty.
 
@@ -83,7 +83,7 @@ Every interaction record must identify:
 
 Absence of a pair from the registry never means that the combination is safe. Class-level warnings must not be described as pair-specific evidence.
 
-Production-proven minimum after wave 6: at least **8 reviewed interactions**. Wave 7 target: at least **11**, adding reviewed carisoprodol interactions with fentanyl, diazepam and alcohol while preserving all prior records.
+Current production-proven minimum after wave 7: **11 reviewed interactions**, including the reviewed carisoprodol interactions with fentanyl, diazepam and alcohol while preserving all prior records.
 
 ## 8. Epidemiology and mortality
 Every numerical record must preserve year, geography, population/scope where relevant, metric definition and resolvable source ID. Never transfer a class-level prevalence number to an individual substance without explicit mapping. Never present US-only surveillance as global.
@@ -100,26 +100,21 @@ Runtime code must not fetch the old repository or a moving source `main` branch.
 
 The historical vendoring script is allowed to refresh only legacy pinned files with known hashes. It MUST NOT overwrite repository-owned extension manifests `substance-waves.json` or `risk-evidence-manifest.json`. Extension waves, comparison extensions, interactions, source registries and statistics files are additive local layers.
 
-Current production-proven baseline before wave 7:
-- 57 substance/family records.
-- 6 registered substance waves.
-- >=34 editorial indexable comparison pages.
-- 8 independent risk dimensions.
-- >=8 reviewed interactions.
-- 21 substances / 168 axis-evidence cells.
-
-Wave 7 release candidate target:
+### Current production-proven baseline — wave 7
 - 71 substance/family records.
 - 7 registered substance waves.
-- >=37 editorial indexable comparison pages.
-- >=11 reviewed interactions.
+- 37 editorial indexable comparison pages.
+- 8 independent risk dimensions.
+- 11 reviewed interactions.
 - 35 substances / 280 axis-evidence cells.
-- >=9 epidemiology/surveillance records.
-- >=8 mortality records.
+- 9 epidemiology/surveillance records.
+- 8 mortality records.
 
 Wave 7 new substances are: `7-hydroxymitragynine`, `phenibut`, `hexahydrocannabinol-hhc`, `carisoprodol`, `protonitazepyne`, `metonitazepyne`, `etonitazepipne`, `n-desethyl-isotonitazene`, `3-oh-pcp`, `n-ethylheptedrone`, `isotonitazepyne`, `n-desethyl-etonitazene`, `mdmb-fubinaca`, and `cychlorphine`.
 
 `cychlorphine` is an early-warning item based on an EUDA initial report. Until stronger evidence exists, all eight risk scores must remain `null` and all eight axis grades `U`; the fact that it is classified as an emerging opioid is not enough to manufacture numeric scores.
+
+The current production proof, exact release run IDs and deployment notes live in `docs/.addiction-atlas-production-state.md`. Future work starts from that production floor, not from historical 54/57-substance checkpoints.
 
 ## 10. Required publication surfaces
 - `/addiction/`
@@ -144,5 +139,10 @@ All published pages remain `index,follow` unless there is a specific documented 
 `npm run addiction-atlas:validate` is mandatory. It must validate record counts, slugs, eight-axis completeness, value ranges, source resolution, interaction integrity, statistics context, axis-level evidence traceability, uncertainty/null semantics, duplicate comparison/interaction pairs and protection against legacy-manifest overwrite.
 
 Repository TypeScript, lint, architecture/preservation checks, OpenNext build and Wrangler dry-run must pass before staging is treated as verified. Production must not be described as updated until deployment and live checks complete.
+
+Wave 7 passed the release contract with:
+`71 substances | 37 comparisons | 11 interactions | 35 axis-evidence substances / 280 cells | 8 risk dimensions | 9 epidemiology | 8 mortality`.
+
+The wave 7 runtime release was deployed to Cloudflare from commit `0ecec5dc702d8679aa8b510e6da5660948bcf9cc`. The marker-by-marker stabilized live diagnostic and the permanent independent production verifier both subsequently passed. This makes wave 7 the current proven production baseline.
 
 If another sector breaks a repository-wide gate, identify it precisely and do not misattribute it to the atlas. Do not silently weaken atlas contracts to make unrelated CI failures disappear.
