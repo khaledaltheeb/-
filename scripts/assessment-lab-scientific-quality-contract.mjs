@@ -3,7 +3,8 @@ import { execFileSync } from 'node:child_process';
 
 const standard = JSON.parse(fs.readFileSync('data/assessment-lab/scientific-quality-standard.v1.json', 'utf8'));
 const monitors = JSON.parse(fs.readFileSync('data/assessment-lab/monitors.v1.json', 'utf8'));
-const banksBase = JSON.parse(fs.readFileSync('data/assessment-lab/question-banks.v1.json', 'utf8'));
+
+// Historical tailored banks remain available for dossier/traceability checks only.
 const banksCore = JSON.parse(fs.readFileSync('data/assessment-lab/question-banks.core-1-12.v1.json', 'utf8'));
 const banksCore13to24 = JSON.parse(fs.readFileSync('data/assessment-lab/question-banks.core-13-24.v1.json', 'utf8'));
 const banksCore25to28 = JSON.parse(fs.readFileSync('data/assessment-lab/question-banks.core-25-28.v1.json', 'utf8'));
@@ -11,6 +12,8 @@ const banksCore29to32 = JSON.parse(fs.readFileSync('data/assessment-lab/question
 const banksCore33to36 = JSON.parse(fs.readFileSync('data/assessment-lab/question-banks.core-33-36.v1.json', 'utf8'));
 const banks49to54 = JSON.parse(fs.readFileSync('data/assessment-lab/question-banks.originals-49-54.v1.json', 'utf8'));
 const banks55to60 = JSON.parse(fs.readFileSync('data/assessment-lab/question-banks.originals-55-60.v1.json', 'utf8'));
+
+// These seven layers are the only question banks permitted at runtime.
 const clarityWave2Banks = JSON.parse(fs.readFileSync('data/assessment-lab/question-banks.clarity-wave2.v1.json', 'utf8'));
 const clarityWave3Banks = JSON.parse(fs.readFileSync('data/assessment-lab/question-banks.clarity-wave3.v1.json', 'utf8'));
 const clarityWave4Banks = JSON.parse(fs.readFileSync('data/assessment-lab/question-banks.clarity-wave4.v1.json', 'utf8'));
@@ -18,6 +21,7 @@ const clarityWave5Banks = JSON.parse(fs.readFileSync('data/assessment-lab/questi
 const clarityWave6Banks = JSON.parse(fs.readFileSync('data/assessment-lab/question-banks.clarity-wave6.v1.json', 'utf8'));
 const clarityWave7Banks = JSON.parse(fs.readFileSync('data/assessment-lab/question-banks.clarity-wave7.v1.json', 'utf8'));
 const safetyHardenedBanks = JSON.parse(fs.readFileSync('data/assessment-lab/question-banks.safety-hardening.v1.json', 'utf8'));
+
 const profilesWave1 = JSON.parse(fs.readFileSync('data/assessment-lab/scientific-profiles.wave1.v1.json', 'utf8')).profiles;
 const profilesCoreList = JSON.parse(fs.readFileSync('data/assessment-lab/scientific-profiles.core-1-12.v1.json', 'utf8')).profiles;
 const profilesCore13to24List = JSON.parse(fs.readFileSync('data/assessment-lab/scientific-profiles.core-13-24.v1.json', 'utf8')).profiles;
@@ -30,12 +34,8 @@ const profilesCore25to36 = Object.fromEntries(profilesCore25to36List.map((row) =
 const profiles49to60 = Object.fromEntries([...profiles49to54List, ...profiles55to60List].map((row) => [row.slug, row]));
 const banksCore25to36 = { ...banksCore25to28, ...banksCore29to32, ...banksCore33to36 };
 const banks49to60 = { ...banks49to54, ...banks55to60 };
-const banks = {
-  ...banksBase,
-  ...banksCore,
-  ...banksCore13to24,
-  ...banksCore25to36,
-  ...banks49to60,
+
+const finalReviewedBanks = {
   ...clarityWave2Banks,
   ...clarityWave3Banks,
   ...clarityWave4Banks,
@@ -44,6 +44,7 @@ const banks = {
   ...clarityWave7Banks,
   ...safetyHardenedBanks,
 };
+
 const runner = fs.readFileSync('components/assessment-monitor-runner.tsx', 'utf8');
 const catalog = fs.readFileSync('lib/assessment-lab/catalog.ts', 'utf8');
 const fail = (message) => { console.error(`ASSESSMENT SCIENTIFIC QUALITY FAILED: ${message}`); process.exitCode = 1; };
@@ -55,28 +56,47 @@ for (const key of ['construct_definition','intended_population','intended_use','
 if (standard.publication_rules?.validated_label_requires_empirical_validation !== true) fail('validated label must require empirical validation');
 if (standard.publication_rules?.mixed_response_semantics_forbidden !== true) fail('mixed response semantics must remain forbidden');
 if (!catalog.includes("AssessmentResponseKind = 'frequency' | 'degree' | 'yes-no'")) fail('catalog must expose explicit response semantics');
-for (const path of [
-  'question-banks.core-1-12.v1.json','question-banks.core-13-24.v1.json','question-banks.core-25-28.v1.json',
-  'question-banks.core-29-32.v1.json','question-banks.core-33-36.v1.json','question-banks.originals-49-54.v1.json',
-  'question-banks.originals-55-60.v1.json','question-banks.clarity-wave2.v1.json','question-banks.clarity-wave3.v1.json',
-  'question-banks.clarity-wave4.v1.json','question-banks.clarity-wave5.v1.json','question-banks.clarity-wave6.v1.json',
-  'question-banks.clarity-wave7.v1.json','question-banks.safety-hardening.v1.json',
-]) {
-  if (!catalog.includes(path)) fail(`${path} must be loaded before generic fallback`);
+
+const runtimeBankPaths = [
+  'question-banks.clarity-wave2.v1.json',
+  'question-banks.clarity-wave3.v1.json',
+  'question-banks.clarity-wave4.v1.json',
+  'question-banks.clarity-wave5.v1.json',
+  'question-banks.clarity-wave6.v1.json',
+  'question-banks.clarity-wave7.v1.json',
+  'question-banks.safety-hardening.v1.json',
+];
+for (const path of runtimeBankPaths) {
+  if (!catalog.includes(path)) fail(`${path} must be loaded as a final reviewed runtime bank`);
 }
+for (const forbiddenRuntimePath of [
+  'question-banks.v1.json',
+  'question-banks.core-1-12.v1.json',
+  'question-banks.core-13-24.v1.json',
+  'question-banks.core-25-28.v1.json',
+  'question-banks.core-29-32.v1.json',
+  'question-banks.core-33-36.v1.json',
+  'question-banks.originals-49-54.v1.json',
+  'question-banks.originals-55-60.v1.json',
+]) {
+  if (catalog.includes(forbiddenRuntimePath)) fail(`${forbiddenRuntimePath} is historical and must not be loaded by the runtime catalog`);
+}
+
 if (!runner.includes("frequency: ['أبدًا', 'نادرًا', 'أحيانًا', 'غالبًا', 'دائمًا تقريبًا']")) fail('frequency response scale missing');
 if (!runner.includes("degree: ['إطلاقًا', 'بدرجة بسيطة', 'بدرجة متوسطة', 'بدرجة كبيرة', 'بدرجة كبيرة جدًا']")) fail('degree response scale missing');
 if (!runner.includes("'yes-no': ['لا', 'إلى حد ما', 'نعم']")) fail('yes/no response scale missing');
 
-for (const monitor of monitors) {
-  if (!banks[monitor.slug]) fail(`${monitor.slug} cannot fall back to generic question generation`);
+if (Object.keys(finalReviewedBanks).length !== monitors.length) {
+  fail(`expected exactly ${monitors.length} final reviewed runtime banks, found ${Object.keys(finalReviewedBanks).length}`);
 }
-if (Object.keys(banks).length !== monitors.length) fail(`expected exactly ${monitors.length} custom-reviewed banks, found ${Object.keys(banks).length}`);
+for (const monitor of monitors) {
+  if (!finalReviewedBanks[monitor.slug]) fail(`${monitor.slug} lacks a final reviewed runtime bank`);
+}
 
 const globalQuestionOwners = new Map();
-for (const [slug, questions] of Object.entries(banks)) {
+for (const [slug, questions] of Object.entries(finalReviewedBanks)) {
   const monitor = monitors.find((row) => row.slug === slug);
-  if (!monitor) fail(`question bank has no monitor: ${slug}`);
+  if (!monitor) fail(`final question bank has no monitor: ${slug}`);
   if (!Array.isArray(questions) || questions.length !== 16) fail(`${slug} must have exactly 16 reviewed items in its current v1 design`);
   const normalized = questions.map((q) => q.text.trim().replace(/\s+/g, ' '));
   if (new Set(normalized).size !== normalized.length) fail(`${slug} contains duplicate item text`);
@@ -136,7 +156,7 @@ function validateProfileSet(slugs, profiles, bankSet, label) {
     const monitor = monitors.find((row) => row.slug === slug);
     const profile = profiles[slug];
     if (!profile) { fail(`missing scientific ${label} profile ${slug}`); continue; }
-    if (!bankSet[slug]) fail(`missing tailored ${label} question bank ${slug}`);
+    if (!bankSet[slug]) fail(`missing tailored ${label} historical bank ${slug}`);
     const construct = profile.construct ?? profile.construct_definition;
     if (!construct || construct.trim().length < 35) fail(`${slug} construct definition is too weak`);
     if (!profile.intended_population || !profile.intended_use) fail(`${slug} intended population/use missing`);
@@ -164,11 +184,10 @@ const originals49to60Slugs = ['anger-escalation','conflict-repair','assertivenes
 validateProfileSet(originals49to60Slugs, profiles49to60, banks49to60, 'originals-49-60');
 
 const allLegacyCoreSlugs = [...coreSlugs, ...core13to24Slugs, ...core25to36Slugs];
-if (allLegacyCoreSlugs.length !== 36 || new Set(allLegacyCoreSlugs).size !== 36) fail('all 36 legacy tools must be uniquely covered by scientific dossiers and tailored banks');
-for (const slug of [...allLegacyCoreSlugs, ...originals49to60Slugs]) if (!banks[slug]) fail(`${slug} cannot fall back to generic question generation`);
+if (allLegacyCoreSlugs.length !== 36 || new Set(allLegacyCoreSlugs).size !== 36) fail('all 36 legacy tools must be uniquely covered by scientific dossiers and historical tailored banks');
 for (const [slug, profile] of Object.entries(profilesWave1)) if (profile.validation_stage === 'validated') fail(`${slug} cannot be marked validated without empirical psychometric evidence`);
 
 if (!process.exitCode) {
-  console.log(`Assessment scientific quality gate passed: ${Object.keys(banks).length} effective custom-reviewed banks; all 60 Rawafid monitors have explicit response semantics and final manual clarity/safety review coverage; exact cross-tool duplicates are forbidden; validated labels remain forbidden without empirical evidence.`);
+  console.log(`Assessment scientific quality gate passed: ${Object.keys(finalReviewedBanks).length} final reviewed runtime banks; all 60 Rawafid monitors have explicit response semantics and final manual clarity/safety review coverage; historical banks are excluded from runtime; exact cross-tool duplicates are forbidden; validated labels remain forbidden without empirical evidence.`);
   execFileSync(process.execPath, ['scripts/assessment-lab-scientific-hardening-v2-contract.mjs'], { stdio: 'inherit' });
 }
