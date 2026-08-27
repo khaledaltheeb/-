@@ -1,0 +1,26 @@
+{
+  "schema_version": "rawafid-addiction-atlas-mortality-v3",
+  "version": "3.0.0",
+  "updated_on": "2026-08-27",
+  "rules_ar": [
+    "هذا السجل يخص الوفيات المبلغ عنها داخل بيانات مراكز السموم ولا يمثل مجموع وفيات الفينيبيوت في الولايات المتحدة.",
+    "وجود مادة في بلاغ وفاة لا يثبت دائماً أنها السبب الوحيد، وخاصة عند وجود مواد أخرى.",
+    "لا يحول العدد التراكمي إلى معدل وفيات سكاني دون مقام مناسب."
+  ],
+  "records": [
+    {
+      "id": "us-phenibut-reported-deaths-2009-2019",
+      "scope_type": "substance",
+      "scope_slug": "phenibut",
+      "metric_type": "reported_deaths_among_poison_center_exposures",
+      "value": 3,
+      "qualifier": "cumulative_2009_2019",
+      "unit": "reported_deaths",
+      "geography": "United States",
+      "year": 2019,
+      "status": "poison-center-surveillance-not-population-mortality",
+      "definition_ar": "وردت ثلاث وفيات ضمن بلاغات التعرض للفينيبيوت إلى مراكز السموم الأمريكية خلال 2009–2019. هذا ليس إحصاءً وطنياً شاملاً للوفيات ولا يثبت أن الفينيبيوت كان العامل الوحيد في كل وفاة.",
+      "source_id": "cdc-phenibut-mmwr-2020"
+    }
+  ]
+}

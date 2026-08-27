@@ -1,0 +1,44 @@
+{
+  "schema_version": "rawafid-addiction-atlas-interactions-v3",
+  "version": "3.0.0",
+  "updated_on": "2026-08-27",
+  "policy_ar": "هذه الموجة تضيف تفاعلات فقط عندما يذكر المرجع المؤسسي الجمع أو الفئات ذات الصلة بصورة صريحة. عدم وجود سجل لأي زوج آخر يعني غير مراجع بعد، وليس آمناً.",
+  "records": [
+    {
+      "id": "carisoprodol-fentanyl",
+      "a": "carisoprodol",
+      "b": "fentanyl",
+      "severity": "critical",
+      "evidence_grade": "A",
+      "evidence_scope": "class-to-substance",
+      "mechanism_ar": "كاريسوبرودول مثبط مركزي، والفنتانيل أفيون قوي. مراجعة WHO تشير إلى تفاقم التهدئة مع الأفيونات، وتحذيرات FDA للفئة الأفيونية تؤكد خطورة الجمع مع مثبطات الجهاز العصبي المركزي.",
+      "risk_ar": "قد يزداد النعاس الشديد وفقدان الوعي وكبت التنفس والغيبوبة والوفاة. لا توجد في الأطلس كمية تجعل هذا الجمع آمناً.",
+      "emergency_ar": "عدم الاستجابة أو بطء/توقف التنفس حالة طارئة. اطلب خدمات الطوارئ فوراً، ويستخدم النالوكسون عند الاشتباه بمكوّن أفيوني وفق الإرشادات المحلية مع استمرار دعم التنفس والرعاية الطبية.",
+      "source_urls": ["https://www.who.int/publications/i/item/9789240107649", "https://www.fda.gov/drugs/information-drug-class/new-safety-measures-announced-opioid-analgesics-prescription-opioid-cough-products-and-benzodiazepines"]
+    },
+    {
+      "id": "carisoprodol-diazepam",
+      "a": "carisoprodol",
+      "b": "diazepam",
+      "severity": "high",
+      "evidence_grade": "A",
+      "evidence_scope": "class-to-substance",
+      "mechanism_ar": "كاريسوبرودول والديازيبام كلاهما يثبط الجهاز العصبي المركزي. توثق مراجعة WHO أن البنزوديازيبينات قد تزيد التهدئة المرتبطة بكاريسوبرودول.",
+      "risk_ar": "قد يزداد النعاس والدوخة وضعف التنسيق واضطراب الوعي، وقد تصبح السمية أخطر في وجود مثبطات إضافية أو عوامل تنفسية.",
+      "emergency_ar": "فقدان الوعي أو صعوبة التنفس أو الاختلاج يستلزم رعاية طارئة. لا تُدار الأعراض الشديدة بالمراقبة المنزلية وحدها.",
+      "source_urls": ["https://www.who.int/publications/i/item/9789240107649", "https://www.fda.gov/drugs/drug-safety-and-availability/fda-requiring-boxed-warning-updated-improve-safe-use-benzodiazepine-drug-class"]
+    },
+    {
+      "id": "carisoprodol-alcohol",
+      "a": "carisoprodol",
+      "b": "alcohol",
+      "severity": "high",
+      "evidence_grade": "A",
+      "evidence_scope": "direct-pair",
+      "mechanism_ar": "الكحول وكاريسوبرودول لهما تأثيرات مثبطة مركزية، وتذكر مراجعة WHO زيادة التهدئة عند المشاركة مع الكحول.",
+      "risk_ar": "قد يزداد اضطراب الوعي وضعف التنسيق والتهدئة الشديدة ومضاعفات التسمم. لا يحدد الأطلس عتبة شرب تجعل الجمع آمناً.",
+      "emergency_ar": "عدم القدرة على الإيقاظ أو التنفس البطيء/الصعب أو الاختلاج يستلزم خدمات الطوارئ فوراً.",
+      "source_urls": ["https://www.who.int/publications/i/item/9789240107649"]
+    }
+  ]
+}
