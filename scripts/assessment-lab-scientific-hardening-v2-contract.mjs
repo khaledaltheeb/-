@@ -5,6 +5,7 @@ const standard = JSON.parse(fs.readFileSync('data/assessment-lab/scientific-qual
 const runner = fs.readFileSync('components/assessment-monitor-runner.tsx', 'utf8');
 const detail = fs.readFileSync('app/assessment-lab/[slug]/page.tsx', 'utf8');
 const registry = fs.readFileSync('lib/assessment-lab/scientific-profiles.ts', 'utf8');
+const catalog = fs.readFileSync('lib/assessment-lab/catalog.ts', 'utf8');
 const fail = (message) => { console.error(`ASSESSMENT SCIENTIFIC HARDENING V2 FAILED: ${message}`); process.exitCode = 1; };
 
 const requiredStandardFields = [
@@ -26,6 +27,35 @@ if (!detail.includes('referencePeriod={profile!.referencePeriod}')) fail('runner
 if (!detail.includes('profile!.scientificReferences')) fail('published tool page must expose scientific references');
 if (!detail.includes('profile!.validationStage')) fail('published tool page must expose validation stage');
 if (!detail.includes('profile!.prohibitedUses')) fail('published tool page must expose prohibited uses');
+
+const finalRuntimeBanks = [
+  'question-banks.clarity-wave2.v1.json',
+  'question-banks.clarity-wave3.v1.json',
+  'question-banks.clarity-wave4.v1.json',
+  'question-banks.clarity-wave5.v1.json',
+  'question-banks.clarity-wave6.v1.json',
+  'question-banks.clarity-wave7.v1.json',
+  'question-banks.safety-hardening.v1.json',
+];
+const historicalBanks = [
+  'question-banks.v1.json',
+  'question-banks.core-1-12.v1.json',
+  'question-banks.core-13-24.v1.json',
+  'question-banks.core-25-28.v1.json',
+  'question-banks.core-29-32.v1.json',
+  'question-banks.core-33-36.v1.json',
+  'question-banks.originals-49-54.v1.json',
+  'question-banks.originals-55-60.v1.json',
+];
+for (const path of finalRuntimeBanks) {
+  if (!catalog.includes(path)) fail(`catalog.ts is missing final reviewed runtime bank ${path}`);
+}
+for (const path of historicalBanks) {
+  if (catalog.includes(path)) fail(`catalog.ts must not load historical bank ${path}`);
+}
+if (catalog.includes('function questionsForAxis')) fail('generic question generation must remain removed');
+if (catalog.includes('function inferResponseKind')) fail('response semantics must remain explicit rather than inferred');
+if (!catalog.includes('Missing tailored Assessment Lab question bank')) fail('runtime must fail closed when a reviewed bank is missing');
 
 const registryRequirements = [
   'constructDefinition','intendedPopulation','intendedUse','prohibitedUses','referencePeriod','domains',
@@ -67,4 +97,4 @@ const uniqueSlugs = new Set(slugs);
 if (uniqueSlugs.size !== 60) fail(`expected 60 unique scientific profiles, found ${uniqueSlugs.size}`);
 for (const monitor of monitors) if (!uniqueSlugs.has(monitor.slug)) fail(`published monitor ${monitor.slug} has no scientific profile`);
 
-if (!process.exitCode) console.log('Assessment scientific hardening v2 passed: 60/60 published monitors use an explicit scientific dossier, recall periods are profile-driven, validation limitations are public, and the 17-field standard remains intact.');
+if (!process.exitCode) console.log('Assessment scientific hardening v2 passed: 60/60 published monitors use an explicit scientific dossier; runtime is locked to final reviewed banks; historical banks cannot ship; recall periods are profile-driven; validation limitations remain public; and the 17-field standard remains intact.');
