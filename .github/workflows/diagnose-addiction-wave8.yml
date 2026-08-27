@@ -1,0 +1,47 @@
+name: Diagnose Addiction Atlas Wave 8
+
+on:
+  push:
+    branches:
+      - addiction-atlas-wave8-20260827
+    paths:
+      - '.github/workflows/diagnose-addiction-wave8.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Print substances missing axis evidence
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFile } from 'node:fs/promises';
+          const root = 'data/addiction-atlas';
+          const j = async (f) => JSON.parse(await readFile(`${root}/${f}`, 'utf8'));
+          const manifest = await j('substance-waves.json');
+          const waveFiles = manifest.waves.map((p) => p.split('/').pop());
+          const waves = await Promise.all(waveFiles.map(j));
+          const substances = waves.flatMap((w) => w.substances || []);
+          const riskManifest = await j('risk-evidence-manifest.json');
+          const riskFiles = riskManifest.waves.map((p) => p.split('/').pop());
+          const riskWaves = await Promise.all(riskFiles.map(j));
+          const covered = new Set(riskWaves.flatMap((w) => w.records || []).map((r) => r.substance_slug));
+          const missing = substances.filter((s) => !covered.has(s.slug)).map((s) => ({
+            slug: s.slug,
+            ar: s.display_name_ar,
+            en: s.display_name_en,
+            class_en: s.class_en,
+            evidence_grade: s.evidence_grade,
+            risk: s.risk,
+            sources: s.source_urls
+          }));
+          console.log(`TOTAL=${substances.length} COVERED=${covered.size} MISSING=${missing.length}`);
+          for (const row of missing) console.log(JSON.stringify(row));
+          NODE
