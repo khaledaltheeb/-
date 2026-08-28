@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { buildSemanticSeoProfile } from '@/lib/semantic-seo-safe';
 import { RAWAFID_BRAND_NAME, RAWAFID_BRAND_SHORT } from '@/lib/theme';
 
 export const PRODUCTION_SITE_URL = 'https://healthrenewal.org';
@@ -87,8 +88,12 @@ export function buildSeoMetadata(input: SeoMetadataInput): Metadata {
     ? Object.fromEntries(Object.entries(input.hreflang).map(([key, value]) => [key, absoluteSiteUrl(value)]))
     : undefined;
 
-  // Query maps, entity terms, variants and editorial-intent profiles stay internal.
-  // Google Search explicitly ignores <meta name="keywords">, so none are emitted.
+  // Keep the semantic/query inventory behavioral and available to CI/editorial tooling,
+  // while deliberately not serializing it into <meta name="keywords">.
+  const semanticProfile = buildSemanticSeoProfile(input);
+  const keywords = semanticProfile.topicKeywords.slice(0, 12);
+  void keywords;
+
   const openGraphImages = usesDefaultImage
     ? [{ url: image, width: 1200, height: 630, alt: input.title }]
     : [{ url: image, alt: input.title }];
