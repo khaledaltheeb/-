@@ -35,10 +35,10 @@ public final class MessageBankTest {
     }
 
     @Test public void chooserAvoidsRecentlyUsedMessagesWhenAlternativesExist(){
-        List<String> pool=Arrays.asList("رسالة أولى طويلة للاختبار", "رسالة ثانية طويلة للاختبار", "رسالة ثالثة طويلة للاختبار");
+        List<String> pool=Arrays.asList("first long test message", "second long test message", "third long test message");
         Set<Integer> recent=new HashSet<>();
         recent.add(pool.get(0).hashCode());
         recent.add(pool.get(1).hashCode());
-        assertEquals(pool.get(2),CompanionWorker.chooseNonRepeating(pool,recent));
+        assertEquals(pool.get(2),MessageSelector.chooseNonRepeating(pool,recent));
     }
 }
