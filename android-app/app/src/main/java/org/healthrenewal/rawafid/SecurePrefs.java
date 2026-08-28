@@ -169,6 +169,13 @@ public final class SecurePrefs {
     public void markLibraryOpened(String path){ setLibraryItems(LocalLibrary.markOpened(getLibraryItems(),path,System.currentTimeMillis())); }
     public void clearLibrary(){ putString("library_items",""); }
 
+    // Symptom journal: observations reported by the user, kept local and encrypted.
+    public List<SymptomJournal.Entry> getSymptomEntries(){ return SymptomJournal.decode(getString("symptom_journal",""); }
+    public void setSymptomEntries(List<SymptomJournal.Entry> entries){ putString("symptom_journal",SymptomJournal.encode(entries)); }
+    public void saveSymptomEntry(SymptomJournal.Entry entry){ if(entry!=null&&entry.isValid()) setSymptomEntries(SymptomJournal.upsert(getSymptomEntries(),entry)); }
+    public void removeSymptomEntry(String id){ setSymptomEntries(SymptomJournal.remove(getSymptomEntries(),id)); }
+    public void clearSymptomJournal(){ putString("symptom_journal",""); }
+
     public void clearSensitiveData(){ prefs.edit().clear().apply(); }
     private static int clamp(int value,int min,int max){ return Math.max(min,Math.min(max,value)); }
 }
