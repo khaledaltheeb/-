@@ -1,6 +1,6 @@
 # Rawafid Outreach Suppressions
 
-Internal operational registry for Rawafid correspondence agents. This file is not public-facing content.
+Internal operational registry for Rawafid correspondence agents. This file is not public-facing site content.
 
 ## Mandatory rule
 Before any new outreach, search this registry in addition to Hostinger `Sent` history. Do not send new outreach to an exact suppressed address. Where the reason indicates a whole domain is invalid or explicitly do-not-contact, suppress the domain as well. A different verified public address at the same organization may be used only when the failure is clearly address-specific and a legitimate new route exists; organization-level Sent deduplication still applies.
@@ -9,6 +9,7 @@ Before any new outreach, search this registry in addition to Hostinger `Sent` hi
 
 | Date | Address / route | Scope | Reason | Action |
 |---|---|---|---|---|
+| 2026-08-28 | `contact@aseanmeded.org` | exact address | Permanent SMTP 550: mailbox does not exist | Do not retry; require a newly verified public institutional route |
 | 2026-08-28 | `info@autism.com.qa` | exact address / unresolved domain route | Permanent DNS / domain resolution failure after outreach | Do not retry; use only a newly verified official route if one appears |
 | 2026-08-28 | `macroscopesupport@service.usepylon.com` | exact support alias | DNS / requested record unavailable | Do not use alias; `contact@macroscope.com` may be used only for a legitimate future need and after Sent dedupe |
 | 2026-08-28 | `eira@health.sdu.dk` | exact address | Permanent SMTP 550 rejection | Do not retry |
