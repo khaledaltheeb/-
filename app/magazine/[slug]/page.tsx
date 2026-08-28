@@ -26,10 +26,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     follow: record.robots_follow,
     type: 'article',
     publishedTime: record.published_at,
-    modifiedTime: record.updated_at,
-    authors: [{ name: record.author_display_name || 'منصة روافد' }],
-    keywords: [record.primary_keyword, ...(record.secondary_keywords ?? []), ...(record.semantic_terms ?? [])].filter((value): value is string => Boolean(value)),
-    hreflang: { ar: path, 'x-default': path },
+    authors: record.author_display_name ? [{ name: record.author_display_name }] : undefined,
   });
 }
 
