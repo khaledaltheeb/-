@@ -16,7 +16,7 @@ import { publicContentHref, publicContentTypeLabel } from '@/lib/public-content-
 export const dynamic = 'force-dynamic';
 type Params = Promise<{ slug: string }>;
 type SearchParams = Promise<{ page?: string | string[] }>;
-type Sector = { id: string; slug: string; name_ar: string; description: string | null; accent: string | null; seo_title: string | null; seo_description: string | null; editorial_content_id: string | null };
+type Sector = { id: string; slug: string; name_ar: string; description: string | null; accent: string | null; seo_title: string | null; seo_description: string | null; editorial_content_id: string | null; metadata: Record<string, unknown> | null };
 type Category = { id: string; slug: string; name_ar: string; description: string | null; parent_id: string | null; sort_order: number };
 type PublishedItem = { id: string; slug: string; title: string; excerpt: string | null; content_type: string; published_at: string | null; canonical_url: string | null };
 type EditorialContent = { id: string; title: string; excerpt: string | null; body_json: unknown; body_text: string | null };
@@ -27,9 +27,27 @@ const pagePath = (slug: string, page: number) => `/sectors/${slug}${page > 1 ? `
 const pageHref = (slug: string, page: number) => `${pagePath(slug, page)}#sector-content`;
 const legacyRoute = (slug: string) => `/sectors/${slug}/`;
 
+function metadataTerms(metadata: Record<string, unknown> | null, key: string) {
+  const value = metadata?.[key];
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter((item): item is string => typeof item === 'string')
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function sectorKeywords(sector: Sector) {
+  return [...new Set([
+    sector.name_ar,
+    ...metadataTerms(sector.metadata, 'seo_keywords'),
+    ...metadataTerms(sector.metadata, 'semantic_terms'),
+    'منصة روافد',
+  ])].slice(0, 40);
+}
+
 async function getSector(slug: string): Promise<Sector | null> {
   const supabase = await createClient();
-  const { data } = await supabase.from('sectors').select('id,slug,name_ar,description,accent,seo_title,seo_description,editorial_content_id').eq('slug', slug).eq('is_active', true).eq('visibility', 'public').maybeSingle();
+  const { data } = await supabase.from('sectors').select('id,slug,name_ar,description,accent,seo_title,seo_description,editorial_content_id,metadata').eq('slug', slug).eq('is_active', true).eq('visibility', 'public').maybeSingle();
   return data as Sector | null;
 }
 
@@ -49,7 +67,7 @@ export async function generateMetadata({ params, searchParams }: { params: Param
     path: pagePath(sector.slug, page),
     index: true,
     follow: true,
-    keywords: [sector.name_ar, 'منصة روافد'],
+    keywords: sectorKeywords(sector),
   });
 }
 
@@ -104,6 +122,7 @@ export default async function SectorPage({ params, searchParams }: { params: Par
   const roots = categoryRows.filter((category) => !category.parent_id);
   const canonicalPath = pagePath(sector.slug, page);
   const canonicalUrl = `${SITE_URL}${canonicalPath}`;
+  const keywords = sectorKeywords(sector);
   const breadcrumbs = breadcrumbJsonLd([{ name: 'الرئيسية', path: '/' }, { name: 'القطاعات', path: '/sectors' }, { name: sector.name_ar, path: `/sectors/${sector.slug}` }]);
   const collectionSchema = {
     '@context': 'https://schema.org',
@@ -112,6 +131,7 @@ export default async function SectorPage({ params, searchParams }: { params: Par
     url: canonicalUrl,
     name: page > 1 ? `${sector.name_ar} - الصفحة ${page}` : sector.name_ar,
     description: sector.description || undefined,
+    keywords: keywords.join(', '),
     inLanguage: 'ar',
     isAccessibleForFree: true,
     isPartOf: { '@id': `${SITE_URL}/#website` },
