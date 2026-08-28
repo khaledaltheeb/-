@@ -26,6 +26,24 @@ jobs:
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
+      - name: Apply phone viewport hardening
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('android-app/app/src/main/java/org/healthrenewal/rawafid/MainActivity.java')
+          text=p.read_text(encoding='utf-8')
+          old='''        WebView w=new WebView(this);\n        activeWebView=w;'''
+          new='''        WebView w=new WebView(this);\n        w.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);\n        activeWebView=w;'''
+          if old not in text:
+              raise SystemExit('WebView creation anchor not found')
+          text=text.replace(old,new,1)
+          anchor='''            @Override public void onReceivedError(WebView view,WebResourceRequest request,WebResourceError error){'''
+          injection='''            @Override public void onPageFinished(WebView view,String finishedUrl){\n                super.onPageFinished(view,finishedUrl);\n                if(!TrustedUrl.isRawafidHttps(finishedUrl)) return;\n                String js="(function(){var m=document.querySelector('meta[name=viewport]');if(!m){m=document.createElement('meta');m.name='viewport';document.head.appendChild(m);}m.setAttribute('content','width=device-width,initial-scale=1,maximum-scale=5,user-scalable=yes');var s=document.getElementById('rawafid-app-fit');if(!s){s=document.createElement('style');s.id='rawafid-app-fit';s.textContent='html,body{width:100%!important;max-width:100vw!important;overflow-x:hidden!important}*,*:before,*:after{box-sizing:border-box!important;min-width:0!important}body>div,main,article,section,header,footer,nav,div{max-width:100vw!important}img,video,svg,canvas{max-width:100%!important;height:auto!important}p,h1,h2,h3,h4,h5,h6,li{max-width:100%!important;overflow-wrap:anywhere!important}table,pre{display:block!important;max-width:100%!important;overflow-x:auto!important}';document.head.appendChild(s);}window.scrollTo(document.documentElement.scrollWidth,0);})();";\n                view.evaluateJavascript(js,null);\n            }\n            @Override public void onReceivedError(WebView view,WebResourceRequest request,WebResourceError error){'''
+          if anchor not in text:
+              raise SystemExit('WebViewClient anchor not found')
+          text=text.replace(anchor,injection,1)
+          p.write_text(text,encoding='utf-8')
+          PY
       - name: Build debug APK
         working-directory: android-app
         run: gradle --no-daemon :app:assembleDebug
