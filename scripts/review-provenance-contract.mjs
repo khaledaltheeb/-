@@ -13,6 +13,7 @@ const requiredHelperFragments = [
   'const reviewerName = hasAttributableReviewer ? explicitReviewer : null;',
   "const reviewerType = hasAttributableReviewer ? (institutionalReviewer ? 'Organization' : 'Person') : null;",
   'const reviewedBySchema = !hasAttributableReviewer',
+  '? undefined',
   "'@type': 'Organization'",
   'reviewedBySchema',
 ];
@@ -27,11 +28,12 @@ const forbiddenHelperFragments = [
   'explicitReviewer || RAWAFID_REVIEW_TEAM',
   "reviewerType = hasRecordedReview ? (explicitReviewer ? 'Person' : 'Organization') : null",
   'name: RAWAFID_REVIEW_TEAM',
+  'const reviewedBySchema = !hasAttributableReviewer\n    ? null',
 ];
 
 for (const fragment of forbiddenHelperFragments) {
   if (helper.includes(fragment)) {
-    throw new Error(`Review provenance helper must not infer reviewer identity: ${fragment}`);
+    throw new Error(`Review provenance helper must not infer or serialize absent reviewer identity: ${fragment}`);
   }
 }
 
@@ -63,4 +65,4 @@ for (const file of surfaces) {
   }
 }
 
-console.log(`Review provenance contract passed: ${surfaces.length} public surfaces preserve recorded review dates and never infer reviewer identity.`);
+console.log(`Review provenance contract passed: ${surfaces.length} public surfaces preserve recorded review dates, omit unattributed reviewedBy, and never infer reviewer identity.`);
