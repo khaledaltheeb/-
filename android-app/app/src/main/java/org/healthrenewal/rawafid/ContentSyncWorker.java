@@ -28,7 +28,7 @@ public final class ContentSyncWorker extends Worker {
         try {
             SecurePrefs prefs = new SecurePrefs(getApplicationContext());
             String selected = prefs.getSectors();
-            if(selected.isBlank()) return Result.success();
+            if(selected.trim().isEmpty()) return Result.success();
             HttpURLConnection con=(HttpURLConnection)new URL("https://healthrenewal.org/sitemap.xml").openConnection();
             con.setConnectTimeout(10000); con.setReadTimeout(15000); con.setRequestProperty("User-Agent","RawafidAndroid/1.0");
             if(con.getResponseCode()!=200) return Result.retry();
@@ -45,7 +45,7 @@ public final class ContentSyncWorker extends Worker {
         } catch(Exception e){ return Result.retry(); }
     }
     private boolean matchesSector(String url,String selected){
-        for(String token:selected.split(",")){ if(!token.isBlank() && url.contains(token.trim())) return true; }
+        for(String token:selected.split(",")){ if(!token.trim().isEmpty() && url.contains(token.trim())) return true; }
         return false;
     }
     private void notifyNewContent(String url){
