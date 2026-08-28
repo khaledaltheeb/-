@@ -146,12 +146,17 @@ export async function GET(request: Request) {
         changeFrequency: 'monthly',
         priority: .72,
       })),
-      ...expandedIndex.map((item) => ({
-        path: item.canonical_url,
-        lastModified: item.updated_at,
-        changeFrequency: 'monthly',
-        priority: .74,
-      })),
+      ...expandedIndex
+        // A published/indexable DB row owns this slug. Its canonical belongs to
+        // the DB-driven sitemap partition, so the static release must not emit a
+        // second legacy /content alias or duplicate that canonical elsewhere.
+        .filter((item) => item.canonical_source === 'static')
+        .map((item) => ({
+          path: item.canonical_url,
+          lastModified: item.updated_at,
+          changeFrequency: 'monthly',
+          priority: .74,
+        })),
     ].filter((item) => !taxonomyOwnedCanonicals.has(normalizeCanonicalPath(item.path)));
   }
 
