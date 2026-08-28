@@ -15,26 +15,26 @@ export function contentReviewProvenance(record: ReviewRecord) {
   const explicitReviewer = nonEmptyString(record.reviewer_display_name);
   const explicitCredentials = nonEmptyString(record.reviewer_credentials);
   const hasRecordedReview = Boolean(recordedReviewDate);
+  const hasAttributableReviewer = Boolean(hasRecordedReview && explicitReviewer);
+  const institutionalReviewer = explicitReviewer === RAWAFID_REVIEW_TEAM;
 
-  // Never manufacture review provenance. A reviewer is attributed only when the content
-  // record contains a real review timestamp. If a named reviewer was recorded, preserve
-  // that person and their recorded credentials; otherwise use Rawafid's institutional
-  // review team as the organization fallback for that recorded review.
+  // Preserve a recorded review date, but never infer who performed the review.
+  // Reviewer identity is emitted only when the content record explicitly stores one.
   const lastReviewedAt = hasRecordedReview ? recordedReviewDate : null;
-  const reviewerName = hasRecordedReview ? explicitReviewer || RAWAFID_REVIEW_TEAM : null;
-  const reviewerCredentials = hasRecordedReview && explicitReviewer ? explicitCredentials : null;
-  const reviewerType = hasRecordedReview ? (explicitReviewer ? 'Person' : 'Organization') : null;
-  const reviewedBySchema = !hasRecordedReview
+  const reviewerName = hasAttributableReviewer ? explicitReviewer : null;
+  const reviewerCredentials = hasAttributableReviewer && !institutionalReviewer ? explicitCredentials : null;
+  const reviewerType = hasAttributableReviewer ? (institutionalReviewer ? 'Organization' : 'Person') : null;
+  const reviewedBySchema = !hasAttributableReviewer
     ? null
-    : explicitReviewer
+    : institutionalReviewer
       ? {
+          '@type': 'Organization',
+          name: explicitReviewer,
+        } as const
+      : {
           '@type': 'Person',
           name: explicitReviewer,
           ...(explicitCredentials ? { description: explicitCredentials } : {}),
-        } as const
-      : {
-          '@type': 'Organization',
-          name: RAWAFID_REVIEW_TEAM,
         } as const;
 
   return {
