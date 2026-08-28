@@ -1,8 +1,5 @@
 name: Build Rawafid Android AAB
 on:
-  push:
-    branches: ["android/rawafid-app-v1"]
-    paths: ["android-app/**", ".github/workflows/build-android-aab.yml"]
   workflow_dispatch:
 permissions:
   contents: read
