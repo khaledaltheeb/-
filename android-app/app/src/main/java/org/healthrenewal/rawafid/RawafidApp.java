@@ -3,6 +3,7 @@ package org.healthrenewal.rawafid;
 import android.app.Application;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.webkit.WebView;
 import androidx.work.Constraints;
 import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.NetworkType;
@@ -16,6 +17,8 @@ public final class RawafidApp extends Application {
 
     @Override public void onCreate() {
         super.onCreate();
+        // Never expose embedded production pages to remote WebView debugging.
+        WebView.setWebContentsDebuggingEnabled(false);
         createChannels();
 
         Constraints connected = new Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build();
