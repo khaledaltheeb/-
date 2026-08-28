@@ -2,83 +2,157 @@ package org.healthrenewal.rawafid;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import androidx.security.crypto.EncryptedSharedPreferences;
-import androidx.security.crypto.MasterKey;
+import android.security.keystore.KeyGenParameterSpec;
+import android.security.keystore.KeyProperties;
+import android.util.Base64;
+import java.nio.charset.StandardCharsets;
+import java.security.KeyStore;
 import java.util.ArrayDeque;
 import java.util.HashSet;
 import java.util.Set;
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.GCMParameterSpec;
 
+/**
+ * Local private state encrypted with a non-exportable Android Keystore AES-256 key.
+ * Preference keys are non-sensitive identifiers; every stored value is AES/GCM encrypted.
+ */
 public final class SecurePrefs {
+    private static final String PREF_FILE="rawafid_secure_v2";
+    private static final String KEY_ALIAS="rawafid_local_data_aes_v1";
+    private static final String TRANSFORMATION="AES/GCM/NoPadding";
+    private static final int GCM_TAG_BITS=128;
     private static final int RECENT_MESSAGE_LIMIT=200;
+
     private final SharedPreferences prefs;
+    private final SecretKey secretKey;
 
     public SecurePrefs(Context context) {
         try {
-            MasterKey key = new MasterKey.Builder(context).setKeyScheme(MasterKey.KeyScheme.AES256_GCM).build();
-            prefs = EncryptedSharedPreferences.create(
-                    context,
-                    "rawafid_secure",
-                    key,
-                    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-            );
-        } catch (Exception e) {
-            throw new IllegalStateException("Secure storage unavailable", e);
+            Context app=context.getApplicationContext();
+            prefs=app.getSharedPreferences(PREF_FILE,Context.MODE_PRIVATE);
+            secretKey=getOrCreateKey();
+        } catch(Exception e) {
+            throw new IllegalStateException("Secure local storage unavailable",e);
         }
     }
 
-    public String getName(){ return prefs.getString("companion_name", ""); }
-    public void setName(String v){ prefs.edit().putString("companion_name", v == null ? "" : v.trim()).apply(); }
-
-    public String getSectors(){ return prefs.getString("sectors", ""); }
-    public void setSectors(String v){ prefs.edit().putString("sectors", v == null ? "" : v).apply(); }
-
-    public long getLastSeen(String key){ return prefs.getLong("seen_" + key, 0L); }
-    public void setLastSeen(String key,long v){ prefs.edit().putLong("seen_" + key,v).apply(); }
-
-    public int getCycleLength(){ return prefs.getInt("cycle_length",28); }
-    public int getPeriodLength(){ return prefs.getInt("period_length",5); }
-    public long getLastPeriod(){ return prefs.getLong("last_period",0L); }
-    public void saveCycle(long start,int cycle,int period){
-        prefs.edit().putLong("last_period",start).putInt("cycle_length",cycle).putInt("period_length",period).apply();
+    private static SecretKey getOrCreateKey() throws Exception {
+        KeyStore keyStore=KeyStore.getInstance("AndroidKeyStore");
+        keyStore.load(null);
+        if(keyStore.containsAlias(KEY_ALIAS)){
+            java.security.Key key=keyStore.getKey(KEY_ALIAS,null);
+            if(key instanceof SecretKey) return (SecretKey)key;
+            throw new IllegalStateException("Unexpected key type");
+        }
+        KeyGenerator generator=KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES,"AndroidKeyStore");
+        KeyGenParameterSpec spec=new KeyGenParameterSpec.Builder(
+                KEY_ALIAS,
+                KeyProperties.PURPOSE_ENCRYPT|KeyProperties.PURPOSE_DECRYPT)
+                .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+                .setKeySize(256)
+                .build();
+        generator.init(spec);
+        return generator.generateKey();
     }
 
-    public boolean isCompanionEnabled(){ return prefs.getBoolean("companion_enabled", false); }
-    public int getCompanionDailyLimit(){ return clamp(prefs.getInt("companion_daily_limit", 4), 1, 12); }
-    public int getCompanionStartHour(){ return clamp(prefs.getInt("companion_start_hour", 8), 0, 23); }
-    public int getCompanionEndHour(){ return clamp(prefs.getInt("companion_end_hour", 22), 0, 23); }
-    public int getCompanionIntervalHours(){ return clamp(prefs.getInt("companion_interval_hours", 4), 1, 12); }
+    private synchronized String encrypt(String plain) throws Exception {
+        Cipher cipher=Cipher.getInstance(TRANSFORMATION);
+        cipher.init(Cipher.ENCRYPT_MODE,secretKey);
+        byte[] iv=cipher.getIV();
+        byte[] encrypted=cipher.doFinal(plain.getBytes(StandardCharsets.UTF_8));
+        return Base64.encodeToString(iv,Base64.NO_WRAP)+":"+Base64.encodeToString(encrypted,Base64.NO_WRAP);
+    }
+
+    private synchronized String decrypt(String encoded) throws Exception {
+        int split=encoded.indexOf(':');
+        if(split<=0 || split>=encoded.length()-1) throw new IllegalArgumentException("Invalid encrypted value");
+        byte[] iv=Base64.decode(encoded.substring(0,split),Base64.NO_WRAP);
+        byte[] encrypted=Base64.decode(encoded.substring(split+1),Base64.NO_WRAP);
+        Cipher cipher=Cipher.getInstance(TRANSFORMATION);
+        cipher.init(Cipher.DECRYPT_MODE,secretKey,new GCMParameterSpec(GCM_TAG_BITS,iv));
+        return new String(cipher.doFinal(encrypted),StandardCharsets.UTF_8);
+    }
+
+    private String getString(String key,String fallback){
+        String encoded=prefs.getString(key,null);
+        if(encoded==null) return fallback;
+        try { return decrypt(encoded); }
+        catch(Exception ignored){ return fallback; }
+    }
+
+    private void putString(String key,String value){
+        try { prefs.edit().putString(key,encrypt(value==null?"":value)).apply(); }
+        catch(Exception e){ throw new IllegalStateException("Unable to protect local data",e); }
+    }
+
+    private int getInt(String key,int fallback){
+        try { return Integer.parseInt(getString(key,Integer.toString(fallback))); }
+        catch(NumberFormatException ignored){ return fallback; }
+    }
+    private long getLong(String key,long fallback){
+        try { return Long.parseLong(getString(key,Long.toString(fallback))); }
+        catch(NumberFormatException ignored){ return fallback; }
+    }
+    private boolean getBoolean(String key,boolean fallback){
+        String value=getString(key,Boolean.toString(fallback));
+        return "true".equalsIgnoreCase(value)?true:"false".equalsIgnoreCase(value)?false:fallback;
+    }
+
+    public String getName(){ return getString("companion_name",""); }
+    public void setName(String v){ putString("companion_name",v==null?"":v.trim()); }
+
+    public String getSectors(){ return getString("sectors",""); }
+    public void setSectors(String v){ putString("sectors",v==null?"":v); }
+
+    public long getLastSeen(String key){ return getLong("seen_"+key,0L); }
+    public void setLastSeen(String key,long v){ putString("seen_"+key,Long.toString(v)); }
+
+    public int getCycleLength(){ return clamp(getInt("cycle_length",28),21,45); }
+    public int getPeriodLength(){ return clamp(getInt("period_length",5),2,10); }
+    public long getLastPeriod(){ return getLong("last_period",0L); }
+    public void saveCycle(long start,int cycle,int period){
+        putString("last_period",Long.toString(Math.max(0L,start)));
+        putString("cycle_length",Integer.toString(clamp(cycle,21,45)));
+        putString("period_length",Integer.toString(clamp(period,2,10)));
+    }
+
+    public boolean isCompanionEnabled(){ return getBoolean("companion_enabled",false); }
+    public int getCompanionDailyLimit(){ return clamp(getInt("companion_daily_limit",4),1,12); }
+    public int getCompanionStartHour(){ return clamp(getInt("companion_start_hour",8),0,23); }
+    public int getCompanionEndHour(){ return clamp(getInt("companion_end_hour",22),0,23); }
+    public int getCompanionIntervalHours(){ return clamp(getInt("companion_interval_hours",4),1,12); }
 
     public void saveCompanionSchedule(boolean enabled,int dailyLimit,int startHour,int endHour,int intervalHours){
-        prefs.edit()
-                .putBoolean("companion_enabled", enabled)
-                .putInt("companion_daily_limit", clamp(dailyLimit,1,12))
-                .putInt("companion_start_hour", clamp(startHour,0,23))
-                .putInt("companion_end_hour", clamp(endHour,0,23))
-                .putInt("companion_interval_hours", clamp(intervalHours,1,12))
-                .apply();
+        putString("companion_enabled",Boolean.toString(enabled));
+        putString("companion_daily_limit",Integer.toString(clamp(dailyLimit,1,12)));
+        putString("companion_start_hour",Integer.toString(clamp(startHour,0,23)));
+        putString("companion_end_hour",Integer.toString(clamp(endHour,0,23)));
+        putString("companion_interval_hours",Integer.toString(clamp(intervalHours,1,12)));
     }
 
-    public long getCompanionLastAutoSentAt(){ return prefs.getLong("companion_last_auto_sent_at", 0L); }
-    public String getCompanionCounterDay(){ return prefs.getString("companion_counter_day", ""); }
-    public int getCompanionCounter(){ return Math.max(0, prefs.getInt("companion_counter", 0)); }
+    public long getCompanionLastAutoSentAt(){ return getLong("companion_last_auto_sent_at",0L); }
+    public String getCompanionCounterDay(){ return getString("companion_counter_day",""); }
+    public int getCompanionCounter(){ return Math.max(0,getInt("companion_counter",0)); }
 
     public void markCompanionAutoSent(long timestamp,String localDay,int newCount){
-        prefs.edit()
-                .putLong("companion_last_auto_sent_at", timestamp)
-                .putString("companion_counter_day", localDay == null ? "" : localDay)
-                .putInt("companion_counter", Math.max(0,newCount))
-                .apply();
+        putString("companion_last_auto_sent_at",Long.toString(Math.max(0L,timestamp)));
+        putString("companion_counter_day",localDay==null?"":localDay);
+        putString("companion_counter",Integer.toString(Math.max(0,newCount)));
     }
 
     public void resetCompanionCounter(String localDay){
-        prefs.edit().putString("companion_counter_day", localDay == null ? "" : localDay).putInt("companion_counter",0).apply();
+        putString("companion_counter_day",localDay==null?"":localDay);
+        putString("companion_counter","0");
     }
 
     public Set<Integer> getRecentCompanionMessageHashes(){
         Set<Integer> out=new HashSet<>();
-        String raw=prefs.getString("companion_recent_hashes","");
-        if(raw==null || raw.isEmpty()) return out;
+        String raw=getString("companion_recent_hashes","");
+        if(raw.isEmpty()) return out;
         for(String token:raw.split(",")){
             try { out.add(Integer.parseInt(token)); } catch(NumberFormatException ignored){}
         }
@@ -86,9 +160,9 @@ public final class SecurePrefs {
     }
 
     public void recordCompanionMessageHash(int hash){
-        String raw=prefs.getString("companion_recent_hashes","");
+        String raw=getString("companion_recent_hashes","");
         ArrayDeque<Integer> queue=new ArrayDeque<>();
-        if(raw!=null && !raw.isEmpty()){
+        if(!raw.isEmpty()){
             for(String token:raw.split(",")){
                 try { int value=Integer.parseInt(token); if(value!=hash) queue.addLast(value); } catch(NumberFormatException ignored){}
             }
@@ -97,7 +171,11 @@ public final class SecurePrefs {
         while(queue.size()>RECENT_MESSAGE_LIMIT) queue.removeFirst();
         StringBuilder encoded=new StringBuilder();
         for(Integer value:queue){ if(encoded.length()>0) encoded.append(','); encoded.append(value); }
-        prefs.edit().putString("companion_recent_hashes",encoded.toString()).apply();
+        putString("companion_recent_hashes",encoded.toString());
+    }
+
+    public void clearSensitiveData(){
+        prefs.edit().clear().apply();
     }
 
     private static int clamp(int value,int min,int max){ return Math.max(min,Math.min(max,value)); }
