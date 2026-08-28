@@ -28,7 +28,7 @@ async function fetchText(url) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const response = await fetch(url, { redirect: 'follow', signal: controller.signal, headers: { 'user-agent': 'Rawafid-Rich-Discovery-Gate/1.2' } });
+    const response = await fetch(url, { redirect: 'follow', signal: controller.signal, headers: { 'user-agent': 'Rawafid-Rich-Discovery-Gate/1.3' } });
     return { response, text: await response.text() };
   } finally { clearTimeout(timer); }
 }
@@ -84,11 +84,38 @@ function hasPageSchema(types) {
   return ['WebPage','CollectionPage','Article','NewsArticle','ScholarlyArticle','MedicalWebPage','ProfilePage','FAQPage','DefinedTerm','DefinedTermSet','MedicalCondition'].some((type) => types.has(type));
 }
 function requireTypes(url, pathname, types) {
+  const found = () => [...types].join(', ') || 'none';
   const require = (...expected) => {
-    for (const type of expected) if (!types.has(type)) failures.push(`${url}: ${pathname} requires ${type} structured data (found: ${[...types].join(', ') || 'none'})`);
+    for (const type of expected) if (!types.has(type)) failures.push(`${url}: ${pathname} requires ${type} structured data (found: ${found()})`);
   };
   const requireAny = (...expected) => {
-    if (!expected.some((type) => types.has(type))) failures.push(`${url}: ${pathname} requires one of ${expected.join(', ')} structured data types (found: ${[...types].join(', ') || 'none'})`);
+    if (!expected.some((type) => types.has(type))) failures.push(`${url}: ${pathname} requires one of ${expected.join(', ')} structured data types (found: ${found()})`);
+  };
+  const requireEncyclopediaSchemaFamily = () => {
+    const hasConditionEntity = types.has('MedicalCondition');
+    const hasConditionPage = types.has('MedicalWebPage');
+    const hasTermEntity = types.has('DefinedTerm');
+    const hasTermPage = types.has('WebPage');
+    const hasConditionFamily = hasConditionEntity || hasConditionPage;
+    const hasTermFamily = hasTermEntity;
+
+    if (hasConditionFamily && hasTermFamily) {
+      failures.push(`${url}: ${pathname} mixes clinical-condition and glossary-term schema families (found: ${found()})`);
+      return;
+    }
+    if (hasConditionFamily) {
+      require('MedicalCondition', 'MedicalWebPage');
+      return;
+    }
+    if (hasTermFamily) {
+      require('DefinedTerm', 'WebPage');
+      return;
+    }
+    if (hasTermPage) {
+      failures.push(`${url}: ${pathname} has WebPage without the required DefinedTerm glossary entity (found: ${found()})`);
+      return;
+    }
+    failures.push(`${url}: ${pathname} requires either MedicalCondition + MedicalWebPage or DefinedTerm + WebPage structured data (found: ${found()})`);
   };
 
   if (['/sectors','/sectors/','/sections','/sections/','/specialists','/specialists/','/centers','/centers/','/quick-info','/quick-info/','/encyclopedia','/encyclopedia/','/magazine','/magazine/'].includes(pathname)) {
@@ -105,10 +132,10 @@ function requireTypes(url, pathname, types) {
   }
   if (/^\/magazine\/.+/.test(pathname)) { require('ScholarlyArticle'); return; }
   if (/^\/quick-info\/[^/]+\/?$/.test(pathname)) { require('Article', 'MedicalWebPage'); return; }
-  if (/^\/encyclopedia\/(?!index(?:\/|$))[^/]+\/?$/.test(pathname)) { require('MedicalWebPage', 'MedicalCondition'); return; }
+  if (/^\/encyclopedia\/(?!index(?:\/|$))[^/]+\/?$/.test(pathname)) { requireEncyclopediaSchemaFamily(); return; }
 
   if (isContentLike(pathname) && !hasPageSchema(types)) {
-    failures.push(`${url}: content-like page lacks page/content structured-data type (${[...types].join(', ') || 'none'})`);
+    failures.push(`${url}: content-like page lacks page/content structured-data type (${found()})`);
   }
 }
 async function audit(url) {
