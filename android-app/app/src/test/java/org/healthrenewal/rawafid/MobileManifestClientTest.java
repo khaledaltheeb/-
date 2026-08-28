@@ -21,6 +21,13 @@ public class MobileManifestClientTest {
         assertTrue(manifest.discoverLinks.isEmpty());
     }
 
+    @Test public void unknownToolIdCannotBeInjectedIntoManifestOrder() throws Exception {
+        String json="{\"ok\":true,\"manifest\":{\"sections\":[{\"id\":\"tools\",\"tool_ids\":[\"unknown_tool\",\"emergency_center\"]}]},\"tools\":[{\"id\":\"emergency_center\",\"name\":\"الطوارئ SOS\",\"description\":\"طوارئ\",\"kind\":\"native\",\"nativeRoute\":\"emergency\",\"webPath\":null}]}";
+        MobileManifestClient.Manifest manifest=MobileManifestClient.parse(json);
+        assertEquals(1,manifest.tools.size());
+        assertEquals("emergency_center",manifest.tools.get(0).id);
+    }
+
     @Test(expected=IllegalArgumentException.class)
     public void failsClosedWhenManifestMissing() throws Exception {
         MobileManifestClient.parse("{\"ok\":true}");
