@@ -133,6 +133,7 @@ const supabase = createClient(url, key, {
   auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
 });
 const nowMs = Date.now();
+const nowIso = new Date(nowMs).toISOString();
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function withRetry(label, task, attempts = 3) {
@@ -151,29 +152,73 @@ async function withRetry(label, task, attempts = 3) {
   throw lastError instanceof Error ? lastError : new Error(`${label}: transient database check failed`);
 }
 
-async function fetchIndexablePublishedInventory() {
-  const rows = [];
-  const batchSize = 500;
-  for (let start = 0; start < 50000; start += batchSize) {
-    const batch = await withRetry(`content inventory batch ${start / batchSize + 1}`, async () => {
+async function fetchQuickInfoSchemaById(ids) {
+  const schemaById = new Map();
+  const batchSize = 100;
+
+  for (let start = 0; start < ids.length; start += batchSize) {
+    const idBatch = ids.slice(start, start + batchSize);
+    const batch = await withRetry(`quick-info schema batch ${start / batchSize + 1}`, async () => {
       const { data, error } = await supabase
         .from('content')
-        .select('id,slug,content_type,canonical_url,published_at,updated_at,schema_json')
-        .eq('status', 'published')
-        .eq('robots_index', true)
-        .order('id', { ascending: true })
-        .range(start, start + batchSize - 1);
+        .select('id,schema_json')
+        .in('id', idBatch)
+        .order('id', { ascending: true });
       if (error) throw new Error(error.message);
       return Array.isArray(data) ? data : [];
     });
+    for (const row of batch) schemaById.set(row.id, row.schema_json ?? null);
+  }
+
+  return schemaById;
+}
+
+async function fetchIndexablePublishedInventory() {
+  const rows = [];
+  const batchSize = 500;
+  let lastId = null;
+
+  // Keyset pagination preserves the same stable id ordering used by the sitemap
+  // while avoiding increasingly expensive OFFSET scans. Keep the main inventory
+  // deliberately narrow: schema_json is large and only Quick Info eligibility
+  // needs it, so that metadata is fetched separately for those canonical rows.
+  for (let batchNumber = 1; batchNumber <= 100; batchNumber += 1) {
+    const batch = await withRetry(`content inventory batch ${batchNumber}`, async () => {
+      let query = supabase
+        .from('content')
+        .select('id,slug,content_type,canonical_url,published_at,updated_at')
+        .eq('status', 'published')
+        .eq('robots_index', true)
+        .lte('published_at', nowIso)
+        .order('id', { ascending: true })
+        .limit(batchSize);
+      if (lastId) query = query.gt('id', lastId);
+      const { data, error } = await query;
+      if (error) throw new Error(error.message);
+      return Array.isArray(data) ? data : [];
+    });
+
+    if (!batch.length) break;
     rows.push(...batch);
+
+    const nextLastId = batch[batch.length - 1]?.id;
+    if (!nextLastId || nextLastId === lastId) {
+      throw new Error(`content inventory keyset pagination made no progress at batch ${batchNumber}`);
+    }
+    lastId = nextLastId;
     if (batch.length < batchSize) break;
   }
-  return rows.filter((row) => {
-    if (!row.published_at) return false;
-    const publishedMs = Date.parse(row.published_at);
-    return Number.isFinite(publishedMs) && publishedMs <= nowMs;
+
+  const quickInfoRows = rows.filter((row) => {
+    const canonical = typeof row.canonical_url === 'string' ? row.canonical_url.trim() : '';
+    return canonical.startsWith('/quick-info/');
   });
+  const quickInfoSchemaById = await fetchQuickInfoSchemaById(quickInfoRows.map((row) => row.id));
+  for (const row of quickInfoRows) {
+    row.schema_json = quickInfoSchemaById.get(row.id) ?? null;
+  }
+
+  return rows;
 }
 
 function encyclopediaOwned(row) {
@@ -228,9 +273,10 @@ function atlasOwned(row) {
 }
 
 try {
-  // One bounded inventory read drives every ownership assertion. Sitemap ownership
+  // One bounded inventory drives every ownership assertion. Sitemap ownership
   // follows canonical namespaces, so internal content types cannot create a dropped
-  // page or a competing non-canonical URL.
+  // page or a competing non-canonical URL. Large schema metadata is loaded only for
+  // the Quick Info rows whose dedicated-sitemap eligibility actually depends on it.
   const publishedRows = await fetchIndexablePublishedInventory();
   const total = publishedRows.length;
   const seenCanonicals = new Set();
