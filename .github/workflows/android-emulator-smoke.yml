@@ -29,6 +29,14 @@ jobs:
       - name: Build debug APK
         working-directory: android-app
         run: gradle --no-daemon :app:assembleDebug
+      - name: Stage phone test APK
+        run: |
+          set -eu
+          APK=$(find "$GITHUB_WORKSPACE/android-app" -type f -name '*.apk' -print -quit)
+          test -f "$APK"
+          cp "$APK" "$GITHUB_WORKSPACE/rawafid-phone-test.apk"
+          test -s "$GITHUB_WORKSPACE/rawafid-phone-test.apk"
+          sha256sum "$GITHUB_WORKSPACE/rawafid-phone-test.apk" | tee "$GITHUB_WORKSPACE/rawafid-phone-test.sha256"
       - name: Run smoke tests on Android emulator
         uses: reactivecircus/android-emulator-runner@v2.38.0
         with:
@@ -41,8 +49,8 @@ jobs:
           script: |
             set -eu
             ARTIFACT_DIR="$GITHUB_WORKSPACE/android-emulator-artifacts"
-            APK=$(find "$GITHUB_WORKSPACE/android-app/app/build/outputs/apk/debug" -type f -name '*.apk' -print -quit)
-            test -f "$APK"
+            APK="$GITHUB_WORKSPACE/rawafid-phone-test.apk"
+            test -s "$APK"
             mkdir -p "$ARTIFACT_DIR"
             adb logcat -c || true
             adb install -r "$APK"
@@ -77,5 +85,7 @@ jobs:
         if: success()
         with:
           name: rawafid-phone-test-apk
-          path: android-app/app/build/outputs/apk/debug/*.apk
+          path: |
+            rawafid-phone-test.apk
+            rawafid-phone-test.sha256
           if-no-files-found: error
