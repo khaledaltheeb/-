@@ -13,10 +13,17 @@ permissions:
 jobs:
   diagnose:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 45
     env:
+      NEXT_PUBLIC_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
       NEXT_PUBLIC_SITE_URL: https://healthrenewal.org
-      SEO_GATE_BASE_URL: https://rawafid-platform-staging.khaledaltheeb.workers.dev
+      NEXT_PUBLIC_ALLOW_INDEXING: 'true'
+      NEXT_PUBLIC_ENABLE_ANALYTICS: 'true'
+      NEXT_PUBLIC_GTM_ID: GTM-WBLQVBG4
+      NEXT_PUBLIC_GA_MEASUREMENT_ID: G-VLZMV8Y4JP
+      NEXT_PUBLIC_ENABLE_DIRECT_GA: 'true'
+      SEO_GATE_BASE_URL: http://127.0.0.1:3000
       SEO_GATE_CONCURRENCY: '12'
       SEO_GATE_TIMEOUT_MS: '20000'
     steps:
@@ -26,6 +33,29 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 24
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Build local production candidate
+        run: npm run build
+      - name: Start local production candidate server
+        shell: bash
+        run: |
+          set -euo pipefail
+          nohup npm run start -- --hostname 127.0.0.1 --port 3000 > /tmp/rawafid-rich-candidate.log 2>&1 &
+          echo "$!" > /tmp/rawafid-rich-candidate.pid
+          ready=0
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:3000/ >/dev/null; then
+              ready=1
+              break
+            fi
+            sleep 1
+          done
+          if [ "$ready" -ne 1 ]; then
+            cat /tmp/rawafid-rich-candidate.log >&2 || true
+            exit 1
+          fi
       - name: Run isolated rich discovery gate
         shell: bash
         run: |
@@ -33,8 +63,16 @@ jobs:
           node scripts/rich-discovery-gate.mjs > /tmp/rich-discovery.log 2>&1
           status=$?
           echo '--- rich discovery diagnostic ---'
-          cat /tmp/rich-discovery.log | tail -n 240
+          tail -n 320 /tmp/rich-discovery.log
           if [ "$status" -ne 0 ]; then
             echo "Rich discovery diagnostic failed with status $status"
             exit "$status"
+          fi
+      - name: Stop local candidate
+        if: always()
+        shell: bash
+        run: |
+          set +e
+          if [ -f /tmp/rawafid-rich-candidate.pid ]; then
+            kill "$(cat /tmp/rawafid-rich-candidate.pid)" 2>/dev/null || true
           fi
