@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "paths": ["app", "components", "lib"],
+  "strict": true,
+  "failOn": "error",
+  "exclude": [],
+  "maxFiles": 10000,
+  "rules": {
+    "RAWAFID-HTML-006": "note",
+    "RAWAFID-CSS-007": "note",
+    "RAWAFID-UTILITY-001": "note"
+  }
+}
