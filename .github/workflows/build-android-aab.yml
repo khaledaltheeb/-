@@ -29,7 +29,18 @@ jobs:
           ! grep -R 'android:debuggable="true"' app/src/main/AndroidManifest.xml
           grep -q 'android:usesCleartextTraffic="false"' app/src/main/AndroidManifest.xml
       - name: Build release bundle
-        run: gradle --no-daemon clean bundleRelease lintRelease
+        run: gradle --no-daemon clean bundleRelease
+      - name: Run release lint
+        run: |
+          set +e
+          gradle --no-daemon lintRelease
+          status=$?
+          report="app/build/intermediates/lint_intermediate_text_report/release/lintReportRelease/lint-results-release.txt"
+          if [ -f "$report" ]; then
+            echo "===== FULL LINT REPORT ====="
+            cat "$report"
+          fi
+          exit $status
       - name: Upload AAB
         uses: actions/upload-artifact@v4
         with:
