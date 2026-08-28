@@ -6,156 +6,153 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public final class ContentSyncWorker extends Worker {
-    private static final String BASE = "https://healthrenewal.org";
-    private static final Pattern LOC = Pattern.compile("<loc>(https://healthrenewal\\.org/[^<]+)</loc>");
-    private static final int MAX_SITEMAPS = 40;
-    private static final int MAX_URLS = 30000;
+    private static final String BASE="https://healthrenewal.org";
+    private static final String FEED=BASE+"/api/mobile/updates";
 
     public ContentSyncWorker(@NonNull Context c,@NonNull WorkerParameters p){ super(c,p); }
 
     @NonNull @Override public Result doWork(){
         try {
-            SecurePrefs prefs = new SecurePrefs(getApplicationContext());
-            String selected = prefs.getSectors();
-            if(selected.trim().isEmpty()) return Result.success();
+            SecurePrefs prefs=new SecurePrefs(getApplicationContext());
+            String selectedRaw=prefs.getSectors();
+            Set<String> selected=parseSelected(selectedRaw);
+            if(selected.isEmpty()) return Result.success();
 
-            Set<String> pageUrls = loadAllPageUrls();
-            if(pageUrls.isEmpty()) return Result.retry();
+            List<UpdateItem> items=fetchUpdates();
+            if(items.isEmpty()) return Result.success();
 
-            List<String> matches = new ArrayList<>();
-            for(String url : pageUrls) if(matchesSelectedPath(url, selected)) matches.add(url);
-            Collections.sort(matches);
-
-            String stateKey = "sector_state_" + Integer.toHexString(selected.hashCode());
-            long previous = prefs.getLastSeen(stateKey);
-            long current = stableFingerprint(matches);
-
-            if(previous != 0L && previous != current) {
-                String target = newestCandidate(matches);
-                notifyNewContent(target);
+            List<UpdateItem> matching=new ArrayList<>();
+            long latestPublished=0L;
+            for(UpdateItem item:items){
+                latestPublished=Math.max(latestPublished,item.publishedAtMillis);
+                if(item.matches(selected)) matching.add(item);
             }
-            prefs.setLastSeen(stateKey,current);
+
+            String stateKey="content_cursor_"+Integer.toHexString(selectedRaw.hashCode());
+            long previous=prefs.getLastSeen(stateKey);
+            if(previous==0L){
+                prefs.setLastSeen(stateKey,latestPublished);
+                return Result.success();
+            }
+
+            List<UpdateItem> fresh=new ArrayList<>();
+            long newCursor=previous;
+            for(UpdateItem item:matching){
+                newCursor=Math.max(newCursor,item.publishedAtMillis);
+                if(item.publishedAtMillis>previous) fresh.add(item);
+            }
+
+            if(!fresh.isEmpty()) notifyNewContent(fresh);
+            prefs.setLastSeen(stateKey,Math.max(newCursor,latestPublished));
             return Result.success();
         } catch(Exception e){
             return Result.retry();
         }
     }
 
-    private Set<String> loadAllPageUrls() throws Exception {
-        String index = fetch(BASE + "/sitemap.xml");
-        Matcher indexMatcher = LOC.matcher(index);
-        List<String> childSitemaps = new ArrayList<>();
-        Set<String> directPages = new LinkedHashSet<>();
-        while(indexMatcher.find()) {
-            String url = decodeXml(indexMatcher.group(1));
-            if(url.contains("/sitemaps/") && url.contains(".xml")) childSitemaps.add(url);
-            else directPages.add(url);
-        }
-        if(childSitemaps.isEmpty()) return directPages;
-
-        Set<String> pages = new LinkedHashSet<>();
-        int sitemapCount = 0;
-        for(String sitemap : childSitemaps) {
-            if(sitemapCount++ >= MAX_SITEMAPS || pages.size() >= MAX_URLS) break;
-            String xml = fetch(sitemap);
-            Matcher m = LOC.matcher(xml);
-            while(m.find() && pages.size() < MAX_URLS) {
-                String url = decodeXml(m.group(1));
-                if(!url.contains("/sitemaps/") && isPublicPage(url)) pages.add(url);
-            }
-        }
-        return pages;
-    }
-
-    private boolean isPublicPage(String url) {
-        return url.startsWith(BASE + "/")
-                && !url.contains("/api/")
-                && !url.contains("/admin")
-                && !url.contains("/login")
-                && !url.contains("/register");
-    }
-
-    private String fetch(String url) throws Exception {
-        HttpURLConnection con = (HttpURLConnection)new URL(url).openConnection();
+    private List<UpdateItem> fetchUpdates() throws Exception {
+        HttpURLConnection con=(HttpURLConnection)new URL(FEED).openConnection();
         con.setConnectTimeout(10000);
-        con.setReadTimeout(20000);
+        con.setReadTimeout(15000);
         con.setInstanceFollowRedirects(true);
-        con.setRequestProperty("Accept","application/xml,text/xml;q=0.9,*/*;q=0.5");
+        con.setRequestProperty("Accept","application/json");
         con.setRequestProperty("User-Agent","RawafidAndroid/1.0 (+https://healthrenewal.org)");
-        int code = con.getResponseCode();
-        if(code < 200 || code >= 300) throw new IllegalStateException("HTTP " + code);
-        StringBuilder body = new StringBuilder();
-        try(BufferedReader r = new BufferedReader(new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8))) {
-            String line;
-            while((line = r.readLine()) != null) body.append(line);
-        } finally {
-            con.disconnect();
+        int code=con.getResponseCode();
+        if(code<200||code>=300){ con.disconnect(); throw new IllegalStateException("HTTP "+code); }
+        StringBuilder body=new StringBuilder();
+        try(BufferedReader r=new BufferedReader(new InputStreamReader(con.getInputStream(),StandardCharsets.UTF_8))){ String line; while((line=r.readLine())!=null) body.append(line); }
+        finally { con.disconnect(); }
+
+        JSONObject root=new JSONObject(body.toString());
+        if(!root.optBoolean("ok",false)) throw new IllegalStateException("Feed unavailable");
+        JSONArray updates=root.optJSONArray("updates");
+        List<UpdateItem> out=new ArrayList<>();
+        if(updates==null) return out;
+        for(int i=0;i<updates.length();i++){
+            JSONObject item=updates.optJSONObject(i); if(item==null) continue;
+            String title=item.optString("title","").trim();
+            String path=item.optString("path","").trim();
+            String published=item.optString("published_at","").trim();
+            JSONArray paths=item.optJSONArray("follow_paths");
+            if(title.isEmpty()||!path.startsWith("/")||published.isEmpty()||paths==null) continue;
+            long publishedMillis;
+            try { publishedMillis=Instant.parse(published).toEpochMilli(); } catch(Exception ignored){ continue; }
+            Set<String> followPaths=new HashSet<>();
+            for(int p=0;p<paths.length();p++){ String value=paths.optString(p,"").trim(); if(value.startsWith("/")) followPaths.add(value); }
+            if(!followPaths.isEmpty()) out.add(new UpdateItem(title,path,publishedMillis,followPaths));
         }
-        return body.toString();
+        return out;
     }
 
-    private String decodeXml(String value) {
-        return value.replace("&amp;","&").replace("&lt;","<").replace("&gt;",">");
+    private Set<String> parseSelected(String raw){
+        Set<String> out=new HashSet<>();
+        if(raw==null) return out;
+        for(String token:raw.split(",")){ String value=token.trim(); if(value.startsWith("/")) out.add(value); }
+        return out;
     }
 
-    private boolean matchesSelectedPath(String url,String selected){
-        for(String token:selected.split(",")) {
-            String clean = token.trim();
-            if(clean.isEmpty()) continue;
-            if(url.startsWith(BASE + clean) || url.contains(clean)) return true;
-        }
-        return false;
-    }
+    private void notifyNewContent(List<UpdateItem> fresh){
+        Context c=getApplicationContext();
+        if(android.os.Build.VERSION.SDK_INT>=33 && ActivityCompat.checkSelfPermission(c,Manifest.permission.POST_NOTIFICATIONS)!=PackageManager.PERMISSION_GRANTED) return;
 
-    private long stableFingerprint(List<String> urls) throws Exception {
-        MessageDigest digest = MessageDigest.getInstance("SHA-256");
-        for(String url : urls) {
-            digest.update(url.getBytes(StandardCharsets.UTF_8));
-            digest.update((byte)'\n');
-        }
-        byte[] hash = digest.digest();
-        long value = 0L;
-        for(int i=0;i<Math.min(8,hash.length);i++) value = (value << 8) | (hash[i] & 0xffL);
-        return value;
-    }
+        UpdateItem newest=fresh.get(0);
+        for(UpdateItem item:fresh) if(item.publishedAtMillis>newest.publishedAtMillis) newest=item;
+        Uri target=Uri.parse(BASE+newest.path);
+        Intent i=new Intent(c,MainActivity.class).setAction(Intent.ACTION_VIEW).setData(target);
+        PendingIntent pi=PendingIntent.getActivity(c,77,i,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
 
-    private String newestCandidate(List<String> matches) {
-        if(matches.isEmpty()) return BASE;
-        return matches.get(matches.size()-1);
-    }
+        String text=fresh.size()==1?newest.title:(fresh.size()+" مواد جديدة ضمن المجالات التي تتابعها");
+        NotificationCompat.Builder publicVersion=new NotificationCompat.Builder(c,RawafidApp.CHANNEL_CONTENT)
+                .setSmallIcon(android.R.drawable.ic_dialog_info)
+                .setContentTitle("روافد")
+                .setContentText("لديك تحديث جديد من روافد")
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setAutoCancel(true);
 
-    private void notifyNewContent(String url){
-        Context c = getApplicationContext();
-        if(android.os.Build.VERSION.SDK_INT>=33 && ActivityCompat.checkSelfPermission(c, Manifest.permission.POST_NOTIFICATIONS)!=PackageManager.PERMISSION_GRANTED) return;
-        Intent i = new Intent(c,MainActivity.class).setAction(Intent.ACTION_VIEW).setData(android.net.Uri.parse(url));
-        PendingIntent pi = PendingIntent.getActivity(c,77,i,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
-        NotificationCompat.Builder b = new NotificationCompat.Builder(c,RawafidApp.CHANNEL_CONTENT)
+        NotificationCompat.Builder b=new NotificationCompat.Builder(c,RawafidApp.CHANNEL_CONTENT)
                 .setSmallIcon(android.R.drawable.ic_dialog_info)
                 .setContentTitle("جديد في روافد")
-                .setContentText("نُشر أو أضيف محتوى جديد ضمن المجالات التي تتابعها.")
+                .setContentText(text)
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(text))
+                .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
+                .setPublicVersion(publicVersion.build())
                 .setContentIntent(pi)
                 .setAutoCancel(true)
                 .setCategory(NotificationCompat.CATEGORY_RECOMMENDATION);
         ((NotificationManager)c.getSystemService(Context.NOTIFICATION_SERVICE)).notify(2001,b.build());
+    }
+
+    static final class UpdateItem {
+        final String title;
+        final String path;
+        final long publishedAtMillis;
+        final Set<String> followPaths;
+        UpdateItem(String title,String path,long publishedAtMillis,Set<String> followPaths){
+            this.title=title; this.path=path; this.publishedAtMillis=publishedAtMillis; this.followPaths=followPaths;
+        }
+        boolean matches(Set<String> selected){
+            for(String value:selected) if(followPaths.contains(value)) return true;
+            return false;
+        }
     }
 }
