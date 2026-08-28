@@ -9,6 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.util.ArrayDeque;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -25,6 +26,7 @@ public final class SecurePrefs {
     private static final String TRANSFORMATION="AES/GCM/NoPadding";
     private static final int GCM_TAG_BITS=128;
     private static final int RECENT_MESSAGE_LIMIT=200;
+    private static final int MOOD_HISTORY_LIMIT=180;
 
     private final SharedPreferences prefs;
     private final SecretKey secretKey;
@@ -119,6 +121,21 @@ public final class SecurePrefs {
         putString("cycle_length",Integer.toString(clamp(cycle,21,45)));
         putString("period_length",Integer.toString(clamp(period,2,10)));
     }
+
+    public List<MoodPatternEngine.Entry> getMoodHistory(){
+        return MoodPatternEngine.decode(getString("mood_history",""));
+    }
+
+    public void recordMood(int mood){
+        List<MoodPatternEngine.Entry> updated=MoodPatternEngine.appendCapped(
+                getMoodHistory(),
+                new MoodPatternEngine.Entry(System.currentTimeMillis(),mood),
+                MOOD_HISTORY_LIMIT
+        );
+        putString("mood_history",MoodPatternEngine.encode(updated));
+    }
+
+    public void clearMoodHistory(){ putString("mood_history",""); }
 
     public boolean isCompanionEnabled(){ return getBoolean("companion_enabled",false); }
     public int getCompanionDailyLimit(){ return clamp(getInt("companion_daily_limit",4),1,12); }
