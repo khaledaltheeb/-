@@ -356,12 +356,19 @@ public final class MainActivity extends AppCompatActivity {
         shell("الخصوصية وبياناتي 🔐");
         sectionTitle("ما الذي يبقى على جهازك؟","روافد يستخدم تخزينًا محليًا مشفرًا بمفتاح Android Keystore للبيانات الشخصية في رفيقة روافد وتقويم المرأة، والنسخ الاحتياطي للتطبيق معطل في إصدار النشر.");
         int moodCount=prefs.getMoodHistory().size();
+        int libraryCount=prefs.getLibraryItems().size();
+        int symptomCount=prefs.getSymptomEntries().size();
+        int emergencyCount=prefs.getEmergencyContacts().size();
         int followed=0; for(String token:prefs.getSectors().split(",")) if(!token.trim().isEmpty()) followed++;
         String summary="الاسم المخصص: "+(prefs.getName().isEmpty()?"غير محفوظ":"محفوظ محليًا")+
                 "\nبيانات دورة: "+(prefs.getLastPeriod()>0?"موجودة":"غير موجودة")+
                 "\nتسجيلات مزاج محلية: "+moodCount+
+                "\nمواد محفوظة في مكتبتي: "+libraryCount+
+                "\nتسجيلات دفتر الأعراض: "+symptomCount+
+                "\nجهات طوارئ محفوظة: "+emergencyCount+
+                "\nإرفاق الموقع في الطوارئ: "+(prefs.isEmergencyLocationEnabled()?"مفعّل عند الاستخدام وبإذن المستخدم":"غير مفعّل")+
                 "\nمسارات متابعة محفوظة: "+followed+
-                "\nرفع تلقائي لبيانات الدورة أو المزاج إلى الحساب: لا";
+                "\nرفع تلقائي لبيانات الطوارئ أو الموقع أو الأعراض أو المكتبة أو الدورة أو المزاج إلى الحساب: لا";
         root.addView(text(summary,15,false,Color.DKGRAY));
 
         Button policy=button("فتح سياسة الخصوصية",teal); policy.setOnClickListener(v->openWeb(BASE+"/privacy")); root.addView(policy);
@@ -376,7 +383,7 @@ public final class MainActivity extends AppCompatActivity {
         Button clearAll=button("حذف جميع بياناتي الشخصية المحلية",Color.rgb(153,55,65));
         clearAll.setOnClickListener(v->new androidx.appcompat.app.AlertDialog.Builder(this)
                 .setTitle("حذف البيانات المحلية؟")
-                .setMessage("سيؤدي ذلك إلى حذف الاسم، بيانات تقويم المرأة، سجل المزاج، جدول رفيقة روافد، القطاعات المتابعة وحالة التنبيهات المحلية من هذا الجهاز. لا يحذف هذا الإجراء بيانات حساب على الموقع إن كان لديك حساب.")
+                .setMessage("سيؤدي ذلك إلى حذف الاسم، خطة الطوارئ وجهات الاتصال المحلية، بيانات تقويم المرأة، سجل المزاج، دفتر الأعراض، مكتبتي، جدول رفيقة روافد، القطاعات المتابعة وحالة التنبيهات المحلية من هذا الجهاز. لا يحذف هذا الإجراء بيانات حساب على الموقع إن كان لديك حساب.")
                 .setNegativeButton("إلغاء",null)
                 .setPositiveButton("حذف",(dialog,which)->{ prefs.clearSensitiveData(); prefs=new SecurePrefs(this); Toast.makeText(this,"تم حذف البيانات الشخصية المحلية",Toast.LENGTH_SHORT).show(); showPrivacy(); })
                 .show()); root.addView(clearAll);
