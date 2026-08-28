@@ -8,11 +8,12 @@ const helper = fs.readFileSync(path.join(root, helperPath), 'utf8');
 const requiredHelperFragments = [
   "const RAWAFID_REVIEW_TEAM = 'فريق روافد';",
   'const hasRecordedReview = Boolean(recordedReviewDate);',
+  'const hasAttributableReviewer = Boolean(hasRecordedReview && explicitReviewer);',
   'const lastReviewedAt = hasRecordedReview ? recordedReviewDate : null;',
-  'const reviewerName = hasRecordedReview ? explicitReviewer || RAWAFID_REVIEW_TEAM : null;',
-  "const reviewerType = hasRecordedReview ? (explicitReviewer ? 'Person' : 'Organization') : null;",
+  'const reviewerName = hasAttributableReviewer ? explicitReviewer : null;',
+  "const reviewerType = hasAttributableReviewer ? (institutionalReviewer ? 'Organization' : 'Person') : null;",
+  'const reviewedBySchema = !hasAttributableReviewer',
   "'@type': 'Organization'",
-  'name: RAWAFID_REVIEW_TEAM',
   'reviewedBySchema',
 ];
 
@@ -23,14 +24,14 @@ for (const fragment of requiredHelperFragments) {
 }
 
 const forbiddenHelperFragments = [
-  'const hasAttributableReview = Boolean(recordedReviewDate && explicitReviewer);',
-  'const reviewerName = hasAttributableReview ? explicitReviewer : null;',
-  'reject inferred team review attribution',
+  'explicitReviewer || RAWAFID_REVIEW_TEAM',
+  "reviewerType = hasRecordedReview ? (explicitReviewer ? 'Person' : 'Organization') : null",
+  'name: RAWAFID_REVIEW_TEAM',
 ];
 
 for (const fragment of forbiddenHelperFragments) {
   if (helper.includes(fragment)) {
-    throw new Error(`Review provenance helper contradicts the Rawafid review-team policy: ${fragment}`);
+    throw new Error(`Review provenance helper must not infer reviewer identity: ${fragment}`);
   }
 }
 
@@ -58,8 +59,8 @@ for (const file of surfaces) {
     throw new Error(`${file}: lastReviewed must be sourced from recorded review provenance`);
   }
   if (!source.includes('review.reviewerName')) {
-    throw new Error(`${file}: visible review attribution must use the resolved reviewer`);
+    throw new Error(`${file}: visible review attribution must use explicit resolved reviewer identity`);
   }
 }
 
-console.log(`Review provenance contract passed: ${surfaces.length} public surfaces preserve lastReviewed as a real Rawafid review date, using a named reviewer when recorded and فريق روافد as the organization fallback.`);
+console.log(`Review provenance contract passed: ${surfaces.length} public surfaces preserve recorded review dates and never infer reviewer identity.`);
