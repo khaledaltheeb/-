@@ -56,10 +56,11 @@ for (const [label, source] of [['content sitemap', contentRoute], ['sitemap inde
   if (source.includes(".is('schema_json->legacy_migration', null)")) {
     fail(`${label} must not exclude an indexable published page merely because legacy_migration metadata exists`);
   }
-  for (const marker of [".eq('status', 'published')", ".neq('content_type', 'condition')", ".eq('robots_index', true)"]) {
+  for (const marker of [".eq('status', 'published')", ".eq('robots_index', true)"]) {
     if (!source.includes(marker)) fail(`${label} missing coverage marker: ${marker}`);
   }
   for (const marker of [
+    ".not('canonical_url', 'like', '/encyclopedia/%')",
     ".not('canonical_url', 'like', '/quick-info/%')",
     ".not('canonical_url', 'like', '/daily-tools/%')",
     ".not('canonical_url', 'like', '/addiction/substances/%')",
@@ -68,13 +69,24 @@ for (const [label, source] of [['content sitemap', contentRoute], ['sitemap inde
   ]) {
     if (!source.includes(marker)) fail(`${label} missing exclusive ownership filter: ${marker}`);
   }
+  if (source.includes(".neq('content_type', 'condition')")) {
+    fail(`${label} must partition encyclopedia ownership by canonical namespace, not content_type`);
+  }
   if (source.includes(".not('slug', 'like', 'quick-info-%')")) {
     fail(`${label} must partition Quick Info by canonical ownership, not by an internal slug prefix`);
   }
 }
 
-for (const marker of [".eq('content_type', 'condition')", ".eq('status', 'published')", ".eq('robots_index', true)"]) {
-  if (!encyclopediaRoute.includes(marker)) fail(`encyclopedia sitemap missing condition coverage marker: ${marker}`);
+for (const marker of [
+  ".in('content_type', ['glossary_term', 'condition'])",
+  ".like('canonical_url', '/encyclopedia/%')",
+  ".eq('status', 'published')",
+  ".eq('robots_index', true)",
+]) {
+  if (!encyclopediaRoute.includes(marker)) fail(`encyclopedia sitemap missing canonical ownership marker: ${marker}`);
+}
+if (encyclopediaRoute.includes(".eq('content_type', 'condition')")) {
+  fail('encyclopedia sitemap must not claim every condition regardless of its canonical namespace');
 }
 if (!contentRoute.includes('DB_BATCH_SIZE = 1000') || !contentRoute.includes('PAGE_SIZE = 5000')) {
   fail('content sitemap must retain bounded database batching and 5000-URL paging');
@@ -164,6 +176,20 @@ async function fetchIndexablePublishedInventory() {
   });
 }
 
+function encyclopediaOwned(row) {
+  const canonical = typeof row.canonical_url === 'string' ? row.canonical_url.trim() : '';
+  if (!canonical.startsWith('/encyclopedia/')) return false;
+  const slug = typeof row.slug === 'string' ? row.slug.trim().toLowerCase() : '';
+  const eligibleType = row.content_type === 'glossary_term' || row.content_type === 'condition';
+  const eligible = eligibleType
+    && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)
+    && normalizePath(canonical) === normalizePath(`/encyclopedia/${slug}/`);
+  if (!eligible) {
+    fail(`indexable encyclopedia canonical row ${row.id} is excluded from content sitemap but is not eligible for the encyclopedia sitemap`);
+  }
+  return true;
+}
+
 function quickInfoOwned(row) {
   const canonical = typeof row.canonical_url === 'string' ? row.canonical_url.trim() : '';
   if (!canonical.startsWith('/quick-info/')) return false;
@@ -202,24 +228,15 @@ function atlasOwned(row) {
 }
 
 try {
-  // One bounded inventory read replaces three expensive exact-count scans plus a
-  // second condition scan. The same rows now drive every partition assertion,
-  // so the no-loss proof is stronger while avoiding PostgreSQL statement timeouts.
+  // One bounded inventory read drives every ownership assertion. Sitemap ownership
+  // follows canonical namespaces, so internal content types cannot create a dropped
+  // page or a competing non-canonical URL.
   const publishedRows = await fetchIndexablePublishedInventory();
   const total = publishedRows.length;
-  const conditionRows = publishedRows.filter((row) => row.content_type === 'condition');
-  const conditions = conditionRows.length;
-  const nonConditions = total - conditions;
-
-  const invalidConditionSlugs = conditionRows
-    .map((row) => typeof row.slug === 'string' ? row.slug.trim().toLowerCase() : '')
-    .filter((slug) => !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug));
-  if (invalidConditionSlugs.length) {
-    fail(`encyclopedia sitemap would drop ${invalidConditionSlugs.length} indexable condition slug(s): ${invalidConditionSlugs.slice(0, 5).join(', ')}`);
-  }
-
   const seenCanonicals = new Set();
+  let encyclopediaOwnedCount = 0;
   let dedicatedOwned = 0;
+
   for (const row of publishedRows) {
     const canonical = typeof row.canonical_url === 'string' ? row.canonical_url.trim() : '';
     const slug = typeof row.slug === 'string' ? row.slug.trim() : '';
@@ -243,23 +260,26 @@ try {
     if (seenCanonicals.has(normalized)) fail(`duplicate published canonical_url: ${canonical}`);
     seenCanonicals.add(normalized);
 
-    if (row.content_type !== 'condition' && (quickInfoOwned(row) || dailyToolsOwned(row) || atlasOwned(row))) {
+    if (encyclopediaOwned(row)) {
+      encyclopediaOwnedCount += 1;
+      continue;
+    }
+    if (quickInfoOwned(row) || dailyToolsOwned(row) || atlasOwned(row)) {
       dedicatedOwned += 1;
     }
   }
 
-  if (total !== conditions + nonConditions) {
-    fail(`indexable published partition mismatch: total=${total}, conditions=${conditions}, nonConditions=${nonConditions}`);
+  const contentOwned = total - encyclopediaOwnedCount - dedicatedOwned;
+  if (contentOwned < 0 || total !== encyclopediaOwnedCount + dedicatedOwned + contentOwned) {
+    fail(`indexable published canonical partition mismatch: total=${total}, encyclopedia=${encyclopediaOwnedCount}, dedicated=${dedicatedOwned}, content=${contentOwned}`);
   }
-  const contentOwned = nonConditions - dedicatedOwned;
-  if (contentOwned < 0) fail(`negative content-owned sitemap partition: ${contentOwned}`);
 
   if (failures.length) {
     for (const message of failures) console.error(`SITEMAP PRESERVATION CONTRACT FAILED: ${message}`);
     process.exit(1);
   }
 
-  console.log(`Sitemap preservation contract passed: ${total} indexable published DB pages = ${conditions} encyclopedia conditions + ${dedicatedOwned} dedicated-map DB pages + ${contentOwned} content-sitemap safety-net pages; Daily Tools ownership is proven from the same immutable source corpus used to generate its 151-route sitemap; canonical URLs are unique production HTTPS URLs with updated_at, and paginated sitemap boundaries are stable.`);
+  console.log(`Sitemap preservation contract passed: ${total} indexable published DB pages = ${encyclopediaOwnedCount} encyclopedia-canonical DB pages + ${dedicatedOwned} other dedicated-map DB pages + ${contentOwned} content-sitemap safety-net pages; Daily Tools ownership is proven from the same immutable source corpus used to generate its 151-route sitemap; canonical URLs are unique production HTTPS URLs with updated_at, and paginated sitemap boundaries are stable.`);
 } catch (error) {
   console.error(`SITEMAP PRESERVATION CONTRACT FAILED: ${error instanceof Error ? error.message : String(error)}`);
   process.exit(1);
