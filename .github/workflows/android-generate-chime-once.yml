@@ -1,0 +1,53 @@
+name: Generate Rawafid Notification Chime Once
+on:
+  push:
+    branches: ["android/rawafid-app-v1"]
+    paths:
+      - ".github/workflows/android-generate-chime-once.yml"
+permissions:
+  contents: write
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: android/rawafid-app-v1
+          fetch-depth: 0
+      - name: Synthesize original Rawafid xylophone chime
+        run: |
+          python3 - <<'PY'
+          import math, wave, struct
+          from pathlib import Path
+          sr=44100
+          duration=0.90
+          n=int(sr*duration)
+          base=1174.66
+          partials=[(1.00,1.0,8.5),(0.34,2.76,11.0),(0.18,5.40,14.5),(0.10,8.93,18.0)]
+          delays=[(0.0,1.0),(0.115,0.22),(0.245,0.10)]
+          samples=[]
+          for i in range(n):
+              t=i/sr
+              value=0.0
+              for delay,gain in delays:
+                  td=t-delay
+                  if td<0: continue
+                  attack=min(1.0,td/0.004)
+                  tone=0.0
+                  for amp,ratio,decay in partials:
+                      tone += amp*math.sin(2*math.pi*base*ratio*td)*math.exp(-decay*td)
+                  value += gain*attack*tone
+              value=max(-1.0,min(1.0,value*0.46))
+              samples.append(int(value*32767))
+          out=Path('android-app/app/src/main/res/raw/rawafid_chime_v2.wav')
+          out.parent.mkdir(parents=True,exist_ok=True)
+          with wave.open(str(out),'wb') as w:
+              w.setnchannels(1); w.setsampwidth(2); w.setframerate(sr)
+              w.writeframes(b''.join(struct.pack('<h',s) for s in samples))
+          print(out, out.stat().st_size)
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add android-app/app/src/main/res/raw/rawafid_chime_v2.wav
+          git commit -m "feat(android): add original Rawafid xylophone notification chime"
+          git push origin HEAD:android/rawafid-app-v1
