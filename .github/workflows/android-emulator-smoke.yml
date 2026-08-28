@@ -72,3 +72,10 @@ jobs:
           name: rawafid-emulator-evidence
           path: android-emulator-artifacts/
           if-no-files-found: error
+      - name: Upload approved phone test APK
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: rawafid-phone-test-apk
+          path: android-app/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
