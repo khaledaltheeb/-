@@ -16,7 +16,6 @@ export const metadata: Metadata = buildSeoMetadata({
   index: true,
   follow: true,
   type: 'website',
-  hreflang: { ar: '/magazine/', 'x-default': '/magazine/' },
 });
 
 function formatDate(value: string | null) {
