@@ -7,7 +7,8 @@ export const dynamic = 'force-dynamic';
 type Params = Promise<{ legacyPath: string[] }>;
 
 function preservedRoute(segments: string[]) {
-  return `/${segments.filter(Boolean).join('/')}/`;
+  const path = segments.filter(Boolean).join('/');
+  return path.toLowerCase().endsWith('.html') ? `/${path}` : `/${path}/`;
 }
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {

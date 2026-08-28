@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 const catalog = fs.readFileSync('lib/legacy-guides.ts','utf8');
+const landing = fs.readFileSync('app/guides/page.tsx','utf8');
 const page = fs.readFileSync('app/guides/[slug]/page.tsx','utf8');
 const config = fs.readFileSync('next.config.ts','utf8');
 const fail=(m)=>{console.error(`LEGACY GUIDE CONTENT CONTRACT FAILED: ${m}`);process.exitCode=1};
@@ -9,6 +10,8 @@ if(new Set(slugs).size!==18)fail('guide slugs must be unique');
 for(const required of ['المحتوى المحفوظ من النسخة القديمة','هذه ليست صفحة تحويل','مرجع رسمي للتحقق','حدود السلامة'])if(!page.includes(required))fail(`missing transfer contract: ${required}`);
 for(const required of ['dynamicParams = true','getCurrentGuide','ContentRenderer',".eq('content_type', 'guide')",'.eq(\'canonical_url\', `/guides/${safe}/`)'])if(!page.includes(required))fail(`missing current published guide routing contract: ${required}`);
 if(page.indexOf('const guide = getLegacyGuide(slug);')>page.indexOf('const current = await getCurrentGuide(slug);'))fail('legacy local guides must retain priority over the database fallback');
+for(const required of ["const route = '/guides/'",'generateMetadata','getLegacyPreservedPage','legacyPreservedMetadata'])if(!landing.includes(required))fail(`guide landing must inherit reviewed published metadata: ${required}`);
+if(/index\s*:\s*false/.test(landing))fail('reviewed /guides/ landing must not hard-code noindex');
 if(config.includes('legacyThinGuideRedirects'))fail('legacy guide redirects must be removed; content routes now own /guides/*');
 if(!fs.existsSync('app/guides/page.tsx')||!fs.existsSync('app/guides/[slug]/page.tsx'))fail('guide content routes are missing');
-if(!process.exitCode)console.log('Legacy guide content contract passed: 18 historical guide routes stay stable and additional reviewed /guides/* canonicals can render from published content without redirects.');
+if(!process.exitCode)console.log('Legacy guide content contract passed: the reviewed /guides/ landing inherits published metadata, 18 historical guide routes stay stable, and additional reviewed /guides/* canonicals can render from published content without redirects.');

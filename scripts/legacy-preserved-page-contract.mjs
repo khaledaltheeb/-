@@ -55,6 +55,7 @@ for(const marker of ['get_legacy_preserved_page','legacyPreservedMetadata','buil
 // Keep the historical noarchive behavior without duplicating a second metadata implementation.
 for(const marker of ['const canIndex = INDEXING_ENABLED && input.index !== false','noarchive: !canIndex','nosnippet: !canIndex']) if(!seo.includes(marker)) fail(`central SEO noindex preservation marker missing: ${marker}`);
 for(const marker of ['نسخة إنتاجية محفوظة','لم تُمنح هذه النسخة اعتماد دورة المراجعة العلمية الحالية','ContentRenderer','legacyInternalLinks','legacyReferences']) if(!view.includes(marker)) fail(`preserved view marker missing: ${marker}`);
+for(const marker of ['legacyPageJsonLd','SITE_URL',"'@type': 'CollectionPage'","'@type': 'ScholarlyArticle'","'@type': ['Article', 'MedicalWebPage']","'@type': 'MedicalCondition'",'dangerouslySetInnerHTML']) if(!view.includes(marker)) fail(`preserved rich-discovery schema marker missing: ${marker}`);
 for(const marker of ['NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY',"rpc('legacy_preserved_route_exists'",'isLegacyProductionRoute']) if(!proxy.includes(marker)) fail(`proxy must document its public preservation RPC dependency: ${marker}`);
 for(const path of routes){
  if(!fs.existsSync(path)){fail(`preserved route missing: ${path}`);continue;}
@@ -86,4 +87,4 @@ for(const path of [
 ]) if(!fs.existsSync(path)) fail(`deployed migration history not mirrored: ${path}`);
 
 if(failed)process.exit(1);
-console.log('Legacy preservation contract passed: production HTML remains available through a Unicode-safe public read-only noindex boundary, reviewed modern takeovers keep priority over fallback rendering, and centralized SEO preserves the historical noarchive/nosnippet behavior without duplicating metadata logic.');
+console.log('Legacy preservation contract passed: production HTML remains available through a Unicode-safe public read-only noindex boundary, reviewed modern takeovers keep priority over fallback rendering, centralized SEO preserves historical noarchive/nosnippet behavior, and route-semantic JSON-LD covers preserved/current takeovers used by rich discovery.');

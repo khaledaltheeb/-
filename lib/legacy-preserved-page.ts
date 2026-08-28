@@ -64,7 +64,10 @@ function safeRoute(route: string): string | null {
 }
 
 function currentTakeoverAllowed(route: string) {
-  return !route.startsWith('/assessments/') && !route.startsWith('/cognitive-tests/');
+  const normalized = safeRoute(route);
+  if (!normalized) return false;
+  if (normalized === '/assessments/') return true;
+  return !normalized.startsWith('/assessments/') && !normalized.startsWith('/cognitive-tests/');
 }
 
 function canonicalVariants(route: string) {
@@ -74,6 +77,11 @@ function canonicalVariants(route: string) {
     else values.add(`${route}/`);
   }
   return [...values];
+}
+
+function canonicalMatchesRoute(canonicalUrl: string | null, route: string) {
+  if (!canonicalUrl) return false;
+  return safeRoute(canonicalUrl) === route;
 }
 
 function normalizeCurrentContent(value: unknown): PublishedCanonicalContent | null {
@@ -198,18 +206,27 @@ function normalizePage(value: unknown, route: string, currentContent: PublishedC
 async function getPublishedCanonicalContent(route: string): Promise<PublishedCanonicalContent | null> {
   if (!currentTakeoverAllowed(route)) return null;
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from('content')
-    .select('id,slug,title,excerpt,body_text,body_json,content_type,seo_title,seo_description,canonical_url,robots_index,robots_follow,published_at,updated_at,reviewer_display_name,last_reviewed_at,references_json,medical_disclaimer')
-    .in('canonical_url', canonicalVariants(route))
-    .eq('status', 'published')
-    .eq('robots_index', true)
-    .lte('published_at', new Date().toISOString())
-    .order('updated_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  if (error) return null;
-  return normalizeCurrentContent(data);
+  const now = new Date().toISOString();
+
+  // Resolve one canonical candidate at a time. This keeps route lookup deterministic and
+  // prevents a sibling record from ever being accepted as the current-content takeover.
+  for (const canonicalUrl of canonicalVariants(route)) {
+    const { data, error } = await supabase
+      .from('content')
+      .select('id,slug,title,excerpt,body_text,body_json,content_type,seo_title,seo_description,canonical_url,robots_index,robots_follow,published_at,updated_at,reviewer_display_name,last_reviewed_at,references_json,medical_disclaimer')
+      .eq('canonical_url', canonicalUrl)
+      .eq('status', 'published')
+      .eq('robots_index', true)
+      .lte('published_at', now)
+      .order('updated_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (error) continue;
+    const current = normalizeCurrentContent(data);
+    if (current && canonicalMatchesRoute(current.canonical_url, route)) return current;
+  }
+
+  return null;
 }
 
 export async function getLegacyPreservedPage(route: string): Promise<LegacyPreservedPage | null> {
@@ -228,12 +245,13 @@ export async function getLegacyPreservedPage(route: string): Promise<LegacyPrese
 
 export function legacyPreservedMetadata(page: LegacyPreservedPage | null, route: string): Metadata {
   if (!page) return {};
+  const canonicalPath = legacyCanonicalPath(route);
   const current = page.current_content;
   if (current) {
     return buildSeoMetadata({
       title: current.seo_title || current.title,
       description: current.seo_description || current.excerpt,
-      path: current.canonical_url || legacyCanonicalPath(route),
+      path: canonicalPath,
       index: current.robots_index,
       follow: current.robots_follow,
       type: ['article', 'guide', 'research', 'news', 'condition', 'protocol', 'intervention', 'assessment'].includes(current.content_type) ? 'article' : 'website',
@@ -244,7 +262,7 @@ export function legacyPreservedMetadata(page: LegacyPreservedPage | null, route:
   return buildSeoMetadata({
     title: page.title || page.h1 || 'محتوى محفوظ',
     description: page.meta_description || page.body_text?.slice(0, 220) || 'صفحة محفوظة من مكتبة روافد قيد المراجعة والترقية التحريرية.',
-    path: legacyCanonicalPath(route),
+    path: canonicalPath,
     index: false,
     follow: true,
     type: 'website',

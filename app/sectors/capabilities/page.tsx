@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
-import { buildSeoMetadata } from '@/lib/seo';
+import { buildSeoMetadata, SITE_URL } from '@/lib/seo';
 
 export const metadata = buildSeoMetadata({
   title: 'لنرتقي بقدراتهم | قطاع القدرات والبروتوكولات والأدوات العملية',
@@ -29,11 +29,35 @@ const principles = [
   ['الفائدة يجب أن تنتقل إلى الحياة', 'لا تكفي نتيجة اختبار أو تمرين إذا لم تحسن المشاركة أو الاستقلال أو هدفًا وظيفيًا حقيقيًا.'],
 ];
 
+const collectionJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  '@id': `${SITE_URL}/sectors/capabilities#collection`,
+  url: `${SITE_URL}/sectors/capabilities`,
+  name: 'لنرتقي بقدراتهم',
+  description: 'قطاع تطبيقي لاكتشاف القدرات وإزالة حواجز الأداء عبر أدلة الحالات والبروتوكولات والأدوات العملية والمنهجية العلمية.',
+  inLanguage: 'ar',
+  numberOfItems: paths.length,
+  mainEntity: {
+    '@type': 'ItemList',
+    itemListElement: paths.map((item, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: item.title,
+      url: `${SITE_URL}${item.href}`,
+    })),
+  },
+};
+
 export default function CapabilitiesSectorPage() {
   return (
     <>
       <SiteHeader />
       <main className="trust-page-shell">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd).replace(/</g, '\\u003c') }}
+        />
         <nav className="breadcrumbs" aria-label="مسار الصفحة">
           <Link href="/">الرئيسية</Link><span>/</span><Link href="/sectors">القطاعات</Link><span>/</span><span aria-current="page">لنرتقي بقدراتهم</span>
         </nav>

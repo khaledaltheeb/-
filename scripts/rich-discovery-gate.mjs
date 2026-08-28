@@ -28,7 +28,7 @@ async function fetchText(url) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const response = await fetch(url, { redirect: 'follow', signal: controller.signal, headers: { 'user-agent': 'Rawafid-Rich-Discovery-Gate/1.2' } });
+    const response = await fetch(url, { redirect: 'follow', signal: controller.signal, headers: { 'user-agent': 'Rawafid-Rich-Discovery-Gate/1.3' } });
     return { response, text: await response.text() };
   } finally { clearTimeout(timer); }
 }
@@ -111,6 +111,17 @@ function requireTypes(url, pathname, types) {
     failures.push(`${url}: content-like page lacks page/content structured-data type (${[...types].join(', ') || 'none'})`);
   }
 }
+function requireCanonicalOrigin(url, label, value) {
+  if (!value) {
+    failures.push(`${url}: missing ${label}`);
+    return;
+  }
+  try {
+    const parsed = new URL(value, canonicalOrigin);
+    if (parsed.origin !== canonicalOrigin) failures.push(`${url}: ${label} leaves production origin (${value})`);
+    if (parsed.hostname.endsWith('.workers.dev')) failures.push(`${url}: ${label} points to temporary workers.dev host (${value})`);
+  } catch { failures.push(`${url}: invalid ${label} (${value})`); }
+}
 async function audit(url) {
   let result;
   try { result = await fetchText(url); }
@@ -122,21 +133,17 @@ async function audit(url) {
   if (attr(htmlTag, 'dir').toLowerCase() !== 'rtl') failures.push(`${url}: html dir is not rtl`);
 
   const canonical = linkHref(html, 'canonical');
-  if (!canonical) failures.push(`${url}: missing canonical`);
-  if (canonical) {
-    try {
-      const parsed = new URL(canonical, canonicalOrigin);
-      if (parsed.origin !== canonicalOrigin) failures.push(`${url}: canonical leaves production origin (${canonical})`);
-      if (parsed.hostname.endsWith('.workers.dev')) failures.push(`${url}: canonical points to temporary workers.dev host (${canonical})`);
-    } catch { failures.push(`${url}: invalid canonical (${canonical})`); }
-  }
+  requireCanonicalOrigin(url, 'canonical', canonical);
 
+  // Next.js may stream route metadata after the initial <head> for non-HTML-limited
+  // user agents. Audit the rendered metadata signals themselves rather than requiring
+  // a production-domain literal inside the first head block. Canonical + og:url are
+  // both required to resolve to the production origin below.
   const head = (html.match(/<head\b[^>]*>([\s\S]*?)<\/head>/i) || [,''])[1];
   if (/\.workers\.dev/i.test(head)) failures.push(`${url}: temporary workers.dev host leaked into <head>`);
-  if (canonicalOrigin === 'https://healthrenewal.org' && !/healthrenewal\.org/i.test(head)) {
-    failures.push(`${url}: production head does not reference healthrenewal.org`);
-  }
 
+  const ogUrl = metaContent(html, 'property', 'og:url');
+  requireCanonicalOrigin(url, 'og:url', ogUrl);
   const ogImage = metaContent(html, 'property', 'og:image');
   const twitterImage = metaContent(html, 'name', 'twitter:image');
   const ogSiteName = metaContent(html, 'property', 'og:site_name');
