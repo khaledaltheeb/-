@@ -3,6 +3,8 @@ package org.healthrenewal.rawafid;
 import android.app.Application;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.media.AudioAttributes;
+import android.net.Uri;
 import android.webkit.WebView;
 import androidx.work.Constraints;
 import androidx.work.ExistingPeriodicWorkPolicy;
@@ -12,12 +14,12 @@ import androidx.work.WorkManager;
 import java.util.concurrent.TimeUnit;
 
 public final class RawafidApp extends Application {
-    public static final String CHANNEL_CONTENT = "rawafid_content";
-    public static final String CHANNEL_COMPANION = "rawafid_companion";
+    // Versioned IDs are intentional: Android keeps a channel's sound once the user/device creates it.
+    public static final String CHANNEL_CONTENT = "rawafid_content_v2";
+    public static final String CHANNEL_COMPANION = "rawafid_companion_v2";
 
     @Override public void onCreate() {
         super.onCreate();
-        // Never expose embedded production pages to remote WebView debugging.
         WebView.setWebContentsDebuggingEnabled(false);
         createChannels();
 
@@ -27,21 +29,29 @@ public final class RawafidApp extends Application {
                 .build();
         WorkManager.getInstance(this).enqueueUniquePeriodicWork("rawafid-content-sync", ExistingPeriodicWorkPolicy.UPDATE, content);
 
-        // WorkManager's minimum periodic interval is 15 minutes. The worker itself enforces the
-        // user's active window, daily cap, and minimum gap, so no notification is sent merely
-        // because this evaluator wakes up.
         PeriodicWorkRequest companion = new PeriodicWorkRequest.Builder(CompanionWorker.class, 15, TimeUnit.MINUTES).build();
         WorkManager.getInstance(this).enqueueUniquePeriodicWork("rawafid-companion", ExistingPeriodicWorkPolicy.UPDATE, companion);
     }
 
     private void createChannels() {
         NotificationManager nm = getSystemService(NotificationManager.class);
+        if(nm==null) return;
 
-        NotificationChannel content = new NotificationChannel(CHANNEL_CONTENT, "جديد القطاعات", NotificationManager.IMPORTANCE_DEFAULT);
-        content.setDescription("تنبيهات المحتوى الجديد في القطاعات التي اخترتها");
+        Uri sound=Uri.parse("android.resource://"+getPackageName()+"/"+R.raw.rawafid_chime_v2);
+        AudioAttributes audioAttributes=new AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .build();
+
+        NotificationChannel content = new NotificationChannel(CHANNEL_CONTENT, "تحديثات روافد", NotificationManager.IMPORTANCE_DEFAULT);
+        content.setDescription("تنبيهات المحتوى الجديد والتحديثات المهمة في المجالات التي اخترتها");
+        content.setSound(sound,audioAttributes);
+        content.enableVibration(true);
 
         NotificationChannel companion = new NotificationChannel(CHANNEL_COMPANION, "رفيقة روافد", NotificationManager.IMPORTANCE_DEFAULT);
         companion.setDescription("رسائل الاهتمام والعناية ضمن الجدول الذي تختارينه");
+        companion.setSound(sound,audioAttributes);
+        companion.enableVibration(true);
 
         nm.createNotificationChannel(content);
         nm.createNotificationChannel(companion);
