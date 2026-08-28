@@ -34,30 +34,15 @@ export function absoluteSiteUrl(pathOrUrl: string) {
   return `${SITE_URL}${path}`;
 }
 
-function truncateAtWordBoundary(value: string, maxLength: number) {
-  const clean = value.replace(/\s+/g, ' ').trim();
-  if (clean.length <= maxLength) return clean;
-
-  const hardLimit = Math.max(1, maxLength - 1);
-  const candidate = clean.slice(0, hardLimit).trimEnd();
-  const lastSpace = candidate.lastIndexOf(' ');
-  const safe = lastSpace > 0 ? candidate.slice(0, lastSpace).trimEnd() : candidate;
-  return `${safe}…`;
-}
-
-function clampTitle(value: string) {
+function normalizeTitle(value: string) {
   const clean = value.replace(/\s+/g, ' ').trim();
   const suffix = ` | ${BRAND_SHORT}`;
-  if (clean === BRAND_SHORT || clean === BRAND_NAME) return truncateAtWordBoundary(clean, 60);
-
-  const base = clean.endsWith(suffix) ? clean.slice(0, -suffix.length).trimEnd() : clean;
-  const available = Math.max(20, 60 - suffix.length);
-  return `${truncateAtWordBoundary(base, available)}${suffix}`;
+  if (clean === BRAND_SHORT || clean === BRAND_NAME || clean.endsWith(suffix)) return clean;
+  return `${clean}${suffix}`;
 }
 
-function clampDescription(value?: string | null) {
-  const clean = (value || DEFAULT_DESCRIPTION).replace(/\s+/g, ' ').trim();
-  return truncateAtWordBoundary(clean, 160);
+function normalizeDescription(value?: string | null) {
+  return (value || DEFAULT_DESCRIPTION).replace(/\s+/g, ' ').trim();
 }
 
 function fallbackSocialImagePath(title: string, type?: SeoMetadataInput['type']) {
@@ -88,8 +73,8 @@ export type SeoMetadataInput = {
 
 export function buildSeoMetadata(input: SeoMetadataInput): Metadata {
   const isHomepage = input.path === '/';
-  const title = isHomepage ? HOME_TITLE : clampTitle(input.title);
-  const description = isHomepage ? HOME_DESCRIPTION : clampDescription(input.description);
+  const title = isHomepage ? HOME_TITLE : normalizeTitle(input.title);
+  const description = isHomepage ? HOME_DESCRIPTION : normalizeDescription(input.description);
   const canonical = absoluteSiteUrl(input.path);
   const canIndex = INDEXING_ENABLED && input.index !== false;
   const canFollow = input.follow !== false;
