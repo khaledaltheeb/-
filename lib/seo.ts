@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import { RAWAFID_BRAND_NAME, RAWAFID_BRAND_SHORT } from '@/lib/theme';
-import { buildSemanticSeoProfile } from '@/lib/semantic-seo-safe';
 
 export const PRODUCTION_SITE_URL = 'https://healthrenewal.org';
 export const STAGING_SITE_URL = 'https://rawafid-platform-staging.khaledaltheeb.workers.dev';
@@ -66,10 +65,15 @@ export type SeoMetadataInput = {
   follow?: boolean;
   type?: 'website' | 'article' | 'profile';
   image?: string | null;
+  /** Internal semantic inputs only. They are intentionally not emitted as <meta name="keywords">. */
   keywords?: string[];
   relatedTerms?: string[];
   searchIntents?: string[];
   publishedTime?: string | null;
+  /**
+   * Kept for caller compatibility while substantive-modification provenance is normalized.
+   * Do not emit this from generic metadata because many records use technical updated_at.
+   */
   modifiedTime?: string | null;
   authors?: { name: string; url?: string }[];
   hreflang?: Record<string, string>;
@@ -87,12 +91,6 @@ export function buildSeoMetadata(input: SeoMetadataInput): Metadata {
   const languages = input.hreflang
     ? Object.fromEntries(Object.entries(input.hreflang).map(([key, value]) => [key, absoluteSiteUrl(value)]))
     : undefined;
-
-  // Keep the full 50 topical + 50 intent profile for editorial/query-coverage validation.
-  // Google explicitly ignores <meta name="keywords">, so only a small, highly relevant
-  // topical subset is emitted for compatibility with secondary clients. No hidden copy is used.
-  const semanticProfile = buildSemanticSeoProfile(input);
-  const keywords = semanticProfile.topicKeywords.slice(0, 12);
   const openGraphImages = usesDefaultImage
     ? [{ url: image, width: 1200, height: 630, alt: input.title }]
     : [{ url: image, alt: input.title }];
@@ -100,7 +98,6 @@ export function buildSeoMetadata(input: SeoMetadataInput): Metadata {
   return {
     title: { absolute: title },
     description,
-    keywords,
     creator: BRAND_NAME,
     publisher: BRAND_NAME,
     alternates: { canonical, languages },
@@ -131,7 +128,6 @@ export function buildSeoMetadata(input: SeoMetadataInput): Metadata {
       ...(input.type === 'article'
         ? {
             publishedTime: input.publishedTime || undefined,
-            modifiedTime: input.modifiedTime || undefined,
             authors: input.authors?.map((author) => author.url || author.name),
           }
         : {}),
