@@ -43,16 +43,14 @@ export default function MagazineArticle({ record, related }: { record: MagazineR
     inLanguage: 'ar',
     isAccessibleForFree: true,
     datePublished: record.published_at || undefined,
-    dateModified: record.updated_at || undefined,
-    author: record.author_display_name
-      ? { '@type': 'Organization', name: record.author_display_name }
-      : { '@id': `${SITE_URL}/#organization` },
+    ...(record.author_display_name
+      ? { author: { '@type': 'Organization', name: record.author_display_name } }
+      : {}),
     publisher: { '@id': `${SITE_URL}/#organization` },
     isPartOf: { '@type': 'CollectionPage', name: 'المجلة والأبحاث', url: `${SITE_URL}/magazine/` },
     isBasedOn: primarySource || undefined,
     citation: references.flatMap((reference) => reference.url ? [reference.url] : []),
     about: [record.primary_keyword, ...(record.semantic_terms ?? [])].filter(Boolean),
-    image: `${SITE_URL}/seo-card`,
   };
   const faqSchema = faqs.length ? {
     '@context': 'https://schema.org',
