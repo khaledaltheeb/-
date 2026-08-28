@@ -78,7 +78,10 @@ export default async function SectorPage({ params, searchParams }: { params: Par
   let contentRows: PublishedItem[] = [];
   let totalContent = 0;
   if (categoryIds.length > 0) {
-    const { data: mappings } = await supabase.from('content_categories').select('content_id').eq('is_primary', true).in('category_id', categoryIds);
+    // A sector library represents every page explicitly classified under any of its
+    // categories, including valid cross-listings. The page canonical and primary
+    // taxonomy stay unchanged; this only fixes sector discovery/aggregation.
+    const { data: mappings } = await supabase.from('content_categories').select('content_id').in('category_id', categoryIds);
     const contentIds = [...new Set((mappings ?? []).map((mapping) => mapping.content_id).filter(Boolean))] as string[];
     if (contentIds.length > 0) {
       const { data: content, count } = await supabase
@@ -129,7 +132,7 @@ export default async function SectorPage({ params, searchParams }: { params: Par
   return <>
     <SiteHeader />
     <main className="site-shell sector-page" style={accentStyle}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify([breadcrumbs, collectionSchema]).replace(/</g, '\\u003c') }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify([breadcrumbs, collectionSchema]).replace(/</g, '\u003c') }} />
       <nav className="breadcrumbs" aria-label="مسار الصفحة"><Link href="/">الرئيسية</Link><span>/</span><Link href="/sectors">القطاعات</Link><span>/</span><span aria-current="page">{sector.name_ar}</span></nav>
       <section className="sector-hero"><span className="eyebrow">قطاع رئيسي</span><h1>{sector.name_ar}</h1><p>{sector.description || 'قطاع رئيسي يجمع موضوعات مترابطة ضمن منصة روافد.'}</p><div className="public-stat-strip"><span>{roots.length.toLocaleString('ar')} أقسام رئيسية</span><span>{categoryRows.length.toLocaleString('ar')} قسمًا وقسمًا فرعيًا</span>{totalContent > 0 && <span>{totalContent.toLocaleString('ar')} صفحة منشورة</span>}{sector.slug === 'addiction-recovery' && <span>موسوعة تفاعلية مستقلة</span>}</div><form className="sector-search" action="/search" method="get"><label className="sr-only" htmlFor="sector-search">ابحث في منصة روافد</label><input id="sector-search" name="q" defaultValue={sector.name_ar} aria-label={`ابحث عن موضوع مرتبط بـ ${sector.name_ar}`} /><button type="submit">بحث</button></form></section>
       <nav className="sector-quick-nav" aria-label={`وصول سريع داخل ${sector.name_ar}`}>
