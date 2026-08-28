@@ -46,6 +46,12 @@ android {
     buildFeatures { buildConfig = true }
     packaging { resources.excludes += "/META-INF/{AL2.0,LGPL2.1}" }
 
+    testOptions {
+        unitTests {
+            isReturnDefaultValues = true
+        }
+    }
+
     lint {
         disable += setOf("OldTargetApi", "GradleDependency")
     }
