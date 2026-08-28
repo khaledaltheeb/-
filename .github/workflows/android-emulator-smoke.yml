@@ -47,32 +47,29 @@ jobs:
           disable-animations: true
           emulator-options: -no-snapshot-load -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none
           script: |
-            set -eu
-            ARTIFACT_DIR="$GITHUB_WORKSPACE/android-emulator-artifacts"
-            APK="$GITHUB_WORKSPACE/rawafid-phone-test.apk"
-            test -s "$APK"
-            mkdir -p "$ARTIFACT_DIR"
+            test -s "$GITHUB_WORKSPACE/rawafid-phone-test.apk"
+            mkdir -p "$GITHUB_WORKSPACE/android-emulator-artifacts"
             adb logcat -c || true
-            adb install -r "$APK"
+            adb install -r "$GITHUB_WORKSPACE/rawafid-phone-test.apk"
             adb shell am force-stop org.healthrenewal.rawafid.debug
             adb shell am start -W -n org.healthrenewal.rawafid.debug/org.healthrenewal.rawafid.MainActivity
             sleep 3
             adb shell pidof org.healthrenewal.rawafid.debug
-            adb exec-out screencap -p > "$ARTIFACT_DIR/home.png"
+            adb exec-out screencap -p > "$GITHUB_WORKSPACE/android-emulator-artifacts/home.png"
             adb shell am start -W -a android.intent.action.VIEW -d 'https://healthrenewal.org/sectors/mental-health' org.healthrenewal.rawafid.debug
             sleep 3
             adb shell pidof org.healthrenewal.rawafid.debug
-            adb exec-out screencap -p > "$ARTIFACT_DIR/deep-link.png"
+            adb exec-out screencap -p > "$GITHUB_WORKSPACE/android-emulator-artifacts/deep-link.png"
             adb shell pm revoke org.healthrenewal.rawafid.debug android.permission.POST_NOTIFICATIONS || true
             adb shell am force-stop org.healthrenewal.rawafid.debug
             adb shell am start -W -n org.healthrenewal.rawafid.debug/org.healthrenewal.rawafid.MainActivity
             sleep 2
             adb shell pidof org.healthrenewal.rawafid.debug
-            adb shell dumpsys meminfo org.healthrenewal.rawafid.debug > "$ARTIFACT_DIR/meminfo.txt"
-            adb shell dumpsys package org.healthrenewal.rawafid.debug > "$ARTIFACT_DIR/package.txt"
-            adb shell dumpsys activity exit-info org.healthrenewal.rawafid.debug > "$ARTIFACT_DIR/exit-info.txt" || true
-            adb logcat -d -t 800 > "$ARTIFACT_DIR/logcat.txt"
-            if grep -E 'ANR in org.healthrenewal.rawafid.debug|Process: org.healthrenewal.rawafid.debug.*FATAL EXCEPTION' "$ARTIFACT_DIR/logcat.txt"; then exit 1; fi
+            adb shell dumpsys meminfo org.healthrenewal.rawafid.debug > "$GITHUB_WORKSPACE/android-emulator-artifacts/meminfo.txt"
+            adb shell dumpsys package org.healthrenewal.rawafid.debug > "$GITHUB_WORKSPACE/android-emulator-artifacts/package.txt"
+            adb shell dumpsys activity exit-info org.healthrenewal.rawafid.debug > "$GITHUB_WORKSPACE/android-emulator-artifacts/exit-info.txt" || true
+            adb logcat -d -t 800 > "$GITHUB_WORKSPACE/android-emulator-artifacts/logcat.txt"
+            if grep -E 'ANR in org.healthrenewal.rawafid.debug|Process: org.healthrenewal.rawafid.debug.*FATAL EXCEPTION' "$GITHUB_WORKSPACE/android-emulator-artifacts/logcat.txt"; then exit 1; fi
       - name: Upload real emulator evidence
         uses: actions/upload-artifact@v4
         if: always()
