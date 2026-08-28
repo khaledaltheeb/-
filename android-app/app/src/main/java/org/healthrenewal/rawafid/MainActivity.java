@@ -3,6 +3,7 @@ package org.healthrenewal.rawafid;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -137,23 +138,120 @@ public final class MainActivity extends AppCompatActivity {
         atHome=false;
         shell("رفيقة روافد 💗");
         root.addView(text("رفيقة روافد جزء اختياري من منصة روافد، وليست بديلًا عن المختص أو خدمة طوارئ.",15,false,Color.DKGRAY));
+
         EditText name=new EditText(this);
         name.setHint("الاسم الذي تفضلين أن أناديكِ به");
         name.setText(prefs.getName());
         name.setTextDirection(View.TEXT_DIRECTION_RTL);
         root.addView(name,new LinearLayout.LayoutParams(-1,dp(58)));
-        Button save=button("حفظ الاسم",rose);
-        save.setOnClickListener(v->{ prefs.setName(name.getText().toString()); Toast.makeText(this,"تم حفظ الاسم على جهازكِ",Toast.LENGTH_SHORT).show(); });
-        root.addView(save);
+        Button saveName=button("حفظ الاسم",rose);
+        saveName.setOnClickListener(v->{
+            prefs.setName(name.getText().toString());
+            Toast.makeText(this,"تم حفظ الاسم على جهازكِ",Toast.LENGTH_SHORT).show();
+        });
+        root.addView(saveName);
+
+        sectionTitle("إشعارات رفيقة روافد","حددي بنفسكِ عدد الرسائل، ساعات عملها، والفاصل بين الرسائل.");
+
+        Switch enabled=new Switch(this);
+        enabled.setText("تفعيل رسائل رفيقة روافد");
+        enabled.setTextSize(16);
+        enabled.setTextDirection(View.TEXT_DIRECTION_RTL);
+        enabled.setChecked(prefs.isCompanionEnabled());
+        root.addView(enabled);
+
+        final int[] dailyLimit={prefs.getCompanionDailyLimit()};
+        final int[] intervalHours={prefs.getCompanionIntervalHours()};
+        final int[] startHour={prefs.getCompanionStartHour()};
+        final int[] endHour={prefs.getCompanionEndHour()};
+
+        TextView dailyLabel=text("الحد الأقصى اليومي: "+dailyLimit[0]+" إشعارات",15,true,Color.DKGRAY);
+        root.addView(dailyLabel);
+        SeekBar dailySeek=new SeekBar(this);
+        dailySeek.setMax(11);
+        dailySeek.setProgress(dailyLimit[0]-1);
+        dailySeek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
+            @Override public void onProgressChanged(SeekBar seekBar,int progress,boolean fromUser){
+                dailyLimit[0]=progress+1;
+                dailyLabel.setText("الحد الأقصى اليومي: "+dailyLimit[0]+" إشعارات");
+            }
+            @Override public void onStartTrackingTouch(SeekBar seekBar){}
+            @Override public void onStopTrackingTouch(SeekBar seekBar){}
+        });
+        root.addView(dailySeek);
+
+        TextView intervalLabel=text("الفاصل الأدنى: كل "+intervalHours[0]+" ساعات",15,true,Color.DKGRAY);
+        root.addView(intervalLabel);
+        SeekBar intervalSeek=new SeekBar(this);
+        intervalSeek.setMax(11);
+        intervalSeek.setProgress(intervalHours[0]-1);
+        intervalSeek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
+            @Override public void onProgressChanged(SeekBar seekBar,int progress,boolean fromUser){
+                intervalHours[0]=progress+1;
+                intervalLabel.setText("الفاصل الأدنى: كل "+intervalHours[0]+" ساعات");
+            }
+            @Override public void onStartTrackingTouch(SeekBar seekBar){}
+            @Override public void onStopTrackingTouch(SeekBar seekBar){}
+        });
+        root.addView(intervalSeek);
+
+        TextView windowLabel=text(companionWindowLabel(startHour[0],endHour[0]),15,true,Color.DKGRAY);
+        root.addView(windowLabel);
+
+        LinearLayout timeRow=new LinearLayout(this);
+        timeRow.setOrientation(LinearLayout.HORIZONTAL);
+        timeRow.setGravity(Gravity.CENTER);
+
+        Button startButton=button("من "+formatHour(startHour[0]),lilac);
+        Button endButton=button("إلى "+formatHour(endHour[0]),lilac);
+        LinearLayout.LayoutParams timeParams=new LinearLayout.LayoutParams(0,dp(56),1f);
+        timeParams.setMargins(dp(4),dp(4),dp(4),dp(4));
+        startButton.setLayoutParams(timeParams);
+        endButton.setLayoutParams(new LinearLayout.LayoutParams(timeParams));
+        timeRow.addView(startButton);
+        timeRow.addView(endButton);
+        root.addView(timeRow);
+
+        startButton.setOnClickListener(v->new TimePickerDialog(this,(view,hour,minute)->{
+            startHour[0]=hour;
+            startButton.setText("من "+formatHour(hour));
+            windowLabel.setText(companionWindowLabel(startHour[0],endHour[0]));
+        },startHour[0],0,true).show());
+
+        endButton.setOnClickListener(v->new TimePickerDialog(this,(view,hour,minute)->{
+            endHour[0]=hour;
+            endButton.setText("إلى "+formatHour(hour));
+            windowLabel.setText(companionWindowLabel(startHour[0],endHour[0]));
+        },endHour[0],0,true).show());
+
+        root.addView(text("إذا كان وقت البداية ووقت النهاية متساويين، تعتبر النافذة طوال اليوم. قد يؤخر Android الإشعار قليلًا بحسب إدارة البطارية.",13,false,Color.GRAY));
+
+        Button saveSchedule=button("حفظ إعدادات الإشعارات",rose);
+        saveSchedule.setOnClickListener(v->{
+            prefs.saveCompanionSchedule(enabled.isChecked(),dailyLimit[0],startHour[0],endHour[0],intervalHours[0]);
+            Toast.makeText(this,"تم حفظ جدول رفيقة روافد",Toast.LENGTH_SHORT).show();
+        });
+        root.addView(saveSchedule);
+
         sectionTitle("كيف تشعرين الآن؟",null);
         moodButton("😊 مرتاحة", "جميل. احتفظي بهذه المساحة لنفسكِ اليوم.");
         moodButton("🙂 مستقرة", "يوم هادئ يستحق أن تعيشيه دون ضغط إضافي.");
         moodButton("😔 متعبة", "خففي التوقعات قليلًا. ما تحتاجينه الآن أهم من إثبات أي شيء.");
         moodButton("😣 مثقلة", "اختاري خطوة صغيرة الآن: ماء، راحة قصيرة، أو شخصًا تثقين به.");
+
         Button test=button("رسالة عناية الآن",lilac);
         test.setOnClickListener(v->CompanionScheduler.sendNow(this));
         root.addView(test);
-        root.addView(text("يمكن إيقاف إشعارات رفيقة روافد من إعدادات إشعارات Android في أي وقت.",13,false,Color.GRAY));
+        root.addView(text("طلب رسالة يدويًا لا يُحتسب من الحد اليومي. ويمكن إيقاف رسائل رفيقة روافد من هنا أو من إعدادات إشعارات Android.",13,false,Color.GRAY));
+    }
+
+    private String companionWindowLabel(int startHour,int endHour){
+        if(startHour==endHour) return "ساعات العمل: طوال اليوم";
+        return "ساعات العمل: من "+formatHour(startHour)+" إلى "+formatHour(endHour);
+    }
+
+    private String formatHour(int hour){
+        return String.format(Locale.US,"%02d:00",hour);
     }
 
     private void moodButton(String label,String reply){
