@@ -22,33 +22,46 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import com.google.android.material.card.MaterialCardView;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public final class MainActivity extends AppCompatActivity {
     private static final String BASE = "https://healthrenewal.org";
+    private static final String SECTOR_CATALOG = BASE + "/api/mobile/sectors";
     private LinearLayout root;
     private SecurePrefs prefs;
     private boolean atHome = true;
+    private final ExecutorService networkExecutor = Executors.newSingleThreadExecutor();
     private final int teal = Color.rgb(11,107,103), rose = Color.rgb(200,75,123), lilac = Color.rgb(125,91,166), bg = Color.rgb(248,251,250);
 
-    private static final LinkedHashMap<String,String> FOLLOW_TOPICS = new LinkedHashMap<>();
+    private static final LinkedHashMap<String,String> FALLBACK_SECTORS = new LinkedHashMap<>();
+    private static final LinkedHashMap<String,String> EXTRA_FOLLOW_PATHS = new LinkedHashMap<>();
     static {
-        FOLLOW_TOPICS.put("الصحة النفسية", "/sectors/mental-health");
-        FOLLOW_TOPICS.put("التربية الخاصة والدامجة", "/sectors/special-needs-inclusion");
-        FOLLOW_TOPICS.put("سرطان الأطفال", "/sectors/pediatric-oncology");
-        FOLLOW_TOPICS.put("الإدمان والتعافي", "/sectors/addiction-recovery");
-        FOLLOW_TOPICS.put("التوحد", "/sections/autism");
-        FOLLOW_TOPICS.put("صعوبات التعلم", "/sections/special-ed-learning-disabilities");
-        FOLLOW_TOPICS.put("دعم الأسرة", "/sections/parenting-family");
-        FOLLOW_TOPICS.put("أدلة التعامل والرعاية", "/care-guides/");
-        FOLLOW_TOPICS.put("الأدلة العلمية", "/evidence-guides/");
-        FOLLOW_TOPICS.put("الموسوعة", "/encyclopedia/");
-        FOLLOW_TOPICS.put("الأدوات اليومية", "/daily-tools/");
-        FOLLOW_TOPICS.put("المختبر المعرفي", "/cognitive-lab");
+        FALLBACK_SECTORS.put("الصحة النفسية", "/sectors/mental-health");
+        FALLBACK_SECTORS.put("التربية الخاصة والدامجة", "/sectors/special-needs-inclusion");
+        FALLBACK_SECTORS.put("سرطان الأطفال", "/sectors/pediatric-oncology");
+        FALLBACK_SECTORS.put("الإدمان والتعافي", "/sectors/addiction-recovery");
+
+        EXTRA_FOLLOW_PATHS.put("التوحد", "/sections/autism");
+        EXTRA_FOLLOW_PATHS.put("صعوبات التعلم", "/sections/special-ed-learning-disabilities");
+        EXTRA_FOLLOW_PATHS.put("دعم الأسرة", "/sections/parenting-family");
+        EXTRA_FOLLOW_PATHS.put("أدلة التعامل والرعاية", "/care-guides/");
+        EXTRA_FOLLOW_PATHS.put("الأدلة العلمية", "/evidence-guides/");
+        EXTRA_FOLLOW_PATHS.put("الموسوعة", "/encyclopedia/");
+        EXTRA_FOLLOW_PATHS.put("الأدوات اليومية", "/daily-tools/");
+        EXTRA_FOLLOW_PATHS.put("المختبر المعرفي", "/cognitive-lab");
     }
 
     @Override protected void onCreate(@Nullable Bundle state) {
@@ -63,6 +76,11 @@ public final class MainActivity extends AppCompatActivity {
         });
         showHome();
         handleIntent(getIntent());
+    }
+
+    @Override protected void onDestroy(){
+        networkExecutor.shutdownNow();
+        super.onDestroy();
     }
 
     @Override protected void onNewIntent(Intent intent){ super.onNewIntent(intent); handleIntent(intent); }
@@ -198,22 +216,88 @@ public final class MainActivity extends AppCompatActivity {
     private void showSectors(){
         atHome=false;
         shell("اختياراتي والتنبيهات 🔔");
-        root.addView(text("يمكنك اختيار أكثر من مجال. الاختيارات محفوظة على جهازك ويمكن تغييرها في أي وقت.",14,false,Color.DKGRAY));
-        String selected=prefs.getSectors();
-        List<CheckBox> boxes=new ArrayList<>();
-        for(Map.Entry<String,String> e:FOLLOW_TOPICS.entrySet()){
-            CheckBox c=new CheckBox(this); c.setText(e.getKey()); c.setTextSize(16); c.setTextDirection(View.TEXT_DIRECTION_RTL); c.setTag(e.getValue());
-            c.setChecked(containsToken(selected,e.getValue())); boxes.add(c); root.addView(c);
-        }
+        root.addView(text("اختر أي عدد من قطاعات روافد المنشورة. ستتحدث قائمة القطاعات من الموقع تلقائيًا عند توفر الاتصال.",14,false,Color.DKGRAY));
+
+        ProgressBar loading = new ProgressBar(this);
+        loading.setIndeterminate(true);
+        root.addView(loading,new LinearLayout.LayoutParams(-1,dp(42)));
+
+        LinearLayout sectorContainer = new LinearLayout(this);
+        sectorContainer.setOrientation(LinearLayout.VERTICAL);
+        root.addView(sectorContainer);
+
+        final List<CheckBox> boxes = new ArrayList<>();
+        final String selected = prefs.getSectors();
+        renderFollowChoices(sectorContainer, boxes, FALLBACK_SECTORS, EXTRA_FOLLOW_PATHS, selected);
+
         Button save=button("حفظ اختياراتي",teal);
         save.setOnClickListener(v->{
             StringBuilder s=new StringBuilder();
-            for(CheckBox c:boxes) if(c.isChecked()){ if(s.length()>0)s.append(','); s.append(c.getTag()); }
+            for(CheckBox c:boxes) if(c.isChecked()){
+                if(s.length()>0)s.append(',');
+                s.append(c.getTag());
+            }
             prefs.setSectors(s.toString());
             Toast.makeText(this,"تم حفظ المجالات التي تتابعها.",Toast.LENGTH_SHORT).show();
         });
         root.addView(save);
-        Button all=button("فتح جميع قطاعات روافد",Color.rgb(70,94,112)); all.setOnClickListener(v->openWeb(BASE+"/sectors")); root.addView(all);
+        Button all=button("فتح جميع قطاعات روافد",Color.rgb(70,94,112));
+        all.setOnClickListener(v->openWeb(BASE+"/sectors"));
+        root.addView(all);
+
+        networkExecutor.execute(() -> {
+            LinkedHashMap<String,String> live = fetchLiveSectors();
+            runOnUiThread(() -> {
+                if(isFinishing() || isDestroyed()) return;
+                loading.setVisibility(View.GONE);
+                if(!live.isEmpty()) {
+                    renderFollowChoices(sectorContainer, boxes, live, EXTRA_FOLLOW_PATHS, selected);
+                    Toast.makeText(this,"تم تحديث قائمة القطاعات من روافد.",Toast.LENGTH_SHORT).show();
+                }
+            });
+        });
+    }
+
+    private void renderFollowChoices(LinearLayout container,List<CheckBox> boxes,LinkedHashMap<String,String> sectors,LinkedHashMap<String,String> extras,String selected){
+        container.removeAllViews();
+        boxes.clear();
+        TextView sectorTitle=text("القطاعات المنشورة",17,true,teal); container.addView(sectorTitle);
+        for(Map.Entry<String,String> e:sectors.entrySet()) addFollowBox(container,boxes,e.getKey(),e.getValue(),selected);
+        TextView extraTitle=text("مسارات إضافية",17,true,teal); extraTitle.setPadding(0,dp(12),0,0); container.addView(extraTitle);
+        for(Map.Entry<String,String> e:extras.entrySet()) addFollowBox(container,boxes,e.getKey(),e.getValue(),selected);
+    }
+
+    private void addFollowBox(LinearLayout container,List<CheckBox> boxes,String label,String path,String selected){
+        CheckBox c=new CheckBox(this);
+        c.setText(label); c.setTextSize(16); c.setTextDirection(View.TEXT_DIRECTION_RTL); c.setTag(path); c.setChecked(containsToken(selected,path));
+        boxes.add(c); container.addView(c);
+    }
+
+    private LinkedHashMap<String,String> fetchLiveSectors(){
+        LinkedHashMap<String,String> result=new LinkedHashMap<>();
+        HttpURLConnection con=null;
+        try {
+            con=(HttpURLConnection)new URL(SECTOR_CATALOG).openConnection();
+            con.setConnectTimeout(7000); con.setReadTimeout(10000); con.setInstanceFollowRedirects(true);
+            con.setRequestProperty("Accept","application/json"); con.setRequestProperty("User-Agent","RawafidAndroid/1.0");
+            if(con.getResponseCode()!=200) return result;
+            StringBuilder body=new StringBuilder();
+            try(BufferedReader r=new BufferedReader(new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8))){ String line; while((line=r.readLine())!=null) body.append(line); }
+            JSONObject root=new JSONObject(body.toString());
+            if(!root.optBoolean("ok",false)) return result;
+            JSONArray sectors=root.optJSONArray("sectors");
+            if(sectors==null) return result;
+            for(int i=0;i<sectors.length();i++){
+                JSONObject item=sectors.optJSONObject(i); if(item==null) continue;
+                String name=item.optString("name","").trim(); String path=item.optString("path","").trim();
+                if(!name.isEmpty() && path.startsWith("/sectors/")) result.put(name,path);
+            }
+        } catch(Exception ignored) {
+            result.clear();
+        } finally {
+            if(con!=null) con.disconnect();
+        }
+        return result;
     }
 
     private boolean containsToken(String selected,String token){
