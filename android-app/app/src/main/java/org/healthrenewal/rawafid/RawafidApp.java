@@ -3,7 +3,6 @@ package org.healthrenewal.rawafid;
 import android.app.Application;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.os.Build;
 import androidx.work.Constraints;
 import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.NetworkType;
@@ -24,13 +23,12 @@ public final class RawafidApp extends Application {
         WorkManager.getInstance(this).enqueueUniquePeriodicWork("rawafid-companion", ExistingPeriodicWorkPolicy.UPDATE, companion);
     }
     private void createChannels() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationManager nm = getSystemService(NotificationManager.class);
-            NotificationChannel content = new NotificationChannel(CHANNEL_CONTENT, "جديد القطاعات", NotificationManager.IMPORTANCE_DEFAULT);
-            content.setDescription("تنبيهات المحتوى الجديد في القطاعات التي اخترتها");
-            NotificationChannel companion = new NotificationChannel(CHANNEL_COMPANION, "رفيقة روافد", NotificationManager.IMPORTANCE_DEFAULT);
-            companion.setDescription("رسائل الاهتمام والعناية والتذكيرات التي اخترتها");
-            nm.createNotificationChannel(content); nm.createNotificationChannel(companion);
-        }
+        NotificationManager nm = getSystemService(NotificationManager.class);
+        NotificationChannel content = new NotificationChannel(CHANNEL_CONTENT, "جديد القطاعات", NotificationManager.IMPORTANCE_DEFAULT);
+        content.setDescription("تنبيهات المحتوى الجديد في القطاعات التي اخترتها");
+        NotificationChannel companion = new NotificationChannel(CHANNEL_COMPANION, "رفيقة روافد", NotificationManager.IMPORTANCE_DEFAULT);
+        companion.setDescription("رسائل الاهتمام والعناية والتذكيرات التي اخترتها");
+        nm.createNotificationChannel(content);
+        nm.createNotificationChannel(companion);
     }
 }
