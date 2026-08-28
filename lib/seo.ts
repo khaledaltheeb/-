@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import { RAWAFID_BRAND_NAME, RAWAFID_BRAND_SHORT } from '@/lib/theme';
-import { buildSemanticSeoProfile } from '@/lib/semantic-seo-safe';
 
 export const PRODUCTION_SITE_URL = 'https://healthrenewal.org';
 export const STAGING_SITE_URL = 'https://rawafid-platform-staging.khaledaltheeb.workers.dev';
@@ -88,13 +87,9 @@ export function buildSeoMetadata(input: SeoMetadataInput): Metadata {
     ? Object.fromEntries(Object.entries(input.hreflang).map(([key, value]) => [key, absoluteSiteUrl(value)]))
     : undefined;
 
-  // Query maps remain private editorial inputs. Build the semantic profile for the
-  // internal 50 topical + 50 intent validation contract, but do not expose it through
-  // <meta name="keywords"> because Google Search ignores that tag entirely.
-  const semanticProfile = buildSemanticSeoProfile(input);
-  const keywords = semanticProfile.topicKeywords.slice(0, 12);
-  void keywords;
-
+  // Query maps remain private editorial inputs. The 50 topical + 50 intent inventory is
+  // validated by the semantic SEO CI contract, not rebuilt on every public metadata render.
+  // Do not emit <meta name="keywords">; Google Search ignores that tag.
   const openGraphImages = usesDefaultImage
     ? [{ url: image, width: 1200, height: 630, alt: input.title }]
     : [{ url: image, alt: input.title }];
