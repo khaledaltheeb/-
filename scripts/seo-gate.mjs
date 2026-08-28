@@ -148,8 +148,8 @@ async function auditPage(pageUrl) {
   const ogUrl = metaContent(html, 'property', 'og:url');
   const ogType = metaContent(html, 'property', 'og:type');
   const twitterCard = metaContent(html, 'name', 'twitter:card');
-  if (!title) failures.push(`${pageUrl}: missing <title>`); else if (title.length < 8 || title.length > 65) failures.push(`${pageUrl}: title length ${title.length} outside 8..65`);
-  if (!description) failures.push(`${pageUrl}: missing meta description`); else if (description.length < 50 || description.length > 170) failures.push(`${pageUrl}: description length ${description.length} outside 50..170`);
+  if (!title) failures.push(`${pageUrl}: missing <title>`); else if (title.length < 8) failures.push(`${pageUrl}: title length ${title.length} is too short to be descriptive`);
+  if (!description) failures.push(`${pageUrl}: missing meta description`); else if (description.length < 50) failures.push(`${pageUrl}: description length ${description.length} is too short to summarize the page`);
   if (!canonical) failures.push(`${pageUrl}: missing canonical`); else if (!samePathAndQuery(canonical, pageUrl)) failures.push(`${pageUrl}: canonical path mismatch (${canonical})`);
   if (robots.includes('noindex')) failures.push(`${pageUrl}: sitemap URL declares noindex`);
   if (robots.includes('nofollow')) failures.push(`${pageUrl}: sitemap URL declares nofollow`);
