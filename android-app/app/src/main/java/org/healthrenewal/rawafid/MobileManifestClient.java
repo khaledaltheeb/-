@@ -15,7 +15,8 @@ import java.util.Map;
 
 /** Fetches public, non-sensitive UI configuration from the Rawafid website. */
 public final class MobileManifestClient {
-    public static final String ENDPOINT="https://healthrenewal.org/api/mobile/app-manifest?appVersion=1";
+    public static final int APP_CAPABILITY_VERSION=2;
+    public static final String ENDPOINT="https://healthrenewal.org/api/mobile/app-manifest?appVersion="+APP_CAPABILITY_VERSION;
 
     private MobileManifestClient(){}
 
