@@ -22,10 +22,11 @@ public final class CompanionPolicyTest {
     }
 
     @Test public void gapMustBeSatisfied(){
-        long now=10_000_000L;
+        long fourHours=4L*60L*60L*1000L;
+        long now=100_000_000L;
         assertTrue(CompanionPolicy.gapSatisfied(now,0L,4));
-        assertFalse(CompanionPolicy.gapSatisfied(now,now-(4L*60L*60L*1000L)+1L,4));
-        assertTrue(CompanionPolicy.gapSatisfied(now,now-(4L*60L*60L*1000L),4));
+        assertFalse(CompanionPolicy.gapSatisfied(now,now-fourHours+1L,4));
+        assertTrue(CompanionPolicy.gapSatisfied(now,now-fourHours,4));
         assertFalse(CompanionPolicy.gapSatisfied(now,now+1L,4));
     }
 
