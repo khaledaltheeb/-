@@ -112,12 +112,15 @@ public final class MainActivity extends AppCompatActivity {
     private void shell(String title){
         activeWebView=null;
         ScrollView sc=new ScrollView(this);
+        sc.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
         root=new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
+        root.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
+        root.setGravity(Gravity.START);
         root.setPadding(dp(18),dp(14),dp(18),dp(32));
         root.setBackgroundColor(bg);
         sc.addView(root);
-        TextView brand=text("روافد",30,true,teal); brand.setGravity(Gravity.END); root.addView(brand);
+        TextView brand=text("روافد",30,true,teal); root.addView(brand);
         root.addView(text("منصة عربية للمعرفة الصحية والنفسية والتربوية",14,false,Color.DKGRAY));
         TextView sub=text(title,19,true,Color.rgb(45,45,52)); sub.setPadding(0,dp(4),0,dp(14)); root.addView(sub);
         setContentView(sc);
@@ -161,7 +164,7 @@ public final class MainActivity extends AppCompatActivity {
         EditText name=new EditText(this);
         name.setHint("الاسم الذي تفضلين أن أناديكِ به");
         name.setText(prefs.getName());
-        name.setTextDirection(View.TEXT_DIRECTION_RTL);
+        applyRtl(name);
         root.addView(name,new LinearLayout.LayoutParams(-1,dp(58)));
         Button saveName=button("حفظ الاسم",rose);
         saveName.setOnClickListener(v->{ prefs.setName(name.getText().toString()); Toast.makeText(this,"تم حفظ الاسم على جهازكِ",Toast.LENGTH_SHORT).show(); });
@@ -169,7 +172,7 @@ public final class MainActivity extends AppCompatActivity {
 
         sectionTitle("إشعارات رفيقة روافد","حددي بنفسكِ عدد الرسائل، ساعات عملها، والفاصل بين الرسائل.");
         Switch enabled=new Switch(this);
-        enabled.setText("تفعيل رسائل رفيقة روافد"); enabled.setTextSize(16); enabled.setTextDirection(View.TEXT_DIRECTION_RTL); enabled.setChecked(prefs.isCompanionEnabled()); root.addView(enabled);
+        enabled.setText("تفعيل رسائل رفيقة روافد"); enabled.setTextSize(16); applyRtl(enabled); enabled.setChecked(prefs.isCompanionEnabled()); root.addView(enabled);
 
         final int[] dailyLimit={prefs.getCompanionDailyLimit()};
         final int[] intervalHours={prefs.getCompanionIntervalHours()};
@@ -191,7 +194,7 @@ public final class MainActivity extends AppCompatActivity {
         }); root.addView(intervalSeek);
 
         TextView windowLabel=text(companionWindowLabel(startHour[0],endHour[0]),15,true,Color.DKGRAY); root.addView(windowLabel);
-        LinearLayout timeRow=new LinearLayout(this); timeRow.setOrientation(LinearLayout.HORIZONTAL); timeRow.setGravity(Gravity.CENTER);
+        LinearLayout timeRow=new LinearLayout(this); timeRow.setOrientation(LinearLayout.HORIZONTAL); timeRow.setLayoutDirection(View.LAYOUT_DIRECTION_RTL); timeRow.setGravity(Gravity.CENTER);
         Button startButton=button("من "+formatHour(startHour[0]),lilac); Button endButton=button("إلى "+formatHour(endHour[0]),lilac);
         LinearLayout.LayoutParams timeParams=new LinearLayout.LayoutParams(0,dp(56),1f); timeParams.setMargins(dp(4),dp(4),dp(4),dp(4));
         startButton.setLayoutParams(timeParams); endButton.setLayoutParams(new LinearLayout.LayoutParams(timeParams)); timeRow.addView(startButton); timeRow.addView(endButton); root.addView(timeRow);
@@ -319,7 +322,7 @@ public final class MainActivity extends AppCompatActivity {
         shell("اختياراتي والتنبيهات 🔔");
         root.addView(text("اختر أي عدد من قطاعات روافد المنشورة. تتحدث القائمة من الموقع تلقائيًا عند توفر الاتصال.",14,false,Color.DKGRAY));
         ProgressBar loading=new ProgressBar(this); loading.setIndeterminate(true); root.addView(loading,new LinearLayout.LayoutParams(-1,dp(42)));
-        LinearLayout sectorContainer=new LinearLayout(this); sectorContainer.setOrientation(LinearLayout.VERTICAL); root.addView(sectorContainer);
+        LinearLayout sectorContainer=new LinearLayout(this); sectorContainer.setOrientation(LinearLayout.VERTICAL); sectorContainer.setLayoutDirection(View.LAYOUT_DIRECTION_RTL); sectorContainer.setGravity(Gravity.START); root.addView(sectorContainer);
         final List<CheckBox> boxes=new ArrayList<>(); final String selected=prefs.getSectors(); renderFollowChoices(sectorContainer,boxes,FALLBACK_SECTORS,EXTRA_FOLLOW_PATHS,selected);
 
         Button save=button("حفظ اختياراتي",teal);
@@ -340,6 +343,7 @@ public final class MainActivity extends AppCompatActivity {
     }
 
     private void renderFollowChoices(LinearLayout container,List<CheckBox> boxes,LinkedHashMap<String,String> sectors,LinkedHashMap<String,String> extras,String selected){
+        container.setLayoutDirection(View.LAYOUT_DIRECTION_RTL); container.setGravity(Gravity.START);
         container.removeAllViews(); boxes.clear(); container.addView(text("القطاعات المنشورة",17,true,teal));
         for(Map.Entry<String,String> e:sectors.entrySet()) addFollowBox(container,boxes,e.getKey(),e.getValue(),selected);
         TextView extraTitle=text("مسارات إضافية",17,true,teal); extraTitle.setPadding(0,dp(12),0,0); container.addView(extraTitle);
@@ -347,7 +351,7 @@ public final class MainActivity extends AppCompatActivity {
     }
 
     private void addFollowBox(LinearLayout container,List<CheckBox> boxes,String label,String path,String selected){
-        CheckBox c=new CheckBox(this); c.setText(label); c.setTextSize(16); c.setTextDirection(View.TEXT_DIRECTION_RTL); c.setTag(path); c.setChecked(containsToken(selected,path)); boxes.add(c); container.addView(c);
+        CheckBox c=new CheckBox(this); c.setText(label); c.setTextSize(16); applyRtl(c); c.setTag(path); c.setChecked(containsToken(selected,path)); boxes.add(c); container.addView(c);
     }
 
     private LinkedHashMap<String,String> fetchLiveSectors(){
@@ -380,6 +384,12 @@ public final class MainActivity extends AppCompatActivity {
         CookieManager.getInstance().setAcceptCookie(true); CookieManager.getInstance().setAcceptThirdPartyCookies(w,false);
         w.setWebViewClient(new WebViewClient(){
             @Override public boolean shouldOverrideUrlLoading(WebView view,WebResourceRequest req){ Uri u=req.getUrl(); if(TrustedUrl.isRawafidHttps(u)) return false; openExternal(u); return true; }
+            @Override public void onPageFinished(WebView view,String finishedUrl){
+                super.onPageFinished(view,finishedUrl);
+                if(!TrustedUrl.isRawafidHttps(finishedUrl)) return;
+                String js="(function(){var m=document.querySelector('meta[name=viewport]');if(!m){m=document.createElement('meta');m.name='viewport';document.head.appendChild(m);}m.setAttribute('content','width=device-width,initial-scale=1,maximum-scale=5,user-scalable=yes');var s=document.getElementById('rawafid-app-fit');if(!s){s=document.createElement('style');s.id='rawafid-app-fit';s.textContent='html{overflow-x:hidden!important}*,*:before,*:after{box-sizing:border-box!important;min-width:0!important}main,article,section,header,footer,nav{max-width:100%!important}img,video,svg,canvas{max-width:100%!important;height:auto!important}p,h1,h2,h3,h4,h5,h6,li{overflow-wrap:anywhere!important}table,pre{display:block!important;max-width:100%!important;overflow-x:auto!important}';document.head.appendChild(s);}requestAnimationFrame(function(){var vw=window.innerWidth||document.documentElement.clientWidth;var sw=Math.max(document.documentElement.scrollWidth,document.body?document.body.scrollWidth:0);if(vw>0&&sw>vw*1.02&&document.body){var z=Math.min(1,vw/sw);document.body.style.zoom=String(z);document.documentElement.style.overflowX='hidden';}});})();";
+                view.evaluateJavascript(js,null);
+            }
             @Override public void onReceivedError(WebView view,WebResourceRequest request,WebResourceError error){
                 if(request.isForMainFrame()) runOnUiThread(()->showNetworkError(url));
             }
@@ -412,17 +422,24 @@ public final class MainActivity extends AppCompatActivity {
     private void requestNotificationsContextually(){ if(!hasNotificationPermission()&&Build.VERSION.SDK_INT>=33) ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.POST_NOTIFICATIONS},NOTIFICATION_REQUEST_CODE); }
 
     private void card(String title,String body,int accent,View.OnClickListener click){
-        MaterialCardView c=new MaterialCardView(this); c.setRadius(dp(20)); c.setCardBackgroundColor(Color.WHITE); c.setStrokeColor(Color.argb(42,Color.red(accent),Color.green(accent),Color.blue(accent))); c.setStrokeWidth(dp(1)); c.setCardElevation(dp(1));
-        LinearLayout box=new LinearLayout(this); box.setPadding(dp(18),dp(15),dp(18),dp(15)); box.setOrientation(LinearLayout.VERTICAL); box.addView(text(title,18,true,accent)); box.addView(text(body,14,false,Color.DKGRAY)); c.addView(box); c.setOnClickListener(click);
+        MaterialCardView c=new MaterialCardView(this); c.setLayoutDirection(View.LAYOUT_DIRECTION_RTL); c.setRadius(dp(20)); c.setCardBackgroundColor(Color.WHITE); c.setStrokeColor(Color.argb(42,Color.red(accent),Color.green(accent),Color.blue(accent))); c.setStrokeWidth(dp(1)); c.setCardElevation(dp(1));
+        LinearLayout box=new LinearLayout(this); box.setPadding(dp(18),dp(15),dp(18),dp(15)); box.setOrientation(LinearLayout.VERTICAL); box.setLayoutDirection(View.LAYOUT_DIRECTION_RTL); box.setGravity(Gravity.START); box.addView(text(title,18,true,accent)); box.addView(text(body,14,false,Color.DKGRAY)); c.addView(box); c.setOnClickListener(click);
         LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(-1,-2); p.setMargins(0,0,0,dp(10)); root.addView(c,p);
     }
 
+    private void applyRtl(TextView t){
+        t.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
+        t.setTextDirection(View.TEXT_DIRECTION_FIRST_STRONG_RTL);
+        t.setTextAlignment(View.TEXT_ALIGNMENT_VIEW_START);
+        t.setGravity(Gravity.START|Gravity.CENTER_VERTICAL);
+    }
+
     private TextView text(String value,int sp,boolean bold,int color){
-        TextView t=new TextView(this); t.setText(value); t.setTextSize(sp); t.setTextColor(color); t.setTextDirection(View.TEXT_DIRECTION_RTL); t.setGravity(Gravity.END); if(bold)t.setTypeface(t.getTypeface(),Typeface.BOLD); t.setLineSpacing(0,1.15f); t.setPadding(0,dp(5),0,dp(5)); return t;
+        TextView t=new TextView(this); t.setText(value); t.setTextSize(sp); t.setTextColor(color); applyRtl(t); if(bold)t.setTypeface(t.getTypeface(),Typeface.BOLD); t.setLineSpacing(0,1.15f); t.setPadding(0,dp(5),0,dp(5)); return t;
     }
 
     private Button button(String value,int color){
-        Button b=new Button(this); b.setText(value); b.setTextSize(16); b.setAllCaps(false); if(color!=Color.WHITE){ b.setBackgroundColor(color); b.setTextColor(Color.WHITE); }
+        Button b=new Button(this); b.setText(value); b.setTextSize(16); b.setAllCaps(false); b.setLayoutDirection(View.LAYOUT_DIRECTION_RTL); b.setTextDirection(View.TEXT_DIRECTION_FIRST_STRONG_RTL); if(color!=Color.WHITE){ b.setBackgroundColor(color); b.setTextColor(Color.WHITE); }
         LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(-1,dp(56)); p.setMargins(0,dp(6),0,dp(6)); b.setLayoutParams(p); return b;
     }
 
