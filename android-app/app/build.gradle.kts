@@ -2,7 +2,7 @@ plugins { id("com.android.application") }
 
 android {
     namespace = "org.healthrenewal.rawafid"
-    compileSdk = 37
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "org.healthrenewal.rawafid"
