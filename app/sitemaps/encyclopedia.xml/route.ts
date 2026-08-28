@@ -12,9 +12,12 @@ type SitemapItem = { slug: string; canonicalUrl: string; updatedAt: string | nul
 function normalizeItem(row: RawItem): SitemapItem | null {
   const slug = typeof row.slug === 'string' ? row.slug.trim().toLowerCase() : '';
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) return null;
+  const canonicalUrl = `/encyclopedia/${slug}/`;
+  const storedCanonical = typeof row.canonical_url === 'string' ? row.canonical_url.trim() : '';
+  if (storedCanonical !== canonicalUrl) return null;
   return {
     slug,
-    canonicalUrl: `/encyclopedia/${slug}/`,
+    canonicalUrl,
     updatedAt: typeof row.updated_at === 'string' ? row.updated_at : null,
   };
 }
@@ -48,10 +51,11 @@ export async function GET(request: Request) {
     const requestedRows = batchEnd - batchStart + 1;
     let query = supabase
       .from('content')
-      .select('slug,updated_at')
-      .eq('content_type', 'condition')
+      .select('slug,canonical_url,updated_at')
+      .in('content_type', ['glossary_term', 'condition'])
       .eq('status', 'published')
       .eq('robots_index', true)
+      .like('canonical_url', '/encyclopedia/%')
       .lte('published_at', now)
       .order('slug', { ascending: true })
       .range(batchStart, batchEnd);
