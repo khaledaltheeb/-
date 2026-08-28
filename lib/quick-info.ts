@@ -68,10 +68,14 @@ function asString(value: unknown) {
   return typeof value === 'string' ? value.trim() : '';
 }
 
-export function quickInfoCardUrl(title: string) {
+export function quickInfoCardPath(title: string) {
   const safeTitle = asString(title) || 'معلومات سريعة';
   const context = 'معلومة سريعة · قراءة عربية واضحة · منصة روافد';
-  return `${SITE_URL}/seo-card?title=${encodeURIComponent(safeTitle)}&context=${encodeURIComponent(context)}`;
+  return `/seo-card?title=${encodeURIComponent(safeTitle)}&context=${encodeURIComponent(context)}`;
+}
+
+export function quickInfoCardUrl(title: string) {
+  return `${SITE_URL}${quickInfoCardPath(title)}`;
 }
 
 function publicationApproved(schema: unknown): boolean {
@@ -184,7 +188,7 @@ export async function getQuickInfoItems(limit = 500): Promise<QuickInfoItem[]> {
       title,
       excerpt: typeof row.excerpt === 'string' ? row.excerpt : null,
       canonicalUrl,
-      featuredImageUrl: quickInfoCardUrl(title),
+      featuredImageUrl: quickInfoCardPath(title),
       updatedAt: typeof row.updated_at === 'string' ? row.updated_at : null,
     }];
   });
