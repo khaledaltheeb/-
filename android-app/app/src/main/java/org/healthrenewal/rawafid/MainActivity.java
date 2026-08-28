@@ -374,6 +374,7 @@ public final class MainActivity extends AppCompatActivity {
         activeWebView=w;
         WebSettings s=w.getSettings();
         s.setJavaScriptEnabled(true); s.setJavaScriptCanOpenWindowsAutomatically(false); s.setSupportMultipleWindows(false); s.setDomStorageEnabled(true);
+        s.setUseWideViewPort(true); s.setLoadWithOverviewMode(true); s.setTextZoom(100); s.setBuiltInZoomControls(true); s.setDisplayZoomControls(false);
         s.setAllowFileAccess(false); s.setAllowContentAccess(false); s.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW); s.setGeolocationEnabled(false);
         s.setMediaPlaybackRequiresUserGesture(true); s.setSafeBrowsingEnabled(true); s.setUserAgentString(s.getUserAgentString()+" RawafidAndroid/1.0");
         CookieManager.getInstance().setAcceptCookie(true); CookieManager.getInstance().setAcceptThirdPartyCookies(w,false);
