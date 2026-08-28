@@ -1,0 +1,118 @@
+name: Wire Rawafid Dynamic Home Once
+on:
+  push:
+    branches: ["android/rawafid-app-v1"]
+    paths:
+      - ".github/workflows/android-wire-dynamic-home-once.yml"
+permissions:
+  contents: write
+jobs:
+  wire:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: android/rawafid-app-v1
+          fetch-depth: 0
+      - name: Replace static-only home with manifest-aware home
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('android-app/app/src/main/java/org/healthrenewal/rawafid/MainActivity.java')
+          text=p.read_text(encoding='utf-8')
+          start=text.index('    private void showHome(){')
+          end=text.index('    private void showCompanion(){', start)
+          block=r'''    private void showHome(){
+        atHome=true;
+        renderHomeFallback();
+        loadDynamicHomeManifest();
+    }
+
+    private void renderHomeFallback(){
+        shell("كل منصة روافد في تطبيق واحد");
+        card("البحث في روافد 🔎","ابحث عن حالة، سؤال، دليل، مختص، مركز أو موضوع في مكتبة روافد.",teal,v->openWeb(BASE+"/search"));
+        card("الطوارئ SOS","خطة طوارئ محلية مشفرة: رسالة مخصصة، عدة جهات اتصال، اتصال وSMS وWhatsApp وبريد مع خيار إرفاق الموقع.",Color.rgb(177,45,52),v->startActivity(new Intent(this,EmergencyActivity.class)));
+
+        sectionTitle("استكشف روافد","وصول مباشر إلى المجالات والخدمات المنشورة على healthrenewal.org.");
+        card("جميع القطاعات","استعرض القطاعات المعرفية المنشورة كاملة.",Color.rgb(31,105,138),v->openWeb(BASE+"/sectors"));
+        card("جميع الأقسام","تصفح الأقسام والتخصصات الفرعية في روافد.",Color.rgb(49,114,110),v->openWeb(BASE+"/sections"));
+        card("أدلة التعامل والرعاية","أدلة عملية للأسرة والمريض ومقدم الرعاية حسب الحاجة والموقف.",Color.rgb(73,108,77),v->openWeb(BASE+"/care-guides/"));
+        card("الأدلة العلمية","محتوى مبني على الدراسات والمصادر مع سياق علمي واضح.",Color.rgb(93,78,143),v->openWeb(BASE+"/evidence-guides/"));
+        card("الموسوعة","الموسوعات والمصطلحات والحالات المرجعية في روافد.",Color.rgb(130,91,54),v->openWeb(BASE+"/encyclopedia/"));
+        card("الأدوات اليومية","أدوات عملية وتفاعلية منشورة ضمن المنصة.",Color.rgb(53,112,150),v->openWeb(BASE+"/daily-tools/"));
+        card("المختبر المعرفي","أدوات معرفية وتفاعلية ومسارات تعلم ضمن روافد.",Color.rgb(91,83,150),v->openWeb(BASE+"/cognitive-lab"));
+        card("المختصون","ابحث عن مختصين ضمن دليل روافد.",Color.rgb(86,114,92),v->openWeb(BASE+"/specialists"));
+        card("المراكز","استعرض المراكز والخدمات المنشورة في الدليل.",Color.rgb(72,105,125),v->openWeb(BASE+"/centers"));
+
+        sectionTitle("تابع ما يهمك","اختر أكثر من مجال واحصل على تنبيه عند ظهور محتوى جديد أو تعديل مهم في مجال تتابعه.");
+        card("اختياراتي والتنبيهات 🔔","حدد المجالات التي تريد متابعتها وتعديلها في أي وقت.",teal,v->showSectors());
+
+        sectionTitle("أدواتي الشخصية","ميزات اختيارية داخل روافد وليست هوية التطبيق الأساسية.");
+        card("رفيقة روافد 💗","مساحة اختيارية للعناية اليومية ورسائل الدعم العام باسم تختارينه.",rose,v->showCompanion());
+        card("تقويم المرأة 🌷","أداة اختيارية لتسجيل الدورة والتوقعات التقريبية والمزاج محليًا على جهازكِ.",lilac,v->showCalendar());
+        card("الخصوصية وبياناتي 🔐","اعرف ما يُحفظ محليًا واحذف سجل المزاج أو جميع البيانات الشخصية المحلية متى أردت.",Color.rgb(64,91,104),v->showPrivacy());
+    }
+
+    private void loadDynamicHomeManifest(){
+        networkExecutor.execute(()->{
+            try {
+                MobileManifestClient.Manifest manifest=MobileManifestClient.fetch();
+                runOnUiThread(()->{
+                    if(!atHome||isFinishing()||isDestroyed()) return;
+                    renderHomeFromManifest(manifest);
+                });
+            } catch(Exception ignored){
+                // The fully functional local fallback remains visible offline or on API failure.
+            }
+        });
+    }
+
+    private void renderHomeFromManifest(MobileManifestClient.Manifest manifest){
+        if(manifest==null) return;
+        shell("كل منصة روافد في تطبيق واحد");
+        card("البحث في روافد 🔎","ابحث عن حالة، سؤال، دليل، مختص، مركز أو موضوع في مكتبة روافد.",teal,v->openWeb(BASE+"/search"));
+
+        sectionTitle("استكشف روافد","هذه الروابط تُدار من منصة روافد وتبقى متزامنة مع بنية الموقع.");
+        int[] accents={Color.rgb(31,105,138),Color.rgb(49,114,110),Color.rgb(73,108,77),Color.rgb(93,78,143),Color.rgb(130,91,54),Color.rgb(53,112,150),Color.rgb(91,83,150),Color.rgb(86,114,92),Color.rgb(72,105,125)};
+        int linkIndex=0;
+        for(MobileManifestClient.Link link:manifest.discoverLinks){
+            final String path=link.path;
+            int accent=accents[linkIndex%accents.length];
+            linkIndex++;
+            card(link.title,"افتح هذا المسار من روافد؛ محتواه يأتي مباشرة من الموقع المنشور.",accent,v->openWeb(BASE+path));
+        }
+
+        sectionTitle("أدوات روافد","لا تظهر هنا إلا الأدوات المفعلة والمتوافقة مع هذه النسخة من التطبيق.");
+        for(MobileManifestClient.Tool tool:manifest.tools) renderManifestTool(tool);
+    }
+
+    private void renderManifestTool(MobileManifestClient.Tool tool){
+        if(tool==null) return;
+        int accent=teal;
+        if("emergency_center".equals(tool.id)) accent=Color.rgb(177,45,52);
+        else if("companion".equals(tool.id)) accent=rose;
+        else if("women_calendar".equals(tool.id)) accent=lilac;
+        else if("privacy_center".equals(tool.id)) accent=Color.rgb(64,91,104);
+        final MobileManifestClient.Tool selected=tool;
+        card(tool.name,tool.description,accent,v->openManifestTool(selected));
+    }
+
+    private void openManifestTool(MobileManifestClient.Tool tool){
+        if(tool==null) return;
+        String route=tool.nativeRoute==null?"":tool.nativeRoute;
+        if("emergency".equals(route)) startActivity(new Intent(this,EmergencyActivity.class));
+        else if("follow_topics".equals(route)) showSectors();
+        else if("companion".equals(route)) showCompanion();
+        else if("women_calendar".equals(route)) showCalendar();
+        else if("privacy".equals(route)) showPrivacy();
+        else if(tool.webPath!=null&&!tool.webPath.isEmpty()&&tool.webPath.startsWith("/")&&!tool.webPath.startsWith("//")) openWeb(BASE+tool.webPath);
+    }
+
+'''
+          p.write_text(text[:start]+block+text[end:],encoding='utf-8')
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add android-app/app/src/main/java/org/healthrenewal/rawafid/MainActivity.java
+          git commit -m "feat(android): render home from dynamic Rawafid manifest"
+          git push origin HEAD:android/rawafid-app-v1
