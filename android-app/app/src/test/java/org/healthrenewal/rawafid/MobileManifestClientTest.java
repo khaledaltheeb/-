@@ -4,6 +4,11 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 public class MobileManifestClientTest {
+    @Test public void capabilityVersionMatchesV2ToolContract(){
+        assertEquals(2,MobileManifestClient.APP_CAPABILITY_VERSION);
+        assertTrue(MobileManifestClient.ENDPOINT.endsWith("appVersion=2"));
+    }
+
     @Test public void parsesDiscoverLinksAndEnabledToolsInManifestOrder() throws Exception {
         String json="{\"ok\":true,\"manifest\":{\"brand\":{\"title\":\"روافد\",\"subtitle\":\"منصة عربية\"},\"sections\":[{\"id\":\"discover\",\"links\":[{\"title\":\"الموسوعة\",\"path\":\"/encyclopedia/\"}]},{\"id\":\"tools\",\"tool_ids\":[\"emergency_center\",\"companion\"]}]},\"tools\":[{\"id\":\"companion\",\"name\":\"رفيقة روافد\",\"description\":\"عناية\",\"kind\":\"native\",\"nativeRoute\":\"companion\",\"webPath\":null},{\"id\":\"emergency_center\",\"name\":\"الطوارئ SOS\",\"description\":\"طوارئ\",\"kind\":\"native\",\"nativeRoute\":\"emergency\",\"webPath\":null}]}";
         MobileManifestClient.Manifest manifest=MobileManifestClient.parse(json);
