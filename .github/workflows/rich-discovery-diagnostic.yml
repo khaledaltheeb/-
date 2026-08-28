@@ -32,8 +32,8 @@ jobs:
           set +e
           node scripts/rich-discovery-gate.mjs > /tmp/rich-discovery.log 2>&1
           status=$?
-          echo '--- diagnostic summary ---'
-          grep -E '^(Rich discovery gate:|Rich discovery gate summary:|FAIL |Rawafid rich discovery gate passed\.)' /tmp/rich-discovery.log | head -n 180 || true
+          echo '--- rich discovery diagnostic ---'
+          cat /tmp/rich-discovery.log | tail -n 240
           if [ "$status" -ne 0 ]; then
             echo "Rich discovery diagnostic failed with status $status"
             exit "$status"
