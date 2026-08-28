@@ -12,8 +12,6 @@ import androidx.work.WorkerParameters;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ThreadLocalRandom;
 
 public final class CompanionWorker extends Worker {
     public CompanionWorker(@NonNull Context c,@NonNull WorkerParameters p){ super(c,p); }
@@ -24,16 +22,16 @@ public final class CompanionWorker extends Worker {
     }
 
     public static void sendAuto(Context c){
-        SecurePrefs prefs = new SecurePrefs(c);
-        LocalDateTime now = LocalDateTime.now();
-        String today = now.toLocalDate().toString();
-        int count = prefs.getCompanionCounter();
-        if(!today.equals(prefs.getCompanionCounterDay())) {
+        SecurePrefs prefs=new SecurePrefs(c);
+        LocalDateTime now=LocalDateTime.now();
+        String today=now.toLocalDate().toString();
+        int count=prefs.getCompanionCounter();
+        if(!today.equals(prefs.getCompanionCounterDay())){
             prefs.resetCompanionCounter(today);
-            count = 0;
+            count=0;
         }
 
-        long nowMillis = System.currentTimeMillis();
+        long nowMillis=System.currentTimeMillis();
         if(!CompanionPolicy.canSend(
                 prefs.isCompanionEnabled(),
                 now.getHour(),
@@ -51,12 +49,12 @@ public final class CompanionWorker extends Worker {
     public static void sendNow(Context c){ sendNotification(c,new SecurePrefs(c)); }
 
     private static boolean sendNotification(Context c,SecurePrefs prefs){
-        if(android.os.Build.VERSION.SDK_INT>=33 && ActivityCompat.checkSelfPermission(c, Manifest.permission.POST_NOTIFICATIONS)!=PackageManager.PERMISSION_GRANTED) return false;
+        if(android.os.Build.VERSION.SDK_INT>=33 && ActivityCompat.checkSelfPermission(c,Manifest.permission.POST_NOTIFICATIONS)!=PackageManager.PERMISSION_GRANTED) return false;
         String period=CompanionPolicy.periodKey(LocalTime.now().getHour());
         List<String> pool=MessageBank.forPeriod(period);
         if(pool.isEmpty()) return false;
 
-        String msg=chooseNonRepeating(pool,prefs.getRecentCompanionMessageHashes());
+        String msg=MessageSelector.chooseNonRepeating(pool,prefs.getRecentCompanionMessageHashes());
         if(msg==null) return false;
         prefs.recordCompanionMessageHash(msg.hashCode());
 
@@ -82,15 +80,5 @@ public final class CompanionWorker extends Worker {
                 .setOnlyAlertOnce(false);
         ((NotificationManager)c.getSystemService(Context.NOTIFICATION_SERVICE)).notify((int)(System.currentTimeMillis()%100000),b.build());
         return true;
-    }
-
-    static String chooseNonRepeating(List<String> pool,Set<Integer> recent){
-        if(pool==null || pool.isEmpty()) return null;
-        int start=ThreadLocalRandom.current().nextInt(pool.size());
-        for(int i=0;i<pool.size();i++){
-            String candidate=pool.get((start+i)%pool.size());
-            if(recent==null || !recent.contains(candidate.hashCode())) return candidate;
-        }
-        return pool.get(start);
     }
 }
