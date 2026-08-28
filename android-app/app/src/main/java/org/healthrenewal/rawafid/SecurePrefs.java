@@ -157,6 +157,18 @@ public final class SecurePrefs {
         putString("emergency_contacts","");
     }
 
+    // Library: local-only encrypted bookmarks/read-later metadata.
+    public List<LocalLibrary.Item> getLibraryItems(){ return LocalLibrary.decode(getString("library_items","")); }
+    public void setLibraryItems(List<LocalLibrary.Item> items){ putString("library_items",LocalLibrary.encode(items)); }
+    public void saveToLibrary(String path,String title,boolean readLater){
+        LocalLibrary.Item item=new LocalLibrary.Item(path,title,System.currentTimeMillis(),0L,readLater);
+        if(!item.isValid()) return;
+        setLibraryItems(LocalLibrary.upsert(getLibraryItems(),item));
+    }
+    public void removeFromLibrary(String path){ setLibraryItems(LocalLibrary.remove(getLibraryItems(),path)); }
+    public void markLibraryOpened(String path){ setLibraryItems(LocalLibrary.markOpened(getLibraryItems(),path,System.currentTimeMillis())); }
+    public void clearLibrary(){ putString("library_items",""); }
+
     public void clearSensitiveData(){ prefs.edit().clear().apply(); }
     private static int clamp(int value,int min,int max){ return Math.max(min,Math.min(max,value)); }
 }
