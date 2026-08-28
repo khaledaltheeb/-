@@ -56,8 +56,8 @@ jobs:
             sleep 3
             adb shell pidof org.healthrenewal.rawafid.debug
             adb exec-out screencap -p > "$GITHUB_WORKSPACE/android-emulator-artifacts/home.png"
-            adb shell am start -W -a android.intent.action.VIEW -d 'https://healthrenewal.org/sectors/mental-health' org.healthrenewal.rawafid.debug
-            sleep 3
+            adb shell am start -W -a android.intent.action.VIEW -d 'https://healthrenewal.org/sectors/home/' org.healthrenewal.rawafid.debug
+            sleep 10
             adb shell pidof org.healthrenewal.rawafid.debug
             adb exec-out screencap -p > "$GITHUB_WORKSPACE/android-emulator-artifacts/deep-link.png"
             adb shell pm revoke org.healthrenewal.rawafid.debug android.permission.POST_NOTIFICATIONS || true
@@ -68,8 +68,29 @@ jobs:
             adb shell dumpsys meminfo org.healthrenewal.rawafid.debug > "$GITHUB_WORKSPACE/android-emulator-artifacts/meminfo.txt"
             adb shell dumpsys package org.healthrenewal.rawafid.debug > "$GITHUB_WORKSPACE/android-emulator-artifacts/package.txt"
             adb shell dumpsys activity exit-info org.healthrenewal.rawafid.debug > "$GITHUB_WORKSPACE/android-emulator-artifacts/exit-info.txt" || true
-            adb logcat -d -t 800 > "$GITHUB_WORKSPACE/android-emulator-artifacts/logcat.txt"
+            adb logcat -d -t 1200 > "$GITHUB_WORKSPACE/android-emulator-artifacts/logcat.txt"
             if grep -E 'ANR in org.healthrenewal.rawafid.debug|Process: org.healthrenewal.rawafid.debug.*FATAL EXCEPTION' "$GITHUB_WORKSPACE/android-emulator-artifacts/logcat.txt"; then exit 1; fi
+      - name: Validate deep-link visual evidence
+        run: |
+          python3 -m pip install --quiet pillow
+          python3 - <<'PY'
+          from PIL import Image, ImageStat
+          from pathlib import Path
+          p=Path('android-emulator-artifacts/deep-link.png')
+          if not p.exists() or p.stat().st_size < 10000:
+              raise SystemExit('Deep-link screenshot is missing or too small')
+          im=Image.open(p).convert('RGB')
+          w,h=im.size
+          crop=im.crop((0, int(h*0.06), w, int(h*0.94)))
+          pixels=crop.getdata()
+          n=crop.width*crop.height
+          near_white=sum(1 for r,g,b in pixels if r>245 and g>245 and b>245)
+          white_ratio=near_white/n
+          std=sum(ImageStat.Stat(crop).stddev)/3
+          print(f'deep-link white_ratio={white_ratio:.4f} mean_stddev={std:.2f}')
+          if white_ratio > 0.94 or std < 8:
+              raise SystemExit('Deep-link visual is blank or nearly blank')
+          PY
       - name: Upload real emulator evidence
         uses: actions/upload-artifact@v4
         if: always()
