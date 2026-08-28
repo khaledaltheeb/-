@@ -1,0 +1,40 @@
+name: Rich Discovery Diagnostic
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/rich-discovery-diagnostic.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      NEXT_PUBLIC_SITE_URL: https://healthrenewal.org
+      SEO_GATE_BASE_URL: https://rawafid-platform-staging.khaledaltheeb.workers.dev
+      SEO_GATE_CONCURRENCY: '12'
+      SEO_GATE_TIMEOUT_MS: '20000'
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Run isolated rich discovery gate
+        shell: bash
+        run: |
+          set +e
+          node scripts/rich-discovery-gate.mjs > /tmp/rich-discovery.log 2>&1
+          status=$?
+          echo '--- diagnostic summary ---'
+          grep -E '^(Rich discovery gate:|Rich discovery gate summary:|FAIL |Rawafid rich discovery gate passed\.)' /tmp/rich-discovery.log | head -n 180 || true
+          if [ "$status" -ne 0 ]; then
+            echo "Rich discovery diagnostic failed with status $status"
+            exit "$status"
+          fi
