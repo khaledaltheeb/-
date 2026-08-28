@@ -2,6 +2,7 @@ package org.healthrenewal.rawafid;
 
 import static org.junit.Assert.*;
 import org.junit.Test;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -45,5 +46,11 @@ public class EmergencyPlanTest {
         assertTrue(EmergencyPlan.looksLikeEmail("care@example.org"));
         assertFalse(EmergencyPlan.looksLikeEmail("care example.org"));
         assertFalse(EmergencyPlan.looksLikeEmail("care@example"));
+    }
+
+    @Test public void persistenceIsCappedAtTwentyContacts(){
+        List<EmergencyPlan.Contact> many=new ArrayList<>();
+        for(int i=0;i<25;i++) many.add(new EmergencyPlan.Contact("جهة "+i,"+962790000"+i,"",true,false,false,false));
+        assertEquals(EmergencyPlan.MAX_CONTACTS,EmergencyPlan.decodeContacts(EmergencyPlan.encodeContacts(many)).size());
     }
 }
