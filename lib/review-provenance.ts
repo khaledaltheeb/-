@@ -25,7 +25,7 @@ export function contentReviewProvenance(record: ReviewRecord) {
   const reviewerCredentials = hasAttributableReviewer && !institutionalReviewer ? explicitCredentials : null;
   const reviewerType = hasAttributableReviewer ? (institutionalReviewer ? 'Organization' : 'Person') : null;
   const reviewedBySchema = !hasAttributableReviewer
-    ? null
+    ? undefined
     : institutionalReviewer
       ? {
           '@type': 'Organization',
