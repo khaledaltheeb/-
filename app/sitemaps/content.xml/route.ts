@@ -27,7 +27,6 @@ type SitemapRow = {
 type ContentSitemapRecord = {
   id: string;
   slug: string;
-  updated_at: string | null;
   canonical_url: string | null;
 };
 
@@ -98,13 +97,13 @@ export async function GET(request: Request) {
   // Child-sitemap ownership is determined by the published canonical namespace,
   // never by an internal content_type. This prevents non-encyclopedia conditions
   // and glossary terms from being dropped or emitted under a competing URL.
-  // Pagination is intentionally ordered by immutable row id; updated_at only feeds lastmod.
+  // Pagination is intentionally ordered by immutable row id.
   for (let batchStart = pageStart; batchStart < pageEndExclusive; batchStart += DB_BATCH_SIZE) {
     const batchEnd = Math.min(batchStart + DB_BATCH_SIZE - 1, pageEndExclusive - 1);
     const requestedRows = batchEnd - batchStart + 1;
     let query = supabase
       .from('content')
-      .select('id,slug,updated_at,canonical_url')
+      .select('id,slug,canonical_url')
       .eq('status', 'published')
       .lte('published_at', now)
       .eq('robots_index', true);
@@ -131,7 +130,9 @@ export async function GET(request: Request) {
     })
     .map((item) => ({
       path: item.canonical_url || `/content/${item.slug}`,
-      lastModified: item.updated_at,
+      // Do not publish a technical database timestamp as sitemap <lastmod>.
+      // It will be restored when substantive editorial-change provenance is explicit.
+      lastModified: null,
       changeFrequency: 'monthly',
       priority: .7,
     }));
