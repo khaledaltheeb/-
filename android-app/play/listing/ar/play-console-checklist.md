@@ -1,21 +1,66 @@
-# Google Play Console Checklist
+# Google Play Console Checklist — روافد
 
-- Package: org.healthrenewal.rawafid
-- App category: Health & Fitness
-- Target audience: 18+ recommended due to reproductive-health tracking and broad health content.
-- Ads: No (current build contains no ad SDK).
-- App access: Public content; no account required for core features.
-- Health Apps Declaration: Period tracking / reproductive health + mental wellbeing information.
-- Medical disclaimer: App is not a medical device, diagnosis, treatment, or emergency service.
-- Privacy policy URL: MUST publish a public HTTPS policy before production submission.
-- Data Safety: Declare local reproductive-health/mood data accurately; do not claim collection if it never leaves device. Reassess if analytics, crash SDK, sync, FCM token, or account sync is added.
-- Content rating: Complete IARC questionnaire truthfully; health/medical information, no gambling, no violence, no sexual explicit content.
-- Notification permission: Runtime permission on Android 13+.
-- Debug: release build has debuggable=false and R8/resource shrinking enabled.
-- Cleartext traffic: disabled.
-- Backup: encrypted-capability requirement and sensitive secure prefs excluded.
-- Deep Links: add /.well-known/assetlinks.json to healthrenewal.org after Play signing certificate SHA-256 is known.
-- App signing: Prefer Play App Signing; keep upload key offline and never commit it.
+## الهوية
+- Package: `org.healthrenewal.rawafid`
+- App name: `روافد | معرفة وصحة عربية`
+- التطبيق يمثل **منصة روافد كاملة المنشورة على healthrenewal.org**.
+- «رفيقة روافد» و«تقويم المرأة» ميزتان اختياريتان داخل التطبيق وليستا اسم التطبيق أو هويته العامة.
+- App category: Health & Fitness (مع إعادة تقييم الفئة قبل الإرسال إذا أصبحت المعرفة/التعليم هي الاستخدام الغالب في بيانات Play الفعلية).
+
+## نطاق التطبيق الذي يجب أن يظهر في صفحة المتجر
+- جميع القطاعات والأقسام المنشورة في روافد.
+- الصحة النفسية.
+- التربية الخاصة والدامجة.
+- التوحد وصعوبات التعلم.
+- سرطان الأطفال.
+- الإدمان والتعافي.
+- دعم الأسرة.
+- الموسوعة.
+- أدلة التعامل والرعاية.
+- الأدلة العلمية.
+- الأدوات اليومية والمختبر المعرفي.
+- دليل المختصين والمراكز.
+- البحث والتنبيهات حسب الاهتمام.
+- رفيقة روافد وتقويم المرأة كأدوات شخصية إضافية فقط.
+
+## الأصول البصرية
 - Store icon: 512x512 PNG.
 - Feature graphic: 1024x500 PNG.
-- Phone screenshots: recommend 6-8 portrait screenshots showing home, companion, calendar, sectors, article, assessment, privacy/settings.
+- Phone screenshots: 6–8 صور عمودية على الأقل تغطي المنصة الكاملة، وليس رفيقة روافد فقط.
+- **لا تعتمد أي لقطة شاشة أو Feature Graphic يحتوي نصًا مولدًا آليًا.**
+- النص العربي الظاهر في مواد المتجر يجب أن يكون صادرًا من واجهة التطبيق الحقيقية أو مركبًا بخط برمجي موثوق بعد تدقيق إملائي يدوي/آلي.
+- أي mockup سابق يحتوي أخطاء كتابة يعتبر مرفوضًا ولا يدخل حزمة Google Play.
+- اللقطات النهائية المطلوبة: الرئيسية، البحث/القطاعات، دليل الرعاية أو الموسوعة، صفحة محتوى فعلية، اختيارات التنبيهات، رفيقة روافد، تقويم المرأة، الخصوصية/الإعدادات.
+
+## الخصوصية والصحة
+- Target audience: لا يُحسم تلقائيًا على 18+؛ يُستكمل نموذج الفئة العمرية وفق المحتوى الفعلي وسياسات Play قبل النشر.
+- Ads: No في البناء الحالي ما دام لا يوجد Ad SDK.
+- App access: المحتوى العام لا يحتاج حسابًا، مع توثيق أي وظائف مستقبلية تتطلب تسجيل الدخول.
+- Health Apps Declaration: Period tracking / reproductive health + mental wellbeing information + أي فئات صحية أخرى تنطبق على الوظائف الفعلية.
+- Medical disclaimer: التطبيق ليس جهازًا طبيًا ولا يقدم تشخيصًا أو علاجًا أو خدمة طوارئ.
+- Privacy policy URL: يجب نشر سياسة HTTPS عامة ومطابقة تمامًا لسلوك التطبيق قبل Production submission.
+- Data Safety: التصريح بدقة عن بيانات الدورة والمزاج والاسم والتفضيلات؛ لا تدّعي جمع بيانات لا تغادر الجهاز. يعاد التقييم إذا أضيف Analytics أو Crash SDK أو FCM token أو مزامنة حساب.
+- تقديرات الدورة والإباضة لا تقدم كوسيلة لمنع الحمل أو قرار طبي.
+
+## الأمان والإصدار
+- Notification permission: Runtime permission على Android 13+.
+- Release debug: `debuggable=false`.
+- R8/resource shrinking: enabled.
+- Cleartext HTTP: disabled.
+- Sensitive local backup: مستبعد حسب قواعد النسخ الاحتياطي.
+- WebView: HTTPS فقط لنطاق روافد، mixed content وfile/content access معطلة، والروابط الخارجية تخرج للمتصفح/التطبيق المختص.
+- Deep Links: نشر `/.well-known/assetlinks.json` بعد معرفة SHA-256 لشهادة Play App Signing الفعلية.
+- App signing: استخدام Play App Signing، وحفظ upload key خارج المستودع.
+- لا تخزن أي keystore أو password أو secret داخل GitHub.
+
+## الجودة قبل الرفع
+- `bundleRelease` ناجح.
+- `lintRelease` ناجح بلا Errors.
+- اختبار جميع الروابط الأساسية ضد Production.
+- اختبار RTL وأحجام الشاشات المختلفة.
+- اختبار Android 8 حتى Android 16 وفق نطاق minSdk/targetSdk.
+- اختبار فقد الإنترنت واستعادته.
+- اختبار رفض إذن الإشعارات.
+- اختبار App Links.
+- اختبار اكتشاف محتوى جديد في قطاع متابع.
+- تدقيق إملائي لكل نص ظاهر في التطبيق والمتجر قبل إنشاء screenshots النهائية.
