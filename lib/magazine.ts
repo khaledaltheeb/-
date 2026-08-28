@@ -29,11 +29,11 @@ export type MagazineRecord = {
 
 export type MagazineListingRecord = Pick<
   MagazineRecord,
-  'id' | 'slug' | 'title' | 'excerpt' | 'canonical_url' | 'published_at' | 'updated_at' | 'schema_json'
+  'id' | 'slug' | 'title' | 'excerpt' | 'canonical_url' | 'published_at' | 'updated_at' | 'schema_json' | 'primary_keyword' | 'secondary_keywords' | 'semantic_terms'
 >;
 
 const FIELDS = 'id,slug,title,excerpt,body_json,body_text,seo_title,seo_description,canonical_url,robots_index,robots_follow,published_at,updated_at,primary_keyword,secondary_keywords,semantic_terms,author_display_name,reviewer_display_name,reviewer_credentials,last_reviewed_at,references_json,medical_disclaimer,schema_json';
-const LISTING_FIELDS = 'id,slug,title,excerpt,canonical_url,published_at,updated_at,schema_json';
+const LISTING_FIELDS = 'id,slug,title,excerpt,canonical_url,published_at,updated_at,schema_json,primary_keyword,secondary_keywords,semantic_terms';
 
 function isPublishedNow(value: string | null) {
   return !value || new Date(value).getTime() <= Date.now();
@@ -49,6 +49,71 @@ export function sourceUrl(item: Pick<MagazineRecord, 'references_json' | 'schema
   if (ref?.url) return ref.url;
   const value = item.schema_json?.source_url;
   return typeof value === 'string' && /^https:\/\//i.test(value) ? value : null;
+}
+
+const RELATED_STOP_WORDS = new Set([
+  'التي', 'الذي', 'هذه', 'هذا', 'ذلك', 'لدى', 'على', 'إلى', 'الى', 'عن', 'من', 'في', 'مع', 'هل', 'ما', 'كيف', 'لماذا',
+  'الأطفال', 'الطفل', 'المراهقين', 'الشباب', 'الأشخاص', 'دراسة', 'بحثية', 'مراجعة', 'تحليل', 'الأدلة', 'العلمية', 'الصحة', 'النفسية', 'علم', 'النفس',
+  'the', 'and', 'for', 'with', 'from', 'review', 'study', 'analysis',
+]);
+
+function topicTokens(values: Array<string | null | undefined>) {
+  const tokens = new Set<string>();
+  for (const value of values) {
+    if (!value) continue;
+    for (const token of value
+      .toLocaleLowerCase('ar')
+      .normalize('NFKD')
+      .replace(/[\u064B-\u065F\u0670]/g, '')
+      .replace(/[^\p{L}\p{N}]+/gu, ' ')
+      .split(/\s+/)
+      .map((part) => part.trim())
+      .filter((part) => part.length >= 3 && !RELATED_STOP_WORDS.has(part))) {
+      tokens.add(token);
+    }
+  }
+  return tokens;
+}
+
+function overlapSize(left: Set<string>, right: Set<string>) {
+  let count = 0;
+  for (const value of left) if (right.has(value)) count += 1;
+  return count;
+}
+
+type RelatedProfile = {
+  tokens: Set<string>;
+  semanticTerms: Set<string>;
+  secondaryKeywords: Set<string>;
+  evidenceKind: string;
+};
+
+function relatedProfile(record: MagazineRecord): RelatedProfile {
+  return {
+    tokens: topicTokens([
+      record.title,
+      record.primary_keyword,
+      ...(record.secondary_keywords ?? []),
+      ...(record.semantic_terms ?? []),
+    ]),
+    semanticTerms: new Set(record.semantic_terms ?? []),
+    secondaryKeywords: new Set(record.secondary_keywords ?? []),
+    evidenceKind: evidenceKind(record),
+  };
+}
+
+function relatedScore(profile: RelatedProfile, candidate: MagazineListingRecord) {
+  const candidateTokens = topicTokens([
+    candidate.title,
+    candidate.primary_keyword,
+    ...(candidate.secondary_keywords ?? []),
+    ...(candidate.semantic_terms ?? []),
+  ]);
+  const tokenOverlap = overlapSize(profile.tokens, candidateTokens);
+  const semanticOverlap = overlapSize(profile.semanticTerms, new Set(candidate.semantic_terms ?? []));
+  const secondaryOverlap = overlapSize(profile.secondaryKeywords, new Set(candidate.secondary_keywords ?? []));
+  const sameEvidenceKind = profile.evidenceKind === evidenceKind(candidate) ? 1 : 0;
+  return (tokenOverlap * 10) + (semanticOverlap * 2) + secondaryOverlap + sameEvidenceKind;
 }
 
 export async function getMagazineItems(): Promise<MagazineListingRecord[]> {
@@ -103,6 +168,9 @@ export async function getPediatricOncologyEvidenceRecord(
 
 export async function getRelatedMagazine(record: MagazineRecord, limit = 4): Promise<MagazineListingRecord[]> {
   const boundedLimit = Math.max(1, Math.min(limit, 12));
+  // Keep a meaningful semantic candidate pool without turning every indexed
+  // magazine request into an unnecessarily large database read during crawls.
+  const candidateLimit = Math.min(96, Math.max(48, boundedLimit * 12));
   const supabase = await createClient();
   const { data, error } = await supabase
     .from('content')
@@ -112,12 +180,16 @@ export async function getRelatedMagazine(record: MagazineRecord, limit = 4): Pro
     .like('canonical_url', '/magazine/%')
     .neq('id', record.id)
     .order('published_at', { ascending: false })
-    .limit(Math.max(24, boundedLimit * 8));
+    .limit(candidateLimit);
   if (error) throw error;
 
-  const kind = evidenceKind(record);
+  const profile = relatedProfile(record);
   return ((data ?? []) as unknown as MagazineListingRecord[])
     .filter((item) => isPublishedNow(item.published_at))
-    .sort((a, b) => Number(evidenceKind(b) === kind) - Number(evidenceKind(a) === kind))
+    .sort((a, b) => {
+      const scoreDifference = relatedScore(profile, b) - relatedScore(profile, a);
+      if (scoreDifference !== 0) return scoreDifference;
+      return new Date(b.published_at || 0).getTime() - new Date(a.published_at || 0).getTime();
+    })
     .slice(0, boundedLimit);
 }

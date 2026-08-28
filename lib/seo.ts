@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
-import { RAWAFID_BRAND_NAME, RAWAFID_BRAND_SHORT } from '@/lib/theme';
 import { buildSemanticSeoProfile } from '@/lib/semantic-seo-safe';
+import { RAWAFID_BRAND_NAME, RAWAFID_BRAND_SHORT } from '@/lib/theme';
 
 export const PRODUCTION_SITE_URL = 'https://healthrenewal.org';
 export const STAGING_SITE_URL = 'https://rawafid-platform-staging.khaledaltheeb.workers.dev';
@@ -88,11 +88,12 @@ export function buildSeoMetadata(input: SeoMetadataInput): Metadata {
     ? Object.fromEntries(Object.entries(input.hreflang).map(([key, value]) => [key, absoluteSiteUrl(value)]))
     : undefined;
 
-  // Keep the full 50 topical + 50 intent profile for editorial/query-coverage validation.
-  // Google explicitly ignores <meta name="keywords">, so only a small, highly relevant
-  // topical subset is emitted for compatibility with secondary clients. No hidden copy is used.
+  // Keep the semantic/query inventory behavioral and available to CI/editorial tooling,
+  // while deliberately not serializing it into <meta name="keywords">.
   const semanticProfile = buildSemanticSeoProfile(input);
   const keywords = semanticProfile.topicKeywords.slice(0, 12);
+  void keywords;
+
   const openGraphImages = usesDefaultImage
     ? [{ url: image, width: 1200, height: 630, alt: input.title }]
     : [{ url: image, alt: input.title }];
@@ -100,7 +101,6 @@ export function buildSeoMetadata(input: SeoMetadataInput): Metadata {
   return {
     title: { absolute: title },
     description,
-    keywords,
     creator: BRAND_NAME,
     publisher: BRAND_NAME,
     alternates: { canonical, languages },
@@ -131,7 +131,8 @@ export function buildSeoMetadata(input: SeoMetadataInput): Metadata {
       ...(input.type === 'article'
         ? {
             publishedTime: input.publishedTime || undefined,
-            modifiedTime: input.modifiedTime || undefined,
+            // modifiedTime is intentionally not mapped from a generic technical timestamp.
+            // Emit a public modification date only after a substantive-change provenance model exists.
             authors: input.authors?.map((author) => author.url || author.name),
           }
         : {}),
