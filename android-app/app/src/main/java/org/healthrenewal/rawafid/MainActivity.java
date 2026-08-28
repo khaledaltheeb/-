@@ -135,6 +135,7 @@ public final class MainActivity extends AppCompatActivity {
         atHome=true;
         shell("كل منصة روافد في تطبيق واحد");
         card("البحث في روافد 🔎","ابحث عن حالة، سؤال، دليل، مختص، مركز أو موضوع في مكتبة روافد.",teal,v->openWeb(BASE+"/search"));
+        card("الطوارئ SOS","خطة طوارئ محلية مشفرة: رسالة مخصصة، عدة جهات اتصال، اتصال وSMS وWhatsApp وبريد مع خيار إرفاق الموقع.",Color.rgb(177,45,52),v->startActivity(new Intent(this,EmergencyActivity.class)));
 
         sectionTitle("استكشف روافد","وصول مباشر إلى المجالات والخدمات المنشورة على healthrenewal.org.");
         card("جميع القطاعات","استعرض القطاعات المعرفية المنشورة كاملة.",Color.rgb(31,105,138),v->openWeb(BASE+"/sectors"));
