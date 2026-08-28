@@ -36,6 +36,7 @@ function applyDedicatedSitemapExclusions<T extends {
   neq: (column: string, value: string) => T;
 }>(query: T): T {
   let owned = query
+    .not('canonical_url', 'like', '/encyclopedia/%')
     .not('canonical_url', 'like', '/quick-info/%')
     .not('canonical_url', 'like', '/daily-tools/%')
     .not('canonical_url', 'like', '/addiction/substances/%')
@@ -56,9 +57,9 @@ export async function GET(request: Request) {
   const now = new Date().toISOString();
   const data: ContentSitemapRecord[] = [];
 
-  // Canonical ownership is exclusive across child sitemaps. Only canonicals actually
-  // owned by Quick Info, Daily Tools, and the Addiction Atlas are excluded here.
-  // Other records may have legacy-looking slugs or namespaces but remain in this no-loss safety net.
+  // Child-sitemap ownership is determined by the published canonical namespace,
+  // never by an internal content_type. This prevents non-encyclopedia conditions
+  // and glossary terms from being dropped or emitted under a competing URL.
   // Pagination is intentionally ordered by immutable row id; updated_at only feeds lastmod.
   for (let batchStart = pageStart; batchStart < pageEndExclusive; batchStart += DB_BATCH_SIZE) {
     const batchEnd = Math.min(batchStart + DB_BATCH_SIZE - 1, pageEndExclusive - 1);
@@ -67,7 +68,6 @@ export async function GET(request: Request) {
       .from('content')
       .select('id,slug,updated_at,canonical_url')
       .eq('status', 'published')
-      .neq('content_type', 'condition')
       .lte('published_at', now)
       .eq('robots_index', true);
     query = applyDedicatedSitemapExclusions(query);
