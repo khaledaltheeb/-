@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import { RAWAFID_BRAND_NAME, RAWAFID_BRAND_SHORT } from '@/lib/theme';
-import { buildSemanticSeoProfile } from '@/lib/semantic-seo-safe';
 
 export const PRODUCTION_SITE_URL = 'https://healthrenewal.org';
 export const STAGING_SITE_URL = 'https://rawafid-platform-staging.khaledaltheeb.workers.dev';
@@ -88,11 +87,8 @@ export function buildSeoMetadata(input: SeoMetadataInput): Metadata {
     ? Object.fromEntries(Object.entries(input.hreflang).map(([key, value]) => [key, absoluteSiteUrl(value)]))
     : undefined;
 
-  // Keep the full 50 topical + 50 intent profile for editorial/query-coverage validation.
-  // Google explicitly ignores <meta name="keywords">, so only a small, highly relevant
-  // topical subset is emitted for compatibility with secondary clients. No hidden copy is used.
-  const semanticProfile = buildSemanticSeoProfile(input);
-  const keywords = semanticProfile.topicKeywords.slice(0, 12);
+  // Query maps remain private editorial inputs. Google Search does not use the
+  // meta-keywords tag for indexing or ranking, so do not emit those terms into HTML.
   const openGraphImages = usesDefaultImage
     ? [{ url: image, width: 1200, height: 630, alt: input.title }]
     : [{ url: image, alt: input.title }];
@@ -100,7 +96,6 @@ export function buildSeoMetadata(input: SeoMetadataInput): Metadata {
   return {
     title: { absolute: title },
     description,
-    keywords,
     creator: BRAND_NAME,
     publisher: BRAND_NAME,
     alternates: { canonical, languages },
