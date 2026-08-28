@@ -157,6 +157,8 @@ public final class MainActivity extends AppCompatActivity {
         card("اختياراتي والتنبيهات 🔔","حدد المجالات التي تريد متابعتها وتعديلها في أي وقت.",teal,v->showSectors());
 
         sectionTitle("أدواتي الشخصية","ميزات اختيارية داخل روافد وليست هوية التطبيق الأساسية.");
+        card("مكتبتي 📚","احفظ مواد روافد واقرأها لاحقًا، وافتح محفوظاتك من مكان واحد.",Color.rgb(70,94,112),v->startActivity(new Intent(this,LibraryActivity.class)));
+        card("دفتر الأعراض 📝","سجل ملاحظاتك وشدة الأعراض والسياق وما ساعد، محليًا ومشفّرًا ودون تشخيص.",Color.rgb(73,108,77),v->startActivity(new Intent(this,SymptomJournalActivity.class)));
         card("رفيقة روافد 💗","مساحة اختيارية للعناية اليومية ورسائل الدعم العام باسم تختارينه.",rose,v->showCompanion());
         card("تقويم المرأة 🌷","أداة اختيارية لتسجيل الدورة والتوقعات التقريبية والمزاج محليًا على جهازكِ.",lilac,v->showCalendar());
         card("الخصوصية وبياناتي 🔐","اعرف ما يُحفظ محليًا واحذف سجل المزاج أو جميع البيانات الشخصية المحلية متى أردت.",Color.rgb(64,91,104),v->showPrivacy());
@@ -214,6 +216,8 @@ public final class MainActivity extends AppCompatActivity {
         else if("companion".equals(route)) showCompanion();
         else if("women_calendar".equals(route)) showCalendar();
         else if("privacy".equals(route)) showPrivacy();
+        else if("library".equals(route)) startActivity(new Intent(this,LibraryActivity.class));
+        else if("symptom_journal".equals(route)) startActivity(new Intent(this,SymptomJournalActivity.class));
         else if(tool.webPath!=null&&!tool.webPath.isEmpty()&&tool.webPath.startsWith("/")&&!tool.webPath.startsWith("//")) openWeb(BASE+tool.webPath);
     }
 
