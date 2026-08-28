@@ -10,6 +10,7 @@ Maximize legitimate long-term value for Health Renewal / Rawafid through individ
 - Verified outreach source: latest canonical verified Rawafid outreach queue; current baseline is `rawafid_1000_verified_emails.xlsx` → `Master_1000_Contacts`.
 - Stable work key: `HANDOFF ID`.
 - Shared suppression registry: `.rawafid/SUPPRESSIONS.md`.
+- Shared send gate: Supabase `automation.reserve_outreach_send`, `automation.finalize_outreach_send`, and `automation.release_outreach_send`.
 - Website repository: `khaledaltheeb/-`.
 - Production domain: `https://healthrenewal.org/`.
 
@@ -22,14 +23,32 @@ Every agent must think as part of one system, not as an independent sender.
 5. Before every send or reply, re-check the thread/sent history immediately.
 6. Process bounces, opt-outs and do-not-contact requests before new outreach.
 7. Check `.rawafid/SUPPRESSIONS.md` before every new outreach send and never use a suppressed address or route.
-8. A successful send is recorded only after the mail provider confirms success.
+8. No send call may occur until the shared Supabase send gate has granted a reservation for that exact action.
+9. A successful send is recorded only after the mail provider confirms success and the reservation is finalized with the provider message id.
+
+## Global send gate — mandatory
+This is a hard coordination rule for every current or future outreach worker. Worker identity, partition, schedule, or run count never creates a separate quota.
+
+Before **every** outbound message:
+- Use a stable idempotency key. For new outreach prefer `new:<lowercase-email>:<HANDOFF ID>`; for a human-thread reply prefer `reply:<latest-inbound-provider-message-id>`.
+- Call `automation.reserve_outreach_send(idempotency_key, run_key, sender_process, recipient_email, send_kind)` before invoking the mail provider.
+- Proceed only when the returned object has `allowed = true`.
+- For a successful provider send, immediately call `automation.finalize_outreach_send(...)` with the provider message id.
+- If the provider send fails or the action is abandoned, call `automation.release_outreach_send(...)` with `failed` or `released` as appropriate.
+- Never send first and record later.
+- Never bypass the gate by using a second worker, another schedule, another queue, another thread, or another tool.
+
+For `new_outreach`, the gate enforces one **global rolling 60-minute limit of 8 successful/reserved new outreach messages across all workers combined**. Active reservations expire if abandoned so a crashed worker does not permanently consume capacity. Human replies use the same idempotency/audit gate but are not counted against the new-outreach quota.
+
+If the gate returns `global_limit_reached` or `new_outreach_disabled`, stop new outreach for that run and continue only safe inbox handling, source verification, content-gap analysis, publication work, and other non-sending tasks. Never compensate by increasing throughput later in the same window.
 
 ## Worker partition
 To prevent overlap between scheduled outreach workers:
 - Worker A owns odd `HANDOFF ID` values for new outreach.
 - Worker B owns even `HANDOFF ID` values for new outreach.
 - A worker must never send new outreach for the other worker's parity.
-- Existing human threads are not partitioned; either worker may reply only when it verifies immediately before sending that no newer outbound reply already exists. Scheduled workers are staggered to make this idempotent.
+- The odd/even partition is a deduplication partition only. It does **not** create per-worker send allowances; all workers consume the same global send gate.
+- Existing human threads are not partitioned; either worker may reply only when it verifies immediately before sending that no newer outbound reply already exists and the shared send gate grants the idempotent reply reservation.
 - If `HANDOFF ID` is unavailable, do not invent an ID or send from that record until it is reconciled into the canonical queue.
 
 ## New-outreach rules
@@ -42,7 +61,8 @@ To prevent overlap between scheduled outreach workers:
 - Explain Rawafid / Health Renewal accurately and use Khaled Altheeb / خالد الذيب as sender identity.
 - Prefer a concrete, proportionate next step over a long list of requests.
 - Before sending, search sent mail and relevant threads by exact email, organization/domain and subject/context; include legacy BCC history in deduplication and skip duplicates.
-- Outreach throughput target for each outreach worker is up to 50 successful unique new messages per run when 50 eligible unsent records exist. If fewer exist, send all remaining eligible records. Provider limits, deliverability protection, bounces, complaints, opt-outs, and human-reply handling take precedence over quota.
+- Throughput is governed only by the shared atomic gate: **maximum 8 new outreach messages globally in a rolling 60-minute window across all workers combined**. There is no per-worker 50-message allowance and no requirement to consume all available slots.
+- Deliverability protection, bounces, complaints, opt-outs, human-reply handling, and message quality take precedence over throughput.
 
 ## Human-reply rules
 - Read the actual message body and enough prior thread context to understand what is being answered.
@@ -87,7 +107,7 @@ Worker B is the primary source-to-site worker.
 - Validate build/tests and page integrity before production-affecting changes. If source rights, medical accuracy, architecture, or build validity is uncertain, stop publication and report the blocking issue instead of guessing.
 
 ## Deliverability circuit breaker
-Pause new outreach for the affected worker and prioritize diagnosis if the provider throttles/rejects sending, a material bounce spike appears, a complaint/abuse signal appears, or domain reputation risk is evident. Never compensate by switching to bulk/BCC behavior.
+Pause new outreach globally and prioritize diagnosis if the provider throttles/rejects sending, a material bounce spike appears, a complaint/abuse signal appears, a burst bypasses the shared send gate, or domain reputation risk is evident. Never compensate by switching to bulk/BCC behavior or another sender process.
 
 ## Run report
 Each run should report, as applicable:
@@ -95,7 +115,8 @@ Each run should report, as applicable:
 - human replies sent;
 - sensitive items needing Khaled's decision;
 - new outreach successfully sent and organizations contacted;
-- skips and reasons (duplicate, bounce, suppression, form-only, invalid, provider limit);
+- send-gate reservations granted/denied/released/failed;
+- skips and reasons (duplicate, bounce, suppression, form-only, invalid, provider limit, global quota);
 - useful resources/links extracted;
 - pages created/enriched and their repository/production links;
 - remaining eligible unsent records in the worker's partition;
