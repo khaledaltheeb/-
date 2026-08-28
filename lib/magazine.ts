@@ -81,23 +81,38 @@ function overlapSize(left: Set<string>, right: Set<string>) {
   return count;
 }
 
-function relatedScore(record: MagazineRecord, candidate: MagazineListingRecord) {
-  const recordTokens = topicTokens([
-    record.title,
-    record.primary_keyword,
-    ...(record.secondary_keywords ?? []),
-    ...(record.semantic_terms ?? []),
-  ]);
+type RelatedProfile = {
+  tokens: Set<string>;
+  semanticTerms: Set<string>;
+  secondaryKeywords: Set<string>;
+  evidenceKind: string;
+};
+
+function relatedProfile(record: MagazineRecord): RelatedProfile {
+  return {
+    tokens: topicTokens([
+      record.title,
+      record.primary_keyword,
+      ...(record.secondary_keywords ?? []),
+      ...(record.semantic_terms ?? []),
+    ]),
+    semanticTerms: new Set(record.semantic_terms ?? []),
+    secondaryKeywords: new Set(record.secondary_keywords ?? []),
+    evidenceKind: evidenceKind(record),
+  };
+}
+
+function relatedScore(profile: RelatedProfile, candidate: MagazineListingRecord) {
   const candidateTokens = topicTokens([
     candidate.title,
     candidate.primary_keyword,
     ...(candidate.secondary_keywords ?? []),
     ...(candidate.semantic_terms ?? []),
   ]);
-  const tokenOverlap = overlapSize(recordTokens, candidateTokens);
-  const semanticOverlap = overlapSize(new Set(record.semantic_terms ?? []), new Set(candidate.semantic_terms ?? []));
-  const secondaryOverlap = overlapSize(new Set(record.secondary_keywords ?? []), new Set(candidate.secondary_keywords ?? []));
-  const sameEvidenceKind = evidenceKind(record) === evidenceKind(candidate) ? 1 : 0;
+  const tokenOverlap = overlapSize(profile.tokens, candidateTokens);
+  const semanticOverlap = overlapSize(profile.semanticTerms, new Set(candidate.semantic_terms ?? []));
+  const secondaryOverlap = overlapSize(profile.secondaryKeywords, new Set(candidate.secondary_keywords ?? []));
+  const sameEvidenceKind = profile.evidenceKind === evidenceKind(candidate) ? 1 : 0;
   return (tokenOverlap * 10) + (semanticOverlap * 2) + secondaryOverlap + sameEvidenceKind;
 }
 
@@ -153,6 +168,9 @@ export async function getPediatricOncologyEvidenceRecord(
 
 export async function getRelatedMagazine(record: MagazineRecord, limit = 4): Promise<MagazineListingRecord[]> {
   const boundedLimit = Math.max(1, Math.min(limit, 12));
+  // Keep a meaningful semantic candidate pool without turning every indexed
+  // magazine request into an unnecessarily large database read during crawls.
+  const candidateLimit = Math.min(96, Math.max(48, boundedLimit * 12));
   const supabase = await createClient();
   const { data, error } = await supabase
     .from('content')
@@ -162,13 +180,14 @@ export async function getRelatedMagazine(record: MagazineRecord, limit = 4): Pro
     .like('canonical_url', '/magazine/%')
     .neq('id', record.id)
     .order('published_at', { ascending: false })
-    .limit(Math.max(160, boundedLimit * 24));
+    .limit(candidateLimit);
   if (error) throw error;
 
+  const profile = relatedProfile(record);
   return ((data ?? []) as unknown as MagazineListingRecord[])
     .filter((item) => isPublishedNow(item.published_at))
     .sort((a, b) => {
-      const scoreDifference = relatedScore(record, b) - relatedScore(record, a);
+      const scoreDifference = relatedScore(profile, b) - relatedScore(profile, a);
       if (scoreDifference !== 0) return scoreDifference;
       return new Date(b.published_at || 0).getTime() - new Date(a.published_at || 0).getTime();
     })
