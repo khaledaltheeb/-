@@ -1,0 +1,53 @@
+name: Rawafid Arabic RTL Audit
+
+on:
+  pull_request:
+    paths:
+      - 'app/**'
+      - 'components/**'
+      - 'lib/**'
+      - '.github/workflows/rtl-audit.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'app/**'
+      - 'components/**'
+      - 'lib/**'
+      - '.github/workflows/rtl-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    name: Arabic RTL source audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Run Rawafid Arabic/RTL audit
+        id: rawafid_rtl
+        uses: khaledaltheeb/rawafid-arabic-rtl-a11y-toolkit@d886201000f78c466c83b75bd721b6a3849cecab
+        with:
+          paths: |
+            app
+            components
+            lib
+          strict: 'true'
+          fail-on: none
+          sarif: 'true'
+          sarif-path: artifacts/rawafid-rtl.sarif
+
+      - name: Preserve Rawafid SARIF evidence
+        if: always() && steps.rawafid_rtl.outputs.sarif-path != ''
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: rawafid-rtl-audit
+          path: artifacts/rawafid-rtl.sarif
+          if-no-files-found: error
+          retention-days: 30
