@@ -1,4 +1,4 @@
-# Short Encyclopedia — Hourly Agent Contract v2
+# Short Encyclopedia — Hourly Agent Contract v2.1
 
 This contract governs automated publishing for `/sectors/short-encyclopedia`.
 
@@ -10,9 +10,9 @@ There is **no minimum word-count requirement**. Pages should be only as long as 
 
 Every run must follow this pipeline:
 
-1. Inspect the live site, existing database content, titles, aliases, canonicals, primary keywords, and internal-link graph before choosing topics.
+1. Inspect the live site and the **entire production content corpus, including published pages and drafts**, before choosing topics.
 2. Find genuine content/search gaps. Prioritize missing entities, unanswered Arabic queries, synonyms, English/Arabic naming variants, important syndromes/conditions, and high-value user questions. Do not publish alphabetically just to increase volume.
-3. Reject candidates that would duplicate an existing page or create search-intent cannibalization. Prefer enriching/linking an existing page when that is the correct action.
+3. Apply the mandatory Gap-first gate below. Reject candidates that would duplicate an existing page or create search-intent cannibalization. Prefer enriching/linking an existing canonical page when that is the correct action.
 4. Research each accepted candidate using current authoritative sources appropriate to the topic: international/public-health bodies, clinical guidance, university or government sources, systematic reviews, meta-analyses, peer-reviewed research, recognized reference works, and authoritative condition/syndrome databases. Never copy protected diagnostic manuals or proprietary tests verbatim.
 5. Write clear Arabic for the intended audience. Preserve the correct English term and recognized synonyms/aliases. State uncertainty and evidence limits where relevant.
 6. Run the scientific/editorial gate.
@@ -20,6 +20,27 @@ Every run must follow this pipeline:
 8. Publish only passing pages to the correct short-encyclopedia category.
 9. Verify the live/public result: successful response, correct canonical, indexability, correct section mapping, valid metadata, valid internal links, and no duplicate title/slug/canonical.
 10. Record audit metadata, sources used, publication status, and failure reason for every rejected candidate.
+
+## Gap-first gate — mandatory before research or writing
+
+No candidate may be drafted merely because an agent knows the term. A new page is allowed only after the agent proves that the intended entity/search intent is not already adequately represented in the corpus.
+
+For every candidate, search and normalize all of the following across the complete production corpus:
+
+- Arabic title and normalized Arabic spelling;
+- English term and recognized English variants;
+- candidate slug and likely slug variants;
+- `search_aliases` and transliterations;
+- `primary_keyword`;
+- `secondary_keywords`;
+- `semantic_terms`;
+- stored `canonical_url`;
+- existing page titles/excerpts/body terminology where needed;
+- near-identical entity meaning and search intent, even when wording differs.
+
+If a published canonical page already covers the same entity or primary intent, **do not create a second page**. Improve, enrich, correct, cross-list, or internally link the existing canonical page instead. If a substantial draft already targets the same entity, repair/complete that draft rather than opening another one. A new page is justified only when it represents a distinct entity or a materially distinct user intent that deserves its own canonical.
+
+The deduplication decision must be logged so later agents do not repeat the same candidate-selection work.
 
 ## Scientific/editorial gate — mandatory
 
@@ -47,9 +68,9 @@ Each new page must have, as applicable:
 - correct slug and no competing canonical/title/intent;
 - visible internal links to the section hub and closely related pages, plus reciprocal/contextual links when useful;
 - breadcrumbs;
-- structured data that truthfully matches the visible content and page type (for example WebPage/DefinedTerm/MedicalWebPage plus BreadcrumbList where appropriate);
+- structured data that truthfully matches the visible content and page type (`DefinedTerm`/`WebPage` for terminology and `MedicalCondition`/`MedicalWebPage` only for genuine clinical conditions, plus `BreadcrumbList` where appropriate);
 - source/review metadata and medical disclaimer where the subject is medical;
-- inclusion in the normal sitemap/indexation pipeline;
+- inclusion in the correct sitemap/indexation pipeline;
 - Arabic spelling variants and common transliterations only when they correspond to real searches and do not degrade the visible text.
 
 A visible FAQ is encouraged when it answers real user questions, but it must be written for users rather than manufactured for rich-result eligibility.
@@ -100,13 +121,16 @@ Default page structure when applicable:
 
 Preferred source classes include WHO, UNICEF, UNESCO, NICE/NHS, CDC/AAP where relevant, GeneReviews/Orphanet for appropriate genetic/rare conditions, evidence-based education/inclusion guidance, systematic reviews, and peer-reviewed literature.
 
-## Data and routing rules
+## Data, canonical, and routing rules
 
-- New short-encyclopedia pages should be created under the `short-encyclopedia` sector and assigned to the correct root category as their primary category unless an existing canonical page already covers the entity.
+- A genuinely new short-encyclopedia terminology page should normally use `content_type='glossary_term'`, canonical `/encyclopedia/{slug}/`, and the relevant short-encyclopedia root category as its primary category.
+- Use `content_type='condition'` only for an entity that is genuinely a clinical condition and only when the page/schema model matches that meaning. Its canonical may still be `/encyclopedia/{slug}/` when the Short Encyclopedia owns that page.
+- **Sitemap ownership is determined by the stored canonical namespace, not by `content_type`.** A row canonicalized to `/encyclopedia/...` belongs to the encyclopedia sitemap; a condition or glossary term canonicalized elsewhere must remain in the sitemap that owns that canonical.
 - Existing pages cross-listed into a new section must retain their existing primary taxonomy and canonical URL; do not create a duplicate page merely to move it into the short encyclopedia.
-- Before any publish, search by slug, title, Arabic and English aliases, canonical URL, primary keyword, and semantic intent.
+- Never rewrite an existing canonical solely to force an old page into this sector. Cross-list it when appropriate.
+- Before any publish, search by normalized Arabic/English term, slug, aliases, canonical URL, primary/secondary keywords, semantic terms, and semantic/search intent.
 - Never delete, hide, de-index, or replace an existing published page as part of this workflow unless an explicit repair decision is separately justified and verified.
 
 ## Throughput and parallelism
 
-The two agents are independent and may run concurrently. Each should aim to complete 50 passing pages per run. Failed candidates do not count as published pages. If fewer than 50 defensible pages can be completed in a run, publish the passing set and retain/replace the rest rather than lowering the quality bar.
+The two agents are independent and may run concurrently. Each should aim to complete 50 passing pages per run. Failed or duplicate candidates do not count as published pages. If fewer than 50 defensible pages can be completed in a run, publish the passing set and retain/replace the rest rather than lowering the quality bar.
