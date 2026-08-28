@@ -8,9 +8,11 @@ import java.util.List;
 public class LocalLibraryTest {
     @Test public void acceptsOnlyRawafidRelativePaths(){
         assertTrue(LocalLibrary.validPath("/sectors/mental-health"));
+        assertTrue(LocalLibrary.validPath("/search?q=الصرع"));
         assertFalse(LocalLibrary.validPath("https://evil.example"));
         assertFalse(LocalLibrary.validPath("//evil.example/path"));
         assertFalse(LocalLibrary.validPath("javascript:alert(1)"));
+        assertFalse(LocalLibrary.validPath("/safe\\evil"));
     }
 
     @Test public void upsertDeduplicatesByPathAndKeepsNewestValue(){
