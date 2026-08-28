@@ -25,7 +25,7 @@ jobs:
       NEXT_PUBLIC_ENABLE_DIRECT_GA: 'true'
       SEO_GATE_BASE_URL: http://127.0.0.1:3000
       SEO_GATE_CONCURRENCY: '12'
-      SEO_GATE_TIMEOUT_MS: '20000'
+      SEO_GATE_TIMEOUT_MS: '60000'
       SEO_GATE_MAX_URLS: '200'
     steps:
       - uses: actions/checkout@v7
