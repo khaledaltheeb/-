@@ -29,6 +29,7 @@ jobs:
           set -eu
           ! grep -R 'android:debuggable="true"' app/src/main/AndroidManifest.xml
           grep -q 'android:usesCleartextTraffic="false"' app/src/main/AndroidManifest.xml
+          grep -q 'android:allowBackup="false"' app/src/main/AndroidManifest.xml
           grep -q 'android.permission.POST_NOTIFICATIONS' app/src/main/AndroidManifest.xml
           ! grep -R -E '(AIza[0-9A-Za-z_-]{20,}|BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY|RAWAFID_KEYSTORE_PASSWORD *=)' app/src/main 2>/dev/null || exit 1
       - name: Show test tasks
