@@ -4,20 +4,23 @@ type ReviewRecord = {
   reviewer_credentials?: string | null;
 };
 
+type ReviewerEntityType = 'Organization' | 'Person' | null;
+
 export const RAWAFID_REVIEW_TEAM = 'فريق روافد';
 
 function nonEmptyString(value: unknown) {
   return typeof value === 'string' && value.trim() ? value.trim() : null;
 }
 
-function isInstitutionalReviewerName(value: string | null) {
-  if (!value) return false;
-  if (value === RAWAFID_REVIEW_TEAM) return true;
+function reviewerEntityType(value: string | null): ReviewerEntityType {
+  if (!value) return null;
+  if (value === RAWAFID_REVIEW_TEAM || /^فريق(?:\s|$)/u.test(value)) return 'Organization';
 
-  // These patterns describe explicitly recorded Rawafid team/editorial labels, not people.
-  // Do not infer an organization from missing data; this only classifies a stored label.
-  return /^فريق(?:\s|$)/u.test(value)
-    || (/^مراجعة(?:\s|$)/u.test(value) && value.includes('منصة روافد'));
+  // A stored process label such as "مراجعة تحريرية وعلمية — منصة روافد" is
+  // review provenance, but it is not itself the name of a Person or Organization.
+  if (/^مراجعة(?:\s|$)/u.test(value) && value.includes('منصة روافد')) return null;
+
+  return 'Person';
 }
 
 export function contentReviewProvenance(record: ReviewRecord) {
@@ -26,17 +29,17 @@ export function contentReviewProvenance(record: ReviewRecord) {
   const explicitCredentials = nonEmptyString(record.reviewer_credentials);
   const hasRecordedReview = Boolean(recordedReviewDate);
   const hasAttributableReviewer = Boolean(hasRecordedReview && explicitReviewer);
-  const institutionalReviewer = isInstitutionalReviewerName(explicitReviewer);
+  const reviewerType = hasAttributableReviewer ? reviewerEntityType(explicitReviewer) : null;
 
   // Preserve a recorded review date, but never infer who performed the review.
-  // Reviewer identity is emitted only when the content record explicitly stores one.
+  // Keep explicitly stored review labels visible, while emitting reviewedBy only
+  // when the stored value genuinely identifies a Person or Organization entity.
   const lastReviewedAt = hasRecordedReview ? recordedReviewDate : null;
   const reviewerName = hasAttributableReviewer ? explicitReviewer : null;
-  const reviewerCredentials = hasAttributableReviewer && !institutionalReviewer ? explicitCredentials : null;
-  const reviewerType = hasAttributableReviewer ? (institutionalReviewer ? 'Organization' : 'Person') : null;
-  const reviewedBySchema = !hasAttributableReviewer
+  const reviewerCredentials = reviewerType === 'Person' ? explicitCredentials : null;
+  const reviewedBySchema = !hasAttributableReviewer || !reviewerType
     ? undefined
-    : institutionalReviewer
+    : reviewerType === 'Organization'
       ? {
           '@type': 'Organization',
           name: explicitReviewer,
