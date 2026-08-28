@@ -23,7 +23,7 @@ public class SymptomJournalTest {
 
     @Test public void invalidEntriesAreDropped(){
         List<SymptomJournal.Entry> entries=new ArrayList<>();
-        entries.add(new SymptomJournal.Entry("x",0,"","5","","",""));
+        entries.add(new SymptomJournal.Entry("x",0,"",5,"","","") );
         assertTrue(SymptomJournal.decode(SymptomJournal.encode(entries)).isEmpty());
     }
 
