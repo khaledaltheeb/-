@@ -25,6 +25,7 @@ function applyDedicatedSitemapExclusions<T extends {
   neq: (column: string, value: string) => T;
 }>(query: T): T {
   let owned = query
+    .not('canonical_url', 'like', '/encyclopedia/%')
     .not('canonical_url', 'like', '/quick-info/%')
     .not('canonical_url', 'like', '/daily-tools/%')
     .not('canonical_url', 'like', '/addiction/substances/%')
@@ -44,7 +45,8 @@ export async function GET() {
   let encyclopediaQuery = supabase
     .from('content')
     .select('id', { count: 'exact', head: true })
-    .eq('content_type', 'condition')
+    .in('content_type', ['glossary_term', 'condition'])
+    .like('canonical_url', '/encyclopedia/%')
     .eq('status', 'published')
     .lte('published_at', now)
     .eq('robots_index', true);
@@ -57,7 +59,6 @@ export async function GET() {
     .from('content')
     .select('id', { count: 'exact', head: true })
     .eq('status', 'published')
-    .neq('content_type', 'condition')
     .lte('published_at', now)
     .eq('robots_index', true);
   contentQuery = applyDedicatedSitemapExclusions(contentQuery);
