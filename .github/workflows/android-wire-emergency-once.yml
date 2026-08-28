@@ -1,0 +1,35 @@
+name: Wire Rawafid Emergency Once
+on:
+  push:
+    branches: ["android/rawafid-app-v1"]
+    paths:
+      - ".github/workflows/android-wire-emergency-once.yml"
+permissions:
+  contents: write
+jobs:
+  wire:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: android/rawafid-app-v1
+          fetch-depth: 0
+      - name: Add emergency entry to native home
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('android-app/app/src/main/java/org/healthrenewal/rawafid/MainActivity.java')
+          text=p.read_text(encoding='utf-8')
+          anchor='''        card("البحث في روافد 🔎","ابحث عن حالة، سؤال، دليل، مختص، مركز أو موضوع في مكتبة روافد.",teal,v->openWeb(BASE+"/search"));'''
+          addition=anchor+'''\n        card("الطوارئ SOS","خطة طوارئ محلية مشفرة: رسالة مخصصة، عدة جهات اتصال، اتصال وSMS وWhatsApp وبريد مع خيار إرفاق الموقع.",Color.rgb(177,45,52),v->startActivity(new Intent(this,EmergencyActivity.class)));'''
+          if 'EmergencyActivity.class' in text:
+              raise SystemExit('Emergency entry already present')
+          if anchor not in text:
+              raise SystemExit('Home search card anchor not found')
+          p.write_text(text.replace(anchor,addition,1),encoding='utf-8')
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add android-app/app/src/main/java/org/healthrenewal/rawafid/MainActivity.java
+          git commit -m "feat(android): expose emergency center from native home"
+          git push origin HEAD:android/rawafid-app-v1
