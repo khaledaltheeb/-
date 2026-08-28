@@ -9,10 +9,10 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 public final class CompanionWorker extends Worker {
@@ -45,27 +45,52 @@ public final class CompanionWorker extends Worker {
                 prefs.getCompanionLastAutoSentAt(),
                 prefs.getCompanionIntervalHours())) return;
 
-        if(sendNotification(c)) prefs.markCompanionAutoSent(nowMillis,today,count+1);
+        if(sendNotification(c,prefs)) prefs.markCompanionAutoSent(nowMillis,today,count+1);
     }
 
-    public static void sendNow(Context c){ sendNotification(c); }
+    public static void sendNow(Context c){ sendNotification(c,new SecurePrefs(c)); }
 
-    private static boolean sendNotification(Context c){
+    private static boolean sendNotification(Context c,SecurePrefs prefs){
         if(android.os.Build.VERSION.SDK_INT>=33 && ActivityCompat.checkSelfPermission(c, Manifest.permission.POST_NOTIFICATIONS)!=PackageManager.PERMISSION_GRANTED) return false;
         String period=CompanionPolicy.periodKey(LocalTime.now().getHour());
         List<String> pool=MessageBank.forPeriod(period);
         if(pool.isEmpty()) return false;
-        String name=new SecurePrefs(c).getName();
+
+        String msg=chooseNonRepeating(pool,prefs.getRecentCompanionMessageHashes());
+        if(msg==null) return false;
+        prefs.recordCompanionMessageHash(msg.hashCode());
+
+        String name=prefs.getName();
         String prefix=name.trim().isEmpty()?"":"يا "+name+"، ";
-        String msg=pool.get(ThreadLocalRandom.current().nextInt(pool.size()));
+        String fullText=prefix+msg;
+
+        NotificationCompat.Builder publicVersion=new NotificationCompat.Builder(c,RawafidApp.CHANNEL_COMPANION)
+                .setSmallIcon(android.R.drawable.btn_star)
+                .setContentTitle("روافد")
+                .setContentText("لديكِ رسالة جديدة من رفيقة روافد")
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setAutoCancel(true);
+
         NotificationCompat.Builder b=new NotificationCompat.Builder(c,RawafidApp.CHANNEL_COMPANION)
                 .setSmallIcon(android.R.drawable.btn_star)
                 .setContentTitle("رفيقة روافد 💗")
-                .setContentText(prefix+msg)
-                .setStyle(new NotificationCompat.BigTextStyle().bigText(prefix+msg))
+                .setContentText(fullText)
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(fullText))
+                .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
+                .setPublicVersion(publicVersion.build())
                 .setAutoCancel(true)
                 .setOnlyAlertOnce(false);
         ((NotificationManager)c.getSystemService(Context.NOTIFICATION_SERVICE)).notify((int)(System.currentTimeMillis()%100000),b.build());
         return true;
+    }
+
+    static String chooseNonRepeating(List<String> pool,Set<Integer> recent){
+        if(pool==null || pool.isEmpty()) return null;
+        int start=ThreadLocalRandom.current().nextInt(pool.size());
+        for(int i=0;i<pool.size();i++){
+            String candidate=pool.get((start+i)%pool.size());
+            if(recent==null || !recent.contains(candidate.hashCode())) return candidate;
+        }
+        return pool.get(start);
     }
 }
