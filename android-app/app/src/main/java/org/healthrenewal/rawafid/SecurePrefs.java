@@ -16,10 +16,7 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 
-/**
- * Local private state encrypted with a non-exportable Android Keystore AES-256 key.
- * Preference keys are non-sensitive identifiers; every stored value is AES/GCM encrypted.
- */
+/** Local private state encrypted with a non-exportable Android Keystore AES-256 key. */
 public final class SecurePrefs {
     private static final String PREF_FILE="rawafid_secure_v2";
     private static final String KEY_ALIAS="rawafid_local_data_aes_v1";
@@ -36,9 +33,7 @@ public final class SecurePrefs {
             Context app=context.getApplicationContext();
             prefs=app.getSharedPreferences(PREF_FILE,Context.MODE_PRIVATE);
             secretKey=getOrCreateKey();
-        } catch(Exception e) {
-            throw new IllegalStateException("Secure local storage unavailable",e);
-        }
+        } catch(Exception e) { throw new IllegalStateException("Secure local storage unavailable",e); }
     }
 
     private static SecretKey getOrCreateKey() throws Exception {
@@ -50,13 +45,10 @@ public final class SecurePrefs {
             throw new IllegalStateException("Unexpected key type");
         }
         KeyGenerator generator=KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES,"AndroidKeyStore");
-        KeyGenParameterSpec spec=new KeyGenParameterSpec.Builder(
-                KEY_ALIAS,
-                KeyProperties.PURPOSE_ENCRYPT|KeyProperties.PURPOSE_DECRYPT)
+        KeyGenParameterSpec spec=new KeyGenParameterSpec.Builder(KEY_ALIAS,KeyProperties.PURPOSE_ENCRYPT|KeyProperties.PURPOSE_DECRYPT)
                 .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
                 .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
-                .setKeySize(256)
-                .build();
+                .setKeySize(256).build();
         generator.init(spec);
         return generator.generateKey();
     }
@@ -82,34 +74,20 @@ public final class SecurePrefs {
     private String getString(String key,String fallback){
         String encoded=prefs.getString(key,null);
         if(encoded==null) return fallback;
-        try { return decrypt(encoded); }
-        catch(Exception ignored){ return fallback; }
+        try { return decrypt(encoded); } catch(Exception ignored){ return fallback; }
     }
-
     private void putString(String key,String value){
         try { prefs.edit().putString(key,encrypt(value==null?"":value)).apply(); }
         catch(Exception e){ throw new IllegalStateException("Unable to protect local data",e); }
     }
-
-    private int getInt(String key,int fallback){
-        try { return Integer.parseInt(getString(key,Integer.toString(fallback))); }
-        catch(NumberFormatException ignored){ return fallback; }
-    }
-    private long getLong(String key,long fallback){
-        try { return Long.parseLong(getString(key,Long.toString(fallback))); }
-        catch(NumberFormatException ignored){ return fallback; }
-    }
-    private boolean getBoolean(String key,boolean fallback){
-        String value=getString(key,Boolean.toString(fallback));
-        return "true".equalsIgnoreCase(value)?true:"false".equalsIgnoreCase(value)?false:fallback;
-    }
+    private int getInt(String key,int fallback){ try { return Integer.parseInt(getString(key,Integer.toString(fallback))); } catch(NumberFormatException ignored){ return fallback; } }
+    private long getLong(String key,long fallback){ try { return Long.parseLong(getString(key,Long.toString(fallback))); } catch(NumberFormatException ignored){ return fallback; } }
+    private boolean getBoolean(String key,boolean fallback){ String value=getString(key,Boolean.toString(fallback)); return "true".equalsIgnoreCase(value)?true:"false".equalsIgnoreCase(value)?false:fallback; }
 
     public String getName(){ return getString("companion_name",""); }
     public void setName(String v){ putString("companion_name",v==null?"":v.trim()); }
-
     public String getSectors(){ return getString("sectors",""); }
     public void setSectors(String v){ putString("sectors",v==null?"":v); }
-
     public long getLastSeen(String key){ return getLong("seen_"+key,0L); }
     public void setLastSeen(String key,long v){ putString("seen_"+key,Long.toString(v)); }
 
@@ -122,19 +100,11 @@ public final class SecurePrefs {
         putString("period_length",Integer.toString(clamp(period,2,10)));
     }
 
-    public List<MoodPatternEngine.Entry> getMoodHistory(){
-        return MoodPatternEngine.decode(getString("mood_history",""));
-    }
-
+    public List<MoodPatternEngine.Entry> getMoodHistory(){ return MoodPatternEngine.decode(getString("mood_history","")); }
     public void recordMood(int mood){
-        List<MoodPatternEngine.Entry> updated=MoodPatternEngine.appendCapped(
-                getMoodHistory(),
-                new MoodPatternEngine.Entry(System.currentTimeMillis(),mood),
-                MOOD_HISTORY_LIMIT
-        );
+        List<MoodPatternEngine.Entry> updated=MoodPatternEngine.appendCapped(getMoodHistory(),new MoodPatternEngine.Entry(System.currentTimeMillis(),mood),MOOD_HISTORY_LIMIT);
         putString("mood_history",MoodPatternEngine.encode(updated));
     }
-
     public void clearMoodHistory(){ putString("mood_history",""); }
 
     public boolean isCompanionEnabled(){ return getBoolean("companion_enabled",false); }
@@ -142,7 +112,6 @@ public final class SecurePrefs {
     public int getCompanionStartHour(){ return clamp(getInt("companion_start_hour",8),0,23); }
     public int getCompanionEndHour(){ return clamp(getInt("companion_end_hour",22),0,23); }
     public int getCompanionIntervalHours(){ return clamp(getInt("companion_interval_hours",4),1,12); }
-
     public void saveCompanionSchedule(boolean enabled,int dailyLimit,int startHour,int endHour,int intervalHours){
         putString("companion_enabled",Boolean.toString(enabled));
         putString("companion_daily_limit",Integer.toString(clamp(dailyLimit,1,12)));
@@ -150,50 +119,44 @@ public final class SecurePrefs {
         putString("companion_end_hour",Integer.toString(clamp(endHour,0,23)));
         putString("companion_interval_hours",Integer.toString(clamp(intervalHours,1,12)));
     }
-
     public long getCompanionLastAutoSentAt(){ return getLong("companion_last_auto_sent_at",0L); }
     public String getCompanionCounterDay(){ return getString("companion_counter_day",""); }
     public int getCompanionCounter(){ return Math.max(0,getInt("companion_counter",0)); }
-
     public void markCompanionAutoSent(long timestamp,String localDay,int newCount){
         putString("companion_last_auto_sent_at",Long.toString(Math.max(0L,timestamp)));
         putString("companion_counter_day",localDay==null?"":localDay);
         putString("companion_counter",Integer.toString(Math.max(0,newCount)));
     }
-
-    public void resetCompanionCounter(String localDay){
-        putString("companion_counter_day",localDay==null?"":localDay);
-        putString("companion_counter","0");
-    }
+    public void resetCompanionCounter(String localDay){ putString("companion_counter_day",localDay==null?"":localDay); putString("companion_counter","0"); }
 
     public Set<Integer> getRecentCompanionMessageHashes(){
-        Set<Integer> out=new HashSet<>();
-        String raw=getString("companion_recent_hashes","");
+        Set<Integer> out=new HashSet<>(); String raw=getString("companion_recent_hashes","");
         if(raw.isEmpty()) return out;
-        for(String token:raw.split(",")){
-            try { out.add(Integer.parseInt(token)); } catch(NumberFormatException ignored){}
-        }
+        for(String token:raw.split(",")){ try { out.add(Integer.parseInt(token)); } catch(NumberFormatException ignored){} }
         return out;
     }
-
     public void recordCompanionMessageHash(int hash){
-        String raw=getString("companion_recent_hashes","");
-        ArrayDeque<Integer> queue=new ArrayDeque<>();
-        if(!raw.isEmpty()){
-            for(String token:raw.split(",")){
-                try { int value=Integer.parseInt(token); if(value!=hash) queue.addLast(value); } catch(NumberFormatException ignored){}
-            }
-        }
-        queue.addLast(hash);
-        while(queue.size()>RECENT_MESSAGE_LIMIT) queue.removeFirst();
-        StringBuilder encoded=new StringBuilder();
-        for(Integer value:queue){ if(encoded.length()>0) encoded.append(','); encoded.append(value); }
+        String raw=getString("companion_recent_hashes",""); ArrayDeque<Integer> queue=new ArrayDeque<>();
+        if(!raw.isEmpty()) for(String token:raw.split(",")){ try { int value=Integer.parseInt(token); if(value!=hash) queue.addLast(value); } catch(NumberFormatException ignored){} }
+        queue.addLast(hash); while(queue.size()>RECENT_MESSAGE_LIMIT) queue.removeFirst();
+        StringBuilder encoded=new StringBuilder(); for(Integer value:queue){ if(encoded.length()>0) encoded.append(','); encoded.append(value); }
         putString("companion_recent_hashes",encoded.toString());
     }
 
-    public void clearSensitiveData(){
-        prefs.edit().clear().apply();
+    // Emergency plan: local-only, encrypted with the same Android Keystore-backed store.
+    public String getEmergencyMessage(){ return getString("emergency_message",EmergencyPlan.DEFAULT_MESSAGE); }
+    public void setEmergencyMessage(String value){ putString("emergency_message",value==null?"":value.trim()); }
+    public boolean isEmergencyLocationEnabled(){ return getBoolean("emergency_location_enabled",true); }
+    public void setEmergencyLocationEnabled(boolean value){ putString("emergency_location_enabled",Boolean.toString(value)); }
+    public List<EmergencyPlan.Contact> getEmergencyContacts(){ return EmergencyPlan.decodeContacts(getString("emergency_contacts","")); }
+    public void setEmergencyContacts(List<EmergencyPlan.Contact> contacts){ putString("emergency_contacts",EmergencyPlan.encodeContacts(contacts)); }
+    public boolean hasEmergencyPlan(){ return !getEmergencyContacts().isEmpty(); }
+    public void clearEmergencyPlan(){
+        putString("emergency_message","");
+        putString("emergency_location_enabled","true");
+        putString("emergency_contacts","");
     }
 
+    public void clearSensitiveData(){ prefs.edit().clear().apply(); }
     private static int clamp(int value,int min,int max){ return Math.max(min,Math.min(max,value)); }
 }
