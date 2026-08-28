@@ -55,7 +55,6 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.8.0")
     implementation("com.google.android.material:material:1.14.0")
     implementation("androidx.work:work-runtime:2.11.2")
-    implementation("androidx.security:security-crypto:1.1.0")
     compileOnly("com.google.code.findbugs:jsr305:3.0.2")
     testImplementation("junit:junit:4.13.2")
 }
