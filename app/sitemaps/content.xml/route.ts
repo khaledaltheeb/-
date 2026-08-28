@@ -6,6 +6,7 @@ import { getExpandedEncyclopediaIndex } from '@/lib/expanded-encyclopedia';
 export const dynamic = 'force-dynamic';
 const PAGE_SIZE = 5000;
 const DB_BATCH_SIZE = 1000;
+const GENERATED_OVERRIDE_BATCH_SIZE = 100;
 const RELEASE = '2026-08-14T00:00:00.000Z';
 
 const ATLAS_OWNED_CANONICALS = [
@@ -32,6 +33,12 @@ type ContentSitemapRecord = {
 
 type TaxonomySitemapRecord = {
   slug: string;
+};
+
+type GeneratedOverrideRecord = {
+  slug: string;
+  canonical_url: string | null;
+  robots_index: boolean;
 };
 
 function applyDedicatedSitemapExclusions<T extends {
@@ -139,18 +146,54 @@ export async function GET(request: Request) {
 
   let generatedRows: SitemapRow[] = [];
   if (page === 0) {
+    const cognitiveIndex = getCognitivePageIndex();
+    const publishedOverrideBySlug = new Map<string, GeneratedOverrideRecord>();
+
+    // `/content/[slug]` intentionally prefers a published database record over a
+    // generated cognitive page. If that record owns a different canonical (for
+    // example `/encyclopedia/<slug>/`) the generated alias must not be advertised
+    // in a sitemap. Query in bounded slug batches so newly published canonical
+    // takeovers cannot create duplicate sitemap discovery URLs.
+    for (let start = 0; start < cognitiveIndex.length; start += GENERATED_OVERRIDE_BATCH_SIZE) {
+      const slugs = cognitiveIndex.slice(start, start + GENERATED_OVERRIDE_BATCH_SIZE).map((item) => item.slug);
+      const { data: overrides, error } = await supabase
+        .from('content')
+        .select('slug,canonical_url,robots_index')
+        .in('slug', slugs)
+        .eq('status', 'published')
+        .lte('published_at', now);
+
+      if (error) {
+        throw new Error(`content sitemap generated override query failed at rows ${start}-${start + slugs.length - 1}: ${error.message}`);
+      }
+
+      for (const override of (overrides ?? []) as GeneratedOverrideRecord[]) {
+        publishedOverrideBySlug.set(override.slug, override);
+      }
+    }
+
     const expandedIndex = await getExpandedEncyclopediaIndex();
-    generatedRows = [
-      ...getCognitivePageIndex().map((item) => ({
+    const cognitiveRows = cognitiveIndex
+      .filter((item) => {
+        const override = publishedOverrideBySlug.get(item.slug);
+        if (!override) return true;
+        const expected = normalizeCanonicalPath(`/content/${item.slug}`);
+        const publishedCanonical = normalizeCanonicalPath(override.canonical_url || `/content/${item.slug}`);
+        return override.robots_index && publishedCanonical === expected;
+      })
+      .map((item) => ({
         path: `/content/${item.slug}`,
         lastModified: RELEASE,
-        changeFrequency: 'monthly',
+        changeFrequency: 'monthly' as const,
         priority: .72,
-      })),
+      }));
+
+    generatedRows = [
+      ...cognitiveRows,
       ...expandedIndex.map((item) => ({
         path: item.canonical_url,
         lastModified: item.updated_at,
-        changeFrequency: 'monthly',
+        changeFrequency: 'monthly' as const,
         priority: .74,
       })),
     ].filter((item) => !taxonomyOwnedCanonicals.has(normalizeCanonicalPath(item.path)));
