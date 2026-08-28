@@ -6,17 +6,19 @@ const helperPath = 'lib/review-provenance.ts';
 const helper = fs.readFileSync(path.join(root, helperPath), 'utf8');
 
 const requiredHelperFragments = [
+  "type ReviewerEntityType = 'Organization' | 'Person' | null;",
   "const RAWAFID_REVIEW_TEAM = 'فريق روافد';",
-  'function isInstitutionalReviewerName(value: string | null)',
+  'function reviewerEntityType(value: string | null): ReviewerEntityType',
   "value.includes('منصة روافد')",
   'const hasRecordedReview = Boolean(recordedReviewDate);',
   'const hasAttributableReviewer = Boolean(hasRecordedReview && explicitReviewer);',
-  'const institutionalReviewer = isInstitutionalReviewerName(explicitReviewer);',
+  'const reviewerType = hasAttributableReviewer ? reviewerEntityType(explicitReviewer) : null;',
   'const lastReviewedAt = hasRecordedReview ? recordedReviewDate : null;',
   'const reviewerName = hasAttributableReviewer ? explicitReviewer : null;',
-  "const reviewerType = hasAttributableReviewer ? (institutionalReviewer ? 'Organization' : 'Person') : null;",
-  'const reviewedBySchema = !hasAttributableReviewer',
+  "const reviewerCredentials = reviewerType === 'Person' ? explicitCredentials : null;",
+  'const reviewedBySchema = !hasAttributableReviewer || !reviewerType',
   '? undefined',
+  "reviewerType === 'Organization'",
   "'@type': 'Organization'",
   "'@type': 'Person'",
   'reviewedBySchema',
@@ -34,35 +36,44 @@ const forbiddenHelperFragments = [
   'name: RAWAFID_REVIEW_TEAM',
   'const reviewedBySchema = !hasAttributableReviewer\n    ? null',
   'const institutionalReviewer = explicitReviewer === RAWAFID_REVIEW_TEAM',
+  'function isInstitutionalReviewerName',
 ];
 
 for (const fragment of forbiddenHelperFragments) {
   if (helper.includes(fragment)) {
-    throw new Error(`Review provenance helper must not infer identity or misclassify recorded institutional labels: ${fragment}`);
+    throw new Error(`Review provenance helper must not infer identity or turn review-process labels into entities: ${fragment}`);
   }
 }
 
-const institutionalExamples = [
+const entityTypeForRecordedLabel = (value) => {
+  if (!value) return null;
+  if (value === 'فريق روافد' || /^فريق(?:\s|$)/u.test(value)) return 'Organization';
+  if (/^مراجعة(?:\s|$)/u.test(value) && value.includes('منصة روافد')) return null;
+  return 'Person';
+};
+
+for (const label of [
   'فريق روافد',
   'فريق المراجعة العلمية والتحريرية في روافد',
   'فريق تحرير منصة روافد',
   'فريق تحرير منصة روافد — مراجعة المصادر',
-  'مراجعة تحريرية وعلمية — منصة روافد',
-  'مراجعة تحريرية ومصادر — منصة روافد',
-];
-
-const institutionalPattern = (value) => value === 'فريق روافد'
-  || /^فريق(?:\s|$)/u.test(value)
-  || (/^مراجعة(?:\s|$)/u.test(value) && value.includes('منصة روافد'));
-
-for (const label of institutionalExamples) {
-  if (!institutionalPattern(label)) {
-    throw new Error(`Institutional reviewer example must classify as Organization: ${label}`);
+]) {
+  if (entityTypeForRecordedLabel(label) !== 'Organization') {
+    throw new Error(`Recorded team label must classify as Organization: ${label}`);
   }
 }
 
-if (institutionalPattern('د. مثال المراجع')) {
-  throw new Error('Named individual reviewer example must remain eligible for Person classification.');
+for (const label of [
+  'مراجعة تحريرية وعلمية — منصة روافد',
+  'مراجعة تحريرية ومصادر — منصة روافد',
+]) {
+  if (entityTypeForRecordedLabel(label) !== null) {
+    throw new Error(`Recorded review-process label must not be serialized as reviewedBy entity: ${label}`);
+  }
+}
+
+if (entityTypeForRecordedLabel('د. مثال المراجع') !== 'Person') {
+  throw new Error('Named individual reviewer example must remain Person.');
 }
 
 const surfaces = [
@@ -89,8 +100,8 @@ for (const file of surfaces) {
     throw new Error(`${file}: lastReviewed must be sourced from recorded review provenance`);
   }
   if (!source.includes('review.reviewerName')) {
-    throw new Error(`${file}: visible review attribution must use explicit resolved reviewer identity`);
+    throw new Error(`${file}: visible review attribution must use explicit recorded provenance`);
   }
 }
 
-console.log(`Review provenance contract passed: ${surfaces.length} public surfaces preserve recorded review dates, omit unattributed reviewedBy, classify recorded Rawafid team/editorial labels as organizations, and never infer reviewer identity.`);
+console.log(`Review provenance contract passed: ${surfaces.length} public surfaces preserve recorded review dates, omit unattributed reviewedBy, serialize only genuine reviewer entities, and never infer reviewer identity.`);
