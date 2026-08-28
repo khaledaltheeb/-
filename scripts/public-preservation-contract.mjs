@@ -64,6 +64,14 @@ async function exactCount(table, configure) {
   });
 }
 
+function normalizeRedirectSource(sourcePath) {
+  const clean = String(sourcePath || '').split(/[?#]/, 1)[0].trim();
+  if (!clean) return '';
+  if (clean === '/') return '/';
+  if (/\.html$/i.test(clean)) return clean;
+  return `${clean.replace(/\/+$/, '')}/`;
+}
+
 try {
   // Keep preservation checks sequential: this is a safety gate, not a load test.
   const publicSectors = await exactCount('sectors', (query) => query.eq('is_active', true).eq('visibility', 'public'));
@@ -84,6 +92,43 @@ try {
   const sectorSlugs = new Set(sectorRows.map((row) => row.slug));
   for (const slug of requiredSectorSlugs) {
     if (!sectorSlugs.has(slug)) fail(`required public sector disappeared: ${slug}`);
+  }
+
+  // An active redirect must never shadow a current page that owns the same self-canonical URL.
+  // Historical redirect rows remain useful for audit, but once a route is independently published
+  // and indexable the redirect must be disabled before release.
+  const activeRedirects = await withRetry('active redirect list', async () => {
+    const result = await supabase
+      .from('redirects')
+      .select('source_path,destination_path,status_code')
+      .eq('is_active', true)
+      .limit(1000);
+    if (result.error) throw new Error(`redirects: ${result.error.message}`);
+    return result.data ?? [];
+  });
+  const redirectCanonicalPaths = [...new Set(activeRedirects.map((row) => normalizeRedirectSource(row.source_path)).filter(Boolean))];
+  if (redirectCanonicalPaths.length) {
+    const currentOwners = await withRetry('redirect canonical ownership', async () => {
+      const result = await supabase
+        .from('content')
+        .select('canonical_url,status,robots_index,published_at')
+        .in('canonical_url', redirectCanonicalPaths)
+        .eq('status', 'published')
+        .eq('robots_index', true)
+        .limit(1000);
+      if (result.error) throw new Error(`content redirect ownership: ${result.error.message}`);
+      return result.data ?? [];
+    });
+    const owned = new Set(
+      currentOwners
+        .filter((row) => !row.published_at || row.published_at <= now)
+        .map((row) => row.canonical_url),
+    );
+    for (const redirect of activeRedirects) {
+      const canonical = normalizeRedirectSource(redirect.source_path);
+      if (!owned.has(canonical)) continue;
+      fail(`active redirect shadows published self-canonical content: ${redirect.source_path} -> ${redirect.destination_path} (${redirect.status_code})`);
+    }
   }
 
   const criticalSearches = [
@@ -115,7 +160,7 @@ try {
     process.exit(1);
   }
 
-  console.log(`Public preservation contract passed: ${publicSectors} sectors, ${publicCategories} categories, ${publishedContent} published pages, ${indexablePublishedContent} indexable published pages.`);
+  console.log(`Public preservation contract passed: ${publicSectors} sectors, ${publicCategories} categories, ${publishedContent} published pages, ${indexablePublishedContent} indexable published pages; ${activeRedirects.length} active redirects do not shadow current self-canonical content.`);
 } catch (error) {
   console.error(`PUBLIC PRESERVATION CONTRACT FAILED: ${error instanceof Error ? error.message : String(error)}`);
   process.exit(1);
