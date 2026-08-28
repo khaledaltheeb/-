@@ -1,6 +1,7 @@
 package org.healthrenewal.rawafid;
 
 import static org.junit.Assert.*;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -31,5 +32,13 @@ public final class MessageBankTest {
             }
         }
         assertEquals(1000,all.size());
+    }
+
+    @Test public void chooserAvoidsRecentlyUsedMessagesWhenAlternativesExist(){
+        List<String> pool=Arrays.asList("رسالة أولى طويلة للاختبار", "رسالة ثانية طويلة للاختبار", "رسالة ثالثة طويلة للاختبار");
+        Set<Integer> recent=new HashSet<>();
+        recent.add(pool.get(0).hashCode());
+        recent.add(pool.get(1).hashCode());
+        assertEquals(pool.get(2),CompanionWorker.chooseNonRepeating(pool,recent));
     }
 }
