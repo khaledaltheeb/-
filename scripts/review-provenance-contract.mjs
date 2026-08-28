@@ -7,14 +7,18 @@ const helper = fs.readFileSync(path.join(root, helperPath), 'utf8');
 
 const requiredHelperFragments = [
   "const RAWAFID_REVIEW_TEAM = 'فريق روافد';",
+  'function isInstitutionalReviewerName(value: string | null)',
+  "value.includes('منصة روافد')",
   'const hasRecordedReview = Boolean(recordedReviewDate);',
   'const hasAttributableReviewer = Boolean(hasRecordedReview && explicitReviewer);',
+  'const institutionalReviewer = isInstitutionalReviewerName(explicitReviewer);',
   'const lastReviewedAt = hasRecordedReview ? recordedReviewDate : null;',
   'const reviewerName = hasAttributableReviewer ? explicitReviewer : null;',
   "const reviewerType = hasAttributableReviewer ? (institutionalReviewer ? 'Organization' : 'Person') : null;",
   'const reviewedBySchema = !hasAttributableReviewer',
   '? undefined',
   "'@type': 'Organization'",
+  "'@type': 'Person'",
   'reviewedBySchema',
 ];
 
@@ -29,12 +33,36 @@ const forbiddenHelperFragments = [
   "reviewerType = hasRecordedReview ? (explicitReviewer ? 'Person' : 'Organization') : null",
   'name: RAWAFID_REVIEW_TEAM',
   'const reviewedBySchema = !hasAttributableReviewer\n    ? null',
+  'const institutionalReviewer = explicitReviewer === RAWAFID_REVIEW_TEAM',
 ];
 
 for (const fragment of forbiddenHelperFragments) {
   if (helper.includes(fragment)) {
-    throw new Error(`Review provenance helper must not infer or serialize absent reviewer identity: ${fragment}`);
+    throw new Error(`Review provenance helper must not infer identity or misclassify recorded institutional labels: ${fragment}`);
   }
+}
+
+const institutionalExamples = [
+  'فريق روافد',
+  'فريق المراجعة العلمية والتحريرية في روافد',
+  'فريق تحرير منصة روافد',
+  'فريق تحرير منصة روافد — مراجعة المصادر',
+  'مراجعة تحريرية وعلمية — منصة روافد',
+  'مراجعة تحريرية ومصادر — منصة روافد',
+];
+
+const institutionalPattern = (value) => value === 'فريق روافد'
+  || /^فريق(?:\s|$)/u.test(value)
+  || (/^مراجعة(?:\s|$)/u.test(value) && value.includes('منصة روافد'));
+
+for (const label of institutionalExamples) {
+  if (!institutionalPattern(label)) {
+    throw new Error(`Institutional reviewer example must classify as Organization: ${label}`);
+  }
+}
+
+if (institutionalPattern('د. مثال المراجع')) {
+  throw new Error('Named individual reviewer example must remain eligible for Person classification.');
 }
 
 const surfaces = [
@@ -65,4 +93,4 @@ for (const file of surfaces) {
   }
 }
 
-console.log(`Review provenance contract passed: ${surfaces.length} public surfaces preserve recorded review dates, omit unattributed reviewedBy, and never infer reviewer identity.`);
+console.log(`Review provenance contract passed: ${surfaces.length} public surfaces preserve recorded review dates, omit unattributed reviewedBy, classify recorded Rawafid team/editorial labels as organizations, and never infer reviewer identity.`);
