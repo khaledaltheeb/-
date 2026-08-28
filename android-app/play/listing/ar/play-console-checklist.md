@@ -1,0 +1,21 @@
+# Google Play Console Checklist
+
+- Package: org.healthrenewal.rawafid
+- App category: Health & Fitness
+- Target audience: 18+ recommended due to reproductive-health tracking and broad health content.
+- Ads: No (current build contains no ad SDK).
+- App access: Public content; no account required for core features.
+- Health Apps Declaration: Period tracking / reproductive health + mental wellbeing information.
+- Medical disclaimer: App is not a medical device, diagnosis, treatment, or emergency service.
+- Privacy policy URL: MUST publish a public HTTPS policy before production submission.
+- Data Safety: Declare local reproductive-health/mood data accurately; do not claim collection if it never leaves device. Reassess if analytics, crash SDK, sync, FCM token, or account sync is added.
+- Content rating: Complete IARC questionnaire truthfully; health/medical information, no gambling, no violence, no sexual explicit content.
+- Notification permission: Runtime permission on Android 13+.
+- Debug: release build has debuggable=false and R8/resource shrinking enabled.
+- Cleartext traffic: disabled.
+- Backup: encrypted-capability requirement and sensitive secure prefs excluded.
+- Deep Links: add /.well-known/assetlinks.json to healthrenewal.org after Play signing certificate SHA-256 is known.
+- App signing: Prefer Play App Signing; keep upload key offline and never commit it.
+- Store icon: 512x512 PNG.
+- Feature graphic: 1024x500 PNG.
+- Phone screenshots: recommend 6-8 portrait screenshots showing home, companion, calendar, sectors, article, assessment, privacy/settings.
