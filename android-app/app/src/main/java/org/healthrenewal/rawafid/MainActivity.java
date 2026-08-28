@@ -15,7 +15,9 @@ import android.os.Bundle;
 import android.view.Gravity;
 import android.view.View;
 import android.webkit.CookieManager;
+import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -48,6 +50,7 @@ public final class MainActivity extends AppCompatActivity {
     private LinearLayout root;
     private SecurePrefs prefs;
     private boolean atHome=true;
+    private WebView activeWebView;
     private final ExecutorService networkExecutor=Executors.newSingleThreadExecutor();
     private final int teal=Color.rgb(11,107,103), rose=Color.rgb(200,75,123), lilac=Color.rgb(125,91,166), bg=Color.rgb(248,251,250);
 
@@ -74,8 +77,16 @@ public final class MainActivity extends AppCompatActivity {
         prefs=new SecurePrefs(this);
         getOnBackPressedDispatcher().addCallback(this,new OnBackPressedCallback(true){
             @Override public void handleOnBackPressed(){
-                if(atHome){ setEnabled(false); getOnBackPressedDispatcher().onBackPressed(); }
-                else showHome();
+                if(activeWebView!=null && activeWebView.canGoBack()){
+                    activeWebView.goBack();
+                    return;
+                }
+                if(atHome){
+                    setEnabled(false);
+                    getOnBackPressedDispatcher().onBackPressed();
+                } else {
+                    showHome();
+                }
             }
         });
         showHome();
@@ -90,10 +101,16 @@ public final class MainActivity extends AppCompatActivity {
 
     @Override protected void onDestroy(){
         networkExecutor.shutdownNow();
+        if(activeWebView!=null){
+            activeWebView.stopLoading();
+            activeWebView.destroy();
+            activeWebView=null;
+        }
         super.onDestroy();
     }
 
     private void shell(String title){
+        activeWebView=null;
         ScrollView sc=new ScrollView(this);
         root=new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
@@ -133,6 +150,7 @@ public final class MainActivity extends AppCompatActivity {
         sectionTitle("أدواتي الشخصية","ميزات اختيارية داخل روافد وليست هوية التطبيق الأساسية.");
         card("رفيقة روافد 💗","مساحة اختيارية للعناية اليومية ورسائل الدعم العام باسم تختارينه.",rose,v->showCompanion());
         card("تقويم المرأة 🌷","أداة اختيارية لتسجيل الدورة والتوقعات التقريبية والمزاج محليًا على جهازكِ.",lilac,v->showCalendar());
+        card("الخصوصية وبياناتي 🔐","اعرف ما يُحفظ محليًا واحذف سجل المزاج أو جميع البيانات الشخصية المحلية متى أردت.",Color.rgb(64,91,104),v->showPrivacy());
     }
 
     private void showCompanion(){
@@ -188,11 +206,7 @@ public final class MainActivity extends AppCompatActivity {
             Toast.makeText(this,"تم حفظ جدول رفيقة روافد",Toast.LENGTH_SHORT).show();
         }); root.addView(saveSchedule);
 
-        sectionTitle("كيف تشعرين الآن؟",null);
-        moodButton("😊 مرتاحة","جميل. احتفظي بهذه المساحة لنفسكِ اليوم.");
-        moodButton("🙂 مستقرة","يوم هادئ يستحق أن تعيشيه دون ضغط إضافي.");
-        moodButton("😔 متعبة","خففي التوقعات قليلًا. ما تحتاجينه الآن أهم من إثبات أي شيء.");
-        moodButton("😣 مثقلة","اختاري خطوة صغيرة الآن: ماء، راحة قصيرة، أو شخصًا تثقين به.");
+        addMoodModule("تسجيل مزاجي","سجلي انطباعًا بسيطًا. تُحفظ التسجيلات محليًا ومشفرة، ويحتاج التطبيق بيانات متكررة قبل عرض أي نمط.");
 
         Button test=button("رسالة عناية الآن",lilac);
         test.setOnClickListener(v->{
@@ -205,7 +219,28 @@ public final class MainActivity extends AppCompatActivity {
     private String companionWindowLabel(int startHour,int endHour){ return startHour==endHour?"ساعات العمل: طوال اليوم":"ساعات العمل: من "+formatHour(startHour)+" إلى "+formatHour(endHour); }
     private String formatHour(int hour){ return String.format(Locale.US,"%02d:00",hour); }
 
-    private void moodButton(String label,String reply){ Button b=button(label,Color.WHITE); b.setTextColor(Color.DKGRAY); b.setOnClickListener(v->Toast.makeText(this,reply,Toast.LENGTH_LONG).show()); root.addView(b); }
+    private void addMoodModule(String title,String body){
+        sectionTitle(title,body);
+        TextView insight=text(currentMoodInsight(),14,false,Color.DKGRAY); root.addView(insight);
+        moodRecordButton("😄 رائعة",5,"سجلنا أن مزاجكِ جيد جدًا اليوم.",insight);
+        moodRecordButton("🙂 جيدة",4,"سجلنا أن مزاجكِ جيد اليوم.",insight);
+        moodRecordButton("😐 مستقرة",3,"سجلنا أن مزاجكِ مستقر أو محايد اليوم.",insight);
+        moodRecordButton("😔 متعبة",2,"سجلنا أن مزاجكِ منخفض اليوم. راقبي ما تحتاجينه دون افتراض سبب واحد.",insight);
+        moodRecordButton("😣 سيئة جدًا",1,"سجلنا أن اليوم ثقيل عليكِ. إذا كان الشعور شديدًا أو مستمرًا أو كان هناك خطر مباشر، اطلبي دعمًا مهنيًا أو طارئًا مناسبًا.",insight);
+    }
+
+    private void moodRecordButton(String label,int score,String reply,TextView insight){
+        Button b=button(label,Color.WHITE); b.setTextColor(Color.DKGRAY);
+        b.setOnClickListener(v->{ prefs.recordMood(score); insight.setText(currentMoodInsight()); Toast.makeText(this,reply,Toast.LENGTH_LONG).show(); });
+        root.addView(b);
+    }
+
+    private String currentMoodInsight(){
+        LocalDate lastPeriod=null;
+        long last=prefs.getLastPeriod();
+        if(last>0L) lastPeriod=Instant.ofEpochMilli(last).atZone(ZoneId.systemDefault()).toLocalDate();
+        return MoodPatternEngine.insight(prefs.getMoodHistory(),lastPeriod,prefs.getCycleLength(),LocalDate.now());
+    }
 
     private void showCalendar(){
         atHome=false;
@@ -223,10 +258,7 @@ public final class MainActivity extends AppCompatActivity {
         }); root.addView(start);
         addNumberSetting("متوسط طول الدورة",21,45,prefs.getCycleLength(),true,status);
         addNumberSetting("متوسط أيام الحيض",2,10,prefs.getPeriodLength(),false,status);
-        sectionTitle("تسجيل اليوم","اختاري الانطباع الأقرب دون افتراض أن سببه الدورة أو الهرمونات وحدها.");
-        moodButton("😊 جيدة","سجلي ملاحظتكِ اليوم وراقبي الأنماط مع الوقت بدل افتراض السبب.");
-        moodButton("😐 عادية","الاستمرار بالملاحظة عبر عدة دورات أهم من قراءة يوم واحد.");
-        moodButton("😔 منخفضة","عاملي نفسكِ بلطف اليوم، واطلبي دعمًا مهنيًا إذا كان الانخفاض شديدًا أو مستمرًا.");
+        addMoodModule("مزاجي والأنماط","تستخدم رفيقة روافد وتقويم المرأة سجل المزاج المحلي نفسه. لا يعزو التطبيق مزاجكِ إلى الدورة تلقائيًا؛ يبحث فقط عن أنماط متكررة في سجلاتكِ.");
     }
 
     private void addNumberSetting(String title,int min,int max,int current,boolean cycle,TextView status){
@@ -249,6 +281,37 @@ public final class MainActivity extends AppCompatActivity {
                     "\nنافذة الخصوبة التقديرية: "+e.fertileWindowStart+" إلى "+e.fertileWindowEnd+
                     "\nالتقديرات للتوعية وملاحظة النمط فقط، وليست وسيلة لمنع الحمل أو قرارًا طبيًا.";
         } catch(IllegalArgumentException ex){ return "بيانات التاريخ غير صالحة. أعيدي تسجيل بداية الدورة."; }
+    }
+
+    private void showPrivacy(){
+        atHome=false;
+        shell("الخصوصية وبياناتي 🔐");
+        sectionTitle("ما الذي يبقى على جهازك؟","روافد يستخدم تخزينًا محليًا مشفرًا بمفتاح Android Keystore للبيانات الشخصية في رفيقة روافد وتقويم المرأة، والنسخ الاحتياطي للتطبيق معطل في إصدار النشر.");
+        int moodCount=prefs.getMoodHistory().size();
+        int followed=0; for(String token:prefs.getSectors().split(",")) if(!token.trim().isEmpty()) followed++;
+        String summary="الاسم المخصص: "+(prefs.getName().isEmpty()?"غير محفوظ":"محفوظ محليًا")+
+                "\nبيانات دورة: "+(prefs.getLastPeriod()>0?"موجودة":"غير موجودة")+
+                "\nتسجيلات مزاج محلية: "+moodCount+
+                "\nمسارات متابعة محفوظة: "+followed+
+                "\nرفع تلقائي لبيانات الدورة أو المزاج إلى الحساب: لا";
+        root.addView(text(summary,15,false,Color.DKGRAY));
+
+        Button policy=button("فتح سياسة الخصوصية",teal); policy.setOnClickListener(v->openWeb(BASE+"/privacy")); root.addView(policy);
+        Button clearMood=button("مسح سجل المزاج فقط",Color.rgb(112,92,121));
+        clearMood.setOnClickListener(v->new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("مسح سجل المزاج؟")
+                .setMessage("سيُحذف سجل المزاج المحلي نهائيًا من هذا الجهاز، ولن تتأثر بقية إعدادات روافد.")
+                .setNegativeButton("إلغاء",null)
+                .setPositiveButton("مسح",(dialog,which)->{ prefs.clearMoodHistory(); Toast.makeText(this,"تم مسح سجل المزاج",Toast.LENGTH_SHORT).show(); showPrivacy(); })
+                .show()); root.addView(clearMood);
+
+        Button clearAll=button("حذف جميع بياناتي الشخصية المحلية",Color.rgb(153,55,65));
+        clearAll.setOnClickListener(v->new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("حذف البيانات المحلية؟")
+                .setMessage("سيؤدي ذلك إلى حذف الاسم، بيانات تقويم المرأة، سجل المزاج، جدول رفيقة روافد، القطاعات المتابعة وحالة التنبيهات المحلية من هذا الجهاز. لا يحذف هذا الإجراء بيانات حساب على الموقع إن كان لديك حساب.")
+                .setNegativeButton("إلغاء",null)
+                .setPositiveButton("حذف",(dialog,which)->{ prefs.clearSensitiveData(); prefs=new SecurePrefs(this); Toast.makeText(this,"تم حذف البيانات الشخصية المحلية",Toast.LENGTH_SHORT).show(); showPrivacy(); })
+                .show()); root.addView(clearAll);
     }
 
     private void showSectors(){
@@ -308,30 +371,41 @@ public final class MainActivity extends AppCompatActivity {
         if(!TrustedUrl.isRawafidHttps(url)){ openExternal(Uri.parse(url)); return; }
         atHome=false;
         WebView w=new WebView(this);
+        activeWebView=w;
         WebSettings s=w.getSettings();
         s.setJavaScriptEnabled(true); s.setJavaScriptCanOpenWindowsAutomatically(false); s.setSupportMultipleWindows(false); s.setDomStorageEnabled(true);
         s.setAllowFileAccess(false); s.setAllowContentAccess(false); s.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW); s.setGeolocationEnabled(false);
         s.setMediaPlaybackRequiresUserGesture(true); s.setSafeBrowsingEnabled(true); s.setUserAgentString(s.getUserAgentString()+" RawafidAndroid/1.0");
-        CookieManager.getInstance().setAcceptThirdPartyCookies(w,false);
+        CookieManager.getInstance().setAcceptCookie(true); CookieManager.getInstance().setAcceptThirdPartyCookies(w,false);
         w.setWebViewClient(new WebViewClient(){
             @Override public boolean shouldOverrideUrlLoading(WebView view,WebResourceRequest req){ Uri u=req.getUrl(); if(TrustedUrl.isRawafidHttps(u)) return false; openExternal(u); return true; }
+            @Override public void onReceivedError(WebView view,WebResourceRequest request,WebResourceError error){
+                if(request.isForMainFrame()) runOnUiThread(()->showNetworkError(url));
+            }
+            @Override public void onReceivedHttpError(WebView view,WebResourceRequest request,WebResourceResponse response){
+                if(request.isForMainFrame() && response.getStatusCode()>=500) runOnUiThread(()->showNetworkError(url));
+            }
         });
         w.loadUrl(url); setContentView(w);
     }
 
+    private void showNetworkError(String retryUrl){
+        atHome=false;
+        shell("تعذر تحميل المحتوى");
+        root.addView(text("لم نتمكن من تحميل هذه الصفحة الآن. تحقّق من الاتصال ثم أعد المحاولة. أدوات رفيقة روافد وتقويم المرأة المحلية تظل متاحة من الرئيسية.",15,false,Color.DKGRAY));
+        Button retry=button("إعادة المحاولة",teal); retry.setOnClickListener(v->openWeb(retryUrl)); root.addView(retry);
+        Button home=button("العودة إلى الرئيسية",Color.rgb(70,94,112)); home.setOnClickListener(v->showHome()); root.addView(home);
+    }
+
     private void openExternal(Uri uri){
         if(uri==null) return;
-        String scheme=uri.getScheme();
-        if(scheme==null) return;
+        String scheme=uri.getScheme(); if(scheme==null) return;
         String normalized=scheme.toLowerCase(Locale.ROOT);
         if(!Arrays.asList("https","http","mailto","tel").contains(normalized)) return;
         try { startActivity(new Intent(Intent.ACTION_VIEW,uri)); } catch(ActivityNotFoundException ignored){}
     }
 
-    private void handleIntent(Intent i){
-        Uri data=i==null?null:i.getData();
-        if(TrustedUrl.isRawafidHttps(data)) openWeb(data.toString());
-    }
+    private void handleIntent(Intent i){ Uri data=i==null?null:i.getData(); if(TrustedUrl.isRawafidHttps(data)) openWeb(data.toString()); }
 
     private boolean hasNotificationPermission(){ return Build.VERSION.SDK_INT<33 || ContextCompat.checkSelfPermission(this,Manifest.permission.POST_NOTIFICATIONS)==PackageManager.PERMISSION_GRANTED; }
     private void requestNotificationsContextually(){ if(!hasNotificationPermission()&&Build.VERSION.SDK_INT>=33) ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.POST_NOTIFICATIONS},NOTIFICATION_REQUEST_CODE); }
