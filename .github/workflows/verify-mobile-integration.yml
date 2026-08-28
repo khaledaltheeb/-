@@ -1,0 +1,23 @@
+name: Verify Rawafid Mobile Integration
+on:
+  push:
+    branches: ["android/rawafid-app-v1"]
+    paths:
+      - "app/api/mobile/**"
+      - "lib/public-content-routing.ts"
+      - "android-app/**"
+      - ".github/workflows/verify-mobile-integration.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  web-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run typecheck
