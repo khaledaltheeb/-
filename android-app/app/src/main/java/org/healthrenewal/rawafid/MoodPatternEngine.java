@@ -10,6 +10,7 @@ import java.util.List;
 
 public final class MoodPatternEngine {
     private MoodPatternEngine(){}
+    private static final String NON_CAUSAL=" هذا وصف لنمط في سجلاتكِ وليس إثباتًا لسبب المزاج أو تشخيصًا طبيًا.";
 
     public static final class Entry {
         public final long timestamp;
@@ -52,7 +53,7 @@ public final class MoodPatternEngine {
     public static String insight(List<Entry> entries,LocalDate lastPeriodStart,int averageCycleLength,LocalDate today){
         if(entries==null || entries.size()<7) return "سجّلي مزاجكِ في أيام مختلفة أولًا. نحتاج سبعة تسجيلات على الأقل قبل عرض أي نمط.";
         double overall=entries.stream().mapToInt(e->e.mood).average().orElse(3.0);
-        if(lastPeriodStart==null) return basicTrend(entries,overall);
+        if(lastPeriodStart==null) return basicTrend(entries,overall)+NON_CAUSAL;
 
         int cycle=Math.max(21,Math.min(45,averageCycleLength));
         int nearCount=0;
@@ -71,10 +72,10 @@ public final class MoodPatternEngine {
         if(nearCount>=3 && otherCount>=4){
             double near=nearSum/nearCount;
             double other=otherSum/otherCount;
-            if(near+0.65<other) return "ظهر في سجلاتكِ حتى الآن انخفاض متكرر نسبيًا في المزاج قرب بعض الأيام المتوقعة حول الدورة. هذا ارتباط شخصي أولي وليس إثباتًا أن الدورة هي السبب؛ استمري بالتسجيل عبر عدة دورات.";
-            if(near>other+0.65) return "ظهر في سجلاتكِ حتى الآن مزاج أفضل نسبيًا في بعض الأيام القريبة من موعد الدورة المتوقع. اعتبريه نمطًا أوليًا فقط وراقبي إن كان يتكرر عبر دورات أخرى.";
+            if(near+0.65<other) return "ظهر في سجلاتكِ حتى الآن انخفاض متكرر نسبيًا في المزاج قرب بعض الأيام المتوقعة حول الدورة. اعتبريه ارتباطًا شخصيًا أوليًا فقط؛ استمري بالتسجيل عبر عدة دورات."+NON_CAUSAL;
+            if(near>other+0.65) return "ظهر في سجلاتكِ حتى الآن مزاج أفضل نسبيًا في بعض الأيام القريبة من موعد الدورة المتوقع. اعتبريه نمطًا أوليًا فقط وراقبي إن كان يتكرر عبر دورات أخرى."+NON_CAUSAL;
         }
-        return basicTrend(entries,overall)+" لم يظهر بعد نمط ثابت كافٍ لربط المزاج بتوقيت الدورة.";
+        return basicTrend(entries,overall)+" لم يظهر بعد نمط ثابت كافٍ لربط المزاج بتوقيت الدورة."+NON_CAUSAL;
     }
 
     private static String basicTrend(List<Entry> entries,double overall){
