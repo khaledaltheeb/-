@@ -47,8 +47,6 @@ android {
     packaging { resources.excludes += "/META-INF/{AL2.0,LGPL2.1}" }
 
     lint {
-        // API 36 is the current Play target required for this release. The CI SDK repository
-        // does not yet expose android-37, so version-advisory checks are intentionally muted.
         disable += setOf("OldTargetApi", "GradleDependency")
     }
 }
@@ -59,4 +57,5 @@ dependencies {
     implementation("androidx.work:work-runtime:2.11.2")
     implementation("androidx.security:security-crypto:1.1.0")
     compileOnly("com.google.code.findbugs:jsr305:3.0.2")
+    testImplementation("junit:junit:4.13.2")
 }
