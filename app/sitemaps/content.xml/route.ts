@@ -31,6 +31,10 @@ type ContentSitemapRecord = {
   canonical_url: string | null;
 };
 
+type TaxonomySitemapRecord = {
+  slug: string;
+};
+
 function applyDedicatedSitemapExclusions<T extends {
   not: (column: string, operator: string, value: string) => T;
   neq: (column: string, value: string) => T;
@@ -47,6 +51,11 @@ function applyDedicatedSitemapExclusions<T extends {
   return owned;
 }
 
+function normalizeCanonicalPath(path: string) {
+  if (path === '/') return path;
+  return path.replace(/\/+$/, '');
+}
+
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const raw = Number(url.searchParams.get('page') ?? '0');
@@ -56,6 +65,35 @@ export async function GET(request: Request) {
   const pageEndExclusive = pageStart + PAGE_SIZE;
   const now = new Date().toISOString();
   const data: ContentSitemapRecord[] = [];
+
+  // Taxonomy hub canonicals belong exclusively to taxonomy.xml. Content rows may
+  // still power those pages editorially, but must not emit a competing sitemap URL.
+  const [sectorResult, categoryResult] = await Promise.all([
+    supabase
+      .from('sectors')
+      .select('slug')
+      .eq('is_active', true)
+      .eq('visibility', 'public')
+      .limit(20000),
+    supabase
+      .from('categories')
+      .select('slug')
+      .eq('is_active', true)
+      .eq('visibility', 'public')
+      .limit(50000),
+  ]);
+
+  if (sectorResult.error) {
+    throw new Error(`content sitemap taxonomy sector query failed: ${sectorResult.error.message}`);
+  }
+  if (categoryResult.error) {
+    throw new Error(`content sitemap taxonomy category query failed: ${categoryResult.error.message}`);
+  }
+
+  const taxonomyOwnedCanonicals = new Set<string>([
+    ...((sectorResult.data ?? []) as TaxonomySitemapRecord[]).map((item) => `/sectors/${item.slug}`),
+    ...((categoryResult.data ?? []) as TaxonomySitemapRecord[]).map((item) => `/sections/${item.slug}`),
+  ]);
 
   // Child-sitemap ownership is determined by the published canonical namespace,
   // never by an internal content_type. This prevents non-encyclopedia conditions
@@ -86,12 +124,17 @@ export async function GET(request: Request) {
     if (batch.length < requestedRows) break;
   }
 
-  const databaseRows: SitemapRow[] = data.map((item) => ({
-    path: item.canonical_url || `/content/${item.slug}`,
-    lastModified: item.updated_at,
-    changeFrequency: 'monthly',
-    priority: .7,
-  }));
+  const databaseRows: SitemapRow[] = data
+    .filter((item) => {
+      const path = item.canonical_url || `/content/${item.slug}`;
+      return !taxonomyOwnedCanonicals.has(normalizeCanonicalPath(path));
+    })
+    .map((item) => ({
+      path: item.canonical_url || `/content/${item.slug}`,
+      lastModified: item.updated_at,
+      changeFrequency: 'monthly',
+      priority: .7,
+    }));
 
   let generatedRows: SitemapRow[] = [];
   if (page === 0) {
@@ -109,7 +152,7 @@ export async function GET(request: Request) {
         changeFrequency: 'monthly',
         priority: .74,
       })),
-    ];
+    ].filter((item) => !taxonomyOwnedCanonicals.has(normalizeCanonicalPath(item.path)));
   }
 
   const unique = new Map<string, SitemapRow>();
