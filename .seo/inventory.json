@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "site": "https://healthrenewal.org",
+  "round": 1,
+  "snapshot_at": "2026-08-28T15:27:43+03:00",
+  "published_total": 4123,
+  "indexable_total": 4118,
+  "published_noindex": 5,
+  "missing_canonical_indexable": 0,
+  "missing_seo_title_indexable": 0,
+  "missing_seo_description_indexable": 0,
+  "image_missing_alt_indexable": 0,
+  "reviewed_selected_total": 100,
+  "audited_successfully": 0,
+  "audited_pending_release": 100,
+  "current_batch": "2026-08-28-1527-batch-002",
+  "next_selection_rule": "unreviewed_then_oldest_audit",
+  "duplicate_diagnostics": {
+    "primary_keyword_duplicate_groups": 87,
+    "primary_keyword_rows_in_groups": 179,
+    "title_duplicate_groups": 34,
+    "title_rows_in_groups": 69,
+    "seo_title_duplicate_groups": 0,
+    "seo_title_rows_in_groups": 0,
+    "canonical_duplicate_groups": 0,
+    "canonical_rows_in_groups": 0
+  },
+  "site_level_warnings": [
+    "Five published database records are noindex; two sensitive care guides remain on explicit quality/review hold and must not be released by fabricating review provenance.",
+    "Batch 002 supersedes unmergeable PR 439 and carries forward the first 50-page audit state onto a branch based on the current main head.",
+    "Generic meta-keywords and technical updated_at-derived Open Graph modified time are removed in this branch pending validation.",
+    "Magazine ScholarlyArticle dateModified is removed until substantive-change provenance exists; explicit source URLs and citations remain intact.",
+    "Database content sitemap entries no longer publish technical updated_at as lastmod; lastmod should return only after substantive editorial-change provenance exists.",
+    "Other route-specific dateModified and generated-sitemap lastmod implementations still require provenance audit in later batches."
+  ]
+}
