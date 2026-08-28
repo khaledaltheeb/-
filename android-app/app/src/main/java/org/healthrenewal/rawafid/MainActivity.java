@@ -133,6 +133,11 @@ public final class MainActivity extends AppCompatActivity {
 
     private void showHome(){
         atHome=true;
+        renderHomeFallback();
+        loadDynamicHomeManifest();
+    }
+
+    private void renderHomeFallback(){
         shell("كل منصة روافد في تطبيق واحد");
         card("البحث في روافد 🔎","ابحث عن حالة، سؤال، دليل، مختص، مركز أو موضوع في مكتبة روافد.",teal,v->openWeb(BASE+"/search"));
         card("الطوارئ SOS","خطة طوارئ محلية مشفرة: رسالة مخصصة، عدة جهات اتصال، اتصال وSMS وWhatsApp وبريد مع خيار إرفاق الموقع.",Color.rgb(177,45,52),v->startActivity(new Intent(this,EmergencyActivity.class)));
@@ -148,13 +153,68 @@ public final class MainActivity extends AppCompatActivity {
         card("المختصون","ابحث عن مختصين ضمن دليل روافد.",Color.rgb(86,114,92),v->openWeb(BASE+"/specialists"));
         card("المراكز","استعرض المراكز والخدمات المنشورة في الدليل.",Color.rgb(72,105,125),v->openWeb(BASE+"/centers"));
 
-        sectionTitle("تابع ما يهمك","اختر أكثر من مجال واحصل على تنبيه عند ظهور محتوى جديد.");
+        sectionTitle("تابع ما يهمك","اختر أكثر من مجال واحصل على تنبيه عند ظهور محتوى جديد أو تعديل مهم في مجال تتابعه.");
         card("اختياراتي والتنبيهات 🔔","حدد المجالات التي تريد متابعتها وتعديلها في أي وقت.",teal,v->showSectors());
 
         sectionTitle("أدواتي الشخصية","ميزات اختيارية داخل روافد وليست هوية التطبيق الأساسية.");
         card("رفيقة روافد 💗","مساحة اختيارية للعناية اليومية ورسائل الدعم العام باسم تختارينه.",rose,v->showCompanion());
         card("تقويم المرأة 🌷","أداة اختيارية لتسجيل الدورة والتوقعات التقريبية والمزاج محليًا على جهازكِ.",lilac,v->showCalendar());
         card("الخصوصية وبياناتي 🔐","اعرف ما يُحفظ محليًا واحذف سجل المزاج أو جميع البيانات الشخصية المحلية متى أردت.",Color.rgb(64,91,104),v->showPrivacy());
+    }
+
+    private void loadDynamicHomeManifest(){
+        networkExecutor.execute(()->{
+            try {
+                MobileManifestClient.Manifest manifest=MobileManifestClient.fetch();
+                runOnUiThread(()->{
+                    if(!atHome||isFinishing()||isDestroyed()) return;
+                    renderHomeFromManifest(manifest);
+                });
+            } catch(Exception ignored){
+                // The fully functional local fallback remains visible offline or on API failure.
+            }
+        });
+    }
+
+    private void renderHomeFromManifest(MobileManifestClient.Manifest manifest){
+        if(manifest==null) return;
+        shell("كل منصة روافد في تطبيق واحد");
+        card("البحث في روافد 🔎","ابحث عن حالة، سؤال، دليل، مختص، مركز أو موضوع في مكتبة روافد.",teal,v->openWeb(BASE+"/search"));
+
+        sectionTitle("استكشف روافد","هذه الروابط تُدار من منصة روافد وتبقى متزامنة مع بنية الموقع.");
+        int[] accents={Color.rgb(31,105,138),Color.rgb(49,114,110),Color.rgb(73,108,77),Color.rgb(93,78,143),Color.rgb(130,91,54),Color.rgb(53,112,150),Color.rgb(91,83,150),Color.rgb(86,114,92),Color.rgb(72,105,125)};
+        int linkIndex=0;
+        for(MobileManifestClient.Link link:manifest.discoverLinks){
+            final String path=link.path;
+            int accent=accents[linkIndex%accents.length];
+            linkIndex++;
+            card(link.title,"افتح هذا المسار من روافد؛ محتواه يأتي مباشرة من الموقع المنشور.",accent,v->openWeb(BASE+path));
+        }
+
+        sectionTitle("أدوات روافد","لا تظهر هنا إلا الأدوات المفعلة والمتوافقة مع هذه النسخة من التطبيق.");
+        for(MobileManifestClient.Tool tool:manifest.tools) renderManifestTool(tool);
+    }
+
+    private void renderManifestTool(MobileManifestClient.Tool tool){
+        if(tool==null) return;
+        int accent=teal;
+        if("emergency_center".equals(tool.id)) accent=Color.rgb(177,45,52);
+        else if("companion".equals(tool.id)) accent=rose;
+        else if("women_calendar".equals(tool.id)) accent=lilac;
+        else if("privacy_center".equals(tool.id)) accent=Color.rgb(64,91,104);
+        final MobileManifestClient.Tool selected=tool;
+        card(tool.name,tool.description,accent,v->openManifestTool(selected));
+    }
+
+    private void openManifestTool(MobileManifestClient.Tool tool){
+        if(tool==null) return;
+        String route=tool.nativeRoute==null?"":tool.nativeRoute;
+        if("emergency".equals(route)) startActivity(new Intent(this,EmergencyActivity.class));
+        else if("follow_topics".equals(route)) showSectors();
+        else if("companion".equals(route)) showCompanion();
+        else if("women_calendar".equals(route)) showCalendar();
+        else if("privacy".equals(route)) showPrivacy();
+        else if(tool.webPath!=null&&!tool.webPath.isEmpty()&&tool.webPath.startsWith("/")&&!tool.webPath.startsWith("//")) openWeb(BASE+tool.webPath);
     }
 
     private void showCompanion(){
