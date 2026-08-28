@@ -152,7 +152,7 @@ begin
     'علاج الإدمان',
     array['علاج اضطرابات استخدام المواد','أدوية علاج الإدمان','العلاج النفسي للإدمان','مستوى الرعاية','مركز علاج الإدمان','منع الانتكاس','التعافي المستمر']::text[],
     array['الميثادون','البوبرينورفين','النالتريكسون','الأكامبروسيت','العلاج المعرفي السلوكي','المقابلة التحفيزية','التعزيز الطارئ','استمرارية الرعاية','الاضطرابات المصاحبة','نتائج العلاج']::text[],
-    'informational-medical-decision-support',
+    'informational',
     'فريق تحرير منصة روافد',null,null,now(),
     jsonb_build_array(
       jsonb_build_object('title','International standards for the treatment of drug use disorders, 2nd edition','publisher','WHO and UNODC','year',2020,'url','https://www.who.int/publications/b/53363','source_type','guideline','authority_tier','primary'),
