@@ -11,7 +11,8 @@ const ACTION_DOC = `${REPOSITORY}/blob/main/docs/GITHUB-ACTION.md`;
 const EVALUATION_DOC = `${REPOSITORY}/blob/main/docs/ENTERPRISE-EVALUATION.md`;
 const EVALUATION_PLAN = `${REPOSITORY}/blob/main/enterprise/evaluation-plan.json`;
 const POLICY_SCHEMA = `${REPOSITORY}/blob/main/schemas/rtl-audit-config.schema.json`;
-const RELEASE = `${REPOSITORY}/releases/tag/v0.2.0`;
+const RELEASE = `${REPOSITORY}/releases/tag/v0.3.0`;
+const NPM_PACKAGE = 'https://www.npmjs.com/package/@rawafid/arabic-rtl-a11y-toolkit';
 
 export const metadata: Metadata = buildSeoMetadata({
   title: 'Arabic RTL Source Audit وAccessibility CI | أداة روافد المفتوحة',
@@ -91,7 +92,7 @@ const capabilities = [
   'CSS logical utilities واختبارات paired RTL/LTR ونوافذ ضيقة ومتصفحات متعددة.',
   'Source Audit يعمل محليًا ودون شبكة لاكتشاف lang/dir وbidi وCSS الفيزيائي ومخاطر ترتيب العرض.',
   'SARIF 2.1.0 وJSON وسياسة versioned وbaseline قابل للمراجعة للمؤسسات.',
-  'First-party GitHub Action لتشغيل نفس المحرك دون انتظار نشر npm.',
+  'First-party GitHub Action لتشغيل نفس محرك Source Audit مباشرة داخل CI، إلى جانب حزمة npm العامة.',
   'Enterprise Evaluation Kit بأربعة pilots ومقاييس قرار بدل تقييم تسويقي غير قابل للقياس.',
 ];
 
@@ -154,7 +155,8 @@ const evidence = [
   { title: 'Browser evidence', text: 'Playwright عبر Chromium وFirefox وWebKit والجوال، مع axe وحالات RTL/LTR واتجاهات مختلطة.', href: `${REPOSITORY}/blob/main/docs/TEST-MATRIX.md`, label: 'عرض Test Matrix' },
   { title: 'Security & supply chain', text: 'Threat model، Security policy، CodeQL، Dependency Review، OpenSSF Scorecard، SHA-pinned Actions وسياسات release/provenance.', href: `${REPOSITORY}/blob/main/SECURITY.md`, label: 'فتح Security Policy' },
   { title: 'OpenSSF OSPS mapping', text: 'خريطة evidence إلى OSPS Baseline مع التصريح بالفجوات التي لا تزال owner-level بدل ادعاء اكتمال غير مثبت.', href: `${REPOSITORY}/blob/main/docs/OSPS-BASELINE.md`, label: 'فتح OSPS map' },
-  { title: 'Public release', text: 'GitHub Release v0.2.0 متاح كنقطة مرجعية عامة. التطوير الحالي على main أوسع منه؛ نشر npm يبقى خطوة منفصلة غير مدعاة.', href: RELEASE, label: 'فتح v0.2.0' },
+  { title: 'Public npm package', text: 'الإصدار 0.3.0 منشور علنًا على npm باسم @rawafid/arabic-rtl-a11y-toolkit ويمكن تثبيته مباشرة من السجل العام.', href: NPM_PACKAGE, label: 'فتح npm v0.3.0' },
+  { title: 'Public release', text: 'GitHub Release v0.3.0 مرتبط بإصدار npm ويحتوي tarball وSPDX SBOM وrelease notes مع أدلة سلسلة توريد قابلة للمراجعة.', href: RELEASE, label: 'فتح v0.3.0' },
 ];
 
 const faqs = [
@@ -171,8 +173,8 @@ const faqs = [
     answer: 'لا لتقييم Source Audit. التصميم الحالي يعمل محليًا ودون شبكة ولا ينفذ كود المشروع المفحوص. المؤسسة تستطيع الاحتفاظ بالمصدر والنتائج داخل بيئتها.',
   },
   {
-    question: 'هل يمكن تجربتها قبل npm؟',
-    answer: 'نعم. المصدر عام، ويمكن تشغيل CLI من checkout، ويوجد First-party GitHub Action يعمل مباشرة من مرجع Git مُثبت. لا نعرض npm على أنه منشور قبل تحقق فعلي من السجل.',
+    question: 'هل الحزمة منشورة على npm؟',
+    answer: 'نعم. الإصدار 0.3.0 منشور علنًا باسم @rawafid/arabic-rtl-a11y-toolkit. ويمكن أيضًا تشغيل First-party GitHub Action مباشرة من مرجع Git مُثبت عندما يكون ذلك أنسب لسياسة CI.',
   },
   {
     question: 'كيف نتعامل مع مشروع قديم مليء بديون RTL؟',
@@ -200,6 +202,7 @@ export default function OpenSourceToolkitPage() {
     description: 'Framework-agnostic TypeScript toolkit and source-audit layer for Arabic/RTL, Unicode bidi safety, localization, accessibility, logical CSS and direction-aware web interaction.',
     url: absoluteSiteUrl(PROJECT_PATH),
     codeRepository: REPOSITORY,
+    version: '0.3.0',
     programmingLanguage: 'TypeScript',
     runtimePlatform: 'Web / Node.js >= 22',
     license: 'https://www.apache.org/licenses/LICENSE-2.0',
@@ -229,13 +232,15 @@ export default function OpenSourceToolkitPage() {
         <p lang="en" dir="ltr"><strong>Rawafid Arabic/RTL Accessibility &amp; Localization Toolkit</strong> combines framework-agnostic primitives, real-browser evidence, an offline source audit, a first-party GitHub Action, SARIF, reviewable policy, and a reproducible enterprise evaluation kit.</p>
         <div className="public-stat-strip">
           <span>Apache-2.0</span>
+          <span>npm · v0.3.0</span>
           <span>0 runtime dependencies</span>
           <span>SARIF 2.1.0</span>
           <span>Node 22 · 24 · 26</span>
           <span>Chromium · Firefox · WebKit · Mobile</span>
         </div>
         <div className="hero-actions">
-          <a className="primary-link" href={REPOSITORY} target="_blank" rel="noreferrer">افحص الكود على GitHub ↗</a>
+          <a className="primary-link" href={NPM_PACKAGE} target="_blank" rel="noreferrer">افتح الحزمة على npm ↗</a>
+          <a className="secondary-link" href={REPOSITORY} target="_blank" rel="noreferrer">افحص الكود على GitHub ↗</a>
           <a className="secondary-link" href={ACTION_DOC} target="_blank" rel="noreferrer">شغّل GitHub Action ↗</a>
           <a className="secondary-link" href={EVALUATION_DOC} target="_blank" rel="noreferrer">ابدأ تقييمًا مؤسسيًا ↗</a>
         </div>
@@ -263,7 +268,8 @@ export default function OpenSourceToolkitPage() {
         <div className="section-mini-heading"><div><span className="eyebrow">Source Audit + CI</span><h2 id="ci-title">من توصيات RTL إلى بوابة تمنع العيب الجديد</h2></div><span>Offline · deterministic · policy-driven · no audited-source execution</span></div>
         <div className="content-card">
           <p>محرك <code>rawafid-rtl-audit</code> يفحص فئات مختارة من أخطاء bidi وlang/dir وCSS الفيزيائي والشورت هاند وترتيب العرض. يمكنه إخراج JSON أو SARIF 2.1.0، واستخدام policy versioned، وإدخال brownfield baseline دون إخفاء نسخة جديدة إضافية من العيب نفسه.</p>
-          <pre dir="ltr"><code>{`rawafid-rtl-audit --config rawafid-rtl-audit.json
+          <pre dir="ltr"><code>{`npm install -D @rawafid/arabic-rtl-a11y-toolkit@0.3.0
+rawafid-rtl-audit --config rawafid-rtl-audit.json
 rawafid-rtl-audit --config rawafid-rtl-audit.json --format sarif --out rawafid-rtl.sarif`}</code></pre>
           <ul>
             <li>السياسة تفشل fail-closed عند Rule ID أو إعداد غير معروف بدل تجاهله بصمت.</li>
@@ -271,7 +277,7 @@ rawafid-rtl-audit --config rawafid-rtl-audit.json --format sarif --out rawafid-r
             <li>GitHub Action تستخدم نفس المحرك وتُبقي scan/config/baseline/SARIF داخل workspace.</li>
             <li>يمكن البدء بـreporting-only ثم رفع threshold بعد مراجعة النتائج.</li>
           </ul>
-          <div className="hero-actions"><a className="primary-link" href={ACTION_DOC} target="_blank" rel="noreferrer">GitHub Action ↗</a><a className="secondary-link" href={AUDIT_DOC} target="_blank" rel="noreferrer">Source Audit contract ↗</a><a className="secondary-link" href={POLICY_SCHEMA} target="_blank" rel="noreferrer">Policy Schema ↗</a></div>
+          <div className="hero-actions"><a className="primary-link" href={NPM_PACKAGE} target="_blank" rel="noreferrer">npm v0.3.0 ↗</a><a className="secondary-link" href={ACTION_DOC} target="_blank" rel="noreferrer">GitHub Action ↗</a><a className="secondary-link" href={AUDIT_DOC} target="_blank" rel="noreferrer">Source Audit contract ↗</a><a className="secondary-link" href={POLICY_SCHEMA} target="_blank" rel="noreferrer">Policy Schema ↗</a></div>
         </div>
       </section>
 
@@ -308,7 +314,7 @@ rawafid-rtl-audit --config rawafid-rtl-audit.json --format sarif --out rawafid-r
           <article className="institutional-sector-card"><span className="eyebrow">Accessibility</span><h3>ليست شهادة WCAG</h3><p>نجاح الفحص لا يثبت وحده WCAG 2.2 أو ISO/IEC 40500:2025 أو EN 301 549 أو EAA. يلزم تقييم أوسع وفق المنتج والسياق.</p></article>
           <article className="institutional-sector-card"><span className="eyebrow">Unicode security</span><h3>ليست UTS #39 كاملة</h3><p>المشروع يوفّر display-risk وbidi signals محددة، ولا يدعي complete confusable detection أو identifier profiles أو Trojan Source analysis كاملًا.</p></article>
           <article className="institutional-sector-card"><span className="eyebrow">Localization</span><h3>لا يستبدل المراجع اللغوي</h3><p>يمكنه فحص البنية وruntime locale invariants، لكنه لا يثبت جودة الصياغة أو الملاءمة الثقافية أو صحة المصطلح المتخصص.</p></article>
-          <article className="institutional-sector-card"><span className="eyebrow">Distribution</span><h3>لا ندعي npm قبل النشر</h3><p>الكود وGitHub Action وGitHub Release متاحة. npm Trusted Publishing/bootstrap خطوة منفصلة ولا تُعرض هنا كمنجزة قبل تحقق السجل.</p></article>
+          <article className="institutional-sector-card"><span className="eyebrow">Distribution</span><h3>npm v0.3.0 منشورة ومتحقق منها</h3><p>الحزمة العامة وGitHub Release متاحان. الإصدار 0.3.0 أُنشئ أول مرة عبر bootstrap token ثم طابقت عملية التحقق اللاحقة tarball السجل مع SHA-512 المحلي وأضيفت GitHub attestations؛ لا ندعي له npm Trusted Publishing provenance لم يحدث فعليًا.</p></article>
         </div>
       </section>
 
@@ -328,7 +334,7 @@ rawafid-rtl-audit --config rawafid-rtl-audit.json --format sarif --out rawafid-r
       <section aria-labelledby="contact-title">
         <div className="section-mini-heading"><div><span className="eyebrow">Technical evaluation</span><h2 id="contact-title">ابدأ بمشكلة قابلة لإعادة الإنتاج، لا بعرض عام</h2></div></div>
         <div className="content-card">
-          <p>يمكن لأي فريق بدء التقييم ذاتيًا من GitHub Action أو Enterprise Evaluation Kit. إذا ظهرت حالة RTL/bidi/i18n حقيقية لا يغطيها المشروع، فالأفضل فتح Issue قابل لإعادة الإنتاج أو التواصل تقنيًا عبر <a href="mailto:contact@healthrenewal.org">contact@healthrenewal.org</a>.</p>
+          <p>يمكن لأي فريق بدء التقييم ذاتيًا من npm أو GitHub Action أو Enterprise Evaluation Kit. إذا ظهرت حالة RTL/bidi/i18n حقيقية لا يغطيها المشروع، فالأفضل فتح Issue قابل لإعادة الإنتاج أو التواصل تقنيًا عبر <a href="mailto:contact@healthrenewal.org">contact@healthrenewal.org</a>.</p>
           <p>لا تُعرض أي جهة على أنها شريك أو داعم أو جهة مراجعة إلا بعد وجود أساس مكتوب لذلك.</p>
         </div>
       </section>
