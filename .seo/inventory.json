@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "site": "https://healthrenewal.org",
+  "round": 1,
+  "snapshot_at": "2026-08-28T14:32:00+03:00",
+  "published_total": 4101,
+  "indexable_total": 4096,
+  "published_noindex": 5,
+  "missing_canonical_indexable": 0,
+  "missing_seo_title_indexable": 0,
+  "missing_seo_description_indexable": 0,
+  "image_missing_alt_indexable": 0,
+  "audited_successfully": 0,
+  "current_batch": "2026-08-28-1430-batch-001",
+  "next_selection_rule": "unreviewed_then_oldest_audit",
+  "duplicate_diagnostics": {
+    "primary_keyword_duplicate_groups": 87,
+    "primary_keyword_rows_in_groups": 179,
+    "title_duplicate_groups": 34,
+    "title_rows_in_groups": 69,
+    "seo_title_duplicate_groups": 0,
+    "seo_title_rows_in_groups": 0
+  },
+  "site_level_warnings": [
+    "Five published records are currently noindex; two care guides explicitly remain on a fresh-review quality hold and must not be released by fabricating review provenance.",
+    "Generic SEO metadata was emitting meta-keywords and technical updated_at as Open Graph modified time; batch-001 removes those emissions.",
+    "Structured-data dateModified still requires a separate provenance-normalization pass where route-specific components derive it from technical updated_at."
+  ]
+}
