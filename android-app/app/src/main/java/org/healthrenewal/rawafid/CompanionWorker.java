@@ -20,7 +20,7 @@ public final class CompanionWorker extends Worker {
         if(android.os.Build.VERSION.SDK_INT>=33 && ActivityCompat.checkSelfPermission(c, Manifest.permission.POST_NOTIFICATIONS)!= PackageManager.PERMISSION_GRANTED) return;
         String period=periodKey(LocalTime.now().getHour()); List<String> pool=MessageBank.forPeriod(period);
         if(pool.isEmpty()) return;
-        String name=new SecurePrefs(c).getName(); String prefix=name.isBlank()?"":"يا "+name+"، ";
+        String name=new SecurePrefs(c).getName(); String prefix=name.trim().isEmpty()?"":"يا "+name+"، ";
         String msg=pool.get(ThreadLocalRandom.current().nextInt(pool.size()));
         NotificationCompat.Builder b=new NotificationCompat.Builder(c,RawafidApp.CHANNEL_COMPANION)
                 .setSmallIcon(android.R.drawable.btn_star).setContentTitle("رفيقة روافد 💗")
