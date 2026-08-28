@@ -1,10 +1,12 @@
 {
   "batch_id": "seo-20260828T1428Z-001",
-  "status": "acquired",
+  "status": "audited_pending_ci",
   "scope": "inventory-selection",
   "owner": "scheduled-seo-agent",
   "acquired_at": "2026-08-28T14:28:26Z",
   "target_count": 50,
+  "resolved_batch": "004",
+  "branch": "seo/batch-20260828-004",
   "rules": [
     "do-not-edit-scientific-body",
     "do-not-change-published-url",
