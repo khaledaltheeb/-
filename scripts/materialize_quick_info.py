@@ -11,7 +11,7 @@ import xml.etree.ElementTree as ET
 from html import unescape
 from html.parser import HTMLParser
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import quote, urlparse
 
 SITE = "https://healthrenewal.org"
 QUICK_PREFIX = "/quick-info/"
@@ -20,6 +20,11 @@ DISCLAIMER = "هذه الصفحة للتثقيف وتنظيم الملاحظات
 
 def clean(value: str) -> str:
     return re.sub(r"\s+", " ", unescape(value or "")).strip()
+
+
+def quick_info_card_url(title: str) -> str:
+    context = "معلومة سريعة · قراءة عربية واضحة · منصة روافد"
+    return f"{SITE}/seo-card?title={quote(title, safe='')}&context={quote(context, safe='')}"
 
 
 def http_get(url: str, retries: int = 4) -> str:
@@ -401,8 +406,8 @@ def page_record(html: str, slug: str, origin: str, source_path: str) -> dict:
             "publication_ready": False,
             "editorial_review_required": True,
         },
-        "featured_image_url": f"{SITE}/assets/quick-info/cards/{slug}.png",
-        "featured_image_alt": title,
+        "featured_image_url": quick_info_card_url(title),
+        "featured_image_alt": f"بطاقة معلومات سريعة: {title}",
         "published_at": published,
         "updated_at": modified,
         "search_aliases": [],
