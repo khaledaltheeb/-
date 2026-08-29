@@ -32,8 +32,6 @@ jobs:
           grep -q 'android:allowBackup="false"' app/src/main/AndroidManifest.xml
           grep -q 'android.permission.POST_NOTIFICATIONS' app/src/main/AndroidManifest.xml
           ! grep -R -E '(AIza[0-9A-Za-z_-]{20,}|BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY|RAWAFID_KEYSTORE_PASSWORD *=)' app/src/main 2>/dev/null || exit 1
-      - name: Show test tasks
-        run: gradle --no-daemon tasks --all | grep -E 'test.*UnitTest|testDebug|testRelease' || true
       - name: Run unit tests
         run: gradle --no-daemon :app:testDebugUnitTest
       - name: Build release bundle
