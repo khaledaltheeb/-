@@ -12,6 +12,7 @@ public final class SafetyTriggerConfig {
 
     public static final String ACTION_CARD="card";
     public static final String ACTION_CENTER="center";
+    public static final String ACTION_CALL_PRIMARY="call_primary";
 
     public static final int MIN_PRESSES=2;
     public static final int MAX_PRESSES=6;
@@ -39,12 +40,13 @@ public final class SafetyTriggerConfig {
     }
 
     public static String normalizeAction(String action){
-        return ACTION_CENTER.equals(action)?ACTION_CENTER:ACTION_CARD;
+        if(ACTION_CENTER.equals(action)||ACTION_CALL_PRIMARY.equals(action)) return action;
+        return ACTION_CARD;
     }
 
     /**
      * Matches only the tail of the received key stream. The service always returns false from
-     * onKeyEvent(), so the normal volume operation remains intact.
+     * onKeyEvent(), so normal volume behavior remains intact.
      */
     public static boolean matches(List<Integer> keyCodes,String pattern,int requiredPresses){
         if(keyCodes==null) return false;
