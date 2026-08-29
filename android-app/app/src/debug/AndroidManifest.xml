@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <application>
+        <!-- Debug-only test surface so emulator smoke can simulate the AlarmManager PendingIntent.
+             The release/main manifest keeps this receiver non-exported. -->
+        <receiver
+            android:name=".CompanionAlarmReceiver"
+            android:exported="true"
+            tools:replace="android:exported" />
+    </application>
+</manifest>
