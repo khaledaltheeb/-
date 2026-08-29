@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
@@ -62,7 +63,7 @@ import java.text.DateFormat
 import java.util.Calendar
 import java.util.Date
 
-private enum class WomenCareType(val key: String, val label: String, val defaultTitle: String) {
+enum class WomenCareType(val key: String, val label: String, val defaultTitle: String) {
     CLINIC("clinic", "موعد متابعة", "موعد متابعة صحية"),
     SCREENING("screening", "فحص أو تصوير", "فحص أو تصوير موصى به"),
     BREAST("breast", "وعي بصحة الثدي", "وقت الوعي بصحة الثدي"),
@@ -71,7 +72,7 @@ private enum class WomenCareType(val key: String, val label: String, val default
     CUSTOM("custom", "أخرى", "موعد عناية")
 }
 
-private data class WomenCareItem(
+data class WomenCareItem(
     val id: Int,
     val type: WomenCareType,
     val atMillis: Long,
