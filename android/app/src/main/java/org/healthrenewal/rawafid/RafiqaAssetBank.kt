@@ -37,7 +37,7 @@ object RafiqaAssetBank {
     private const val EXPECTED_PER_CATEGORY = 1000
     private const val PARTS_PER_CATEGORY = 4
 
-    private val categories = listOf(
+    val categories = listOf(
         "confidence", "hard_day", "personal_checkin", "self_care",
         "morning", "midday", "evening", "boundaries",
         "setback", "achievement", "cycle", "low_confidence"
@@ -79,27 +79,41 @@ object RafiqaAssetBank {
         return CompanionMessage("asset:${chosen.id}", tags + chosen.category + chosen.tone, chosen.text)
     }
 
-    fun availableCategories(context: Context): Set<String> = categories.filterTo(mutableSetOf()) { hasAllParts(context, it) }
+    fun availableCategories(context: Context): Set<String> = categories.filterTo(mutableSetOf()) { hasAsset(context, it) }
     fun totalBundledMessages(context: Context): Int = categories.sumOf { loadCategory(context, it).size }
+    fun categoryCount(context: Context, category: String): Int = loadCategory(context, category).size
     fun isComplete(context: Context): Boolean = categories.all { loadCategory(context, it).size == EXPECTED_PER_CATEGORY }
+
+    private fun hasAsset(context: Context, category: String): Boolean =
+        runCatching { context.assets.open(singlePath(category)).close(); true }.getOrDefault(false) || hasAllParts(context, category)
 
     private fun hasAllParts(context: Context, category: String): Boolean = (0 until PARTS_PER_CATEGORY).all { index ->
         runCatching { context.assets.open(partPath(category, index)).close(); true }.getOrDefault(false)
     }
 
     private fun loadCategory(context: Context, category: String): List<RafiqaAssetMessage> = cache.getOrPut(category) {
-        if (!hasAllParts(context, category)) return@getOrPut emptyList()
+        val encoded = readSingle(context, category) ?: readParts(context, category) ?: return@getOrPut emptyList()
         runCatching {
-            val encoded = buildString {
-                for (i in 0 until PARTS_PER_CATEGORY) {
-                    context.assets.open(partPath(category, i)).bufferedReader(Charsets.US_ASCII).use { append(it.readText().trim()) }
-                }
-            }
             val compressed = Base64.decode(encoded, Base64.DEFAULT)
             GZIPInputStream(ByteArrayInputStream(compressed)).use { gzip ->
                 BufferedReader(InputStreamReader(gzip, Charsets.UTF_8)).useLines { lines -> lines.mapNotNull(::parseTsv).toList() }
             }
         }.getOrDefault(emptyList())
+    }
+
+    private fun readSingle(context: Context, category: String): String? = runCatching {
+        context.assets.open(singlePath(category)).bufferedReader(Charsets.US_ASCII).use { it.readText().trim() }
+    }.getOrNull()
+
+    private fun readParts(context: Context, category: String): String? {
+        if (!hasAllParts(context, category)) return null
+        return runCatching {
+            buildString {
+                for (i in 0 until PARTS_PER_CATEGORY) {
+                    context.assets.open(partPath(category, i)).bufferedReader(Charsets.US_ASCII).use { append(it.readText().trim()) }
+                }
+            }
+        }.getOrNull()
     }
 
     private fun parseTsv(line: String): RafiqaAssetMessage? {
@@ -116,6 +130,7 @@ object RafiqaAssetBank {
         }.getOrNull()
     }
 
+    private fun singlePath(category: String) = "rafiqa/$category.tsv.gz.b64"
     private fun partPath(category: String, index: Int) = "rafiqa/$category.part${index.toString().padStart(2, '0')}.b64"
 
     private fun chooseCategory(tags: Set<String>): String {
