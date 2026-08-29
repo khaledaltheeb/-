@@ -120,7 +120,10 @@ public final class WebContentActivity extends AppCompatActivity {
         s.setSupportMultipleWindows(false);
         s.setDomStorageEnabled(true);
         s.setUseWideViewPort(true);
-        s.setLoadWithOverviewMode(true);
+        // The site already ships a responsive device-width viewport. Overview mode
+        // can add a second native page-scale pass and displace RTL paint independently
+        // from the DOM/visualViewport coordinates that Chromium reports.
+        s.setLoadWithOverviewMode(false);
         s.setTextZoom(100);
         s.setBuiltInZoomControls(true);
         s.setDisplayZoomControls(false);
