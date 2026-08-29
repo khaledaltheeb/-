@@ -22,6 +22,16 @@
         </activity>
 
         <activity
+            android:name=".WomenActivity"
+            android:exported="true"
+            android:label="رفيقة روافد">
+            <intent-filter>
+                <action android:name="org.healthrenewal.rawafid.OPEN_WOMEN" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <activity
             android:name=".WebActivity"
             android:exported="false" />
 
