@@ -42,6 +42,11 @@
             android:label="خطة العناية النسائية" />
 
         <activity
+            android:name=".WomenVisitPrepActivity"
+            android:exported="false"
+            android:label="جهزي زيارتي" />
+
+        <activity
             android:name=".WebActivity"
             android:exported="false" />
 
@@ -59,7 +64,7 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action_MY_PACKAGE_REPLACED" />
             </intent-filter>
         </receiver>
     </application>
