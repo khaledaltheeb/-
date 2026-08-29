@@ -11,7 +11,11 @@ const timeoutMs = Math.max(2000, Number(process.env.SEO_GATE_TIMEOUT_MS || 15000
 const maxUrls = Math.max(0, Number(process.env.SEO_GATE_MAX_URLS || 0));
 const pageAttempts = Math.max(1, Math.min(5, Number(process.env.SEO_GATE_PAGE_ATTEMPTS || 3)));
 const pageRetryDelayMs = Math.max(0, Number(process.env.SEO_GATE_PAGE_RETRY_DELAY_MS || 300));
-const crawlerUserAgent = process.env.SEO_GATE_USER_AGENT || 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)';
+// This gate requires critical metadata to be present in <head>. Next.js streams
+// metadata for Googlebot by design because Googlebot inspects the full DOM, so
+// use an HTML-limited crawler for the head contract while keeping the same SEO
+// assertions. Bingbot is part of Next.js' built-in HTML-limited bot list.
+const crawlerUserAgent = process.env.SEO_GATE_USER_AGENT || 'Mozilla/5.0 (compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)';
 const failures = [];
 
 function decodeXml(value) {
