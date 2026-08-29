@@ -162,12 +162,11 @@ jobs:
           if white_ratio > 0.94 or std < 8:
               raise SystemExit('Deep-link visual is blank or nearly blank')
 
-          # Regression guard for the Android WebView RTL paint bug. In the known bad
-          # builds, Arabic glyph ink was visibly painted through the physical right
-          # edge even though DOM rectangles were in bounds. The production page has
-          # a real right margin in this region, so dark ink in the last 40 px is a
-          # reliable paint-level clipping signal and does not depend on OCR.
-          edge=im.crop((max(0,w-40), int(h*0.15), w, int(h*0.65)))
+          # Regression guard for the Android WebView RTL paint bug. The app now has
+          # native chrome plus the site's header above the article, so inspect the
+          # actual article band rather than the header/logo band. The known clipped
+          # H1 still intersects this 25%-65% region while legitimate chrome does not.
+          edge=im.crop((max(0,w-40), int(h*0.25), w, int(h*0.65)))
           dark=sum(1 for r,g,b in edge.getdata() if r<100 and g<130 and b<130)
           print(f'deep-link right_edge_dark_pixels={dark}')
           if dark > 120:
