@@ -1,5 +1,16 @@
 <resources>
     <color name="rawafid_teal">#0B6B67</color>
     <color name="companion_rose">#C84B7B</color>
-    <color name="warm_bg">#FFF8F6</color>
+
+    <color name="rawafid_bg">#F6F9F8</color>
+    <color name="rawafid_surface">#FFFFFF</color>
+    <color name="rawafid_surface_alt">#EDF4F2</color>
+    <color name="rawafid_text_primary">#16211E</color>
+    <color name="rawafid_text_secondary">#4A5A55</color>
+    <color name="rawafid_border">#D6E2DE</color>
+    <color name="rawafid_on_primary">#FFFFFF</color>
+    <color name="rawafid_danger">#9A3742</color>
+
+    <!-- Kept as an alias for existing theme references. -->
+    <color name="warm_bg">@color/rawafid_bg</color>
 </resources>
