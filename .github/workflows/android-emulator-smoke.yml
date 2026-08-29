@@ -60,6 +60,21 @@ jobs:
             adb shell pidof org.healthrenewal.rawafid.debug
             adb exec-out screencap -p > "$GITHUB_WORKSPACE/android-emulator-artifacts/home.png"
 
+            # Exercise the new native quick-access surfaces from the real home screen.
+            # Coordinates are intentionally tied to the fixed Pixel 5 emulator profile above.
+            adb shell input tap 540 1250
+            sleep 2
+            adb shell dumpsys activity activities | grep -q 'QuickToolsActivity'
+            adb exec-out screencap -p > "$GITHUB_WORKSPACE/android-emulator-artifacts/quick-tools.png"
+            adb shell input keyevent KEYCODE_BACK
+            sleep 1
+            adb shell input tap 540 820
+            sleep 2
+            adb shell dumpsys activity activities | grep -q 'EmergencyShortcutActivity'
+            adb exec-out screencap -p > "$GITHUB_WORKSPACE/android-emulator-artifacts/sos-shortcut.png"
+            adb shell input keyevent KEYCODE_BACK
+            sleep 1
+
             # Exercise the real AlarmManager receiver from a cold/background process.
             adb shell input keyevent KEYCODE_HOME
             sleep 1
@@ -142,12 +157,26 @@ jobs:
               if left < -2 or right > vw+2 or right <= left:
                   raise SystemExit(f'{name} is clipped: left={left} right={right} viewport={vw}')
           PY
-      - name: Validate deep-link visual evidence
+      - name: Validate native and deep-link visual evidence
         run: |
           python3 -m pip install --quiet pillow
           python3 - <<'PY'
           from PIL import Image, ImageStat
           from pathlib import Path
+
+          for name in ['home.png','quick-tools.png','sos-shortcut.png']:
+              p=Path('android-emulator-artifacts')/name
+              if not p.exists() or p.stat().st_size < 10000:
+                  raise SystemExit(f'{name} is missing or too small')
+              im=Image.open(p).convert('RGB')
+              w,h=im.size
+              crop=im.crop((0,int(h*0.05),w,int(h*0.95)))
+              std=sum(ImageStat.Stat(crop).stddev)/3
+              near_white=sum(1 for r,g,b in crop.getdata() if r>245 and g>245 and b>245)/(crop.width*crop.height)
+              print(f'{name}: size={w}x{h} white_ratio={near_white:.4f} mean_stddev={std:.2f}')
+              if std < 7 or near_white > 0.95:
+                  raise SystemExit(f'{name} appears blank or visually broken')
+
           p=Path('android-emulator-artifacts/deep-link.png')
           if not p.exists() or p.stat().st_size < 10000:
               raise SystemExit('Deep-link screenshot is missing or too small')
