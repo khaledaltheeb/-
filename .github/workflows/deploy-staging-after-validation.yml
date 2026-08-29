@@ -56,6 +56,16 @@ jobs:
       - name: Install locked dependencies
         run: npm ci --no-audit --no-fund
 
+      - name: Install deterministic Arabic image build dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends imagemagick fontconfig fonts-noto-core librsvg2-bin
+          convert -version
+          rsvg-convert --version
+          fc-match 'Noto Sans Arabic'
+
       - name: Confirm Cloudflare credentials
         shell: bash
         run: |
@@ -111,9 +121,6 @@ jobs:
             if [[ "$comparison" == *"Fentanyl"* && "$comparison" == *"Heroin"* && "$comparison" == *"Article"* ]]; then comparison_ready=true; fi
             if [[ "$methodology" == *"قوة الدليل"* ]]; then methodology_ready=true; fi
 
-            # Staging is intentionally noindex. sitemap-xml.ts therefore emits valid,
-            # deliberately empty XML containers instead of indexable production URLs.
-            # Production URL coverage remains enforced by addiction-atlas-contract.mjs.
             if [[ "$root_sitemap" == *"<sitemapindex"* \
               && "$atlas_sitemap" == *"<urlset"* \
               && "$root_sitemap" != *"<sitemap><loc>"* \
