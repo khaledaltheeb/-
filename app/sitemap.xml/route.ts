@@ -16,6 +16,8 @@ const ATLAS_OWNED_CANONICALS = [
   '/addiction/methodology/',
 ] as const;
 
+const PRESERVED_NOINDEX_CANONICALS = ['/assessments/', '/assessments'] as const;
+
 function inFilter(values: string[]) {
   return `(${values.join(',')})`;
 }
@@ -30,7 +32,7 @@ function applyDedicatedSitemapExclusions<T extends {
     .not('canonical_url', 'like', '/daily-tools/%')
     .not('canonical_url', 'like', '/addiction/substances/%')
     .not('canonical_url', 'like', '/addiction/compare/%');
-  for (const canonical of ATLAS_OWNED_CANONICALS) {
+  for (const canonical of [...ATLAS_OWNED_CANONICALS, ...PRESERVED_NOINDEX_CANONICALS]) {
     owned = owned.neq('canonical_url', canonical);
   }
   return owned;

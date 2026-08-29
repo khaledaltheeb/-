@@ -43,17 +43,20 @@ requireAll(semanticSafe, [
 ], 'semantic SEO ambiguity guard');
 
 requireAll(seo, [
-  "import { buildSemanticSeoProfile } from '@/lib/semantic-seo-safe'",
   'relatedTerms?: string[]',
   'searchIntents?: string[]',
-  'const semanticProfile = buildSemanticSeoProfile(input)',
-  'const keywords = semanticProfile.topicKeywords.slice(0, 12)',
-], 'SEO metadata integration');
+  'Query maps remain private editorial inputs',
+], 'SEO metadata contract');
 
-// The 100-signal inventory is an editorial/query-coverage instrument, not a reason to emit
-// 100 meta keywords. Google explicitly ignores meta keywords; keep public metadata concise.
-if (seo.includes('const keywords = semanticProfile.keywords')) {
-  throw new Error('SEO metadata integration: full 100-signal inventory must not be emitted as meta keywords');
+// Semantic/query expansion is an internal editorial + CI instrument. It must not be rebuilt
+// as dead work on every public metadata render, and it must never be emitted as meta keywords.
+for (const forbidden of [
+  "import { buildSemanticSeoProfile } from '@/lib/semantic-seo-safe'",
+  'const semanticProfile = buildSemanticSeoProfile(input)',
+  'const keywords = semanticProfile.topicKeywords',
+  'keywords,',
+]) {
+  if (seo.includes(forbidden)) throw new Error(`SEO metadata render path must not contain semantic/meta-keyword work: ${forbidden}`);
 }
 
 // Never use hidden page copy or synthetic numbered filler to satisfy the inventory.
@@ -72,15 +75,15 @@ for (const forbidden of [
   if (semantic.includes(forbidden) || semanticSafe.includes(forbidden)) throw new Error(`semantic SEO profile: synthetic/hidden filler is forbidden: ${forbidden}`);
 }
 
-// Runtime metadata generation must not remove a public page just because semantic expansion
-// is incomplete. Validation belongs here in CI, not in page rendering.
+// Semantic generators used by editorial/CI tooling must remain non-throwing for incomplete
+// expansion. Page rendering is deliberately decoupled from this machinery.
 if (/throw new Error/.test(semantic) || /throw new Error/.test(semanticSafe)) {
-  throw new Error('semantic SEO profile: runtime SEO generation must remain non-throwing');
+  throw new Error('semantic SEO profile: semantic expansion must remain non-throwing');
 }
 
 // Execute the base TypeScript generator itself so the 50 + 50 internal rule is behavioral,
 // not merely textual. Ambiguous recovery terms on explicit mental-health routes are handled
-// by semantic-seo-safe.ts before the base generator is called by production metadata.
+// by semantic-seo-safe.ts for tooling that imports the safe wrapper.
 const transpiled = ts.transpileModule(semantic, {
   compilerOptions: {
     module: ts.ModuleKind.ES2022,
@@ -184,4 +187,4 @@ if (indexableFloor < 3519) {
   throw new Error(`public no-loss protection: indexable published baseline regressed to ${indexableFloor}`);
 }
 
-console.log(`Semantic SEO contract: OK — ${samples.length} runtime profiles each produced exactly 50 topical signals + 50 domain-aware search intents internally, while public meta keywords remain concise and filler-free.`);
+console.log(`Semantic SEO contract: OK — ${samples.length} profiles produced exactly 50 topical signals + 50 domain-aware search intents in CI/editorial tooling, with no public meta-keywords emission or render-path semantic expansion.`);
