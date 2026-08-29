@@ -6,6 +6,7 @@ import {
 
 const FIELDS = 'id,slug,title,excerpt,body_json,body_text,seo_title,seo_description,canonical_url,robots_index,robots_follow,published_at,updated_at,primary_keyword,secondary_keywords,semantic_terms,author_display_name,reviewer_display_name,reviewer_credentials,last_reviewed_at,references_json,medical_disclaimer,schema_json';
 const RELEASE_TOKEN_RE = /^[a-f0-9]{32}$/;
+const RELEASE_VISIBLE_STATUSES = ['approved', 'scheduled', 'published'] as const;
 
 function normalizeReleaseToken(value?: string | null) {
   const token = value?.trim().toLowerCase() || '';
@@ -52,7 +53,7 @@ export async function getPediatricOncologyEvidenceRecordForRequest(
     .from('content')
     .select(FIELDS)
     .eq('content_type', 'research')
-    .in('status', ['approved', 'scheduled'])
+    .in('status', [...RELEASE_VISIBLE_STATUSES])
     .eq('canonical_url', canonical)
     .maybeSingle();
 
@@ -72,7 +73,7 @@ export async function getPediatricOncologyReleasePreviewByToken(
     .from('content')
     .select(FIELDS)
     .eq('content_type', 'research')
-    .in('status', ['approved', 'scheduled'])
+    .in('status', [...RELEASE_VISIBLE_STATUSES])
     .like('canonical_url', '/magazine/pediatric-oncology/%')
     .limit(2);
 
