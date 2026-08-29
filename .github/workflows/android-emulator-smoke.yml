@@ -83,12 +83,18 @@ jobs:
             adb logcat -d -t 700 > "$GITHUB_WORKSPACE/android-emulator-artifacts/companion-notification-logcat.txt"
             if grep -E 'ANR in org\.healthrenewal\.rawafid\.debug|Process: org\.healthrenewal\.rawafid\.debug|Unable to start receiver.*org\.healthrenewal\.rawafid|SecurityException.*org\.healthrenewal\.rawafid' "$GITHUB_WORKSPACE/android-emulator-artifacts/companion-notification-logcat.txt"; then exit 1; fi
 
-            # Open real production content and collect Chromium viewport evidence.
+            # Open real production content. Software-rasterized WebView can finish
+            # materially later than the hardware-composited path, so wait for the
+            # actual Rawafid viewport probe instead of relying on a fixed sleep.
             adb shell am start -W -a android.intent.action.VIEW -d 'https://healthrenewal.org/sectors/home/' org.healthrenewal.rawafid.debug
-            sleep 12
+            for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30; do
+              adb logcat -d -t 2500 | grep -q 'RawafidFit.*metrics=' && break
+              sleep 2
+            done
+            sleep 2
             adb shell pidof org.healthrenewal.rawafid.debug
             adb exec-out screencap -p > "$GITHUB_WORKSPACE/android-emulator-artifacts/deep-link.png"
-            adb logcat -d -t 1600 > "$GITHUB_WORKSPACE/android-emulator-artifacts/deep-link-logcat.txt"
+            adb logcat -d -t 2500 > "$GITHUB_WORKSPACE/android-emulator-artifacts/deep-link-logcat.txt"
 
             adb shell pm revoke org.healthrenewal.rawafid.debug android.permission.POST_NOTIFICATIONS || true
             adb shell am force-stop org.healthrenewal.rawafid.debug
@@ -158,6 +164,17 @@ jobs:
           print(f'deep-link white_ratio={white_ratio:.4f} mean_stddev={std:.2f}')
           if white_ratio > 0.94 or std < 8:
               raise SystemExit('Deep-link visual is blank or nearly blank')
+
+          # Regression guard for the Android WebView RTL paint bug. In the known bad
+          # builds, Arabic glyph ink was visibly painted through the physical right
+          # edge even though DOM rectangles were in bounds. The production page has
+          # a real right margin in this region, so dark ink in the last 40 px is a
+          # reliable paint-level clipping signal and does not depend on OCR.
+          edge=im.crop((max(0,w-40), int(h*0.15), w, int(h*0.65)))
+          dark=sum(1 for r,g,b in edge.getdata() if r<100 and g<130 and b<130)
+          print(f'deep-link right_edge_dark_pixels={dark}')
+          if dark > 120:
+              raise SystemExit(f'RTL paint appears clipped at the right screen edge: {dark} dark pixels')
           PY
       - name: Upload real emulator evidence
         uses: actions/upload-artifact@v4
