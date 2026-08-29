@@ -63,7 +63,10 @@ public final class WebContentActivity extends AppCompatActivity {
 
     @Override protected void onResume(){
         super.onResume();
-        if(pageReady&&webView!=null) applyReadingMode();
+        if(pageReady&&webView!=null){
+            applyReadingMode();
+            applyFitScript();
+        }
         refreshSaveButton();
     }
 
@@ -139,6 +142,14 @@ public final class WebContentActivity extends AppCompatActivity {
                 refreshSaveButton();
                 applyReadingMode();
                 applyFitScript();
+                // Next.js/hydration can change widths after onPageFinished. Re-apply the
+                // non-destructive viewport clamp while the page settles.
+                webView.postDelayed(thisActivityFit(),350L);
+                webView.postDelayed(thisActivityFit(),1200L);
+                webView.postDelayed(thisActivityFit(),3000L);
+            }
+            private Runnable thisActivityFit(){
+                return ()->{ if(webView!=null&&pageReady) applyFitScript(); };
             }
             @Override public void onReceivedError(WebView view,WebResourceRequest request,WebResourceError error){
                 if(request.isForMainFrame()) showError();
@@ -215,7 +226,21 @@ public final class WebContentActivity extends AppCompatActivity {
 
     private void applyFitScript(){
         if(webView==null) return;
-        String js="(function(){var m=document.querySelector('meta[name=viewport]');if(!m){m=document.createElement('meta');m.name='viewport';document.head.appendChild(m);}m.setAttribute('content','width=device-width,initial-scale=1,maximum-scale=5,user-scalable=yes');var s=document.getElementById('rawafid-app-fit');if(!s){s=document.createElement('style');s.id='rawafid-app-fit';s.textContent='html{overflow-x:hidden!important}*,*:before,*:after{box-sizing:border-box!important;min-width:0!important}main,article,section,header,footer,nav{max-width:100%!important}img,video,svg,canvas{max-width:100%!important;height:auto!important}p,h1,h2,h3,h4,h5,h6,li{overflow-wrap:anywhere!important}table,pre{display:block!important;max-width:100%!important;overflow-x:auto!important}';document.head.appendChild(s);}})();";
+        String js="(function(){"
+                +"var m=document.querySelector('meta[name=viewport]');"
+                +"if(!m){m=document.createElement('meta');m.name='viewport';document.head.appendChild(m);}"
+                +"m.setAttribute('content','width=device-width,initial-scale=1,maximum-scale=5,user-scalable=yes');"
+                +"var s=document.getElementById('rawafid-app-fit');"
+                +"if(!s){s=document.createElement('style');s.id='rawafid-app-fit';document.head.appendChild(s);}"
+                +"s.textContent='html,body{width:100%!important;max-width:100vw!important;overflow-x:hidden!important}'"
+                +"+'*,*:before,*:after{box-sizing:border-box!important;min-width:0!important}'"
+                +"+'body *{max-width:100vw!important}'"
+                +"+'main,article,section,header,footer,nav,div{min-width:0!important}'"
+                +"+'img,video,svg,canvas,iframe{max-width:100%!important;height:auto!important}'"
+                +"+'p,h1,h2,h3,h4,h5,h6,li{max-width:100%!important;white-space:normal!important;overflow-wrap:anywhere!important;word-break:normal!important}'"
+                +"+'table,pre{display:block!important;max-width:100%!important;overflow-x:auto!important}';"
+                +"return JSON.stringify({vw:document.documentElement.clientWidth,sw:Math.max(document.documentElement.scrollWidth,document.body?document.body.scrollWidth:0)});"
+                +"})();";
         webView.evaluateJavascript(js,null);
     }
 
