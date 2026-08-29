@@ -58,9 +58,7 @@ jobs:
             adb shell pidof org.healthrenewal.rawafid.debug
             adb exec-out screencap -p > "$GITHUB_WORKSPACE/android-emulator-artifacts/home.png"
 
-            # Exercise the background Rafiqa receiver after the UI process is no longer foreground.
-            # Default Rafiqa state is disabled, so this verifies cold-process receiver startup and
-            # rescheduling code without creating a synthetic user notification.
+            # Exercise the real AlarmManager receiver from a cold/background process.
             adb shell input keyevent KEYCODE_HOME
             sleep 1
             adb shell am kill org.healthrenewal.rawafid.debug || true
@@ -69,6 +67,19 @@ jobs:
             sleep 2
             adb logcat -d -t 500 > "$GITHUB_WORKSPACE/android-emulator-artifacts/companion-background-logcat.txt"
             if grep -E 'FATAL EXCEPTION|SecurityException|Unable to start receiver|ANR in org.healthrenewal.rawafid.debug' "$GITHUB_WORKSPACE/android-emulator-artifacts/companion-background-logcat.txt"; then exit 1; fi
+
+            # Prove that a real Rafiqa notification can be posted while the UI is not open.
+            adb shell pm grant org.healthrenewal.rawafid.debug android.permission.POST_NOTIFICATIONS || true
+            adb shell input keyevent KEYCODE_HOME
+            adb shell am kill org.healthrenewal.rawafid.debug || true
+            sleep 1
+            adb shell am broadcast -a org.healthrenewal.rawafid.debug.SEND_COMPANION_TEST -n org.healthrenewal.rawafid.debug/org.healthrenewal.rawafid.CompanionTestReceiver
+            sleep 2
+            adb shell dumpsys notification --noredact > "$GITHUB_WORKSPACE/android-emulator-artifacts/companion-notifications.txt"
+            grep -q 'org.healthrenewal.rawafid.debug' "$GITHUB_WORKSPACE/android-emulator-artifacts/companion-notifications.txt"
+            grep -q 'رفيقة روافد' "$GITHUB_WORKSPACE/android-emulator-artifacts/companion-notifications.txt"
+            adb logcat -d -t 700 > "$GITHUB_WORKSPACE/android-emulator-artifacts/companion-notification-logcat.txt"
+            if grep -E 'FATAL EXCEPTION|SecurityException|Unable to start receiver|ANR in org.healthrenewal.rawafid.debug' "$GITHUB_WORKSPACE/android-emulator-artifacts/companion-notification-logcat.txt"; then exit 1; fi
 
             adb shell am start -W -a android.intent.action.VIEW -d 'https://healthrenewal.org/sectors/home/' org.healthrenewal.rawafid.debug
             sleep 12
