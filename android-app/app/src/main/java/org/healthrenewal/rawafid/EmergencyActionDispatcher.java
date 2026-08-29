@@ -68,7 +68,6 @@ public final class EmergencyActionDispatcher {
 
     public static void openCenter(Context context,boolean triggered){
         Intent center=new Intent(context,EmergencyActivity.class);
-        center.putExtra(EmergencyActivity.EXTRA_TRIGGERED,triggered);
         center.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
         try { context.startActivity(center); } catch(Exception ignored){}
     }
