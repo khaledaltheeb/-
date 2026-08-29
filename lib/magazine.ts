@@ -32,11 +32,81 @@ export type MagazineListingRecord = Pick<
   'id' | 'slug' | 'title' | 'excerpt' | 'canonical_url' | 'published_at' | 'updated_at' | 'schema_json'
 >;
 
+export type ResearchCatalogRecord = {
+  id: string;
+  openalex_id: string;
+  doi: string | null;
+  source_url: string;
+  title: string;
+  publication_date: string;
+  publication_year: number;
+  work_type: 'article' | 'dissertation';
+  evidence_kind_ar: string;
+  language: string | null;
+  authors: string[];
+  journal_title: string | null;
+  publisher: string | null;
+  cited_by_count: number;
+  is_open_access: boolean;
+  oa_status: string | null;
+  primary_topic: string | null;
+  rawafid_cluster: string;
+  rawafid_cluster_ar: string;
+  catalog_rank: number;
+  source_api: string;
+  last_synced_at: string;
+};
+
+export type MagazinePageResult = {
+  items: MagazineListingRecord[];
+  count: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+};
+
+export type ResearchCatalogPageResult = {
+  items: ResearchCatalogRecord[];
+  count: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+};
+
+export type ResearchCatalogStats = {
+  total: number;
+  articles: number;
+  dissertations: number;
+  openAccess: number;
+  withDoi: number;
+  last30Days: number;
+  last90Days: number;
+  newestDate: string | null;
+  oldestDate: string | null;
+  lastSyncedAt: string | null;
+  clusters: Array<{ key: string; label: string; count: number }>;
+};
+
 const FIELDS = 'id,slug,title,excerpt,body_json,body_text,seo_title,seo_description,canonical_url,robots_index,robots_follow,published_at,updated_at,primary_keyword,secondary_keywords,semantic_terms,author_display_name,reviewer_display_name,reviewer_credentials,last_reviewed_at,references_json,medical_disclaimer,schema_json';
 const LISTING_FIELDS = 'id,slug,title,excerpt,canonical_url,published_at,updated_at,schema_json';
+const RESEARCH_CATALOG_FIELDS = 'id,openalex_id,doi,source_url,title,publication_date,publication_year,work_type,evidence_kind_ar,language,authors,journal_title,publisher,cited_by_count,is_open_access,oa_status,primary_topic,rawafid_cluster,rawafid_cluster_ar,catalog_rank,source_api,last_synced_at';
 
 function isPublishedNow(value: string | null) {
   return !value || new Date(value).getTime() <= Date.now();
+}
+
+function safePage(value: number | undefined) {
+  if (!Number.isFinite(value)) return 1;
+  return Math.max(1, Math.min(Math.trunc(value || 1), 500));
+}
+
+function safePageSize(value: number | undefined, fallback: number, max: number) {
+  if (!Number.isFinite(value)) return fallback;
+  return Math.max(1, Math.min(Math.trunc(value || fallback), max));
+}
+
+function safeSearch(value: string | undefined) {
+  return value?.trim().replace(/\s+/g, ' ').slice(0, 140) || '';
 }
 
 export function evidenceKind(item: Pick<MagazineRecord, 'schema_json'>) {
@@ -60,9 +130,152 @@ export async function getMagazineItems(): Promise<MagazineListingRecord[]> {
     .eq('status', 'published')
     .like('canonical_url', '/magazine/%')
     .order('published_at', { ascending: false })
-    .limit(500);
+    .limit(1000);
   if (error) throw error;
   return ((data ?? []) as unknown as MagazineListingRecord[]).filter((item) => isPublishedNow(item.published_at));
+}
+
+export async function getMagazinePage(options: {
+  page?: number;
+  pageSize?: number;
+  q?: string;
+  kind?: string;
+} = {}): Promise<MagazinePageResult> {
+  const page = safePage(options.page);
+  const pageSize = safePageSize(options.pageSize, 18, 48);
+  const q = safeSearch(options.q);
+  const kind = options.kind?.trim().slice(0, 80) || '';
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+  const supabase = await createClient();
+
+  let query = supabase
+    .from('content')
+    .select(LISTING_FIELDS, { count: 'exact' })
+    .eq('content_type', 'research')
+    .eq('status', 'published')
+    .like('canonical_url', '/magazine/%');
+
+  if (q) query = query.ilike('title', `%${q}%`);
+  if (kind) query = query.contains('schema_json', { evidence_kind: kind });
+
+  const { data, error, count } = await query
+    .order('published_at', { ascending: false })
+    .range(from, to);
+  if (error) throw error;
+
+  const items = ((data ?? []) as unknown as MagazineListingRecord[]).filter((item) => isPublishedNow(item.published_at));
+  const total = count ?? items.length;
+  return { items, count: total, page, pageSize, totalPages: Math.max(1, Math.ceil(total / pageSize)) };
+}
+
+export async function getMagazineOverview() {
+  const supabase = await createClient();
+  const [{ count, error: countError }, { data, error: kindsError }] = await Promise.all([
+    supabase
+      .from('content')
+      .select('id', { count: 'exact', head: true })
+      .eq('content_type', 'research')
+      .eq('status', 'published')
+      .like('canonical_url', '/magazine/%'),
+    supabase
+      .from('content')
+      .select('schema_json')
+      .eq('content_type', 'research')
+      .eq('status', 'published')
+      .like('canonical_url', '/magazine/%')
+      .limit(1000),
+  ]);
+  if (countError) throw countError;
+  if (kindsError) throw kindsError;
+
+  const kinds = Array.from(new Set(((data ?? []) as Array<{ schema_json: Record<string, unknown> | null }>).map((item) => {
+    const value = item.schema_json?.evidence_kind;
+    return typeof value === 'string' && value.trim() ? value.trim() : 'دراسة بحثية';
+  }))).sort((a, b) => a.localeCompare(b, 'ar'));
+
+  return { count: count ?? 0, kinds };
+}
+
+export async function getResearchCatalogPage(options: {
+  page?: number;
+  pageSize?: number;
+  q?: string;
+  cluster?: string;
+  workType?: string;
+} = {}): Promise<ResearchCatalogPageResult> {
+  const page = safePage(options.page);
+  const pageSize = safePageSize(options.pageSize, 24, 48);
+  const q = safeSearch(options.q);
+  const cluster = options.cluster?.trim().slice(0, 80) || '';
+  const workType = options.workType === 'article' || options.workType === 'dissertation' ? options.workType : '';
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+  const supabase = await createClient();
+
+  let query = supabase
+    .from('research_catalog')
+    .select(RESEARCH_CATALOG_FIELDS, { count: 'exact' })
+    .eq('is_active', true);
+
+  if (q) query = query.ilike('title', `%${q}%`);
+  if (cluster) query = query.eq('rawafid_cluster', cluster);
+  if (workType) query = query.eq('work_type', workType);
+
+  const { data, error, count } = await query
+    .order('catalog_rank', { ascending: true })
+    .range(from, to);
+  if (error) throw error;
+
+  const items = (data ?? []) as unknown as ResearchCatalogRecord[];
+  const total = count ?? items.length;
+  return { items, count: total, page, pageSize, totalPages: Math.max(1, Math.ceil(total / pageSize)) };
+}
+
+export async function getResearchCatalogStats(): Promise<ResearchCatalogStats> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('research_catalog')
+    .select('doi,publication_date,work_type,is_open_access,rawafid_cluster,rawafid_cluster_ar,last_synced_at')
+    .eq('is_active', true)
+    .order('catalog_rank', { ascending: true })
+    .limit(1000);
+  if (error) throw error;
+
+  const rows = (data ?? []) as Array<{
+    doi: string | null;
+    publication_date: string;
+    work_type: 'article' | 'dissertation';
+    is_open_access: boolean;
+    rawafid_cluster: string;
+    rawafid_cluster_ar: string;
+    last_synced_at: string;
+  }>;
+  const now = Date.now();
+  const day = 86_400_000;
+  const clusterMap = new Map<string, { key: string; label: string; count: number }>();
+
+  for (const row of rows) {
+    const current = clusterMap.get(row.rawafid_cluster) ?? { key: row.rawafid_cluster, label: row.rawafid_cluster_ar, count: 0 };
+    current.count += 1;
+    clusterMap.set(row.rawafid_cluster, current);
+  }
+
+  const dates = rows.map((row) => row.publication_date).filter(Boolean).sort();
+  const syncDates = rows.map((row) => row.last_synced_at).filter(Boolean).sort();
+  return {
+    total: rows.length,
+    articles: rows.filter((row) => row.work_type === 'article').length,
+    dissertations: rows.filter((row) => row.work_type === 'dissertation').length,
+    openAccess: rows.filter((row) => row.is_open_access).length,
+    withDoi: rows.filter((row) => Boolean(row.doi)).length,
+    last30Days: rows.filter((row) => now - new Date(row.publication_date).getTime() <= 30 * day).length,
+    last90Days: rows.filter((row) => now - new Date(row.publication_date).getTime() <= 90 * day).length,
+    newestDate: dates.at(-1) ?? null,
+    oldestDate: dates[0] ?? null,
+    lastSyncedAt: syncDates.at(-1) ?? null,
+    clusters: Array.from(clusterMap.values()),
+  };
 }
 
 export async function getMagazineRecord(routeSlug: string): Promise<MagazineRecord | null> {
