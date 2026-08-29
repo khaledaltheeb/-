@@ -25,6 +25,9 @@ import android.widget.Toast;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -41,7 +44,6 @@ public final class WebContentActivity extends AppCompatActivity {
 
     private final int teal=Color.rgb(11,107,103);
     private final int ink=Color.rgb(22,33,30);
-    private final int muted=Color.rgb(74,90,85);
     private final int surface=Color.WHITE;
     private final int appBg=Color.rgb(246,249,248);
     private final int border=Color.rgb(214,226,222);
@@ -90,6 +92,11 @@ public final class WebContentActivity extends AppCompatActivity {
         root.setOrientation(LinearLayout.VERTICAL);
         root.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
         root.setBackgroundColor(appBg);
+        ViewCompat.setOnApplyWindowInsetsListener(root,(view,windowInsets)->{
+            Insets system=windowInsets.getInsets(WindowInsetsCompat.Type.statusBars()|WindowInsetsCompat.Type.navigationBars());
+            view.setPadding(system.left,system.top,system.right,system.bottom);
+            return windowInsets;
+        });
 
         root.addView(buildTopBar(),new LinearLayout.LayoutParams(-1,dp(58)));
 
@@ -147,6 +154,7 @@ public final class WebContentActivity extends AppCompatActivity {
         root.addView(webView,new LinearLayout.LayoutParams(-1,0,1f));
         root.addView(buildBottomBar(),new LinearLayout.LayoutParams(-1,dp(66)));
         setContentView(root);
+        ViewCompat.requestApplyInsets(root);
     }
 
     private View buildTopBar(){
@@ -263,7 +271,14 @@ public final class WebContentActivity extends AppCompatActivity {
                 +"+'main,article,section,header,footer,nav,div{min-width:0!important}'"
                 +"+'img,video,svg,canvas,iframe{max-width:100%!important;height:auto!important}'"
                 +"+'p,h1,h2,h3,h4,h5,h6,li{max-width:100%!important;white-space:normal!important;overflow-wrap:anywhere!important;word-break:normal!important}'"
-                +"+'table,pre{display:block!important;max-width:100%!important;overflow-x:auto!important}';"
+                +"+'table,pre{display:block!important;max-width:100%!important;overflow-x:auto!important}'"
+                +"+'[data-rawafid-app-nav-hidden=\"1\"]{display:none!important}';"
+                +"Array.prototype.forEach.call(document.querySelectorAll('nav,[role=navigation]'),function(el){"
+                +"var cs=getComputedStyle(el),r=el.getBoundingClientRect(),controls=el.querySelectorAll('a,button').length;"
+                +"var fixed=(cs.position==='fixed'||cs.position==='sticky');"
+                +"var bottom=r.bottom>=window.innerHeight-24&&r.top>window.innerHeight*0.55;"
+                +"if(fixed&&bottom&&r.height>35&&r.height<=170&&controls>=3){el.setAttribute('data-rawafid-app-nav-hidden','1');}"
+                +"});"
                 +"var de=document.documentElement,b=document.body,vv=window.visualViewport;var h=document.querySelector('h1'),main=document.querySelector('main');"
                 +"var hr=h?h.getBoundingClientRect():null,mr=main?main.getBoundingClientRect():null;"
                 +"return [window.innerWidth,de.clientWidth,de.scrollWidth,b?b.scrollWidth:0,window.scrollX,getComputedStyle(de).direction,b?getComputedStyle(b).direction:'',vv?vv.offsetLeft:0,vv?vv.width:0,hr?hr.left:-999,hr?hr.right:-999,mr?mr.left:-999,mr?mr.right:-999].join('|');})();";
