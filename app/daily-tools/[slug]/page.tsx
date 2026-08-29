@@ -41,23 +41,33 @@ export default async function DailyToolPage({ params }: { params: Params }) {
 
   return <>
     <SiteHeader />
-    <main className="article-shell">
+    <main className="article-shell daily-tool-page">
       <nav className="breadcrumbs" aria-label="مسار الصفحة">
         <Link href="/">الرئيسية</Link><span>/</span>
         <Link href="/daily-tools/">الأدوات اليومية</Link><span>/</span>
         <span aria-current="page">{title}</span>
       </nav>
       <article>
-        <header className="article-hero">
+        <header className="article-hero daily-tool-detail-hero">
           <span className="eyebrow">أداة يومية محلية غير تشخيصية</span>
           <h1>{title}</h1>
           {page.meta_description ? <p>{page.meta_description}</p> : null}
-          <p>تعمل الأداة داخل متصفحك. لا تُرسل المدخلات الشخصية إلى خادم روافد، ويمكنك مسح البيانات المحلية من الأداة متى شئت.</p>
+          <div className="daily-tool-trust-row" aria-label="خصائص الأداة">
+            <span>تعمل داخل المتصفح</span>
+            <span>الحفظ اختياري ومحلي</span>
+            <span>يمكن مسح البيانات في أي وقت</span>
+          </div>
         </header>
         {interactive}
-        <div className="article-body">
-          <ContentRenderer bodyJson={page.body_json} bodyText={page.body_text} recordId={page.source_path} />
-        </div>
+        <details className="daily-tool-reference">
+          <summary>
+            <span>الدليل والمحتوى المرجعي</span>
+            <small>افتح هذا القسم لقراءة الشرح الكامل، طريقة الاستخدام، والتنبيهات المرتبطة بالأداة.</small>
+          </summary>
+          <div className="article-body">
+            <ContentRenderer bodyJson={page.body_json} bodyText={page.body_text} recordId={page.source_path} />
+          </div>
+        </details>
         <DailyToolResources page={page} route={route} />
       </article>
     </main>
