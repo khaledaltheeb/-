@@ -1,6 +1,7 @@
 package org.healthrenewal.rawafid;
 
 import android.app.Application;
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.media.AudioAttributes;
@@ -17,6 +18,7 @@ public final class RawafidApp extends Application {
     // Versioned IDs are intentional: Android keeps a channel's sound once the user/device creates it.
     public static final String CHANNEL_CONTENT = "rawafid_content_v2";
     public static final String CHANNEL_COMPANION = "rawafid_companion_v2";
+    public static final String CHANNEL_EMERGENCY = "rawafid_emergency_v1";
 
     @Override public void onCreate() {
         super.onCreate();
@@ -56,7 +58,14 @@ public final class RawafidApp extends Application {
         companion.setSound(sound,audioAttributes);
         companion.enableVibration(true);
 
+        NotificationChannel emergency = new NotificationChannel(CHANNEL_EMERGENCY, "SOS وبطاقة الطوارئ", NotificationManager.IMPORTANCE_HIGH);
+        emergency.setDescription("تنبيه محلي عالي الأولوية عند تشغيل اختصار SOS الذي فعّله المستخدم");
+        emergency.setSound(sound,audioAttributes);
+        emergency.enableVibration(true);
+        emergency.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+
         nm.createNotificationChannel(content);
         nm.createNotificationChannel(companion);
+        nm.createNotificationChannel(emergency);
     }
 }
