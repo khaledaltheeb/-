@@ -63,6 +63,8 @@ Test at minimum:
 ## Google Play release gates
 
 - Play App Signing/upload key configured outside source control.
+- The Play artifact is produced only by the signed-release workflow and `jarsigner -verify` succeeds before upload.
+- Unsigned CI validation bundles are labeled explicitly and must never be submitted to Play Console.
 - `assetlinks.json` contains the final Play signing SHA-256 certificate fingerprint.
 - Public HTTPS app privacy policy is live and matches actual behavior.
 - Data Safety answers match actual collection/storage/sharing.
