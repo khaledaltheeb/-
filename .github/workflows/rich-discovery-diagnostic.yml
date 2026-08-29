@@ -1,4 +1,4 @@
-# Re-run after low-level crawler transport fix
+# Re-run after crawler-head curl fallback
 name: Rich Discovery Diagnostic
 
 on:
