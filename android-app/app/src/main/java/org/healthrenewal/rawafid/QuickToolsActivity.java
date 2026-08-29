@@ -106,7 +106,7 @@ public final class QuickToolsActivity extends AppCompatActivity {
     private void addEmergencyCardLauncher(){
         LinearLayout box=toolCard("بطاقة الطوارئ","اعرض بطاقة الحالة وجهات الاتصال التي أعددتها في مركز SOS، بما في ذلك فوق شاشة القفل عند التفعيل السريع.");
         Button open=button("عرض بطاقتي الآن",rose); open.setOnClickListener(v->EmergencyActionDispatcher.showCard(this,"tools")); box.addView(open);
-        Button setup=button("إعداد SOS والاختصار",teal); setup.setOnClickListener(v->startActivity(new android.content.Intent(this,EmergencyActivity.class))); box.addView(setup);
+        Button setup=button("إعداد SOS والاختصار",teal); setup.setOnClickListener(v->startActivity(new android.content.Intent(this,EmergencyShortcutActivity.class))); box.addView(setup);
     }
 
     private LinearLayout toolCard(String title,String body){
