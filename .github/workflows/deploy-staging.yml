@@ -1,0 +1,82 @@
+name: Deploy Staging
+
+on:
+  workflow_run:
+    workflows: ["Cloudflare Workers Validate"]
+    types: [completed]
+
+concurrency:
+  group: rawafid-staging-deploy
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
+      NEXT_PUBLIC_SITE_URL: https://rawafid-platform-staging.khaledaltheeb.workers.dev
+      NEXT_PUBLIC_ALLOW_INDEXING: 'false'
+      NEXT_PUBLIC_ENABLE_ANALYTICS: 'false'
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: 1910e1ad3c793fd568ba1caafe34f964
+
+    steps:
+      - name: Require Cloudflare API token
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "${CLOUDFLARE_API_TOKEN:-}" ]; then
+            echo 'Cloudflare API token is not configured.' >&2
+            exit 1
+          fi
+
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Install deterministic Arabic image build dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends imagemagick fontconfig fonts-noto-core librsvg2-bin
+
+      - name: Verify validated commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${{ github.event.workflow_run.head_sha }}"
+
+      - name: Build staging Worker
+        run: npx opennextjs-cloudflare build
+
+      - name: Deploy staging Worker
+        run: npx opennextjs-cloudflare deploy
+
+      - name: Verify staging origin
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="${NEXT_PUBLIC_SITE_URL}"
+          stamp="${{ github.event.workflow_run.head_sha }}"
+          for attempt in $(seq 1 12); do
+            if curl -fsS --retry 2 --retry-delay 2 "${base}/?deploy=${stamp}" >/dev/null; then
+              exit 0
+            fi
+            sleep 5
+          done
+          exit 1
