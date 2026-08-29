@@ -97,7 +97,7 @@ function isPublishedNow(value: string | null) {
 
 function safePage(value: number | undefined) {
   if (!Number.isFinite(value)) return 1;
-  return Math.max(1, Math.min(Math.trunc(value || 1), 500));
+  return Math.max(1, Math.min(Math.trunc(value || 1), 10000));
 }
 
 function safePageSize(value: number | undefined, fallback: number, max: number) {
@@ -234,47 +234,33 @@ export async function getResearchCatalogPage(options: {
 
 export async function getResearchCatalogStats(): Promise<ResearchCatalogStats> {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from('research_catalog')
-    .select('doi,publication_date,work_type,is_open_access,rawafid_cluster,rawafid_cluster_ar,last_synced_at')
-    .eq('is_active', true)
-    .order('catalog_rank', { ascending: true })
-    .limit(1000);
+  const { data, error } = await supabase.rpc('get_research_catalog_stats');
   if (error) throw error;
 
-  const rows = (data ?? []) as Array<{
-    doi: string | null;
-    publication_date: string;
-    work_type: 'article' | 'dissertation';
-    is_open_access: boolean;
-    rawafid_cluster: string;
-    rawafid_cluster_ar: string;
-    last_synced_at: string;
-  }>;
-  const now = Date.now();
-  const day = 86_400_000;
-  const clusterMap = new Map<string, { key: string; label: string; count: number }>();
+  const raw = (data ?? {}) as Record<string, unknown>;
+  const clusters = Array.isArray(raw.clusters)
+    ? raw.clusters.map((item) => {
+        const value = (item ?? {}) as Record<string, unknown>;
+        return {
+          key: String(value.key ?? ''),
+          label: String(value.label ?? ''),
+          count: Number(value.count ?? 0),
+        };
+      }).filter((item) => item.key && item.label)
+    : [];
 
-  for (const row of rows) {
-    const current = clusterMap.get(row.rawafid_cluster) ?? { key: row.rawafid_cluster, label: row.rawafid_cluster_ar, count: 0 };
-    current.count += 1;
-    clusterMap.set(row.rawafid_cluster, current);
-  }
-
-  const dates = rows.map((row) => row.publication_date).filter(Boolean).sort();
-  const syncDates = rows.map((row) => row.last_synced_at).filter(Boolean).sort();
   return {
-    total: rows.length,
-    articles: rows.filter((row) => row.work_type === 'article').length,
-    dissertations: rows.filter((row) => row.work_type === 'dissertation').length,
-    openAccess: rows.filter((row) => row.is_open_access).length,
-    withDoi: rows.filter((row) => Boolean(row.doi)).length,
-    last30Days: rows.filter((row) => now - new Date(row.publication_date).getTime() <= 30 * day).length,
-    last90Days: rows.filter((row) => now - new Date(row.publication_date).getTime() <= 90 * day).length,
-    newestDate: dates.at(-1) ?? null,
-    oldestDate: dates[0] ?? null,
-    lastSyncedAt: syncDates.at(-1) ?? null,
-    clusters: Array.from(clusterMap.values()),
+    total: Number(raw.total ?? 0),
+    articles: Number(raw.articles ?? 0),
+    dissertations: Number(raw.dissertations ?? 0),
+    openAccess: Number(raw.openAccess ?? 0),
+    withDoi: Number(raw.withDoi ?? 0),
+    last30Days: Number(raw.last30Days ?? 0),
+    last90Days: Number(raw.last90Days ?? 0),
+    newestDate: typeof raw.newestDate === 'string' ? raw.newestDate : null,
+    oldestDate: typeof raw.oldestDate === 'string' ? raw.oldestDate : null,
+    lastSyncedAt: typeof raw.lastSyncedAt === 'string' ? raw.lastSyncedAt : null,
+    clusters,
   };
 }
 
