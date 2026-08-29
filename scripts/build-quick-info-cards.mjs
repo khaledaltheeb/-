@@ -17,6 +17,90 @@ const MANIFEST_PATH = join(process.cwd(), 'public', 'quick-info', 'cards-manifes
 const TMP_ROOT = join(tmpdir(), `rawafid-quick-info-cards-${process.pid}`);
 let IMAGE_COMMAND = '';
 
+const TOPIC_PROFILES = [
+  {
+    id: 'mental-health',
+    label: 'الصحة النفسية',
+    match: /اكتئاب|قلق|حزن|مزاج|نفسي|نفسية|توتر|هلع|وسواس|صدمة|احتراق|وحدة|خوف|غضب|مشاعر|ثقة بالنفس/u,
+    accent: '#176b65',
+    accentDark: '#0f4f4b',
+    soft: '#dff2ee',
+    glow: '#edf8f5',
+  },
+  {
+    id: 'sleep',
+    label: 'النوم والراحة',
+    match: /نوم|أرق|استيقاظ|كوابيس|نعاس|ساعة بيولوجية|راحة/u,
+    accent: '#405d78',
+    accentDark: '#2f485f',
+    soft: '#e6edf3',
+    glow: '#f1f5f8',
+  },
+  {
+    id: 'family',
+    label: 'الأسرة والعلاقات',
+    match: /أسرة|اسرة|زواج|زوج|زوجة|علاقة|علاقات|والد|والدة|أبناء|ابناء|طفل|أطفال|اطفال|مراهق|تربية/u,
+    accent: '#8a6651',
+    accentDark: '#684b3c',
+    soft: '#f1e8e1',
+    glow: '#faf6f2',
+  },
+  {
+    id: 'addiction',
+    label: 'التعافي والإدمان',
+    match: /إدمان|ادمان|تعاطي|انسحاب|انتكاس|مخدر|كحول|تدخين|نيكوتين|تعافي/u,
+    accent: '#5f6752',
+    accentDark: '#454b3d',
+    soft: '#e9ede3',
+    glow: '#f5f7f2',
+  },
+  {
+    id: 'nutrition',
+    label: 'التغذية ونمط الحياة',
+    match: /غذاء|تغذية|طعام|أكل|اكل|سكر|قهوة|كافيين|ماء|وزن|شهية|فيتامين|رياضة|مشي/u,
+    accent: '#6b7a45',
+    accentDark: '#4f5b32',
+    soft: '#edf1df',
+    glow: '#f7f9f1',
+  },
+  {
+    id: 'neurology',
+    label: 'الدماغ والجهاز العصبي',
+    match: /صرع|نوبة|نوبات|صداع|شقيقة|ذاكرة|تركيز|دوار|دوخة|دماغ|عصبي|أعصاب|اعصاب/u,
+    accent: '#516a80',
+    accentDark: '#3c5062',
+    soft: '#e5edf2',
+    glow: '#f2f6f8',
+  },
+  {
+    id: 'medication',
+    label: 'دواء وسلامة صحية',
+    match: /دواء|أدوية|ادوية|جرعة|مسكن|مضاد|علاج|آثار جانبية|اعراض جانبية|أعراض جانبية/u,
+    accent: '#3f7172',
+    accentDark: '#2d5556',
+    soft: '#e0eff0',
+    glow: '#f1f7f7',
+  },
+  {
+    id: 'social',
+    label: 'الحياة الاجتماعية',
+    match: /صديق|أصدقاء|اصدقاء|اجتماعي|اجتماعية|عمل|مدرسة|جامعة|تنمر|حدود|تواصل|رفض|مقارنة/u,
+    accent: '#6e6282',
+    accentDark: '#514860',
+    soft: '#ece8f2',
+    glow: '#f6f3f9',
+  },
+];
+
+const DEFAULT_TOPIC = {
+  id: 'general',
+  label: 'معلومة سريعة',
+  accent: '#176b65',
+  accentDark: '#123b3c',
+  soft: '#e3f1ef',
+  glow: '#f4faf8',
+};
+
 function failOrSkip(message) {
   if (REQUIRED) throw new Error(message);
   console.warn(`[quick-info-cards] ${message} Skipping outside CI.`);
@@ -74,7 +158,12 @@ function routeSlug(contentSlug) {
   return /^[a-z0-9][a-z0-9-]*$/.test(slug) ? slug : '';
 }
 
-function wrapArabicTitle(title, maxChars = 28, maxLines = 3) {
+function topicProfile(title) {
+  const normalized = String(title || '').trim();
+  return TOPIC_PROFILES.find((profile) => profile.match.test(normalized)) || DEFAULT_TOPIC;
+}
+
+function wrapArabicTitle(title, maxChars = 27, maxLines = 3) {
   const words = String(title || '').trim().split(/\s+/u).filter(Boolean);
   const lines = [];
   let current = '';
@@ -142,10 +231,20 @@ async function loadPublishedQuickInfo() {
   return items;
 }
 
+function buildBrandIcon(theme) {
+  return `
+    <rect x="1008" y="82" width="72" height="72" rx="20" fill="${theme.accentDark}"/>
+    <path d="M1029 126c9-10 20-15 33-15v23c-13 0-24 5-33 15z" fill="#ffffff" opacity="0.96"/>
+    <path d="M1059 102c-8 5-13 12-15 21 10-2 18-7 23-15-1-4-4-6-8-6z" fill="#ffffff" opacity="0.82"/>
+    <circle cx="1027" cy="105" r="5" fill="#ffffff" opacity="0.78"/>
+  `;
+}
+
 function buildSvg(title) {
+  const theme = topicProfile(title);
   const titleLines = wrapArabicTitle(title);
-  const titleSize = title.length > 67 ? 44 : title.length > 56 ? 47 : 51;
-  const titleStartY = titleLines.length === 1 ? 330 : titleLines.length === 2 ? 292 : 258;
+  const titleSize = title.length > 74 ? 42 : title.length > 62 ? 46 : title.length > 50 ? 50 : 54;
+  const titleStartY = titleLines.length === 1 ? 340 : titleLines.length === 2 ? 310 : 274;
   const lineHeight = 72;
   const titleTspans = titleLines.map((line, index) => (
     `<tspan x="1092" y="${titleStartY + index * lineHeight}">${escapeXml(line)}</tspan>`
@@ -155,27 +254,42 @@ function buildSvg(title) {
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" xml:lang="ar">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#f4faf8"/>
+      <stop offset="0" stop-color="${theme.glow}"/>
       <stop offset="1" stop-color="#f8f6ed"/>
     </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="125%">
+      <feDropShadow dx="0" dy="10" stdDeviation="16" flood-color="#123b3c" flood-opacity="0.08"/>
+    </filter>
   </defs>
+
   <rect width="1200" height="630" fill="url(#bg)"/>
-  <circle cx="1110" cy="60" r="160" fill="#e3f1ef"/>
-  <circle cx="120" cy="590" r="160" fill="#f3f2e8"/>
-  <rect x="64" y="54" width="1072" height="522" rx="34" fill="#ffffff" stroke="#d8e8e5" stroke-width="1"/>
+  <circle cx="1115" cy="68" r="178" fill="${theme.soft}" opacity="0.94"/>
+  <circle cx="86" cy="582" r="184" fill="#f1eee3" opacity="0.82"/>
+  <circle cx="160" cy="78" r="76" fill="${theme.soft}" opacity="0.36"/>
+  <rect x="54" y="44" width="1092" height="542" rx="38" fill="#ffffff" stroke="#d8e8e5" stroke-width="1" filter="url(#shadow)"/>
+
+  ${buildBrandIcon(theme)}
 
   <g font-family="Noto Sans Arabic, Noto Sans, sans-serif" direction="rtl" unicode-bidi="plaintext" text-anchor="end">
-    <text x="1092" y="126" font-size="40" font-weight="700" fill="#123b3c">روافد</text>
-    <text x="1092" y="164" font-size="20" font-weight="500" fill="#36545a">منصة المعرفة العربية الموثوقة</text>
-    <text font-size="${titleSize}" font-weight="700" fill="#102f36">${titleTspans}</text>
-    <text x="1092" y="500" font-size="24" font-weight="500" fill="#31595b">معلومة سريعة · قراءة عربية واضحة · منصة روافد</text>
+    <text x="990" y="116" font-size="37" font-weight="700" fill="#123b3c">روافد</text>
+    <text x="990" y="151" font-size="19" font-weight="500" fill="#36545a">منصة المعرفة العربية الموثوقة</text>
+
+    <rect x="820" y="188" width="272" height="48" rx="24" fill="${theme.soft}"/>
+    <text x="1062" y="221" font-size="19" font-weight="700" fill="${theme.accentDark}">${escapeXml(theme.label)}</text>
+
+    <text font-size="${titleSize}" font-weight="750" fill="#102f36">${titleTspans}</text>
+
+    <line x1="674" y1="472" x2="1092" y2="472" stroke="${theme.accent}" stroke-width="4" stroke-linecap="round" opacity="0.72"/>
+    <text x="1092" y="518" font-size="23" font-weight="500" fill="#31595b">معلومة سريعة • قراءة عربية واضحة • منصة روافد</text>
   </g>
-  <text x="1092" y="548" font-family="Noto Sans, sans-serif" font-size="20" font-weight="500" fill="#4f7172" text-anchor="end">healthrenewal.org</text>
+
+  <text x="1092" y="558" font-family="Noto Sans, sans-serif" font-size="19" font-weight="600" fill="#4f7172" text-anchor="end">healthrenewal.org</text>
 </svg>`;
 }
 
 async function createCard(item) {
   const temp = join(TMP_ROOT, item.slug);
+  const theme = topicProfile(item.title);
   await mkdir(temp, { recursive: true });
   const svgPath = join(temp, 'card.svg');
   const og = join(OG_DIR, `${item.slug}.png`);
@@ -187,7 +301,14 @@ async function createCard(item) {
 
   const [ogStat, cardStat] = await Promise.all([stat(og), stat(card)]);
   if (!ogStat.size || !cardStat.size) throw new Error(`Generated empty card asset for ${item.slug}.`);
-  return { slug: item.slug, title: item.title, og: `/quick-info/og/${item.slug}.png`, card: `/quick-info/cards/${item.slug}.webp` };
+  return {
+    slug: item.slug,
+    title: item.title,
+    topic: theme.id,
+    topicLabel: theme.label,
+    og: `/quick-info/og/${item.slug}.png`,
+    card: `/quick-info/cards/${item.slug}.webp`,
+  };
 }
 
 async function main() {
@@ -213,9 +334,9 @@ async function main() {
     }
   }
 
-  await writeFile(MANIFEST_PATH, `${JSON.stringify({ version: 2, generatedAt: new Date().toISOString(), count: manifest.length, items: manifest }, null, 2)}\n`, 'utf8');
+  await writeFile(MANIFEST_PATH, `${JSON.stringify({ version: 3, generatedAt: new Date().toISOString(), count: manifest.length, items: manifest }, null, 2)}\n`, 'utf8');
   await rm(TMP_ROOT, { recursive: true, force: true });
-  console.log(`[quick-info-cards] ready: ${manifest.length} static RTL cards; one Supabase REST read, zero runtime image API calls.`);
+  console.log(`[quick-info-cards] ready: ${manifest.length} topic-aware static RTL cards; one Supabase REST read, zero runtime image API calls.`);
 }
 
 main().catch((error) => {
