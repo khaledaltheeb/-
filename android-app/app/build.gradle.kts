@@ -62,5 +62,10 @@ dependencies {
     implementation("com.google.android.material:material:1.14.0")
     implementation("androidx.work:work-runtime:2.11.2")
     compileOnly("com.google.code.findbugs:jsr305:3.0.2")
+
     testImplementation("junit:junit:4.13.2")
+    // Android's local JVM provides non-functional framework stubs for org.json.
+    // Use the reference implementation so serialization/parser unit tests execute
+    // the same JSON behavior that is available on real Android devices.
+    testImplementation("org.json:json:20240303")
 }
