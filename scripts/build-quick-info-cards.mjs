@@ -35,26 +35,19 @@ function commandWorks(command, probeArgs) {
 function selectImageMagickCommand() {
   if (commandWorks('magick', ['-version'])) return 'magick';
   if (commandWorks('convert', ['-version'])) return 'convert';
-  failOrSkip('ImageMagick is required for deterministic static card generation.');
+  failOrSkip('ImageMagick is required for deterministic static WebP generation.');
   return '';
 }
 
-function findFont(family) {
-  const result = commandResult('fc-match', ['-f', '%{file}', family]);
-  if (result.error || result.status !== 0 || !result.stdout.trim()) {
-    failOrSkip(`A fontconfig font matching ${family} is unavailable.`);
-  }
-  return result.stdout.trim();
-}
-
-function runImage(args) {
-  const result = spawnSync(IMAGE_COMMAND, args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+function run(command, args) {
+  const result = spawnSync(command, args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
   if (result.error || result.status !== 0) {
-    throw new Error(`ImageMagick failed: ${result.stderr || result.error?.message || 'unknown error'}`);
+    throw new Error(`${command} failed: ${result.stderr || result.error?.message || 'unknown error'}`);
   }
+  return result;
 }
 
-function escapePango(value) {
+function escapeXml(value) {
   return String(value)
     .replaceAll('&', '&amp;')
     .replaceAll('<', '&lt;')
@@ -81,6 +74,40 @@ function routeSlug(contentSlug) {
   return /^[a-z0-9][a-z0-9-]*$/.test(slug) ? slug : '';
 }
 
+function wrapArabicTitle(title, maxChars = 28, maxLines = 3) {
+  const words = String(title || '').trim().split(/\s+/u).filter(Boolean);
+  const lines = [];
+  let current = '';
+
+  for (const word of words) {
+    const candidate = current ? `${current} ${word}` : word;
+    if (candidate.length <= maxChars || !current) {
+      current = candidate;
+      continue;
+    }
+    lines.push(current);
+    current = word;
+  }
+  if (current) lines.push(current);
+
+  if (lines.length <= maxLines) return lines;
+
+  const balanced = [];
+  const target = Math.ceil(String(title).length / maxLines);
+  current = '';
+  for (const word of words) {
+    const candidate = current ? `${current} ${word}` : word;
+    if (balanced.length < maxLines - 1 && current && candidate.length > Math.max(target, maxChars)) {
+      balanced.push(current);
+      current = word;
+    } else {
+      current = candidate;
+    }
+  }
+  if (current) balanced.push(current);
+  return balanced.slice(0, maxLines);
+}
+
 async function loadPublishedQuickInfo() {
   if (!SUPABASE_URL || !SUPABASE_KEY) failOrSkip('Supabase public build credentials are required.');
   const url = new URL(`${SUPABASE_URL}/rest/v1/content`);
@@ -99,9 +126,7 @@ async function loadPublishedQuickInfo() {
       Accept: 'application/json',
     },
   });
-  if (!response.ok) {
-    throw new Error(`Quick Info build query failed (${response.status}): ${await response.text()}`);
-  }
+  if (!response.ok) throw new Error(`Quick Info build query failed (${response.status}): ${await response.text()}`);
   const rows = await response.json();
   if (!Array.isArray(rows)) throw new Error('Quick Info build query returned a non-array payload.');
 
@@ -117,68 +142,48 @@ async function loadPublishedQuickInfo() {
   return items;
 }
 
-function renderPangoLayer({ text, width, height, pointSize, font, color, output }) {
-  runImage([
-    '-background', 'none',
-    '-fill', color,
-    '-font', font,
-    '-pointsize', String(pointSize),
-    '-gravity', 'east',
-    '-size', `${width}x${height}`,
-    `pango:<span foreground="${color}">${escapePango(text)}</span>`,
-    output,
-  ]);
+function buildSvg(title) {
+  const titleLines = wrapArabicTitle(title);
+  const titleSize = title.length > 67 ? 44 : title.length > 56 ? 47 : 51;
+  const titleStartY = titleLines.length === 1 ? 330 : titleLines.length === 2 ? 292 : 258;
+  const lineHeight = 72;
+  const titleTspans = titleLines.map((line, index) => (
+    `<tspan x="1092" y="${titleStartY + index * lineHeight}">${escapeXml(line)}</tspan>`
+  )).join('');
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" xml:lang="ar">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f4faf8"/>
+      <stop offset="1" stop-color="#f8f6ed"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <circle cx="1110" cy="60" r="160" fill="#e3f1ef"/>
+  <circle cx="120" cy="590" r="160" fill="#f3f2e8"/>
+  <rect x="64" y="54" width="1072" height="522" rx="34" fill="#ffffff" stroke="#d8e8e5" stroke-width="1"/>
+
+  <g font-family="Noto Sans Arabic, Noto Sans, sans-serif" direction="rtl" unicode-bidi="plaintext" text-anchor="end">
+    <text x="1092" y="126" font-size="40" font-weight="700" fill="#123b3c">روافد</text>
+    <text x="1092" y="164" font-size="20" font-weight="500" fill="#36545a">منصة المعرفة العربية الموثوقة</text>
+    <text font-size="${titleSize}" font-weight="700" fill="#102f36">${titleTspans}</text>
+    <text x="1092" y="500" font-size="24" font-weight="500" fill="#31595b">معلومة سريعة · قراءة عربية واضحة · منصة روافد</text>
+  </g>
+  <text x="1092" y="548" font-family="Noto Sans, sans-serif" font-size="20" font-weight="500" fill="#4f7172" text-anchor="end">healthrenewal.org</text>
+</svg>`;
 }
 
-async function createCard(item, fonts) {
+async function createCard(item) {
   const temp = join(TMP_ROOT, item.slug);
   await mkdir(temp, { recursive: true });
-  const base = join(temp, 'base.png');
-  const title = join(temp, 'title.png');
-  const brand = join(temp, 'brand.png');
-  const subtitle = join(temp, 'subtitle.png');
-  const context = join(temp, 'context.png');
-  const site = join(temp, 'site.png');
+  const svgPath = join(temp, 'card.svg');
   const og = join(OG_DIR, `${item.slug}.png`);
   const card = join(CARD_DIR, `${item.slug}.webp`);
+  await writeFile(svgPath, buildSvg(item.title), 'utf8');
 
-  runImage([
-    '-size', `${CARD_WIDTH}x${CARD_HEIGHT}`,
-    'xc:#f4faf8',
-    '-fill', '#e3f1ef', '-draw', 'circle 1110,60 1270,60',
-    '-fill', '#f3f2e8', '-draw', 'circle 120,590 280,590',
-    '-fill', '#ffffff', '-stroke', '#d8e8e5', '-strokewidth', '1',
-    '-draw', 'roundrectangle 64,54 1136,576 34,34',
-    base,
-  ]);
-
-  const titleSize = item.title.length > 67 ? 42 : item.title.length > 56 ? 45 : 49;
-  renderPangoLayer({ text: item.title, width: 984, height: 235, pointSize: titleSize, font: fonts.arabicBold, color: '#102f36', output: title });
-  renderPangoLayer({ text: 'روافد', width: 260, height: 64, pointSize: 37, font: fonts.arabicBold, color: '#123b3c', output: brand });
-  renderPangoLayer({ text: 'منصة المعرفة العربية الموثوقة', width: 360, height: 45, pointSize: 18, font: fonts.arabicRegular, color: '#36545a', output: subtitle });
-  renderPangoLayer({ text: 'معلومة سريعة · قراءة عربية واضحة · منصة روافد', width: 760, height: 54, pointSize: 22, font: fonts.arabicRegular, color: '#31595b', output: context });
-
-  runImage([
-    '-background', 'none', '-fill', '#4f7172', '-font', fonts.latinRegular,
-    '-pointsize', '19', '-gravity', 'east', '-size', '300x42', 'label:healthrenewal.org', site,
-  ]);
-
-  runImage([
-    base,
-    title, '-gravity', 'northeast', '-geometry', '+108+222', '-composite',
-    brand, '-gravity', 'northeast', '-geometry', '+108+72', '-composite',
-    subtitle, '-gravity', 'northeast', '-geometry', '+108+128', '-composite',
-    context, '-gravity', 'southeast', '-geometry', '+108+91', '-composite',
-    site, '-gravity', 'southeast', '-geometry', '+108+48', '-composite',
-    '-strip', '-quality', '92', og,
-  ]);
-
-  runImage([
-    og,
-    '-resize', `${LIST_WIDTH}x${LIST_HEIGHT}!`,
-    '-strip', '-quality', '82',
-    card,
-  ]);
+  run('rsvg-convert', ['--width', String(CARD_WIDTH), '--height', String(CARD_HEIGHT), '--format', 'png', '--output', og, svgPath]);
+  run(IMAGE_COMMAND, [og, '-resize', `${LIST_WIDTH}x${LIST_HEIGHT}!`, '-strip', '-quality', '82', card]);
 
   const [ogStat, cardStat] = await Promise.all([stat(og), stat(card)]);
   if (!ogStat.size || !cardStat.size) throw new Error(`Generated empty card asset for ${item.slug}.`);
@@ -187,14 +192,12 @@ async function createCard(item, fonts) {
 
 async function main() {
   IMAGE_COMMAND = selectImageMagickCommand();
-  if (!commandWorks('fc-match', ['Noto Sans Arabic'])) failOrSkip('fontconfig is required for deterministic Arabic rendering.');
-  const fonts = {
-    arabicRegular: findFont('Noto Sans Arabic'),
-    arabicBold: findFont('Noto Sans Arabic:style=Bold'),
-    latinRegular: findFont('Noto Sans'),
-  };
-  const items = await loadPublishedQuickInfo();
+  if (!commandWorks('rsvg-convert', ['--version'])) failOrSkip('librsvg rsvg-convert is required for deterministic Arabic rasterization.');
+  if (!commandWorks('fc-match', ['Noto Sans Arabic'])) failOrSkip('fontconfig with Noto Sans Arabic is required.');
+  const fontCheck = commandResult('fc-match', ['-f', '%{family}', 'Noto Sans Arabic']);
+  if (!/Noto Sans Arabic/i.test(fontCheck.stdout || '')) failOrSkip('Noto Sans Arabic was not resolved by fontconfig.');
 
+  const items = await loadPublishedQuickInfo();
   await rm(CARD_DIR, { recursive: true, force: true });
   await rm(OG_DIR, { recursive: true, force: true });
   await rm(TMP_ROOT, { recursive: true, force: true });
@@ -204,13 +207,13 @@ async function main() {
 
   const manifest = [];
   for (const [index, item] of items.entries()) {
-    manifest.push(await createCard(item, fonts));
+    manifest.push(await createCard(item));
     if ((index + 1) % 25 === 0 || index + 1 === items.length) {
       console.log(`[quick-info-cards] generated ${index + 1}/${items.length}`);
     }
   }
 
-  await writeFile(MANIFEST_PATH, `${JSON.stringify({ version: 1, generatedAt: new Date().toISOString(), count: manifest.length, items: manifest }, null, 2)}\n`, 'utf8');
+  await writeFile(MANIFEST_PATH, `${JSON.stringify({ version: 2, generatedAt: new Date().toISOString(), count: manifest.length, items: manifest }, null, 2)}\n`, 'utf8');
   await rm(TMP_ROOT, { recursive: true, force: true });
   console.log(`[quick-info-cards] ready: ${manifest.length} static RTL cards; one Supabase REST read, zero runtime image API calls.`);
 }
