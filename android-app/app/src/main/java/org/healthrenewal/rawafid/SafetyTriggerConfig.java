@@ -9,6 +9,8 @@ public final class SafetyTriggerConfig {
     public static final String PATTERN_VOLUME_UP="volume_up";
     public static final String PATTERN_VOLUME_DOWN="volume_down";
     public static final String PATTERN_ALTERNATE="alternate";
+    /** Two different volume keys pressed within a deliberately short interval. */
+    public static final String PATTERN_VOLUME_CHORD="volume_chord";
 
     public static final String ACTION_CARD="card";
     public static final String ACTION_CENTER="center";
@@ -19,6 +21,7 @@ public final class SafetyTriggerConfig {
     public static final int MIN_WINDOW_MS=800;
     public static final int MAX_WINDOW_MS=5000;
     public static final int DEFAULT_WINDOW_MS=2200;
+    public static final int CHORD_WINDOW_MS=650;
 
     private SafetyTriggerConfig(){}
 
@@ -35,7 +38,7 @@ public final class SafetyTriggerConfig {
     }
 
     public static String normalizePattern(String pattern){
-        if(PATTERN_VOLUME_DOWN.equals(pattern)||PATTERN_ALTERNATE.equals(pattern)) return pattern;
+        if(PATTERN_VOLUME_DOWN.equals(pattern)||PATTERN_ALTERNATE.equals(pattern)||PATTERN_VOLUME_CHORD.equals(pattern)) return pattern;
         return PATTERN_VOLUME_UP;
     }
 
@@ -50,9 +53,10 @@ public final class SafetyTriggerConfig {
      */
     public static boolean matches(List<Integer> keyCodes,String pattern,int requiredPresses){
         if(keyCodes==null) return false;
+        String normalized=normalizePattern(pattern);
+        if(PATTERN_VOLUME_CHORD.equals(normalized)) return false; // Chords require timing; see matchesChord().
         int presses=clampPresses(requiredPresses);
         if(keyCodes.size()<presses) return false;
-        String normalized=normalizePattern(pattern);
         int start=keyCodes.size()-presses;
         if(PATTERN_VOLUME_UP.equals(normalized)){
             for(int i=start;i<keyCodes.size();i++) if(keyCodes.get(i)!=KeyEvent.KEYCODE_VOLUME_UP) return false;
@@ -67,6 +71,14 @@ public final class SafetyTriggerConfig {
         return true;
     }
 
+    public static boolean matchesChord(int previousKey,int currentKey,long deltaMs){
+        return supportedKey(previousKey)
+                && supportedKey(currentKey)
+                && previousKey!=currentKey
+                && deltaMs>=0L
+                && deltaMs<=CHORD_WINDOW_MS;
+    }
+
     public static List<Integer> tail(List<Integer> values,int max){
         ArrayList<Integer> out=new ArrayList<>();
         if(values==null||max<=0) return out;
@@ -79,6 +91,7 @@ public final class SafetyTriggerConfig {
         String normalized=normalizePattern(pattern);
         if(PATTERN_VOLUME_DOWN.equals(normalized)) return "خفض الصوت";
         if(PATTERN_ALTERNATE.equals(normalized)) return "رفع وخفض الصوت بالتبادل";
+        if(PATTERN_VOLUME_CHORD.equals(normalized)) return "رفع + خفض الصوت معًا";
         return "رفع الصوت";
     }
 }
