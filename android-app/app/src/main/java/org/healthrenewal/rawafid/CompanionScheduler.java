@@ -1,10 +1,13 @@
 package org.healthrenewal.rawafid;
 
+import android.Manifest;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Build;
+import androidx.core.content.ContextCompat;
 import java.time.ZonedDateTime;
 
 public final class CompanionScheduler {
@@ -22,7 +25,7 @@ public final class CompanionScheduler {
 
         PendingIntent pending=pendingIntent(app);
         alarm.cancel(pending);
-        if(!prefs.isCompanionEnabled()) return;
+        if(!prefs.isCompanionEnabled() || !hasNotificationPermission(app)) return;
 
         long triggerAt=CompanionSchedulePlanner.nextTriggerMillis(
                 true,
@@ -44,6 +47,10 @@ public final class CompanionScheduler {
         Context app=context.getApplicationContext();
         AlarmManager alarm=(AlarmManager)app.getSystemService(Context.ALARM_SERVICE);
         if(alarm!=null) alarm.cancel(pendingIntent(app));
+    }
+
+    public static boolean hasNotificationPermission(Context context){
+        return Build.VERSION.SDK_INT<33 || ContextCompat.checkSelfPermission(context,Manifest.permission.POST_NOTIFICATIONS)==PackageManager.PERMISSION_GRANTED;
     }
 
     private static PendingIntent pendingIntent(Context context){
