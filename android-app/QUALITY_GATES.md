@@ -45,6 +45,9 @@ Test at minimum:
 - Doze/background scheduling behavior
 - process death/state restoration
 - screen rotation/resizing
+- Native app chrome respects Android status/navigation-bar insets and never overlaps system UI.
+- Embedded pages do not expose a second fixed bottom navigation when the native app navigation is present.
+- Light and reading-night surfaces maintain readable foreground, hint, placeholder, field and dialog contrast.
 
 ## Functional regression gates
 
