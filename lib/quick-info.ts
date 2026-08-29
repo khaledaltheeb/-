@@ -68,14 +68,29 @@ function asString(value: unknown) {
   return typeof value === 'string' ? value.trim() : '';
 }
 
-export function quickInfoCardPath(title: string) {
-  const safeTitle = asString(title) || 'معلومات سريعة';
-  const context = 'معلومة سريعة · قراءة عربية واضحة · منصة روافد';
-  return `/seo-card?title=${encodeURIComponent(safeTitle)}&context=${encodeURIComponent(context)}`;
+function safeRouteSlug(value: string) {
+  const slug = asString(value);
+  return /^[a-z0-9][a-z0-9-]*$/.test(slug) ? slug : '';
 }
 
-export function quickInfoCardUrl(title: string) {
-  return `${SITE_URL}${quickInfoCardPath(title)}`;
+export function quickInfoCardPath(routeSlug: string) {
+  const slug = safeRouteSlug(routeSlug);
+  return slug ? `/quick-info/cards/${slug}.webp` : '';
+}
+
+export function quickInfoOgPath(routeSlug: string) {
+  const slug = safeRouteSlug(routeSlug);
+  return slug ? `/quick-info/og/${slug}.png` : '';
+}
+
+export function quickInfoCardUrl(routeSlug: string) {
+  const path = quickInfoCardPath(routeSlug);
+  return path ? `${SITE_URL}${path}` : '';
+}
+
+export function quickInfoOgUrl(routeSlug: string) {
+  const path = quickInfoOgPath(routeSlug);
+  return path ? `${SITE_URL}${path}` : '';
 }
 
 function publicationApproved(schema: unknown): boolean {
@@ -140,11 +155,13 @@ export function quickInfoRouteSlug(contentSlug: string) {
 }
 
 export async function getQuickInfoRecord(routeSlug: string): Promise<QuickInfoRecord | null> {
+  const safeSlug = safeRouteSlug(routeSlug);
+  if (!safeSlug) return null;
   const supabase = await createClient();
   const { data } = await supabase
     .from('content')
     .select('id,slug,title,excerpt,body_json,body_text,content_type,seo_title,seo_description,canonical_url,robots_index,robots_follow,published_at,updated_at,featured_image_url,featured_image_alt,primary_keyword,secondary_keywords,semantic_terms,author_display_name,reviewer_display_name,reviewer_credentials,last_reviewed_at,references_json,medical_disclaimer,schema_json')
-    .eq('slug', quickInfoContentSlug(routeSlug))
+    .eq('slug', quickInfoContentSlug(safeSlug))
     .eq('status', 'published')
     .lte('published_at', new Date().toISOString())
     .maybeSingle();
@@ -152,13 +169,12 @@ export async function getQuickInfoRecord(routeSlug: string): Promise<QuickInfoRe
   const record = data as QuickInfoRecord | null;
   if (!record) return null;
   if (!publicationApproved(record.schema_json)) return null;
-  const expectedCanonical = `/quick-info/${routeSlug}/`;
+  const expectedCanonical = `/quick-info/${safeSlug}/`;
   if (record.canonical_url && record.canonical_url !== expectedCanonical) return null;
-  const featuredImage = quickInfoCardUrl(record.title);
   return {
     ...record,
     body_json: sanitizeQuickInfoBodyJson(record.body_json),
-    featured_image_url: featuredImage,
+    featured_image_url: quickInfoOgUrl(safeSlug),
     featured_image_alt: `بطاقة معلومات سريعة: ${record.title}`,
   };
 }
@@ -177,8 +193,8 @@ export async function getQuickInfoItems(limit = 500): Promise<QuickInfoItem[]> {
 
   return (Array.isArray(data) ? data : []).flatMap((row): QuickInfoItem[] => {
     if (!publicationApproved(row.schema_json)) return [];
-    const routeSlug = quickInfoRouteSlug(asString(row.slug));
-    if (!routeSlug || !/^[a-z0-9][a-z0-9-]*$/.test(routeSlug)) return [];
+    const routeSlug = safeRouteSlug(quickInfoRouteSlug(asString(row.slug)));
+    if (!routeSlug) return [];
     const canonicalUrl = asString(row.canonical_url) || `/quick-info/${routeSlug}/`;
     if (canonicalUrl !== `/quick-info/${routeSlug}/`) return [];
     const title = asString(row.title);
@@ -188,7 +204,7 @@ export async function getQuickInfoItems(limit = 500): Promise<QuickInfoItem[]> {
       title,
       excerpt: typeof row.excerpt === 'string' ? row.excerpt : null,
       canonicalUrl,
-      featuredImageUrl: quickInfoCardPath(title),
+      featuredImageUrl: quickInfoCardPath(routeSlug),
       updatedAt: typeof row.updated_at === 'string' ? row.updated_at : null,
     }];
   });
