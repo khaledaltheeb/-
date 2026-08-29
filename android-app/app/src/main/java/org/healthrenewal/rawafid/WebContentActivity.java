@@ -27,7 +27,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
-/** Hardened first-party Rawafid reader with a native library/share/reading toolbar. */
+/** Hardened first-party Rawafid reader; its LTR render surface preserves a stable viewport while document content remains RTL. */
 public final class WebContentActivity extends AppCompatActivity {
     public static final String EXTRA_URL="rawafid_url";
     private static final String FIT_TAG="RawafidFit";
