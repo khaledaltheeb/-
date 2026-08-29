@@ -19,12 +19,14 @@ class RawafidApplication : Application(), Application.ActivityLifecycleCallbacks
         activity is WomenActivity ||
             activity is WomenCalendarActivity ||
             activity is WomenCarePlannerActivity ||
-            activity is WomenVisitPrepActivity
+            activity is WomenVisitPrepActivity ||
+            activity is WomenPrivacySettingsActivity
 
     private fun targetFor(activity: Activity): String = when (activity) {
         is WomenCalendarActivity -> WomenPrivacyGate.TARGET_CALENDAR
         is WomenCarePlannerActivity -> WomenPrivacyGate.TARGET_PLANNER
         is WomenVisitPrepActivity -> WomenPrivacyGate.TARGET_VISIT_PREP
+        is WomenPrivacySettingsActivity -> WomenPrivacyGate.TARGET_SETTINGS
         else -> WomenPrivacyGate.TARGET_COMPANION
     }
 
