@@ -63,14 +63,23 @@ jobs:
             cat /tmp/rawafid-rich-candidate.log >&2 || true
             exit 1
           fi
-      - name: Inspect representative legacy head
+      - name: Inspect representative route heads
         shell: bash
         run: |
           set -euo pipefail
-          curl -fsS http://127.0.0.1:3000/accessibility-statement/ \
-            | sed 's/></>\n</g' \
-            | grep -Ei 'canonical|og:image|twitter:image|og:site_name|healthrenewal\.org' \
-            | head -n 80 || true
+          for route in \
+            /accessibility-statement/ \
+            /accessibility/accessible-participation-travel/ \
+            /addiction/ \
+            /addiction/audiences/family/ \
+            /addiction/protocol-atlas/; do
+            echo "--- HEAD $route ---"
+            curl -fsS "http://127.0.0.1:3000${route}" \
+              | awk 'BEGIN{RS="</head>"} NR==1{print}' \
+              | sed 's/></>\n</g' \
+              | grep -Ei 'canonical|og:url|og:image|twitter:image|og:site_name|healthrenewal\.org|robots' \
+              | head -n 120 || true
+          done
       - name: Run isolated rich discovery gate
         shell: bash
         run: |
