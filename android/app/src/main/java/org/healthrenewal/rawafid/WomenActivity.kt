@@ -197,35 +197,42 @@ class WomenCompanionWorker(context: Context, params: WorkerParameters) : Corouti
     }
 
     private fun adaptiveTags(context: Context): Set<String> {
+        fun withProfile(tags: Set<String>) = tags + WomenProfileStore.adaptiveTags(context)
         val today = LocalDate.now()
         val latest = WomenCompanionStore.entries(context).firstOrNull()
+        val profile = WomenProfileStore.load(context)
 
         if (WomenCompanionStore.careDaysEnabled(context)) {
             when (today.dayOfMonth) {
-                5 -> return setOf("breast", "awareness")
-                12 -> return setOf("selfcare", "routine")
-                19 -> return setOf("sleep", "care")
-                26 -> return setOf("period", "cycle")
+                5 -> if (profile.wantsBreastAwareness) return withProfile(setOf("breast", "awareness"))
+                12 -> if (profile.wantsSelfCareDays) return withProfile(setOf("selfcare", "routine"))
+                19 -> if (profile.wantsSleepSupport) return withProfile(setOf("sleep", "care"))
+                26 -> if (profile.stage == WomenStage.CYCLE || profile.stage == WomenStage.PERIMENOPAUSE || profile.stage == WomenStage.GENERAL) return withProfile(setOf("period", "cycle"))
             }
         }
         if (latest != null) {
-            if (latest.pain >= 6) return setOf("pain", "soothing")
-            if (latest.energy <= 2) return setOf("tired", "care")
-            if (latest.feeling == "قلقة") return setOf("anxious", "soothing")
-            if (latest.need == "تواصل آمن") return setOf("connection", "social")
-            if (latest.bleeding == "heavy") return setOf("period", "cycle")
+            if (latest.pain >= 6) return withProfile(setOf("pain", "soothing"))
+            if (latest.energy <= 2) return withProfile(setOf("tired", "care"))
+            if (latest.feeling == "قلقة" && profile.wantsMentalSupport) return withProfile(setOf("anxious", "soothing"))
+            if (latest.need == "تواصل آمن") return withProfile(setOf("connection", "social"))
+            if (latest.bleeding == "heavy") return withProfile(setOf("period", "cycle"))
         }
-        return when (LocalDateTime.now().hour) {
-            in 6..10 -> setOf("checkin", "warm")
-            in 11..16 -> setOf("care", "motivation")
-            in 17..20 -> setOf("warm", "checkin")
-            else -> setOf("sleep", "soothing")
-        }
+        return withProfile(
+            when (LocalDateTime.now().hour) {
+                in 6..10 -> setOf("checkin", "warm")
+                in 11..16 -> setOf("care", "motivation")
+                in 17..20 -> setOf("warm", "checkin")
+                else -> setOf("sleep", "soothing")
+            }
+        )
     }
 
     private fun titleFor(tags: Set<String>) = when {
         "breast" in tags -> "رفيقة روافد · اليوم وعي بصحة الثدي"
         "selfcare" in tags -> "رفيقة روافد · اليوم وقت العناية بك"
+        "pregnancy" in tags -> "رفيقة روافد · متابعة حملك بلطف"
+        "postpartum" in tags -> "رفيقة روافد · أنتِ أيضًا تحتاجين للرعاية"
+        "perimenopause" in tags -> "رفيقة روافد · راقبي نمطك وراحتك"
         "sleep" in tags -> "رفيقة روافد · لنغلق اليوم بلطف"
         "period" in tags -> "رفيقة روافد · مراجعة نمطك"
         else -> "رفيقة روافد · مررت لأطمئن عليكِ"
@@ -264,6 +271,7 @@ class WomenActivity : ComponentActivity() {
 private fun WomenCompanionScreen(requestNotifications: ((Boolean) -> Unit) -> Unit) {
     val context = LocalContext.current
     var version by remember { mutableIntStateOf(0) }
+    var profile by remember(version) { mutableStateOf(WomenProfileStore.load(context)) }
     val today = LocalDate.now().toString()
     val existing = remember(version) { WomenCompanionStore.entries(context).firstOrNull { it.date == today } }
 
@@ -277,20 +285,27 @@ private fun WomenCompanionScreen(requestNotifications: ((Boolean) -> Unit) -> Un
     var vent by rememberSaveable { mutableStateOf("") }
     var savedMessage by remember { mutableStateOf("") }
 
+    fun updateProfile(next: WomenProfile) {
+        profile = next
+        WomenProfileStore.save(context, next)
+        version++
+    }
+
     val recent = remember(version) { WomenCompanionStore.entries(context).take(7) }
     val reminderEnabled = remember(version) { WomenCompanionStore.reminderEnabled(context) }
     val careDaysEnabled = remember(version) { WomenCompanionStore.careDaysEnabled(context) }
     val reminderMinutes = remember(version) { WomenCompanionStore.reminderMinutes(context) }
     val reminderMax = remember(version) { WomenCompanionStore.reminderMax(context) }
-    val companion = remember(feeling, need, mood, energy, pain, bleeding) {
+    val companion = remember(feeling, need, mood, energy, pain, bleeding, profile) {
         val tags = buildSet {
             add("warm")
-            if (feeling == "قلقة") add("anxious")
+            addAll(profile.stage.tags)
+            if (profile.wantsMentalSupport && feeling == "قلقة") add("anxious")
             if (feeling == "متعبة" || energy <= 2) add("tired")
             if (pain >= 6) add("pain")
             if (need == "تواصل آمن") add("connection")
             if (bleeding != "none") add("period")
-            if (mood <= 2) add("sad")
+            if (mood <= 2 && profile.wantsMentalSupport) add("sad")
         }
         CompanionContentBank.next(context, tags).text
     }
@@ -301,10 +316,34 @@ private fun WomenCompanionScreen(requestNotifications: ((Boolean) -> Unit) -> Un
                 Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text("قطاع المرأة", fontWeight = FontWeight.Bold)
                     Text("رفيقة روافد", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-                    Text("رفيقة رقمية مهتمة تساعدك على ملاحظة يومك والعناية بنفسك دون لوم أو تشخيص.")
+                    Text("رفيقة رقمية مهتمة تتكيف مع مرحلتك واحتياجاتك، من دون افتراض أن كل موضوع يناسب كل امرأة.")
                 }
             }
         }
+
+        item {
+            Card {
+                Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text("خصّصي رفيقتك", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                    Text("تُحفظ هذه الاختيارات على هاتفك وتحدد ما الذي يظهر لك وما الذي تتجنبه الرفيقة.", style = MaterialTheme.typography.bodySmall)
+                    Text("المرحلة الحالية", fontWeight = FontWeight.Bold)
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        items(WomenStage.entries.size) { index ->
+                            val stage = WomenStage.entries[index]
+                            FilterChip(selected = profile.stage == stage, onClick = { updateProfile(profile.copy(stage = stage)) }, label = { Text(stage.label) })
+                        }
+                    }
+                    PreferenceSwitch("دورات غير منتظمة", profile.irregularCycles) { updateProfile(profile.copy(irregularCycles = it)) }
+                    PreferenceSwitch("وعي بصحة الثدي", profile.wantsBreastAwareness) { updateProfile(profile.copy(wantsBreastAwareness = it)) }
+                    PreferenceSwitch("صحة الحوض", profile.wantsPelvicHealth) { updateProfile(profile.copy(wantsPelvicHealth = it)) }
+                    PreferenceSwitch("الدعم النفسي والتلطيف", profile.wantsMentalSupport) { updateProfile(profile.copy(wantsMentalSupport = it)) }
+                    PreferenceSwitch("أيام العناية الشخصية", profile.wantsSelfCareDays) { updateProfile(profile.copy(wantsSelfCareDays = it)) }
+                    PreferenceSwitch("النوم والطاقة", profile.wantsSleepSupport) { updateProfile(profile.copy(wantsSleepSupport = it)) }
+                    PreferenceSwitch("العلاقات والحدود", profile.wantsRelationshipBoundaries) { updateProfile(profile.copy(wantsRelationshipBoundaries = it)) }
+                }
+            }
+        }
+
         item {
             Card {
                 Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -320,6 +359,7 @@ private fun WomenCompanionScreen(requestNotifications: ((Boolean) -> Unit) -> Un
                 }
             }
         }
+
         item {
             Card {
                 Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -339,6 +379,7 @@ private fun WomenCompanionScreen(requestNotifications: ((Boolean) -> Unit) -> Un
                 }
             }
         }
+
         item {
             Card {
                 Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -350,6 +391,7 @@ private fun WomenCompanionScreen(requestNotifications: ((Boolean) -> Unit) -> Un
                 }
             }
         }
+
         item {
             Card {
                 Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -377,15 +419,19 @@ private fun WomenCompanionScreen(requestNotifications: ((Boolean) -> Unit) -> Un
                 }
             }
         }
-        item {
-            Card {
-                Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text("وعي بصحة الثدي", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                    Text("الهدف معرفة الشكل والإحساس المعتاد لديك والانتباه إلى تغير جديد مثل كتلة، تغير الجلد أو الحلمة، إفراز جديد أو تغير مستمر، ثم التواصل مع مختصة بدل محاولة التشخيص بنفسك.")
-                    Text("الوعي الذاتي لا يستبدل التصوير أو برامج التحري المناسبة للعمر والخطورة.", style = MaterialTheme.typography.bodySmall)
+
+        if (profile.wantsBreastAwareness) {
+            item {
+                Card {
+                    Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Text("وعي بصحة الثدي", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                        Text("الهدف معرفة الشكل والإحساس المعتاد لديك والانتباه إلى تغير جديد مثل كتلة، تغير الجلد أو الحلمة، إفراز جديد أو تغير مستمر، ثم التواصل مع مختصة بدل محاولة التشخيص بنفسك.")
+                        Text("الوعي الذاتي لا يستبدل التصوير أو برامج التحري المناسبة للعمر والخطورة.", style = MaterialTheme.typography.bodySmall)
+                    }
                 }
             }
         }
+
         item {
             Card {
                 Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -398,6 +444,7 @@ private fun WomenCompanionScreen(requestNotifications: ((Boolean) -> Unit) -> Un
                 }
             }
         }
+
         item {
             Card {
                 Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -412,11 +459,20 @@ private fun WomenCompanionScreen(requestNotifications: ((Boolean) -> Unit) -> Un
                 }
             }
         }
+
         item {
             OutlinedButton(onClick = { context.startActivity(Intent(context, MainActivity::class.java).putExtra("destination", "safety")) }, modifier = Modifier.fillMaxWidth()) {
                 Icon(Icons.Default.Security, contentDescription = null); Spacer(Modifier.size(8.dp)); Text("فتح مركز الأمان")
             }
         }
+    }
+}
+
+@Composable
+private fun PreferenceSwitch(label: String, checked: Boolean, onChange: (Boolean) -> Unit) {
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+        Text(label)
+        Switch(checked = checked, onCheckedChange = onChange)
     }
 }
 
