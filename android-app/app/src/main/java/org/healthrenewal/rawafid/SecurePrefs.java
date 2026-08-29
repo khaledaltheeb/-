@@ -25,13 +25,14 @@ public final class SecurePrefs {
     private static final int RECENT_MESSAGE_LIMIT=200;
     private static final int MOOD_HISTORY_LIMIT=180;
 
+    private final Context appContext;
     private final SharedPreferences prefs;
     private final SecretKey secretKey;
 
     public SecurePrefs(Context context) {
         try {
-            Context app=context.getApplicationContext();
-            prefs=app.getSharedPreferences(PREF_FILE,Context.MODE_PRIVATE);
+            appContext=context.getApplicationContext();
+            prefs=appContext.getSharedPreferences(PREF_FILE,Context.MODE_PRIVATE);
             secretKey=getOrCreateKey();
         } catch(Exception e) { throw new IllegalStateException("Secure local storage unavailable",e); }
     }
@@ -118,6 +119,7 @@ public final class SecurePrefs {
         putString("companion_start_hour",Integer.toString(clamp(startHour,0,23)));
         putString("companion_end_hour",Integer.toString(clamp(endHour,0,23)));
         putString("companion_interval_hours",Integer.toString(clamp(intervalHours,1,12)));
+        if(enabled) CompanionScheduler.scheduleNext(appContext); else CompanionScheduler.cancel(appContext);
     }
     public long getCompanionLastAutoSentAt(){ return getLong("companion_last_auto_sent_at",0L); }
     public String getCompanionCounterDay(){ return getString("companion_counter_day",""); }
@@ -176,6 +178,9 @@ public final class SecurePrefs {
     public void removeSymptomEntry(String id){ setSymptomEntries(SymptomJournal.remove(getSymptomEntries(),id)); }
     public void clearSymptomJournal(){ putString("symptom_journal",""); }
 
-    public void clearSensitiveData(){ prefs.edit().clear().apply(); }
+    public void clearSensitiveData(){
+        CompanionScheduler.cancel(appContext);
+        prefs.edit().clear().apply();
+    }
     private static int clamp(int value,int min,int max){ return Math.max(min,Math.min(max,value)); }
 }
