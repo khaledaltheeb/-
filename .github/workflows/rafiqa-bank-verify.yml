@@ -1,0 +1,23 @@
+name: Rafiqa 12K Bank Verify
+
+on:
+  pull_request:
+    paths:
+      - 'android/app/src/main/assets/rafiqa/**'
+      - 'android/app/src/main/java/org/healthrenewal/rawafid/RafiqaAssetBank.kt'
+      - 'android/verify_rafiqa_bank.py'
+      - '.github/workflows/rafiqa-bank-verify.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Verify canonical Rafiqa bank
+        run: python3 android/verify_rafiqa_bank.py
