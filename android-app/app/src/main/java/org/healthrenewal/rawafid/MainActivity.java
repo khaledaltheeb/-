@@ -23,6 +23,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.*;
 import androidx.activity.OnBackPressedCallback;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -97,6 +98,19 @@ public final class MainActivity extends AppCompatActivity {
         super.onNewIntent(intent);
         setIntent(intent);
         handleIntent(intent);
+    }
+
+    @Override public void onRequestPermissionsResult(int requestCode,@NonNull String[] permissions,@NonNull int[] grantResults){
+        super.onRequestPermissionsResult(requestCode,permissions,grantResults);
+        if(requestCode==NOTIFICATION_REQUEST_CODE){
+            if(grantResults.length>0 && grantResults[0]==PackageManager.PERMISSION_GRANTED){
+                CompanionScheduler.scheduleNext(this);
+                Toast.makeText(this,"تم تفعيل إشعارات روافد",Toast.LENGTH_SHORT).show();
+            } else {
+                CompanionScheduler.cancel(this);
+                Toast.makeText(this,"الإشعارات غير مفعلة. يمكنك تغيير ذلك لاحقًا من إعدادات التطبيق.",Toast.LENGTH_LONG).show();
+            }
+        }
     }
 
     @Override protected void onDestroy(){
@@ -429,14 +443,12 @@ public final class MainActivity extends AppCompatActivity {
     private LinkedHashMap<String,String> fetchLiveSectors(){
         LinkedHashMap<String,String> result=new LinkedHashMap<>(); HttpURLConnection con=null;
         try {
-            con=(HttpURLConnection)new URL(SECTOR_CATALOG).openConnection(); con.setConnectTimeout(7000); con.setReadTimeout(10000); con.setInstanceFollowRedirects(true);
-            con.setRequestProperty("Accept","application/json"); con.setRequestProperty("User-Agent","RawafidAndroid/1.0");
-            if(con.getResponseCode()!=200) return result;
-            StringBuilder body=new StringBuilder(); try(BufferedReader r=new BufferedReader(new InputStreamReader(con.getInputStream(),StandardCharsets.UTF_8))){ String line; while((line=r.readLine())!=null) body.append(line); }
-            JSONObject json=new JSONObject(body.toString()); if(!json.optBoolean("ok",false)) return result; JSONArray sectors=json.optJSONArray("sectors"); if(sectors==null) return result;
-            for(int i=0;i<sectors.length();i++){ JSONObject item=sectors.optJSONObject(i); if(item==null) continue; String name=item.optString("name","").trim(); String path=item.optString("path","").trim(); if(!name.isEmpty()&&path.startsWith("/sectors/")) result.put(name,path); }
-        } catch(Exception ignored){ result.clear(); }
-        finally { if(con!=null) con.disconnect(); }
+            con=(HttpURLConnection)new URL(SECTOR_CATALOG).openConnection(); con.setConnectTimeout(8000); con.setReadTimeout(10000); con.setRequestProperty("Accept","application/json");
+            if(con.getResponseCode()<200||con.getResponseCode()>=300) return result;
+            StringBuilder b=new StringBuilder(); try(BufferedReader r=new BufferedReader(new InputStreamReader(con.getInputStream(),StandardCharsets.UTF_8))){ String line; while((line=r.readLine())!=null)b.append(line); }
+            JSONArray a=new JSONObject(b.toString()).optJSONArray("sectors"); if(a==null)return result;
+            for(int i=0;i<a.length();i++){ JSONObject o=a.optJSONObject(i); if(o==null)continue; String name=o.optString("name","").trim(),path=o.optString("path","").trim(); if(!name.isEmpty()&&path.startsWith("/"))result.put(name,path); }
+        } catch(Exception ignored){} finally { if(con!=null)con.disconnect(); }
         return result;
     }
 
@@ -448,53 +460,6 @@ public final class MainActivity extends AppCompatActivity {
         atHome=false;
         WebView w=new WebView(this);
         activeWebView=w;
-
-        LinearLayout webShell=new LinearLayout(this);
-        webShell.setOrientation(LinearLayout.VERTICAL);
-        webShell.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
-        webShell.setBackgroundColor(Color.WHITE);
-        LinearLayout toolbar=new LinearLayout(this);
-        toolbar.setOrientation(LinearLayout.HORIZONTAL);
-        toolbar.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
-        toolbar.setGravity(Gravity.CENTER_VERTICAL);
-        toolbar.setPadding(dp(6),dp(3),dp(6),dp(3));
-        toolbar.setBackgroundColor(bg);
-
-        Button saveButton=compactButton("حفظ",teal);
-        Button libraryButton=compactButton("مكتبتي",Color.rgb(74,91,112));
-        Button shareButton=compactButton("مشاركة",Color.rgb(88,104,92));
-        LinearLayout.LayoutParams actionParams=new LinearLayout.LayoutParams(0,dp(46),1f);
-        actionParams.setMargins(dp(2),0,dp(2),0);
-        saveButton.setLayoutParams(new LinearLayout.LayoutParams(actionParams));
-        libraryButton.setLayoutParams(new LinearLayout.LayoutParams(actionParams));
-        shareButton.setLayoutParams(new LinearLayout.LayoutParams(actionParams));
-        toolbar.addView(saveButton); toolbar.addView(libraryButton); toolbar.addView(shareButton);
-        webShell.addView(toolbar,new LinearLayout.LayoutParams(-1,dp(52)));
-        webShell.addView(w,new LinearLayout.LayoutParams(-1,0,1f));
-
-        final String[] currentPath={rawafidRelativePath(Uri.parse(url))};
-        final String[] currentTitle={"روافد"};
-        updateLibraryButton(saveButton,currentPath[0]);
-        saveButton.setOnClickListener(v->{
-            if(currentPath[0].isEmpty()) return;
-            if(isSavedInLibrary(currentPath[0])){
-                prefs.removeFromLibrary(currentPath[0]);
-                Toast.makeText(this,"تمت الإزالة من مكتبتي",Toast.LENGTH_SHORT).show();
-            } else {
-                prefs.saveToLibrary(currentPath[0],currentTitle[0],true);
-                Toast.makeText(this,"تم الحفظ في مكتبتي",Toast.LENGTH_SHORT).show();
-            }
-            updateLibraryButton(saveButton,currentPath[0]);
-        });
-        libraryButton.setOnClickListener(v->startActivity(new Intent(this,LibraryActivity.class)));
-        shareButton.setOnClickListener(v->{
-            String target=BASE+(currentPath[0].isEmpty()?"/":currentPath[0]);
-            Intent share=new Intent(Intent.ACTION_SEND);
-            share.setType("text/plain");
-            share.putExtra(Intent.EXTRA_TEXT,currentTitle[0]+"\n"+target);
-            startActivity(Intent.createChooser(share,"مشاركة من روافد"));
-        });
-
         WebSettings s=w.getSettings();
         s.setJavaScriptEnabled(true); s.setJavaScriptCanOpenWindowsAutomatically(false); s.setSupportMultipleWindows(false); s.setDomStorageEnabled(true);
         s.setUseWideViewPort(true); s.setLoadWithOverviewMode(true); s.setTextZoom(100); s.setBuiltInZoomControls(true); s.setDisplayZoomControls(false);
@@ -506,11 +471,6 @@ public final class MainActivity extends AppCompatActivity {
             @Override public void onPageFinished(WebView view,String finishedUrl){
                 super.onPageFinished(view,finishedUrl);
                 if(!TrustedUrl.isRawafidHttps(finishedUrl)) return;
-                currentPath[0]=rawafidRelativePath(Uri.parse(finishedUrl));
-                String pageTitle=view.getTitle();
-                currentTitle[0]=(pageTitle==null||pageTitle.trim().isEmpty())?"روافد":pageTitle.trim();
-                updateLibraryButton(saveButton,currentPath[0]);
-                if(!currentPath[0].isEmpty()&&isSavedInLibrary(currentPath[0])) prefs.markLibraryOpened(currentPath[0]);
                 String js="(function(){var m=document.querySelector('meta[name=viewport]');if(!m){m=document.createElement('meta');m.name='viewport';document.head.appendChild(m);}m.setAttribute('content','width=device-width,initial-scale=1,maximum-scale=5,user-scalable=yes');var s=document.getElementById('rawafid-app-fit');if(!s){s=document.createElement('style');s.id='rawafid-app-fit';s.textContent='html{overflow-x:hidden!important}*,*:before,*:after{box-sizing:border-box!important;min-width:0!important}main,article,section,header,footer,nav{max-width:100%!important}img,video,svg,canvas{max-width:100%!important;height:auto!important}p,h1,h2,h3,h4,h5,h6,li{overflow-wrap:anywhere!important}table,pre{display:block!important;max-width:100%!important;overflow-x:auto!important}';document.head.appendChild(s);}requestAnimationFrame(function(){var vw=window.innerWidth||document.documentElement.clientWidth;var sw=Math.max(document.documentElement.scrollWidth,document.body?document.body.scrollWidth:0);if(vw>0&&sw>vw*1.02&&document.body){var z=Math.min(1,vw/sw);document.body.style.zoom=String(z);document.documentElement.style.overflowX='hidden';}});})();";
                 view.evaluateJavascript(js,null);
             }
@@ -521,35 +481,7 @@ public final class MainActivity extends AppCompatActivity {
                 if(request.isForMainFrame() && response.getStatusCode()>=500) runOnUiThread(()->showNetworkError(url));
             }
         });
-        w.loadUrl(url); setContentView(webShell);
-    }
-
-    private String rawafidRelativePath(Uri uri){
-        if(!TrustedUrl.isRawafidHttps(uri)) return "";
-        String path=uri.getEncodedPath();
-        if(path==null||path.isEmpty()) path="/";
-        String query=uri.getEncodedQuery();
-        return query==null?path:path+"?"+query;
-    }
-
-    private boolean isSavedInLibrary(String path){
-        if(path==null||path.isEmpty()) return false;
-        for(LocalLibrary.Item item:prefs.getLibraryItems()) if(path.equals(item.path)) return true;
-        return false;
-    }
-
-    private void updateLibraryButton(Button button,String path){
-        button.setText(isSavedInLibrary(path)?"محفوظ ✓":"حفظ");
-    }
-
-    private Button compactButton(String value,int color){
-        Button b=new Button(this);
-        b.setText(value); b.setTextSize(13); b.setAllCaps(false);
-        b.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
-        b.setTextDirection(View.TEXT_DIRECTION_FIRST_STRONG_RTL);
-        b.setBackgroundColor(color); b.setTextColor(Color.WHITE);
-        b.setMinHeight(0); b.setMinWidth(0); b.setPadding(dp(4),0,dp(4),0);
-        return b;
+        w.loadUrl(url); setContentView(w);
     }
 
     private void showNetworkError(String retryUrl){
