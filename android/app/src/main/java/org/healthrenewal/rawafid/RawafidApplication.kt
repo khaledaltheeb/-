@@ -5,6 +5,7 @@ import android.app.Application
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.content.Intent
 import android.os.Bundle
 import android.view.WindowManager
 
@@ -42,6 +43,11 @@ class RawafidApplication : Application(), Application.ActivityLifecycleCallbacks
         if (WomenPrivacyStore.enabled(activity) && !WomenPrivacyStore.sessionUnlocked(activity)) {
             activity.startActivity(WomenPrivacyGate.intent(activity, targetFor(activity)))
             activity.finish()
+            return
+        }
+
+        if (activity is WomenActivity && !WomenPrivacyStore.setupSeen(activity)) {
+            activity.startActivity(Intent(activity, WomenPrivacySettingsActivity::class.java))
         }
     }
 
