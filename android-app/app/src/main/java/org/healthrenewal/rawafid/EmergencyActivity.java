@@ -19,8 +19,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import com.google.android.material.materialswitch.MaterialSwitch;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,7 +30,7 @@ public final class EmergencyActivity extends AppCompatActivity {
     private SecurePrefs prefs;
     private LinearLayout root;
     private EditText messageInput;
-    private Switch locationSwitch;
+    private MaterialSwitch locationSwitch;
     private LinearLayout contactsContainer;
     private final List<EmergencyPlan.Contact> contacts=new ArrayList<>();
     private int red=Color.rgb(177,45,52),teal=Color.rgb(11,107,103),bg=Color.rgb(250,248,247);
@@ -55,7 +55,7 @@ public final class EmergencyActivity extends AppCompatActivity {
         section("رسالة الطوارئ","اكتب نصًا واضحًا يفهمه من يستلم الرسالة. مثال: أنا مصاب بالزهايمر وقد أحتاج للمساعدة. يرجى الاتصال بعائلتي على الرقم المسجل.");
         messageInput=new EditText(this); messageInput.setMinLines(4); messageInput.setMaxLines(8); messageInput.setText(prefs.getEmergencyMessage()); messageInput.setHint("اكتب رسالة الطوارئ هنا"); rtl(messageInput); root.addView(messageInput,new LinearLayout.LayoutParams(-1,-2));
 
-        locationSwitch=new Switch(this); locationSwitch.setText("إرفاق موقعي الحالي عند استخدام الخطة"); locationSwitch.setChecked(prefs.isEmergencyLocationEnabled()); rtl(locationSwitch); root.addView(locationSwitch);
+        locationSwitch=new MaterialSwitch(this); locationSwitch.setText("إرفاق موقعي الحالي عند استخدام الخطة"); locationSwitch.setChecked(prefs.isEmergencyLocationEnabled()); rtl(locationSwitch); root.addView(locationSwitch);
         root.addView(text("لن يطلب روافد موقعك أثناء التصفح. يُطلب إذن الموقع فقط عندما تستخدم خطة الطوارئ إذا كان هذا الخيار مفعّلًا.",13,false,Color.GRAY));
 
         section("جهات الطوارئ","يمكنك إضافة أكثر من شخص وأكثر من وسيلة تواصل لكل شخص. أدخل أرقام الهاتف بصيغة دولية عند استخدام WhatsApp مثل 9627XXXXXXXX.");
@@ -169,8 +169,12 @@ public final class EmergencyActivity extends AppCompatActivity {
     private void sms(String phone,String message){ Intent i=new Intent(Intent.ACTION_SENDTO,Uri.parse("smsto:"+Uri.encode(phone))); i.putExtra("sms_body",message); open(i); }
     private void whatsapp(String phone,String message){
         String number=EmergencyPlan.whatsappNumber(phone); if(number.isEmpty()) return;
-        String encoded=URLEncoder.encode(message,StandardCharsets.UTF_8).replace("+","%20");
-        open(new Intent(Intent.ACTION_VIEW,Uri.parse("https://wa.me/"+number+"?text="+encoded)));
+        try {
+            String encoded=URLEncoder.encode(message,"UTF-8").replace("+","%20");
+            open(new Intent(Intent.ACTION_VIEW,Uri.parse("https://wa.me/"+number+"?text="+encoded)));
+        } catch(java.io.UnsupportedEncodingException ignored){
+            Toast.makeText(this,"تعذر تجهيز رسالة WhatsApp على هذا الجهاز",Toast.LENGTH_LONG).show();
+        }
     }
     private void email(String email,String message){
         Uri uri=Uri.parse("mailto:"+Uri.encode(email)+"?subject="+Uri.encode("رسالة طوارئ من روافد")+"&body="+Uri.encode(message)); open(new Intent(Intent.ACTION_SENDTO,uri));
