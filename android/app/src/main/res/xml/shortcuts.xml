@@ -4,12 +4,11 @@
         android:shortcutId="women_privacy"
         android:enabled="true"
         android:icon="@drawable/ic_launcher"
-        android:shortcutShortLabel="خصوصية المرأة"
-        android:shortcutLongLabel="خصوصية قطاع المرأة">
+        android:shortcutShortLabel="@string/women_privacy_shortcut_short"
+        android:shortcutLongLabel="@string/women_privacy_shortcut_long">
         <intent
             android:action="android.intent.action.VIEW"
             android:targetPackage="org.healthrenewal.rawafid"
             android:targetClass="org.healthrenewal.rawafid.WomenPrivacySettingsActivity" />
-        <categories android:name="android.shortcut.conversation" />
     </shortcut>
 </shortcuts>
