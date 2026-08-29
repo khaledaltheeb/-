@@ -30,7 +30,9 @@ requireMatch('proxy', files.proxy, /'\/quick-info\/cards'/, 'card route must be 
 requireMatch('proxy', files.proxy, /'\/quick-info\/og'/, 'OpenGraph route must be excluded from Supabase redirect resolution.');
 requireMatch('proxy', files.proxy, /'\/seo-card'/, 'legacy seo-card route must be excluded from Supabase redirect resolution.');
 requireMatch('generator', files.generator, /Noto Sans Arabic/, 'Arabic build font contract missing.');
-requireMatch('generator', files.generator, /pango:/, 'Pango RTL shaping contract missing.');
+requireMatch('generator', files.generator, /rsvg-convert/, 'librsvg rasterization contract missing.');
+requireMatch('generator', files.generator, /direction="rtl"/, 'SVG RTL direction contract missing.');
+requireMatch('generator', files.generator, /text-anchor="end"/, 'right-edge text anchoring contract missing.');
 requireMatch('generator', files.generator, /#102f36/, 'high-contrast title color contract missing.');
 requireMatch('generator', files.generator, /limit', '500'/, 'generator must fetch Quick Info records in one bounded read.');
 
@@ -40,4 +42,4 @@ if (errors.length) {
   process.exit(1);
 }
 
-console.log('Quick Info image contract passed: static assets, RTL shaping, high contrast, middleware bypass, and bounded Supabase build read are enforced.');
+console.log('Quick Info image contract passed: static assets, RTL shaping, right alignment, high contrast, middleware bypass, and bounded Supabase build read are enforced.');
