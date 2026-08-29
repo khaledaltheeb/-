@@ -1,0 +1,25 @@
+name: Wire Rawafid Reader Once
+on:
+  push:
+    branches: ["android/rawafid-app-v1"]
+    paths:
+      - ".github/workflows/android-wire-reader-once.yml"
+permissions:
+  contents: write
+jobs:
+  wire:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: android/rawafid-app-v1
+          fetch-depth: 0
+      - name: Patch MainActivity reader launcher
+        run: python3 scripts/patch_android_reader_launcher.py
+      - name: Commit reader launcher
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add android-app/app/src/main/java/org/healthrenewal/rawafid/MainActivity.java
+          git commit -m "feat(android): route Rawafid pages through native reader"
+          git push origin HEAD:android/rawafid-app-v1
