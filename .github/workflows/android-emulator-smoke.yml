@@ -83,43 +83,12 @@ jobs:
             adb logcat -d -t 700 > "$GITHUB_WORKSPACE/android-emulator-artifacts/companion-notification-logcat.txt"
             if grep -E 'ANR in org\.healthrenewal\.rawafid\.debug|Process: org\.healthrenewal\.rawafid\.debug|Unable to start receiver.*org\.healthrenewal\.rawafid|SecurityException.*org\.healthrenewal\.rawafid' "$GITHUB_WORKSPACE/android-emulator-artifacts/companion-notification-logcat.txt"; then exit 1; fi
 
-            # Open real production content and assert the Chromium RTL viewport itself.
+            # Open real production content and collect Chromium viewport evidence.
             adb shell am start -W -a android.intent.action.VIEW -d 'https://healthrenewal.org/sectors/home/' org.healthrenewal.rawafid.debug
             sleep 12
             adb shell pidof org.healthrenewal.rawafid.debug
             adb exec-out screencap -p > "$GITHUB_WORKSPACE/android-emulator-artifacts/deep-link.png"
             adb logcat -d -t 1600 > "$GITHUB_WORKSPACE/android-emulator-artifacts/deep-link-logcat.txt"
-            if grep -q 'RawafidWeb: main-frame-load-error' "$GITHUB_WORKSPACE/android-emulator-artifacts/deep-link-logcat.txt"; then exit 1; fi
-            python3 - <<'PY'
-            from pathlib import Path
-            import re
-
-            p=Path('android-emulator-artifacts/deep-link-logcat.txt')
-            lines=[line for line in p.read_text(errors='replace').splitlines() if 'RawafidFit' in line and 'metrics=' in line]
-            if not lines:
-                raise SystemExit('Missing Rawafid viewport metrics')
-            match=re.search(r'metrics="?([^"\r\n]+)"?', lines[-1])
-            if not match:
-                raise SystemExit('Malformed Rawafid viewport metrics')
-            parts=match.group(1).split('|')
-            if len(parts) != 13:
-                raise SystemExit(f'Unexpected viewport metric count: {len(parts)} {parts}')
-            vw,client,docw,bodyw,scrollx=map(float,parts[:5])
-            html_dir,body_dir=parts[5],parts[6]
-            vv_left,vv_width,h1_left,h1_right,main_left,main_right=map(float,parts[7:])
-            print('Rawafid viewport:', parts)
-            if vw < 300 or abs(client-vw) > 2:
-                raise SystemExit('Invalid WebView viewport width')
-            if docw > vw+2 or bodyw > vw+2:
-                raise SystemExit('Horizontal DOM overflow detected')
-            if abs(scrollx) > 1 or abs(vv_left) > 1 or abs(vv_width-vw) > 2:
-                raise SystemExit('Visual viewport is horizontally displaced')
-            if html_dir != 'ltr' or body_dir != 'rtl':
-                raise SystemExit('RTL scroll-origin normalization is missing')
-            for name,left,right in [('h1',h1_left,h1_right),('main',main_left,main_right)]:
-                if left < -2 or right > vw+2 or right <= left:
-                    raise SystemExit(f'{name} is clipped: left={left} right={right} viewport={vw}')
-            PY
 
             adb shell pm revoke org.healthrenewal.rawafid.debug android.permission.POST_NOTIFICATIONS || true
             adb shell am force-stop org.healthrenewal.rawafid.debug
@@ -131,6 +100,44 @@ jobs:
             adb shell dumpsys activity exit-info org.healthrenewal.rawafid.debug > "$GITHUB_WORKSPACE/android-emulator-artifacts/exit-info.txt" || true
             adb logcat -d -t 1200 > "$GITHUB_WORKSPACE/android-emulator-artifacts/logcat.txt"
             if grep -E 'ANR in org.healthrenewal.rawafid.debug|Process: org.healthrenewal.rawafid.debug.*FATAL EXCEPTION' "$GITHUB_WORKSPACE/android-emulator-artifacts/logcat.txt"; then exit 1; fi
+      - name: Validate RTL WebView contract
+        run: |
+          set -eu
+          test -s android-emulator-artifacts/deep-link-logcat.txt
+          if grep -q 'RawafidWeb: main-frame-load-error' android-emulator-artifacts/deep-link-logcat.txt; then
+            echo 'Rawafid main-frame load error detected'
+            exit 1
+          fi
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          p=Path('android-emulator-artifacts/deep-link-logcat.txt')
+          lines=[line for line in p.read_text(errors='replace').splitlines() if 'RawafidFit' in line and 'metrics=' in line]
+          if not lines:
+              raise SystemExit('Missing Rawafid viewport metrics')
+          match=re.search(r'metrics="?([^"\r\n]+)"?', lines[-1])
+          if not match:
+              raise SystemExit('Malformed Rawafid viewport metrics')
+          parts=match.group(1).split('|')
+          if len(parts) != 13:
+              raise SystemExit(f'Unexpected viewport metric count: {len(parts)} {parts}')
+          vw,client,docw,bodyw,scrollx=map(float,parts[:5])
+          html_dir,body_dir=parts[5],parts[6]
+          vv_left,vv_width,h1_left,h1_right,main_left,main_right=map(float,parts[7:])
+          print('Rawafid viewport:', parts)
+          if vw < 300 or abs(client-vw) > 2:
+              raise SystemExit('Invalid WebView viewport width')
+          if docw > vw+2 or bodyw > vw+2:
+              raise SystemExit('Horizontal DOM overflow detected')
+          if abs(scrollx) > 1 or abs(vv_left) > 1 or abs(vv_width-vw) > 2:
+              raise SystemExit('Visual viewport is horizontally displaced')
+          if html_dir != 'ltr' or body_dir != 'rtl':
+              raise SystemExit('RTL scroll-origin normalization is missing')
+          for name,left,right in [('h1',h1_left,h1_right),('main',main_left,main_right)]:
+              if left < -2 or right > vw+2 or right <= left:
+                  raise SystemExit(f'{name} is clipped: left={left} right={right} viewport={vw}')
+          PY
       - name: Validate deep-link visual evidence
         run: |
           python3 -m pip install --quiet pillow
