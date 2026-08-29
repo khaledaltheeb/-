@@ -3,7 +3,6 @@ package org.healthrenewal.rawafid;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.View;
@@ -94,8 +93,8 @@ public final class LibraryActivity extends AppCompatActivity {
         remove.setLayoutParams(new LinearLayout.LayoutParams(p));
         open.setOnClickListener(v->{
             prefs.markLibraryOpened(item.path);
-            Intent i=new Intent(Intent.ACTION_VIEW,Uri.parse(BASE+item.path));
-            i.setPackage(getPackageName());
+            Intent i=new Intent(this,WebContentActivity.class);
+            i.putExtra(WebContentActivity.EXTRA_URL,BASE+item.path);
             startActivity(i);
         });
         remove.setOnClickListener(v->{ prefs.removeFromLibrary(item.path); render(); });
