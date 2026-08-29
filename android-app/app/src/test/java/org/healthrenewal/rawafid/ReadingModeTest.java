@@ -33,10 +33,16 @@ public class ReadingModeTest {
         assertFalse(js.contains("line-height:-"));
     }
 
-    @Test public void nightModeUsesFixedLocalPaletteOnly(){
+    @Test public void nightModeUsesFixedReadableLocalPaletteOnly(){
         String js=ReadingMode.webScript(new ReadingMode.Settings(100,155,false,true));
-        assertTrue(js.contains("#121817"));
-        assertTrue(js.contains("brightness(.88)"));
+        assertTrue(js.contains("#101513"));
+        assertTrue(js.contains("#f7faf9"));
+        assertTrue(js.contains("#202a26"));
+        assertTrue(js.contains("#aebbb6"));
+        assertTrue(js.contains("input,textarea,select"));
+        assertTrue(js.contains("input::placeholder,textarea::placeholder"));
+        assertTrue(js.contains("opacity:1!important"));
+        assertTrue(js.contains("brightness(.84)"));
         assertFalse(js.contains("javascript:"));
         assertFalse(js.contains("http://"));
         assertFalse(js.contains("https://"));
