@@ -111,9 +111,9 @@ public final class WebContentActivity extends AppCompatActivity {
 
         webView=new WebView(this);
         webView.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
-        // Diagnostic: DOM, native geometry and page scale are all correct while the
-        // pixels are displaced. Force software rasterization to isolate the Android
-        // WebView hardware-compositor path without changing document layout.
+        // Keep Rawafid's reader on software rasterization: Android WebView's hardware
+        // compositor displaced RTL glyph paint past the physical right edge despite
+        // correct native, DOM and visual-viewport geometry.
         webView.setLayerType(View.LAYER_TYPE_SOFTWARE,null);
         WebSettings s=webView.getSettings();
         s.setJavaScriptEnabled(true);
