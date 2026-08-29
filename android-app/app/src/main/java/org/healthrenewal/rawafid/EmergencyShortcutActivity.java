@@ -39,7 +39,8 @@ public final class EmergencyShortcutActivity extends AppCompatActivity {
     private EditText conditionInput,noteInput;
     private Spinner contactSpinner,patternSpinner,pressSpinner,windowSpinner,actionSpinner;
     private Switch enabledSwitch,immediateSwitch;
-    private TextView serviceState,patternHelp;
+    private TextView serviceState,patternHelp,actionHelp;
+    private Button callPermissionButton;
     private List<EmergencyPlan.Contact> contacts;
     private final int teal=Color.rgb(11,107,103),danger=Color.rgb(154,55,66),ink=Color.rgb(22,33,30),muted=Color.rgb(74,90,85),bg=Color.rgb(246,249,248);
 
@@ -53,14 +54,14 @@ public final class EmergencyShortcutActivity extends AppCompatActivity {
         root.addView(text("اضبط استجابة يمكن تشغيلها من مفاتيح الصوت دون فتح روافد أولًا. الإعدادات محفوظة مشفّرة على الجهاز.",14,false,muted));
 
         infoCard("لماذا لا نستخدم زر التشغيل؟","Android والشركات المصنّعة تحجز زر التشغيل واختصاراته لوظائف النظام، لذلك لا أعتمد عليه كمسار طوارئ يمكن ضمانه على جميع الأجهزة. روافد يستخدم مفاتيح الصوت، مع زر Quick Settings كمسار احتياطي.",Color.rgb(93,78,143));
-        infoCard("الإرسال المباشر وحدوده","يمكن تنفيذ اتصال هاتفي مباشر بعد موافقة المستخدم المسبقة على إذن الاتصال. أما WhatsApp وSMS عبر تطبيقات المستخدم فتتطلب عادة واجهة الإرسال/التأكيد؛ روافد لا يدّعي تجاوز حماية Android أو الإرسال الصامت من حساب WhatsApp الشخصي.",Color.rgb(31,105,138));
+        infoCard("الإرسال المباشر وحدوده","يمكن تنفيذ اتصال هاتفي مباشر بعد موافقة المستخدم المسبقة على إذن الاتصال. أما WhatsApp وSMS عبر تطبيقات المستخدم فتحتاج عادة ضغط الإرسال النهائي؛ روافد يستطيع فتح الجهة والرسالة جاهزتين فورًا لكنه لا يتجاوز حماية Android أو يرسل صامتًا من حسابك.",Color.rgb(31,105,138));
 
         section("بطاقة الحالة","اكتب ما تريد أن يراه من يساعدك بسرعة: مثل نوبة صرع، سكري، نوبة فزع، حساسية شديدة، أو تعليمات قصيرة.");
         conditionInput=input("عنوان الحالة، مثال: نوبة صرع"); conditionInput.setText(prefs.getEmergencyCondition()); root.addView(conditionInput);
         noteInput=input("تعليمات مختصرة، مثال: أبعد الأشياء الخطرة ولا تضع شيئًا في فمي. اتصل بوالدي."); noteInput.setMinLines(3); noteInput.setMaxLines(6); noteInput.setText(prefs.getEmergencyCardNote()); root.addView(noteInput);
 
         contacts=prefs.getEmergencyContacts();
-        section("جهة الطوارئ الأساسية","تستخدم للاتصال المباشر عند اختيار هذا الإجراء.");
+        section("جهة الطوارئ الأساسية","تستخدم للاتصال المباشر أو لفتح رسالة الطوارئ الجاهزة عند اختيار أحد هذه الإجراءات.");
         ArrayList<String> contactLabels=new ArrayList<>();
         if(contacts.isEmpty()) contactLabels.add("لا توجد جهة اتصال — أضفها من مركز الطوارئ");
         else for(EmergencyPlan.Contact c:contacts) contactLabels.add((c.name.isEmpty()?"جهة طوارئ":c.name)+(c.phone.isEmpty()?"":" — "+c.phone));
@@ -83,11 +84,23 @@ public final class EmergencyShortcutActivity extends AppCompatActivity {
         serviceState=text("",13,true,muted); root.addView(serviceState); refreshServiceState();
         Button accessibility=button("تفعيل خدمة اختصار SOS من إعدادات Android",Color.rgb(93,78,143)); accessibility.setOnClickListener(v->confirmAccessibilityDisclosure()); root.addView(accessibility);
 
-        section("ماذا يحدث عند اكتمال الضغطات؟","وضع التأكيد يعرض البطاقة أولًا. الوضع الفوري ينفذ الإجراء الذي اخترته مباشرة.");
+        section("ماذا يحدث عند اكتمال الضغطات؟","وضع التأكيد يعرض البطاقة أولًا. الوضع الفوري ينتقل مباشرة إلى الإجراء الذي اخترته.");
         immediateSwitch=new Switch(this); immediateSwitch.setText("تنفيذ فوري — بدون شاشة تأكيد داخل روافد"); immediateSwitch.setTextSize(16); immediateSwitch.setChecked(prefs.isEmergencyShortcutImmediate()); rtl(immediateSwitch); root.addView(immediateSwitch);
-        String[] actions={"عرض بطاقة الطوارئ فوق الشاشة","فتح مركز الطوارئ","اتصال مباشر بجهة الطوارئ الأساسية"}; actionSpinner=spinner(actions); actionSpinner.setSelection(actionIndex(prefs.getEmergencyShortcutAction())); root.addView(actionSpinner,new LinearLayout.LayoutParams(-1,dp(56)));
-        root.addView(text("عند اختيار الاتصال المباشر، يجب منح إذن الاتصال مرة واحدة مسبقًا. إذا لم يتوفر الإذن أو الرقم، يعود روافد إلى بطاقة الطوارئ بدل الفشل الصامت.",13,false,muted));
-        Button callPermission=button("منح إذن الاتصال المباشر",danger); callPermission.setOnClickListener(v->requestCallPermission()); root.addView(callPermission);
+        String[] actions={
+                "عرض بطاقة الطوارئ فوق الشاشة",
+                "فتح مركز الطوارئ",
+                "اتصال مباشر بجهة الطوارئ الأساسية",
+                "فتح SMS برسالة جاهزة إلى جهة الطوارئ",
+                "فتح WhatsApp برسالة جاهزة إلى جهة الطوارئ"
+        };
+        actionSpinner=spinner(actions); actionSpinner.setSelection(actionIndex(prefs.getEmergencyShortcutAction())); root.addView(actionSpinner,new LinearLayout.LayoutParams(-1,dp(56)));
+        actionHelp=text("",13,false,muted); root.addView(actionHelp);
+        callPermissionButton=button("منح إذن الاتصال المباشر",danger); callPermissionButton.setOnClickListener(v->requestCallPermission()); root.addView(callPermissionButton);
+        actionSpinner.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener(){
+            @Override public void onItemSelected(android.widget.AdapterView<?> parent,View view,int position,long id){ updateActionControls(); }
+            @Override public void onNothingSelected(android.widget.AdapterView<?> parent){}
+        });
+        updateActionControls();
 
         section("مسار ثانٍ للطوارئ","يمكن إضافة مربع SOS روافد إلى Quick Settings من لوحة الإعدادات السريعة في Android. هذا يوفر زرًا سريعًا حتى دون فتح التطبيق.");
         Button quickSettings=button("فتح إعدادات النظام السريعة",Color.rgb(70,94,112)); quickSettings.setOnClickListener(v->openQuickSettings()); root.addView(quickSettings);
@@ -109,6 +122,17 @@ public final class EmergencyShortcutActivity extends AppCompatActivity {
                 : "حدد عدد الضغطات والمدة القصوى لإكمال التسلسل. يمكنك مثلًا اختيار 3 أو 4 ضغطات سريعة.");
     }
 
+    private void updateActionControls(){
+        if(actionSpinner==null||actionHelp==null||callPermissionButton==null) return;
+        int action=actionSpinner.getSelectedItemPosition();
+        callPermissionButton.setVisibility(action==2?View.VISIBLE:View.GONE);
+        if(action==0) actionHelp.setText("يعرض الحالة والتعليمات وأرقام الطوارئ في بطاقة واضحة فوق الشاشة. هذا أفضل خيار عندما يحتاج من حول المستخدم إلى فهم حالته فورًا.");
+        else if(action==1) actionHelp.setText("يفتح مركز الطوارئ الكامل لإتاحة الاتصال والرسائل وبقية الخيارات.");
+        else if(action==2) actionHelp.setText("إذا كان «التنفيذ الفوري» مفعّلًا وإذن الاتصال ممنوحًا، يبدأ الاتصال مباشرة. عند غياب الإذن أو الرقم، تظهر بطاقة الطوارئ بدل الفشل الصامت.");
+        else if(action==3) actionHelp.setText("يفتح تطبيق SMS مباشرة على جهة الطوارئ مع نص الحالة والرسالة مجهزًا. Android يترك ضغط زر الإرسال للمستخدم.");
+        else actionHelp.setText("يفتح WhatsApp مباشرة على جهة الطوارئ مع نص الحالة والرسالة مجهزًا. يبقى ضغط زر الإرسال النهائي داخل WhatsApp.");
+    }
+
     private void save(){
         prefs.setEmergencyCondition(conditionInput.getText().toString());
         prefs.setEmergencyCardNote(noteInput.getText().toString());
@@ -125,7 +149,12 @@ public final class EmergencyShortcutActivity extends AppCompatActivity {
         }
         prefs.setEmergencyShortcutEnabled(enabledSwitch.isChecked());
         prefs.setEmergencyShortcutImmediate(immediateSwitch.isChecked());
-        String action=actionSpinner.getSelectedItemPosition()==1?SafetyTriggerConfig.ACTION_CENTER:actionSpinner.getSelectedItemPosition()==2?SafetyTriggerConfig.ACTION_CALL_PRIMARY:SafetyTriggerConfig.ACTION_CARD;
+        int actionPosition=actionSpinner.getSelectedItemPosition();
+        String action=actionPosition==1?SafetyTriggerConfig.ACTION_CENTER
+                :actionPosition==2?SafetyTriggerConfig.ACTION_CALL_PRIMARY
+                :actionPosition==3?SafetyTriggerConfig.ACTION_SMS_PRIMARY
+                :actionPosition==4?SafetyTriggerConfig.ACTION_WHATSAPP_PRIMARY
+                :SafetyTriggerConfig.ACTION_CARD;
         prefs.setEmergencyShortcutAction(action);
         if(Build.VERSION.SDK_INT>=33 && ContextCompat.checkSelfPermission(this,Manifest.permission.POST_NOTIFICATIONS)!=PackageManager.PERMISSION_GRANTED) ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.POST_NOTIFICATIONS},NOTIFICATION_PERMISSION);
         if(enabledSwitch.isChecked()&&!isSafetyServiceEnabled()) Toast.makeText(this,"تم الحفظ. بقي تفعيل خدمة SOS من إعدادات إمكانية الوصول.",Toast.LENGTH_LONG).show();
@@ -172,7 +201,13 @@ public final class EmergencyShortcutActivity extends AppCompatActivity {
 
     private void refreshServiceState(){ boolean on=isSafetyServiceEnabled(); serviceState.setText(on?"خدمة اختصار SOS: مفعّلة":"خدمة اختصار SOS: غير مفعّلة بعد"); serviceState.setTextColor(on?teal:danger); }
     private int patternIndex(String p){ return SafetyTriggerConfig.PATTERN_VOLUME_DOWN.equals(p)?1:SafetyTriggerConfig.PATTERN_ALTERNATE.equals(p)?2:SafetyTriggerConfig.PATTERN_VOLUME_CHORD.equals(p)?3:0; }
-    private int actionIndex(String a){ return SafetyTriggerConfig.ACTION_CENTER.equals(a)?1:SafetyTriggerConfig.ACTION_CALL_PRIMARY.equals(a)?2:0; }
+    private int actionIndex(String a){
+        if(SafetyTriggerConfig.ACTION_CENTER.equals(a)) return 1;
+        if(SafetyTriggerConfig.ACTION_CALL_PRIMARY.equals(a)) return 2;
+        if(SafetyTriggerConfig.ACTION_SMS_PRIMARY.equals(a)) return 3;
+        if(SafetyTriggerConfig.ACTION_WHATSAPP_PRIMARY.equals(a)) return 4;
+        return 0;
+    }
     private int windowIndex(int ms){ if(ms<=1400)return 0; if(ms<=2000)return 1; if(ms<=2600)return 2; if(ms<=3500)return 3; return 4; }
 
     @Override public void onRequestPermissionsResult(int requestCode,@NonNull String[] permissions,@NonNull int[] grantResults){ super.onRequestPermissionsResult(requestCode,permissions,grantResults); if(requestCode==CALL_PERMISSION&&grantResults.length>0) Toast.makeText(this,grantResults[0]==PackageManager.PERMISSION_GRANTED?"تم تفعيل الاتصال المباشر":"لم يتم منح إذن الاتصال",Toast.LENGTH_SHORT).show(); }
