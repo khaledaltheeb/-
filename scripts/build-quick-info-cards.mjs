@@ -15,6 +15,7 @@ const CARD_DIR = join(process.cwd(), 'public', 'quick-info', 'cards');
 const OG_DIR = join(process.cwd(), 'public', 'quick-info', 'og');
 const MANIFEST_PATH = join(process.cwd(), 'public', 'quick-info', 'cards-manifest.json');
 const TMP_ROOT = join(tmpdir(), `rawafid-quick-info-cards-${process.pid}`);
+let IMAGE_COMMAND = '';
 
 function failOrSkip(message) {
   if (REQUIRED) throw new Error(message);
@@ -26,21 +27,28 @@ function commandResult(command, args) {
   return spawnSync(command, args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
 }
 
-function requireCommand(command, probeArgs) {
+function commandWorks(command, probeArgs) {
   const result = commandResult(command, probeArgs);
-  if (result.error || result.status !== 0) failOrSkip(`${command} is required for deterministic static card generation.`);
+  return !result.error && result.status === 0;
+}
+
+function selectImageMagickCommand() {
+  if (commandWorks('magick', ['-version'])) return 'magick';
+  if (commandWorks('convert', ['-version'])) return 'convert';
+  failOrSkip('ImageMagick is required for deterministic static card generation.');
+  return '';
 }
 
 function findFont(family) {
   const result = commandResult('fc-match', ['-f', '%{file}', family]);
   if (result.error || result.status !== 0 || !result.stdout.trim()) {
-    failOrSkip(`Font family ${family} is unavailable.`);
+    failOrSkip(`A fontconfig font matching ${family} is unavailable.`);
   }
   return result.stdout.trim();
 }
 
-function runMagick(args) {
-  const result = spawnSync('magick', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+function runImage(args) {
+  const result = spawnSync(IMAGE_COMMAND, args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
   if (result.error || result.status !== 0) {
     throw new Error(`ImageMagick failed: ${result.stderr || result.error?.message || 'unknown error'}`);
   }
@@ -110,14 +118,15 @@ async function loadPublishedQuickInfo() {
 }
 
 function renderPangoLayer({ text, width, height, pointSize, font, color, output }) {
-  runMagick([
+  const rtlText = `\u202B${text}\u202C`;
+  runImage([
     '-background', 'none',
     '-fill', color,
     '-font', font,
     '-pointsize', String(pointSize),
     '-gravity', 'east',
     '-size', `${width}x${height}`,
-    `pango:<span foreground="${color}">${escapePango(text)}</span>`,
+    `pango:<span foreground="${color}">${escapePango(rtlText)}</span>`,
     output,
   ]);
 }
@@ -134,7 +143,7 @@ async function createCard(item, fonts) {
   const og = join(OG_DIR, `${item.slug}.png`);
   const card = join(CARD_DIR, `${item.slug}.webp`);
 
-  runMagick([
+  runImage([
     '-size', `${CARD_WIDTH}x${CARD_HEIGHT}`,
     'xc:#f4faf8',
     '-fill', '#e3f1ef', '-draw', 'circle 1110,60 1270,60',
@@ -150,12 +159,12 @@ async function createCard(item, fonts) {
   renderPangoLayer({ text: 'منصة المعرفة العربية الموثوقة', width: 360, height: 45, pointSize: 18, font: fonts.arabicRegular, color: '#36545a', output: subtitle });
   renderPangoLayer({ text: 'معلومة سريعة · قراءة عربية واضحة · منصة روافد', width: 760, height: 54, pointSize: 22, font: fonts.arabicRegular, color: '#31595b', output: context });
 
-  runMagick([
+  runImage([
     '-background', 'none', '-fill', '#4f7172', '-font', fonts.latinRegular,
     '-pointsize', '19', '-gravity', 'east', '-size', '300x42', 'label:healthrenewal.org', site,
   ]);
 
-  runMagick([
+  runImage([
     base,
     title, '-gravity', 'northeast', '-geometry', '+108+222', '-composite',
     brand, '-gravity', 'northeast', '-geometry', '+108+72', '-composite',
@@ -165,7 +174,7 @@ async function createCard(item, fonts) {
     '-strip', '-quality', '92', og,
   ]);
 
-  runMagick([
+  runImage([
     og,
     '-resize', `${LIST_WIDTH}x${LIST_HEIGHT}!`,
     '-strip', '-quality', '82',
@@ -178,8 +187,8 @@ async function createCard(item, fonts) {
 }
 
 async function main() {
-  requireCommand('magick', ['-version']);
-  requireCommand('fc-match', ['Noto Sans Arabic']);
+  IMAGE_COMMAND = selectImageMagickCommand();
+  if (!commandWorks('fc-match', ['Noto Sans Arabic'])) failOrSkip('fontconfig is required for deterministic Arabic rendering.');
   const fonts = {
     arabicRegular: findFont('Noto Sans Arabic'),
     arabicBold: findFont('Noto Sans Arabic:style=Bold'),
