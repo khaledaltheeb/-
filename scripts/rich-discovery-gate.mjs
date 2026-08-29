@@ -1,6 +1,9 @@
 import http from 'node:http';
 import https from 'node:https';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
 
+const execFileAsync = promisify(execFile);
 const base = (process.env.SEO_GATE_BASE_URL || process.env.SMOKE_BASE_URL || 'http://127.0.0.1:3000').replace(/\/$/, '');
 const canonicalOrigin = new URL(process.env.NEXT_PUBLIC_SITE_URL || base).origin;
 const concurrency = Math.max(1, Math.min(24, Number(process.env.SEO_GATE_CONCURRENCY || 6)));
@@ -26,6 +29,9 @@ function metaContent(html, key, value) {
 function linkHref(html, rel) {
   for (const tag of html.match(/<link\b[^>]*>/gi) || []) if (attr(tag, 'rel').toLowerCase().split(/\s+/).includes(rel.toLowerCase())) return attr(tag, 'href');
   return '';
+}
+function extractHead(html) {
+  return (html.match(/<head\b[^>]*>([\s\S]*?)<\/head>/i) || [,''])[1];
 }
 function sitemapLocs(xml) {
   return [...xml.matchAll(/<loc>([\s\S]*?)<\/loc>/gi)].map((match) => decodeXml(stripTags(match[1]))).filter(Boolean);
@@ -85,6 +91,29 @@ async function fetchText(url) {
     }
   }
   throw lastError || new Error(`request failed after ${pageAttempts} attempts`);
+}
+async function fetchCrawlerHeadWithCurl(url) {
+  const timeoutSeconds = Math.max(2, Math.ceil(timeoutMs / 1000));
+  let lastError;
+  for (let attempt = 1; attempt <= pageAttempts; attempt += 1) {
+    try {
+      const { stdout } = await execFileAsync('curl', [
+        '-fsSL',
+        '--max-time', String(timeoutSeconds),
+        '-A', crawlerUserAgent,
+        '-H', 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        url,
+      ], { maxBuffer: 16 * 1024 * 1024 });
+      const head = extractHead(stdout);
+      if (head || attempt === pageAttempts) return head;
+    } catch (error) {
+      lastError = error;
+      if (attempt === pageAttempts) break;
+    }
+    await sleep(pageRetryDelayMs * attempt);
+  }
+  if (lastError) throw lastError;
+  return '';
 }
 async function discoverUrls() {
   const index = await fetchText(`${base}/sitemap.xml`);
@@ -212,10 +241,16 @@ async function audit(url) {
     } catch { failures.push(`${url}: invalid canonical (${canonical})`); }
   }
 
-  const head = (html.match(/<head\b[^>]*>([\s\S]*?)<\/head>/i) || [,''])[1];
+  let head = extractHead(html);
   if (/\.workers\.dev/i.test(head)) failures.push(`${url}: temporary workers.dev host leaked into <head>`);
   if (canonicalOrigin === 'https://healthrenewal.org' && !/healthrenewal\.org/i.test(head)) {
-    failures.push(`${url}: production head does not reference healthrenewal.org`);
+    try {
+      head = await fetchCrawlerHeadWithCurl(url);
+    } catch (error) {
+      failures.push(`${url}: crawler-head verification request failed (${error?.message || error})`);
+    }
+    if (/\.workers\.dev/i.test(head)) failures.push(`${url}: temporary workers.dev host leaked into crawler <head>`);
+    if (!/healthrenewal\.org/i.test(head)) failures.push(`${url}: production crawler head does not reference healthrenewal.org`);
   }
 
   const ogImage = metaContent(html, 'property', 'og:image');
