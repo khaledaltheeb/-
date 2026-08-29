@@ -36,8 +36,10 @@ public final class SafetyTriggerConfigTest {
         assertEquals(5000,SafetyTriggerConfig.clampWindowMs(9000));
     }
 
-    @Test public void normalizesDirectCallAction(){
+    @Test public void normalizesShortcutActions(){
         assertEquals(SafetyTriggerConfig.ACTION_CALL_PRIMARY,SafetyTriggerConfig.normalizeAction(SafetyTriggerConfig.ACTION_CALL_PRIMARY));
+        assertEquals(SafetyTriggerConfig.ACTION_SMS_PRIMARY,SafetyTriggerConfig.normalizeAction(SafetyTriggerConfig.ACTION_SMS_PRIMARY));
+        assertEquals(SafetyTriggerConfig.ACTION_WHATSAPP_PRIMARY,SafetyTriggerConfig.normalizeAction(SafetyTriggerConfig.ACTION_WHATSAPP_PRIMARY));
         assertEquals(SafetyTriggerConfig.ACTION_CARD,SafetyTriggerConfig.normalizeAction("unknown"));
     }
 }
