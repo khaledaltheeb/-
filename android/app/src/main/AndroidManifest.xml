@@ -37,11 +37,20 @@
             android:label="تقويم المرأة" />
 
         <activity
+            android:name=".WomenCarePlannerActivity"
+            android:exported="false"
+            android:label="خطة العناية النسائية" />
+
+        <activity
             android:name=".WebActivity"
             android:exported="false" />
 
         <receiver
             android:name=".TreatmentReminderReceiver"
+            android:exported="false" />
+
+        <receiver
+            android:name=".WomenCareReminderReceiver"
             android:exported="false" />
 
         <receiver
