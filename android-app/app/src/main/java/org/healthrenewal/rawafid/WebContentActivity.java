@@ -89,9 +89,6 @@ public final class WebContentActivity extends AppCompatActivity {
     private void render(){
         root=new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
-        // Keep the entire WebView ancestry LTR. Native controls that need Arabic
-        // ordering opt into RTL explicitly below, so Chromium never inherits an
-        // RTL ancestor that can mirror/offset its compositor surface.
         root.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
         root.setBackgroundColor(Color.rgb(248,251,250));
 
@@ -113,18 +110,18 @@ public final class WebContentActivity extends AppCompatActivity {
         root.addView(toolbar,new LinearLayout.LayoutParams(-1,dp(60)));
 
         webView=new WebView(this);
-        // Keep the Android rendering surface LTR. The document content remains RTL.
         webView.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
+        // Diagnostic: DOM, native geometry and page scale are all correct while the
+        // pixels are displaced. Force software rasterization to isolate the Android
+        // WebView hardware-compositor path without changing document layout.
+        webView.setLayerType(View.LAYER_TYPE_SOFTWARE,null);
         WebSettings s=webView.getSettings();
         s.setJavaScriptEnabled(true);
         s.setJavaScriptCanOpenWindowsAutomatically(false);
         s.setSupportMultipleWindows(false);
         s.setDomStorageEnabled(true);
-        // Rawafid pages already declare a device-width viewport. Avoid WebView's
-        // legacy wide-layout viewport so RTL paint uses the same phone-width space
-        // reported by the DOM and visualViewport APIs.
-        s.setUseWideViewPort(false);
-        s.setLoadWithOverviewMode(false);
+        s.setUseWideViewPort(true);
+        s.setLoadWithOverviewMode(true);
         s.setTextZoom(100);
         s.setBuiltInZoomControls(true);
         s.setDisplayZoomControls(false);
@@ -265,7 +262,7 @@ public final class WebContentActivity extends AppCompatActivity {
             int[] window=new int[2];
             webView.getLocationOnScreen(screen);
             webView.getLocationInWindow(window);
-            Log.i(NATIVE_FIT_TAG,"scrollX="+webView.getScrollX()+" width="+webView.getWidth()+" left="+webView.getLeft()+" right="+webView.getRight()+" dir="+webView.getLayoutDirection());
+            Log.i(NATIVE_FIT_TAG,"scrollX="+webView.getScrollX()+" width="+webView.getWidth()+" left="+webView.getLeft()+" right="+webView.getRight()+" dir="+webView.getLayoutDirection()+" layer="+webView.getLayerType());
             Log.i(SCALE_TAG,"nativeScale="+webView.getScale()+" x="+webView.getX()+" translationX="+webView.getTranslationX()+" screenX="+screen[0]+" windowX="+window[0]+" rootDir="+(root==null?-1:root.getLayoutDirection()));
             String scaleJs="(function(){var vv=window.visualViewport;return [window.devicePixelRatio,vv?vv.scale:-1,vv?vv.offsetLeft:-1,vv?vv.width:-1,screen.width,window.innerWidth].join('|');})();";
             webView.evaluateJavascript(scaleJs,value->Log.i(SCALE_TAG,"js="+value));
