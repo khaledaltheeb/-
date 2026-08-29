@@ -8,5 +8,15 @@
             android:name=".CompanionAlarmReceiver"
             android:exported="true"
             tools:replace="android:exported" />
+
+        <!-- Debug-only probe that posts a real Rafiqa notification from a cold process.
+             This receiver does not exist in release builds. -->
+        <receiver
+            android:name=".CompanionTestReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="org.healthrenewal.rawafid.debug.SEND_COMPANION_TEST" />
+            </intent-filter>
+        </receiver>
     </application>
 </manifest>
