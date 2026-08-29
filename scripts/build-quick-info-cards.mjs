@@ -118,7 +118,6 @@ async function loadPublishedQuickInfo() {
 }
 
 function renderPangoLayer({ text, width, height, pointSize, font, color, output }) {
-  const rtlText = `\u202B${text}\u202C`;
   runImage([
     '-background', 'none',
     '-fill', color,
@@ -126,7 +125,7 @@ function renderPangoLayer({ text, width, height, pointSize, font, color, output 
     '-pointsize', String(pointSize),
     '-gravity', 'east',
     '-size', `${width}x${height}`,
-    `pango:<span foreground="${color}">${escapePango(rtlText)}</span>`,
+    `pango:<span foreground="${color}">${escapePango(text)}</span>`,
     output,
   ]);
 }
