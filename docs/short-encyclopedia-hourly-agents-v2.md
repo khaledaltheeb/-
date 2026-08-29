@@ -1,10 +1,10 @@
-# Short Encyclopedia — Hourly Agent Contract v2.1
+# Short Encyclopedia — Hourly Agent Contract v3.0
 
 This contract governs automated publishing for `/sectors/short-encyclopedia`.
 
 ## Global operating rule
 
-The production target is **up to 50 newly published pages per agent per run**. Quality is a hard gate, not a soft preference. A candidate that fails scientific accuracy, source verification, duplicate/cannibalization review, editorial clarity, SEO validation, or post-publication verification must not be published merely to fill the quota. It remains in the backlog for correction or replacement.
+The production target is **up to 150 newly published pages per agent per hourly run**. Quality is a hard gate, not a soft preference. A candidate that fails scientific accuracy, source verification, duplicate/cannibalization review, editorial clarity, SEO validation, or post-publication verification must not be published merely to fill the quota. It remains in the backlog for correction or replacement.
 
 There is **no minimum word-count requirement**. Pages should be only as long as necessary to answer the search intent completely and accurately. Filler, generic prose, artificial expansion, keyword stuffing, and repeated boilerplate are prohibited.
 
@@ -133,4 +133,4 @@ Preferred source classes include WHO, UNICEF, UNESCO, NICE/NHS, CDC/AAP where re
 
 ## Throughput and parallelism
 
-The two agents are independent and may run concurrently. Each should aim to complete 50 passing pages per run. Failed or duplicate candidates do not count as published pages. If fewer than 50 defensible pages can be completed in a run, publish the passing set and retain/replace the rest rather than lowering the quality bar.
+The two agents are independent and may run concurrently once per hour. Each should aim to complete **150 passing pages per run**. Failed, unsupported, weak, or duplicate candidates do not count as published pages. If fewer than 150 defensible pages can be completed in a run, publish the passing set and retain/replace the rest rather than lowering the quality bar. The objective is sustained high throughput without sacrificing scientific integrity or creating SEO cannibalization.
