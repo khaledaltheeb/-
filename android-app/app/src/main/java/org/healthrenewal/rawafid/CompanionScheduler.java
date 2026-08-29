@@ -39,8 +39,8 @@ public final class CompanionScheduler {
                 prefs.getCompanionIntervalHours());
         if(triggerAt<=0L) return;
 
-        if(Build.VERSION.SDK_INT>=23) alarm.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,triggerAt,pending);
-        else alarm.set(AlarmManager.RTC_WAKEUP,triggerAt,pending);
+        // minSdk is 26, so setAndAllowWhileIdle is always available.
+        alarm.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,triggerAt,pending);
     }
 
     public static void cancel(Context context){
