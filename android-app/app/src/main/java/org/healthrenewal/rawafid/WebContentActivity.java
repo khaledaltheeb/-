@@ -33,6 +33,7 @@ public final class WebContentActivity extends AppCompatActivity {
     private static final String FIT_TAG="RawafidFit";
     private static final String TEXT_FIT_TAG="RawafidTextFit";
     private static final String NATIVE_FIT_TAG="RawafidNativeFit";
+    private static final String SCALE_TAG="RawafidScale";
     private static final String WEB_TAG="RawafidWeb";
 
     private final int teal=Color.rgb(11,107,103);
@@ -119,10 +120,10 @@ public final class WebContentActivity extends AppCompatActivity {
         s.setJavaScriptCanOpenWindowsAutomatically(false);
         s.setSupportMultipleWindows(false);
         s.setDomStorageEnabled(true);
-        s.setUseWideViewPort(true);
-        // The site already ships a responsive device-width viewport. Overview mode
-        // can add a second native page-scale pass and displace RTL paint independently
-        // from the DOM/visualViewport coordinates that Chromium reports.
+        // Rawafid pages already declare a device-width viewport. Avoid WebView's
+        // legacy wide-layout viewport so RTL paint uses the same phone-width space
+        // reported by the DOM and visualViewport APIs.
+        s.setUseWideViewPort(false);
         s.setLoadWithOverviewMode(false);
         s.setTextZoom(100);
         s.setBuiltInZoomControls(true);
@@ -260,7 +261,14 @@ public final class WebContentActivity extends AppCompatActivity {
             if(BuildConfig.DEBUG) Log.i(FIT_TAG,"metrics="+value);
         });
         if(BuildConfig.DEBUG){
+            int[] screen=new int[2];
+            int[] window=new int[2];
+            webView.getLocationOnScreen(screen);
+            webView.getLocationInWindow(window);
             Log.i(NATIVE_FIT_TAG,"scrollX="+webView.getScrollX()+" width="+webView.getWidth()+" left="+webView.getLeft()+" right="+webView.getRight()+" dir="+webView.getLayoutDirection());
+            Log.i(SCALE_TAG,"nativeScale="+webView.getScale()+" x="+webView.getX()+" translationX="+webView.getTranslationX()+" screenX="+screen[0]+" windowX="+window[0]+" rootDir="+(root==null?-1:root.getLayoutDirection()));
+            String scaleJs="(function(){var vv=window.visualViewport;return [window.devicePixelRatio,vv?vv.scale:-1,vv?vv.offsetLeft:-1,vv?vv.width:-1,screen.width,window.innerWidth].join('|');})();";
+            webView.evaluateJavascript(scaleJs,value->Log.i(SCALE_TAG,"js="+value));
             String textJs="(function(){"
                     +"var h=document.querySelector('h1');if(!h)return 'NO_H1';"
                     +"var rr=null;try{var range=document.createRange();range.selectNodeContents(h);rr=range.getBoundingClientRect();}catch(e){}"
