@@ -29,7 +29,6 @@ import androidx.core.content.ContextCompat;
 import com.google.android.material.card.MaterialCardView;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 /** User-facing setup for the optional hardware SOS shortcut. */
 public final class EmergencyShortcutActivity extends AppCompatActivity {
@@ -40,7 +39,7 @@ public final class EmergencyShortcutActivity extends AppCompatActivity {
     private EditText conditionInput,noteInput;
     private Spinner contactSpinner,patternSpinner,pressSpinner,windowSpinner,actionSpinner;
     private Switch enabledSwitch,immediateSwitch;
-    private TextView serviceState;
+    private TextView serviceState,patternHelp;
     private List<EmergencyPlan.Contact> contacts;
     private final int teal=Color.rgb(11,107,103),danger=Color.rgb(154,55,66),ink=Color.rgb(22,33,30),muted=Color.rgb(74,90,85),bg=Color.rgb(246,249,248);
 
@@ -53,8 +52,8 @@ public final class EmergencyShortcutActivity extends AppCompatActivity {
         root.addView(text("SOS السريع",28,true,danger));
         root.addView(text("اضبط استجابة يمكن تشغيلها من مفاتيح الصوت دون فتح روافد أولًا. الإعدادات محفوظة مشفّرة على الجهاز.",14,false,muted));
 
-        infoCard("لماذا لا نستخدم زر التشغيل؟","Android يحجز زر التشغيل واختصاراته للنظام والشركة المصنّعة، ولا يوجد مسار موثوق لتطبيق عادي يضمن التقاط ضغطاته على كل جهاز. لذلك يعتمد روافد على مفاتيح الصوت فقط، مع زر Quick Settings كمسار إضافي.",Color.rgb(93,78,143));
-        infoCard("الإرسال المباشر وحدوده","يمكن تنفيذ اتصال هاتفي مباشر بعد موافقة المستخدم المسبقة على إذن الاتصال. أما WhatsApp وSMS عبر تطبيقات المستخدم فتتطلب عادة فتح واجهة الإرسال/التأكيد؛ روافد لا يدّعي تجاوز قيود النظام أو الإرسال الصامت من حساب WhatsApp الشخصي.",Color.rgb(31,105,138));
+        infoCard("لماذا لا نستخدم زر التشغيل؟","Android والشركات المصنّعة تحجز زر التشغيل واختصاراته لوظائف النظام، لذلك لا أعتمد عليه كمسار طوارئ يمكن ضمانه على جميع الأجهزة. روافد يستخدم مفاتيح الصوت، مع زر Quick Settings كمسار احتياطي.",Color.rgb(93,78,143));
+        infoCard("الإرسال المباشر وحدوده","يمكن تنفيذ اتصال هاتفي مباشر بعد موافقة المستخدم المسبقة على إذن الاتصال. أما WhatsApp وSMS عبر تطبيقات المستخدم فتتطلب عادة واجهة الإرسال/التأكيد؛ روافد لا يدّعي تجاوز حماية Android أو الإرسال الصامت من حساب WhatsApp الشخصي.",Color.rgb(31,105,138));
 
         section("بطاقة الحالة","اكتب ما تريد أن يراه من يساعدك بسرعة: مثل نوبة صرع، سكري، نوبة فزع، حساسية شديدة، أو تعليمات قصيرة.");
         conditionInput=input("عنوان الحالة، مثال: نوبة صرع"); conditionInput.setText(prefs.getEmergencyCondition()); root.addView(conditionInput);
@@ -69,13 +68,20 @@ public final class EmergencyShortcutActivity extends AppCompatActivity {
         Button manage=button("إدارة جهات الطوارئ والرسالة",teal); manage.setOnClickListener(v->startActivity(new Intent(this,EmergencyActivity.class))); root.addView(manage);
 
         section("نمط الأزرار","اختر تسلسلًا متعمدًا لتقليل التشغيل بالخطأ. الضغط المطوّل لا يُحتسب؛ كل ضغطة منفصلة فقط.");
-        String[] patterns={"رفع الصوت","خفض الصوت","رفع وخفض الصوت بالتبادل"}; patternSpinner=spinner(patterns); patternSpinner.setSelection(patternIndex(prefs.getEmergencyShortcutPattern())); root.addView(patternSpinner,new LinearLayout.LayoutParams(-1,dp(56)));
+        String[] patterns={"رفع الصوت","خفض الصوت","رفع وخفض الصوت بالتبادل","رفع + خفض الصوت معًا"};
+        patternSpinner=spinner(patterns); patternSpinner.setSelection(patternIndex(prefs.getEmergencyShortcutPattern())); root.addView(patternSpinner,new LinearLayout.LayoutParams(-1,dp(56)));
+        patternHelp=text("",13,false,muted); root.addView(patternHelp);
         String[] presses={"ضغطتان","3 ضغطات","4 ضغطات","5 ضغطات","6 ضغطات"}; pressSpinner=spinner(presses); pressSpinner.setSelection(prefs.getEmergencyShortcutPresses()-2); root.addView(pressSpinner,new LinearLayout.LayoutParams(-1,dp(56)));
         String[] windows={"خلال 1.2 ثانية","خلال 1.8 ثانية","خلال 2.2 ثانية","خلال 3 ثوانٍ","خلال 4 ثوانٍ"}; windowSpinner=spinner(windows); windowSpinner.setSelection(windowIndex(prefs.getEmergencyShortcutWindowMs())); root.addView(windowSpinner,new LinearLayout.LayoutParams(-1,dp(56)));
+        patternSpinner.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener(){
+            @Override public void onItemSelected(android.widget.AdapterView<?> parent,View view,int position,long id){ updatePatternControls(); }
+            @Override public void onNothingSelected(android.widget.AdapterView<?> parent){}
+        });
+        updatePatternControls();
 
         enabledSwitch=new Switch(this); enabledSwitch.setText("تفعيل اختصار مفاتيح الصوت"); enabledSwitch.setTextSize(16); enabledSwitch.setChecked(prefs.isEmergencyShortcutEnabled()); rtl(enabledSwitch); root.addView(enabledSwitch);
         serviceState=text("",13,true,muted); root.addView(serviceState); refreshServiceState();
-        Button accessibility=button("فتح إعدادات إمكانية الوصول لتفعيل الاختصار",Color.rgb(93,78,143)); accessibility.setOnClickListener(v->openAccessibilitySettings()); root.addView(accessibility);
+        Button accessibility=button("تفعيل خدمة اختصار SOS من إعدادات Android",Color.rgb(93,78,143)); accessibility.setOnClickListener(v->confirmAccessibilityDisclosure()); root.addView(accessibility);
 
         section("ماذا يحدث عند اكتمال الضغطات؟","وضع التأكيد يعرض البطاقة أولًا. الوضع الفوري ينفذ الإجراء الذي اخترته مباشرة.");
         immediateSwitch=new Switch(this); immediateSwitch.setText("تنفيذ فوري — بدون شاشة تأكيد داخل روافد"); immediateSwitch.setTextSize(16); immediateSwitch.setChecked(prefs.isEmergencyShortcutImmediate()); rtl(immediateSwitch); root.addView(immediateSwitch);
@@ -93,14 +99,30 @@ public final class EmergencyShortcutActivity extends AppCompatActivity {
         setContentView(scroll);
     }
 
+    private void updatePatternControls(){
+        if(patternSpinner==null||pressSpinner==null||windowSpinner==null||patternHelp==null) return;
+        boolean chord=patternSpinner.getSelectedItemPosition()==3;
+        pressSpinner.setVisibility(chord?View.GONE:View.VISIBLE);
+        windowSpinner.setVisibility(chord?View.GONE:View.VISIBLE);
+        patternHelp.setText(chord
+                ? "يعمل هذا الخيار عندما يستقبل روافد مفتاحي رفع وخفض الصوت بفارق لا يتجاوز 650 مللي ثانية تقريبًا. لا يحتاج عدد ضغطات إضافيًا."
+                : "حدد عدد الضغطات والمدة القصوى لإكمال التسلسل. يمكنك مثلًا اختيار 3 أو 4 ضغطات سريعة.");
+    }
+
     private void save(){
         prefs.setEmergencyCondition(conditionInput.getText().toString());
         prefs.setEmergencyCardNote(noteInput.getText().toString());
         if(!contacts.isEmpty()) prefs.setEmergencyPrimaryContactIndex(contactSpinner.getSelectedItemPosition());
-        String pattern=patternSpinner.getSelectedItemPosition()==1?SafetyTriggerConfig.PATTERN_VOLUME_DOWN:patternSpinner.getSelectedItemPosition()==2?SafetyTriggerConfig.PATTERN_ALTERNATE:SafetyTriggerConfig.PATTERN_VOLUME_UP;
+        int patternPosition=patternSpinner.getSelectedItemPosition();
+        String pattern=patternPosition==1?SafetyTriggerConfig.PATTERN_VOLUME_DOWN
+                :patternPosition==2?SafetyTriggerConfig.PATTERN_ALTERNATE
+                :patternPosition==3?SafetyTriggerConfig.PATTERN_VOLUME_CHORD
+                :SafetyTriggerConfig.PATTERN_VOLUME_UP;
         prefs.setEmergencyShortcutPattern(pattern);
-        prefs.setEmergencyShortcutPresses(pressSpinner.getSelectedItemPosition()+2);
-        int[] windows={1200,1800,2200,3000,4000}; prefs.setEmergencyShortcutWindowMs(windows[windowSpinner.getSelectedItemPosition()]);
+        if(!SafetyTriggerConfig.PATTERN_VOLUME_CHORD.equals(pattern)){
+            prefs.setEmergencyShortcutPresses(pressSpinner.getSelectedItemPosition()+2);
+            int[] windows={1200,1800,2200,3000,4000}; prefs.setEmergencyShortcutWindowMs(windows[windowSpinner.getSelectedItemPosition()]);
+        }
         prefs.setEmergencyShortcutEnabled(enabledSwitch.isChecked());
         prefs.setEmergencyShortcutImmediate(immediateSwitch.isChecked());
         String action=actionSpinner.getSelectedItemPosition()==1?SafetyTriggerConfig.ACTION_CENTER:actionSpinner.getSelectedItemPosition()==2?SafetyTriggerConfig.ACTION_CALL_PRIMARY:SafetyTriggerConfig.ACTION_CARD;
@@ -112,7 +134,21 @@ public final class EmergencyShortcutActivity extends AppCompatActivity {
 
     private void requestCallPermission(){
         if(ContextCompat.checkSelfPermission(this,Manifest.permission.CALL_PHONE)==PackageManager.PERMISSION_GRANTED){ Toast.makeText(this,"إذن الاتصال المباشر مفعّل بالفعل",Toast.LENGTH_SHORT).show(); return; }
-        new AlertDialog.Builder(this).setTitle("السماح بالاتصال المباشر؟").setMessage("يستخدم روافد الإذن فقط إذا اخترت أنت «اتصال مباشر» ضمن SOS. لن يجري التطبيق مكالمات دورية أو مخفية.").setNegativeButton("إلغاء",null).setPositiveButton("متابعة",(d,w)->ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.CALL_PHONE},CALL_PERMISSION)).show();
+        new AlertDialog.Builder(this)
+                .setTitle("السماح بالاتصال المباشر؟")
+                .setMessage("يستخدم روافد الإذن فقط إذا اخترت أنت «اتصال مباشر» ضمن SOS. لن يجري التطبيق مكالمات دورية أو مخفية.")
+                .setNegativeButton("إلغاء",null)
+                .setPositiveButton("متابعة",(d,w)->ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.CALL_PHONE},CALL_PERMISSION))
+                .show();
+    }
+
+    private void confirmAccessibilityDisclosure(){
+        new AlertDialog.Builder(this)
+                .setTitle("تفعيل اختصار مفاتيح الصوت")
+                .setMessage("لتشغيل SOS من مفاتيح الصوت خارج روافد، يحتاج Android إلى تفعيل خدمة إمكانية الوصول «SOS روافد».\n\nالخدمة تستقبل ضغطات مفاتيح رفع/خفض الصوت فقط لمطابقة التسلسل الذي تختاره. لا تقرأ محتوى الشاشة، لا تضغط أزرارًا نيابة عنك، لا تكتب نصوصًا، ولا ترسل بيانات إمكانية الوصول إلى خادم.\n\nبعد موافقتك ستفتح إعدادات Android، والتفعيل النهائي يتم بيدك من هناك.")
+                .setNegativeButton("ليس الآن",null)
+                .setPositiveButton("أوافق وأفتح الإعدادات",(d,w)->openAccessibilitySettings())
+                .show();
     }
 
     private void openAccessibilitySettings(){ try { startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)); } catch(Exception ignored){} }
@@ -135,7 +171,7 @@ public final class EmergencyShortcutActivity extends AppCompatActivity {
     }
 
     private void refreshServiceState(){ boolean on=isSafetyServiceEnabled(); serviceState.setText(on?"خدمة اختصار SOS: مفعّلة":"خدمة اختصار SOS: غير مفعّلة بعد"); serviceState.setTextColor(on?teal:danger); }
-    private int patternIndex(String p){ return SafetyTriggerConfig.PATTERN_VOLUME_DOWN.equals(p)?1:SafetyTriggerConfig.PATTERN_ALTERNATE.equals(p)?2:0; }
+    private int patternIndex(String p){ return SafetyTriggerConfig.PATTERN_VOLUME_DOWN.equals(p)?1:SafetyTriggerConfig.PATTERN_ALTERNATE.equals(p)?2:SafetyTriggerConfig.PATTERN_VOLUME_CHORD.equals(p)?3:0; }
     private int actionIndex(String a){ return SafetyTriggerConfig.ACTION_CENTER.equals(a)?1:SafetyTriggerConfig.ACTION_CALL_PRIMARY.equals(a)?2:0; }
     private int windowIndex(int ms){ if(ms<=1400)return 0; if(ms<=2000)return 1; if(ms<=2600)return 2; if(ms<=3500)return 3; return 4; }
 
