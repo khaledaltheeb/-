@@ -145,18 +145,47 @@ public final class SecurePrefs {
         putString("companion_recent_hashes",encoded.toString());
     }
 
-    // Emergency plan: local-only, encrypted with the same Android Keystore-backed store.
+    // Emergency plan and shortcut: local-only, encrypted with the same Android Keystore-backed store.
     public String getEmergencyMessage(){ return getString("emergency_message",EmergencyPlan.DEFAULT_MESSAGE); }
     public void setEmergencyMessage(String value){ putString("emergency_message",value==null?"":value.trim()); }
+    public String getEmergencyCondition(){ return getString("emergency_condition",""); }
+    public void setEmergencyCondition(String value){ putString("emergency_condition",value==null?"":value.trim()); }
+    public String getEmergencyCardNote(){ return getString("emergency_card_note",""); }
+    public void setEmergencyCardNote(String value){ putString("emergency_card_note",value==null?"":value.trim()); }
     public boolean isEmergencyLocationEnabled(){ return getBoolean("emergency_location_enabled",true); }
     public void setEmergencyLocationEnabled(boolean value){ putString("emergency_location_enabled",Boolean.toString(value)); }
     public List<EmergencyPlan.Contact> getEmergencyContacts(){ return EmergencyPlan.decodeContacts(getString("emergency_contacts","")); }
     public void setEmergencyContacts(List<EmergencyPlan.Contact> contacts){ putString("emergency_contacts",EmergencyPlan.encodeContacts(contacts)); }
+    public int getEmergencyPrimaryContactIndex(){ return Math.max(0,getInt("emergency_primary_contact_index",0)); }
+    public void setEmergencyPrimaryContactIndex(int value){ putString("emergency_primary_contact_index",Integer.toString(Math.max(0,value))); }
     public boolean hasEmergencyPlan(){ return !getEmergencyContacts().isEmpty(); }
+
+    public boolean isEmergencyShortcutEnabled(){ return getBoolean("emergency_shortcut_enabled",false); }
+    public void setEmergencyShortcutEnabled(boolean value){ putString("emergency_shortcut_enabled",Boolean.toString(value)); }
+    public String getEmergencyShortcutPattern(){ return SafetyTriggerConfig.normalizePattern(getString("emergency_shortcut_pattern",SafetyTriggerConfig.PATTERN_VOLUME_UP)); }
+    public void setEmergencyShortcutPattern(String value){ putString("emergency_shortcut_pattern",SafetyTriggerConfig.normalizePattern(value)); }
+    public int getEmergencyShortcutPresses(){ return SafetyTriggerConfig.clampPresses(getInt("emergency_shortcut_presses",3)); }
+    public void setEmergencyShortcutPresses(int value){ putString("emergency_shortcut_presses",Integer.toString(SafetyTriggerConfig.clampPresses(value))); }
+    public int getEmergencyShortcutWindowMs(){ return SafetyTriggerConfig.clampWindowMs(getInt("emergency_shortcut_window_ms",SafetyTriggerConfig.DEFAULT_WINDOW_MS)); }
+    public void setEmergencyShortcutWindowMs(int value){ putString("emergency_shortcut_window_ms",Integer.toString(SafetyTriggerConfig.clampWindowMs(value))); }
+    public boolean isEmergencyShortcutImmediate(){ return getBoolean("emergency_shortcut_immediate",false); }
+    public void setEmergencyShortcutImmediate(boolean value){ putString("emergency_shortcut_immediate",Boolean.toString(value)); }
+    public String getEmergencyShortcutAction(){ return SafetyTriggerConfig.normalizeAction(getString("emergency_shortcut_action",SafetyTriggerConfig.ACTION_CARD)); }
+    public void setEmergencyShortcutAction(String value){ putString("emergency_shortcut_action",SafetyTriggerConfig.normalizeAction(value)); }
+
     public void clearEmergencyPlan(){
         putString("emergency_message","");
+        putString("emergency_condition","");
+        putString("emergency_card_note","");
         putString("emergency_location_enabled","true");
         putString("emergency_contacts","");
+        putString("emergency_primary_contact_index","0");
+        putString("emergency_shortcut_enabled","false");
+        putString("emergency_shortcut_pattern",SafetyTriggerConfig.PATTERN_VOLUME_UP);
+        putString("emergency_shortcut_presses","3");
+        putString("emergency_shortcut_window_ms",Integer.toString(SafetyTriggerConfig.DEFAULT_WINDOW_MS));
+        putString("emergency_shortcut_immediate","false");
+        putString("emergency_shortcut_action",SafetyTriggerConfig.ACTION_CARD);
     }
 
     // Library: local-only encrypted bookmarks/read-later metadata.
