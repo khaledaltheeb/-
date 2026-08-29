@@ -48,6 +48,7 @@ Test at minimum:
 - Native app chrome respects Android status/navigation-bar insets and never overlaps system UI.
 - Embedded pages do not expose a second fixed bottom navigation when the native app navigation is present.
 - Light and reading-night surfaces maintain readable foreground, hint, placeholder, field and dialog contrast.
+- Production-page screenshots are captured only after the real article H1 has rendered; loading or blank WebView frames never qualify as visual evidence.
 
 ## Functional regression gates
 
