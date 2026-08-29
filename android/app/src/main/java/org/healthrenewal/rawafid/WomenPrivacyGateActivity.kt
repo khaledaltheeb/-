@@ -34,6 +34,7 @@ object WomenPrivacyGate {
     const val TARGET_CALENDAR = "calendar"
     const val TARGET_PLANNER = "planner"
     const val TARGET_VISIT_PREP = "visit_prep"
+    const val TARGET_SETTINGS = "settings"
     private const val EXTRA_TARGET = "women_privacy_target"
 
     fun intent(context: Context, target: String): Intent =
@@ -52,6 +53,7 @@ object WomenPrivacyGate {
         TARGET_CALENDAR -> Intent(context, WomenCalendarActivity::class.java)
         TARGET_PLANNER -> Intent(context, WomenCarePlannerActivity::class.java)
         TARGET_VISIT_PREP -> Intent(context, WomenVisitPrepActivity::class.java)
+        TARGET_SETTINGS -> Intent(context, WomenPrivacySettingsActivity::class.java)
         else -> Intent(context, WomenActivity::class.java)
     }
 }
@@ -105,7 +107,7 @@ class WomenPrivacyGateActivity : ComponentActivity() {
         if (!manager.isDeviceSecure) return
         val confirmIntent = manager.createConfirmDeviceCredentialIntent(
             "فتح قطاع المرأة",
-            "استخدمي قفل الهاتف لفتح بيانات رفيقة روافد وتقويم المرأة."
+            "استخدمي قفل الهاتف للوصول إلى بيانات وإعدادات قطاع المرأة."
         ) ?: return
         authenticationStarted = true
         credentialLauncher.launch(confirmIntent)
@@ -124,7 +126,7 @@ private fun PrivacyGateScreen(canUseDeviceLock: Boolean, onUnlock: () -> Unit, o
         Spacer(Modifier.size(8.dp))
         Text(
             if (canUseDeviceLock)
-                "لحماية التقويم والمتابعات والملاحظات، افتحي هذا القسم باستخدام قفل هاتفك."
+                "لحماية التقويم والمتابعات والملاحظات والإعدادات، افتحي هذا القسم باستخدام قفل هاتفك."
             else
                 "قفل الخصوصية مفعّل لكن الهاتف لا يملك قفل شاشة آمنًا حاليًا. فعّلي قفل الجهاز أولًا لحماية هذا القسم."
         )
