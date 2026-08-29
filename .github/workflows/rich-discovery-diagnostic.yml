@@ -1,4 +1,4 @@
-# Re-run after crawler-aware Rich Discovery fix
+# Re-run after low-level crawler transport fix
 name: Rich Discovery Diagnostic
 
 on:
