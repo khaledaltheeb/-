@@ -31,6 +31,7 @@ import java.util.Locale;
 public final class WebContentActivity extends AppCompatActivity {
     public static final String EXTRA_URL="rawafid_url";
     private static final String FIT_TAG="RawafidFit";
+    private static final String TEXT_FIT_TAG="RawafidTextFit";
     private static final String WEB_TAG="RawafidWeb";
 
     private final int teal=Color.rgb(11,107,103);
@@ -251,6 +252,16 @@ public final class WebContentActivity extends AppCompatActivity {
         webView.evaluateJavascript(js,value->{
             if(BuildConfig.DEBUG) Log.i(FIT_TAG,"metrics="+value);
         });
+        if(BuildConfig.DEBUG){
+            String textJs="(function(){"
+                    +"var h=document.querySelector('h1');if(!h)return 'NO_H1';"
+                    +"var rr=null;try{var range=document.createRange();range.selectNodeContents(h);rr=range.getBoundingClientRect();}catch(e){}"
+                    +"var hr=h.getBoundingClientRect(),cs=getComputedStyle(h);"
+                    +"var kids=[];Array.prototype.slice.call(h.querySelectorAll('*'),0,12).forEach(function(el){var r=el.getBoundingClientRect(),c=getComputedStyle(el);kids.push([el.tagName,Math.round(r.left),Math.round(r.right),Math.round(r.width),el.clientWidth,el.scrollWidth,c.whiteSpace,c.overflow,c.textIndent,c.transform].join('~'));});"
+                    +"return [Math.round(hr.left),Math.round(hr.right),Math.round(hr.width),h.clientWidth,h.scrollWidth,rr?Math.round(rr.left):-999,rr?Math.round(rr.right):-999,rr?Math.round(rr.width):-1,cs.whiteSpace,cs.overflow,cs.textIndent,cs.transform,cs.fontSize,cs.lineHeight,kids.join('^')].join('|');"
+                    +"})();";
+            webView.evaluateJavascript(textJs,value->Log.i(TEXT_FIT_TAG,"metrics="+value));
+        }
     }
 
     private void shareCurrent(){
