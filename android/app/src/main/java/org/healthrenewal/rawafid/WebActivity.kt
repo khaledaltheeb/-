@@ -16,7 +16,13 @@ class WebActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val initial = safeUrl(intent.getStringExtra(EXTRA_URL)) ?: "https://healthrenewal.org/"
+        val initialUri = safeUri(intent.getStringExtra(EXTRA_URL)) ?: Uri.parse("https://healthrenewal.org/")
+        if (isWomenCalendar(initialUri)) {
+            startActivity(Intent(this, WomenCalendarActivity::class.java))
+            finish()
+            return
+        }
+
         webView = WebView(this).apply {
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
@@ -24,18 +30,22 @@ class WebActivity : ComponentActivity() {
             settings.allowContentAccess = false
             settings.javaScriptCanOpenWindowsAutomatically = false
             settings.setSupportMultipleWindows(false)
-            settings.userAgentString = settings.userAgentString + " RawafidAndroid/0.2"
+            settings.userAgentString = settings.userAgentString + " RawafidAndroid/0.3"
             CookieManager.getInstance().setAcceptCookie(true)
             webViewClient = object : WebViewClient() {
                 override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
                     val uri = request.url
+                    if (isWomenCalendar(uri)) {
+                        startActivity(Intent(this@WebActivity, WomenCalendarActivity::class.java))
+                        return true
+                    }
                     return if (isRawafid(uri)) false else {
                         runCatching { startActivity(Intent(Intent.ACTION_VIEW, uri)) }
                         true
                     }
                 }
             }
-            loadUrl(initial)
+            loadUrl(initialUri.toString())
         }
         setContentView(webView)
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
@@ -46,16 +56,21 @@ class WebActivity : ComponentActivity() {
     }
 
     override fun onDestroy() {
-        webView.stopLoading()
-        webView.webViewClient = WebViewClient()
-        webView.destroy()
+        if (::webView.isInitialized) {
+            webView.stopLoading()
+            webView.webViewClient = WebViewClient()
+            webView.destroy()
+        }
         super.onDestroy()
     }
 
-    private fun safeUrl(raw: String?): String? {
+    private fun safeUri(raw: String?): Uri? {
         val uri = raw?.let { runCatching { Uri.parse(it) }.getOrNull() } ?: return null
-        return if (isRawafid(uri)) uri.toString() else null
+        return if (isRawafid(uri)) uri else null
     }
+
+    private fun isWomenCalendar(uri: Uri): Boolean =
+        isRawafid(uri) && uri.path?.trimEnd('/') == "/sectors/calendars/women"
 
     private fun isRawafid(uri: Uri): Boolean {
         val host = uri.host?.lowercase() ?: return false
