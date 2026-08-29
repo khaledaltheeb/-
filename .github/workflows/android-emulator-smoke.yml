@@ -83,11 +83,12 @@ jobs:
             adb logcat -d -t 700 > "$GITHUB_WORKSPACE/android-emulator-artifacts/companion-notification-logcat.txt"
             if grep -E 'ANR in org\.healthrenewal\.rawafid\.debug|Process: org\.healthrenewal\.rawafid\.debug|Unable to start receiver.*org\.healthrenewal\.rawafid|SecurityException.*org\.healthrenewal\.rawafid' "$GITHUB_WORKSPACE/android-emulator-artifacts/companion-notification-logcat.txt"; then exit 1; fi
 
-            # Open real production content. Software-rasterized WebView can finish
-            # materially later than the hardware-composited path, so wait for the
-            # actual Rawafid viewport probe instead of relying on a fixed sleep.
+            # Open real production content. Clear old viewport probes, then wait for
+            # a text-fit probe that proves the article H1 exists before screenshotting.
+            adb logcat -c || true
             adb shell am start -W -a android.intent.action.VIEW -d 'https://healthrenewal.org/sectors/home/' org.healthrenewal.rawafid.debug
-            for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30; do adb logcat -d -t 2500 | grep -q 'RawafidFit.*metrics=' && break; sleep 2; done
+            for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30; do adb logcat -d -t 2500 | grep 'RawafidTextFit.*metrics=' | grep -vq 'NO_H1' && break; sleep 2; done
+            adb logcat -d -t 2500 | grep 'RawafidTextFit.*metrics=' | grep -vq 'NO_H1'
             sleep 2
             adb shell pidof org.healthrenewal.rawafid.debug
             adb exec-out screencap -p > "$GITHUB_WORKSPACE/android-emulator-artifacts/deep-link.png"
