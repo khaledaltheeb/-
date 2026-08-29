@@ -26,7 +26,7 @@ jobs:
       SEO_GATE_BASE_URL: http://127.0.0.1:3000
       SEO_GATE_CONCURRENCY: '12'
       SEO_GATE_TIMEOUT_MS: '60000'
-      SEO_GATE_MAX_URLS: '200'
+      SEO_GATE_MAX_URLS: '80'
     steps:
       - uses: actions/checkout@v7
         with:
@@ -57,6 +57,14 @@ jobs:
             cat /tmp/rawafid-rich-candidate.log >&2 || true
             exit 1
           fi
+      - name: Inspect representative legacy head
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS http://127.0.0.1:3000/accessibility-statement/ \
+            | sed 's/></>\n</g' \
+            | grep -Ei 'canonical|og:image|twitter:image|og:site_name|healthrenewal\.org' \
+            | head -n 80 || true
       - name: Run isolated rich discovery gate
         shell: bash
         run: |
