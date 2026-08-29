@@ -454,34 +454,14 @@ public final class MainActivity extends AppCompatActivity {
 
     private boolean containsToken(String selected,String token){ for(String value:selected.split(",")) if(token.equals(value.trim())) return true; return false; }
 
-    @SuppressLint("SetJavaScriptEnabled")
     private void openWeb(String url){
-        if(!TrustedUrl.isRawafidHttps(url)){ openExternal(Uri.parse(url)); return; }
-        atHome=false;
-        WebView w=new WebView(this);
-        activeWebView=w;
-        WebSettings s=w.getSettings();
-        s.setJavaScriptEnabled(true); s.setJavaScriptCanOpenWindowsAutomatically(false); s.setSupportMultipleWindows(false); s.setDomStorageEnabled(true);
-        s.setUseWideViewPort(true); s.setLoadWithOverviewMode(true); s.setTextZoom(100); s.setBuiltInZoomControls(true); s.setDisplayZoomControls(false);
-        s.setAllowFileAccess(false); s.setAllowContentAccess(false); s.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW); s.setGeolocationEnabled(false);
-        s.setMediaPlaybackRequiresUserGesture(true); s.setSafeBrowsingEnabled(true); s.setUserAgentString(s.getUserAgentString()+" RawafidAndroid/1.0");
-        CookieManager.getInstance().setAcceptCookie(true); CookieManager.getInstance().setAcceptThirdPartyCookies(w,false);
-        w.setWebViewClient(new WebViewClient(){
-            @Override public boolean shouldOverrideUrlLoading(WebView view,WebResourceRequest req){ Uri u=req.getUrl(); if(TrustedUrl.isRawafidHttps(u)) return false; openExternal(u); return true; }
-            @Override public void onPageFinished(WebView view,String finishedUrl){
-                super.onPageFinished(view,finishedUrl);
-                if(!TrustedUrl.isRawafidHttps(finishedUrl)) return;
-                String js="(function(){var m=document.querySelector('meta[name=viewport]');if(!m){m=document.createElement('meta');m.name='viewport';document.head.appendChild(m);}m.setAttribute('content','width=device-width,initial-scale=1,maximum-scale=5,user-scalable=yes');var s=document.getElementById('rawafid-app-fit');if(!s){s=document.createElement('style');s.id='rawafid-app-fit';s.textContent='html{overflow-x:hidden!important}*,*:before,*:after{box-sizing:border-box!important;min-width:0!important}main,article,section,header,footer,nav{max-width:100%!important}img,video,svg,canvas{max-width:100%!important;height:auto!important}p,h1,h2,h3,h4,h5,h6,li{overflow-wrap:anywhere!important}table,pre{display:block!important;max-width:100%!important;overflow-x:auto!important}';document.head.appendChild(s);}requestAnimationFrame(function(){var vw=window.innerWidth||document.documentElement.clientWidth;var sw=Math.max(document.documentElement.scrollWidth,document.body?document.body.scrollWidth:0);if(vw>0&&sw>vw*1.02&&document.body){var z=Math.min(1,vw/sw);document.body.style.zoom=String(z);document.documentElement.style.overflowX='hidden';}});})();";
-                view.evaluateJavascript(js,null);
-            }
-            @Override public void onReceivedError(WebView view,WebResourceRequest request,WebResourceError error){
-                if(request.isForMainFrame()) runOnUiThread(()->showNetworkError(url));
-            }
-            @Override public void onReceivedHttpError(WebView view,WebResourceRequest request,WebResourceResponse response){
-                if(request.isForMainFrame() && response.getStatusCode()>=500) runOnUiThread(()->showNetworkError(url));
-            }
-        });
-        w.loadUrl(url); setContentView(w);
+        if(!TrustedUrl.isRawafidHttps(url)){
+            openExternal(Uri.parse(url));
+            return;
+        }
+        Intent reader=new Intent(this,WebContentActivity.class);
+        reader.putExtra(WebContentActivity.EXTRA_URL,url);
+        startActivity(reader);
     }
 
     private void showNetworkError(String retryUrl){
