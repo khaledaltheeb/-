@@ -18,6 +18,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Rawafid"
         android:usesCleartextTraffic="false">
+        <activity android:name=".WebContentActivity" android:exported="false" />
         <activity android:name=".ReadingModeActivity" android:exported="false" />
         <activity android:name=".SymptomJournalActivity" android:exported="false" />
         <activity android:name=".LibraryActivity" android:exported="false" />
