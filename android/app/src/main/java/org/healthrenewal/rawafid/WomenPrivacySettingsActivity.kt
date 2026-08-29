@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -61,26 +60,22 @@ private fun WomenPrivacySettingsScreen() {
         item {
             Card {
                 Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                            Text("قفل قطاع المرأة بقفل الهاتف", fontWeight = FontWeight.Bold)
-                            Text("يستخدم بصمة/وجه/رمز الجهاز وفق إعداد هاتفك، ولا ينشئ روافد كلمة مرور جديدة.", style = MaterialTheme.typography.bodySmall)
-                        }
-                        Switch(
-                            checked = enabled,
-                            onCheckedChange = { checked ->
-                                if (!checked) {
-                                    WomenPrivacyStore.setEnabled(context, false)
-                                    version++
-                                } else if (WomenPrivacyStore.canUseDeviceLock(context)) {
-                                    WomenPrivacyStore.setEnabled(context, true)
-                                    WomenPrivacyStore.markUnlocked(context)
-                                    version++
-                                }
-                            },
-                            enabled = secure || enabled
-                        )
-                    }
+                    Text("قفل قطاع المرأة بقفل الهاتف", fontWeight = FontWeight.Bold)
+                    Text("يستخدم بصمة/وجه/رمز الجهاز وفق إعداد هاتفك، ولا ينشئ روافد كلمة مرور جديدة.", style = MaterialTheme.typography.bodySmall)
+                    Switch(
+                        checked = enabled,
+                        onCheckedChange = { checked ->
+                            if (!checked) {
+                                WomenPrivacyStore.setEnabled(context, false)
+                                version++
+                            } else if (WomenPrivacyStore.canUseDeviceLock(context)) {
+                                WomenPrivacyStore.setEnabled(context, true)
+                                WomenPrivacyStore.markUnlocked(context)
+                                version++
+                            }
+                        },
+                        enabled = secure || enabled
+                    )
                     if (!secure && !enabled) {
                         Text("فعّلي قفل شاشة آمنًا على الهاتف أولًا، ثم عودي لتفعيل حماية القطاع.", color = MaterialTheme.colorScheme.error)
                         OutlinedButton(onClick = { context.startActivity(Intent(Settings.ACTION_SECURITY_SETTINGS)) }) {
@@ -113,16 +108,12 @@ private fun WomenPrivacySettingsScreen() {
             item {
                 Card {
                     Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                                Text("إظهار محتوى الإشعارات الحساسة", fontWeight = FontWeight.Bold)
-                                Text("الافتراضي إخفاء التفاصيل. حتى مع السماح، Android وإعدادات شاشة القفل قد تخفيها.", style = MaterialTheme.typography.bodySmall)
-                            }
-                            Switch(
-                                checked = showPreview,
-                                onCheckedChange = { WomenPrivacyStore.setShowNotificationContent(context, it); version++ }
-                            )
-                        }
+                        Text("إظهار محتوى الإشعارات الحساسة", fontWeight = FontWeight.Bold)
+                        Text("الافتراضي إخفاء التفاصيل. حتى مع السماح، Android وإعدادات شاشة القفل قد يخفيها.", style = MaterialTheme.typography.bodySmall)
+                        Switch(
+                            checked = showPreview,
+                            onCheckedChange = { WomenPrivacyStore.setShowNotificationContent(context, it); version++ }
+                        )
                     }
                 }
             }
