@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.webkit.CookieManager;
@@ -29,6 +30,7 @@ import java.util.Locale;
 /** Hardened first-party Rawafid reader with a native library/share/reading toolbar. */
 public final class WebContentActivity extends AppCompatActivity {
     public static final String EXTRA_URL="rawafid_url";
+    private static final String FIT_TAG="RawafidFit";
 
     private final int teal=Color.rgb(11,107,103);
     private SecurePrefs prefs;
@@ -142,8 +144,6 @@ public final class WebContentActivity extends AppCompatActivity {
                 refreshSaveButton();
                 applyReadingMode();
                 applyFitScript();
-                // Next.js/hydration can change widths after onPageFinished. Re-apply the
-                // non-destructive viewport clamp while the page settles.
                 webView.postDelayed(thisActivityFit(),350L);
                 webView.postDelayed(thisActivityFit(),1200L);
                 webView.postDelayed(thisActivityFit(),3000L);
@@ -239,9 +239,11 @@ public final class WebContentActivity extends AppCompatActivity {
                 +"+'img,video,svg,canvas,iframe{max-width:100%!important;height:auto!important}'"
                 +"+'p,h1,h2,h3,h4,h5,h6,li{max-width:100%!important;white-space:normal!important;overflow-wrap:anywhere!important;word-break:normal!important}'"
                 +"+'table,pre{display:block!important;max-width:100%!important;overflow-x:auto!important}';"
-                +"return JSON.stringify({vw:document.documentElement.clientWidth,sw:Math.max(document.documentElement.scrollWidth,document.body?document.body.scrollWidth:0)});"
+                +"var de=document.documentElement,b=document.body;"
+                +"var dirDe=getComputedStyle(de).direction,dirB=b?getComputedStyle(b).direction:'';"
+                +"return [window.innerWidth,de.clientWidth,de.scrollWidth,b?b.scrollWidth:0,window.scrollX,dirDe,dirB].join('|');"
                 +"})();";
-        webView.evaluateJavascript(js,null);
+        webView.evaluateJavascript(js,value->Log.i(FIT_TAG,"metrics="+value));
     }
 
     private void shareCurrent(){
