@@ -31,6 +31,7 @@ import java.util.Locale;
 public final class WebContentActivity extends AppCompatActivity {
     public static final String EXTRA_URL="rawafid_url";
     private static final String FIT_TAG="RawafidFit";
+    private static final String WEB_TAG="RawafidWeb";
 
     private final int teal=Color.rgb(11,107,103);
     private SecurePrefs prefs;
@@ -242,12 +243,14 @@ public final class WebContentActivity extends AppCompatActivity {
                 +"+'img,video,svg,canvas,iframe{max-width:100%!important;height:auto!important}'"
                 +"+'p,h1,h2,h3,h4,h5,h6,li{max-width:100%!important;white-space:normal!important;overflow-wrap:anywhere!important;word-break:normal!important}'"
                 +"+'table,pre{display:block!important;max-width:100%!important;overflow-x:auto!important}';"
-                +"var de=document.documentElement,b=document.body;"
-                +"var dirDe=getComputedStyle(de).direction,dirB=b?getComputedStyle(b).direction:'';"
-                +"var vv=window.visualViewport;"
-                +"return [window.innerWidth,de.clientWidth,de.scrollWidth,b?b.scrollWidth:0,window.scrollX,dirDe,dirB,vv?vv.offsetLeft:0,vv?vv.width:0].join('|');"
+                +"var de=document.documentElement,b=document.body,vv=window.visualViewport;"
+                +"var h=document.querySelector('h1'),main=document.querySelector('main');"
+                +"var hr=h?h.getBoundingClientRect():null,mr=main?main.getBoundingClientRect():null;"
+                +"return [window.innerWidth,de.clientWidth,de.scrollWidth,b?b.scrollWidth:0,window.scrollX,getComputedStyle(de).direction,b?getComputedStyle(b).direction:'',vv?vv.offsetLeft:0,vv?vv.width:0,hr?hr.left:-999,hr?hr.right:-999,mr?mr.left:-999,mr?mr.right:-999].join('|');"
                 +"})();";
-        webView.evaluateJavascript(js,value->Log.i(FIT_TAG,"metrics="+value));
+        webView.evaluateJavascript(js,value->{
+            if(BuildConfig.DEBUG) Log.i(FIT_TAG,"metrics="+value);
+        });
     }
 
     private void shareCurrent(){
@@ -261,6 +264,7 @@ public final class WebContentActivity extends AppCompatActivity {
 
     private void showError(){
         if(isFinishing()||webView==null||root==null||errorPanel!=null) return;
+        if(BuildConfig.DEBUG) Log.e(WEB_TAG,"main-frame-load-error url="+currentUrl);
         pageReady=false;
         webView.stopLoading();
         webView.setVisibility(View.GONE);
