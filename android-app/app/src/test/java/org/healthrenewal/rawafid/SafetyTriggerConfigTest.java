@@ -21,6 +21,14 @@ public final class SafetyTriggerConfigTest {
         assertFalse(SafetyTriggerConfig.matches(Arrays.asList(KeyEvent.KEYCODE_VOLUME_DOWN,KeyEvent.KEYCODE_VOLUME_DOWN,KeyEvent.KEYCODE_VOLUME_UP),SafetyTriggerConfig.PATTERN_ALTERNATE,3));
     }
 
+    @Test public void matchesNearSimultaneousChordEitherDirection(){
+        assertTrue(SafetyTriggerConfig.matchesChord(KeyEvent.KEYCODE_VOLUME_UP,KeyEvent.KEYCODE_VOLUME_DOWN,200));
+        assertTrue(SafetyTriggerConfig.matchesChord(KeyEvent.KEYCODE_VOLUME_DOWN,KeyEvent.KEYCODE_VOLUME_UP,650));
+        assertFalse(SafetyTriggerConfig.matchesChord(KeyEvent.KEYCODE_VOLUME_UP,KeyEvent.KEYCODE_VOLUME_DOWN,651));
+        assertFalse(SafetyTriggerConfig.matchesChord(KeyEvent.KEYCODE_VOLUME_UP,KeyEvent.KEYCODE_VOLUME_UP,100));
+        assertFalse(SafetyTriggerConfig.matches(Arrays.asList(KeyEvent.KEYCODE_VOLUME_UP,KeyEvent.KEYCODE_VOLUME_DOWN),SafetyTriggerConfig.PATTERN_VOLUME_CHORD,2));
+    }
+
     @Test public void clampsUnsafeValues(){
         assertEquals(2,SafetyTriggerConfig.clampPresses(0));
         assertEquals(6,SafetyTriggerConfig.clampPresses(99));
