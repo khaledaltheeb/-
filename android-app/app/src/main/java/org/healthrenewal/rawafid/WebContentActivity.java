@@ -106,6 +106,10 @@ public final class WebContentActivity extends AppCompatActivity {
         root.addView(toolbar,new LinearLayout.LayoutParams(-1,dp(60)));
 
         webView=new WebView(this);
+        // Keep the Android rendering surface LTR. The first-party document itself
+        // declares RTL, and letting WebView inherit the native RTL container can
+        // offset Chromium's drawing surface even when the DOM viewport is exact.
+        webView.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
         WebSettings s=webView.getSettings();
         s.setJavaScriptEnabled(true);
         s.setJavaScriptCanOpenWindowsAutomatically(false);
