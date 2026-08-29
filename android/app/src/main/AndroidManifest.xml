@@ -9,6 +9,7 @@
         android:label="روافد"
         android:icon="@drawable/ic_launcher"
         android:theme="@style/Theme.Rawafid"
+        android:supportsRtl="true"
         android:usesCleartextTraffic="false">
 
         <activity
@@ -24,12 +25,8 @@
             android:name=".WebActivity"
             android:exported="false" />
 
-        <activity
-            android:name=".ReminderActivity"
-            android:exported="false" />
-
         <receiver
-            android:name=".ReminderReceiver"
+            android:name=".TreatmentReminderReceiver"
             android:exported="false" />
 
         <receiver
