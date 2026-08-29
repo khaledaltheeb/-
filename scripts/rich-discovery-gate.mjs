@@ -3,6 +3,9 @@ const canonicalOrigin = new URL(process.env.NEXT_PUBLIC_SITE_URL || base).origin
 const concurrency = Math.max(1, Math.min(24, Number(process.env.SEO_GATE_CONCURRENCY || 6)));
 const timeoutMs = Math.max(2000, Number(process.env.SEO_GATE_TIMEOUT_MS || 15000));
 const maxUrls = Math.max(0, Number(process.env.SEO_GATE_MAX_URLS || 0));
+const pageAttempts = Math.max(1, Math.min(5, Number(process.env.SEO_GATE_PAGE_ATTEMPTS || 3)));
+const pageRetryDelayMs = Math.max(0, Number(process.env.SEO_GATE_PAGE_RETRY_DELAY_MS || 300));
+const crawlerUserAgent = process.env.SEO_GATE_USER_AGENT || 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)';
 const failures = [];
 
 function decodeXml(value) {
@@ -24,13 +27,37 @@ function linkHref(html, rel) {
 function sitemapLocs(xml) {
   return [...xml.matchAll(/<loc>([\s\S]*?)<\/loc>/gi)].map((match) => decodeXml(stripTags(match[1]))).filter(Boolean);
 }
-async function fetchText(url) {
+function sleep(ms) { return new Promise((resolve) => setTimeout(resolve, ms)); }
+async function fetchTextOnce(url) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const response = await fetch(url, { redirect: 'follow', signal: controller.signal, headers: { 'user-agent': 'Rawafid-Rich-Discovery-Gate/1.3' } });
+    const response = await fetch(url, {
+      redirect: 'follow',
+      signal: controller.signal,
+      headers: { 'user-agent': crawlerUserAgent },
+    });
     return { response, text: await response.text() };
   } finally { clearTimeout(timer); }
+}
+async function fetchText(url) {
+  let lastError;
+  for (let attempt = 1; attempt <= pageAttempts; attempt += 1) {
+    try {
+      const result = await fetchTextOnce(url);
+      const retryableStatus = result.response.status === 429 || result.response.status >= 500;
+      if (retryableStatus && attempt < pageAttempts) {
+        await sleep(pageRetryDelayMs * attempt);
+        continue;
+      }
+      return result;
+    } catch (error) {
+      lastError = error;
+      if (attempt === pageAttempts) break;
+      await sleep(pageRetryDelayMs * attempt);
+    }
+  }
+  throw lastError || new Error(`request failed after ${pageAttempts} attempts`);
 }
 async function discoverUrls() {
   const index = await fetchText(`${base}/sitemap.xml`);
