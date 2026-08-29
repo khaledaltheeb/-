@@ -106,9 +106,7 @@ public final class WebContentActivity extends AppCompatActivity {
         root.addView(toolbar,new LinearLayout.LayoutParams(-1,dp(60)));
 
         webView=new WebView(this);
-        // Keep the Android rendering surface LTR. The first-party document itself
-        // declares RTL, and letting WebView inherit the native RTL container can
-        // offset Chromium's drawing surface even when the DOM viewport is exact.
+        // Keep the Android rendering surface LTR. The document content remains RTL.
         webView.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
         WebSettings s=webView.getSettings();
         s.setJavaScriptEnabled(true);
@@ -236,7 +234,8 @@ public final class WebContentActivity extends AppCompatActivity {
                 +"m.setAttribute('content','width=device-width,initial-scale=1,maximum-scale=5,user-scalable=yes');"
                 +"var s=document.getElementById('rawafid-app-fit');"
                 +"if(!s){s=document.createElement('style');s.id='rawafid-app-fit';document.head.appendChild(s);}"
-                +"s.textContent='html,body{width:100%!important;max-width:100vw!important;overflow-x:hidden!important}'"
+                +"s.textContent='html{direction:ltr!important;width:100%!important;max-width:100vw!important;overflow-x:hidden!important}'"
+                +"+'body{direction:rtl!important;width:100%!important;max-width:100vw!important;overflow-x:hidden!important}'"
                 +"+'*,*:before,*:after{box-sizing:border-box!important;min-width:0!important}'"
                 +"+'body *{max-width:100vw!important}'"
                 +"+'main,article,section,header,footer,nav,div{min-width:0!important}'"
@@ -245,7 +244,8 @@ public final class WebContentActivity extends AppCompatActivity {
                 +"+'table,pre{display:block!important;max-width:100%!important;overflow-x:auto!important}';"
                 +"var de=document.documentElement,b=document.body;"
                 +"var dirDe=getComputedStyle(de).direction,dirB=b?getComputedStyle(b).direction:'';"
-                +"return [window.innerWidth,de.clientWidth,de.scrollWidth,b?b.scrollWidth:0,window.scrollX,dirDe,dirB].join('|');"
+                +"var vv=window.visualViewport;"
+                +"return [window.innerWidth,de.clientWidth,de.scrollWidth,b?b.scrollWidth:0,window.scrollX,dirDe,dirB,vv?vv.offsetLeft:0,vv?vv.width:0].join('|');"
                 +"})();";
         webView.evaluateJavascript(js,value->Log.i(FIT_TAG,"metrics="+value));
     }
