@@ -155,6 +155,7 @@ private fun HomeScreen(onNavigate: (Destination) -> Unit) {
                     Text("رفيقة روافد", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                     Text("قطاع المرأة: رفيقة يومية، تقويم متقدم، عناية ذاتية، دعم نفسي وحدود وأمان.")
                     Button(onClick = { context.startActivity(Intent(context, WomenActivity::class.java)) }) { Text("فتح قطاع المرأة") }
+                    OutlinedButton(onClick = { context.startActivity(Intent(context, WomenCarePlannerActivity::class.java)) }) { Text("خطة العناية النسائية") }
                 }
             }
         }
