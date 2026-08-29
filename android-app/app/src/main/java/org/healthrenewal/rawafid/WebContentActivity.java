@@ -88,7 +88,10 @@ public final class WebContentActivity extends AppCompatActivity {
     private void render(){
         root=new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
-        root.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
+        // Keep the entire WebView ancestry LTR. Native controls that need Arabic
+        // ordering opt into RTL explicitly below, so Chromium never inherits an
+        // RTL ancestor that can mirror/offset its compositor surface.
+        root.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
         root.setBackgroundColor(Color.rgb(248,251,250));
 
         LinearLayout toolbar=new LinearLayout(this);
