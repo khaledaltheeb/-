@@ -1,6 +1,8 @@
 package org.healthrenewal.rawafid
 
 import android.content.Context
+import android.util.Base64
+import android.util.Base64InputStream
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -33,11 +35,11 @@ private data class RafiqaAssetMessage(
 /**
  * Offline engine for the canonical 12,000-message Rafiqa bank.
  *
- * Assets are intentionally split by category and gzip-compressed under:
- *   assets/rafiqa/<category>.jsonl.gz
+ * Each category is stored as gzip-compressed JSONL encoded as Base64 text:
+ *   assets/rafiqa/<category>.jsonl.gz.b64
  *
- * If an asset is not packaged yet, callers receive null and can fall back to
- * the compact in-code safety bank. No network request is made.
+ * Keeping 1,000 messages per category means only the category needed for the
+ * current moment is decoded and cached. No network request is made.
  */
 object RafiqaAssetBank {
     private const val HISTORY_PREFS = "rawafid_rafiqa_asset_history_v1"
@@ -70,8 +72,7 @@ object RafiqaAssetBank {
         val history = context.getSharedPreferences(HISTORY_PREFS, Context.MODE_PRIVATE)
 
         val contextSafe = messages.filter { message ->
-            timeMatches(message.timeWindow, window) &&
-                healthContextAllowed(message, profile, tags)
+            timeMatches(message.timeWindow, window) && healthContextAllowed(message, profile, tags)
         }.ifEmpty { messages.filter { healthContextAllowed(it, profile, tags) } }
 
         if (contextSafe.isEmpty()) return null
@@ -106,9 +107,7 @@ object RafiqaAssetBank {
             timeMatches(it.timeWindow, window) &&
                 healthContextAllowed(it, profile, tags) &&
                 isOffCooldown(history, it, now)
-        }.ifEmpty {
-            messages.filter { healthContextAllowed(it, profile, tags) }
-        }
+        }.ifEmpty { messages.filter { healthContextAllowed(it, profile, tags) } }
         if (pool.isEmpty()) return null
         val seed = (System.currentTimeMillis() / 60_000L + category.hashCode()).absoluteValue
         val chosen = pool[(seed % pool.size).toInt()]
@@ -144,10 +143,12 @@ object RafiqaAssetBank {
     private fun loadCategory(context: Context, category: String): List<RafiqaAssetMessage> =
         cache.getOrPut(category) {
             runCatching {
-                context.assets.open(assetPath(category)).use { input ->
-                    GZIPInputStream(input).use { gzip ->
-                        BufferedReader(InputStreamReader(gzip, Charsets.UTF_8)).useLines { lines ->
-                            lines.mapNotNull(::parse).toList()
+                context.assets.open(assetPath(category)).use { encoded ->
+                    Base64InputStream(encoded, Base64.DEFAULT).use { decoded ->
+                        GZIPInputStream(decoded).use { gzip ->
+                            BufferedReader(InputStreamReader(gzip, Charsets.UTF_8)).useLines { lines ->
+                                lines.mapNotNull(::parse).toList()
+                            }
                         }
                     }
                 }
@@ -177,7 +178,7 @@ object RafiqaAssetBank {
         )
     }.getOrNull()
 
-    private fun assetPath(category: String) = "rafiqa/$category.jsonl.gz"
+    private fun assetPath(category: String) = "rafiqa/$category.jsonl.gz.b64"
 
     private fun currentTimeWindow(): String = when (LocalDateTime.now().hour) {
         in 5..10 -> "morning"
@@ -203,13 +204,12 @@ object RafiqaAssetBank {
         history: android.content.SharedPreferences,
         message: RafiqaAssetMessage,
         now: Long
-    ): Boolean {
-        return elapsed(history, "m:${message.id}", now) >= hours(message.cooldownExactHours) &&
+    ): Boolean =
+        elapsed(history, "m:${message.id}", now) >= hours(message.cooldownExactHours) &&
             elapsed(history, "s:${message.semanticFamily}", now) >= hours(message.cooldownSemanticHours) &&
             elapsed(history, "o:${message.openerFamily}", now) >= hours(message.cooldownOpenerHours) &&
             elapsed(history, "c:${message.coreFamily}", now) >= hours(message.cooldownCoreHours) &&
             elapsed(history, "a:${message.actionFamily}", now) >= hours(message.cooldownActionHours)
-    }
 
     private fun elapsed(history: android.content.SharedPreferences, key: String, now: Long): Long {
         val previous = history.getLong(key, 0L)
