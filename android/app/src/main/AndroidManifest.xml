@@ -29,6 +29,11 @@
             android:label="حماية قطاع المرأة" />
 
         <activity
+            android:name=".WomenPrivacySettingsActivity"
+            android:exported="false"
+            android:label="خصوصية قطاع المرأة" />
+
+        <activity
             android:name=".WomenActivity"
             android:exported="true"
             android:label="رفيقة روافد">
