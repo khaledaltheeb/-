@@ -296,6 +296,9 @@ private fun WomenCarePlannerScreen(requestNotifications: ((Boolean) -> Unit) -> 
                     Text("قبل الموعد", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                     Text("اكتبي الأعراض الجديدة، متى بدأت، شدتها، الأدوية والمكملات التي تستخدمينها، والأسئلة التي لا تريدين نسيانها. اتبعي تعليمات التحضير التي أعطتك إياها الجهة الطبية.")
                     Text("بعد الموعد: سجلي الخطوة التالية والموعد القادم وما الذي يستوجب الرجوع للمختصة.", style = MaterialTheme.typography.bodySmall)
+                    OutlinedButton(onClick = { context.startActivity(Intent(context, WomenVisitPrepActivity::class.java)) }, modifier = Modifier.fillMaxWidth()) {
+                        Text("جهزي ملخص الزيارة")
+                    }
                 }
             }
         }
