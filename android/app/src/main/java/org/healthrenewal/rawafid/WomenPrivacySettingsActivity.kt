@@ -49,7 +49,6 @@ private fun WomenPrivacySettingsScreen() {
     val enabled = remember(version) { WomenPrivacyStore.enabled(context) }
     val secure = remember(version) { WomenPrivacyStore.canUseDeviceLock(context) }
     val timeout = remember(version) { WomenPrivacyStore.timeoutMinutes(context) }
-    val showPreview = remember(version) { WomenPrivacyStore.showNotificationContent(context) }
 
     LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         item {
@@ -107,13 +106,9 @@ private fun WomenPrivacySettingsScreen() {
 
             item {
                 Card {
-                    Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Text("إظهار محتوى الإشعارات الحساسة", fontWeight = FontWeight.Bold)
-                        Text("الافتراضي إخفاء التفاصيل. حتى مع السماح، Android وإعدادات شاشة القفل قد يخفيها.", style = MaterialTheme.typography.bodySmall)
-                        Switch(
-                            checked = showPreview,
-                            onCheckedChange = { WomenPrivacyStore.setShowNotificationContent(context, it); version++ }
-                        )
+                    Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text("خصوصية الإشعارات", fontWeight = FontWeight.Bold)
+                        Text("قنوات إشعارات رفيقة روافد وخطة العناية مضبوطة بخصوصية شاشة قفل أعلى. التحكم التفصيلي بمعاينة كل نوع إشعار سيُربط لاحقًا بعد ربط بنك الرسائل الكبير بالكامل.", style = MaterialTheme.typography.bodySmall)
                     }
                 }
             }
