@@ -25,9 +25,20 @@ public class ReadingModeTest {
         assertTrue(js.contains("rawafid-reading-mode-v1"));
     }
 
-    @Test public void nightModeUsesDarkPalette(){
+    @Test public void outOfRangeValuesCannotEscapeBoundsInScript(){
+        String js=ReadingMode.webScript(new ReadingMode.Settings(999,-5,false,false));
+        assertTrue(js.contains("font-size:"+ReadingMode.MAX_TEXT_SCALE+"%"));
+        assertTrue(js.contains("line-height:"+(ReadingMode.MIN_LINE_HEIGHT/100.0)));
+        assertFalse(js.contains("font-size:999%"));
+        assertFalse(js.contains("line-height:-"));
+    }
+
+    @Test public void nightModeUsesFixedLocalPaletteOnly(){
         String js=ReadingMode.webScript(new ReadingMode.Settings(100,155,false,true));
         assertTrue(js.contains("#121817"));
         assertTrue(js.contains("brightness(.88)"));
+        assertFalse(js.contains("javascript:"));
+        assertFalse(js.contains("http://"));
+        assertFalse(js.contains("https://"));
     }
 }
