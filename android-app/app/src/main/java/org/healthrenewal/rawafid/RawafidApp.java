@@ -27,10 +27,13 @@ public final class RawafidApp extends Application {
         PeriodicWorkRequest content = new PeriodicWorkRequest.Builder(ContentSyncWorker.class, 1, TimeUnit.HOURS)
                 .setConstraints(connected)
                 .build();
-        WorkManager.getInstance(this).enqueueUniquePeriodicWork("rawafid-content-sync", ExistingPeriodicWorkPolicy.UPDATE, content);
+        WorkManager workManager=WorkManager.getInstance(this);
+        workManager.enqueueUniquePeriodicWork("rawafid-content-sync", ExistingPeriodicWorkPolicy.UPDATE, content);
 
-        PeriodicWorkRequest companion = new PeriodicWorkRequest.Builder(CompanionWorker.class, 15, TimeUnit.MINUTES).build();
-        WorkManager.getInstance(this).enqueueUniquePeriodicWork("rawafid-companion", ExistingPeriodicWorkPolicy.UPDATE, companion);
+        // Remove the legacy 15-minute companion poller. Rafiqa now uses a one-shot alarm
+        // that is restored after reboot/time changes and schedules itself again after delivery.
+        workManager.cancelUniqueWork("rawafid-companion");
+        CompanionScheduler.scheduleNext(this);
     }
 
     private void createChannels() {
