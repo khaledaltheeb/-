@@ -65,9 +65,7 @@ jobs:
             sleep 1
             adb shell am kill org.healthrenewal.rawafid.debug || true
             sleep 1
-            adb shell am broadcast \
-              -a org.healthrenewal.rawafid.COMPANION_ALARM \
-              -n org.healthrenewal.rawafid.debug/org.healthrenewal.rawafid.CompanionAlarmReceiver
+            adb shell am broadcast -a org.healthrenewal.rawafid.COMPANION_ALARM -n org.healthrenewal.rawafid.debug/org.healthrenewal.rawafid.CompanionAlarmReceiver
             sleep 2
             adb logcat -d -t 500 > "$GITHUB_WORKSPACE/android-emulator-artifacts/companion-background-logcat.txt"
             if grep -E 'FATAL EXCEPTION|SecurityException|Unable to start receiver|ANR in org.healthrenewal.rawafid.debug' "$GITHUB_WORKSPACE/android-emulator-artifacts/companion-background-logcat.txt"; then exit 1; fi
