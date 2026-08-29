@@ -1,3 +1,6 @@
+import http from 'node:http';
+import https from 'node:https';
+
 const base = (process.env.SEO_GATE_BASE_URL || process.env.SMOKE_BASE_URL || 'http://127.0.0.1:3000').replace(/\/$/, '');
 const canonicalOrigin = new URL(process.env.NEXT_PUBLIC_SITE_URL || base).origin;
 const concurrency = Math.max(1, Math.min(24, Number(process.env.SEO_GATE_CONCURRENCY || 6)));
@@ -28,17 +31,41 @@ function sitemapLocs(xml) {
   return [...xml.matchAll(/<loc>([\s\S]*?)<\/loc>/gi)].map((match) => decodeXml(stripTags(match[1]))).filter(Boolean);
 }
 function sleep(ms) { return new Promise((resolve) => setTimeout(resolve, ms)); }
-async function fetchTextOnce(url) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    const response = await fetch(url, {
-      redirect: 'follow',
-      signal: controller.signal,
-      headers: { 'user-agent': crawlerUserAgent },
+async function fetchTextOnce(url, redirects = 0) {
+  if (redirects > 5) throw new Error(`too many redirects for ${url}`);
+  const parsed = new URL(url);
+  const transport = parsed.protocol === 'https:' ? https : http;
+  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') throw new Error(`unsupported protocol for ${url}`);
+
+  return await new Promise((resolve, reject) => {
+    const request = transport.request(parsed, {
+      method: 'GET',
+      headers: {
+        'User-Agent': crawlerUserAgent,
+        Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'ar,en;q=0.8',
+        Connection: 'close',
+      },
+    }, (response) => {
+      const status = response.statusCode || 0;
+      const location = response.headers.location;
+      if ([301, 302, 303, 307, 308].includes(status) && location) {
+        response.resume();
+        fetchTextOnce(new URL(location, parsed).href, redirects + 1).then(resolve, reject);
+        return;
+      }
+
+      response.setEncoding('utf8');
+      let text = '';
+      response.on('data', (chunk) => { text += chunk; });
+      response.on('end', () => resolve({ response: { status, ok: status >= 200 && status < 300 }, text }));
+      response.on('error', reject);
     });
-    return { response, text: await response.text() };
-  } finally { clearTimeout(timer); }
+
+    request.setTimeout(timeoutMs, () => request.destroy(new Error(`request timeout after ${timeoutMs}ms`)));
+    request.on('error', reject);
+    request.end();
+  });
 }
 async function fetchText(url) {
   let lastError;
