@@ -4,7 +4,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-/** Debug-only receiver used by emulator smoke to prove a real Rafiqa notification can be posted from a cold process. */
+/**
+ * Debug-only smoke-test surface. It deliberately bypasses the user schedule and asks
+ * the production notification path to post one Rafiqa message, so CI can prove that
+ * notification delivery still works after the foreground UI process has been killed.
+ * This class is compiled only into debug builds and is absent from release builds.
+ */
 public final class CompanionTestReceiver extends BroadcastReceiver {
     public static final String ACTION_SEND_TEST="org.healthrenewal.rawafid.debug.SEND_COMPANION_TEST";
 
