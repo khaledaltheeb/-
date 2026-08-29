@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.icons.Icons
@@ -42,6 +43,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -50,15 +52,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.work.CoroutineWorker
-import androidx.work.Data
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
@@ -88,18 +88,12 @@ private object WomenCompanionStore {
     fun reminderEnabled(context: Context) = prefs(context).getBoolean("reminder_enabled", false)
     fun reminderMinutes(context: Context) = prefs(context).getLong("reminder_minutes", 240L)
     fun reminderMax(context: Context) = prefs(context).getInt("reminder_max", 4)
+    fun careDaysEnabled(context: Context) = prefs(context).getBoolean("care_days_enabled", true)
 
-    fun setReminderEnabled(context: Context, enabled: Boolean) {
-        prefs(context).edit().putBoolean("reminder_enabled", enabled).apply()
-    }
-
-    fun setReminderMinutes(context: Context, minutes: Long) {
-        prefs(context).edit().putLong("reminder_minutes", minutes.coerceAtLeast(60L)).apply()
-    }
-
-    fun setReminderMax(context: Context, value: Int) {
-        prefs(context).edit().putInt("reminder_max", value.coerceIn(1, 8)).apply()
-    }
+    fun setReminderEnabled(context: Context, enabled: Boolean) = prefs(context).edit().putBoolean("reminder_enabled", enabled).apply()
+    fun setReminderMinutes(context: Context, minutes: Long) = prefs(context).edit().putLong("reminder_minutes", minutes.coerceAtLeast(60L)).apply()
+    fun setReminderMax(context: Context, value: Int) = prefs(context).edit().putInt("reminder_max", value.coerceIn(1, 8)).apply()
+    fun setCareDaysEnabled(context: Context, enabled: Boolean) = prefs(context).edit().putBoolean("care_days_enabled", enabled).apply()
 
     fun claimReminderSlot(context: Context): Boolean {
         val p = prefs(context)
@@ -167,7 +161,6 @@ private object WomenCompanionScheduler {
         val minutes = WomenCompanionStore.reminderMinutes(context).coerceAtLeast(60L)
         val request = PeriodicWorkRequestBuilder<WomenCompanionWorker>(minutes, TimeUnit.MINUTES)
             .setInitialDelay(minutes, TimeUnit.MINUTES)
-            .setInputData(Data.EMPTY)
             .build()
         manager.enqueueUniquePeriodicWork(UNIQUE_WORK, ExistingPeriodicWorkPolicy.UPDATE, request)
     }
@@ -193,17 +186,8 @@ class WomenCompanionWorker(context: Context, params: WorkerParameters) : Corouti
         if (Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) return Result.success()
 
         WomenCompanionScheduler.ensureChannel(applicationContext)
-        val bank = listOf(
-            "كيف حالك الآن؟ لا تحتاجين إلى إجابة مثالية؛ اختاري ما تحتاجينه فعلًا في هذه اللحظة.",
-            "امنحي نفسك دقيقة: ماء، راحة، حركة لطيفة، طعام مناسب، هدوء أو تواصل مع شخص آمن.",
-            "طاقتك اليوم ليست مقياسًا لقيمتك. عدّلي خطتك بحيث تناسب واقعك لا توقعات الآخرين.",
-            "هل مر وقت طويل وأنت منشغلة بالآخرين؟ خذي لحظة قصيرة لك أنتِ الآن.",
-            "إذا كان يومك ثقيلًا، اختاري مهمة واحدة فقط يمكن إنجازها بوضوح واتركي الباقي لوقته.",
-            "لا تهملي تغيرًا واضحًا أو مزعجًا عن المعتاد لديك؛ سجليه وناقشيه مع مختصة مؤهلة إذا استمر أو أقلقك.",
-            "حدودك وراحتك ووقتك احتياجات مشروعة. ليس عليك شرح كل احتياج حتى يصبح مهمًا.",
-            "خذي نفسًا أبطأ، أرخِي كتفيك، واسألي نفسك: ما الذي سيجعل الساعة القادمة ألطف بدرجة واحدة؟"
-        )
-        val index = (LocalDate.now().dayOfYear * 7 + LocalDateTime.now().hour) % bank.size
+        val tags = adaptiveTags(applicationContext)
+        val message = CompanionContentBank.next(applicationContext, tags)
         val openIntent = PendingIntent.getActivity(
             applicationContext,
             9401,
@@ -212,16 +196,52 @@ class WomenCompanionWorker(context: Context, params: WorkerParameters) : Corouti
         )
         val notification = NotificationCompat.Builder(applicationContext, WomenCompanionScheduler.channelId())
             .setSmallIcon(R.drawable.ic_launcher)
-            .setContentTitle("رفيقة روافد · لحظة لك")
-            .setContentText(bank[index])
-            .setStyle(NotificationCompat.BigTextStyle().bigText(bank[index]))
+            .setContentTitle(titleFor(tags))
+            .setContentText(message.text)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(message.text))
             .setContentIntent(openIntent)
             .setAutoCancel(true)
             .setCategory(NotificationCompat.CATEGORY_REMINDER)
             .build()
-        (applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
-            .notify(9400, notification)
+        (applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).notify(9400, notification)
         return Result.success()
+    }
+
+    private fun adaptiveTags(context: Context): Set<String> {
+        val today = LocalDate.now()
+        val hour = LocalDateTime.now().hour
+        val latest = WomenCompanionStore.entries(context).firstOrNull()
+
+        if (WomenCompanionStore.careDaysEnabled(context)) {
+            when (today.dayOfMonth) {
+                5 -> return setOf("breast", "awareness")
+                12 -> return setOf("selfcare", "routine")
+                19 -> return setOf("sleep", "care")
+                26 -> return setOf("period", "cycle")
+            }
+        }
+
+        if (latest != null) {
+            if (latest.pain >= 6) return setOf("pain", "soothing")
+            if (latest.energy <= 2) return setOf("tired", "care")
+            if (latest.feeling == "قلقة") return setOf("anxious", "soothing")
+            if (latest.need == "تواصل آمن") return setOf("connection", "social")
+            if (latest.bleeding == "heavy") return setOf("period", "cycle")
+        }
+        return when (hour) {
+            in 6..10 -> setOf("checkin", "warm")
+            in 11..16 -> setOf("care", "motivation")
+            in 17..20 -> setOf("warm", "checkin")
+            else -> setOf("sleep", "soothing")
+        }
+    }
+
+    private fun titleFor(tags: Set<String>): String = when {
+        "breast" in tags -> "رفيقة روافد · اليوم وعي بصحة الثدي"
+        "selfcare" in tags -> "رفيقة روافد · اليوم وقت العناية بك"
+        "sleep" in tags -> "رفيقة روافد · لنغلق اليوم بلطف"
+        "period" in tags -> "رفيقة روافد · مراجعة نمطك"
+        else -> "رفيقة روافد · مررت لأطمئن عليكِ"
     }
 }
 
@@ -239,9 +259,7 @@ class WomenActivity : ComponentActivity() {
         setContent {
             RawafidTheme {
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                    Surface(Modifier.fillMaxSize()) {
-                        WomenCompanionScreen(requestNotifications = ::requestNotifications)
-                    }
+                    Surface(Modifier.fillMaxSize()) { WomenCompanionScreen(::requestNotifications) }
                 }
             }
         }
@@ -274,24 +292,31 @@ private fun WomenCompanionScreen(requestNotifications: ((Boolean) -> Unit) -> Un
     var vent by rememberSaveable { mutableStateOf("") }
     var savedMessage by remember { mutableStateOf("") }
 
-    val companion = remember(mood, energy, pain, bleeding, feeling, need) {
-        companionMessage(mood, energy, pain, bleeding, feeling, need)
-    }
-    val recent = remember(version) { WomenCompanionStore.entries(context).take(7) }
     val reminderEnabled = remember(version) { WomenCompanionStore.reminderEnabled(context) }
+    val careDaysEnabled = remember(version) { WomenCompanionStore.careDaysEnabled(context) }
     val reminderMinutes = remember(version) { WomenCompanionStore.reminderMinutes(context) }
     val reminderMax = remember(version) { WomenCompanionStore.reminderMax(context) }
+    val recent = remember(version) { WomenCompanionStore.entries(context).take(7) }
+    val companion = remember(feeling, need, mood, energy, pain, bleeding) {
+        val tags = buildSet {
+            add("warm")
+            if (feeling == "قلقة") add("anxious")
+            if (feeling == "متعبة" || energy <= 2) add("tired")
+            if (pain >= 6) add("pain")
+            if (need == "تواصل آمن") add("connection")
+            if (bleeding != "none") add("period")
+            if (mood <= 2) add("sad")
+        }
+        CompanionContentBank.next(context, tags).text
+    }
 
     LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         item {
             Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)) {
                 Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Icon(Icons.Default.Favorite, contentDescription = null)
-                        Text("قطاع المرأة", fontWeight = FontWeight.Bold)
-                    }
+                    Text("قطاع المرأة", fontWeight = FontWeight.Bold)
                     Text("رفيقة روافد", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-                    Text("مساحة يومية خاصة للمرأة: تسمعك، تساعدك على وصف يومك، وتذكّرك بالعناية بنفسك من دون لوم أو تشخيص.")
+                    Text("رفيقة رقمية مهتمة تساعدك على ملاحظة يومك والعناية بنفسك دون لوم أو تشخيص، وتذكرك متى يكون من الأفضل طلب مساعدة بشرية أو طبية.")
                 }
             }
         }
@@ -300,9 +325,9 @@ private fun WomenCompanionScreen(requestNotifications: ((Boolean) -> Unit) -> Un
             Card {
                 Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text("كيف تشعرين الآن؟", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                    ChoiceRow(listOf("هادئة", "بخير", "متعبة", "قلقة", "منزعجة"), feeling) { feeling = it }
+                    ChoiceRowRafiqa(listOf("هادئة", "بخير", "متعبة", "قلقة", "منزعجة"), feeling) { feeling = it }
                     Text("ماذا تحتاجين الآن؟", fontWeight = FontWeight.Bold)
-                    ChoiceRow(listOf("هدوء", "ماء", "راحة", "حركة", "طعام", "تواصل آمن"), need) { need = it }
+                    ChoiceRowRafiqa(listOf("هدوء", "ماء", "راحة", "حركة", "طعام", "تواصل آمن"), need) { need = it }
                     Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
                         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                             Text("من رفيقة روافد", fontWeight = FontWeight.Bold)
@@ -317,32 +342,23 @@ private fun WomenCompanionScreen(requestNotifications: ((Boolean) -> Unit) -> Un
             Card {
                 Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text("متابعة اليوم", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                    MetricSlider("المزاج", mood, 1, 5) { mood = it }
-                    MetricSlider("الطاقة", energy, 1, 5) { energy = it }
-                    MetricSlider("الألم", pain, 0, 10) { pain = it }
+                    MetricSliderRafiqa("المزاج", mood, 1, 5) { mood = it }
+                    MetricSliderRafiqa("الطاقة", energy, 1, 5) { energy = it }
+                    MetricSliderRafiqa("الألم", pain, 0, 10) { pain = it }
                     Text("النزف", fontWeight = FontWeight.Bold)
-                    ChoiceRow(listOf("none", "light", "moderate", "heavy"), bleeding, labels = mapOf("none" to "لا يوجد", "light" to "خفيف", "moderate" to "متوسط", "heavy" to "غزير")) { bleeding = it }
-                    OutlinedTextField(
-                        value = note,
-                        onValueChange = { note = it.take(600) },
-                        modifier = Modifier.fillMaxWidth(),
-                        minLines = 3,
-                        label = { Text("ملاحظة خاصة اختيارية") }
-                    )
+                    ChoiceRowRafiqa(
+                        listOf("none", "light", "moderate", "heavy"), bleeding,
+                        mapOf("none" to "لا يوجد", "light" to "خفيف", "moderate" to "متوسط", "heavy" to "غزير")
+                    ) { bleeding = it }
+                    OutlinedTextField(value = note, onValueChange = { note = it.take(600) }, modifier = Modifier.fillMaxWidth(), minLines = 3, label = { Text("ملاحظة خاصة اختيارية") })
                     Button(onClick = {
-                        WomenCompanionStore.saveToday(
-                            context,
-                            WomenEntry(today, mood, energy, pain, bleeding, feeling, need, note.trim())
-                        )
+                        WomenCompanionStore.saveToday(context, WomenEntry(today, mood, energy, pain, bleeding, feeling, need, note.trim()))
                         savedMessage = "تم حفظ متابعة اليوم على هذا الهاتف."
                         version++
                     }) { Text("حفظ متابعة اليوم") }
                     if (savedMessage.isNotBlank()) Text(savedMessage, color = MaterialTheme.colorScheme.primary)
                     if (pain >= 8 || bleeding == "heavy") {
-                        Text(
-                            "إذا كان الألم شديدًا جدًا، أو كان النزف مختلفًا بوضوح عن المعتاد لديك، أو ترافق مع دوخة شديدة/إغماء أو شعور بأنك لست بخير، فاطلبي تقييمًا طبيًا مناسبًا بدل الاعتماد على التطبيق.",
-                            color = MaterialTheme.colorScheme.error
-                        )
+                        Text("إذا كان الألم شديدًا جدًا أو النزف مختلفًا بوضوح عن المعتاد، أو ترافق مع دوخة شديدة/إغماء أو شعور بأنك لست بخير، فاطلبي تقييمًا طبيًا مناسبًا.", color = MaterialTheme.colorScheme.error)
                     }
                 }
             }
@@ -351,14 +367,9 @@ private fun WomenCompanionScreen(requestNotifications: ((Boolean) -> Unit) -> Un
         item {
             Card {
                 Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text("تقويم المرأة", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                    Text("افتحي تقويم المرأة لتسجيل النمط عبر الأيام ومراجعة المزاج والطاقة والألم والنزف. الرفيقة لا تحول هذه البيانات إلى تشخيص أو تنبؤ بالخصوبة.")
-                    Button(onClick = {
-                        context.startActivity(
-                            Intent(context, WebActivity::class.java)
-                                .putExtra(WebActivity.EXTRA_URL, "https://healthrenewal.org/sectors/calendars/women")
-                        )
-                    }) {
+                    Text("تقويم المرأة المتقدم", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                    Text("يتابع الدورة والمزاج والطاقة والنوم والألم والصداع وألم الحوض والنزف، ويعرض اتجاهات آخر 30 يومًا محليًا.")
+                    Button(onClick = { context.startActivity(Intent(context, WomenCalendarActivity::class.java)) }) {
                         Icon(Icons.Default.CalendarMonth, contentDescription = null)
                         Spacer(Modifier.size(8.dp))
                         Text("فتح تقويم المرأة")
@@ -371,32 +382,32 @@ private fun WomenCompanionScreen(requestNotifications: ((Boolean) -> Unit) -> Un
             Card {
                 Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text("رسائل رفيقة روافد", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                    Text("بنك المحتوى الحالي: ${CompanionContentBank.count()} رسالة أساسية موزعة على ${CompanionContentBank.categories().size} سياقًا، مع منع إعادة آخر 48 رسالة قدر الإمكان.")
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         Column(Modifier.weight(1f)) {
                             Text("تفعيل الرفيقة خلال اليوم", fontWeight = FontWeight.Bold)
-                            Text("اختياري، ويحترم ساعات الصمت العامة في «اهتم بي».", style = MaterialTheme.typography.bodySmall)
+                            Text("اختياري ويحترم ساعات الصمت.", style = MaterialTheme.typography.bodySmall)
                         }
                         Switch(checked = reminderEnabled, onCheckedChange = { enabled ->
                             if (!enabled) {
-                                WomenCompanionStore.setReminderEnabled(context, false)
-                                WomenCompanionScheduler.sync(context)
-                                version++
-                            } else {
-                                requestNotifications { granted ->
-                                    if (granted) {
-                                        WomenCompanionStore.setReminderEnabled(context, true)
-                                        WomenCompanionScheduler.sync(context)
-                                        version++
-                                    }
+                                WomenCompanionStore.setReminderEnabled(context, false); WomenCompanionScheduler.sync(context); version++
+                            } else requestNotifications { granted ->
+                                if (granted) {
+                                    WomenCompanionStore.setReminderEnabled(context, true); WomenCompanionScheduler.sync(context); version++
                                 }
                             }
                         })
                     }
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        Column(Modifier.weight(1f)) {
+                            Text("أيام العناية المفاجئة", fontWeight = FontWeight.Bold)
+                            Text("وعي بالثدي، عناية شخصية، مراجعة النوم والطاقة، ومراجعة نمط الدورة. يمكنك إيقافها بالكامل.", style = MaterialTheme.typography.bodySmall)
+                        }
+                        Switch(checked = careDaysEnabled, onCheckedChange = { WomenCompanionStore.setCareDaysEnabled(context, it); version++ })
+                    }
                     Text("كل كم ساعة؟", fontWeight = FontWeight.Bold)
-                    ChoiceRow(listOf("120", "240", "360"), reminderMinutes.toString(), labels = mapOf("120" to "ساعتان", "240" to "4 ساعات", "360" to "6 ساعات")) {
-                        WomenCompanionStore.setReminderMinutes(context, it.toLong())
-                        WomenCompanionScheduler.sync(context)
-                        version++
+                    ChoiceRowRafiqa(listOf("120", "240", "360"), reminderMinutes.toString(), mapOf("120" to "ساعتان", "240" to "4 ساعات", "360" to "6 ساعات")) {
+                        WomenCompanionStore.setReminderMinutes(context, it.toLong()); WomenCompanionScheduler.sync(context); version++
                     }
                     Text("الحد الأقصى اليومي: $reminderMax", fontWeight = FontWeight.Bold)
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -410,18 +421,22 @@ private fun WomenCompanionScreen(requestNotifications: ((Boolean) -> Unit) -> Un
         item {
             Card {
                 Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text("كيف يكون يوم الوعي بصحة الثدي؟", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                    Text("رفيقة روافد لا تطلب فحصًا تشخيصيًا ذاتيًا بخطوات إلزامية. تذكرك بمعرفة الشكل والإحساس المعتاد لديك، والانتباه إلى تغير جديد مثل كتلة، تغير الجلد أو الحلمة، إفراز جديد، أو تغير مستمر، ثم التواصل مع مختصة بدل محاولة التشخيص بنفسك.")
+                    Text("الوعي الذاتي لا يستبدل التصوير أو برامج التحري الموصى بها حسب العمر والخطورة.", style = MaterialTheme.typography.bodySmall)
+                }
+            }
+        }
+
+        item {
+            Card {
+                Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Icon(Icons.Default.Lock, contentDescription = null)
                         Text("فضفضي ثم اتركيها", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                     }
                     Text("هذا النص لا يُكتب إلى التخزين المحلي ولا إلى الخادم؛ يبقى في ذاكرة الشاشة فقط.")
-                    OutlinedTextField(
-                        value = vent,
-                        onValueChange = { vent = it.take(4000) },
-                        modifier = Modifier.fillMaxWidth(),
-                        minLines = 5,
-                        label = { Text("اكتبي ما في بالك") }
-                    )
+                    OutlinedTextField(value = vent, onValueChange = { vent = it.take(4000) }, modifier = Modifier.fillMaxWidth(), minLines = 5, label = { Text("اكتبي ما في بالك") })
                     Button(enabled = vent.isNotBlank(), onClick = { vent = "" }) {
                         Icon(Icons.Default.AutoAwesome, contentDescription = null)
                         Spacer(Modifier.size(8.dp))
@@ -435,10 +450,8 @@ private fun WomenCompanionScreen(requestNotifications: ((Boolean) -> Unit) -> Un
             Card {
                 Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text("مساحتك وحدودك", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                    Text("يمكنك أن تقولي: أحتاج وقتًا، لا أستطيع الآن، أريد أن أفكر أولًا، أحتاج أن أتحدث مع شخص أثق به. الحدود ليست إساءة للآخرين.")
-                    OutlinedButton(onClick = {
-                        context.startActivity(Intent(context, MainActivity::class.java).putExtra("destination", "safety"))
-                    }) {
+                    Text("يمكنك أن تقولي: أحتاج وقتًا، لا أستطيع الآن، أريد أن أفكر أولًا، أو أحتاج أن أتحدث مع شخص أثق به. الحدود ليست إساءة للآخرين.")
+                    OutlinedButton(onClick = { context.startActivity(Intent(context, MainActivity::class.java).putExtra("destination", "safety")) }) {
                         Icon(Icons.Default.Security, contentDescription = null)
                         Spacer(Modifier.size(8.dp))
                         Text("فتح مركز الأمان")
@@ -458,8 +471,8 @@ private fun WomenCompanionScreen(requestNotifications: ((Boolean) -> Unit) -> Un
                         val avgEnergy = recent.map { it.energy }.average()
                         val maxPain = recent.maxOf { it.pain }
                         Text("أيام مسجلة: ${recent.size}/7")
-                        Text("متوسط المزاج الوصفي: ${"%.1f".format(avgMood)}/5")
-                        Text("متوسط الطاقة الوصفي: ${"%.1f".format(avgEnergy)}/5")
+                        Text("متوسط المزاج الوصفي: ${String.format("%.1f", avgMood)}/5")
+                        Text("متوسط الطاقة الوصفي: ${String.format("%.1f", avgEnergy)}/5")
                         Text("أعلى ألم مسجل: $maxPain/10")
                         Text("هذه أرقام وصفية لبياناتك وليست تفسيرًا طبيًا.", style = MaterialTheme.typography.bodySmall)
                     }
@@ -470,44 +483,19 @@ private fun WomenCompanionScreen(requestNotifications: ((Boolean) -> Unit) -> Un
 }
 
 @Composable
-private fun MetricSlider(label: String, value: Int, min: Int, max: Int, onChange: (Int) -> Unit) {
+private fun MetricSliderRafiqa(label: String, value: Int, min: Int, max: Int, onChange: (Int) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text("$label: $value/$max", fontWeight = FontWeight.Bold)
-        Slider(
-            value = value.toFloat(),
-            onValueChange = { onChange(it.toInt().coerceIn(min, max)) },
-            valueRange = min.toFloat()..max.toFloat(),
-            steps = (max - min - 1).coerceAtLeast(0)
-        )
+        Slider(value = value.toFloat(), onValueChange = { onChange(it.toInt().coerceIn(min, max)) }, valueRange = min.toFloat()..max.toFloat(), steps = (max - min - 1).coerceAtLeast(0))
     }
 }
 
 @Composable
-private fun ChoiceRow(values: List<String>, selected: String, labels: Map<String, String> = emptyMap(), onSelect: (String) -> Unit) {
+private fun ChoiceRowRafiqa(values: List<String>, selected: String, labels: Map<String, String> = emptyMap(), onSelect: (String) -> Unit) {
     LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         items(values.size) { index ->
             val value = values[index]
-            FilterChip(
-                selected = selected == value,
-                onClick = { onSelect(value) },
-                label = { Text(labels[value] ?: value) }
-            )
+            FilterChip(selected = selected == value, onClick = { onSelect(value) }, label = { Text(labels[value] ?: value) })
         }
-    }
-}
-
-private fun companionMessage(mood: Int, energy: Int, pain: Int, bleeding: String, feeling: String, need: String): String {
-    return when {
-        feeling == "قلقة" -> "أنتِ لا تحتاجين إلى حل كل ما يقلقك الآن. حددي الشيء الأقرب: ما الذي يحدث؟ ما الذي تحت سيطرتك؟ وما الخطوة الأصغر التي تستطيعين أخذها؟"
-        feeling == "متعبة" || energy <= 2 -> "طاقتك منخفضة اليوم؛ خففي سقف التوقعات واختاري ما هو ضروري فعلًا. الراحة ليست شيئًا يجب أن تستحقيه بالإنجاز."
-        pain >= 7 -> "الألم الذي يضغط على يومك يستحق أن يؤخذ بجدية. سجلي توقيته وما يؤثر فيه، وخففي ما تستطيعين من العبء. إذا كان شديدًا أو مختلفًا بوضوح عن المعتاد فاطلبي تقييمًا مناسبًا."
-        bleeding == "heavy" -> "سجلي أن النزف اليوم غزير وقارنيه بما هو معتاد لديك. إذا كان غير معتاد أو ترافق مع شعور بأنك لست بخير، لا تعتمدي على التتبع وحده واطلبي رعاية مناسبة."
-        need == "ماء" -> "خذي استراحة قصيرة واشربي ماءً إذا كان مناسبًا لك ولا توجد لديك تعليمات طبية تحد السوائل. ثم عودي لما كنت تفعلينه بهدوء."
-        need == "راحة" -> "اختاري راحة حقيقية، حتى لو كانت عشر دقائق بلا شاشة أو مطالب. لا تحولي الاستراحة إلى قائمة مهام جديدة."
-        need == "حركة" -> "قفي وتحركي بلطف حسب قدرتك: خطوات قليلة، تمدد بسيط أو تغيير وضعية. الهدف أن تشعري أفضل، لا أن تعاقبي جسدك."
-        need == "طعام" -> "إذا كنت جائعة، خذي احتياجك بجدية واختاري طعامًا مناسبًا لك ومتاحًا بدل تأجيل الأكل حتى يشتد الإرهاق."
-        need == "تواصل آمن" -> "اختاري شخصًا تشعرين معه بالأمان. يمكنك أن تقولي له بوضوح: لا أحتاج حلًا الآن، أحتاج فقط أن تسمعني أو تبقى معي قليلًا."
-        mood >= 4 -> "يبدو أن يومك أفضل نسبيًا الآن. احتفظي بالشيء الذي ساعدك اليوم؛ التفاصيل الصغيرة التي تنفعك تستحق أن تُلاحظ."
-        else -> "كوني لطيفة ودقيقة مع نفسك: ماذا تحتاجين خلال الساعة القادمة فقط؟ اختاري احتياجًا واحدًا بدل محاولة إصلاح اليوم كله دفعة واحدة."
     }
 }
