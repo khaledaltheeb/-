@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.CALL_PHONE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
@@ -22,7 +23,39 @@
         <activity android:name=".ReadingModeActivity" android:exported="false" />
         <activity android:name=".SymptomJournalActivity" android:exported="false" />
         <activity android:name=".LibraryActivity" android:exported="false" />
+        <activity android:name=".QuickToolsActivity" android:exported="false" />
         <activity android:name=".EmergencyActivity" android:exported="false" />
+        <activity
+            android:name=".EmergencyCardActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true" />
+
+        <service
+            android:name=".SafetyAccessibilityService"
+            android:exported="true"
+            android:label="@string/safety_tile_label"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/safety_accessibility_service" />
+        </service>
+
+        <service
+            android:name=".EmergencyTileService"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher"
+            android:label="@string/safety_tile_label"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+            <meta-data android:name="android.service.quicksettings.ACTIVE_TILE" android:value="true" />
+        </service>
 
         <receiver android:name=".CompanionAlarmReceiver" android:exported="false" />
         <receiver android:name=".CompanionRescheduleReceiver" android:exported="true">
