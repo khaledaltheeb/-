@@ -15,6 +15,8 @@ public final class SafetyTriggerConfig {
     public static final String ACTION_CARD="card";
     public static final String ACTION_CENTER="center";
     public static final String ACTION_CALL_PRIMARY="call_primary";
+    public static final String ACTION_SMS_PRIMARY="sms_primary";
+    public static final String ACTION_WHATSAPP_PRIMARY="whatsapp_primary";
 
     public static final int MIN_PRESSES=2;
     public static final int MAX_PRESSES=6;
@@ -43,7 +45,10 @@ public final class SafetyTriggerConfig {
     }
 
     public static String normalizeAction(String action){
-        if(ACTION_CENTER.equals(action)||ACTION_CALL_PRIMARY.equals(action)) return action;
+        if(ACTION_CENTER.equals(action)
+                || ACTION_CALL_PRIMARY.equals(action)
+                || ACTION_SMS_PRIMARY.equals(action)
+                || ACTION_WHATSAPP_PRIMARY.equals(action)) return action;
         return ACTION_CARD;
     }
 
