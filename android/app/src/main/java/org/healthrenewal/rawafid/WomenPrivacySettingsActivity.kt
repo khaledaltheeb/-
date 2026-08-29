@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 class WomenPrivacySettingsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WomenPrivacyStore.markSetupSeen(this)
         setContent {
             RawafidTheme {
                 Surface(Modifier.fillMaxSize()) { WomenPrivacySettingsScreen() }
