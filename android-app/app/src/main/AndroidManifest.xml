@@ -24,6 +24,7 @@
         <activity android:name=".SymptomJournalActivity" android:exported="false" />
         <activity android:name=".LibraryActivity" android:exported="false" />
         <activity android:name=".QuickToolsActivity" android:exported="false" />
+        <activity android:name=".EmergencyShortcutActivity" android:exported="false" />
         <activity android:name=".EmergencyActivity" android:exported="false" />
         <activity
             android:name=".EmergencyCardActivity"
