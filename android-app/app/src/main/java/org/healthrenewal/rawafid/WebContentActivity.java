@@ -29,11 +29,12 @@ import java.util.Locale;
 /** Hardened first-party Rawafid reader with a native library/share/reading toolbar. */
 public final class WebContentActivity extends AppCompatActivity {
     public static final String EXTRA_URL="rawafid_url";
-    private static final String BASE="https://healthrenewal.org";
 
     private final int teal=Color.rgb(11,107,103);
     private SecurePrefs prefs;
+    private LinearLayout root;
     private WebView webView;
+    private View errorPanel;
     private Button saveButton;
     private String currentUrl="";
     private String currentTitle="";
@@ -67,13 +68,17 @@ public final class WebContentActivity extends AppCompatActivity {
     }
 
     @Override protected void onDestroy(){
-        if(webView!=null){ webView.stopLoading(); webView.destroy(); webView=null; }
+        if(webView!=null){
+            webView.stopLoading();
+            webView.destroy();
+            webView=null;
+        }
         super.onDestroy();
     }
 
     @SuppressLint("SetJavaScriptEnabled")
     private void render(){
-        LinearLayout root=new LinearLayout(this);
+        root=new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
         root.setBackgroundColor(Color.rgb(248,251,250));
@@ -128,6 +133,8 @@ public final class WebContentActivity extends AppCompatActivity {
                 currentUrl=finishedUrl;
                 currentTitle=cleanTitle(view.getTitle(),Uri.parse(finishedUrl));
                 pageReady=true;
+                dismissErrorPanel();
+                webView.setVisibility(View.VISIBLE);
                 markOpenedIfSaved();
                 refreshSaveButton();
                 applyReadingMode();
@@ -222,12 +229,16 @@ public final class WebContentActivity extends AppCompatActivity {
     }
 
     private void showError(){
-        if(isFinishing()||webView==null) return;
+        if(isFinishing()||webView==null||root==null||errorPanel!=null) return;
+        pageReady=false;
         webView.stopLoading();
+        webView.setVisibility(View.GONE);
+
         LinearLayout box=new LinearLayout(this);
         box.setOrientation(LinearLayout.VERTICAL);
         box.setGravity(Gravity.CENTER);
         box.setPadding(dp(24),dp(24),dp(24),dp(24));
+        box.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
         TextView message=new TextView(this);
         message.setText("تعذر تحميل الصفحة. تحقق من الاتصال ثم أعد المحاولة.");
         message.setTextSize(16);
@@ -239,9 +250,23 @@ public final class WebContentActivity extends AppCompatActivity {
         retry.setAllCaps(false);
         retry.setTextColor(Color.WHITE);
         retry.setBackgroundColor(teal);
-        retry.setOnClickListener(v->{ setContentView(webView); webView.loadUrl(currentUrl); });
-        LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(-1,dp(56)); p.setMargins(0,dp(16),0,0); box.addView(retry,p);
-        setContentView(box);
+        retry.setOnClickListener(v->{
+            dismissErrorPanel();
+            webView.setVisibility(View.VISIBLE);
+            webView.loadUrl(currentUrl);
+        });
+        LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(-1,dp(56));
+        p.setMargins(0,dp(16),0,0);
+        box.addView(retry,p);
+        errorPanel=box;
+        root.addView(box,new LinearLayout.LayoutParams(-1,0,1f));
+    }
+
+    private void dismissErrorPanel(){
+        if(errorPanel!=null&&root!=null){
+            root.removeView(errorPanel);
+            errorPanel=null;
+        }
     }
 
     private void openExternal(Uri uri){
