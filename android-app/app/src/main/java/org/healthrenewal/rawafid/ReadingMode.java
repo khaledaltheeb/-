@@ -27,22 +27,27 @@ public final class ReadingMode {
 
     public static String webScript(Settings input){
         Settings s=input==null?Settings.defaults():input;
-        String bg=s.night?"#121817":s.highContrast?"#ffffff":"#fffdfa";
-        String fg=s.night?"#f2f5f4":"#18211f";
-        String muted=s.night?"#c8d0ce":"#4b5754";
-        String link=s.night?"#78d8d2":"#075e5b";
-        String border=s.night?"#394441":"#d8e1df";
+        String bg=s.night?"#101513":s.highContrast?"#ffffff":"#fffdfa";
+        String surface=s.night?"#19211e":"#ffffff";
+        String field=s.night?"#202a26":"#ffffff";
+        String fg=s.night?"#f7faf9":"#17211e";
+        String muted=s.night?"#c9d4d0":"#46534f";
+        String link=s.night?"#8ce3dc":"#075e5b";
+        String border=s.night?"#52625c":"#cbd9d5";
+        String placeholder=s.night?"#aebbb6":"#66736f";
         return "(function(){"+
                 "var id='rawafid-reading-mode-v1';var st=document.getElementById(id);"+
                 "if(!st){st=document.createElement('style');st.id=id;document.head.appendChild(st);}"+
                 "st.textContent='html,body{background:"+bg+"!important;color:"+fg+"!important;}"+
                 "body,main,article{font-size:"+s.textScale+"%!important;}"+
                 "p,li,blockquote,dd,dt{line-height:"+(s.lineHeight/100.0)+"!important;}"+
-                "p,li,blockquote,dd,dt,h1,h2,h3,h4,h5,h6{color:"+fg+"!important;}"+
-                "a{color:"+link+"!important;}"+
-                "small,time,.text-muted,[class*=muted]{color:"+muted+"!important;}"+
-                "article,main,section,[class*=card]{border-color:"+border+"!important;}"+
-                (s.night?"img,video{filter:brightness(.88) contrast(.96);}":"")+
+                "p,li,blockquote,dd,dt,h1,h2,h3,h4,h5,h6,label,legend{color:"+fg+"!important;}"+
+                "a{color:"+link+"!important;text-decoration-color:"+link+"!important;}"+
+                "small,time,.text-muted,[class*=muted],[class*=secondary]{color:"+muted+"!important;}"+
+                "input,textarea,select{background:"+field+"!important;color:"+fg+"!important;border-color:"+border+"!important;caret-color:"+link+"!important;}"+
+                "input::placeholder,textarea::placeholder{color:"+placeholder+"!important;opacity:1!important;}"+
+                "article,main,section,[class*=card],[class*=panel],[role=dialog]{border-color:"+border+"!important;}"+
+                (s.night?"[class*=card],[class*=panel],[role=dialog]{background-color:"+surface+"!important;}button{border-color:"+border+"!important;}img,video{filter:brightness(.84) contrast(1.02);}":"")+
                 "';"+
                 "document.documentElement.dataset.rawafidReading='1';"+
                 "})();";
