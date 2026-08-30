@@ -64,17 +64,24 @@ import org.json.JSONObject
 enum class CirclePermission(val id: String, val label: String) {
     EMERGENCY("emergency", "جهة موثوقة للطوارئ"),
     SAFE_ARRIVAL("safe_arrival", "وصلت بالسلامة / Check-in"),
-    LOCATION_SAFETY("location_safety", "استلام موقع مراقبة الأمان"),
+    LOCATION_SAFETY("location_safety", "استلام موقع مراقبة الأمان عبر SMS"),
     CARE("care", "مهام الرعاية"),
     HEALTH_SUMMARY("health_summary", "ملخص صحي أختار مشاركته"),
     SUPPORT("support", "أحتاجك / دعم وتواصل")
 }
 
-data class CirclePerson(val id: Long, val name: String, val relation: String, val phone: String, val permissions: Set<CirclePermission>)
+data class CirclePerson(
+    val id: Long,
+    val name: String,
+    val relation: String,
+    val phone: String,
+    val permissions: Set<CirclePermission>
+)
 
 object MyCircleStore {
     private const val PREFS = "rawafid_my_circle_v1"
     private fun prefs(context: Context) = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+
     fun people(context: Context): List<CirclePerson> {
         val raw = prefs(context).getString("people", "[]") ?: "[]"
         return runCatching {
@@ -82,27 +89,55 @@ object MyCircleStore {
             buildList {
                 for (i in 0 until a.length()) {
                     val o = a.optJSONObject(i) ?: continue
-                    val ids = buildSet { val p = o.optJSONArray("permissions") ?: JSONArray(); for (j in 0 until p.length()) add(p.optString(j)) }
-                    add(CirclePerson(o.optLong("id"), o.optString("name"), o.optString("relation"), o.optString("phone"), CirclePermission.entries.filterTo(mutableSetOf()) { it.id in ids }))
+                    val ids = buildSet {
+                        val p = o.optJSONArray("permissions") ?: JSONArray()
+                        for (j in 0 until p.length()) add(p.optString(j))
+                    }
+                    add(
+                        CirclePerson(
+                            o.optLong("id"),
+                            o.optString("name"),
+                            o.optString("relation"),
+                            o.optString("phone"),
+                            CirclePermission.entries.filterTo(mutableSetOf()) { it.id in ids }
+                        )
+                    )
                 }
             }.take(20)
         }.getOrDefault(emptyList())
     }
+
     fun save(context: Context, people: List<CirclePerson>) {
         val a = JSONArray()
         people.take(20).forEach { person ->
-            val permissions = JSONArray(); person.permissions.forEach { permissions.put(it.id) }
-            a.put(JSONObject().put("id", person.id).put("name", person.name).put("relation", person.relation).put("phone", person.phone).put("permissions", permissions))
+            val permissions = JSONArray()
+            person.permissions.forEach { permissions.put(it.id) }
+            a.put(
+                JSONObject()
+                    .put("id", person.id)
+                    .put("name", person.name)
+                    .put("relation", person.relation)
+                    .put("phone", person.phone)
+                    .put("permissions", permissions)
+            )
         }
         prefs(context).edit().putString("people", a.toString()).apply()
     }
-    fun forPermission(context: Context, permission: CirclePermission): List<CirclePerson> = people(context).filter { permission in it.permissions }
+
+    fun forPermission(context: Context, permission: CirclePermission): List<CirclePerson> =
+        people(context).filter { permission in it.permissions }
 }
 
 class MyCircleActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent { RawafidTheme { CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) { Surface(Modifier.fillMaxSize()) { MyCircleScreen() } } } }
+        setContent {
+            RawafidTheme {
+                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                    Surface(Modifier.fillMaxSize()) { MyCircleScreen() }
+                }
+            }
+        }
     }
 }
 
@@ -130,110 +165,266 @@ private fun MyCircleScreen() {
     var localName by rememberSaveable { mutableStateOf("") }
     var localRelation by rememberSaveable { mutableStateOf("") }
     var localPhone by rememberSaveable { mutableStateOf("") }
-    var localPermissions by remember { mutableStateOf(setOf(CirclePermission.EMERGENCY, CirclePermission.LOCATION_SAFETY)) }
+    var localPermissions by remember {
+        mutableStateOf(setOf(CirclePermission.EMERGENCY, CirclePermission.LOCATION_SAFETY))
+    }
     val localPeople = remember(localVersion) { MyCircleStore.people(context) }
 
-    fun task(success: String = "", block: () -> Unit) {
+    fun runTask(success: String = "", operation: () -> Unit, afterSuccess: () -> Unit = {}) {
         if (loading) return
         scope.launch {
-            loading = true; error = ""; status = ""
-            runCatching { withContext(Dispatchers.IO) { block() } }
-                .onSuccess { if (success.isNotBlank()) status = success }
-                .onFailure { error = it.message ?: "تعذر إكمال العملية." }
+            loading = true
+            error = ""
+            status = ""
+            val result = withContext(Dispatchers.IO) { runCatching { operation() } }
+            result.onSuccess {
+                afterSuccess()
+                if (success.isNotBlank()) status = success
+            }.onFailure {
+                error = it.message ?: "تعذر إكمال العملية."
+            }
             loading = false
         }
     }
 
     LaunchedEffect(refresh, signedIn) {
-        if (!signedIn) { identity = ""; pending = emptyList(); connections = emptyList(); return@LaunchedEffect }
-        loading = true; error = ""
-        runCatching { withContext(Dispatchers.IO) { Triple(RawafidCircleApi.myIdentity(context), RawafidCircleApi.pendingRequests(context), RawafidCircleApi.connections(context)) } }
-            .onSuccess { identity = it.first; pending = it.second; connections = it.third }
-            .onFailure { error = it.message ?: "تعذر تحميل دائرتك." }
+        if (!signedIn) {
+            identity = ""
+            pending = emptyList()
+            connections = emptyList()
+            return@LaunchedEffect
+        }
+        loading = true
+        error = ""
+        val result = withContext(Dispatchers.IO) {
+            runCatching {
+                Triple(
+                    RawafidCircleApi.myIdentity(context),
+                    RawafidCircleApi.pendingRequests(context),
+                    RawafidCircleApi.connections(context)
+                )
+            }
+        }
+        result.onSuccess {
+            identity = it.first
+            pending = it.second
+            connections = it.third
+        }.onFailure { error = it.message ?: "تعذر تحميل دائرتك." }
         loading = false
     }
 
     LaunchedEffect(permissionsTarget?.connectionId, refresh) {
         val target = permissionsTarget ?: return@LaunchedEffect
-        runCatching { withContext(Dispatchers.IO) { RawafidCircleApi.permissionSnapshot(context, target.connectionId) } }
-            .onSuccess { permissionSnapshot = it }.onFailure { error = it.message ?: "تعذر تحميل الصلاحيات." }
+        val result = withContext(Dispatchers.IO) {
+            runCatching { RawafidCircleApi.permissionSnapshot(context, target.connectionId) }
+        }
+        result.onSuccess { permissionSnapshot = it }
+            .onFailure { error = it.message ?: "تعذر تحميل الصلاحيات." }
     }
 
-    LazyColumn(contentPadding = PaddingValues(RawafidSpacing.ScreenHorizontal), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Md)) {
+    LazyColumn(
+        contentPadding = PaddingValues(RawafidSpacing.ScreenHorizontal),
+        verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Md)
+    ) {
         item {
             Column(verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
                 Text("دائرتي — Rawafid Circle", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-                Text("تواصل خاص للرعاية والأمان: رسائل اختيارية، أسئلة سريعة، طلب موقع وصلاحيات مستقلة. معرفة المعرّف وحدها لا تمنح أي وصول.")
+                Text("تواصل خاص للرعاية والأمان. معرفة المعرّف وحدها لا تمنح أي وصول، ولا يبدأ التواصل قبل موافقة الطرفين.")
             }
         }
 
         if (!signedIn) {
             item {
-                Card { Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)) {
-                    Text("اربط دائرتك بين الأجهزة", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                    Text("سجّل الدخول أو أنشئ حسابًا لتحصل على معرّف روافد ثابت وتضيف أفراد أسرتك ومقدمي الرعاية بموافقتهم.")
-                    Button(onClick = { context.startActivity(Intent(context, CircleAccountActivity::class.java)) }) { Text("حساب روافد") }
-                    OutlinedButton(onClick = { refresh++ }) { Text("تحديث بعد تسجيل الدخول") }
-                } }
+                Card {
+                    Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)) {
+                        Text("اربط دائرتك بين الأجهزة", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                        Text("سجّل الدخول أو أنشئ حسابًا للحصول على معرّف روافد ثابت وإضافة أفراد الأسرة أو مقدمي الرعاية بموافقتهم.")
+                        Button(onClick = { context.startActivity(Intent(context, CircleAccountActivity::class.java)) }) { Text("حساب روافد") }
+                        OutlinedButton(onClick = { refresh++ }) { Text("تحديث بعد تسجيل الدخول") }
+                    }
+                }
             }
         } else {
             item {
-                Card { Column(Modifier.fillMaxWidth().padding(RawafidSpacing.CardContent), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)) {
-                    Text("معرّف روافد الخاص بي", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                    Text(if (identity.isBlank()) "جارٍ إنشاء المعرّف..." else identity, style = MaterialTheme.typography.titleMedium)
-                    if (identity.isNotBlank()) {
-                        val qr = remember(identity) { rawafidQr(identity) }
-                        Image(qr.asImageBitmap(), contentDescription = "QR لمعرّف روافد", modifier = Modifier.size(190.dp))
-                        FlowRow(horizontalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
-                            OutlinedButton(onClick = { (context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).setPrimaryClip(ClipData.newPlainText("Rawafid ID", identity)); status = "تم نسخ المعرّف." }) { Text("نسخ") }
-                            OutlinedButton(onClick = { context.startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).apply { type = "text/plain"; putExtra(Intent.EXTRA_TEXT, "أضفني إلى دائرتك في روافد: $identity") }, "مشاركة المعرّف")) }) { Text("مشاركة") }
-                            OutlinedButton(enabled = !loading, onClick = { refresh++ }) { Text("تحديث") }
+                Card {
+                    Column(
+                        Modifier.fillMaxWidth().padding(RawafidSpacing.CardContent),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)
+                    ) {
+                        Text("معرّف روافد الخاص بي", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                        Text(if (identity.isBlank()) "جارٍ إنشاء المعرّف..." else identity, style = MaterialTheme.typography.titleMedium)
+                        if (identity.isNotBlank()) {
+                            val qr = remember(identity) { rawafidQr(identity) }
+                            Image(qr.asImageBitmap(), contentDescription = "QR لمعرّف روافد", modifier = Modifier.size(190.dp))
+                            FlowRow(horizontalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
+                                OutlinedButton(onClick = {
+                                    (context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager)
+                                        .setPrimaryClip(ClipData.newPlainText("Rawafid ID", identity))
+                                    status = "تم نسخ المعرّف."
+                                }) { Text("نسخ") }
+                                OutlinedButton(onClick = {
+                                    context.startActivity(
+                                        Intent.createChooser(
+                                            Intent(Intent.ACTION_SEND).apply {
+                                                type = "text/plain"
+                                                putExtra(Intent.EXTRA_TEXT, "أضفني إلى دائرتك في روافد: $identity")
+                                            },
+                                            "مشاركة المعرّف"
+                                        )
+                                    )
+                                }) { Text("مشاركة") }
+                                OutlinedButton(enabled = !loading, onClick = { refresh++ }) { Text("تحديث") }
+                            }
                         }
                     }
-                } }
+                }
             }
+
             item {
-                Card { Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)) {
-                    Text("إضافة شخص", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                    OutlinedTextField(targetId, { targetId = CircleRules.normalizeRawafidId(it).take(24) }, label = { Text("معرّف روافد — RFD-....") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-                    OutlinedTextField(targetLabel, { targetLabel = it.take(80) }, label = { Text("من هو بالنسبة لي؟ مثال: ابني، أبي، مقدم الرعاية") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-                    FlowRow(horizontalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
-                        Button(enabled = !loading && CircleRules.isValidRawafidId(targetId) && targetLabel.isNotBlank(), onClick = {
-                            task("تم إرسال طلب الارتباط.") { RawafidCircleApi.sendConnectionRequest(context, targetId, targetLabel); targetId = ""; targetLabel = ""; refresh++ }
-                        }) { Text("إرسال الطلب") }
-                        OutlinedButton(onClick = { val clip = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager; targetId = CircleRules.normalizeRawafidId(clip.primaryClip?.getItemAt(0)?.coerceToText(context)?.toString().orEmpty()).take(24) }) { Text("لصق المعرّف") }
+                Card {
+                    Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)) {
+                        Text("إضافة شخص", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                        OutlinedTextField(
+                            targetId,
+                            { targetId = CircleRules.normalizeRawafidId(it).take(24) },
+                            label = { Text("معرّف روافد — RFD-....") },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true
+                        )
+                        OutlinedTextField(
+                            targetLabel,
+                            { targetLabel = it.take(80) },
+                            label = { Text("من هو بالنسبة لي؟ مثال: ابني، أبي، مقدم الرعاية") },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true
+                        )
+                        FlowRow(horizontalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
+                            Button(
+                                enabled = !loading && CircleRules.isValidRawafidId(targetId) && targetLabel.isNotBlank(),
+                                onClick = {
+                                    val id = targetId
+                                    val label = targetLabel
+                                    runTask(
+                                        success = "تم إرسال طلب الارتباط.",
+                                        operation = { RawafidCircleApi.sendConnectionRequest(context, id, label) },
+                                        afterSuccess = {
+                                            targetId = ""
+                                            targetLabel = ""
+                                            refresh++
+                                        }
+                                    )
+                                }
+                            ) { Text("إرسال الطلب") }
+                            OutlinedButton(onClick = {
+                                val clip = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                targetId = CircleRules.normalizeRawafidId(
+                                    clip.primaryClip?.getItemAt(0)?.coerceToText(context)?.toString().orEmpty()
+                                ).take(24)
+                            }) { Text("لصق المعرّف") }
+                        }
+                        Text("لن يبدأ التواصل قبل قبول الطرف الآخر واختياره الاسم الذي يسجلك به.", style = MaterialTheme.typography.bodySmall)
                     }
-                    Text("لن يبدأ التواصل قبل قبول الطرف الآخر واختياره الاسم الذي يسجلك به.", style = MaterialTheme.typography.bodySmall)
-                } }
+                }
             }
+
             if (pending.isNotEmpty()) {
                 item { Text("طلبات واردة", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold) }
                 items(pending, key = { it.requestId }) { request ->
-                    Card { Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)) {
-                        Text(request.requesterName, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold); Text(request.requesterRawafidId)
-                        OutlinedTextField(pendingLabels[request.requestId].orEmpty(), { pendingLabels[request.requestId] = it.take(80) }, label = { Text("كيف تريد تسجيله عندك؟") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-                        FlowRow(horizontalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
-                            Button(enabled = !loading && pendingLabels[request.requestId].orEmpty().isNotBlank(), onClick = { val label = pendingLabels[request.requestId].orEmpty(); task("تم قبول الارتباط.") { RawafidCircleApi.respondToRequest(context, request.requestId, true, label); pendingLabels.remove(request.requestId); refresh++ } }) { Text("قبول") }
-                            OutlinedButton(enabled = !loading, onClick = { task("تم رفض الطلب.") { RawafidCircleApi.respondToRequest(context, request.requestId, false, ""); pendingLabels.remove(request.requestId); refresh++ } }) { Text("رفض") }
+                    Card {
+                        Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)) {
+                            Text(request.requesterName, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                            Text(request.requesterRawafidId)
+                            OutlinedTextField(
+                                pendingLabels[request.requestId].orEmpty(),
+                                { pendingLabels[request.requestId] = it.take(80) },
+                                label = { Text("كيف تريد تسجيله عندك؟") },
+                                modifier = Modifier.fillMaxWidth(),
+                                singleLine = true
+                            )
+                            FlowRow(horizontalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
+                                Button(
+                                    enabled = !loading && pendingLabels[request.requestId].orEmpty().isNotBlank(),
+                                    onClick = {
+                                        val label = pendingLabels[request.requestId].orEmpty()
+                                        runTask(
+                                            success = "تم قبول الارتباط.",
+                                            operation = { RawafidCircleApi.respondToRequest(context, request.requestId, true, label) },
+                                            afterSuccess = {
+                                                pendingLabels.remove(request.requestId)
+                                                refresh++
+                                            }
+                                        )
+                                    }
+                                ) { Text("قبول") }
+                                OutlinedButton(
+                                    enabled = !loading,
+                                    onClick = {
+                                        runTask(
+                                            success = "تم رفض الطلب.",
+                                            operation = { RawafidCircleApi.respondToRequest(context, request.requestId, false, "") },
+                                            afterSuccess = {
+                                                pendingLabels.remove(request.requestId)
+                                                refresh++
+                                            }
+                                        )
+                                    }
+                                ) { Text("رفض") }
+                            }
                         }
-                    } }
+                    }
                 }
             }
-            val permissionPerson = permissionsTarget
-            if (permissionPerson != null) {
-                item { CirclePermissionsCard(permissionPerson, permissionSnapshot, loading, onToggle = { permission, enabled -> task { RawafidCircleApi.setPermission(context, permissionPerson.connectionId, permission, enabled); permissionSnapshot = RawafidCircleApi.permissionSnapshot(context, permissionPerson.connectionId); refresh++ } }, onClose = { permissionsTarget = null; permissionSnapshot = emptyList() }) }
+
+            permissionsTarget?.let { person ->
+                item {
+                    CirclePermissionsCard(
+                        connection = person,
+                        snapshot = permissionSnapshot,
+                        busy = loading,
+                        onToggle = { permission, enabled ->
+                            runTask(
+                                operation = { RawafidCircleApi.setPermission(context, person.connectionId, permission, enabled) },
+                                afterSuccess = { refresh++ }
+                            )
+                        },
+                        onClose = {
+                            permissionsTarget = null
+                            permissionSnapshot = emptyList()
+                        }
+                    )
+                }
             }
+
             item { Text("أشخاصي", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold) }
             if (connections.isEmpty()) item { Text(if (loading) "جارٍ التحميل..." else "لا توجد ارتباطات مقبولة بعد.") }
-            items(connections, key = { it.connectionId }) { c ->
-                Card { Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
-                    Text(c.counterpartName, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold); if (c.myLabel.isNotBlank()) Text(c.myLabel); Text(c.counterpartRawafidId, style = MaterialTheme.typography.bodySmall)
-                    FlowRow(horizontalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
-                        Button(onClick = { context.startActivity(Intent(context, CircleConversationActivity::class.java).apply { putExtra("connection_id", c.connectionId); putExtra("counterpart_name", c.counterpartName); putExtra("my_label", c.myLabel); putExtra("can_message", c.canMessage); putExtra("can_quick_question", c.canQuickQuestion); putExtra("can_request_location", c.canRequestLocation) }) }) { Text("المحادثة") }
-                        OutlinedButton(onClick = { permissionsTarget = c }) { Text("الصلاحيات") }
-                        TextButton(onClick = { removeTarget = c }) { Text("إزالة") }
+            items(connections, key = { it.connectionId }) { connection ->
+                Card {
+                    Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
+                        Text(connection.counterpartName, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                        if (connection.myLabel.isNotBlank()) Text(connection.myLabel)
+                        Text(connection.counterpartRawafidId, style = MaterialTheme.typography.bodySmall)
+                        FlowRow(horizontalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
+                            Button(onClick = {
+                                context.startActivity(
+                                    Intent(context, CircleConversationActivity::class.java).apply {
+                                        putExtra("connection_id", connection.connectionId)
+                                        putExtra("counterpart_name", connection.counterpartName)
+                                        putExtra("my_label", connection.myLabel)
+                                        putExtra("can_message", connection.canMessage)
+                                        putExtra("can_quick_question", connection.canQuickQuestion)
+                                        putExtra("can_request_location", connection.canRequestLocation)
+                                    }
+                                )
+                            }) { Text("المحادثة") }
+                            OutlinedButton(onClick = {
+                                permissionSnapshot = emptyList()
+                                permissionsTarget = connection
+                            }) { Text("الصلاحيات") }
+                            TextButton(onClick = { removeTarget = connection }) { Text("إزالة") }
+                        }
                     }
-                } }
+                }
             }
             item { OutlinedButton(onClick = { context.startActivity(Intent(context, CircleAccountActivity::class.java)) }) { Text("إدارة الحساب") } }
         }
@@ -241,47 +432,146 @@ private fun MyCircleScreen() {
         if (status.isNotBlank()) item { Text(status, color = MaterialTheme.colorScheme.primary) }
         if (error.isNotBlank()) item { Text(error, color = MaterialTheme.colorScheme.error) }
         item { HorizontalDivider() }
-        item { Card { Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)) {
-            Text("جهات الطوارئ على هذا الهاتف", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-            Text("تبقى محلية لتعمل مع الاتصال وSMS ومراقبة الأمان حتى عند ضعف الإنترنت.")
-            OutlinedButton(onClick = { showLocal = !showLocal }) { Text(if (showLocal) "إخفاء" else "إدارة جهات الطوارئ المحلية") }
-        } } }
-        if (showLocal) {
-            item { Card { Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)) {
-                OutlinedTextField(localName, { localName = it.take(80) }, label = { Text("الاسم") }, modifier = Modifier.fillMaxWidth())
-                OutlinedTextField(localRelation, { localRelation = it.take(80) }, label = { Text("العلاقة") }, modifier = Modifier.fillMaxWidth())
-                OutlinedTextField(localPhone, { localPhone = it.take(40) }, label = { Text("رقم الهاتف") }, modifier = Modifier.fillMaxWidth())
-                CirclePermission.entries.forEach { permission -> Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) { Text(permission.label, Modifier.weight(1f)); Checkbox(permission in localPermissions, { yes -> localPermissions = if (yes) localPermissions + permission else localPermissions - permission }) } }
-                Button(enabled = localName.isNotBlank() && localPhone.isNotBlank(), onClick = { MyCircleStore.save(context, localPeople + CirclePerson(System.currentTimeMillis(), localName.trim(), localRelation.trim(), localPhone.trim(), localPermissions)); localName = ""; localRelation = ""; localPhone = ""; localPermissions = setOf(CirclePermission.EMERGENCY, CirclePermission.LOCATION_SAFETY); localVersion++ }) { Text("حفظ جهة الطوارئ") }
-            } } }
-            items(localPeople, key = { it.id }) { person -> Card { Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
-                Text(person.name, fontWeight = FontWeight.Bold); if (person.relation.isNotBlank()) Text(person.relation); Text(person.phone)
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
-                    Button(onClick = { context.startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:${Uri.encode(person.phone)}"))) }) { Text("اتصال") }
-                    OutlinedButton(onClick = { context.startActivity(Intent(Intent.ACTION_SENDTO, Uri.parse("smsto:${Uri.encode(person.phone)}"))) }) { Text("SMS") }
-                    TextButton(onClick = { MyCircleStore.save(context, localPeople.filterNot { it.id == person.id }); localVersion++ }) { Text("إزالة") }
+
+        item {
+            Card {
+                Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)) {
+                    Text("جهات الطوارئ المحلية على هذا الهاتف", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                    Text("مسار مستقل يعمل للاتصال وSMS ومراقبة الأمان حتى عند تعذر الإنترنت. لا يُرفع دفتر الأرقام إلى دائرة روافد.")
+                    OutlinedButton(onClick = { showLocal = !showLocal }) { Text(if (showLocal) "إخفاء" else "إدارة جهات الطوارئ المحلية") }
                 }
-            } } }
+            }
+        }
+
+        if (showLocal) {
+            item {
+                Card {
+                    Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)) {
+                        OutlinedTextField(localName, { localName = it.take(80) }, label = { Text("الاسم") }, modifier = Modifier.fillMaxWidth())
+                        OutlinedTextField(localRelation, { localRelation = it.take(80) }, label = { Text("العلاقة") }, modifier = Modifier.fillMaxWidth())
+                        OutlinedTextField(localPhone, { localPhone = it.take(40) }, label = { Text("رقم الهاتف") }, modifier = Modifier.fillMaxWidth())
+                        CirclePermission.entries.forEach { permission ->
+                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                                Text(permission.label, Modifier.weight(1f))
+                                Checkbox(
+                                    checked = permission in localPermissions,
+                                    onCheckedChange = { yes ->
+                                        localPermissions = if (yes) localPermissions + permission else localPermissions - permission
+                                    }
+                                )
+                            }
+                        }
+                        Button(
+                            enabled = localName.isNotBlank() && localPhone.isNotBlank(),
+                            onClick = {
+                                MyCircleStore.save(
+                                    context,
+                                    localPeople + CirclePerson(
+                                        System.currentTimeMillis(),
+                                        localName.trim(),
+                                        localRelation.trim(),
+                                        localPhone.trim(),
+                                        localPermissions
+                                    )
+                                )
+                                localName = ""
+                                localRelation = ""
+                                localPhone = ""
+                                localPermissions = setOf(CirclePermission.EMERGENCY, CirclePermission.LOCATION_SAFETY)
+                                localVersion++
+                            }
+                        ) { Text("حفظ جهة الطوارئ") }
+                    }
+                }
+            }
+
+            items(localPeople, key = { it.id }) { person ->
+                Card {
+                    Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
+                        Text(person.name, fontWeight = FontWeight.Bold)
+                        if (person.relation.isNotBlank()) Text(person.relation)
+                        Text(person.phone)
+                        FlowRow(horizontalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
+                            Button(onClick = { context.startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:${Uri.encode(person.phone)}"))) }) { Text("اتصال") }
+                            OutlinedButton(onClick = { context.startActivity(Intent(Intent.ACTION_SENDTO, Uri.parse("smsto:${Uri.encode(person.phone)}"))) }) { Text("SMS") }
+                            TextButton(onClick = {
+                                MyCircleStore.save(context, localPeople.filterNot { it.id == person.id })
+                                localVersion++
+                            }) { Text("إزالة") }
+                        }
+                    }
+                }
+            }
         }
     }
 
-    removeTarget?.let { c -> AlertDialog(onDismissRequest = { removeTarget = null }, title = { Text("إزالة الارتباط؟") }, text = { Text("سيتم إيقاف المحادثة والصلاحيات بينكما. يمكن الارتباط مجددًا لاحقًا.") }, confirmButton = { Button(onClick = { removeTarget = null; task("تمت إزالة الارتباط.") { RawafidCircleApi.removeConnection(context, c.connectionId); refresh++ } }) { Text("إزالة") } }, dismissButton = { TextButton(onClick = { removeTarget = null }) { Text("إلغاء") } }) }
+    removeTarget?.let { connection ->
+        AlertDialog(
+            onDismissRequest = { removeTarget = null },
+            title = { Text("إزالة الارتباط؟") },
+            text = { Text("سيتم إيقاف المحادثة والصلاحيات بينكما. يمكن الارتباط مجددًا لاحقًا.") },
+            confirmButton = {
+                Button(onClick = {
+                    removeTarget = null
+                    runTask(
+                        success = "تمت إزالة الارتباط.",
+                        operation = { RawafidCircleApi.removeConnection(context, connection.connectionId) },
+                        afterSuccess = { refresh++ }
+                    )
+                }) { Text("إزالة") }
+            },
+            dismissButton = { TextButton(onClick = { removeTarget = null }) { Text("إلغاء") } }
+        )
+    }
 }
 
 @Composable
-private fun CirclePermissionsCard(connection: CircleConnection, snapshot: List<CirclePermissionSnapshot>, busy: Boolean, onToggle: (String, Boolean) -> Unit, onClose: () -> Unit) {
-    val labels = mapOf("chat" to "السماح له بإرسال رسائل اختيارية لي", "quick_questions" to "السماح له بإرسال أسئلة سريعة لي", "location_request" to "السماح له بطلب موقعي — لا يُرسل دون موافقتي", "emergency" to "السماح له باستلام تنبيهات طوارئي عند تفعيلها", "safe_arrival" to "السماح له باستلام تحديثات الوصول الآمن", "care" to "السماح له بمزايا الرعاية التي أفعّلها")
-    Card { Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)) {
-        Text("صلاحياتي مع ${connection.counterpartName}", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-        Text("كل صلاحية مستقلة ويمكن سحبها في أي وقت.")
-        if (snapshot.isEmpty()) Text("جارٍ تحميل الصلاحيات...")
-        snapshot.forEach { p -> Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) { Column(Modifier.weight(1f)) { Text(labels[p.permission] ?: p.permission); Text(if (p.theirs) "الطرف الآخر يمنحك الصلاحية المقابلة" else "الطرف الآخر لم يمنحك الصلاحية المقابلة", style = MaterialTheme.typography.bodySmall) }; Switch(p.mine, enabled = !busy, onCheckedChange = { onToggle(p.permission, it) }) } }
-        OutlinedButton(onClick = onClose) { Text("إغلاق") }
-    } }
+private fun CirclePermissionsCard(
+    connection: CircleConnection,
+    snapshot: List<CirclePermissionSnapshot>,
+    busy: Boolean,
+    onToggle: (String, Boolean) -> Unit,
+    onClose: () -> Unit
+) {
+    val labels = mapOf(
+        "chat" to "السماح له بإرسال رسائل اختيارية لي",
+        "quick_questions" to "السماح له بإرسال أسئلة سريعة لي",
+        "location_request" to "السماح له بطلب موقعي — لا يُرسل دون موافقتي",
+        "emergency" to "السماح له باستلام تنبيهات طوارئي عند تفعيلها",
+        "safe_arrival" to "السماح له باستلام تحديثات الوصول الآمن",
+        "care" to "السماح له بمزايا الرعاية التي أفعّلها",
+        "safety_location" to "إرسال موقع مراقبة الأمان الخاص بي إليه تلقائيًا عندما أشغّل المراقبة"
+    )
+    Card {
+        Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)) {
+            Text("صلاحياتي مع ${connection.counterpartName}", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            Text("كل صلاحية مستقلة ويمكن سحبها في أي وقت. صلاحية موقع الأمان ترسل موقعك أنت لذلك الشخص؛ ولا تمنحه حق تتبعك خارج مراقبة الأمان.")
+            if (snapshot.isEmpty()) Text("جارٍ تحميل الصلاحيات...")
+            snapshot.forEach { permission ->
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        Text(labels[permission.permission] ?: permission.permission)
+                        Text(
+                            if (permission.theirs) "الطرف الآخر يمنحك الصلاحية المقابلة" else "الطرف الآخر لم يمنحك الصلاحية المقابلة",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                    Switch(permission.mine, enabled = !busy, onCheckedChange = { onToggle(permission.permission, it) })
+                }
+            }
+            OutlinedButton(onClick = onClose) { Text("إغلاق") }
+        }
+    }
 }
 
 private fun rawafidQr(text: String): Bitmap {
-    val size = 720; val matrix = QRCodeWriter().encode(text, BarcodeFormat.QR_CODE, size, size); val pixels = IntArray(size * size)
-    for (y in 0 until size) for (x in 0 until size) pixels[y * size + x] = if (matrix[x, y]) Color.BLACK else Color.WHITE
-    return Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888).also { it.setPixels(pixels, 0, size, 0, 0, size, size) }
+    val size = 720
+    val matrix = QRCodeWriter().encode(text, BarcodeFormat.QR_CODE, size, size)
+    val pixels = IntArray(size * size)
+    for (y in 0 until size) {
+        for (x in 0 until size) pixels[y * size + x] = if (matrix[x, y]) Color.BLACK else Color.WHITE
+    }
+    return Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888).also {
+        it.setPixels(pixels, 0, size, 0, 0, size, size)
+    }
 }
