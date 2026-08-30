@@ -148,6 +148,41 @@ object RawafidCircleApi {
         )
     )
 
+    fun broadcastDriveAlert(
+        context: Context,
+        latitude: Double,
+        longitude: Double,
+        accuracyM: Double?,
+        event: String,
+        summary: String
+    ): Int = scalarInt(
+        rpc(
+            context,
+            "circle_broadcast_drive_alert",
+            JSONObject()
+                .put("p_latitude", latitude)
+                .put("p_longitude", longitude)
+                .put("p_accuracy_m", accuracyM ?: JSONObject.NULL)
+                .put("p_event", event.trim().lowercase().take(40))
+                .put("p_summary", summary.trim().take(900))
+        )
+    )
+
+    fun broadcastDriveReport(context: Context, report: SafeDriveTripReport): Int = scalarInt(
+        rpc(
+            context,
+            "circle_broadcast_drive_report",
+            JSONObject()
+                .put("p_summary", SafeDriveScoring.reportSummary(report))
+                .put("p_score", report.score)
+                .put("p_max_speed_kmh", report.maxSpeedKmh)
+                .put("p_duration_seconds", (report.durationMs / 1000L).coerceAtMost(Int.MAX_VALUE.toLong()).toInt())
+                .put("p_distance_km", report.distanceKm)
+                .put("p_high_speed_seconds", (report.highSpeedDurationMs / 1000L).coerceAtMost(Int.MAX_VALUE.toLong()).toInt())
+                .put("p_event_count", report.events.size)
+        )
+    )
+
     fun notifications(context: Context, limit: Int = 50): List<CircleCloudNotification> {
         val a = JSONArray(rpc(context, "get_my_notifications", JSONObject().put("p_limit", limit.coerceIn(1, 100)).put("p_offset", 0)))
         return buildList { for (i in 0 until a.length()) { val o = a.optJSONObject(i) ?: continue; add(CircleCloudNotification(o.optString("notification_id"), o.optString("kind"), o.optString("title"), o.optString("body"), o.optJSONObject("data") ?: JSONObject(), o.optNullableString("read_at"), o.optString("created_at"))) } }
