@@ -71,13 +71,13 @@ private enum class ShellTab(val key: String, val label: String, val icon: ImageV
     HEALTH("health", "صحتي", Icons.Default.MedicalServices),
     SAFETY("safety", "الأمان", Icons.Default.Security),
     LIFE("life", "حياتي", Icons.Default.Favorite),
-    MORE("more", "المزيد", Icons.Default.AccountCircle)
+    MORE("more", "حسابي", Icons.Default.AccountCircle)
 }
 
 object HomePreferenceStore {
     private const val PREFS = "rawafid_home_preferences_v1"
     private const val KEY = "categories"
-    private val defaults = setOf("daily", "health", "wellbeing", "safety", "knowledge")
+    private val defaults = setOf("daily", "health", "wellbeing", "safety", "knowledge", "family")
 
     fun selected(context: Context): Set<String> =
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getStringSet(KEY, defaults)?.toSet() ?: defaults
@@ -198,6 +198,10 @@ private fun TodayScreen(expanded: Boolean, onNavigate: (ShellTab) -> Unit) {
         }
 
         item {
+            AccountCircleGatewayCard(context = context, features = all)
+        }
+
+        item {
             SectionHeader("أحتاج الآن", "اختصارات مباشرة لأكثر الأفعال استخدامًا")
         }
         item {
@@ -297,6 +301,50 @@ private fun TodayHero(greeting: String, onHelp: () -> Unit, onAllTools: () -> Un
             ) {
                 Button(onClick = onHelp) { Text("ساعدني الآن") }
                 OutlinedButton(onClick = onAllTools) { Text("كل الأدوات") }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AccountCircleGatewayCard(context: Context, features: List<RawafidFeature>) {
+    val signedIn = RawafidCircleApi.hasSession(context)
+    Card(
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
+    ) {
+        Column(
+            Modifier.fillMaxWidth().padding(RawafidSpacing.Lg),
+            verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(Icons.Default.AccountCircle, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Xxs)) {
+                    Text("حسابي ودائرتي", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                    Text(
+                        if (signedIn) "حسابك مسجّل. اعرض رقم RFD واربط الأشخاص والجهات الموثوقة بموافقتهم."
+                        else "ابدأ هنا: أنشئ حساب روافد للحصول على رقم RFD، ثم استخدمه لربط الأشخاص والجهات الموثوقة."
+                    )
+                }
+            }
+            Text(
+                "إنشاء الحساب ← الحصول على رقم RFD ← إرسال أو قبول طلب الربط ← اختيار الصلاحيات.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onTertiaryContainer
+            )
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs),
+                verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)
+            ) {
+                Button(onClick = { openFeature(context, features, "rawafid_account") }) {
+                    Text(if (signedIn) "إدارة حسابي" else "إنشاء حساب / دخول")
+                }
+                OutlinedButton(onClick = { openFeature(context, features, "my_circle") }) {
+                    Text("رقمي وربط الجهات")
+                }
             }
         }
     }
@@ -569,7 +617,11 @@ private fun MoreScreen(expanded: Boolean, onNavigate: (ShellTab) -> Unit) {
         ),
         verticalArrangement = Arrangement.spacedBy(RawafidSpacing.SectionGap)
     ) {
-        item { PageHeader("المزيد", "الإعدادات، المعرفة، الوصولية وتخصيص ما يظهر لك.") }
+        item { PageHeader("حسابي والمزيد", "الحساب، رقم RFD، ربط الأشخاص والجهات الموثوقة، ثم الإعدادات والمعرفة.") }
+
+        item {
+            AccountCircleGatewayCard(context = context, features = all)
+        }
 
         item {
             Box(
