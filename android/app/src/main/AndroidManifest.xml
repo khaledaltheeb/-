@@ -20,23 +20,18 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <meta-data
-                android:name="android.app.shortcuts"
-                android:resource="@xml/shortcuts" />
+            <meta-data android:name="android.app.shortcuts" android:resource="@xml/shortcuts" />
         </activity>
 
         <activity android:name=".ToolCatalogActivity" android:exported="false" android:label="أدوات روافد" />
         <activity android:name=".LifeUtilityActivity" android:exported="false" android:label="أدوات روافد" />
         <activity android:name=".CareHubActivity" android:exported="false" android:label="اهتم بي" />
         <activity android:name=".HealthTimelineActivity" android:exported="false" android:label="دفتر الصحة الزمني" />
+        <activity android:name=".FamilyHubActivity" android:exported="false" android:label="مركز الأسرة" />
         <activity android:name=".SafeArrivalActivity" android:exported="false" android:label="وصلت بالسلامة" />
         <activity android:name=".SupportPassportActivity" android:exported="false" android:label="جواز احتياجاتي" />
 
-        <activity
-            android:name=".WomenPrivacyGateActivity"
-            android:exported="false"
-            android:excludeFromRecents="true"
-            android:label="حماية قطاع المرأة" />
+        <activity android:name=".WomenPrivacyGateActivity" android:exported="false" android:excludeFromRecents="true" android:label="حماية قطاع المرأة" />
         <activity android:name=".WomenPrivacySettingsActivity" android:exported="true" android:label="خصوصية قطاع المرأة" />
         <activity android:name=".WomenActivity" android:exported="true" android:label="رفيقة روافد">
             <intent-filter>
@@ -52,7 +47,6 @@
         <receiver android:name=".TreatmentReminderReceiver" android:exported="false" />
         <receiver android:name=".WomenCareReminderReceiver" android:exported="false" />
         <receiver android:name=".SafeArrivalReceiver" android:exported="false" />
-
         <receiver android:name=".BootReceiver" android:enabled="true" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
