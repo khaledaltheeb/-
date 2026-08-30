@@ -46,6 +46,7 @@
         <activity android:name=".MyCircleActivity" android:exported="false" android:label="دائرتي" />
         <activity android:name=".SafeArrivalActivity" android:exported="false" android:label="وصلت بالسلامة" />
         <activity android:name=".SafetyMonitorActivity" android:exported="false" android:label="مراقبة الأمان والموقع" />
+        <activity android:name=".EmergencyBeaconActivity" android:exported="false" android:label="بطاقة المساعدة" />
         <activity android:name=".LifeCardActivity" android:exported="false" android:label="بطاقة روافد للحياة" />
         <activity android:name=".WhatNowActivity" android:exported="false" android:label="ماذا أفعل الآن؟" />
         <activity android:name=".HelpNowActivity" android:exported="false" android:label="ساعدني الآن" />
@@ -93,6 +94,19 @@
             android:exported="false"
             android:foregroundServiceType="location" />
 
+        <service
+            android:name=".SafetyHotkeyAccessibilityService"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
+            android:exported="true"
+            android:label="اختصار أمان روافد">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/safety_hotkey_accessibility_service" />
+        </service>
+
         <receiver android:name=".RawafidWidgetProvider" android:exported="false">
             <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
             <meta-data android:name="android.appwidget.provider" android:resource="@xml/rawafid_widget_info" />
@@ -103,6 +117,7 @@
         <receiver android:name=".WomenCareReminderReceiver" android:exported="false" />
         <receiver android:name=".SafeArrivalReceiver" android:exported="false" />
         <receiver android:name=".SafetyMonitorReceiver" android:exported="false" />
+        <receiver android:name=".EmergencyBeaconReceiver" android:exported="false" />
         <receiver android:name=".BootReceiver" android:enabled="true" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
