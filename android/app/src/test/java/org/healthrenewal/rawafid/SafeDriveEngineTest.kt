@@ -24,6 +24,18 @@ class SafeDriveEngineTest {
     }
 
     @Test
+    fun fiveMinutesAbovePersonalThresholdCreatesPersistentSpeedEvent() {
+        val config = SafeDriveConfig(personalSpeedAlertKmh = 120, speedAlertAfterSeconds = 300)
+        val analyzer = SafeDriveAnalyzer(config, startedWallTimeMs = 1_000_000L, startedElapsedMs = 0L)
+        val events = mutableListOf<SafeDriveEvent>()
+        for (second in 0..300) {
+            events += analyzer.consume(driveSample(second * 1_000L, speedKmh = 126.0))
+        }
+        assertTrue(events.any { it.type == SafeDriveEventType.SPEEDING_PERSISTENT })
+        assertTrue(analyzer.liveState().highSpeedDurationMs >= 300_000L)
+    }
+
+    @Test
     fun repeatedRiskLowersScoreWithoutGoingNegative() {
         val score = SafeDriveScoring.score(
             highSpeedDurationMs = 12 * 60_000L,
@@ -96,6 +108,18 @@ class SafeDriveEngineTest {
         accuracyM = 5f,
         speedMps = null,
         speedAccuracyMps = null,
+        bearingDegrees = 0f,
+        bearingAccuracyDegrees = 2f
+    )
+
+    private fun driveSample(elapsedMs: Long, speedKmh: Double) = SafeDriveSample(
+        wallTimeMs = 1_000_000L + elapsedMs,
+        elapsedMs = elapsedMs,
+        latitude = 31.9539,
+        longitude = 35.9106,
+        accuracyM = 5f,
+        speedMps = speedKmh / 3.6,
+        speedAccuracyMps = 0.5f,
         bearingDegrees = 0f,
         bearingAccuracyDegrees = 2f
     )
