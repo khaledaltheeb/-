@@ -19,7 +19,10 @@ const CARD_RIGHT = 1082;
 const BRAND_TEXT_RIGHT = 966;
 const SAFE_LEFT = 92;
 const TITLE_LINE_HEIGHT = 64;
-const EXCERPT_LINE_HEIGHT = 32;
+const EXCERPT_LINE_HEIGHT = 38;
+const EXCERPT_FONT_SIZE = 24;
+const SITE_URL_FONT_SIZE = 21;
+const SITE_URL_LABEL = 'https://healthrenewal.org';
 
 const run = (cmd, args) => {
   const r = spawnSync(cmd, args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
@@ -133,10 +136,10 @@ async function load() {
 function svg(item) {
   const profile = profileFor(item.title);
   const titleLines = wrap(item.title, 28, 3);
-  const excerptLines = wrap(item.excerpt, 58, 2);
+  const excerptLines = wrap(item.excerpt, 54, 2);
   const titleSize = item.title.length > 88 ? 38 : item.title.length > 72 ? 42 : item.title.length > 56 ? 47 : 53;
   const titleStart = titleLines.length === 1 ? 320 : titleLines.length === 2 ? 280 : 238;
-  const excerptStart = titleStart + titleLines.length * TITLE_LINE_HEIGHT + 30;
+  const excerptStart = titleStart + titleLines.length * TITLE_LINE_HEIGHT + 32;
 
   const titleSpans = titleLines.map(
     (line, index) => `<tspan x="${CARD_RIGHT}" y="${titleStart + index * TITLE_LINE_HEIGHT}">${esc(line)}</tspan>`,
@@ -163,9 +166,9 @@ function svg(item) {
       <rect x="600" y="174" width="260" height="48" rx="24" fill="${profile.soft}"/>
       <text x="832" y="207" font-size="19" font-weight="700" fill="${profile.accentDark}">${esc(profile.label)}</text>
       <text font-size="${titleSize}" font-weight="780" fill="#102f36">${titleSpans}</text>
-      ${excerptSpans ? `<text font-size="20" fill="#506a70">${excerptSpans}</text>` : ''}
+      ${excerptSpans ? `<text font-size="${EXCERPT_FONT_SIZE}" fill="#506a70">${excerptSpans}</text>` : ''}
     </g>
-    <text x="${CARD_RIGHT}" y="548" direction="ltr" unicode-bidi="plaintext" text-anchor="end" font-size="19" font-weight="700" fill="${profile.accentDark}">healthrenewal.org</text>
+    <text x="${CARD_RIGHT}" y="548" direction="ltr" unicode-bidi="plaintext" text-anchor="end" font-size="${SITE_URL_FONT_SIZE}" font-weight="700" fill="${profile.accentDark}">${SITE_URL_LABEL}</text>
   </g>
 </svg>`;
 }
@@ -200,9 +203,9 @@ async function main() {
     });
   }
 
-  await writeFile(MANIFEST, `${JSON.stringify({ version: 7, generatedAt: new Date().toISOString(), count: manifest.length, items: manifest }, null, 2)}\n`);
+  await writeFile(MANIFEST, `${JSON.stringify({ version: 8, generatedAt: new Date().toISOString(), count: manifest.length, items: manifest }, null, 2)}\n`);
   await rm(TMP, { recursive: true, force: true });
-  console.log(`[quick-info-social] ready: ${manifest.length} indexable card images with official Rawafid branding and RTL-safe text alignment.`);
+  console.log(`[quick-info-social] ready: ${manifest.length} indexable card images with official Rawafid branding, readable excerpt sizing, canonical site URL, and RTL-safe text alignment.`);
 }
 
 main().catch((error) => {
