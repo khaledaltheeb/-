@@ -26,6 +26,11 @@
         </activity>
 
         <activity
+            android:name=".SupportPassportActivity"
+            android:exported="false"
+            android:label="جواز احتياجاتي" />
+
+        <activity
             android:name=".WomenPrivacyGateActivity"
             android:exported="false"
             android:excludeFromRecents="true"
