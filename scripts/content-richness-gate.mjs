@@ -1,4 +1,11 @@
 import crypto from 'node:crypto';
+import {
+  SEO_SHARED_USER_AGENT,
+  getSeoSharedCacheStats,
+  readSeoSharedCache,
+  sharedCacheRecordToFetchResult,
+  writeSeoSharedCache,
+} from './seo-shared-cache.mjs';
 
 const base = (process.env.SEO_GATE_BASE_URL || process.env.SMOKE_BASE_URL || 'http://127.0.0.1:3000').replace(/\/$/, '');
 const canonicalOrigin = new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://healthrenewal.org').origin;
@@ -24,11 +31,24 @@ function locs(xml) {
   return [...xml.matchAll(/<loc>([\s\S]*?)<\/loc>/gi)].map((m) => stripTags(m[1])).filter(Boolean);
 }
 async function fetchText(url) {
+  const cached = await readSeoSharedCache(url, SEO_SHARED_USER_AGENT);
+  if (cached) return sharedCacheRecordToFetchResult(cached);
+
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const response = await fetch(url, { redirect: 'follow', signal: controller.signal, headers: { 'user-agent': 'Rawafid-Content-Richness-Gate/1.0' } });
-    return { response, text: await response.text() };
+    const response = await fetch(url, { redirect: 'follow', signal: controller.signal, headers: { 'user-agent': SEO_SHARED_USER_AGENT } });
+    const text = await response.text();
+    if (response.status >= 200 && response.status < 400) {
+      await writeSeoSharedCache(url, {
+        userAgent: SEO_SHARED_USER_AGENT,
+        status: response.status,
+        finalUrl: response.url || url,
+        contentType: response.headers.get('content-type') || '',
+        text,
+      });
+    }
+    return { response, text, cacheHit: false };
   } finally { clearTimeout(timer); }
 }
 function runtimeUrl(publicUrl) {
@@ -157,7 +177,8 @@ async function main() {
     if (!scholarlyHasSource(result.text)) failures.push(`${publicUrl}: ScholarlyArticle lacks citation/isBasedOn source signal`);
   });
 
-  console.log(`Content richness gate: audited=${urls.length}, detailPages=${details}, minDetailWords=${Number.isFinite(minimumObserved) ? minimumObserved : 0}, exactDuplicateBodies=${failures.filter((x) => x.includes('exact normalized')).length}, failures=${failures.length}`);
+  const cache = getSeoSharedCacheStats();
+  console.log(`Content richness gate: audited=${urls.length}, detailPages=${details}, minDetailWords=${Number.isFinite(minimumObserved) ? minimumObserved : 0}, exactDuplicateBodies=${failures.filter((x) => x.includes('exact normalized')).length}, failures=${failures.length}, sharedCacheHits=${cache.hits}, sharedCacheWrites=${cache.writes}`);
   if (failures.length) {
     failures.slice(0, 500).forEach((failure) => console.error(`RICHNESS FAIL: ${failure}`));
     if (failures.length > 500) console.error(`RICHNESS FAIL: ${failures.length - 500} additional failures omitted`);
