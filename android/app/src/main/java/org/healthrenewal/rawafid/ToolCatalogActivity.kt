@@ -52,6 +52,7 @@ private fun ToolCatalogScreen() {
         "daily" to "يومي",
         "wellbeing" to "هدوء ودعم",
         "health" to "صحة",
+        "family" to "الأسرة",
         "safety" to "أمان",
         "accessibility" to "وصولية",
         "women" to "المرأة",
@@ -73,23 +74,25 @@ private fun ToolCatalogScreen() {
         }
         item {
             androidx.compose.foundation.lazy.LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(categories.size) { index ->
-                    val category = categories[index]
-                    FilterChip(
-                        selected = selected == category,
-                        onClick = { selected = category },
-                        label = { Text(labels[category] ?: category) }
-                    )
+                categories.forEach { category ->
+                    item(key = category) {
+                        FilterChip(
+                            selected = selected == category,
+                            onClick = { selected = category },
+                            label = { Text(labels[category] ?: category) }
+                        )
+                    }
                 }
             }
         }
-        items(visible.size, key = { visible[it].id }) { index ->
-            val feature = visible[index]
-            Card(modifier = Modifier.fillMaxWidth(), onClick = { FeatureRouter.open(context, feature) }) {
-                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                    Text(feature.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                    Text(feature.subtitle, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    if (feature.status == "beta") Text("تجريبي", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+        visible.forEach { feature ->
+            item(key = feature.id) {
+                Card(modifier = Modifier.fillMaxWidth(), onClick = { FeatureRouter.open(context, feature) }) {
+                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                        Text(feature.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                        Text(feature.subtitle, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        if (feature.status == "beta") Text("تجريبي", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+                    }
                 }
             }
         }
