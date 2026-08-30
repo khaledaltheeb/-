@@ -16,6 +16,12 @@ coverage/
 public/encyclopedia-data/
 bundled/
 
+# Never commit Firebase Admin / service-account private-key downloads.
+# android/app/google-services.json is public client configuration and is intentionally tracked.
+*serviceAccountKey*.json
+*service-account*.json
+firebase-adminsdk*.json
+
 # Deterministically materialized from the validated v3 legacy static-asset bundle
 public/api/v1/iris-learning-pathways.json
 public/api/v1/openapi.json
