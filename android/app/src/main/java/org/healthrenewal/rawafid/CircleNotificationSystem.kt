@@ -1,6 +1,7 @@
 package org.healthrenewal.rawafid
 
 import android.Manifest
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -66,6 +67,7 @@ object CircleNotificationSystem {
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         manager.createNotificationChannel(NotificationChannel(CIRCLE_CHANNEL_ID, "دائرتي في روافد", NotificationManager.IMPORTANCE_HIGH).apply {
             description = "طلبات الارتباط والرسائل والأسئلة السريعة وطلبات الموقع من الأشخاص المرتبطين بك"
+            lockscreenVisibility = Notification.VISIBILITY_PRIVATE
         })
     }
 
@@ -85,6 +87,11 @@ object CircleNotificationSystem {
             }
         } else Intent(context, MyCircleActivity::class.java)
         val open = PendingIntent.getActivity(context, item.notificationId.hashCode(), openIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        val publicVersion = NotificationCompat.Builder(context, CIRCLE_CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_launcher)
+            .setContentTitle("روافد · دائرتي")
+            .setContentText("لديك تحديث جديد من دائرتك")
+            .build()
         val builder = NotificationCompat.Builder(context, CIRCLE_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_launcher)
             .setContentTitle(item.title.ifBlank { "دائرتي في روافد" })
@@ -94,6 +101,8 @@ object CircleNotificationSystem {
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+            .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
+            .setPublicVersion(publicVersion)
 
         if (messageId.isNotBlank() && (item.kind == "circle_question" || kind == "yes_no_question")) {
             builder.addAction(0, "نعم ✓", answerPendingIntent(context, item, messageId, "yes", 1))
