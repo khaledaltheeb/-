@@ -4,8 +4,10 @@ on:
   pull_request:
     paths:
       - 'android/**'
+      - 'supabase/config.toml'
       - 'supabase/functions/rawafid-circle-push/**'
       - 'supabase/migrations/*rawafid_circle*.sql'
+      - '.gitignore'
       - '.github/scripts/verify_android_catalogs.py'
       - '.github/scripts/verify_android_motion.py'
       - '.github/scripts/verify_android_safety.py'
@@ -14,8 +16,10 @@ on:
     branches: [main]
     paths:
       - 'android/**'
+      - 'supabase/config.toml'
       - 'supabase/functions/rawafid-circle-push/**'
       - 'supabase/migrations/*rawafid_circle*.sql'
+      - '.gitignore'
       - '.github/scripts/verify_android_catalogs.py'
       - '.github/scripts/verify_android_motion.py'
       - '.github/scripts/verify_android_safety.py'
