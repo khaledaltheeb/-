@@ -18,53 +18,74 @@ Never expose this token to browser code or use a `NEXT_PUBLIC_` prefix.
 
 ## Server-side architecture
 
-1. `lib/lens/client.ts` calls the official Lens Scholarly endpoint: `POST https://api.lens.org/scholarly/search`.
-2. `app/api/evidence/lens/scholarly/route.ts` provides an internal Rawafid HTTP interface.
-3. The endpoint returns explicit source attribution: `Data sourced from The Lens`.
-4. Responses are `no-store` and `noindex` by default while the licensing/caching policy is being confirmed with Lens.
-5. Search size is capped at 100 per request.
-6. Rate-limit headers are observed and exposed only as integration metadata.
+1. `lib/lens/client.ts` calls `POST https://api.lens.org/scholarly/search`.
+2. `lib/lens/aggregation.ts` prepares guarded landscape queries for `POST https://api.lens.org/scholarly/aggregate`.
+3. `lib/evidence/types.ts` defines the provider-neutral Rawafid evidence model.
+4. `lib/evidence/normalize-lens.ts` maps Lens records into that model.
+5. `lib/evidence/dedupe.ts` prioritizes DOI, then PMID, then provider ID when eliminating duplicates.
+6. `/api/evidence/lens/scholarly` provides normalized scholarly results.
+7. `/api/evidence/lens/landscape` exposes only predefined safe aggregation dimensions; it is not a generic Lens proxy.
+8. Responses are `no-store` and `noindex` by default while licensing/caching policy is being confirmed.
 
-## Example internal request
+## Supported landscape dimensions
+
+- `year`
+- `field`
+- `country`
+- `institution`
+- `publication_type`
+- `open_access`
+
+Example:
 
 ```text
-GET /api/evidence/lens/scholarly?q=autism&size=20&year_from=2024&year_to=2026
+GET /api/evidence/lens/landscape?q=autism&dimension=year&year_from=2015&year_to=2026
 ```
 
-If the token has not been configured, the endpoint returns HTTP 503 with `status: not_configured` rather than silently failing or using another data source.
+## Existing Rawafid research catalog
 
-## Intended next phases
+Production already contains `public.research_catalog`, currently centered on OpenAlex records. It has DOI, publication metadata, authors, journal, citations, open-access state, Rawafid cluster fields and JSON metadata.
 
-### Phase 1 — Trial validation
+Do not create a duplicate Lens-only catalog. The intended migration is to make the existing catalog provider-neutral while preserving all existing OpenAlex rows. The migration must not be applied until Lens confirms what metadata/identifiers may be persisted and for how long.
 
-- Verify connectivity with an approved Lens Scholarly token.
-- Validate actual response schema against the typed adapter.
-- Test Arabic and English queries.
-- Verify DOI / PMID / Lens identifier coverage.
-- Capture rate-limit behaviour.
+Proposed provider-neutral additions after approval:
 
-### Phase 2 — Evidence normalization
+- nullable `openalex_id` for legacy compatibility;
+- `source_api` remains the provider marker;
+- provider record ID stored in metadata or a dedicated `provider_record_id` column;
+- optional PMID and other identifiers;
+- DOI remains the strongest cross-provider deduplication key;
+- Lens-only metadata is persisted only to the extent expressly permitted by Lens.
 
-Normalize provider records into a provider-neutral Rawafid evidence model so Lens can coexist with DOI resolvers, PubMed and open-access primary-source links without coupling public pages to a single provider.
+## Trial validation checklist
 
-### Phase 3 — Evidence Observatory
+- verify connectivity with an approved Lens token;
+- fetch `/schema/scholarly` and compare schema version;
+- test Arabic and English search queries;
+- validate DOI, PMID and Lens identifier extraction;
+- verify citation/reference fields;
+- verify retraction/update handling;
+- test Open Access fields and original-source URLs;
+- record rate-limit headers and retry behavior;
+- test each guarded aggregation dimension;
+- verify Lens attribution/logo requirements before any public launch.
 
-After licensing/caching guidance is confirmed, build Arabic-facing evidence landscapes for topics such as psychology, disability, inclusive education, rehabilitation and addiction recovery.
+## Evidence Observatory plan
 
-Potential views include:
+Once access and persistence rules are confirmed, Rawafid can build Arabic evidence landscapes for psychology, disability, inclusive education, rehabilitation, addiction recovery and other sectors.
 
-- recent scholarly works;
+Potential surfaces:
+
+- latest scholarly works;
 - systematic reviews and meta-analyses;
-- publication trend by year;
+- publication trends by year;
 - institutions and countries;
+- fields of study;
 - citation indicators;
+- patent-to-scholar citation signals;
 - open-access indicators;
-- DOI / PMID / Lens ID links;
-- links to the original scholarly source.
-
-### Phase 4 — Aggregations
-
-If Lens grants Scholarly Aggregation API access, add aggregated research-landscape endpoints. This should remain a separate adapter because the aggregation subscription and API limits may differ from the scholarly-search API.
+- DOI / PMID / Lens ID resolution;
+- links to original scholarly sources.
 
 ## Licensing and data-governance guardrails
 
@@ -73,15 +94,26 @@ Until Lens confirms the long-term arrangement:
 - do not bulk redistribute Lens datasets;
 - do not expose API tokens;
 - do not create a public mirror of Lens metadata;
+- do not persist Lens API results in the production research catalog;
 - keep API responses uncached by default;
 - link users to traceable Lens/original records;
 - preserve required Lens attribution;
-- treat stored identifiers/metadata policy as pending Lens confirmation.
+- treat identifier/metadata persistence policy as pending Lens confirmation.
 
 ## Attribution
 
-Public UI that displays Lens-derived data must preserve the attribution agreed with The Lens. The current provisional string is:
+The current provisional attribution is:
 
 > Data sourced from The Lens
 
-This should be updated if the Lens team specifies a different wording/logo treatment.
+Lens documentation also states that the Lens logo should be visible when Lens data are used on a website. Final wording/logo treatment will be updated after the Lens team replies.
+
+## Validation contract
+
+Run:
+
+```text
+node scripts/lens-evidence-contract.mjs
+```
+
+The contract fails if the Lens token becomes public, no-store/noindex guards are removed, attribution disappears, or expected evidence-normalization/deduplication files are missing.
