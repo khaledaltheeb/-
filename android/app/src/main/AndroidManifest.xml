@@ -78,6 +78,11 @@
         <activity android:name=".WebActivity" android:exported="false" />
 
         <service android:name=".SafetyLocationService" android:exported="false" android:foregroundServiceType="location" />
+        <service android:name=".RawafidFirebaseMessagingService" android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
         <service android:name=".SafetyHotkeyAccessibilityService" android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE" android:exported="true" android:label="اختصار أمان روافد">
             <intent-filter><action android:name="android.accessibilityservice.AccessibilityService" /></intent-filter>
             <meta-data android:name="android.accessibilityservice" android:resource="@xml/safety_hotkey_accessibility_service" />
