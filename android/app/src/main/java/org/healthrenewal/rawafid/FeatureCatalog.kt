@@ -2,6 +2,8 @@ package org.healthrenewal.rawafid
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
+import android.widget.Toast
 import org.json.JSONArray
 
 data class RawafidFeature(
@@ -17,10 +19,15 @@ data class RawafidFeature(
 
 object FeatureCatalog {
     private const val ASSET = "rawafid_feature_catalog.json"
+    private const val TAG = "RawafidFeatureCatalog"
+    private val allowedRouteTypes = setOf("web", "main", "quick", "activity")
     @Volatile private var cache: List<RawafidFeature>? = null
 
     fun all(context: Context): List<RawafidFeature> = cache ?: synchronized(this) {
-        cache ?: load(context).also { cache = it }
+        cache ?: load(context).also { loaded ->
+            validate(context, loaded).forEach { Log.e(TAG, it) }
+            cache = loaded
+        }
     }
 
     fun byCategory(context: Context, category: String): List<RawafidFeature> =
@@ -28,6 +35,24 @@ object FeatureCatalog {
 
     fun visible(context: Context): List<RawafidFeature> =
         all(context).filter { it.status != "hidden" }.sortedByDescending { it.priority }
+
+    fun diagnostics(context: Context): List<String> = validate(context, all(context))
+
+    private fun validate(context: Context, features: List<RawafidFeature>): List<String> = buildList {
+        features.groupBy { it.id }.filterValues { it.size > 1 }.keys.forEach { add("Duplicate feature id: $it") }
+        features.forEach { feature ->
+            if (feature.id.isBlank()) add("Feature has blank id: ${feature.title}")
+            if (feature.title.isBlank()) add("Feature ${feature.id} has blank title")
+            if (feature.routeType !in allowedRouteTypes) add("Feature ${feature.id} has unsupported route type: ${feature.routeType}")
+            if (feature.routeTarget.isBlank()) add("Feature ${feature.id} has blank route target")
+            if (feature.routeType == "web" && !feature.routeTarget.startsWith("https://healthrenewal.org")) {
+                add("Feature ${feature.id} web route is outside healthrenewal.org")
+            }
+            if (feature.routeType == "activity" && runCatching { Class.forName(feature.routeTarget) }.isFailure) {
+                add("Feature ${feature.id} activity class not found: ${feature.routeTarget}")
+            }
+        }
+    }
 
     private fun load(context: Context): List<RawafidFeature> = runCatching {
         val raw = context.assets.open(ASSET).bufferedReader(Charsets.UTF_8).use { it.readText() }
@@ -49,28 +74,36 @@ object FeatureCatalog {
                 )
             }
         }
-    }.getOrDefault(emptyList())
+    }.onFailure { Log.e(TAG, "Unable to load feature catalog", it) }.getOrDefault(emptyList())
 }
 
 object FeatureRouter {
+    private const val TAG = "RawafidFeatureRouter"
+
     fun open(context: Context, feature: RawafidFeature) {
-        when (feature.routeType) {
-            "web" -> context.startActivity(
-                Intent(context, WebActivity::class.java).putExtra(WebActivity.EXTRA_URL, feature.routeTarget)
-            )
-            "main" -> context.startActivity(
-                Intent(context, MainActivity::class.java)
-                    .putExtra("destination", feature.routeTarget)
-                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-            )
-            "quick" -> context.startActivity(
-                Intent(context, LifeUtilityActivity::class.java)
-                    .putExtra(LifeUtilityActivity.EXTRA_TOOL_ID, feature.routeTarget)
-            )
+        val intent = when (feature.routeType) {
+            "web" -> Intent(context, WebActivity::class.java).putExtra(WebActivity.EXTRA_URL, feature.routeTarget)
+            "main" -> Intent(context, MainActivity::class.java)
+                .putExtra("destination", feature.routeTarget)
+                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            "quick" -> Intent(context, LifeUtilityActivity::class.java)
+                .putExtra(LifeUtilityActivity.EXTRA_TOOL_ID, feature.routeTarget)
             "activity" -> {
                 val clazz = runCatching { Class.forName(feature.routeTarget) }.getOrNull()
-                if (clazz != null) context.startActivity(Intent(context, clazz))
+                clazz?.let { Intent(context, it) }
             }
+            else -> null
         }
+
+        if (intent == null) {
+            Log.e(TAG, "Invalid feature route: ${feature.id} / ${feature.routeType} / ${feature.routeTarget}")
+            Toast.makeText(context, "تعذر فتح هذه الأداة. تم تسجيل الخطأ للمراجعة.", Toast.LENGTH_SHORT).show()
+            return
+        }
+        runCatching { context.startActivity(intent) }
+            .onFailure {
+                Log.e(TAG, "Failed opening feature ${feature.id}", it)
+                Toast.makeText(context, "تعذر فتح هذه الأداة الآن.", Toast.LENGTH_SHORT).show()
+            }
     }
 }
