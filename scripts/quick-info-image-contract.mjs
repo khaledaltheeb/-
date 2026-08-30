@@ -59,15 +59,17 @@ forbid('proxy', files.proxy, /'\/quick-info\/cards'/, 'retired card route must n
 requireMatch('proxy', files.proxy, /'\/quick-info\/og'/, 'generated Quick Info image route must remain excluded from redirect resolution.');
 forbid('generator', files.generator, /\/seo-card(?:\?|\/|$)|\/quick-info\/cards|CARD_DIR|LIST_WIDTH|LIST_HEIGHT|\.webp/, 'retired on-site raster generation must be absent.');
 requireMatch('generator', files.generator, /social-images-manifest\.json/, 'generator must produce an image manifest.');
-requireMatch('generator', files.generator, /public','assets','brand','logo-mark\.svg/, 'generated images must use the official Rawafid logo asset.');
+requireMatch('generator', files.generator, /public', 'assets', 'brand', 'logo-mark\.svg/, 'generated images must use the official Rawafid logo asset.');
 requireMatch('generator', files.generator, /LOGO_DATA/, 'official logo must be embedded deterministically in generated PNG cards.');
 requireMatch('generator', files.generator, /معلومات سريعة/, 'generated image must preserve the approved Quick Info badge.');
-requireMatch('generator', files.generator, /alt:imageAlt\(item\)/, 'generated image manifest must carry descriptive alt text.');
-requireMatch('generator', files.generator, /width:1200,height:630/, 'generated image manifest dimensions missing.');
+requireMatch('generator', files.generator, /alt: imageAlt\(item\)/, 'generated image manifest must carry descriptive alt text.');
+requireMatch('generator', files.generator, /width: 1200,[\s\S]*height: 630/, 'generated image manifest dimensions missing.');
 requireMatch('generator', files.generator, /Noto Sans Arabic/, 'Arabic image font contract missing.');
 requireMatch('generator', files.generator, /rsvg-convert/, 'deterministic PNG rasterization missing.');
 requireMatch('generator', files.generator, /direction="rtl"/, 'generated SVG RTL direction missing.');
-requireMatch('generator', files.generator, /text-anchor="end"/, 'generated SVG right-edge anchoring missing.');
+requireMatch('generator', files.generator, /text-anchor="start"/, 'generated SVG Arabic text must anchor from the RTL start edge so text flows leftward inside the safe frame.');
+requireMatch('generator', files.generator, /clipPath id="safe-content"/, 'generated SVG must clip all content to a safe inner frame.');
+requireMatch('generator', files.generator, /const CARD_RIGHT = 1082/, 'generated image must keep a deterministic right content boundary.');
 forbid('generator', files.generator, />ر<\/text>/, 'temporary letter logo must not appear in generated images.');
 requireMatch('seo', files.seo, /imageAlt\?: string \| null/, 'SEO metadata must accept page-specific image alt text.');
 requireMatch('seo', files.seo, /alt:\s*imageAlt/, 'OpenGraph image alt must use the page-specific value.');
@@ -77,4 +79,4 @@ if (errors.length) {
   for (const error of errors) console.error(`- ${error}`);
   process.exit(1);
 }
-console.log('Quick Info visual contract passed: semantic HTML cards are preserved, official Rawafid branding is used, each page exposes a real directly discoverable PNG with alt and ImageObject metadata, and Quick Info sitemap carries image URLs.');
+console.log('Quick Info visual contract passed: semantic HTML cards are preserved, official Rawafid branding is used, generated Arabic PNG text stays inside a deterministic RTL-safe frame, each page exposes a real image with alt and ImageObject metadata, and Quick Info sitemap carries image URLs.');
