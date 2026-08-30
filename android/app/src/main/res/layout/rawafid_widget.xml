@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="14dp"
+    android:background="#F6FAF9">
+
+    <TextView
+        android:id="@+id/widget_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="روافد · ماذا تحتاج الآن؟"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:textColor="#171D1D"
+        android:gravity="end" />
+
+    <TextView
+        android:id="@+id/widget_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="ماء اليوم: 0"
+        android:textSize="13sp"
+        android:textColor="#3F4948"
+        android:gravity="end"
+        android:paddingTop="5dp"
+        android:paddingBottom="9dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/widget_tools"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="الأدوات" />
+
+        <Button
+            android:id="@+id/widget_water"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="ماء" />
+
+        <Button
+            android:id="@+id/widget_safe"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="أنا بخير" />
+    </LinearLayout>
+</LinearLayout>
