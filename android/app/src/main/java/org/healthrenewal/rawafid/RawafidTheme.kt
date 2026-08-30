@@ -6,7 +6,10 @@ import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 
 private val LightColors = lightColorScheme(
     primary = Color(0xFF00696B),
@@ -44,11 +47,83 @@ private val DarkColors = darkColorScheme(
     onError = Color(0xFF690005)
 )
 
+private val HighContrastLight = lightColorScheme(
+    primary = Color(0xFF004B4C),
+    onPrimary = Color.White,
+    primaryContainer = Color(0xFFD7FFFF),
+    onPrimaryContainer = Color.Black,
+    secondary = Color(0xFF213F3F),
+    onSecondary = Color.White,
+    background = Color.White,
+    onBackground = Color.Black,
+    surface = Color.White,
+    onSurface = Color.Black,
+    surfaceVariant = Color(0xFFE8EEEE),
+    onSurfaceVariant = Color.Black,
+    outline = Color(0xFF242424),
+    error = Color(0xFF9B0000),
+    onError = Color.White
+)
+
+private val HighContrastDark = darkColorScheme(
+    primary = Color(0xFFB9FFFF),
+    onPrimary = Color.Black,
+    primaryContainer = Color(0xFF006466),
+    onPrimaryContainer = Color.White,
+    secondary = Color(0xFFD8FFFF),
+    onSecondary = Color.Black,
+    background = Color.Black,
+    onBackground = Color.White,
+    surface = Color(0xFF090909),
+    onSurface = Color.White,
+    surfaceVariant = Color(0xFF202020),
+    onSurfaceVariant = Color.White,
+    outline = Color(0xFFD9D9D9),
+    error = Color(0xFFFFB4AB),
+    onError = Color.Black
+)
+
+val LocalRawafidAccessibility = staticCompositionLocalOf { AccessibilityProfile() }
+
+private fun scaledTypography(scale: Float): Typography {
+    val base = Typography()
+    fun androidx.compose.ui.text.TextStyle.scaled() = copy(fontSize = fontSize * scale, lineHeight = lineHeight * scale)
+    return base.copy(
+        displayLarge = base.displayLarge.scaled(),
+        displayMedium = base.displayMedium.scaled(),
+        displaySmall = base.displaySmall.scaled(),
+        headlineLarge = base.headlineLarge.scaled(),
+        headlineMedium = base.headlineMedium.scaled(),
+        headlineSmall = base.headlineSmall.scaled(),
+        titleLarge = base.titleLarge.scaled(),
+        titleMedium = base.titleMedium.scaled(),
+        titleSmall = base.titleSmall.scaled(),
+        bodyLarge = base.bodyLarge.scaled(),
+        bodyMedium = base.bodyMedium.scaled(),
+        bodySmall = base.bodySmall.scaled(),
+        labelLarge = base.labelLarge.scaled(),
+        labelMedium = base.labelMedium.scaled(),
+        labelSmall = base.labelSmall.scaled()
+    )
+}
+
 @Composable
 fun RawafidTheme(content: @Composable () -> Unit) {
-    MaterialTheme(
-        colorScheme = if (isSystemInDarkTheme()) DarkColors else LightColors,
-        typography = Typography(),
-        content = content
-    )
+    val context = LocalContext.current
+    val accessibility = AccessibilityProfileStore.load(context)
+    val dark = isSystemInDarkTheme()
+    val colors = when {
+        accessibility.highContrast && dark -> HighContrastDark
+        accessibility.highContrast -> HighContrastLight
+        dark -> DarkColors
+        else -> LightColors
+    }
+
+    CompositionLocalProvider(LocalRawafidAccessibility provides accessibility) {
+        MaterialTheme(
+            colorScheme = colors,
+            typography = scaledTypography(accessibility.textScale),
+            content = content
+        )
+    }
 }
