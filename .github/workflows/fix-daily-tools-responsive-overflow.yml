@@ -24,40 +24,25 @@ jobs:
           from pathlib import Path
           path = Path('app/daily-tools-mobile-polish.css')
           text = path.read_text()
-          old = '''.daily-tools-hub .article-hero,
-          .daily-tool-page .article-hero {
-            width: 100%;
-            min-width: 0;
-            max-width: 100%;
-            overflow: visible;
-          }'''.replace('          ', '')
-          new = '''.daily-tools-hub .article-hero,
-          .daily-tool-page .article-hero {
-            width: 100%;
-            min-width: 0;
-            max-width: 100%;
-            overflow: hidden;
-          }'''.replace('          ', '')
-          if old not in text:
-              raise SystemExit('hero overflow target not found')
-          text = text.replace(old, new, 1)
-          marker = '''@media(max-width:760px) {
-          body:has(.daily-tool-page),'''.replace('          ', '')
-          replacement = '''@media(max-width:760px) {
-          .daily-tools-hub > article,
-          .daily-tool-page > article {
-            width: 100%;
-            min-width: 0;
-            max-width: 100%;
-          }
-
-          body:has(.daily-tool-page),'''.replace('          ', '')
-          if marker not in text:
-              raise SystemExit('responsive article target not found')
-          text = text.replace(marker, replacement, 1)
+          if text.count('overflow: visible;') != 1:
+              raise SystemExit(f'expected one Daily Tools visible-overflow declaration, found {text.count("overflow: visible;")}')
+          text = text.replace('overflow: visible;', 'overflow: hidden;', 1)
+          marker = '@media(max-width:760px) {'
+          if text.count(marker) != 1:
+              raise SystemExit(f'expected one 760px media block, found {text.count(marker)}')
+          responsive = '''@media(max-width:760px) {
+  .daily-tools-hub > article,
+  .daily-tool-page > article {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+'''
+          text = text.replace(marker, responsive, 1)
           path.write_text(text)
           PY
           git diff --check
+          git diff -- app/daily-tools-mobile-polish.css
           git config user.name 'rawafid-responsive-fix'
           git config user.email 'actions@users.noreply.github.com'
           git add app/daily-tools-mobile-polish.css
