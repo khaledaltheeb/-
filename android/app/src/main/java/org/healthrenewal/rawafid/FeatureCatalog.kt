@@ -45,7 +45,7 @@ object FeatureCatalog {
             if (feature.title.isBlank()) add("Feature ${feature.id} has blank title")
             if (feature.routeType !in allowedRouteTypes) add("Feature ${feature.id} has unsupported route type: ${feature.routeType}")
             if (feature.routeTarget.isBlank()) add("Feature ${feature.id} has blank route target")
-            if (feature.routeType == "web" && !feature.routeTarget.startsWith("https://healthrenewal.org")) {
+            if (feature.routeType == "web" && !TrustedSitePolicy.isAllowedHttps(feature.routeTarget)) {
                 add("Feature ${feature.id} web route is outside healthrenewal.org")
             }
             if (feature.routeType == "activity" && runCatching { Class.forName(feature.routeTarget) }.isFailure) {
@@ -82,7 +82,11 @@ object FeatureRouter {
 
     fun open(context: Context, feature: RawafidFeature) {
         val intent = when (feature.routeType) {
-            "web" -> Intent(context, WebActivity::class.java).putExtra(WebActivity.EXTRA_URL, feature.routeTarget)
+            "web" -> if (TrustedSitePolicy.isAllowedHttps(feature.routeTarget)) {
+                Intent(context, WebActivity::class.java).putExtra(WebActivity.EXTRA_URL, feature.routeTarget)
+            } else {
+                null
+            }
             "main" -> Intent(context, MainActivity::class.java)
                 .putExtra("destination", feature.routeTarget)
                 .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)

@@ -63,4 +63,6 @@ dependencies {
     implementation("androidx.webkit:webkit:1.17.0")
     implementation("androidx.health.connect:connect-client:1.1.0")
     implementation("com.google.zxing:core:3.5.4")
+
+    testImplementation("junit:junit:4.13.2")
 }

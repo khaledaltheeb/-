@@ -49,33 +49,24 @@ private fun ToolCatalogScreen() {
     val categories = remember(features) { listOf("all") + features.map { it.category }.distinct() }
     var selected by remember { mutableStateOf("all") }
     var query by remember { mutableStateOf("") }
-    val labels = mapOf(
-        "all" to "الكل",
-        "daily" to "يومي",
-        "wellbeing" to "هدوء ودعم",
-        "health" to "صحة",
-        "family" to "الأسرة",
-        "safety" to "أمان",
-        "accessibility" to "وصولية",
-        "women" to "المرأة",
-        "memory" to "ذاكرة",
-        "planning" to "تنظيم",
-        "social" to "تواصل",
-        "knowledge" to "الموقع والمعرفة"
-    )
-    val categoryVisible = remember(selected, features) {
-        if (selected == "all") features else features.filter { it.category == selected }
+    val labels = remember {
+        mapOf(
+            "all" to "الكل",
+            "daily" to "يومي",
+            "wellbeing" to "هدوء ودعم",
+            "health" to "صحة",
+            "family" to "الأسرة",
+            "safety" to "أمان",
+            "accessibility" to "وصولية",
+            "women" to "المرأة",
+            "memory" to "ذاكرة",
+            "planning" to "تنظيم",
+            "social" to "تواصل",
+            "knowledge" to "الموقع والمعرفة"
+        )
     }
-    val normalizedQuery = query.trim()
-    val visible = if (normalizedQuery.isBlank()) {
-        categoryVisible
-    } else {
-        categoryVisible.filter { feature ->
-            feature.title.contains(normalizedQuery, ignoreCase = true) ||
-                feature.subtitle.contains(normalizedQuery, ignoreCase = true) ||
-                feature.id.contains(normalizedQuery, ignoreCase = true) ||
-                feature.category.contains(normalizedQuery, ignoreCase = true)
-        }
+    val visible = remember(selected, query, features, labels) {
+        ToolCatalogSearch.filter(features, selected, query, labels)
     }
 
     LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
