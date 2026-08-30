@@ -11,11 +11,11 @@ import { buildSeoMetadata, SITE_URL } from '@/lib/seo';
 export const revalidate = 300;
 
 export const metadata = buildSeoMetadata({
-  title: 'روافد: الصحة النفسية والتربية الخاصة وسرطان الأطفال',
-  description: 'روافد منصة عربية للمعرفة الموثوقة في الصحة النفسية والتربية الخاصة والتوحد وصعوبات التعلم وسرطان الأطفال والتعافي، مع أدلة عملية ومختصين ومراكز.',
+  title: 'منصة روافد | معرفة عربية موثوقة للصحة والنفس والتربية',
+  description: 'منصة روافد مرجع عربي منظم للصحة النفسية والتربية الخاصة والتوحد وصعوبات التعلم وسرطان الأطفال والتعافي، مع أدلة علمية وأدوات عملية ومختصين ومراكز ومصادر قابلة للتتبع.',
   path: '/',
   index: true,
-  keywords: ['روافد', 'منصة روافد', 'الصحة النفسية', 'التربية الخاصة', 'التوحد', 'صعوبات التعلم', 'سرطان الأطفال', 'التربية الدامجة', 'الإدمان والتعافي', 'دعم الأسرة'],
+  keywords: ['منصة روافد', 'روافد', 'Rawafid', 'الصحة النفسية', 'علم النفس', 'التربية الخاصة', 'التوحد', 'صعوبات التعلم', 'سرطان الأطفال', 'التربية الدامجة', 'الإدمان والتعافي', 'الأدلة العلمية'],
 });
 
 const quickLinks = [
@@ -32,12 +32,14 @@ const homepageJsonLd = {
   '@type': 'WebPage',
   '@id': `${SITE_URL}/#homepage`,
   url: `${SITE_URL}/`,
-  name: 'روافد | الصحة النفسية والتربية الخاصة وسرطان الأطفال',
-  description: 'روافد منصة عربية للمعرفة الموثوقة في الصحة النفسية والتربية الخاصة والتوحد وصعوبات التعلم وسرطان الأطفال والتعافي، مع أدلة عملية ومختصين ومراكز.',
+  name: 'منصة روافد | معرفة عربية موثوقة للصحة والنفس والتربية',
+  description: 'منصة روافد مرجع عربي منظم للصحة النفسية والتربية الخاصة والتوحد وصعوبات التعلم وسرطان الأطفال والتعافي، مع أدلة علمية وأدوات عملية ومختصين ومراكز ومصادر قابلة للتتبع.',
   inLanguage: 'ar',
   isPartOf: { '@id': `${SITE_URL}/#website` },
+  mainEntity: { '@id': `${SITE_URL}/#organization` },
   about: [
     'الصحة النفسية',
+    'علم النفس',
     'التربية الخاصة',
     'اضطراب طيف التوحد',
     'صعوبات التعلم',
@@ -68,9 +70,9 @@ export default async function HomePage() {
       <main className="site-shell rawafid-home">
         <section className="rawafid-hero" aria-labelledby="home-title">
           <div className="rawafid-hero-copy">
-            <span className="rawafid-kicker">روافد — معرفة عربية موثوقة تقودك إلى الخطوة التالية</span>
-            <h1 id="home-title">روافد: <em>الصحة النفسية والتربية الخاصة</em> في منصة معرفية مترابطة.</h1>
-            <p>استكشف محتوى عربيًا موثوقًا في الصحة النفسية، التوحد، صعوبات التعلم، التربية الخاصة والدامجة، سرطان الأطفال، الإدمان والتعافي ودعم الأسرة؛ مع أدلة عملية ودليل للمختصين والمراكز.</p>
+            <span className="rawafid-kicker">منصة روافد — معرفة عربية موثوقة ومترابطة</span>
+            <h1 id="home-title">منصة روافد: <em>مرجع عربي للصحة النفسية والتربية الخاصة</em> والمعرفة العملية الموثوقة.</h1>
+            <p>تجمع روافد المعرفة الصحية والنفسية والتربوية في مكان واحد: الصحة النفسية، علم النفس، التوحد، صعوبات التعلم، التربية الخاصة والدامجة، سرطان الأطفال، الإدمان والتعافي ودعم الأسرة؛ مع أدلة علمية، أدوات عملية، مختصين ومراكز ومصادر قابلة للتتبع.</p>
 
             <form className="search rawafid-search" action="/search" method="get" role="search">
               <label className="sr-only" htmlFor="home-search">البحث في منصة روافد</label>
@@ -108,7 +110,7 @@ export default async function HomePage() {
 
         <section className="rawafid-section" id="sectors" aria-labelledby="sectors-title">
           <div className="rawafid-section-head">
-            <div className="rawafid-section-title"><span>مجالات روافد</span><h2 id="sectors-title">استكشف المعرفة حسب المجال</h2><p>قطاعات مترابطة تشمل الصحة النفسية، التوحد وصعوبات التعلم، التربية الخاصة والدامجة، سرطان الأطفال، التعافي ودعم الأسرة؛ لتسهيل الانتقال من السؤال إلى المعرفة المناسبة.</p></div>
+            <div className="rawafid-section-title"><span>مجالات روافد</span><h2 id="sectors-title">استكشف المعرفة حسب المجال</h2><p>قطاعات مترابطة تشمل الصحة النفسية، علم النفس، التوحد وصعوبات التعلم، التربية الخاصة والدامجة، سرطان الأطفال، التعافي ودعم الأسرة؛ لتسهيل الانتقال من السؤال إلى المعرفة المناسبة.</p></div>
             <Link prefetch={false} className="section-text-link" href="/sectors">عرض جميع القطاعات ←</Link>
           </div>
 
@@ -178,6 +180,20 @@ export default async function HomePage() {
               <div><PlatformIcon name="specialist" /><strong>تواصل ومواعيد</strong></div>
               <div><PlatformIcon name="center" /><strong>موقع وفروع</strong></div>
             </div>
+          </div>
+        </section>
+
+        <section className="rawafid-section rawafid-pathways" aria-labelledby="trust-reference-title">
+          <div className="rawafid-section-head">
+            <div className="rawafid-section-title"><span>هوية ومنهج موثقان</span><h2 id="trust-reference-title">تعرف على روافد ومصادرها ومعاييرها</h2><p>صفحات مرجعية توضح هوية المنصة، منهج اختيار المصادر، السياسة التحريرية، المراجعة العلمية والطبية، وطريقة الاستشهاد بمحتوى روافد.</p></div>
+          </div>
+          <div className="rawafid-platform-grid">
+            <Link prefetch={false} className="rawafid-platform-card" href="/about"><div className="icon-shell"><PlatformIcon name="community" /></div><h3>عن منصة روافد</h3><p>رسالة المنصة ونطاقها وما الذي تقدمه للقارئ العربي.</p><span>تعرف على روافد ←</span></Link>
+            <Link prefetch={false} className="rawafid-platform-card" href="/sources"><div className="icon-shell"><PlatformIcon name="knowledge" /></div><h3>المصادر والمراجع</h3><p>كيف تُختار المصادر وكيف تُعرض المراجع القابلة للتتبع داخل المحتوى.</p><span>منهج المصادر ←</span></Link>
+            <Link prefetch={false} className="rawafid-platform-card" href="/editorial-policy"><div className="icon-shell"><PlatformIcon name="review" /></div><h3>السياسة التحريرية</h3><p>معايير إعداد المحتوى ومراجعته وتحديثه ومسؤوليات النشر.</p><span>قراءة السياسة ←</span></Link>
+            <Link prefetch={false} className="rawafid-platform-card" href="/medical-review-policy"><div className="icon-shell"><PlatformIcon name="secure" /></div><h3>المراجعة العلمية والطبية</h3><p>حدود المراجعة وآلية التعامل مع المحتوى الصحي الحساس.</p><span>قراءة سياسة المراجعة ←</span></Link>
+            <Link prefetch={false} className="rawafid-platform-card" href="/citation"><div className="icon-shell"><PlatformIcon name="knowledge" /></div><h3>الاستشهاد بروافد</h3><p>صيغة مرجعية موحدة للباحثين والطلاب والجهات التي تستشهد بمحتوى المنصة.</p><span>طريقة الاستشهاد ←</span></Link>
+            <Link prefetch={false} className="rawafid-platform-card" href="/press"><div className="icon-shell"><PlatformIcon name="community" /></div><h3>المركز الإعلامي</h3><p>الهوية الرسمية وحقائق المنصة وروابطها المرجعية للاستخدام الإعلامي والبحثي.</p><span>فتح المركز الإعلامي ←</span></Link>
           </div>
         </section>
 
