@@ -148,8 +148,6 @@ object SafeDriveSensorFusionObserver : SensorEventListener {
         appContext = app
         sensorManager = app.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         gyroscope = sensorManager?.getDefaultSensor(Sensor.TYPE_GYROSCOPE)
-        sensorThread = HandlerThread("RawafidSafeDriveGyro").also { it.start() }
-        sensorHandler = sensorThread?.looper?.let(::Handler)
 
         scope.launch {
             SafeDriveRuntime.state.collectLatest { state ->
@@ -175,11 +173,18 @@ object SafeDriveSensorFusionObserver : SensorEventListener {
         peakAngularRate = 0.0
         recentAngularRate = 0.0
         recentGyroTripElapsedMs = -1L
+
         val gyro = gyroscope
         val manager = sensorManager
-        val handler = sensorHandler
-        registered = gyro != null && manager != null && handler != null &&
-            manager.registerListener(this, gyro, SensorManager.SENSOR_DELAY_GAME, handler)
+        if (gyro != null && manager != null) {
+            val thread = HandlerThread("RawafidSafeDriveGyro").also { it.start() }
+            sensorThread = thread
+            sensorHandler = Handler(thread.looper)
+            registered = manager.registerListener(this, gyro, SensorManager.SENSOR_DELAY_GAME, sensorHandler)
+            if (!registered) releaseSensorThread()
+        } else {
+            registered = false
+        }
         publish(active = true, gpsHardTurnCount = state.hardTurnCount)
     }
 
@@ -205,6 +210,7 @@ object SafeDriveSensorFusionObserver : SensorEventListener {
     private fun endTrip(report: SafeDriveTripReport?) {
         if (registered) runCatching { sensorManager?.unregisterListener(this) }
         registered = false
+        releaseSensorThread()
         val context = appContext
         if (context != null && report != null && report.startedAtMs == tripStartedAtMs) {
             SafeDriveSensorFusionStore.save(
@@ -249,6 +255,12 @@ object SafeDriveSensorFusionObserver : SensorEventListener {
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) = Unit
+
+    private fun releaseSensorThread() {
+        sensorHandler = null
+        sensorThread?.quitSafely()
+        sensorThread = null
+    }
 
     private fun publish(active: Boolean, gpsHardTurnCount: Int) {
         SafeDriveSensorFusionRuntime.update(
