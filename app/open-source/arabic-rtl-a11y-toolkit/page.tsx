@@ -5,11 +5,14 @@ import SiteFooter from '@/components/site-footer';
 import { absoluteSiteUrl, breadcrumbJsonLd, buildSeoMetadata, SITE_URL } from '@/lib/seo';
 
 const REPOSITORY = 'https://github.com/khaledaltheeb/rawafid-arabic-rtl-a11y-toolkit';
+const NPM_PACKAGE = 'https://www.npmjs.com/package/@rawafid/arabic-rtl-a11y-toolkit';
+const RELEASE = `${REPOSITORY}/releases/tag/v0.3.0`;
 const PROJECT_PATH = '/open-source/arabic-rtl-a11y-toolkit';
+const CURRENT_VERSION = '0.3.0';
 
 export const metadata: Metadata = buildSeoMetadata({
   title: 'أداة روافد المفتوحة للعربية وRTL والوصولية',
-  description: 'المصدر الرسمي لأداة روافد المفتوحة للعربية وواجهات RTL والوصولية والتوطين: نطاق المشروع، الكود العام، الاختبارات، الأمن، المساهمة وأدلة التشغيل البيني.',
+  description: 'المصدر الرسمي لأداة روافد المفتوحة للعربية وواجهات RTL والوصولية والتوطين: نطاق المشروع، الكود العام، حزمة npm، الاختبارات، الأمن، المساهمة وأدلة التشغيل البيني.',
   path: PROJECT_PATH,
   index: true,
   follow: true,
@@ -41,6 +44,18 @@ const evidence = [
     text: 'المستودع عام ومستقل عن المحتوى العلمي والتحريري لمنصة روافد، ويصدر بترخيص Apache-2.0.',
     href: REPOSITORY,
     label: 'فتح المستودع العام',
+  },
+  {
+    title: 'حزمة npm العامة',
+    text: `الحزمة العامة @rawafid/arabic-rtl-a11y-toolkit منشورة بإصدار ${CURRENT_VERSION} ويمكن تثبيتها ومراجعة بياناتها مباشرة من سجل npm.`,
+    href: NPM_PACKAGE,
+    label: 'فتح الحزمة على npm',
+  },
+  {
+    title: `إصدار GitHub v${CURRENT_VERSION}`,
+    text: 'الإصدار العام موثق في GitHub Release ويتضمن حزمة الإصدار وبيانات SBOM وأدلة الإصدار القابلة للفحص.',
+    href: RELEASE,
+    label: 'فتح الإصدار العام',
   },
   {
     title: 'العقود والواجهات',
@@ -100,6 +115,8 @@ export default function OpenSourceToolkitPage() {
     description: 'Framework-agnostic TypeScript toolkit for Arabic/RTL, localization, Unicode bidi safety, accessibility and direction-aware web interaction.',
     url: absoluteSiteUrl(PROJECT_PATH),
     codeRepository: REPOSITORY,
+    version: CURRENT_VERSION,
+    downloadUrl: NPM_PACKAGE,
     programmingLanguage: 'TypeScript',
     runtimePlatform: 'Web / Node.js',
     license: 'https://www.apache.org/licenses/LICENSE-2.0',
@@ -113,8 +130,11 @@ export default function OpenSourceToolkitPage() {
     },
     maintainer: {
       '@type': 'Person',
-      name: 'Khaled Altheeb',
-      url: `${REPOSITORY}/commits?author=khaledaltheeb`,
+      '@id': `${SITE_URL}/#founder`,
+      name: 'Khaled altheeb',
+      alternateName: 'خالد الذيب',
+      url: `${SITE_URL}/press#founder`,
+      sameAs: ['https://github.com/khaledaltheeb'],
     },
   };
 
@@ -125,19 +145,21 @@ export default function OpenSourceToolkitPage() {
       <nav className="breadcrumbs" aria-label="مسار الصفحة"><Link href="/">الرئيسية</Link><span>/</span><span>المصدر المفتوح</span><span>/</span><span aria-current="page">أداة العربية وRTL</span></nav>
 
       <section className="public-index-hero" aria-labelledby="toolkit-title">
-        <span className="eyebrow">مشروع برمجي عام مستقل · Apache-2.0</span>
+        <span className="eyebrow">مشروع برمجي عام مستقل · Apache-2.0 · v{CURRENT_VERSION}</span>
         <h1 id="toolkit-title">أداة روافد المفتوحة للعربية وRTL والوصولية والتوطين</h1>
         <p>طبقة هندسية TypeScript عامة وقابلة لإعادة الاستخدام لبناء واختبار واجهات عربية وثنائية الاتجاه بصورة أدق: اتجاه النص والـlocale، Unicode bidi، التوطين، التقسيم الآمن للنص، أنماط التفاعل، CSS المنطقي، والوصولية في المتصفح.</p>
         <p lang="en" dir="ltr"><strong>Rawafid Arabic/RTL Accessibility &amp; Localization Toolkit</strong> is a framework-agnostic, zero-runtime-dependency open-source engineering component for Arabic and bidirectional web applications.</p>
         <div className="public-stat-strip">
           <span>Apache-2.0</span>
+          <span>npm v{CURRENT_VERSION}</span>
           <span>TypeScript</span>
           <span>0 runtime dependencies</span>
           <span>Chromium · Firefox · WebKit</span>
         </div>
         <div className="hero-actions">
           <a className="primary-link" href={REPOSITORY} target="_blank" rel="noreferrer">GitHub — المصدر والكود ↗</a>
-          <a className="secondary-link" href={`${REPOSITORY}/blob/main/README.md`} target="_blank" rel="noreferrer">README والدليل التقني ↗</a>
+          <a className="secondary-link" href={NPM_PACKAGE} target="_blank" rel="noreferrer">npm — الحزمة المنشورة ↗</a>
+          <a className="secondary-link" href={RELEASE} target="_blank" rel="noreferrer">GitHub Release v{CURRENT_VERSION} ↗</a>
         </div>
       </section>
 
@@ -146,7 +168,7 @@ export default function OpenSourceToolkitPage() {
         <div className="institutional-sector-grid">
           <article className="institutional-sector-card"><span className="eyebrow">داخل المستودع</span><h3>هندسة عامة قابلة لإعادة الاستخدام</h3><p>كود وأدوات واختبارات عامة للعربية وRTL والتوطين والوصولية وUnicode والتفاعل، مع وثائق وعقود قابلة للمراجعة الخارجية.</p></article>
           <article className="institutional-sector-card"><span className="eyebrow">خارج المستودع</span><h3>لا يحتوي corpus روافد العلمي</h3><p>لا يتضمن مقالات الموسوعة، قواعد المحتوى العلمي، بيانات المستخدمين، التحليلات، أسرار الإنتاج، أو منطق النشر والترتيب الخاص بالمنصة.</p></article>
-          <article className="institutional-sector-card"><span className="eyebrow">الوضع الحالي</span><h3>GitHub هو قناة التوزيع المؤكدة الآن</h3><p>المصدر والإصدارات وأدلة التحقق متاحة على GitHub. حزمة npm مخطط لها، لكن لا تُعرض هنا كحزمة منشورة إلى أن يكتمل bootstrap للسجل ويُتحقق منه فعليًا.</p></article>
+          <article className="institutional-sector-card"><span className="eyebrow">الوضع الحالي</span><h3>GitHub وnpm قناتا التوزيع العامتان</h3><p>المصدر والإصدارات وأدلة التحقق متاحة على GitHub، والحزمة العامة <code>@rawafid/arabic-rtl-a11y-toolkit</code> منشورة بإصدار {CURRENT_VERSION} على npm.</p></article>
         </div>
       </section>
 
