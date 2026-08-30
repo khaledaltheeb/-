@@ -11,6 +11,7 @@ on:
       - '.github/scripts/verify_android_catalogs.py'
       - '.github/scripts/verify_android_motion.py'
       - '.github/scripts/verify_android_safety.py'
+      - '.github/scripts/verify_android_account_discovery.py'
       - '.github/workflows/android-app-build.yml'
   push:
     branches: [main]
@@ -23,6 +24,7 @@ on:
       - '.github/scripts/verify_android_catalogs.py'
       - '.github/scripts/verify_android_motion.py'
       - '.github/scripts/verify_android_safety.py'
+      - '.github/scripts/verify_android_account_discovery.py'
       - '.github/workflows/android-app-build.yml'
 
 permissions:
@@ -41,6 +43,7 @@ jobs:
           python3 .github/scripts/verify_android_catalogs.py
           python3 .github/scripts/verify_android_motion.py
           python3 .github/scripts/verify_android_safety.py
+          python3 .github/scripts/verify_android_account_discovery.py
 
       - name: Set up JDK 17
         uses: actions/setup-java@v5
