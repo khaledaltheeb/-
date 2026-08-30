@@ -111,6 +111,7 @@ private fun FutureNoteScreen() {
     var delayDays by rememberSaveable { mutableIntStateOf(1) }
     val notes = remember(version) { FutureNoteStore.notes(context) }
     val now = System.currentTimeMillis()
+    val requestNotifications = rememberNotificationPermissionRequester()
 
     LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         item {
@@ -132,6 +133,7 @@ private fun FutureNoteScreen() {
                             val note = FutureNote(id, id + delayDays * 86_400_000L, text.trim(), false)
                             FutureNoteStore.save(context, notes + note)
                             FutureNoteScheduler.schedule(context, note)
+                            requestNotifications()
                             text = ""; version++
                         }
                     }) { Text("احفظها للمستقبل") }
