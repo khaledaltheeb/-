@@ -2,6 +2,7 @@ import Link from 'next/link';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import ContentRenderer from '@/components/content-renderer';
+import { SITE_URL } from '@/lib/seo';
 import {
   legacyCanonicalPath,
   legacyInternalLinks,
@@ -25,8 +26,22 @@ export default function LegacyPreservedPageView({ page, route }: Props) {
   const references = legacyReferences(current?.references_json ?? page.references_json);
   const internalLinks = current ? [] : legacyInternalLinks(page.internal_links_json);
   const reviewedAt = current?.last_reviewed_at ? new Date(current.last_reviewed_at) : null;
+  const canonicalUrl = /^https?:\/\//i.test(canonical) ? canonical : `${SITE_URL}${canonical.startsWith('/') ? canonical : `/${canonical}`}`;
+  const sectorCollectionSchema = route.startsWith('/sectors/') ? {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    '@id': `${canonicalUrl}#collection`,
+    url: canonicalUrl,
+    name: title,
+    description: current?.excerpt || page.meta_description || `${title} ضمن قطاعات منصة روافد.`,
+    inLanguage: 'ar',
+    isAccessibleForFree: true,
+    isPartOf: { '@id': `${SITE_URL}/#website` },
+    publisher: { '@id': `${SITE_URL}/#organization` },
+  } : null;
 
   return <><SiteHeader /><main className="article-shell">
+    {sectorCollectionSchema ? <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(sectorCollectionSchema).replace(/</g, '\u003c') }} /> : null}
     <nav className="breadcrumbs" aria-label="مسار الصفحة">
       <Link href="/">الرئيسية</Link><span>/</span><span>{current ? 'محتوى روافد المراجع' : familyLabel(page.source_family)}</span><span>/</span><span aria-current="page">{title}</span>
     </nav>
