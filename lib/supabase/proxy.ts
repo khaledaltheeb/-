@@ -35,7 +35,6 @@ const redirectExcludedPrefixes = [
   '/specialists-partners/portal',
   '/api',
   '/seo-card',
-  '/quick-info/cards',
   '/quick-info/og',
 ];
 
