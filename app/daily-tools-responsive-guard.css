@@ -1,0 +1,17 @@
+/* Daily Tools responsive containment guard.
+ * Keeps intentionally scrollable controls local to their component and
+ * prevents decorative hero overflow from expanding the document canvas.
+ */
+.daily-tools-hub .article-hero,
+.daily-tool-page .article-hero {
+  overflow: hidden;
+}
+
+@media (max-width: 760px) {
+  .daily-tools-hub > article,
+  .daily-tool-page > article {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+}

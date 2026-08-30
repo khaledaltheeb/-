@@ -4,9 +4,48 @@
  * overriding the site-wide institutional theme.
  */
 
+.daily-tools-hub,
+.daily-tool-page,
+.daily-tools-hub *,
+.daily-tool-page * {
+  box-sizing: border-box;
+}
+
+.daily-tools-hub,
+.daily-tool-page {
+  min-width: 0;
+  max-width: 100%;
+}
+
 .daily-tools-hub .article-hero,
 .daily-tool-page .article-hero {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
   overflow: visible;
+}
+
+.daily-tools-directory,
+.daily-tools-intro,
+.daily-tools-search-panel,
+.daily-tools-category-list,
+.daily-tools-results-bar,
+.daily-tools-grid,
+.daily-tool-card,
+.daily-tool-workspace,
+.daily-tool-reference {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.daily-tools-directory {
+  width: 100%;
+}
+
+.daily-tools-search-panel,
+.daily-tools-grid,
+.daily-tool-card {
+  width: 100%;
 }
 
 .daily-tools-hub .article-hero h1,
@@ -78,9 +117,18 @@
 }
 
 @media(max-width:760px) {
+  body:has(.daily-tool-page),
+  body:has(.daily-tools-hub) {
+    max-width: 100vw;
+    overflow-x: clip;
+    padding-bottom: 72px;
+  }
+
   .daily-tools-hub,
   .daily-tool-page {
+    width: 100%;
     padding-bottom: 18px;
+    overflow-x: clip;
   }
 
   .daily-tools-hub .article-hero,
@@ -123,8 +171,25 @@
     font-size: 10px;
   }
 
+  .daily-tools-directory,
+  .daily-tools-search-panel,
+  .daily-tools-grid,
+  .daily-tool-card,
+  .daily-tool-workspace,
+  .daily-tool-reference {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
   .daily-tools-search-panel input {
+    min-width: 0;
+    max-width: 100%;
     min-height: 50px;
+  }
+
+  .daily-tools-category-list {
+    max-width: 100%;
   }
 
   .daily-tool-card {
@@ -297,6 +362,8 @@
 
   .daily-tool-field input:not([type=range]),
   .daily-tool-field textarea {
+    min-width: 0;
+    max-width: 100%;
     min-height: 48px;
     font-size: 16px;
   }
@@ -309,6 +376,7 @@
 
   .daily-tool-actions button {
     width: 100%;
+    min-width: 0;
     min-height: 48px;
     padding-inline: 8px;
   }
@@ -335,19 +403,18 @@
     padding-inline-end: 26px;
   }
 
-  body:has(.daily-tool-page),
-  body:has(.daily-tools-hub) {
-    padding-bottom: 72px;
-  }
-
   body:has(.daily-tool-page) .mobile-bottom-nav,
   body:has(.daily-tools-hub) .mobile-bottom-nav {
+    inset-inline: 0;
+    width: 100%;
+    max-width: 100vw;
     padding-top: 5px;
     padding-bottom: max(5px,env(safe-area-inset-bottom));
   }
 
   body:has(.daily-tool-page) .mobile-bottom-nav a,
   body:has(.daily-tools-hub) .mobile-bottom-nav a {
+    min-width: 0;
     min-height: 47px;
     gap: 1px;
     font-size: 8.5px;
