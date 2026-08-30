@@ -90,6 +90,7 @@ class BootReceiver : BroadcastReceiver() {
             FutureNoteScheduler.restore(context)
             EmergencyBeaconManager.restore(context)
             SafetyMonitorScheduler.resync(context, ensureService = true)
+            CircleNotificationScheduler.ensureScheduled(context)
             val safeArrival = SafeArrivalStore.load(context)
             if (safeArrival.active && safeArrival.dueAt > System.currentTimeMillis()) {
                 SafeArrivalScheduler.schedule(context, safeArrival)
