@@ -15,9 +15,7 @@
         android:supportsRtl="true"
         android:usesCleartextTraffic="false">
 
-        <activity
-            android:name=".MainActivity"
-            android:exported="true">
+        <activity android:name=".MainActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -36,6 +34,9 @@
         <activity android:name=".FamilyHubActivity" android:exported="false" android:label="مركز الأسرة" />
         <activity android:name=".MyCircleActivity" android:exported="false" android:label="دائرتي" />
         <activity android:name=".SafeArrivalActivity" android:exported="false" android:label="وصلت بالسلامة" />
+        <activity android:name=".LifeCardActivity" android:exported="false" android:label="بطاقة روافد للحياة" />
+        <activity android:name=".WhatNowActivity" android:exported="false" android:label="ماذا أفعل الآن؟" />
+        <activity android:name=".HelpNowActivity" android:exported="false" android:label="ساعدني الآن" />
         <activity android:name=".SupportPassportActivity" android:exported="false" android:label="جواز احتياجاتي" />
         <activity android:name=".LifeVaultActivity" android:exported="false" android:label="خزانة الحياة" />
         <activity android:name=".TravelSafeActivity" android:exported="false" android:label="Travel Safe" />
@@ -54,9 +55,7 @@
         <activity android:name=".WebActivity" android:exported="false" />
 
         <receiver android:name=".RawafidWidgetProvider" android:exported="true">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
             <meta-data android:name="android.appwidget.provider" android:resource="@xml/rawafid_widget_info" />
         </receiver>
         <receiver android:name=".TreatmentReminderReceiver" android:exported="false" />
