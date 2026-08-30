@@ -75,7 +75,7 @@ class HealthConnectActivity : ComponentActivity() {
 @Composable
 private fun HealthConnectScreen(
     requestPermissions: (Set<String>, (Set<String>) -> Unit) -> Unit,
-    launchRead: (() -> Unit) -> Unit
+    launchRead: (suspend () -> Unit) -> Unit
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val sdkStatus = remember { HealthConnectClient.getSdkStatus(context) }
