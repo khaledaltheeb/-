@@ -19,8 +19,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -47,8 +47,8 @@ private fun ToolCatalogScreen() {
     val context = LocalContext.current
     val features = remember { FeatureCatalog.visible(context) }
     val categories = remember(features) { listOf("all") + features.map { it.category }.distinct() }
-    var selected by remember { mutableStateOf("all") }
-    var query by remember { mutableStateOf("") }
+    var selected by rememberSaveable { androidx.compose.runtime.mutableStateOf("all") }
+    var query by rememberSaveable { androidx.compose.runtime.mutableStateOf("") }
     val labels = remember {
         mapOf(
             "all" to "الكل",
