@@ -33,6 +33,8 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     type: 'article',
     image: record.featured_image_url,
     imageAlt: record.featured_image_alt,
+    imageWidth: 1280,
+    imageHeight: 720,
     keywords: [record.primary_keyword, ...(record.secondary_keywords ?? []), ...(record.semantic_terms ?? []).slice(0, 10)].filter(Boolean) as string[],
     publishedTime: record.published_at,
     modifiedTime: record.updated_at,
@@ -53,8 +55,9 @@ export default async function QuickInfoDetailPage({ params }: { params: Params }
   const canonical = record.canonical_url || `/quick-info/${slug}/`;
   const url = `${SITE_URL}${canonical}`;
   const imagePath = quickInfoOgPath(slug);
-  const imageUrl = record.featured_image_url || undefined;
-  const imageAlt = record.featured_image_alt || `بطاقة معلومات سريعة من منصة روافد بعنوان «${record.title}»`;
+  const discoverImageUrl = record.featured_image_url || undefined;
+  const imageAlt = `بطاقة معلومات سريعة من منصة روافد بعنوان «${record.title}»`;
+  const discoverAlt = record.featured_image_alt || `صورة معلومات سريعة مهيأة للاكتشاف من منصة روافد بعنوان «${record.title}»`;
   const references = safeQuickInfoReferences(record.references_json);
   const faqItems = visibleQuickInfoFaq(record.body_json);
   const review = contentReviewProvenance(record);
@@ -79,16 +82,17 @@ export default async function QuickInfoDetailPage({ params }: { params: Params }
     author: record.author_display_name ? { '@type': 'Organization', name: record.author_display_name } : { '@id': `${SITE_URL}/#organization` },
     reviewedBy: review.reviewedBySchema,
     publisher: { '@id': `${SITE_URL}/#organization` },
-    image: imageUrl ? {
+    image: discoverImageUrl ? {
       '@type': 'ImageObject',
       '@id': `${url}#primary-image`,
-      url: imageUrl,
-      contentUrl: imageUrl,
-      width: 1200,
-      height: 630,
-      caption: imageAlt,
+      url: discoverImageUrl,
+      contentUrl: discoverImageUrl,
+      width: 1280,
+      height: 720,
+      caption: discoverAlt,
       representativeOfPage: true,
     } : undefined,
+    thumbnailUrl: imagePath ? `${SITE_URL}${imagePath}` : undefined,
     keywords: keywords.join(', '),
     wordCount,
     citation: references.flatMap((reference) => reference.url ? [reference.url] : []),
