@@ -14,6 +14,7 @@ class RawafidApplication : Application(), Application.ActivityLifecycleCallbacks
         super.onCreate()
         registerActivityLifecycleCallbacks(this)
         createPrivacyFirstWomenChannels()
+        CirclePushRegistration.registerCurrentToken(this)
     }
 
     private fun isWomenSensitive(activity: Activity): Boolean =
