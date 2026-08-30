@@ -17,6 +17,8 @@ import mortalityV3Json from '@/data/addiction-atlas/mortality-v3.json';
 import sourceRegistryV1Json from '@/data/addiction-atlas/source-registry-v1.json';
 import sourceRegistryV2Json from '@/data/addiction-atlas/source-registry-v2.json';
 import sourceRegistryV3Json from '@/data/addiction-atlas/source-registry-v3.json';
+import sourceRegistryV4Json from '@/data/addiction-atlas/source-registry-v4.json';
+import sourceRegistryV5Json from '@/data/addiction-atlas/source-registry-v5.json';
 import interactionsV1Json from '@/data/addiction-atlas/interactions-v1.json';
 import interactionsV2Json from '@/data/addiction-atlas/interactions-v2.json';
 import interactionsV3Json from '@/data/addiction-atlas/interactions-v3.json';
@@ -222,7 +224,7 @@ async function loadAtlas(): Promise<AddictionAtlas> {
   const interactionFiles = [interactionsV1Json, interactionsV2Json, interactionsV3Json] as unknown as InteractionFile[];
   const epidemiologyFiles = [epidemiologyV1Json, epidemiologyV2Json] as unknown as EpidemiologyFile[];
   const mortalityFiles = [mortalityV1Json, mortalityV2Json, mortalityV3Json] as unknown as MortalityFile[];
-  const sourceRegistries = [sourceRegistryV1Json, sourceRegistryV2Json, sourceRegistryV3Json] as unknown as SourceRegistry[];
+  const sourceRegistries = [sourceRegistryV1Json, sourceRegistryV2Json, sourceRegistryV3Json, sourceRegistryV4Json, sourceRegistryV5Json] as unknown as SourceRegistry[];
   const waveByFile: Record<string, SubstanceWave> = {
     'substances-v1.json': substancesV1Json as unknown as SubstanceWave,
     'substances-v2.json': substancesV2Json as unknown as SubstanceWave,

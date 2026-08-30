@@ -9,6 +9,7 @@ const INTERACTION_SEVERITY = new Set(['moderate','high','critical']);
 const INTERACTION_SCOPE = new Set(['direct-pair','class-to-substance','class-to-class']);
 const WAVE6_SLUGS = ['tianeptine','carfentanil','medetomidine'];
 const WAVE7_SLUGS = ['7-hydroxymitragynine','phenibut','hexahydrocannabinol-hhc','carisoprodol','protonitazepyne','metonitazepyne','etonitazepipne','n-desethyl-isotonitazene','3-oh-pcp','n-ethylheptedrone','isotonitazepyne','n-desethyl-etonitazene','mdmb-fubinaca','cychlorphine'];
+const WAVE8_EVIDENCE_SLUGS = ['fentanyl','heroin','cocaine','methamphetamine','cannabis','alcohol','nicotine','synthetic-cannabinoids','morphine','oxycodone','tramadol','methadone','alprazolam','diazepam','amphetamine','mdma','ketamine','ghb','buprenorphine','nitazenes'];
 
 function assert(condition, message) { if (!condition) throw new Error(`addiction-atlas-contract: ${message}`); }
 async function json(file) { return JSON.parse(await readFile(path.join(ROOT, file), 'utf8')); }
@@ -20,8 +21,8 @@ const [
   interactionsV1, interactionsV2, interactionsV3,
   epidemiologyV1, epidemiologyV2,
   mortalityV1, mortalityV2, mortalityV3,
-  sourceRegistryV1, sourceRegistryV2, sourceRegistryV3,
-  riskEvidenceV4, riskEvidenceV5, riskEvidenceV6, riskEvidenceV7,
+  sourceRegistryV1, sourceRegistryV2, sourceRegistryV3, sourceRegistryV4, sourceRegistryV5,
+  riskEvidenceV4, riskEvidenceV5, riskEvidenceV6, riskEvidenceV7, riskEvidenceV8,
 ] = await Promise.all([
   json('substance-waves.json'),
   json('methodology-v1.json'),
@@ -38,10 +39,13 @@ const [
   json('source-registry-v1.json'),
   json('source-registry-v2.json'),
   json('source-registry-v3.json'),
+  json('source-registry-v4.json'),
+  json('source-registry-v5.json'),
   json('risk-evidence-v4.json'),
   json('risk-evidence-v5.json'),
   json('risk-evidence-v6.json'),
   json('risk-evidence-v7.json'),
+  json('risk-evidence-v8.json'),
 ]);
 
 assert(Array.isArray(manifest.waves) && manifest.waves.length >= 7, `expected at least 7 waves, got ${manifest.waves?.length}`);
@@ -105,7 +109,7 @@ assert(interactionRecords.some((item) => item.evidence_scope === 'direct-pair'),
 for (const required of ['fentanyl-xylazine','fentanyl-medetomidine','carfentanil-alcohol','carisoprodol-fentanyl','carisoprodol-diazepam','carisoprodol-alcohol']) assert(interactionIds.has(required), `required reviewed interaction missing: ${required}`);
 assert((interactionsV3.policy_ar || '').includes('غير مراجع بعد'), 'wave 7 interaction absence safety rule missing');
 
-const sources = [...(sourceRegistryV1.sources || []), ...(sourceRegistryV2.sources || []), ...(sourceRegistryV3.sources || [])];
+const sources = [...(sourceRegistryV1.sources || []), ...(sourceRegistryV2.sources || []), ...(sourceRegistryV3.sources || []), ...(sourceRegistryV4.sources || []), ...(sourceRegistryV5.sources || [])];
 const sourceIds = new Set();
 for (const source of sources) {
   assert(source.id && !sourceIds.has(source.id), `duplicate source id ${source.id}`);
@@ -113,9 +117,9 @@ for (const source of sources) {
   assert(source.organization && source.title && source.url && source.verified_on, `${source.id}: incomplete source metadata`);
   assert(new URL(source.url).protocol === 'https:', `${source.id}: source URL must be https`);
 }
-for (const required of ['fda-tianeptine-2025','cdc-carfentanil-mmwr-2024','cdc-medetomidine-han-2026','who-ecdd47-report-2025','who-cnd-nps-control-2025','who-cnd-nps-control-2026','fda-7oh-update-2026','euda-cychlorphine-initial-2026','fda-opioid-cns-depressant-warning-2016']) assert(sourceIds.has(required), `required extension source missing: ${required}`);
+for (const required of ['fda-tianeptine-2025','cdc-carfentanil-mmwr-2024','cdc-medetomidine-han-2026','who-ecdd47-report-2025','who-cnd-nps-control-2025','who-cnd-nps-control-2026','fda-7oh-update-2026','euda-cychlorphine-initial-2026','fda-opioid-cns-depressant-warning-2016','nida-fentanyl-2025','nida-cocaine-current','nida-methamphetamine-current','nida-cannabis-current','fda-opioid-labeling-2023','fda-methadone-label-2025','fda-tramadol-label-2023','who-drug-withdrawal-mhgap','who-alcohol-withdrawal-mhgap','euda-edr-2026-mdma','who-ghb-ecdd-2013','samhsa-buprenorphine-2026','nida-synthetic-cannabinoids-current']) assert(sourceIds.has(required), `required extension source missing: ${required}`);
 
-const axisEvidence = [...(riskEvidenceV4.records || []), ...(riskEvidenceV5.records || []), ...(riskEvidenceV6.records || []), ...(riskEvidenceV7.records || [])];
+const axisEvidence = [...(riskEvidenceV4.records || []), ...(riskEvidenceV5.records || []), ...(riskEvidenceV6.records || []), ...(riskEvidenceV7.records || []), ...(riskEvidenceV8.records || [])];
 const evidenceSlugs = new Set();
 for (const record of axisEvidence) {
   assert(record.substance_slug && slugs.has(record.substance_slug), `axis evidence references unknown substance ${record.substance_slug}`);
@@ -134,11 +138,21 @@ for (const record of axisEvidence) {
     for (const sourceId of evidence.source_ids) assert(sourceIds.has(sourceId), `${record.substance_slug}/${key}: unknown source ${sourceId}`);
   }
 }
-assert(axisEvidence.length >= 35, `expected at least 35 axis-evidence substances, got ${axisEvidence.length}`);
-assert(axisEvidence.length * RISK_KEYS.length >= 280, 'expected at least 280 axis-evidence cells');
-for (const slug of [...WAVE6_SLUGS, ...WAVE7_SLUGS]) assert(evidenceSlugs.has(slug), `extension substance missing axis evidence: ${slug}`);
+assert(axisEvidence.length >= 55, `expected at least 55 axis-evidence substances, got ${axisEvidence.length}`);
+assert(axisEvidence.length * RISK_KEYS.length >= 440, 'expected at least 440 axis-evidence cells');
+for (const slug of [...WAVE6_SLUGS, ...WAVE7_SLUGS, ...WAVE8_EVIDENCE_SLUGS]) assert(evidenceSlugs.has(slug), `extension substance missing axis evidence: ${slug}`);
 const cychlorphineEvidence = axisEvidence.find((record) => record.substance_slug === 'cychlorphine');
 assert(cychlorphineEvidence && RISK_KEYS.every((key) => cychlorphineEvidence.dimensions[key].score === null && cychlorphineEvidence.dimensions[key].evidence_grade === 'U'), 'cychlorphine axis evidence must remain U/null');
+const nitazenesEvidence = axisEvidence.find((record) => record.substance_slug === 'nitazenes');
+assert(nitazenesEvidence?.dimensions.withdrawal_medical_risk?.score === null && nitazenesEvidence?.dimensions.withdrawal_medical_risk?.evidence_grade === 'U', 'nitazenes withdrawal must remain U/null until supported');
+const methadoneEvidence = axisEvidence.find((record) => record.substance_slug === 'methadone');
+assert(methadoneEvidence?.dimensions.cardio_harm?.evidence_grade === 'A' && methadoneEvidence?.dimensions.cardio_harm?.source_ids?.includes('fda-methadone-label-2025'), 'methadone cardiac axis must retain FDA-specific QT evidence');
+const tramadolEvidence = axisEvidence.find((record) => record.substance_slug === 'tramadol');
+assert(tramadolEvidence?.dimensions.neuro_harm?.evidence_grade === 'A' && tramadolEvidence?.dimensions.neuro_harm?.source_ids?.includes('fda-tramadol-label-2023'), 'tramadol neuro axis must retain seizure-specific FDA evidence');
+const alcoholEvidence = axisEvidence.find((record) => record.substance_slug === 'alcohol');
+assert(alcoholEvidence?.dimensions.withdrawal_medical_risk?.evidence_grade === 'A' && alcoholEvidence?.dimensions.withdrawal_medical_risk?.source_ids?.includes('who-alcohol-withdrawal-mhgap'), 'alcohol withdrawal axis must retain WHO medical-withdrawal evidence');
+const buprenorphineEvidence = axisEvidence.find((record) => record.substance_slug === 'buprenorphine');
+assert(buprenorphineEvidence && RISK_KEYS.some((key) => buprenorphineEvidence.dimensions[key].source_ids?.includes('samhsa-buprenorphine-2026')), 'buprenorphine evidence must preserve treatment-context source');
 
 function validateStatistic(record, kind) {
   assert(record.id && record.definition_ar, `${kind}: missing id/definition`);
