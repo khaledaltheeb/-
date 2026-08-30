@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Card
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -47,6 +48,7 @@ private fun ToolCatalogScreen() {
     val features = remember { FeatureCatalog.visible(context) }
     val categories = remember(features) { listOf("all") + features.map { it.category }.distinct() }
     var selected by remember { mutableStateOf("all") }
+    var query by remember { mutableStateOf("") }
     val labels = mapOf(
         "all" to "الكل",
         "daily" to "يومي",
@@ -61,16 +63,36 @@ private fun ToolCatalogScreen() {
         "social" to "تواصل",
         "knowledge" to "الموقع والمعرفة"
     )
-    val visible = remember(selected, features) {
+    val categoryVisible = remember(selected, features) {
         if (selected == "all") features else features.filter { it.category == selected }
+    }
+    val normalizedQuery = query.trim()
+    val visible = if (normalizedQuery.isBlank()) {
+        categoryVisible
+    } else {
+        categoryVisible.filter { feature ->
+            feature.title.contains(normalizedQuery, ignoreCase = true) ||
+                feature.subtitle.contains(normalizedQuery, ignoreCase = true) ||
+                feature.id.contains(normalizedQuery, ignoreCase = true) ||
+                feature.category.contains(normalizedQuery, ignoreCase = true)
+        }
     }
 
     LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         item {
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text("أدوات روافد", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-                Text("قدرات كثيرة دون ازدحام: اختر الفئة التي تحتاجها الآن. ترتيب الأدوات وتعريفها يأتي من كتالوج مستقل قابل للتوسعة.")
+                Text("ابحث باسم الأداة أو وظيفتها، أو اختر الفئة التي تحتاجها الآن.")
             }
+        }
+        item {
+            OutlinedTextField(
+                value = query,
+                onValueChange = { query = it.take(80) },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                label = { Text("ابحث في الأدوات") }
+            )
         }
         item {
             androidx.compose.foundation.lazy.LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
