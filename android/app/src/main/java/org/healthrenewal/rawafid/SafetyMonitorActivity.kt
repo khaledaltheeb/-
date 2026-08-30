@@ -402,7 +402,7 @@ class SafetyLocationService : Service(), LocationListener {
 
         startForeground(STATUS_NOTIFICATION_ID, SafetyMonitorScheduler.statusNotification(this, config))
 
-        if (intent.action == SERVICE_CAPTURE && !locating) requestCurrentLocation()
+        if (intent?.action == SERVICE_CAPTURE && !locating) requestCurrentLocation()
         return START_STICKY
     }
 
