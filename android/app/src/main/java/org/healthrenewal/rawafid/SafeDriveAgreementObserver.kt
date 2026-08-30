@@ -6,6 +6,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.roundToInt
 
@@ -13,12 +14,15 @@ import kotlin.math.roundToInt
  * Evaluates only explicitly customized Safe Drive agreements. Legacy recipients
  * without a customized agreement continue to be handled by the existing
  * broadcast path. No location is transmitted by this observer.
+ *
+ * Mutable trip bookkeeping is owned by the state-flow collector. The only
+ * structure changed by an IO callback is the concurrent sent-alert set.
  */
 object SafeDriveAgreementObserver {
     private val started = AtomicBoolean(false)
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val episodeStartedAtMs = mutableMapOf<String, Long>()
-    private val persistentAlertSent = mutableSetOf<String>()
+    private val persistentAlertSent = ConcurrentHashMap.newKeySet<String>()
     private val lastAttemptAtMs = mutableMapOf<String, Long>()
 
     @Volatile private var agreements: List<CircleDriveAgreement> = emptyList()
@@ -44,6 +48,7 @@ object SafeDriveAgreementObserver {
                 } else {
                     refreshAgreements(app, force = false)
                 }
+                pruneRemovedAgreements()
                 evaluatePersistentSpeed(app, state)
                 evaluateHighRiskCounters(app, state)
             }
@@ -73,12 +78,15 @@ object SafeDriveAgreementObserver {
             runCatching { RawafidCircleApi.customDriveAgreements(context) }
                 .onSuccess { fresh ->
                     agreements = fresh.filter { it.permissionEnabled && it.riskAlertsEnabled }
-                    val validIds = agreements.mapTo(mutableSetOf()) { it.connectionId }
-                    episodeStartedAtMs.keys.retainAll(validIds)
-                    persistentAlertSent.retainAll(validIds)
-                    lastAttemptAtMs.keys.retainAll(validIds)
                 }
         }
+    }
+
+    private fun pruneRemovedAgreements() {
+        val validIds = agreements.mapTo(mutableSetOf()) { it.connectionId }
+        episodeStartedAtMs.keys.retainAll(validIds)
+        persistentAlertSent.retainAll(validIds)
+        lastAttemptAtMs.keys.retainAll(validIds)
     }
 
     private fun evaluatePersistentSpeed(context: Context, state: SafeDriveLiveState) {
@@ -114,26 +122,20 @@ object SafeDriveAgreementObserver {
 
     private fun evaluateHighRiskCounters(context: Context, state: SafeDriveLiveState) {
         if (state.severeSpeedCount > previousSevereCount) {
-            val delta = state.severeSpeedCount - previousSevereCount
-            repeat(delta.coerceAtMost(1)) {
-                sendHighRiskToAll(
-                    context,
-                    "severe_speed",
-                    state,
-                    "تنبيه قيادة آمنة: رُصدت سرعة مرتفعة جدًا مقارنة بحد التنبيه الشخصي. السرعة المقدرة ${state.currentSpeedKmh.roundToInt()} كم/س."
-                )
-            }
+            sendHighRiskToAll(
+                context,
+                "severe_speed",
+                state,
+                "تنبيه قيادة آمنة: رُصدت سرعة مرتفعة جدًا مقارنة بحد التنبيه الشخصي. السرعة المقدرة ${state.currentSpeedKmh.roundToInt()} كم/س."
+            )
         }
         if (state.riskClusterCount > previousRiskClusterCount) {
-            val delta = state.riskClusterCount - previousRiskClusterCount
-            repeat(delta.coerceAtMost(1)) {
-                sendHighRiskToAll(
-                    context,
-                    "risk_cluster",
-                    state,
-                    "تنبيه قيادة آمنة: تكررت مؤشرات قيادة حادة خلال وقت قصير. التقييم المؤقت ${state.provisionalScore}/100."
-                )
-            }
+            sendHighRiskToAll(
+                context,
+                "risk_cluster",
+                state,
+                "تنبيه قيادة آمنة: تكررت مؤشرات قيادة حادة خلال وقت قصير. التقييم المؤقت ${state.provisionalScore}/100."
+            )
         }
         previousSevereCount = state.severeSpeedCount
         previousRiskClusterCount = state.riskClusterCount
