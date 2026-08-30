@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import ContentRenderer from '@/components/content-renderer';
 import LegacyPreservedPageView from '@/components/legacy-preserved-page';
 import PublicPagination from '@/components/public-pagination';
@@ -26,6 +26,7 @@ const qSafe = (value: string) => value.trim().replace(/[%_(),]/g, ' ').replace(/
 const indexPagePath = (slug: string, page: number) => `/sections/${slug}${page > 1 ? `?page=${page}` : ''}`;
 const pageHref = (slug: string, page: number, q: string) => { const params = new URLSearchParams(); if (page > 1) params.set('page', String(page)); if (q) params.set('q', q); return `/sections/${slug}${params.size ? `?${params}` : ''}`; };
 const legacyRoute = (slug: string) => `/sections/${slug}/`;
+const retryDelay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function dbCategory(slug: string) {
   const supabase = await createClient();
@@ -139,24 +140,35 @@ export default async function SectionPage({ params, searchParams }: { params: Pa
     parent = par as typeof parent;
     childCards = (children ?? []) as typeof childCards;
 
-    let contentQuery = supabase
-      .from('content')
-      .select('id,slug,title,excerpt,content_type,published_at,canonical_url,content_categories!inner(category_id)', { count: 'exact' })
-      .eq('content_categories.category_id', category.id)
-      .eq('status', 'published')
-      .lte('published_at', now)
-      .eq('robots_index', true)
-      .order('published_at', { ascending: false })
-      .order('title');
-    if (query) contentQuery = contentQuery.ilike('title', `%${query}%`);
-    const { data, count, error } = await contentQuery.range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
-    if (error) throw new Error(`section content query failed: ${error.message}`);
-    rows = (data ?? []) as unknown as Item[];
-    total = count ?? 0;
+    const loadContentPage = async () => {
+      let contentQuery = supabase
+        .from('content')
+        .select('id,slug,title,excerpt,content_type,published_at,canonical_url,content_categories!inner(category_id)', { count: 'exact' })
+        .eq('content_categories.category_id', category.id)
+        .eq('status', 'published')
+        .lte('published_at', now)
+        .eq('robots_index', true)
+        .order('published_at', { ascending: false })
+        .order('title');
+      if (query) contentQuery = contentQuery.ilike('title', `%${query}%`);
+      return contentQuery.range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
+    };
+    let result = await loadContentPage();
+    if (result.error) {
+      await retryDelay(150);
+      result = await loadContentPage();
+    }
+    if (result.error) {
+      await retryDelay(350);
+      result = await loadContentPage();
+    }
+    if (result.error) throw new Error(`section content query failed after retries: ${result.error.message}`);
+    rows = (result.data ?? []) as unknown as Item[];
+    total = result.count ?? 0;
   }
 
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  if (page > pages && page > 1) notFound();
+  if (page > pages && page > 1) redirect(pageHref(slug, pages, query));
   const canonicalPath = query ? `/sections/${slug}` : indexPagePath(slug, page);
   const canonical = `${SITE_URL}${canonicalPath}`;
   const schemas = [
