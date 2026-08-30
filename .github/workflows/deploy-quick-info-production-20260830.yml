@@ -1,0 +1,88 @@
+name: Deploy Quick Info Production 20260830
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/deploy-quick-info-production-20260830.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rawafid-production-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy-quick-info:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
+      NEXT_PUBLIC_SITE_URL: https://healthrenewal.org
+      NEXT_PUBLIC_ALLOW_INDEXING: 'true'
+      NEXT_PUBLIC_ENABLE_ANALYTICS: 'true'
+      NEXT_PUBLIC_GTM_ID: GTM-WBLQVBG4
+      NEXT_PUBLIC_GA_MEASUREMENT_ID: G-VLZMV8Y4JP
+      NEXT_PUBLIC_ENABLE_DIRECT_GA: 'true'
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: 1910e1ad3c793fd568ba1caafe34f964
+    steps:
+      - name: Require Cloudflare token
+        run: test -n "${CLOUDFLARE_API_TOKEN:-}"
+      - uses: actions/checkout@v7
+        with:
+          ref: 437df67051e38d9be3e940ee782ef05d56d58f5a
+      - name: Verify exact Quick Info release SHA
+        run: test "$(git rev-parse HEAD)" = '437df67051e38d9be3e940ee782ef05d56d58f5a'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Install deterministic Arabic image dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends imagemagick fontconfig fonts-noto-core librsvg2-bin
+          rsvg-convert --version
+          fc-match 'Noto Sans Arabic'
+      - name: Verify Quick Info release contracts
+        run: |
+          npm run typecheck
+          npm run lint
+          node scripts/quick-info-image-contract.mjs
+          npm run live-preservation:validate
+      - name: Verify Cloudflare access
+        run: npx wrangler whoami
+      - name: Build exact production Worker
+        run: npx opennextjs-cloudflare build --env production
+      - name: Deploy exact production Worker
+        run: npx opennextjs-cloudflare deploy --env production
+      - name: Verify Quick Info live production
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://healthrenewal.org'
+          stamp='437df67051e38d9be3e940ee782ef05d56d58f5a'
+          get() { curl -fsSL --compressed --retry 12 --retry-delay 3 --retry-all-errors -H 'Cache-Control: no-cache, no-store, max-age=0' "$1"; }
+          hub="$(get "${base}/quick-info/?release=${stamp}")"
+          sitemap="$(get "${base}/sitemaps/quick-info.xml?release=${stamp}")"
+          [[ "$hub" == *'معلومات سريعة'* ]]
+          [[ "$hub" == *'/assets/brand/logo-mark.svg'* ]]
+          [[ "$sitemap" == *'xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"'* ]]
+          [[ "$sitemap" == *'<image:image><image:loc>'* ]]
+          page_url="$(printf '%s' "$sitemap" | grep -oE '<loc>https://healthrenewal\.org/quick-info/[a-z0-9-]+/</loc>' | head -n 1 | sed -E 's#</?loc>##g')"
+          test -n "$page_url"
+          slug="$(printf '%s' "$page_url" | sed -E 's#https://healthrenewal\.org/quick-info/([^/]+)/#\1#')"
+          page="$(get "${page_url}?release=${stamp}")"
+          image_url="${base}/quick-info/og/${slug}.png"
+          image_headers="$(curl -fsSI --retry 12 --retry-delay 3 --retry-all-errors -H 'Cache-Control: no-cache, no-store, max-age=0' "${image_url}?release=${stamp}")"
+          [[ "$page" == *'data-quick-info-indexable-image'* ]]
+          [[ "$page" == *"/quick-info/og/${slug}.png"* ]]
+          [[ "$page" == *'ImageObject'* ]]
+          [[ "$page" == *'/assets/brand/logo-mark.svg'* ]]
+          printf '%s' "$image_headers" | head -n 1 | grep -Eq ' 200( |$)'
+          printf '%s' "$image_headers" | grep -Eqi '^content-type: image/png'
+          echo "Quick Info release ${stamp} is live: ${page_url} with ${image_url}"
