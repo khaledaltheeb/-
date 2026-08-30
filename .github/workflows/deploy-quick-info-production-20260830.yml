@@ -33,9 +33,9 @@ jobs:
         run: test -n "${CLOUDFLARE_API_TOKEN:-}"
       - uses: actions/checkout@v7
         with:
-          ref: 437df67051e38d9be3e940ee782ef05d56d58f5a
+          ref: 0f48ed4dd088227100fc05777cfe638a787c7282
       - name: Verify exact Quick Info release SHA
-        run: test "$(git rev-parse HEAD)" = '437df67051e38d9be3e940ee782ef05d56d58f5a'
+        run: test "$(git rev-parse HEAD)" = '0f48ed4dd088227100fc05777cfe638a787c7282'
       - uses: actions/setup-node@v7
         with:
           node-version: 24
@@ -65,7 +65,7 @@ jobs:
         run: |
           set -euo pipefail
           base='https://healthrenewal.org'
-          stamp='437df67051e38d9be3e940ee782ef05d56d58f5a'
+          stamp='0f48ed4dd088227100fc05777cfe638a787c7282'
           get() { curl -fsSL --compressed --retry 12 --retry-delay 3 --retry-all-errors -H 'Cache-Control: no-cache, no-store, max-age=0' "$1"; }
           hub="$(get "${base}/quick-info/?release=${stamp}")"
           sitemap="$(get "${base}/sitemaps/quick-info.xml?release=${stamp}")"
