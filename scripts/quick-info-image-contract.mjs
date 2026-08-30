@@ -31,6 +31,7 @@ requireMatch('component', files.component, /description/, 'Quick Info browser ca
 forbid('component', files.component, /next\/image|<img|<Image/, 'Quick Info browser card must not use a baked raster image.');
 requireMatch('component CSS', files.componentCss, /--qi-accent/, 'topic-aware CSS visual tokens missing.');
 requireMatch('component CSS', files.componentCss, /@media\(max-width:760px\)/, 'mobile Quick Info visual contract missing.');
+requireMatch('component CSS', files.componentCss, /\.visual,\.hero \.visual\{display:none\}/, 'mobile Quick Info must remove the top visual block so content starts at the platform identity.');
 requireMatch('detail page', files.detail, /<QuickInfoCard[^>]*variant="hero"/, 'detail page must use the semantic HTML/CSS hero visual.');
 forbid('detail page', files.detail, /next\/image|quickInfoCardPath|<Image/, 'detail page must not render the old generated raster card.');
 requireMatch('detail page', files.detail, /dir="rtl"/, 'Quick Info detail page must explicitly declare RTL.');
@@ -55,4 +56,4 @@ if (errors.length) {
   process.exit(1);
 }
 
-console.log('Quick Info visual contract passed: on-site visuals are semantic RTL HTML/CSS; rasterization is isolated to static social/OpenGraph images.');
+console.log('Quick Info visual contract passed: on-site visuals are semantic RTL HTML/CSS; mobile starts at content without the top visual block; rasterization is isolated to static social/OpenGraph images.');
