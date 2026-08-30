@@ -1,0 +1,22 @@
+[
+  {"id":"knowledge_home","title":"معرفة روافد","subtitle":"الموقع والموسوعة والأدلة والقطاعات","category":"knowledge","route_type":"web","route_target":"https://healthrenewal.org/","status":"stable","priority":100},
+  {"id":"knowledge_daily_tools","title":"أدوات الموقع","subtitle":"افتح الأدوات المنشورة على healthrenewal.org دون تغيير الموقع","category":"knowledge","route_type":"web","route_target":"https://healthrenewal.org/daily-tools/","status":"stable","priority":95},
+  {"id":"care_center","title":"اهتم بي","subtitle":"الماء والحركة وراحة العين والرسائل وساعات الصمت","category":"daily","route_type":"main","route_target":"care","status":"stable","priority":100},
+  {"id":"support_passport","title":"جواز احتياجاتي","subtitle":"كيف أفضل أن يتعامل معي الآخرون، مع مشاركة دقيقة لكل بند","category":"accessibility","route_type":"activity","route_target":"org.healthrenewal.rawafid.SupportPassportActivity","status":"stable","priority":100},
+  {"id":"women_companion","title":"رفيقة روافد","subtitle":"رفيقة يومية وقطاع المرأة والتقويم والعناية","category":"women","route_type":"activity","route_target":"org.healthrenewal.rawafid.WomenActivity","status":"beta","priority":100},
+  {"id":"women_calendar","title":"تقويم المرأة","subtitle":"دورة ومزاج وطاقة ونوم وألم واتجاهات وصفية","category":"women","route_type":"activity","route_target":"org.healthrenewal.rawafid.WomenCalendarActivity","status":"beta","priority":95},
+  {"id":"screen_rest","title":"راحة الشاشة","subtitle":"ارمش، انظر بعيدًا، حرّك الرقبة وخذ فاصلًا قصيرًا","category":"daily","route_type":"quick","route_target":"screen_rest","status":"stable","priority":95},
+  {"id":"one_minute","title":"دقيقة لي","subtitle":"تنفس أو تمدد أو ماء أو صمت أو حركة قصيرة","category":"wellbeing","route_type":"quick","route_target":"one_minute","status":"stable","priority":94},
+  {"id":"calm_now","title":"هدوء الآن","subtitle":"واجهة منخفضة التحفيز للحظة القلق أو الإرهاق","category":"wellbeing","route_type":"quick","route_target":"calm_now","status":"stable","priority":93},
+  {"id":"mood_to_action","title":"ماذا أحتاج الآن؟","subtitle":"حوّل تسجيل الشعور إلى خطوة صغيرة نافعة بدل رقم فقط","category":"wellbeing","route_type":"quick","route_target":"mood_to_action","status":"stable","priority":92},
+  {"id":"before_leave","title":"قبل أن أخرج","subtitle":"مفاتيح، هاتف، محفظة، دواء، ماء وما تختاره أنت","category":"daily","route_type":"quick","route_target":"before_leave","status":"stable","priority":91},
+  {"id":"where_put_it","title":"أين وضعتها؟","subtitle":"سجل مكان غرض مهم وابحث عنه لاحقًا","category":"memory","route_type":"quick","route_target":"where_put_it","status":"stable","priority":90},
+  {"id":"quick_capture","title":"ذاكرتي الصغيرة","subtitle":"ملاحظة سريعة محلية لشيء لا تريد نسيانه","category":"memory","route_type":"quick","route_target":"quick_capture","status":"stable","priority":89},
+  {"id":"daily_review","title":"راجع يومي","subtitle":"ماذا نجح، ماذا بقي، وما أهم شيء للغد؟","category":"planning","route_type":"quick","route_target":"daily_review","status":"stable","priority":88},
+  {"id":"gentle_focus","title":"تركيز لطيف","subtitle":"جلسة قصيرة مع فاصل للعين والحركة بدل الضغط المستمر","category":"planning","route_type":"quick","route_target":"gentle_focus","status":"stable","priority":87},
+  {"id":"need_you","title":"أحتاجك","subtitle":"جهّز رسالة واضحة لشخص موثوق دون إرسال تلقائي","category":"social","route_type":"quick","route_target":"need_you","status":"stable","priority":86},
+  {"id":"breathing","title":"تنفس دقيقة","subtitle":"إيقاع بسيط اختياري للتهدئة أو استعادة التركيز","category":"wellbeing","route_type":"quick","route_target":"breathing","status":"stable","priority":85},
+  {"id":"treatment_center","title":"مواعيد العلاج","subtitle":"أضف زيارة أو جلسة أو تحليلًا واحصل على تذكير محلي","category":"health","route_type":"main","route_target":"care","status":"stable","priority":84},
+  {"id":"life_card","title":"بطاقة روافد للحياة","subtitle":"بطاقة طوارئ ومساعدة محلية قابلة للمشاركة","category":"safety","route_type":"main","route_target":"safety","status":"beta","priority":100},
+  {"id":"site_entry","title":"الدخول إلى الموقع","subtitle":"مدخل مباشر وآمن للموقع المنشور دون تعديل أو تأثير على الإنتاج","category":"knowledge","route_type":"web","route_target":"https://healthrenewal.org/","status":"stable","priority":90}
+]
