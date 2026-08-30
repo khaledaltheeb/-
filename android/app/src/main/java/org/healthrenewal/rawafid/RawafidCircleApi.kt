@@ -16,6 +16,15 @@ data class CircleMfaFactor(val id: String, val friendlyName: String, val factorT
 data class CirclePendingRequest(val requestId: String, val requesterRawafidId: String, val requesterName: String, val requestedAt: String)
 data class CircleConnection(val connectionId: String, val counterpartRawafidId: String, val counterpartName: String, val myLabel: String, val connectedAt: String, val canMessage: Boolean, val canQuickQuestion: Boolean, val canRequestLocation: Boolean, val allowMessagesFromThem: Boolean, val allowQuickQuestionsFromThem: Boolean, val allowLocationRequestsFromThem: Boolean)
 data class CirclePermissionSnapshot(val permission: String, val mine: Boolean, val theirs: Boolean)
+data class CircleDriveAgreement(
+    val connectionId: String,
+    val permissionEnabled: Boolean,
+    val incidentsEnabled: Boolean,
+    val riskAlertsEnabled: Boolean,
+    val tripReportsEnabled: Boolean,
+    val speedThresholdKmh: Int,
+    val persistentSpeedSeconds: Int
+)
 data class CircleCloudMessage(val messageId: String, val senderIsMe: Boolean, val kind: String, val body: String, val templateKey: String?, val latitude: Double?, val longitude: Double?, val accuracyM: Double?, val replyToId: String?, val createdAt: String, val answerCode: String?, val answeredAt: String?)
 data class CircleCloudNotification(val notificationId: String, val kind: String, val title: String, val body: String, val data: JSONObject, val readAt: String?, val createdAt: String)
 
@@ -119,6 +128,58 @@ object RawafidCircleApi {
 
     fun setPermission(context: Context, connectionId: String, permission: String, enabled: Boolean): Boolean = scalarBoolean(rpc(context, "circle_set_permission", JSONObject().put("p_connection_id", connectionId).put("p_permission", permission).put("p_enabled", enabled)))
     fun removeConnection(context: Context, connectionId: String): Boolean = scalarBoolean(rpc(context, "circle_remove_connection", JSONObject().put("p_connection_id", connectionId)))
+
+    fun driveAgreements(context: Context): List<CircleDriveAgreement> {
+        val a = JSONArray(rpc(context, "circle_get_drive_agreements", JSONObject()))
+        return buildList {
+            for (i in 0 until a.length()) {
+                val o = a.optJSONObject(i) ?: continue
+                add(
+                    CircleDriveAgreement(
+                        connectionId = o.optString("connection_id"),
+                        permissionEnabled = o.optBoolean("permission_enabled"),
+                        incidentsEnabled = o.optBoolean("incidents_enabled", true),
+                        riskAlertsEnabled = o.optBoolean("risk_alerts_enabled", true),
+                        tripReportsEnabled = o.optBoolean("trip_reports_enabled", true),
+                        speedThresholdKmh = o.optInt("speed_threshold_kmh", 120).coerceIn(50, 180),
+                        persistentSpeedSeconds = o.optInt("persistent_speed_seconds", 120).coerceIn(30, 900)
+                    )
+                )
+            }
+        }
+    }
+
+    fun setDriveAgreement(context: Context, agreement: CircleDriveAgreement): Boolean = scalarBoolean(
+        rpc(
+            context,
+            "circle_set_drive_agreement",
+            JSONObject()
+                .put("p_connection_id", agreement.connectionId)
+                .put("p_incidents_enabled", agreement.incidentsEnabled)
+                .put("p_risk_alerts_enabled", agreement.riskAlertsEnabled)
+                .put("p_trip_reports_enabled", agreement.tripReportsEnabled)
+                .put("p_speed_threshold_kmh", agreement.speedThresholdKmh.coerceIn(50, 180))
+                .put("p_persistent_speed_seconds", agreement.persistentSpeedSeconds.coerceIn(30, 900))
+        )
+    )
+
+    fun sendDriveRiskToConnection(
+        context: Context,
+        connectionId: String,
+        speedKmh: Double,
+        continuousSeconds: Int,
+        summary: String
+    ): Boolean = scalarBoolean(
+        rpc(
+            context,
+            "circle_send_drive_risk_to_connection",
+            JSONObject()
+                .put("p_connection_id", connectionId)
+                .put("p_speed_kmh", speedKmh.coerceIn(0.0, 350.0))
+                .put("p_continuous_seconds", continuousSeconds.coerceIn(0, 7200))
+                .put("p_summary", summary.trim().take(900))
+        )
+    )
 
     fun messages(context: Context, connectionId: String, limit: Int = 80): List<CircleCloudMessage> {
         val a = JSONArray(rpc(context, "circle_get_messages", JSONObject().put("p_connection_id", connectionId).put("p_limit", limit.coerceIn(1, 100)).put("p_before", JSONObject.NULL)))
