@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { notFound, redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import ContentRenderer from '@/components/content-renderer';
 import LegacyPreservedPageView from '@/components/legacy-preserved-page';
 import PublicPagination from '@/components/public-pagination';
@@ -168,7 +168,7 @@ export default async function SectionPage({ params, searchParams }: { params: Pa
   }
 
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  if (page > pages && page > 1) redirect(pageHref(slug, pages, query));
+  if (page > pages && page > 1) notFound();
   const canonicalPath = query ? `/sections/${slug}` : indexPagePath(slug, page);
   const canonical = `${SITE_URL}${canonicalPath}`;
   const schemas = [
