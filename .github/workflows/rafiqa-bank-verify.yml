@@ -1,12 +1,12 @@
-name: Rafiqa 12K Bank Verify
+name: Rafiqa 12K Bank Verify (Final Stage)
 
+# The 12K companion-bank expansion is intentionally deferred until the final
+# product stage. Existing bundled assets remain untouched and may be used as
+# available, but completeness of all 12,000 messages must not block feature
+# development or Android builds.
+#
+# Run this workflow manually only when the final content-upload stage starts.
 on:
-  pull_request:
-    paths:
-      - 'android/app/src/main/assets/rafiqa/**'
-      - 'android/app/src/main/java/org/healthrenewal/rawafid/RafiqaAssetBank.kt'
-      - 'android/verify_rafiqa_bank.py'
-      - '.github/workflows/rafiqa-bank-verify.yml'
   workflow_dispatch:
 
 permissions:
