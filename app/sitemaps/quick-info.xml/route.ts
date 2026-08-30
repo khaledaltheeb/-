@@ -8,53 +8,24 @@ const DB_BATCH_SIZE = 1000;
 const QUICK_INFO_HUB = { path: '/quick-info/' } as const;
 
 type JsonRecord = Record<string, unknown>;
+type QuickInfoSitemapRecord = { id: string; slug: string; canonical_url: string | null; updated_at: string | null; schema_json: JsonRecord | null };
 
-type QuickInfoSitemapRecord = {
-  id: string;
-  slug: string;
-  canonical_url: string | null;
-  updated_at: string | null;
-  schema_json: JsonRecord | null;
-};
-
-function asRecord(value: unknown): JsonRecord | null {
-  return value && typeof value === 'object' && !Array.isArray(value) ? value as JsonRecord : null;
-}
-
-function asString(value: unknown) {
-  return typeof value === 'string' ? value.trim() : '';
-}
-
-function escapeXml(value: string) {
-  return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;');
-}
-
-function absolute(path: string) {
-  return `${SITE_URL}${path.startsWith('/') ? path : `/${path}`}`;
-}
-
+function asRecord(value: unknown): JsonRecord | null { return value && typeof value === 'object' && !Array.isArray(value) ? value as JsonRecord : null; }
+function asString(value: unknown) { return typeof value === 'string' ? value.trim() : ''; }
+function escapeXml(value: string) { return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;'); }
+function absolute(path: string) { return `${SITE_URL}${path.startsWith('/') ? path : `/${path}`}`; }
 function publicationApproved(schema: unknown): boolean {
   const record = asRecord(schema);
-  return Boolean(
-    record
-    && asString(record.page_role) === 'quick-info'
-    && record.publication_ready === true
-    && record.editorial_review_required === false,
-  );
+  return Boolean(record && asString(record.page_role) === 'quick-info' && record.publication_ready === true && record.editorial_review_required === false);
 }
-
 function response(rows: string) {
   return new NextResponse(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">${rows}</urlset>`, {
-    headers: {
-      'Content-Type': 'application/xml; charset=utf-8',
-      'Cache-Control': 'public, max-age=0, s-maxage=900, stale-while-revalidate=3600',
-    },
+    headers: { 'Content-Type': 'application/xml; charset=utf-8', 'Cache-Control': 'public, max-age=0, s-maxage=900, stale-while-revalidate=3600' },
   });
 }
 
 export async function GET(request: Request) {
   if (!INDEXING_ENABLED) return response('');
-
   const url = new URL(request.url);
   const raw = Number(url.searchParams.get('page') ?? '0');
   const page = Number.isInteger(raw) && raw >= 0 && raw < 10000 ? raw : 0;
@@ -76,7 +47,6 @@ export async function GET(request: Request) {
       .lte('published_at', now)
       .order('id', { ascending: true })
       .range(batchStart, batchEnd);
-
     if (error) throw new Error(`quick-info sitemap query failed at rows ${batchStart}-${batchEnd}: ${error.message}`);
     if (!Array.isArray(batch)) throw new Error('quick-info sitemap query returned no data array');
     data.push(...(batch as QuickInfoSitemapRecord[]));
@@ -95,16 +65,14 @@ export async function GET(request: Request) {
 
   const rows: string[] = [];
   if (page === 0) {
-    const latest = items.reduce<string | null>((value, item) => {
-      if (!item.updatedAt) return value;
-      return !value || item.updatedAt > value ? item.updatedAt : value;
-    }, null);
+    const latest = items.reduce<string | null>((value, item) => !item.updatedAt ? value : !value || item.updatedAt > value ? item.updatedAt : value, null);
     rows.push(`<url><loc>${escapeXml(absolute(QUICK_INFO_HUB.path))}</loc>${latest ? `<lastmod>${escapeXml(new Date(latest).toISOString())}</lastmod>` : ''}<changefreq>weekly</changefreq><priority>0.8</priority></url>`);
   }
 
   for (const item of items) {
-    const imageUrl = absolute(`/quick-info/og/${item.routeSlug}.png`);
-    rows.push(`<url><loc>${escapeXml(absolute(item.canonicalUrl))}</loc>${item.updatedAt ? `<lastmod>${escapeXml(new Date(item.updatedAt).toISOString())}</lastmod>` : ''}<changefreq>monthly</changefreq><priority>0.7</priority><image:image><image:loc>${escapeXml(imageUrl)}</image:loc></image:image></url>`);
+    const discoverUrl = absolute(`/quick-info/discover/${item.routeSlug}.png`);
+    const cardUrl = absolute(`/quick-info/og/${item.routeSlug}.png`);
+    rows.push(`<url><loc>${escapeXml(absolute(item.canonicalUrl))}</loc>${item.updatedAt ? `<lastmod>${escapeXml(new Date(item.updatedAt).toISOString())}</lastmod>` : ''}<changefreq>monthly</changefreq><priority>0.7</priority><image:image><image:loc>${escapeXml(discoverUrl)}</image:loc></image:image><image:image><image:loc>${escapeXml(cardUrl)}</image:loc></image:image></url>`);
   }
 
   return response(rows.join(''));
