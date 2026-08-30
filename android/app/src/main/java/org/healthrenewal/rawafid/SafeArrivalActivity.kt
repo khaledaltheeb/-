@@ -1,10 +1,13 @@
 package org.healthrenewal.rawafid
 
+import android.Manifest
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -36,6 +39,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -96,6 +100,7 @@ class SafeArrivalReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent?) {
         val check = SafeArrivalStore.load(context)
         if (!check.active) return
+        if (Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) return
         val open = Intent(context, SafeArrivalActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         val pending = PendingIntent.getActivity(context, 8302, open, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
@@ -151,8 +156,8 @@ private fun SafeArrivalScreen() {
                         if (existing.reason.isNotBlank()) Text("السبب: ${existing.reason}")
                         Button(onClick = { SafeArrivalScheduler.cancel(context); SafeArrivalStore.clear(context); version++ }) { Text("أنا بخير — إنهاء الفحص") }
                         OutlinedButton(onClick = {
-                            val intent = Intent(Intent.ACTION_SEND).apply { type = "text/plain"; putExtra(Intent.EXTRA_TEXT, existing.message) }
-                            context.startActivity(Intent.createChooser(intent, "اختر شخصًا أو تطبيقًا"))
+                            val shareIntent = Intent(Intent.ACTION_SEND).apply { type = "text/plain"; putExtra(Intent.EXTRA_TEXT, existing.message) }
+                            context.startActivity(Intent.createChooser(shareIntent, "اختر شخصًا أو تطبيقًا"))
                         }) { Text("مشاركة رسالة المساعدة") }
                     }
                 }
