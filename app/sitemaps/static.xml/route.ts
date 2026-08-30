@@ -10,6 +10,7 @@ export async function GET() {
     { path:'/magazine/', changeFrequency:'daily', priority:.84 },
     { path:'/addiction', changeFrequency:'weekly', priority:.82 },
     { path:'/about', changeFrequency:'monthly', priority:.7 },
+    { path:'/press', changeFrequency:'monthly', priority:.66 },
     { path:'/start-here', changeFrequency:'monthly', priority:.78 },
     { path:'/guided-assessment', changeFrequency:'monthly', priority:.68 },
     { path:'/assessment-lab', changeFrequency:'monthly', priority:.76 },
