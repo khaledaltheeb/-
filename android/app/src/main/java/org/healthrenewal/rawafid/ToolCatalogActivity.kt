@@ -98,13 +98,31 @@ private fun ToolCatalogScreen() {
                 }
             }
         }
-        visible.forEach { feature ->
-            item(key = feature.id) {
-                Card(modifier = Modifier.fillMaxWidth(), onClick = { FeatureRouter.open(context, feature) }) {
-                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                        Text(feature.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                        Text(feature.subtitle, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        if (feature.status == "beta") Text("تجريبي", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+        if (visible.isEmpty()) {
+            item(key = "tool-catalog-empty") {
+                Card(modifier = Modifier.fillMaxWidth()) {
+                    Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Text("لا توجد أدوات مطابقة", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                        Text(
+                            if (query.isBlank()) {
+                                "لا توجد أدوات منشورة ضمن هذه الفئة حاليًا."
+                            } else {
+                                "جرّب كلمة أقصر، اسمًا آخر للأداة، أو اختر «الكل»."
+                            },
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+        } else {
+            visible.forEach { feature ->
+                item(key = feature.id) {
+                    Card(modifier = Modifier.fillMaxWidth(), onClick = { FeatureRouter.open(context, feature) }) {
+                        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                            Text(feature.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                            Text(feature.subtitle, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            if (feature.status == "beta") Text("تجريبي", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+                        }
                     }
                 }
             }
