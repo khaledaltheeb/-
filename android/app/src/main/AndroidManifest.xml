@@ -34,6 +34,7 @@
         <activity android:name=".MedicationCompanionActivity" android:exported="false" android:label="رفيق العلاج" />
         <activity android:name=".AppointmentCompanionActivity" android:exported="false" android:label="رفيق الموعد" />
         <activity android:name=".FamilyHubActivity" android:exported="false" android:label="مركز الأسرة" />
+        <activity android:name=".MyCircleActivity" android:exported="false" android:label="دائرتي" />
         <activity android:name=".SafeArrivalActivity" android:exported="false" android:label="وصلت بالسلامة" />
         <activity android:name=".SupportPassportActivity" android:exported="false" android:label="جواز احتياجاتي" />
         <activity android:name=".LifeVaultActivity" android:exported="false" android:label="خزانة الحياة" />
