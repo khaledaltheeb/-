@@ -2,6 +2,8 @@ package org.healthrenewal.rawafid
 
 import android.content.Context
 import android.content.Intent
+import android.media.AudioManager
+import android.media.ToneGenerator
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -341,7 +343,7 @@ private fun ScreenRestScreen() {
         item { TimerControls(running, completed, onStart = { running = true }, onPause = { running = false }, onRestart = { secondsLeft = 45; running = true }) }
         item {
             Text(
-                "تذكير الرمش الدوري خارج هذه الشاشة يبقى إشعار Android ويمكن ضبط نغمته واهتزازه من إعدادات روافد.",
+                "سيصدر تنبيه صوتي قصير عند انتهاء الجلسة؛ يمكنك إبعاد نظرك عن الشاشة بثقة. تذكير الرمش الدوري خارج هذه الشاشة يبقى إشعار Android ويمكن ضبط نغمته واهتزازه من إعدادات روافد.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -357,6 +359,24 @@ private fun TimerControls(
     onPause: () -> Unit,
     onRestart: () -> Unit
 ) {
+    var completionSoundPlayed by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(completed) {
+        if (!completed) {
+            completionSoundPlayed = false
+            return@LaunchedEffect
+        }
+        if (!completionSoundPlayed) {
+            completionSoundPlayed = true
+            val tone = ToneGenerator(AudioManager.STREAM_ALARM, 85)
+            try {
+                tone.startTone(ToneGenerator.TONE_PROP_ACK, 450)
+                delay(500)
+            } finally {
+                tone.release()
+            }
+        }
+    }
+
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
         Button(
             onClick = if (running) onPause else if (completed) onRestart else onStart,
@@ -502,10 +522,54 @@ private fun DailyReviewScreen() {
 @Composable
 private fun GentleFocusScreen() {
     var minutes by rememberSaveable { mutableIntStateOf(15) }
+    var secondsLeft by rememberSaveable { mutableIntStateOf(15 * 60) }
+    var running by rememberSaveable { mutableStateOf(false) }
+    val completed = secondsLeft == 0
+
+    LaunchedEffect(running, secondsLeft) {
+        if (running && secondsLeft > 0) {
+            delay(1000)
+            secondsLeft -= 1
+            if (secondsLeft == 0) running = false
+        }
+    }
+
     LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        item { ToolHeader("تركيز لطيف", "اختر جلسة قصيرة ثم خذ فاصل عين وحركة.") }
-        item { Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { listOf(10, 15, 25).forEach { value -> FilterChip(selected = minutes == value, onClick = { minutes = value }, label = { Text("$value د") }) } } }
-        item { Card { Text("ركز $minutes دقيقة على شيء واحد فقط. بعدها: انظر بعيدًا، تحرك قليلًا، ثم قرر إن كنت تحتاج جلسة أخرى.", Modifier.padding(18.dp)) } }
+        item { ToolHeader("تركيز لطيف", "جلسة تركيز فعلية قصيرة مع عدّ تنازلي وتنبيه صوتي عند النهاية.") }
+        item {
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                listOf(10, 15, 25).forEach { value ->
+                    FilterChip(
+                        selected = minutes == value,
+                        onClick = { minutes = value; secondsLeft = value * 60; running = false },
+                        enabled = !running,
+                        label = { Text("$value د") }
+                    )
+                }
+            }
+        }
+        item {
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(
+                    Modifier.fillMaxWidth().padding(18.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Text(if (completed) "اكتملت جلسة التركيز" else "ركز على شيء واحد فقط", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+                    Text(formatCountdown(secondsLeft), style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold)
+                    Text("بعد النهاية: انظر بعيدًا، تحرك قليلًا، ثم قرر إن كنت تحتاج جلسة أخرى.", color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
+                }
+            }
+        }
+        item {
+            TimerControls(
+                running = running,
+                completed = completed,
+                onStart = { running = true },
+                onPause = { running = false },
+                onRestart = { secondsLeft = minutes * 60; running = true }
+            )
+        }
     }
 }
 
