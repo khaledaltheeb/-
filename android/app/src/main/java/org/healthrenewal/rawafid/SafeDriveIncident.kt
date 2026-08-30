@@ -5,6 +5,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.util.UUID
 import kotlin.math.max
+import kotlin.math.min
 
 /**
  * A suspected sudden stop is intentionally conservative: a large speed drop
@@ -68,6 +69,8 @@ class SafeDriveIncidentDetector(config: SafeDriveIncidentConfig) {
     private val speedWindow = ArrayDeque<SpeedPoint>()
     private var peakImpactG = 0.0
     private var impactAtElapsedMs = Long.MIN_VALUE / 2
+    private var strongestRecentDecelerationMps2 = 0.0
+    private var decelerationAtElapsedMs = Long.MIN_VALUE / 2
     private var lastCandidateElapsedMs = Long.MIN_VALUE / 2
 
     fun recordImpact(elapsedMs: Long, magnitudeG: Double) {
@@ -84,6 +87,16 @@ class SafeDriveIncidentDetector(config: SafeDriveIncidentConfig) {
         currentAccelerationMps2: Double
     ): SafeDriveIncidentCandidate? {
         if (!config.enabled || !currentSpeedKmh.isFinite() || !currentAccelerationMps2.isFinite()) return null
+
+        if (sample.elapsedMs - decelerationAtElapsedMs > 5_000L) {
+            strongestRecentDecelerationMps2 = 0.0
+            decelerationAtElapsedMs = Long.MIN_VALUE / 2
+        }
+        if (currentAccelerationMps2 < strongestRecentDecelerationMps2) {
+            strongestRecentDecelerationMps2 = currentAccelerationMps2.coerceAtLeast(-15.0)
+            decelerationAtElapsedMs = sample.elapsedMs
+        }
+
         speedWindow.addLast(SpeedPoint(sample.elapsedMs, currentSpeedKmh.coerceAtLeast(0.0)))
         while (speedWindow.isNotEmpty() && sample.elapsedMs - speedWindow.first().elapsedMs > 6_000L) {
             speedWindow.removeFirst()
@@ -96,7 +109,9 @@ class SafeDriveIncidentDetector(config: SafeDriveIncidentConfig) {
         if (preStop < config.minimumPreStopSpeedKmh || drop < config.minimumSpeedDropKmh) return null
 
         val impactIsRecent = sample.elapsedMs - impactAtElapsedMs in 0L..5_000L
-        val hardDeceleration = currentAccelerationMps2 <= -config.hardDecelerationMps2
+        val decelerationIsRecent = sample.elapsedMs - decelerationAtElapsedMs in 0L..5_000L
+        val relevantDeceleration = if (decelerationIsRecent) min(currentAccelerationMps2, strongestRecentDecelerationMps2) else currentAccelerationMps2
+        val hardDeceleration = relevantDeceleration <= -config.hardDecelerationMps2
         val impactSupports = impactIsRecent && peakImpactG >= config.impactThresholdG
         if (!hardDeceleration && !impactSupports) return null
 
@@ -106,7 +121,7 @@ class SafeDriveIncidentDetector(config: SafeDriveIncidentConfig) {
             hardDeceleration -> "توقف سريع بعد تباطؤ حاد"
             else -> "توقف سريع مع إشارة صدمة من الهاتف"
         }
-        return SafeDriveIncidentCandidate(
+        val candidate = SafeDriveIncidentCandidate(
             detectedAtMs = sample.wallTimeMs,
             elapsedMs = sample.elapsedMs,
             latitude = sample.latitude,
@@ -114,10 +129,15 @@ class SafeDriveIncidentDetector(config: SafeDriveIncidentConfig) {
             accuracyM = sample.accuracyM,
             preStopSpeedKmh = preStop,
             currentSpeedKmh = currentSpeedKmh,
-            decelerationMps2 = currentAccelerationMps2,
+            decelerationMps2 = relevantDeceleration,
             peakImpactG = if (impactIsRecent) peakImpactG else 0.0,
             reason = reason
         )
+        peakImpactG = 0.0
+        impactAtElapsedMs = Long.MIN_VALUE / 2
+        strongestRecentDecelerationMps2 = 0.0
+        decelerationAtElapsedMs = Long.MIN_VALUE / 2
+        return candidate
     }
 }
 
