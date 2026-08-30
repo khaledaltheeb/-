@@ -37,13 +37,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.ui.unit.dp
 import org.json.JSONArray
 import org.json.JSONObject
 
 enum class CirclePermission(val id: String, val label: String) {
     EMERGENCY("emergency", "جهة موثوقة للطوارئ"),
     SAFE_ARRIVAL("safe_arrival", "وصلت بالسلامة / Check-in"),
+    LOCATION_SAFETY("location_safety", "استلام موقع مراقبة الأمان"),
     CARE("care", "مهام الرعاية"),
     HEALTH_SUMMARY("health_summary", "ملخص صحي أختار مشاركته"),
     SUPPORT("support", "أحتاجك / دعم وتواصل")
@@ -121,16 +121,16 @@ private fun MyCircleScreen() {
     var permissions by remember { mutableStateOf(setOf(CirclePermission.SUPPORT)) }
     val people = remember(version) { MyCircleStore.people(context) }
 
-    LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+    LazyColumn(contentPadding = PaddingValues(RawafidSpacing.ScreenHorizontal), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Md)) {
         item {
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
                 Text("دائرتي", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-                Text("الأشخاص الذين تثق بهم ليسوا متساوين في الصلاحيات. اختر لكل شخص ما الذي تعتمد عليه فيه. لا يتم إرسال شيء تلقائيًا في هذه النسخة.")
+                Text("حدد لكل شخص ما الذي تسمح لروافد باستخدامه معه. إذن «استلام موقع مراقبة الأمان» منفصل عن الاتصال والطوارئ وبقية الصلاحيات.")
             }
         }
         item {
             Card {
-                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(9.dp)) {
+                Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)) {
                     Text("إضافة شخص موثوق", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                     OutlinedTextField(name, { name = it.take(80) }, label = { Text("الاسم") }, modifier = Modifier.fillMaxWidth())
                     OutlinedTextField(relation, { relation = it.take(80) }, label = { Text("العلاقة — أب، أم، شريك، صديق، مقدم رعاية...") }, modifier = Modifier.fillMaxWidth())
@@ -157,12 +157,12 @@ private fun MyCircleScreen() {
         if (people.isEmpty()) item { Text("لم تضف أشخاصًا بعد.") }
         items(people, key = { it.id }) { person ->
             Card {
-                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(7.dp)) {
+                Column(Modifier.padding(RawafidSpacing.Md), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
                     Text(person.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                     if (person.relation.isNotBlank()) Text(person.relation)
                     person.permissions.forEach { Text("• ${it.label}", style = MaterialTheme.typography.bodySmall) }
                     if (person.phone.isNotBlank()) {
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
                             OutlinedButton(onClick = { context.startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:${Uri.encode(person.phone)}"))) }) { Text("اتصال") }
                             OutlinedButton(onClick = { context.startActivity(Intent(Intent.ACTION_SENDTO, Uri.parse("smsto:${Uri.encode(person.phone)}")).putExtra("sms_body", "أحتاج أن أتواصل معك عبر روافد.")) }) { Text("رسالة") }
                         }
