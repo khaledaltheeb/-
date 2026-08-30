@@ -4,13 +4,16 @@ on:
   workflow_run:
     workflows: ['Cloudflare Workers Validate']
     types: [completed]
+    branches: [main]
 
 permissions:
   contents: read
   statuses: write
 
+# Only equivalent validated-main outcomes may supersede one another. A failed
+# validation (or a non-push run) must never cancel a valid staging deployment.
 concurrency:
-  group: rawafid-staging-deploy
+  group: rawafid-staging-deploy-${{ github.event.workflow_run.event }}-${{ github.event.workflow_run.head_branch }}-${{ github.event.workflow_run.conclusion }}
   cancel-in-progress: true
 
 jobs:
