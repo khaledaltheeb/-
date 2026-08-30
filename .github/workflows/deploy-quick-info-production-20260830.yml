@@ -1,5 +1,6 @@
 name: Deploy Quick Info Production 20260830
 
+# Retry exact Discover verification after shared production deployment completes.
 on:
   push:
     branches: [main]
