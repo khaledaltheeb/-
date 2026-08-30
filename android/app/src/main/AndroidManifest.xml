@@ -27,6 +27,7 @@
 
         <activity android:name=".ToolCatalogActivity" android:exported="false" android:label="أدوات روافد" />
         <activity android:name=".LifeUtilityActivity" android:exported="false" android:label="أدوات روافد" />
+        <activity android:name=".CareHubActivity" android:exported="false" android:label="اهتم بي" />
         <activity android:name=".HealthTimelineActivity" android:exported="false" android:label="دفتر الصحة الزمني" />
         <activity android:name=".SafeArrivalActivity" android:exported="false" android:label="وصلت بالسلامة" />
         <activity android:name=".SupportPassportActivity" android:exported="false" android:label="جواز احتياجاتي" />
