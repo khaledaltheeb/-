@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="tools_hub"
+        android:enabled="true"
+        android:icon="@drawable/ic_launcher"
+        android:shortcutShortLabel="@string/tools_shortcut_short"
+        android:shortcutLongLabel="@string/tools_shortcut_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="org.healthrenewal.rawafid"
+            android:targetClass="org.healthrenewal.rawafid.ToolCatalogActivity" />
+    </shortcut>
+
+    <shortcut
+        android:shortcutId="safe_arrival"
+        android:enabled="true"
+        android:icon="@drawable/ic_launcher"
+        android:shortcutShortLabel="@string/safe_arrival_shortcut_short"
+        android:shortcutLongLabel="@string/safe_arrival_shortcut_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="org.healthrenewal.rawafid"
+            android:targetClass="org.healthrenewal.rawafid.SafeArrivalActivity" />
+    </shortcut>
+
+    <shortcut
+        android:shortcutId="health_timeline"
+        android:enabled="true"
+        android:icon="@drawable/ic_launcher"
+        android:shortcutShortLabel="@string/timeline_shortcut_short"
+        android:shortcutLongLabel="@string/timeline_shortcut_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="org.healthrenewal.rawafid"
+            android:targetClass="org.healthrenewal.rawafid.HealthTimelineActivity" />
+    </shortcut>
+
+    <shortcut
+        android:shortcutId="women_privacy"
+        android:enabled="true"
+        android:icon="@drawable/ic_launcher"
+        android:shortcutShortLabel="@string/women_privacy_shortcut_short"
+        android:shortcutLongLabel="@string/women_privacy_shortcut_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="org.healthrenewal.rawafid"
+            android:targetClass="org.healthrenewal.rawafid.WomenPrivacySettingsActivity" />
+    </shortcut>
+</shortcuts>
