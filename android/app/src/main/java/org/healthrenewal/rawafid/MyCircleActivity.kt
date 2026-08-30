@@ -65,6 +65,7 @@ enum class CirclePermission(val id: String, val label: String) {
     EMERGENCY("emergency", "جهة موثوقة للطوارئ"),
     SAFE_ARRIVAL("safe_arrival", "وصلت بالسلامة / Check-in"),
     LOCATION_SAFETY("location_safety", "استلام موقع مراقبة الأمان عبر SMS"),
+    DRIVING_SAFETY("driving_safety", "قيادة آمنة — تنبيه وموقع عند طلب المساعدة"),
     CARE("care", "مهام الرعاية"),
     HEALTH_SUMMARY("health_summary", "ملخص صحي أختار مشاركته"),
     SUPPORT("support", "أحتاجك / دعم وتواصل")
@@ -436,9 +437,9 @@ private fun MyCircleScreen() {
         item {
             Card {
                 Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)) {
-                    Text("جهات الطوارئ المحلية على هذا الهاتف", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                    Text("مسار مستقل يعمل للاتصال وSMS ومراقبة الأمان حتى عند تعذر الإنترنت. لا يُرفع دفتر الأرقام إلى دائرة روافد.")
-                    OutlinedButton(onClick = { showLocal = !showLocal }) { Text(if (showLocal) "إخفاء" else "إدارة جهات الطوارئ المحلية") }
+                    Text("جهات الأمان المحلية على هذا الهاتف", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                    Text("مسار مستقل يعمل للاتصال وSMS ومراقبة الأمان والقيادة الآمنة عند تعذر الإنترنت. أنت تختار لكل رقم الوظائف المسموح بها، ولا يُرفع دفتر الأرقام إلى دائرة روافد.")
+                    OutlinedButton(onClick = { showLocal = !showLocal }) { Text(if (showLocal) "إخفاء" else "إدارة جهات الأمان المحلية") }
                 }
             }
         }
@@ -480,7 +481,7 @@ private fun MyCircleScreen() {
                                 localPermissions = setOf(CirclePermission.EMERGENCY, CirclePermission.LOCATION_SAFETY)
                                 localVersion++
                             }
-                        ) { Text("حفظ جهة الطوارئ") }
+                        ) { Text("حفظ الجهة") }
                     }
                 }
             }
@@ -491,6 +492,9 @@ private fun MyCircleScreen() {
                         Text(person.name, fontWeight = FontWeight.Bold)
                         if (person.relation.isNotBlank()) Text(person.relation)
                         Text(person.phone)
+                        if (person.permissions.isNotEmpty()) {
+                            Text(person.permissions.joinToString(" · ") { it.label }, style = MaterialTheme.typography.bodySmall)
+                        }
                         FlowRow(horizontalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
                             Button(onClick = { context.startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:${Uri.encode(person.phone)}"))) }) { Text("اتصال") }
                             OutlinedButton(onClick = { context.startActivity(Intent(Intent.ACTION_SENDTO, Uri.parse("smsto:${Uri.encode(person.phone)}"))) }) { Text("SMS") }
@@ -540,12 +544,13 @@ private fun CirclePermissionsCard(
         "emergency" to "السماح له باستلام تنبيهات طوارئي عند تفعيلها",
         "safe_arrival" to "السماح له باستلام تحديثات الوصول الآمن",
         "care" to "السماح له بمزايا الرعاية التي أفعّلها",
-        "safety_location" to "إرسال موقع مراقبة الأمان الخاص بي إليه تلقائيًا عندما أشغّل المراقبة"
+        "safety_location" to "إرسال موقع مراقبة الأمان الخاص بي إليه تلقائيًا عندما أشغّل المراقبة",
+        "driving_safety" to "السماح له باستلام تنبيهات وتقارير القيادة الآمنة التي أفعّل مشاركتها، وموقعي فقط عند طلب المساعدة أو التصعيد المفعّل مسبقًا"
     )
     Card {
         Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)) {
             Text("صلاحياتي مع ${connection.counterpartName}", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-            Text("كل صلاحية مستقلة ويمكن سحبها في أي وقت. صلاحية موقع الأمان ترسل موقعك أنت لذلك الشخص؛ ولا تمنحه حق تتبعك خارج مراقبة الأمان.")
+            Text("كل صلاحية مستقلة ويمكن سحبها في أي وقت. موقع الأمان أو موقع حادث القيادة يخصك أنت ولا يمنح الطرف الآخر حق تتبعك المستمر.")
             if (snapshot.isEmpty()) Text("جارٍ تحميل الصلاحيات...")
             snapshot.forEach { permission ->
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
