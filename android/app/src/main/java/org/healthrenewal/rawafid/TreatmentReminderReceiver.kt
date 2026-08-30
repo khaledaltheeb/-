@@ -50,11 +50,17 @@ object TreatmentReminderScheduler {
 
 class TreatmentReminderReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        if (Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) return
-        NotificationChannels.create(context)
         val id = intent.getIntExtra("id", 0)
         val title = intent.getStringExtra("title").orEmpty().ifBlank { "موعد علاج" }
         val note = intent.getStringExtra("note").orEmpty()
+
+        // The reminder has fired, so clear the one-time local item even if Android
+        // notification permission is unavailable. This prevents stale expired reminders.
+        LocalStore.removeTreatment(context, id)
+
+        if (Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) return
+
+        NotificationChannels.create(context)
         val openIntent = PendingIntent.getActivity(
             context,
             id,
@@ -73,7 +79,6 @@ class TreatmentReminderReceiver : BroadcastReceiver() {
             .setCategory(NotificationCompat.CATEGORY_REMINDER)
             .build()
         (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).notify(9000 + id, notification)
-        LocalStore.removeTreatment(context, id)
     }
 }
 
