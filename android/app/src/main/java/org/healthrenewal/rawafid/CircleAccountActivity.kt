@@ -176,7 +176,7 @@ private fun CircleAccountScreen(onDone: () -> Unit) {
                 Card {
                     Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
                         Text("لأول مرة؟", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                        Text("1) أنشئ حسابًا.  2) أكّد بريدك إذا طُلب.  3) ارجع إلى «دائرتي» وسيظهر لك رقم RFD الخاص بك مباشرة.")
+                        Text("1) أنشئ حسابًا.  2) راجع بريدك لتأكيد الحساب إذا طُلب.  3) إذا لم تجد رسالة التأكيد في الوارد، افحص «الرسائل غير المرغوب فيها / Spam / Junk».  4) افتح رابط التأكيد ثم سجّل الدخول.  5) ارجع إلى «دائرتي» وسيظهر رقم RFD الخاص بك.")
                     }
                 }
             }
@@ -207,7 +207,8 @@ private fun CircleAccountScreen(onDone: () -> Unit) {
                     Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)) {
                         if (mode == "signup") {
                             Text("إنشاء حساب روافد", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                            Text("استخدم بريدًا يمكنك الوصول إليه وكلمة مرور قوية وفق الشروط الظاهرة أدناه.")
+                            Text("استخدم بريدًا يمكنك الوصول إليه. قد تحتاج إلى تأكيد الحساب من رسالة بريد؛ إذا لم تصل إلى الوارد فتحقق من Spam / Junk / الرسائل غير المرغوب فيها.")
+                            Text("كلمة المرور المطلوبة: 10 أحرف على الأقل، وحرف إنجليزي كبير، وحرف صغير، ورقم، ورمز خاص. ستظهر علامة ✓ أمام كل شرط عند تحققه.", fontWeight = FontWeight.SemiBold)
                             OutlinedTextField(
                                 value = name,
                                 onValueChange = { name = it.take(120) },
@@ -291,7 +292,7 @@ private fun CircleAccountScreen(onDone: () -> Unit) {
                                             CircleNotificationScheduler.checkNow(context)
                                             sessionVersion++
                                         } else if (created) {
-                                            status = "تم إنشاء الحساب. إذا كان تأكيد البريد مفعّلًا، افتح رسالة التأكيد ثم سجّل الدخول. بعد ذلك سيظهر رقم RFD في «دائرتي»."
+                                            status = "تم إنشاء الحساب. راجع بريدك لتأكيد الحساب إذا طُلب. إذا لم تجد رسالة التأكيد في الوارد، افحص الرسائل غير المرغوب فيها / Spam / Junk، ثم افتح رابط التأكيد وسجّل الدخول. بعد ذلك سيظهر رقم RFD في «دائرتي»."
                                             mode = "login"
                                             passwordConfirmation = ""
                                         }
