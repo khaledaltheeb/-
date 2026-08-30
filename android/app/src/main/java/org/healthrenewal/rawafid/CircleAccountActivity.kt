@@ -19,6 +19,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -34,6 +35,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.LayoutDirection
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -57,10 +59,12 @@ private fun CircleAccountScreen(onDone: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var sessionVersion by remember { mutableIntStateOf(0) }
-    var mode by rememberSaveable { mutableStateOf("login") }
+    var mode by rememberSaveable { mutableStateOf("signup") }
     var name by rememberSaveable { mutableStateOf("") }
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
+    var passwordConfirmation by rememberSaveable { mutableStateOf("") }
+    var passwordVisible by rememberSaveable { mutableStateOf(false) }
     var busy by remember { mutableStateOf(false) }
     var status by remember { mutableStateOf("") }
     var error by remember { mutableStateOf("") }
@@ -69,6 +73,8 @@ private fun CircleAccountScreen(onDone: () -> Unit) {
     var challengeId by remember { mutableStateOf<String?>(null) }
     var mfaCode by rememberSaveable { mutableStateOf("") }
     val signedIn = remember(sessionVersion) { RawafidCircleApi.hasSession(context) }
+    val passwordRequirements = remember(password) { CirclePasswordPolicy.requirements(password) }
+    val passwordMatches = password.isNotBlank() && password == passwordConfirmation
 
     fun runTask(block: () -> Unit) {
         if (busy) return
@@ -109,8 +115,8 @@ private fun CircleAccountScreen(onDone: () -> Unit) {
     ) {
         item {
             Column(verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
-                Text("حساب روافد", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-                Text("الحساب يربط «دائرتي» بين الأجهزة. لا يكشف رقم هاتفك أو بياناتك الصحية لمجرد معرفة معرّف روافد.")
+                Text("حساب روافد ورقمي", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+                Text("هذا هو الحساب الذي يمنحك معرّف RFD الثابت ويتيح ربط «دائرتي» بين الأجهزة. معرفة المعرّف وحدها لا تكشف رقم هاتفك أو بياناتك الصحية.")
             }
         }
 
@@ -155,8 +161,8 @@ private fun CircleAccountScreen(onDone: () -> Unit) {
                                 ) { Text("تحقق") }
                             }
                         } else {
-                            Text("الحساب جاهز لاستخدام Rawafid Circle.")
-                            Button(onClick = onDone) { Text("العودة إلى دائرتي") }
+                            Text("الحساب جاهز. ارجع إلى «دائرتي» لعرض رقم RFD والـQR وإرسال أو قبول طلبات الربط.")
+                            Button(onClick = onDone) { Text("العودة إلى دائرتي وعرض رقمي") }
                         }
                         OutlinedButton(
                             enabled = !busy,
@@ -167,21 +173,112 @@ private fun CircleAccountScreen(onDone: () -> Unit) {
             }
         } else {
             item {
+                Card {
+                    Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
+                        Text("لأول مرة؟", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                        Text("1) أنشئ حسابًا.  2) أكّد بريدك إذا طُلب.  3) ارجع إلى «دائرتي» وسيظهر لك رقم RFD الخاص بك مباشرة.")
+                    }
+                }
+            }
+            item {
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
-                    FilterChip(selected = mode == "login", onClick = { mode = "login" }, label = { Text("تسجيل الدخول") })
-                    FilterChip(selected = mode == "signup", onClick = { mode = "signup" }, label = { Text("حساب جديد") })
+                    FilterChip(
+                        selected = mode == "signup",
+                        onClick = {
+                            mode = "signup"
+                            error = ""
+                            status = ""
+                        },
+                        label = { Text("إنشاء حساب جديد") }
+                    )
+                    FilterChip(
+                        selected = mode == "login",
+                        onClick = {
+                            mode = "login"
+                            error = ""
+                            status = ""
+                        },
+                        label = { Text("لدي حساب — تسجيل الدخول") }
+                    )
                 }
             }
             item {
                 Card {
                     Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)) {
                         if (mode == "signup") {
-                            OutlinedTextField(value = name, onValueChange = { name = it.take(120) }, modifier = Modifier.fillMaxWidth(), label = { Text("الاسم الظاهر") }, singleLine = true)
+                            Text("إنشاء حساب روافد", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                            Text("استخدم بريدًا يمكنك الوصول إليه وكلمة مرور قوية وفق الشروط الظاهرة أدناه.")
+                            OutlinedTextField(
+                                value = name,
+                                onValueChange = { name = it.take(120) },
+                                modifier = Modifier.fillMaxWidth(),
+                                label = { Text("الاسم الظاهر") },
+                                singleLine = true
+                            )
+                        } else {
+                            Text("تسجيل الدخول", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                         }
-                        OutlinedTextField(value = email, onValueChange = { email = it.take(254) }, modifier = Modifier.fillMaxWidth(), label = { Text("البريد الإلكتروني") }, singleLine = true)
-                        OutlinedTextField(value = password, onValueChange = { password = it.take(128) }, modifier = Modifier.fillMaxWidth(), label = { Text("كلمة المرور") }, singleLine = true, visualTransformation = PasswordVisualTransformation())
+
+                        OutlinedTextField(
+                            value = email,
+                            onValueChange = { email = it.take(254) },
+                            modifier = Modifier.fillMaxWidth(),
+                            label = { Text("البريد الإلكتروني") },
+                            singleLine = true
+                        )
+                        OutlinedTextField(
+                            value = password,
+                            onValueChange = { password = it.take(128) },
+                            modifier = Modifier.fillMaxWidth(),
+                            label = { Text("كلمة المرور") },
+                            singleLine = true,
+                            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation()
+                        )
+                        TextButton(onClick = { passwordVisible = !passwordVisible }) {
+                            Text(if (passwordVisible) "إخفاء كلمة المرور" else "إظهار كلمة المرور")
+                        }
+
+                        if (mode == "signup") {
+                            Card {
+                                Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
+                                    Text("شروط كلمة المرور", fontWeight = FontWeight.Bold)
+                                    passwordRequirements.forEach { requirement ->
+                                        Text(
+                                            text = (if (requirement.met) "✓ " else "○ ") + requirement.label,
+                                            color = if (requirement.met) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                    Text("لا تستخدم كلمة المرور نفسها في خدمات أخرى، ولا ترسلها لأي شخص.", style = MaterialTheme.typography.bodySmall)
+                                }
+                            }
+                            OutlinedTextField(
+                                value = passwordConfirmation,
+                                onValueChange = { passwordConfirmation = it.take(128) },
+                                modifier = Modifier.fillMaxWidth(),
+                                label = { Text("تأكيد كلمة المرور") },
+                                singleLine = true,
+                                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation()
+                            )
+                            if (passwordConfirmation.isNotBlank()) {
+                                Text(
+                                    if (passwordMatches) "✓ كلمتا المرور متطابقتان" else "كلمتا المرور غير متطابقتين",
+                                    color = if (passwordMatches) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
+                        }
+
+                        val canSubmit = if (mode == "login") {
+                            !busy && email.contains('@') && password.isNotBlank()
+                        } else {
+                            !busy &&
+                                name.isNotBlank() &&
+                                email.contains('@') &&
+                                CirclePasswordPolicy.isValid(password) &&
+                                passwordMatches
+                        }
                         Button(
-                            enabled = !busy && email.contains('@') && password.length >= 6 && (mode == "login" || name.isNotBlank()),
+                            enabled = canSubmit,
                             onClick = {
                                 runTask {
                                     if (mode == "login") {
@@ -194,13 +291,20 @@ private fun CircleAccountScreen(onDone: () -> Unit) {
                                             CircleNotificationScheduler.checkNow(context)
                                             sessionVersion++
                                         } else if (created) {
-                                            status = "تم إنشاء الحساب. إذا كان تأكيد البريد مفعّلًا، افتح رسالة التأكيد ثم سجّل الدخول."
+                                            status = "تم إنشاء الحساب. إذا كان تأكيد البريد مفعّلًا، افتح رسالة التأكيد ثم سجّل الدخول. بعد ذلك سيظهر رقم RFD في «دائرتي»."
                                             mode = "login"
+                                            passwordConfirmation = ""
                                         }
                                     }
                                 }
                             }
-                        ) { Text(if (busy) "جارٍ التحقق..." else if (mode == "login") "دخول" else "إنشاء الحساب") }
+                        ) {
+                            Text(
+                                if (busy) "جارٍ التحقق..."
+                                else if (mode == "login") "دخول"
+                                else "إنشاء الحساب والحصول على رقم RFD"
+                            )
+                        }
 
                         if (mode == "login") {
                             OutlinedButton(
