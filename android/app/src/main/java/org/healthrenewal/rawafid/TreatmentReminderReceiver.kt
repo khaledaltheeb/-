@@ -85,10 +85,12 @@ class BootReceiver : BroadcastReceiver() {
             ReminderScheduler.syncAll(context)
             FlexibleReminderScheduler.syncAll(context)
             MedicationReminderScheduler.syncAll(context)
+            FutureNoteScheduler.restore(context)
             val safeArrival = SafeArrivalStore.load(context)
             if (safeArrival.active && safeArrival.dueAt > System.currentTimeMillis()) {
                 SafeArrivalScheduler.schedule(context, safeArrival)
             }
+            RawafidWidgetProvider.updateAll(context)
         }
     }
 }
