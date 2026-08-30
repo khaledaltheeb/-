@@ -172,7 +172,7 @@ try {
     { query: 'الصحة النفسية', expectedType: 'sector', expectedDestination: '/sectors/mental-health' },
     { query: 'الإدمان والتعافي', expectedType: 'sector', expectedDestination: '/sectors/addiction-recovery' },
     { query: 'ذوو الاحتياجات الخاصة', expectedType: 'sector', expectedDestination: '/sectors/special-needs-inclusion' },
-    { query: 'القلق الاجتماعي', expectedType: 'content', expectedDestination: '/content/legacy-psychology-social-anxiety' },
+    { query: 'القلق الاجتماعي', expectedType: 'content', expectedDestination: '/psychology/social-anxiety/' },
   ];
 
   for (const test of criticalSearches) {
