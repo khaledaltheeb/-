@@ -149,7 +149,6 @@ class MedicationReminderReceiver : BroadcastReceiver() {
         val medication = MedicationStore.medications(context).firstOrNull { it.id == id } ?: return
         if (!medication.reminderEnabled) return
 
-        // Keep the next reminder alive even if notification permission is currently denied.
         MedicationReminderScheduler.sync(context, medication)
 
         if (Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) return
@@ -194,6 +193,7 @@ private fun MedicationCompanionScreen() {
     var time by rememberSaveable { mutableStateOf("08:00") }
     var remaining by rememberSaveable { mutableStateOf("") }
     val meds = remember(version) { MedicationStore.medications(context) }
+    val requestNotifications = rememberNotificationPermissionRequester()
 
     LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         item {
@@ -217,6 +217,7 @@ private fun MedicationCompanionScreen() {
                             val item = MedicationItem(id, name.trim(), instruction.trim(), parsed.hour, parsed.minute, true, remaining.toIntOrNull())
                             MedicationStore.saveMedications(context, meds + item)
                             MedicationReminderScheduler.sync(context, item)
+                            requestNotifications()
                             name = ""; instruction = ""; remaining = ""; version++
                         }
                     }) { Text("حفظ وتفعيل التذكير") }
