@@ -33,9 +33,9 @@ jobs:
         run: test -n "${CLOUDFLARE_API_TOKEN:-}"
       - uses: actions/checkout@v7
         with:
-          ref: e5e35693891657dd82b17f4434aca7103401f46e
+          ref: df2bbf4c5eee68ed226436c454983b5b0f084070
       - name: Verify exact Quick Info release SHA
-        run: test "$(git rev-parse HEAD)" = 'e5e35693891657dd82b17f4434aca7103401f46e'
+        run: test "$(git rev-parse HEAD)" = 'df2bbf4c5eee68ed226436c454983b5b0f084070'
       - uses: actions/setup-node@v7
         with:
           node-version: 24
@@ -60,29 +60,41 @@ jobs:
         run: npx opennextjs-cloudflare build --env production
       - name: Deploy exact production Worker
         run: npx opennextjs-cloudflare deploy --env production
-      - name: Verify Quick Info live production
+      - name: Verify Quick Info Discover live production
         shell: bash
         run: |
           set -euo pipefail
           base='https://healthrenewal.org'
-          stamp='e5e35693891657dd82b17f4434aca7103401f46e'
+          stamp='df2bbf4c5eee68ed226436c454983b5b0f084070'
           get() { curl -fsSL --compressed --retry 12 --retry-delay 3 --retry-all-errors -H 'Cache-Control: no-cache, no-store, max-age=0' "$1"; }
           hub="$(get "${base}/quick-info/?release=${stamp}")"
           sitemap="$(get "${base}/sitemaps/quick-info.xml?release=${stamp}")"
           [[ "$hub" == *'معلومات سريعة'* ]]
           [[ "$hub" == *'/assets/brand/logo-mark.svg'* ]]
           [[ "$sitemap" == *'xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"'* ]]
-          [[ "$sitemap" == *'<image:image><image:loc>'* ]]
+          [[ "$sitemap" == *'/quick-info/discover/'* ]]
+          [[ "$sitemap" == *'/quick-info/og/'* ]]
           page_url="$(printf '%s' "$sitemap" | awk 'match($0, /<loc>https:\/\/healthrenewal\.org\/quick-info\/[a-z0-9-]+\/<\/loc>/) { print substr($0, RSTART + 5, RLENGTH - 11); exit }')"
           test -n "$page_url"
           slug="$(printf '%s' "$page_url" | sed -E 's#https://healthrenewal\.org/quick-info/([^/]+)/#\1#')"
           page="$(get "${page_url}?release=${stamp}")"
-          image_url="${base}/quick-info/og/${slug}.png"
-          image_headers="$(curl -fsSI --retry 12 --retry-delay 3 --retry-all-errors -H 'Cache-Control: no-cache, no-store, max-age=0' "${image_url}?release=${stamp}")"
+          discover_url="${base}/quick-info/discover/${slug}.png"
+          card_url="${base}/quick-info/og/${slug}.png"
+          discover_headers="$(curl -fsSI --retry 12 --retry-delay 3 --retry-all-errors -H 'Cache-Control: no-cache, no-store, max-age=0' "${discover_url}?release=${stamp}")"
+          card_headers="$(curl -fsSI --retry 12 --retry-delay 3 --retry-all-errors -H 'Cache-Control: no-cache, no-store, max-age=0' "${card_url}?release=${stamp}")"
           [[ "$page" == *'data-quick-info-indexable-image'* ]]
           [[ "$page" == *"/quick-info/og/${slug}.png"* ]]
+          [[ "$page" == *"/quick-info/discover/${slug}.png"* ]]
           [[ "$page" == *'ImageObject'* ]]
+          [[ "$page" == *'1280'* ]]
+          [[ "$page" == *'720'* ]]
           [[ "$page" == *'/assets/brand/logo-mark.svg'* ]]
-          printf '%s\n' "$image_headers" | grep -m 1 -Eq '^HTTP/[0-9.]+ 200( |$)'
-          printf '%s\n' "$image_headers" | grep -m 1 -Eqi '^content-type: image/png'
-          echo "Quick Info release ${stamp} is live: ${page_url} with ${image_url}"
+          printf '%s\n' "$discover_headers" | grep -m 1 -Eq '^HTTP/[0-9.]+ 200( |$)'
+          printf '%s\n' "$discover_headers" | grep -m 1 -Eqi '^content-type: image/png'
+          printf '%s\n' "$card_headers" | grep -m 1 -Eq '^HTTP/[0-9.]+ 200( |$)'
+          printf '%s\n' "$card_headers" | grep -m 1 -Eqi '^content-type: image/png'
+          curl -fsSL --retry 12 --retry-delay 3 --retry-all-errors -H 'Cache-Control: no-cache, no-store, max-age=0' "${discover_url}?release=${stamp}" -o /tmp/quick-info-discover.png
+          curl -fsSL --retry 12 --retry-delay 3 --retry-all-errors -H 'Cache-Control: no-cache, no-store, max-age=0' "${card_url}?release=${stamp}" -o /tmp/quick-info-card.png
+          test "$(identify -format '%wx%h' /tmp/quick-info-discover.png)" = '1280x720'
+          test "$(identify -format '%wx%h' /tmp/quick-info-card.png)" = '1200x630'
+          echo "Quick Info Discover release ${stamp} is live: ${page_url} | Discover ${discover_url} (1280x720) | Card ${card_url} (1200x630)"
