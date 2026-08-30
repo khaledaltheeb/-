@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import json
 import pathlib
+import re
 import sys
 from urllib.parse import urlparse
 
@@ -31,6 +32,20 @@ def require_unique(items, label):
         seen.add(item_id)
 
 
+def declared_kotlin_classes():
+    classes = set()
+    pattern = re.compile(r"\b(?:class|object)\s+([A-Za-z_][A-Za-z0-9_]*)\b")
+    for path in JAVA.glob("*.kt"):
+        try:
+            text = path.read_text(encoding="utf-8")
+        except Exception as exc:
+            errors.append(f"cannot read Kotlin source {path.name}: {exc}")
+            continue
+        classes.update(pattern.findall(text))
+    return classes
+
+
+classes = declared_kotlin_classes()
 features = load_json("rawafid_feature_catalog.json")
 if not isinstance(features, list) or not features:
     errors.append("feature catalog: expected non-empty array")
@@ -61,8 +76,8 @@ else:
 
         if route_type == "activity" and target.startswith("org.healthrenewal.rawafid."):
             class_name = target.rsplit(".", 1)[-1]
-            if not (JAVA / f"{class_name}.kt").exists():
-                errors.append(f"{fid}: activity target file missing: {class_name}.kt")
+            if class_name not in classes:
+                errors.append(f"{fid}: activity class not declared in Kotlin sources: {class_name}")
 
         if route_type == "web":
             parsed = urlparse(target)
@@ -104,4 +119,4 @@ if errors:
         print(f"- {error}")
     sys.exit(1)
 
-print(f"Android catalogs OK: {len(features)} features, {len(reminders)} reminder definitions")
+print(f"Android catalogs OK: {len(features)} features, {len(reminders)} reminder definitions, {len(classes)} Kotlin classes/objects")
