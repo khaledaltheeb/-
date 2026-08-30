@@ -29,8 +29,50 @@ const requiredSectorSlugs = [
   'addiction-recovery',
 ];
 
+const REQUEST_TIMEOUT_MS = 15_000;
+const RETRY_DELAYS_MS = [1_500, 3_000, 6_000, 12_000];
+
+function describeError(error) {
+  if (error instanceof Error) {
+    return `${error.name}: ${error.message || '(no message)'}`;
+  }
+  if (error && typeof error === 'object') {
+    try {
+      return JSON.stringify(error);
+    } catch {
+      return String(error);
+    }
+  }
+  return String(error);
+}
+
+async function fetchWithTimeout(input, init = {}) {
+  const controller = new AbortController();
+  const upstreamSignal = init.signal;
+  const forwardAbort = () => controller.abort(upstreamSignal?.reason);
+  const timeout = setTimeout(() => {
+    controller.abort(new Error(`Supabase request exceeded ${REQUEST_TIMEOUT_MS}ms`));
+  }, REQUEST_TIMEOUT_MS);
+
+  if (upstreamSignal) {
+    if (upstreamSignal.aborted) {
+      forwardAbort();
+    } else {
+      upstreamSignal.addEventListener('abort', forwardAbort, { once: true });
+    }
+  }
+
+  try {
+    return await globalThis.fetch(input, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timeout);
+    if (upstreamSignal) upstreamSignal.removeEventListener('abort', forwardAbort);
+  }
+}
+
 const supabase = createClient(url, key, {
   auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+  global: { fetch: fetchWithTimeout },
 });
 
 const now = new Date().toISOString();
@@ -38,7 +80,7 @@ const failures = [];
 const fail = (message) => failures.push(message);
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-async function withRetry(label, task, attempts = 3) {
+async function withRetry(label, task, attempts = RETRY_DELAYS_MS.length + 1) {
   let lastError;
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
     try {
@@ -46,12 +88,14 @@ async function withRetry(label, task, attempts = 3) {
     } catch (error) {
       lastError = error;
       if (attempt === attempts) break;
-      const delayMs = 750 * attempt;
-      console.warn(`PUBLIC PRESERVATION CONTRACT RETRY: ${label} failed on attempt ${attempt}; retrying in ${delayMs}ms.`);
+      const delayMs = RETRY_DELAYS_MS[Math.min(attempt - 1, RETRY_DELAYS_MS.length - 1)];
+      console.warn(
+        `PUBLIC PRESERVATION CONTRACT RETRY: ${label} failed on attempt ${attempt}: ${describeError(error)}; retrying in ${delayMs}ms.`,
+      );
       await sleep(delayMs);
     }
   }
-  throw lastError instanceof Error ? lastError : new Error(`${label}: transient check failed`);
+  throw lastError instanceof Error ? lastError : new Error(`${label}: transient check failed: ${describeError(lastError)}`);
 }
 
 async function exactCount(table, configure) {
@@ -59,7 +103,7 @@ async function exactCount(table, configure) {
     let query = supabase.from(table).select('id', { count: 'exact', head: true });
     query = configure(query);
     const { count, error } = await query;
-    if (error) throw new Error(`${table}: ${error.message}`);
+    if (error) throw new Error(`${table}: ${error.message || describeError(error)}`);
     return count ?? 0;
   });
 }
@@ -72,7 +116,7 @@ try {
   const indexablePublishedContent = await exactCount('content', (query) => query.eq('status', 'published').lte('published_at', now).eq('robots_index', true));
   const sectorRows = await withRetry('public sector list', async () => {
     const result = await supabase.from('sectors').select('slug').eq('is_active', true).eq('visibility', 'public').limit(100);
-    if (result.error) throw new Error(`sectors: ${result.error.message}`);
+    if (result.error) throw new Error(`sectors: ${result.error.message || describeError(result.error)}`);
     return result.data ?? [];
   });
 
@@ -98,7 +142,7 @@ try {
     try {
       const data = await withRetry(`search «${test.query}»`, async () => {
         const result = await supabase.rpc('search_platform', { p_query: test.query, p_limit: 5 });
-        if (result.error) throw new Error(result.error.message);
+        if (result.error) throw new Error(result.error.message || describeError(result.error));
         return result.data ?? [];
       });
       const first = data[0];
@@ -106,7 +150,7 @@ try {
         fail(`search regression for «${test.query}»: expected ${test.expectedDestination} first`);
       }
     } catch (error) {
-      fail(`search failed for «${test.query}»: ${error instanceof Error ? error.message : String(error)}`);
+      fail(`search failed for «${test.query}»: ${describeError(error)}`);
     }
   }
 
@@ -117,6 +161,6 @@ try {
 
   console.log(`Public preservation contract passed: ${publicSectors} sectors, ${publicCategories} categories, ${publishedContent} published pages, ${indexablePublishedContent} indexable published pages.`);
 } catch (error) {
-  console.error(`PUBLIC PRESERVATION CONTRACT FAILED: ${error instanceof Error ? error.message : String(error)}`);
+  console.error(`PUBLIC PRESERVATION CONTRACT FAILED: ${describeError(error)}`);
   process.exit(1);
 }
