@@ -26,6 +26,11 @@
         </activity>
 
         <activity
+            android:name=".ToolCatalogActivity"
+            android:exported="false"
+            android:label="أدوات روافد" />
+
+        <activity
             android:name=".LifeUtilityActivity"
             android:exported="false"
             android:label="أدوات روافد" />
