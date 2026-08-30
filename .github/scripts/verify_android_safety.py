@@ -11,6 +11,9 @@ PUSH_ANDROID = (SRC / "CirclePushMessaging.kt").read_text(encoding="utf-8")
 CIRCLE_API = (SRC / "RawafidCircleApi.kt").read_text(encoding="utf-8")
 PUSH_EDGE_PATH = ROOT / "supabase/functions/rawafid-circle-push/index.ts"
 PUSH_EDGE = PUSH_EDGE_PATH.read_text(encoding="utf-8") if PUSH_EDGE_PATH.exists() else ""
+SUPABASE_CONFIG_PATH = ROOT / "supabase/config.toml"
+SUPABASE_CONFIG = SUPABASE_CONFIG_PATH.read_text(encoding="utf-8") if SUPABASE_CONFIG_PATH.exists() else ""
+GITIGNORE = (ROOT / ".gitignore").read_text(encoding="utf-8")
 CIRCLE_MIGRATIONS = "\n".join(
     path.read_text(encoding="utf-8")
     for path in sorted((ROOT / "supabase/migrations").glob("*rawafid_circle*.sql"))
@@ -48,6 +51,8 @@ checks = {
     "Circle push nonce gate": "circle_push_claim" in PUSH_EDGE and "p_nonce" in PUSH_EDGE and "invalid_or_expired_nonce" in PUSH_EDGE,
     "Circle push async database dispatch": "notifications_circle_push_dispatch" in CIRCLE_MIGRATIONS and "net.http_post" in CIRCLE_MIGRATIONS,
     "Circle push retry scheduler": "rawafid-circle-push-retry" in CIRCLE_MIGRATIONS and "retry_pending_circle_pushes" in CIRCLE_MIGRATIONS,
+    "Circle webhook auth mode persisted": "[functions.rawafid-circle-push]" in SUPABASE_CONFIG and "verify_jwt = false" in SUPABASE_CONFIG,
+    "Firebase Admin key downloads ignored": "firebase-adminsdk*.json" in GITIGNORE and "*serviceAccountKey*.json" in GITIGNORE,
     "no Firebase private key in Android": "BEGIN PRIVATE KEY" not in android_text and "FIREBASE_PRIVATE_KEY" not in android_text,
     "no Supabase service role secret in Android": "SUPABASE_SERVICE_ROLE_KEY" not in android_text,
     "vault AES-GCM": "AES/GCM/NoPadding" in (SRC / "LifeVaultFileStore.kt").read_text(encoding="utf-8"),
