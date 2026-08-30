@@ -1,0 +1,65 @@
+name: Fix Daily Tools responsive overflow
+
+on:
+  push:
+    branches:
+      - fix/daily-tools-responsive-overflow-20260830
+    paths:
+      - '.github/workflows/fix-daily-tools-responsive-overflow.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: fix/daily-tools-responsive-overflow-20260830
+      - name: Constrain Daily Tools responsive surfaces
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('app/daily-tools-mobile-polish.css')
+          text = path.read_text()
+          old = '''.daily-tools-hub .article-hero,
+          .daily-tool-page .article-hero {
+            width: 100%;
+            min-width: 0;
+            max-width: 100%;
+            overflow: visible;
+          }'''.replace('          ', '')
+          new = '''.daily-tools-hub .article-hero,
+          .daily-tool-page .article-hero {
+            width: 100%;
+            min-width: 0;
+            max-width: 100%;
+            overflow: hidden;
+          }'''.replace('          ', '')
+          if old not in text:
+              raise SystemExit('hero overflow target not found')
+          text = text.replace(old, new, 1)
+          marker = '''@media(max-width:760px) {
+          body:has(.daily-tool-page),'''.replace('          ', '')
+          replacement = '''@media(max-width:760px) {
+          .daily-tools-hub > article,
+          .daily-tool-page > article {
+            width: 100%;
+            min-width: 0;
+            max-width: 100%;
+          }
+
+          body:has(.daily-tool-page),'''.replace('          ', '')
+          if marker not in text:
+              raise SystemExit('responsive article target not found')
+          text = text.replace(marker, replacement, 1)
+          path.write_text(text)
+          PY
+          git diff --check
+          git config user.name 'rawafid-responsive-fix'
+          git config user.email 'actions@users.noreply.github.com'
+          git add app/daily-tools-mobile-polish.css
+          git commit -m 'Fix Daily Tools responsive overflow'
+          git push origin HEAD:fix/daily-tools-responsive-overflow-20260830
