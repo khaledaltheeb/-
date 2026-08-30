@@ -138,6 +138,7 @@ private fun SafeArrivalScreen() {
     var minutes by rememberSaveable { mutableStateOf("60") }
     var reason by rememberSaveable { mutableStateOf(existing.reason) }
     var message by rememberSaveable { mutableStateOf(existing.message.ifBlank { "لم أؤكد وصولي في الوقت الذي حددته. أرجو التواصل معي للاطمئنان." }) }
+    val requestNotifications = rememberNotificationPermissionRequester()
 
     LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         item {
@@ -175,6 +176,7 @@ private fun SafeArrivalScreen() {
                         val check = SafeArrivalCheck(System.currentTimeMillis() + mins * 60_000L, reason.trim(), message.trim(), true)
                         SafeArrivalStore.save(context, check)
                         SafeArrivalScheduler.schedule(context, check)
+                        requestNotifications()
                         version++
                     }) { Text("بدء فحص الأمان") }
                 }
