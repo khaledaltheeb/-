@@ -146,7 +146,7 @@ function cardSvg(item) {
   const cardHasThreeLines = titleLines.length >= 3;
   const cardTitleFontSize = cardHasThreeLines ? Math.min(baseTitleSize, 40) : baseTitleSize;
   const cardTitleLineHeight = cardHasThreeLines ? 56 : TITLE_LINE_HEIGHT;
-  const titleStart = cardHasThreeLines ? 274 : titleLines.length === 2 ? 280 : 320;
+  const titleStart = cardHasThreeLines ? 274 : titleLines.length === 2 ? 286 : 320;
   const excerptStart = titleStart + titleLines.length * cardTitleLineHeight + (cardHasThreeLines ? 24 : 32);
   assertTitleClearance('Quick Info card', titleStart, cardTitleFontSize, CARD_PILL_BOTTOM);
   const titleSpans = titleLines.map((line, index) => `<tspan x="${CARD_RIGHT}" y="${titleStart + index * cardTitleLineHeight}">${esc(line)}</tspan>`).join('');
@@ -184,7 +184,7 @@ function discoverSvg(item) {
   const discoverHasThreeLines = titleLines.length >= 3;
   const imageTitleFontSize = discoverHasThreeLines ? Math.min(baseTitleSize, 48) : baseTitleSize;
   const discoverTitleLineHeight = discoverHasThreeLines ? 72 : DISCOVER_TITLE_LINE_HEIGHT;
-  const titleStart = discoverHasThreeLines ? 306 : titleLines.length === 2 ? 314 : 352;
+  const titleStart = discoverHasThreeLines ? 306 : titleLines.length === 2 ? 322 : 352;
   assertTitleClearance('Quick Info Discover', titleStart, imageTitleFontSize, DISCOVER_PILL_BOTTOM);
   const titleSpans = titleLines.map((line, index) => `<tspan x="${DISCOVER_RIGHT}" y="${titleStart + index * discoverTitleLineHeight}">${esc(line)}</tspan>`).join('');
 
