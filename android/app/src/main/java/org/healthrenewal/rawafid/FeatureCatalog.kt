@@ -21,6 +21,16 @@ object FeatureCatalog {
     private const val ASSET = "rawafid_feature_catalog.json"
     private const val TAG = "RawafidFeatureCatalog"
     private val allowedRouteTypes = setOf("web", "main", "quick", "activity")
+    private val accountFeature = RawafidFeature(
+        id = "rawafid_account",
+        title = "حساب روافد ورقمي",
+        subtitle = "أنشئ الحساب أو سجّل الدخول للحصول على معرّف RFD الثابت ثم استخدمه لربط دائرتك بين الأجهزة.",
+        category = "family",
+        routeType = "activity",
+        routeTarget = "org.healthrenewal.rawafid.CircleAccountActivity",
+        status = "stable",
+        priority = 121
+    )
     @Volatile private var cache: List<RawafidFeature>? = null
 
     fun all(context: Context): List<RawafidFeature> = cache ?: synchronized(this) {
@@ -31,10 +41,26 @@ object FeatureCatalog {
     }
 
     fun byCategory(context: Context, category: String): List<RawafidFeature> =
-        all(context).filter { it.category == category }.sortedByDescending { it.priority }
+        visible(context).filter { it.category == category }.sortedByDescending { it.priority }
 
-    fun visible(context: Context): List<RawafidFeature> =
-        all(context).filter { it.status != "hidden" }.sortedByDescending { it.priority }
+    fun visible(context: Context): List<RawafidFeature> {
+        val published = all(context)
+            .filter { it.status != "hidden" }
+            .map { feature ->
+                if (feature.id == "my_circle") {
+                    feature.copy(
+                        title = "دائرتي — الرقم والربط",
+                        subtitle = "اعرض رقم RFD والـQR، أضف شخصًا بمعرّفه، واقبل الربط قبل تفعيل المحادثة أو الصلاحيات.",
+                        priority = 120
+                    )
+                } else {
+                    feature
+                }
+            }
+        return (listOf(accountFeature) + published)
+            .distinctBy { it.id }
+            .sortedByDescending { it.priority }
+    }
 
     fun diagnostics(context: Context): List<String> = validate(context, all(context))
 
