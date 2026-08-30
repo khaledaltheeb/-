@@ -45,6 +45,25 @@
         <activity android:name=".LifeVaultActivity" android:exported="false" android:label="خزانة الحياة" />
         <activity android:name=".TravelSafeActivity" android:exported="false" android:label="Travel Safe" />
 
+        <activity
+            android:name=".HealthPermissionsRationaleActivity"
+            android:exported="true"
+            android:label="خصوصية Health Connect">
+            <intent-filter>
+                <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
+            </intent-filter>
+        </activity>
+        <activity-alias
+            android:name=".ViewHealthPermissionUsageActivity"
+            android:exported="true"
+            android:targetActivity=".HealthPermissionsRationaleActivity"
+            android:permission="android.permission.START_VIEW_PERMISSION_USAGE">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW_PERMISSION_USAGE" />
+                <category android:name="android.intent.category.HEALTH_PERMISSIONS" />
+            </intent-filter>
+        </activity-alias>
+
         <activity android:name=".WomenPrivacyGateActivity" android:exported="false" android:excludeFromRecents="true" android:label="حماية قطاع المرأة" />
         <activity android:name=".WomenPrivacySettingsActivity" android:exported="true" android:label="خصوصية قطاع المرأة" />
         <activity android:name=".WomenActivity" android:exported="true" android:label="رفيقة روافد">
