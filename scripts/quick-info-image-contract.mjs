@@ -29,8 +29,9 @@ requireMatch('component', files.component, /dir="rtl"/, 'Quick Info card must ex
 requireMatch('component', files.component, /<h2/, 'Quick Info title must remain semantic text.');
 requireMatch('component', files.component, /styles\.quickBadge/, 'Quick Info identity badge missing.');
 requireMatch('component', files.component, /معلومات سريعة/, 'Quick Info text identity missing.');
-requireMatch('component', files.component, /\/assets\/brand\/logo-mark\.svg/, 'official Rawafid logo must replace the temporary letter mark.');
-forbid('component', files.component, /next\/image|<Image|TopicGlyph|styles\.(?:visual|glyph|moon|personLarge|pill|chatOne|mindRing)/, 'Quick Info HTML card must remain text-first and free of expressive topic pictograms.');
+requireMatch('component', files.component, /import Image from 'next\/image'/, 'official Rawafid logo must use optimized Next Image.');
+requireMatch('component', files.component, /<Image[^>]*src="\/assets\/brand\/logo-mark\.svg"[^>]*alt=""/, 'official Rawafid logo must replace the temporary letter mark.');
+forbid('component', files.component, /TopicGlyph|styles\.(?:visual|glyph|moon|personLarge|pill|chatOne|mindRing)/, 'Quick Info HTML card must remain text-first and free of expressive topic pictograms.');
 forbid('component', files.component, />\s*ر\s*</, 'temporary Rawafid letter mark must not return.');
 requireMatch('component CSS', files.componentCss, /--qi-accent/, 'topic-aware color tokens missing.');
 requireMatch('component CSS', files.componentCss, /@media\(max-width:760px\)/, 'mobile Quick Info contract missing.');
@@ -39,14 +40,16 @@ requireMatch('component CSS', files.componentCss, /\.brandMark img/, 'official l
 forbid('component CSS', files.componentCss, /\.(?:visual|glyph|moon|personLarge|personSmall|pill|chatOne|mindRing)\b/, 'expressive Quick Info illustration CSS must be absent.');
 requireMatch('detail page', files.detail, /<QuickInfoCard[^>]*variant="hero"/, 'detail page must preserve the semantic HTML/CSS hero card.');
 requireMatch('detail page', files.detail, /data-quick-info-indexable-image/, 'detail page must expose a real indexable image without replacing the HTML card.');
-requireMatch('detail page', files.detail, /<img[^>]*src=\{imageUrl\}[^>]*alt=\{imageAlt\}/, 'real Quick Info image must use page-specific alt text.');
+requireMatch('detail page', files.detail, /import Image from 'next\/image'/, 'detail image must use Next Image.');
+requireMatch('detail page', files.detail, /<Image[^>]*src=\{imageUrl\}[^>]*alt=\{imageAlt\}[^>]*width=\{1200\}[^>]*height=\{630\}/, 'real Quick Info image must use page-specific alt text and stable dimensions.');
+requireMatch('detail page', files.detail, /unoptimized/, 'generated PNG URL must remain directly discoverable rather than replaced by an optimizer URL.');
 requireMatch('detail page', files.detail, /'@type': 'ImageObject'/, 'Article schema must expose the primary image as ImageObject.');
 requireMatch('detail page', files.detail, /width:\s*1200[\s\S]*height:\s*630/, 'ImageObject dimensions missing.');
-forbid('detail page', files.detail, /next\/image|quickInfoCardPath|<Image/, 'detail page must not reintroduce the retired raster-card rendering path.');
+forbid('detail page', files.detail, /quickInfoCardPath/, 'detail page must not reintroduce the retired raster-card rendering path.');
 requireMatch('image presentation', files.imageCss, /width:min\(640px,100%\)/, 'indexable image must remain visually secondary and responsive.');
 requireMatch('image presentation', files.imageCss, /aspect-ratio:1200\/630/, 'indexable image aspect ratio must be stable.');
 requireMatch('index page', files.index, /<QuickInfoCard/, 'Quick Info listing must use the semantic card.');
-forbid('index page', files.index, /next\/image|featuredImageUrl|<Image/, 'Quick Info listing must not render duplicate raster thumbnails.');
+forbid('index page', files.index, /featuredImageUrl/, 'Quick Info listing must not render duplicate raster thumbnails.');
 requireMatch('image sitemap', files.imageSitemap, /xmlns:image="http:\/\/www\.google\.com\/schemas\/sitemap-image\/1\.1"/, 'Quick Info sitemap must declare the Google image namespace.');
 requireMatch('image sitemap', files.imageSitemap, /<image:image><image:loc>/, 'Quick Info sitemap must associate each canonical page with its PNG image.');
 requireMatch('image sitemap', files.imageSitemap, /\/quick-info\/og\/\$\{item\.routeSlug\}\.png/, 'Quick Info sitemap image path must match generated assets.');
@@ -77,4 +80,4 @@ if (errors.length) {
   for (const error of errors) console.error(`- ${error}`);
   process.exit(1);
 }
-console.log('Quick Info visual contract passed: semantic HTML cards are preserved, official Rawafid branding is used, each page exposes a real indexed PNG with alt and ImageObject metadata, and Quick Info sitemap carries image URLs.');
+console.log('Quick Info visual contract passed: semantic HTML cards are preserved, official Rawafid branding is used, each page exposes a real directly discoverable PNG with alt and ImageObject metadata, and Quick Info sitemap carries image URLs.');
