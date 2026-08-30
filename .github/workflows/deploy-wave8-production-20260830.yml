@@ -1,0 +1,123 @@
+name: Deploy Production
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/deploy-wave8-production-20260830.yml'
+
+concurrency:
+  group: rawafid-production-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
+      NEXT_PUBLIC_SITE_URL: https://healthrenewal.org
+      NEXT_PUBLIC_ALLOW_INDEXING: 'true'
+      NEXT_PUBLIC_ENABLE_ANALYTICS: 'true'
+      NEXT_PUBLIC_GTM_ID: GTM-WBLQVBG4
+      NEXT_PUBLIC_GA_MEASUREMENT_ID: G-VLZMV8Y4JP
+      NEXT_PUBLIC_ENABLE_DIRECT_GA: 'true'
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: 1910e1ad3c793fd568ba1caafe34f964
+    steps:
+      - name: Require Cloudflare API token
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${CLOUDFLARE_API_TOKEN:-}"
+
+      - uses: actions/checkout@v7
+        with:
+          ref: 233568f2f67d7aa6026290eee5c4c6c574d035e4
+
+      - name: Pin release SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = '233568f2f67d7aa6026290eee5c4c6c574d035e4'
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Install deterministic Arabic image build dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends imagemagick fontconfig fonts-noto-core librsvg2-bin
+
+      - name: Revalidate release contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run typecheck
+          npm run lint
+          npm run architecture-check
+          npm run live-preservation:validate
+
+      - name: Verify Cloudflare credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx wrangler whoami
+
+      - name: Build Cloudflare Worker
+        run: npx opennextjs-cloudflare build --env production
+
+      - name: Deploy exact Wave 8 release
+        run: npx opennextjs-cloudflare deploy --env production
+
+      - name: Verify Wave 8 live production
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://healthrenewal.org'
+          stamp='233568f2f67d7aa6026290eee5c4c6c574d035e4'
+          fetch_page() { curl -fsSL --compressed --retry 10 --retry-delay 3 --retry-all-errors -H 'Cache-Control: no-cache, no-store, max-age=0' "$1"; }
+
+          hub="$(fetch_page "${base}/addiction/?release=${stamp}")"
+          atlas="$(fetch_page "${base}/addiction/substances/?release=${stamp}")"
+          fentanyl="$(fetch_page "${base}/addiction/substances/fentanyl/?release=${stamp}")"
+          cocaine="$(fetch_page "${base}/addiction/substances/cocaine/?release=${stamp}")"
+          alcohol="$(fetch_page "${base}/addiction/substances/alcohol/?release=${stamp}")"
+          methadone="$(fetch_page "${base}/addiction/substances/methadone/?release=${stamp}")"
+          tramadol="$(fetch_page "${base}/addiction/substances/tramadol/?release=${stamp}")"
+          buprenorphine="$(fetch_page "${base}/addiction/substances/buprenorphine/?release=${stamp}")"
+          nitazenes="$(fetch_page "${base}/addiction/substances/nitazenes/?release=${stamp}")"
+          comparison="$(fetch_page "${base}/addiction/compare/fentanyl-vs-heroin/?release=${stamp}")"
+          root_sitemap="$(fetch_page "${base}/sitemap.xml?release=${stamp}")"
+          atlas_sitemap="$(fetch_page "${base}/sitemaps/addiction-atlas.xml?release=${stamp}")"
+
+          [[ "$hub" == *'موسوعة روافد التفاعلية'* ]]
+          [[ "$atlas" == *'Fentanyl'* && "$atlas" == *'Heroin'* && "$atlas" == *'71'* ]]
+          [[ "$fentanyl" == *'طبقة التتبع العلمي'* && "$fentanyl" == *'National Institute on Drug Abuse (NIDA)'* ]]
+          [[ "$cocaine" == *'طبقة التتبع العلمي'* && "$cocaine" == *'National Institute on Drug Abuse (NIDA)'* ]]
+          [[ "$alcohol" == *'طبقة التتبع العلمي'* && "$alcohol" == *'Management of alcohol withdrawal'* ]]
+          [[ "$methadone" == *'طبقة التتبع العلمي'* && "$methadone" == *'Methadone Hydrochloride'* ]]
+          [[ "$tramadol" == *'طبقة التتبع العلمي'* && "$tramadol" == *'ULTRAM'* ]]
+          [[ "$buprenorphine" == *'طبقة التتبع العلمي'* && "$buprenorphine" == *'What is Buprenorphine?'* ]]
+          [[ "$nitazenes" == *'طبقة التتبع العلمي'* && "$nitazenes" == *'غير محسوم'* ]]
+          [[ "$comparison" == *'Fentanyl'* && "$comparison" == *'Heroin'* && "$comparison" == *'Article'* ]]
+          [[ "$root_sitemap" == *'/sitemaps/addiction-atlas.xml'* ]]
+          [[ "$atlas_sitemap" == *'/addiction/substances/fentanyl/'* && "$atlas_sitemap" == *'/addiction/methodology/'* && "$atlas_sitemap" != *'workers.dev'* ]]
+          for page in "$hub" "$atlas" "$fentanyl" "$cocaine" "$alcohol" "$methadone" "$tramadol" "$buprenorphine" "$nitazenes" "$comparison"; do
+            if printf '%s' "$page" | grep -Eqi '<meta[^>]+name=["'"']robots["'"'][^>]+content=["'"'][^"'"']*noindex'; then
+              echo 'Unexpected noindex detected in Wave 8 production surface.' >&2
+              exit 1
+            fi
+          done
+          echo 'Wave 8 exact-SHA production deployment verified live.'
