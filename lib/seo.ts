@@ -66,6 +66,7 @@ export type SeoMetadataInput = {
   follow?: boolean;
   type?: 'website' | 'article' | 'profile';
   image?: string | null;
+  imageAlt?: string | null;
   keywords?: string[];
   relatedTerms?: string[];
   searchIntents?: string[];
@@ -84,6 +85,7 @@ export function buildSeoMetadata(input: SeoMetadataInput): Metadata {
   const canFollow = input.follow !== false;
   const usesDefaultImage = !input.image;
   const image = absoluteSiteUrl(input.image || fallbackSocialImagePath(input.title, input.type));
+  const imageAlt = (input.imageAlt || input.title).replace(/\s+/g, ' ').trim();
   const languages = input.hreflang
     ? Object.fromEntries(Object.entries(input.hreflang).map(([key, value]) => [key, absoluteSiteUrl(value)]))
     : undefined;
@@ -94,8 +96,8 @@ export function buildSeoMetadata(input: SeoMetadataInput): Metadata {
   const semanticProfile = buildSemanticSeoProfile(input);
   const keywords = semanticProfile.topicKeywords.slice(0, 12);
   const openGraphImages = usesDefaultImage
-    ? [{ url: image, width: 1200, height: 630, alt: input.title }]
-    : [{ url: image, alt: input.title }];
+    ? [{ url: image, width: 1200, height: 630, alt: imageAlt }]
+    : [{ url: image, alt: imageAlt }];
 
   return {
     title: { absolute: title },
