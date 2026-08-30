@@ -81,6 +81,14 @@ requireMatch('generator', files.generator, /clipPath id="discover-safe"/, 'Disco
 requireMatch('generator', files.generator, /const CARD_RIGHT = 1082/, 'card image must keep a deterministic right content boundary.');
 requireMatch('generator', files.generator, /const EXCERPT_FONT_SIZE = 24/, 'card supporting text must remain legible at mobile preview size.');
 requireMatch('generator', files.generator, /const SITE_URL_LABEL = 'https:\/\/healthrenewal\.org'/, 'generated images must print the canonical HTTPS site URL.');
+requireMatch('generator', files.generator, /const CARD_PILL_BOTTOM = 222/, 'card badge-row lower boundary must remain explicit for collision prevention.');
+requireMatch('generator', files.generator, /const DISCOVER_PILL_BOTTOM = 248/, 'Discover badge-row lower boundary must remain explicit for collision prevention.');
+requireMatch('generator', files.generator, /const TITLE_CLEARANCE = 10/, 'generated Arabic titles must preserve a minimum protected vertical gap below badges.');
+requireMatch('generator', files.generator, /function assertTitleClearance\([\s\S]*titleStart - titleFontSize < pillBottom \+ TITLE_CLEARANCE/, 'generator must fail rather than emit a title that collides with the badge row.');
+requireMatch('generator', files.generator, /cardHasThreeLines \? Math\.min\(baseTitleSize, 40\)/, 'three-line card titles must use the compact protected font-size ceiling.');
+requireMatch('generator', files.generator, /cardHasThreeLines \? 274/, 'three-line card titles must start below the protected badge area.');
+requireMatch('generator', files.generator, /discoverHasThreeLines \? Math\.min\(baseTitleSize, 48\)/, 'three-line Discover titles must use the compact protected font-size ceiling.');
+requireMatch('generator', files.generator, /discoverHasThreeLines \? 306/, 'three-line Discover titles must start below the protected badge area.');
 forbid('generator', files.generator, />healthrenewal\.org<\/text>/, 'bare non-HTTPS site label must not return.');
 forbid('generator', files.generator, />ر<\/text>/, 'temporary letter logo must not appear in generated images.');
 requireMatch('seo', files.seo, /imageAlt\?: string \| null/, 'SEO metadata must accept page-specific image alt text.');
@@ -94,4 +102,4 @@ if (errors.length) {
   for (const error of errors) console.error(`- ${error}`);
   process.exit(1);
 }
-console.log('Quick Info visual contract passed: the HTML card and 1200x630 visible image are preserved, while every approved page receives a dedicated elegant 1280x720 16:9 Discover image used by social metadata and Article ImageObject, with large image previews and both image variants exposed to the image sitemap.');
+console.log('Quick Info visual contract passed: the HTML card and 1200x630 visible image are preserved, every approved page receives a dedicated 1280x720 Discover image, and long three-line Arabic titles are protected by deterministic badge-clearance guards before rasterization.');
