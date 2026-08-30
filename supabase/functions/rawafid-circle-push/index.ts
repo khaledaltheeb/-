@@ -5,7 +5,7 @@ const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 const FIREBASE_PROJECT_ID = Deno.env.get("FIREBASE_PROJECT_ID") ?? "";
 const FIREBASE_CLIENT_EMAIL = Deno.env.get("FIREBASE_CLIENT_EMAIL") ?? "";
 const FIREBASE_PRIVATE_KEY = (Deno.env.get("FIREBASE_PRIVATE_KEY") ?? "").replace(/\\n/g, "\n");
-const VERSION = "2026-08-30.4";
+const VERSION = "2026-08-30.5";
 
 type PushDevice = { device_id: string; token: string };
 type Claim = {
@@ -66,7 +66,6 @@ async function firebaseAccessToken(): Promise<string> {
     false,
     ["sign"],
   );
-
   const now = Math.floor(Date.now() / 1000);
   const header = base64Url(JSON.stringify({ alg: "RS256", typ: "JWT" }));
   const payload = base64Url(JSON.stringify({
@@ -96,7 +95,6 @@ async function firebaseAccessToken(): Promise<string> {
   if (!tokenResponse.ok || typeof tokenBody?.access_token !== "string") {
     throw new Error(`firebase_oauth_${tokenResponse.status}`);
   }
-
   cachedAccessToken = tokenBody.access_token;
   cachedAccessTokenExpiresAt = Date.now() + Number(tokenBody.expires_in ?? 3600) * 1000;
   return cachedAccessToken;
@@ -106,7 +104,6 @@ async function rpc<T>(name: string, args: Record<string, unknown>): Promise<T> {
   if (!SUPABASE_URL || !SERVICE_ROLE) {
     throw new Error("supabase_runtime_secrets_missing");
   }
-
   const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${name}`, {
     method: "POST",
     headers: {
@@ -141,6 +138,7 @@ async function sendWake(
         message: {
           token,
           data: {
+            scope: "circle",
             type: "circle_wake",
             notification_id: notificationId,
           },
