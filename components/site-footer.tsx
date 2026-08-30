@@ -1,5 +1,4 @@
 import RawafidBrand from '@/components/rawafid-brand';
-import { FOUNDER_DISPLAY_NAME } from '@/lib/founder';
 
 const groups = [
   {
@@ -63,7 +62,6 @@ export default function SiteFooter() {
         <div className="footer-brand-block">
           <RawafidBrand className="footer-brand" />
           <p>منصة عربية مؤسسية تربط المعرفة الموثوقة بالأدلة العملية والرعاية الأسرية والخدمات المهنية، مع مسارات واضحة للصحة النفسية وسرطان الأطفال والتعافي والدمج والتمكين.</p>
-          <p style={{ marginTop: '.55rem', fontWeight: 700 }}>المؤسس: {FOUNDER_DISPLAY_NAME}</p>
           <form className="footer-search" action="/search" method="get" role="search">
             <label className="sr-only" htmlFor="footer-search-input">البحث في منصة روافد</label>
             <input id="footer-search-input" name="q" type="search" placeholder="ابحث عن معلومة أو دليل أو خدمة" maxLength={120} enterKeyHint="search" />
