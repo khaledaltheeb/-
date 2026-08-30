@@ -26,6 +26,7 @@ incident = text(JAVA / "SafeDriveIncident.kt")
 service = text(JAVA / "SafeDriveService.kt")
 activity = text(JAVA / "SafeDriveActivity.kt")
 circle = text(JAVA / "RawafidCircleApi.kt")
+my_circle = text(JAVA / "MyCircleActivity.kt")
 
 for token in [
     "SafeDriveAnalyzer",
@@ -46,6 +47,7 @@ for token in [
     "HELP_REQUESTED",
     "minimumSpeedDropKmh",
     "impactThresholdG",
+    "strongestRecentDecelerationMps2",
 ]:
     if token not in incident:
         errors.append(f"SafeDriveIncident.kt missing contract: {token}")
@@ -59,6 +61,8 @@ for token in [
     'SafeDriveReportShareWorker',
     'ACTION_SAFE_DRIVE_HELP_NOW',
     'startForeground(',
+    'location.accuracy in 0.1f..driveConfig.maxLocationAccuracyM',
+    'CirclePermission.DRIVING_SAFETY',
 ]:
     if token not in service:
         errors.append(f"SafeDriveService.kt missing contract: {token}")
@@ -69,9 +73,19 @@ for token in [
     '"التصعيد عند عدم الرد"',
     '"هذا ليس حد السرعة القانوني للطريق."',
     'لا يخزن روافد مسار الرحلة الكامل',
+    'Manifest.permission.ACCESS_COARSE_LOCATION',
+    'SafeDriveIncidentStore.records(context)',
+    '"نقطة اطمئنان — أكد المستخدم أنه بخير"',
 ]:
     if token not in activity:
         errors.append(f"SafeDriveActivity.kt missing contract: {token}")
+
+for token in [
+    'DRIVING_SAFETY("driving_safety"',
+    '"driving_safety" to "السماح له باستلام تنبيهات وتقارير القيادة الآمنة',
+]:
+    if token not in my_circle:
+        errors.append(f"MyCircleActivity.kt missing driving-safety permission contract: {token}")
 
 for token in [
     '"circle_broadcast_drive_alert"',
@@ -99,6 +113,7 @@ try:
     app = root.find("application")
     permissions = {node.attrib.get(ANDROID_NS + "name", "") for node in root.findall("uses-permission")}
     for required in [
+        "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.ACCESS_FINE_LOCATION",
         "android.permission.FOREGROUND_SERVICE",
         "android.permission.FOREGROUND_SERVICE_LOCATION",
@@ -124,6 +139,8 @@ for token in [
     "circle_broadcast_drive_report",
     "safe_drive_incident",
     "safe_drive_report",
+    "safe_drive_risk",
+    "'location_shared',false",
 ]:
     if token not in migration_text:
         errors.append(f"Safe Drive migration contract missing: {token}")
@@ -139,4 +156,4 @@ if errors:
         print(f"- {error}")
     sys.exit(1)
 
-print("Android Safe Drive contract OK: foreground monitoring, aggregate encrypted reports, consented Circle sharing and sudden-stop check verified")
+print("Android Safe Drive contract OK: reliable foreground monitoring, encrypted aggregate reports, explicit responders, location minimization and sudden-stop safety checks verified")
