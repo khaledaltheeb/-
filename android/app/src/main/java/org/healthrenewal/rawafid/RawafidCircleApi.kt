@@ -129,6 +129,18 @@ object RawafidCircleApi {
     fun shareLocation(context: Context, connectionId: String, latitude: Double, longitude: Double, accuracyM: Double?, replyToId: String? = null): String = sendMessage(context, connectionId, "location_share", "تم إرسال موقعي الحالي", "location_share", replyToId, latitude, longitude, accuracyM)
     fun answerMessage(context: Context, messageId: String, answerCode: String): Boolean = scalarBoolean(rpc(context, "circle_answer_message", JSONObject().put("p_message_id", messageId).put("p_answer_code", answerCode)))
 
+    fun broadcastSafetyLocation(context: Context, latitude: Double, longitude: Double, accuracyM: Double?, label: String): Int = scalarInt(
+        rpc(
+            context,
+            "circle_broadcast_safety_location",
+            JSONObject()
+                .put("p_latitude", latitude)
+                .put("p_longitude", longitude)
+                .put("p_accuracy_m", accuracyM ?: JSONObject.NULL)
+                .put("p_label", label.trim().take(120).ifBlank { JSONObject.NULL })
+        )
+    )
+
     fun notifications(context: Context, limit: Int = 50): List<CircleCloudNotification> {
         val a = JSONArray(rpc(context, "get_my_notifications", JSONObject().put("p_limit", limit.coerceIn(1, 100)).put("p_offset", 0)))
         return buildList { for (i in 0 until a.length()) { val o = a.optJSONObject(i) ?: continue; add(CircleCloudNotification(o.optString("notification_id"), o.optString("kind"), o.optString("title"), o.optString("body"), o.optJSONObject("data") ?: JSONObject(), o.optNullableString("read_at"), o.optString("created_at"))) } }
@@ -205,6 +217,7 @@ object RawafidCircleApi {
 
     private fun scalarString(raw: String): String = when (val value = JSONTokener(raw).nextValue()) { is String -> value; JSONObject.NULL, null -> ""; else -> value.toString() }
     private fun scalarBoolean(raw: String): Boolean { val value = JSONTokener(raw).nextValue(); return value as? Boolean ?: value.toString().toBooleanStrictOrNull() ?: false }
+    private fun scalarInt(raw: String): Int { val value = JSONTokener(raw).nextValue(); return (value as? Number)?.toInt() ?: value.toString().toIntOrNull() ?: 0 }
     private fun JSONObject.optNullableString(key: String): String? = if (isNull(key)) null else optString(key).takeIf { it.isNotBlank() }
     private fun JSONObject.optNullableDouble(key: String): Double? = if (isNull(key) || !has(key)) null else optDouble(key).takeIf { !it.isNaN() }
 }
