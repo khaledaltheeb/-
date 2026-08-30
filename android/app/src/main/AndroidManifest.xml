@@ -58,7 +58,7 @@
         <activity android:name=".WomenVisitPrepActivity" android:exported="false" android:label="جهزي زيارتي" />
         <activity android:name=".WebActivity" android:exported="false" />
 
-        <receiver android:name=".RawafidWidgetProvider" android:exported="true">
+        <receiver android:name=".RawafidWidgetProvider" android:exported="false">
             <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
             <meta-data android:name="android.appwidget.provider" android:resource="@xml/rawafid_widget_info" />
         </receiver>
