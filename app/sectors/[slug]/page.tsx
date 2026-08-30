@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { notFound, redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import ContentRenderer from '@/components/content-renderer';
 import LegacyPreservedPageView from '@/components/legacy-preserved-page';
 import PublicPagination from '@/components/public-pagination';
@@ -105,9 +105,7 @@ export default async function SectorPage({ params, searchParams }: { params: Par
   }
 
   const contentPages = Math.max(1, Math.ceil(totalContent / PAGE_SIZE));
-  // Publishing agents can change the collection while a crawler or user is paging.
-  // A formerly-valid deep page should converge to the current last page, never become a broken link.
-  if (page > contentPages && page > 1) redirect(pagePath(sector.slug, contentPages));
+  if (page > contentPages && page > 1) notFound();
   const roots = categoryRows.filter((category) => !category.parent_id);
   const canonicalPath = pagePath(sector.slug, page);
   const canonicalUrl = `${SITE_URL}${canonicalPath}`;
