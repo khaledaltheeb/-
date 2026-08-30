@@ -68,7 +68,6 @@ export default function DailyToolWorkspace({ slug, title, spec }: Props) {
   }
   function toggleStep(index: number, value: boolean) {
     setChecked(current => current.map((entry, i) => i === index ? value : entry));
-    if (value && mode === 'guided' && index < spec.steps.length - 1) setActiveStep(index + 1);
   }
 
   return <section className="daily-tool-workspace" aria-labelledby="daily-tool-workspace-title">
