@@ -39,9 +39,10 @@ requireMatch('component CSS', files.componentCss, /\.quickBadge/, 'Quick Info ba
 requireMatch('component CSS', files.componentCss, /\.brandMark img/, 'official logo sizing contract missing.');
 forbid('component CSS', files.componentCss, /\.(?:visual|glyph|moon|personLarge|personSmall|pill|chatOne|mindRing)\b/, 'expressive Quick Info illustration CSS must be absent.');
 requireMatch('detail page', files.detail, /<QuickInfoCard[^>]*variant="hero"/, 'detail page must preserve the semantic HTML/CSS hero card.');
+requireMatch('detail page', files.detail, /quickInfoOgPath/, 'detail page must derive the visible image from the local static PNG path.');
 requireMatch('detail page', files.detail, /data-quick-info-indexable-image/, 'detail page must expose a real indexable image without replacing the HTML card.');
 requireMatch('detail page', files.detail, /import Image from 'next\/image'/, 'detail image must use Next Image.');
-requireMatch('detail page', files.detail, /<Image[^>]*src=\{imageUrl\}[^>]*alt=\{imageAlt\}[^>]*width=\{1200\}[^>]*height=\{630\}/, 'real Quick Info image must use page-specific alt text and stable dimensions.');
+requireMatch('detail page', files.detail, /<Image[^>]*src=\{imagePath\}[^>]*alt=\{imageAlt\}[^>]*width=\{1200\}[^>]*height=\{630\}/, 'real Quick Info image must use the direct local PNG, page-specific alt text, and stable dimensions.');
 requireMatch('detail page', files.detail, /unoptimized/, 'generated PNG URL must remain directly discoverable rather than replaced by an optimizer URL.');
 requireMatch('detail page', files.detail, /'@type': 'ImageObject'/, 'Article schema must expose the primary image as ImageObject.');
 requireMatch('detail page', files.detail, /width:\s*1200[\s\S]*height:\s*630/, 'ImageObject dimensions missing.');
