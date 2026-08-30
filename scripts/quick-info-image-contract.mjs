@@ -28,7 +28,7 @@ requireMatch('index page', files.index, /loading="lazy"/, 'list thumbnails must 
 requireMatch('middleware', files.middleware, /quick-info\/\(\?:cards\|og\)/, 'static Quick Info image routes must bypass middleware.');
 requireMatch('proxy', files.proxy, /'\/quick-info\/cards'/, 'card route must be excluded from Supabase redirect resolution.');
 requireMatch('proxy', files.proxy, /'\/quick-info\/og'/, 'OpenGraph route must be excluded from Supabase redirect resolution.');
-requireMatch('proxy', files.proxy, /'\/seo-card'/, 'legacy seo-card route must be excluded from Supabase redirect resolution.');
+forbid('generator', files.generator, /\/seo-card(?:\?|\/|$)/, 'canonical Quick Info generator must not depend on the legacy runtime seo-card route.');
 requireMatch('generator', files.generator, /Noto Sans Arabic/, 'Arabic build font contract missing.');
 requireMatch('generator', files.generator, /rsvg-convert/, 'librsvg rasterization contract missing.');
 requireMatch('generator', files.generator, /direction="rtl"/, 'SVG RTL direction contract missing.');
