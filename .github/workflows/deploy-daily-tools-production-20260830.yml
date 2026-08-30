@@ -68,7 +68,7 @@ jobs:
           npm run lint
           npm run architecture-check
           npm run live-preservation:validate
-          npm run daily-tools:contract
+          npm run daily-tools:validate
 
       - name: Verify Cloudflare credentials
         shell: bash
