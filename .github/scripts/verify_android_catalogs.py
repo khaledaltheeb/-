@@ -3,11 +3,16 @@ import json
 import pathlib
 import re
 import sys
+import xml.etree.ElementTree as ET
 from urllib.parse import urlparse
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
-ASSETS = ROOT / "android" / "app" / "src" / "main" / "assets"
-JAVA = ROOT / "android" / "app" / "src" / "main" / "java" / "org" / "healthrenewal" / "rawafid"
+APP = ROOT / "android" / "app" / "src" / "main"
+ASSETS = APP / "assets"
+JAVA = APP / "java" / "org" / "healthrenewal" / "rawafid"
+MANIFEST = APP / "AndroidManifest.xml"
+PACKAGE = "org.healthrenewal.rawafid"
+ANDROID_NS = "{http://schemas.android.com/apk/res/android}"
 
 errors = []
 
@@ -45,7 +50,28 @@ def declared_kotlin_classes():
     return classes
 
 
+def manifest_activities():
+    registered = set()
+    try:
+        root = ET.parse(MANIFEST).getroot()
+    except Exception as exc:
+        errors.append(f"AndroidManifest.xml: cannot parse: {exc}")
+        return registered
+    for node in root.findall(".//activity"):
+        name = (node.attrib.get(ANDROID_NS + "name") or "").strip()
+        if not name:
+            continue
+        if name.startswith("."):
+            registered.add(PACKAGE + name)
+        elif "." not in name:
+            registered.add(PACKAGE + "." + name)
+        else:
+            registered.add(name)
+    return registered
+
+
 classes = declared_kotlin_classes()
+registered_activities = manifest_activities()
 features = load_json("rawafid_feature_catalog.json")
 if not isinstance(features, list) or not features:
     errors.append("feature catalog: expected non-empty array")
@@ -74,10 +100,12 @@ else:
         if not isinstance(priority, int):
             errors.append(f"{fid}: priority must be integer")
 
-        if route_type == "activity" and target.startswith("org.healthrenewal.rawafid."):
+        if route_type == "activity" and target.startswith(PACKAGE + "."):
             class_name = target.rsplit(".", 1)[-1]
             if class_name not in classes:
                 errors.append(f"{fid}: activity class not declared in Kotlin sources: {class_name}")
+            if target not in registered_activities:
+                errors.append(f"{fid}: activity not registered in AndroidManifest.xml: {target}")
 
         if route_type == "web":
             parsed = urlparse(target)
@@ -119,4 +147,7 @@ if errors:
         print(f"- {error}")
     sys.exit(1)
 
-print(f"Android catalogs OK: {len(features)} features, {len(reminders)} reminder definitions, {len(classes)} Kotlin classes/objects")
+print(
+    f"Android catalogs OK: {len(features)} features, {len(reminders)} reminder definitions, "
+    f"{len(classes)} Kotlin classes/objects, {len(registered_activities)} manifest activities"
+)
