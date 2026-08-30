@@ -1,0 +1,17 @@
+/* Daily Tools responsive containment guard.
+ * Decorative hero layers must never expand the document canvas.
+ * Keep the fix scoped to Daily Tools rather than clipping the whole site.
+ */
+.daily-tools-hub .article-hero,
+.daily-tool-page .article-hero {
+  overflow: hidden;
+}
+
+@media (max-width: 820px) {
+  .daily-tools-hub > article,
+  .daily-tool-page > article {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+}
