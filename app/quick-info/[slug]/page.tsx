@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import SiteHeader from '@/components/site-header';
@@ -114,7 +115,7 @@ export default async function QuickInfoDetailPage({ params }: { params: Params }
       <QuickInfoCard title={record.title} description={record.excerpt} variant="hero" showAction={false} />
       <ContentRenderer bodyJson={record.body_json} bodyText={record.body_text} recordId={record.id} />
       {imageUrl && <figure className={imageStyles.figure} data-quick-info-indexable-image>
-        <img className={imageStyles.image} src={imageUrl} alt={imageAlt} width="1200" height="630" loading="lazy" decoding="async" />
+        <Image className={imageStyles.image} src={imageUrl} alt={imageAlt} width={1200} height={630} sizes="(max-width: 760px) calc(100vw - 36px), 640px" loading="lazy" unoptimized />
         <figcaption className={imageStyles.caption}>نسخة مرئية قابلة للمشاركة والفهرسة من بطاقة معلومات سريعة — منصة روافد</figcaption>
       </figure>}
     </div>
