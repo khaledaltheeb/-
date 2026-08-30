@@ -7,6 +7,7 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Handler
 import android.os.HandlerThread
+import android.os.SystemClock
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -54,7 +55,7 @@ object SafeDriveTurnFusionRule {
         minRateDegPerSec: Double = DEFAULT_MIN_GYRO_RATE_DEG_PER_SEC,
         maxSignalAgeMs: Long = DEFAULT_MAX_SIGNAL_AGE_MS
     ): Boolean {
-        if (!gyroscopeAvailable || gyroSignalAtElapsedMs <= 0L) return false
+        if (!gyroscopeAvailable || gyroSignalAtElapsedMs < 0L) return false
         val age = hardTurnDetectedAtElapsedMs - gyroSignalAtElapsedMs
         if (age !in 0L..maxSignalAgeMs) return false
         return gyroAngularRateDegPerSec.isFinite() && gyroAngularRateDegPerSec >= minRateDegPerSec
@@ -133,12 +134,13 @@ object SafeDriveSensorFusionObserver : SensorEventListener {
     private var sensorHandler: Handler? = null
     private var registered = false
     private var tripStartedAtMs = 0L
+    private var tripStartedSensorElapsedMs = 0L
     private var previousHardTurnCount = 0
     private var corroboratedTurns = 0
     private var gpsOnlyTurns = 0
     private var peakAngularRate = 0.0
     @Volatile private var recentAngularRate = 0.0
-    @Volatile private var recentGyroElapsedMs = 0L
+    @Volatile private var recentGyroTripElapsedMs = -1L
 
     fun start(context: Context) {
         if (!started.compareAndSet(false, true)) return
@@ -152,7 +154,7 @@ object SafeDriveSensorFusionObserver : SensorEventListener {
         scope.launch {
             SafeDriveRuntime.state.collectLatest { state ->
                 if (state.active) {
-                    if (!registered) beginTrip(state)
+                    if (!registered && tripStartedAtMs == 0L) beginTrip(state)
                     evaluateHardTurnChange(state)
                     publish(active = true, gpsHardTurnCount = state.hardTurnCount)
                 } else if (registered || tripStartedAtMs > 0L) {
@@ -166,12 +168,13 @@ object SafeDriveSensorFusionObserver : SensorEventListener {
 
     private fun beginTrip(state: SafeDriveLiveState) {
         tripStartedAtMs = state.startedAtMs
+        tripStartedSensorElapsedMs = SystemClock.elapsedRealtime()
         previousHardTurnCount = state.hardTurnCount
         corroboratedTurns = 0
         gpsOnlyTurns = 0
         peakAngularRate = 0.0
         recentAngularRate = 0.0
-        recentGyroElapsedMs = 0L
+        recentGyroTripElapsedMs = -1L
         val gyro = gyroscope
         val manager = sensorManager
         val handler = sensorHandler
@@ -186,12 +189,11 @@ object SafeDriveSensorFusionObserver : SensorEventListener {
             return
         }
         val delta = (state.hardTurnCount - previousHardTurnCount).coerceAtMost(3)
-        val eventElapsedMs = state.elapsedMs
         repeat(delta) {
             if (
                 SafeDriveTurnFusionRule.corroborates(
-                    hardTurnDetectedAtElapsedMs = eventElapsedMs,
-                    gyroSignalAtElapsedMs = recentGyroElapsedMs,
+                    hardTurnDetectedAtElapsedMs = state.elapsedMs,
+                    gyroSignalAtElapsedMs = recentGyroTripElapsedMs,
                     gyroAngularRateDegPerSec = recentAngularRate,
                     gyroscopeAvailable = registered
                 )
@@ -220,12 +222,13 @@ object SafeDriveSensorFusionObserver : SensorEventListener {
             )
         }
         tripStartedAtMs = 0L
+        tripStartedSensorElapsedMs = 0L
         previousHardTurnCount = 0
         corroboratedTurns = 0
         gpsOnlyTurns = 0
         peakAngularRate = 0.0
         recentAngularRate = 0.0
-        recentGyroElapsedMs = 0L
+        recentGyroTripElapsedMs = -1L
         publish(active = false, gpsHardTurnCount = 0)
     }
 
@@ -238,8 +241,9 @@ object SafeDriveSensorFusionObserver : SensorEventListener {
         )
         val degreesPerSecond = radiansPerSecond * 180.0 / PI
         if (!degreesPerSecond.isFinite() || degreesPerSecond > 2_000.0) return
+        val sensorElapsedMs = event.timestamp / 1_000_000L
         recentAngularRate = degreesPerSecond
-        recentGyroElapsedMs = event.timestamp / 1_000_000L
+        recentGyroTripElapsedMs = (sensorElapsedMs - tripStartedSensorElapsedMs).coerceAtLeast(0L)
         if (degreesPerSecond > peakAngularRate) peakAngularRate = degreesPerSecond
         publish(active = true, gpsHardTurnCount = SafeDriveRuntime.state.value.hardTurnCount)
     }
