@@ -23,10 +23,10 @@ export const INDEXING_ENABLED = process.env.NEXT_PUBLIC_ALLOW_INDEXING === 'true
 export const BRAND_NAME = RAWAFID_BRAND_NAME;
 export const BRAND_SHORT = RAWAFID_BRAND_SHORT;
 export const DEFAULT_LOCALE = 'ar_AR';
-export const DEFAULT_DESCRIPTION = 'روافد منصة عربية للمعرفة الموثوقة في الصحة النفسية والتربية الخاصة والتوحد وصعوبات التعلم وسرطان الأطفال والتعافي، مع أدلة عملية ومختصين ومراكز.';
+export const DEFAULT_DESCRIPTION = 'منصة روافد مرجع عربي منظم للمعرفة الصحية والنفسية والتربوية، يجمع الأدلة والمصادر الموثوقة والأدوات العملية والمختصين والمراكز في مسارات واضحة.';
 
-const HOME_TITLE = 'منصة روافد | الصحة النفسية والتربية الخاصة وسرطان الأطفال';
-const HOME_DESCRIPTION = DEFAULT_DESCRIPTION;
+const HOME_TITLE = 'منصة روافد | معرفة عربية موثوقة للصحة والنفس والتربية';
+const HOME_DESCRIPTION = 'منصة روافد مرجع عربي منظم للصحة النفسية والتربية الخاصة والتوحد وصعوبات التعلم وسرطان الأطفال والتعافي، مع أدلة علمية وأدوات عملية ومختصين ومراكز ومصادر قابلة للتتبع.';
 
 export function absoluteSiteUrl(pathOrUrl: string) {
   if (/^https?:\/\//i.test(pathOrUrl)) return pathOrUrl;
@@ -173,7 +173,7 @@ export function organizationJsonLd() {
         '@type': 'Organization',
         '@id': `${SITE_URL}/#organization`,
         name: BRAND_NAME,
-        alternateName: [BRAND_SHORT, 'Rawafid'],
+        alternateName: [BRAND_SHORT, 'Rawafid', 'Rawafid Platform'],
         url: `${SITE_URL}/`,
         description: DEFAULT_DESCRIPTION,
         logo: {
@@ -186,13 +186,14 @@ export function organizationJsonLd() {
           caption: BRAND_NAME,
         },
         image: { '@id': `${SITE_URL}/#logo` },
+        founder: { '@id': `${SITE_URL}/#founder` },
         knowsAbout: topics,
       },
       {
         '@type': 'WebSite',
         '@id': `${SITE_URL}/#website`,
         name: BRAND_NAME,
-        alternateName: [BRAND_SHORT, 'Rawafid', SITE_HOSTNAME],
+        alternateName: [BRAND_SHORT, 'Rawafid', 'Rawafid Platform'],
         url: `${SITE_URL}/`,
         description: DEFAULT_DESCRIPTION,
         inLanguage: 'ar',
