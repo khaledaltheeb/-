@@ -103,12 +103,17 @@ export default async function SectionPage({ params, searchParams }: { params: Pa
     const generated: Item[] = [...cognitiveGenerated, ...expandedGenerated];
     let existing: Item[] = [];
     if (isRoot) {
-      const { data: mappings } = await supabase.from('content_categories').select('content_id').eq('category_id', category.id).eq('is_primary', true);
-      const ids = [...new Set((mappings ?? []).map((mapping) => mapping.content_id).filter(Boolean))] as string[];
-      if (ids.length > 0) {
-        const { data } = await supabase.from('content').select('id,slug,title,excerpt,content_type,published_at,canonical_url').in('id', ids).eq('status', 'published').lte('published_at', now).eq('robots_index', true).order('title');
-        existing = (data ?? []) as Item[];
-      }
+      const { data, error } = await supabase
+        .from('content')
+        .select('id,slug,title,excerpt,content_type,published_at,canonical_url,content_categories!inner(category_id,is_primary)')
+        .eq('content_categories.category_id', category.id)
+        .eq('content_categories.is_primary', true)
+        .eq('status', 'published')
+        .lte('published_at', now)
+        .eq('robots_index', true)
+        .order('title');
+      if (error) throw new Error(`section root content query failed: ${error.message}`);
+      existing = (data ?? []) as unknown as Item[];
       childCards = [
         ...getExpandedEncyclopediaCategories().map((item) => ({ slug: item.slug, name_ar: item.name, description: item.description })),
         ...getCognitiveCategories().map((item) => ({ slug: item.slug, name_ar: item.name, description: item.description })),
@@ -125,23 +130,29 @@ export default async function SectionPage({ params, searchParams }: { params: Pa
     total = all.length;
     rows = all.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
   } else {
-    const [{ data: sec }, { data: par }, { data: children }, { data: mappings }] = await Promise.all([
+    const [{ data: sec }, { data: par }, { data: children }] = await Promise.all([
       category.sector_id ? supabase.from('sectors').select('slug,name_ar').eq('id', category.sector_id).maybeSingle() : Promise.resolve({ data: null }),
       category.parent_id ? supabase.from('categories').select('slug,name_ar').eq('id', category.parent_id).maybeSingle() : Promise.resolve({ data: null }),
       supabase.from('categories').select('slug,name_ar,description').eq('parent_id', category.id).eq('is_active', true).eq('visibility', 'public').order('sort_order'),
-      supabase.from('content_categories').select('content_id').eq('category_id', category.id),
     ]);
     sector = sec as typeof sector;
     parent = par as typeof parent;
     childCards = (children ?? []) as typeof childCards;
-    const ids = [...new Set((mappings ?? []).map((mapping) => mapping.content_id).filter(Boolean))] as string[];
-    if (ids.length > 0) {
-      let contentQuery = supabase.from('content').select('id,slug,title,excerpt,content_type,published_at,canonical_url', { count: 'exact' }).in('id', ids).eq('status', 'published').lte('published_at', now).eq('robots_index', true).order('published_at', { ascending: false }).order('title');
-      if (query) contentQuery = contentQuery.ilike('title', `%${query}%`);
-      const { data, count } = await contentQuery.range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
-      rows = (data ?? []) as Item[];
-      total = count ?? 0;
-    }
+
+    let contentQuery = supabase
+      .from('content')
+      .select('id,slug,title,excerpt,content_type,published_at,canonical_url,content_categories!inner(category_id)', { count: 'exact' })
+      .eq('content_categories.category_id', category.id)
+      .eq('status', 'published')
+      .lte('published_at', now)
+      .eq('robots_index', true)
+      .order('published_at', { ascending: false })
+      .order('title');
+    if (query) contentQuery = contentQuery.ilike('title', `%${query}%`);
+    const { data, count, error } = await contentQuery.range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
+    if (error) throw new Error(`section content query failed: ${error.message}`);
+    rows = (data ?? []) as unknown as Item[];
+    total = count ?? 0;
   }
 
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
