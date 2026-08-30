@@ -1,3 +1,11 @@
+import {
+  SEO_SHARED_USER_AGENT,
+  getSeoSharedCacheStats,
+  readSeoSharedCache,
+  sharedCacheRecordToFetchResult,
+  writeSeoSharedCache,
+} from './seo-shared-cache.mjs';
+
 const base = (process.env.SEO_GATE_BASE_URL || process.env.SMOKE_BASE_URL || 'http://127.0.0.1:3000').replace(/\/$/, '');
 const concurrency = Math.max(1, Math.min(32, Number(process.env.SEO_GATE_CONCURRENCY || 8)));
 const requestTimeoutMs = Math.max(1000, Number(process.env.SEO_GATE_TIMEOUT_MS || 15000));
@@ -45,19 +53,32 @@ async function fetchWithTimeout(url, options = {}) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), requestTimeoutMs);
   try {
-    return await fetch(url, { ...options, signal: controller.signal, headers: { 'user-agent': 'Rawafid-SEO-Gate/1.0', ...(options.headers || {}) } });
+    return await fetch(url, { ...options, signal: controller.signal, headers: { 'user-agent': SEO_SHARED_USER_AGENT, ...(options.headers || {}) } });
   } finally { clearTimeout(timer); }
 }
 async function getText(url) {
+  const cached = await readSeoSharedCache(url, SEO_SHARED_USER_AGENT);
+  if (cached) return sharedCacheRecordToFetchResult(cached);
+
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), requestTimeoutMs);
   try {
     const response = await fetch(url, {
       redirect: 'follow',
       signal: controller.signal,
-      headers: { 'user-agent': 'Rawafid-SEO-Gate/1.0' },
+      headers: { 'user-agent': SEO_SHARED_USER_AGENT },
     });
-    return { response, text: await response.text() };
+    const text = await response.text();
+    if (response.status >= 200 && response.status < 400) {
+      await writeSeoSharedCache(url, {
+        userAgent: SEO_SHARED_USER_AGENT,
+        status: response.status,
+        finalUrl: response.url || url,
+        contentType: response.headers.get('content-type') || '',
+        text,
+      });
+    }
+    return { response, text, cacheHit: false };
   } finally {
     clearTimeout(timer);
   }
@@ -66,7 +87,13 @@ async function getTextWithRetry(url, attempts = pageAttempts) {
   let lastError;
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
     try {
-      return await getText(url);
+      const result = await getText(url);
+      const retryableStatus = result.response.status === 429 || result.response.status >= 500;
+      if (retryableStatus && attempt < attempts) {
+        await sleep(pageRetryDelayMs * attempt);
+        continue;
+      }
+      return result;
     } catch (error) {
       lastError = error;
       if (attempt === attempts) break;
@@ -205,7 +232,8 @@ async function main() {
   const statuses = await runPool(allInternalLinks, async (url) => [url, await auditInternalLink(url)]);
   for (const [url, status] of statuses) if (status < 200 || status >= 400) failures.push(`${url}: broken internal link status ${status || 'request-failed'}`);
   const elapsed = ((Date.now() - started) / 1000).toFixed(1);
-  console.log(`SEO gate summary: pages=${urls.length}, internalLinks=${allInternalLinks.length}, failures=${failures.length}, seconds=${elapsed}`);
+  const cache = getSeoSharedCacheStats();
+  console.log(`SEO gate summary: pages=${urls.length}, internalLinks=${allInternalLinks.length}, failures=${failures.length}, seconds=${elapsed}, sharedCacheHits=${cache.hits}, sharedCacheWrites=${cache.writes}`);
   if (failures.length) {
     for (const failure of failures.slice(0, 300)) console.error(`FAIL ${failure}`);
     if (failures.length > 300) console.error(`FAIL ... ${failures.length - 300} additional failures omitted`);
