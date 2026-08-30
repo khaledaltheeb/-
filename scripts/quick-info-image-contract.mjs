@@ -70,6 +70,11 @@ requireMatch('generator', files.generator, /direction="rtl"/, 'generated SVG RTL
 requireMatch('generator', files.generator, /text-anchor="start"/, 'generated SVG Arabic text must anchor from the RTL start edge so text flows leftward inside the safe frame.');
 requireMatch('generator', files.generator, /clipPath id="safe-content"/, 'generated SVG must clip all content to a safe inner frame.');
 requireMatch('generator', files.generator, /const CARD_RIGHT = 1082/, 'generated image must keep a deterministic right content boundary.');
+requireMatch('generator', files.generator, /const EXCERPT_FONT_SIZE = 24/, 'Quick Info image supporting text must remain legible at mobile preview size.');
+requireMatch('generator', files.generator, /const EXCERPT_LINE_HEIGHT = 38/, 'Quick Info image supporting text line height must remain readable.');
+requireMatch('generator', files.generator, /const SITE_URL_FONT_SIZE = 21/, 'Quick Info image canonical site URL must remain legible.');
+requireMatch('generator', files.generator, /const SITE_URL_LABEL = 'https:\/\/healthrenewal\.org'/, 'Quick Info image must print the canonical HTTPS site URL.');
+forbid('generator', files.generator, />healthrenewal\.org<\/text>/, 'bare non-HTTPS site label must not return.');
 forbid('generator', files.generator, />ر<\/text>/, 'temporary letter logo must not appear in generated images.');
 requireMatch('seo', files.seo, /imageAlt\?: string \| null/, 'SEO metadata must accept page-specific image alt text.');
 requireMatch('seo', files.seo, /alt:\s*imageAlt/, 'OpenGraph image alt must use the page-specific value.');
@@ -79,4 +84,4 @@ if (errors.length) {
   for (const error of errors) console.error(`- ${error}`);
   process.exit(1);
 }
-console.log('Quick Info visual contract passed: semantic HTML cards are preserved, official Rawafid branding is used, generated Arabic PNG text stays inside a deterministic RTL-safe frame, each page exposes a real image with alt and ImageObject metadata, and Quick Info sitemap carries image URLs.');
+console.log('Quick Info visual contract passed: semantic HTML cards are preserved, official Rawafid branding is used, generated Arabic PNG text stays inside a deterministic RTL-safe frame, supporting text and canonical HTTPS URL remain legible, each page exposes a real image with alt and ImageObject metadata, and Quick Info sitemap carries image URLs.');
