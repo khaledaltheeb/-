@@ -48,6 +48,8 @@ private const val SAFE_DRIVE_ALERT_CHANNEL = "rawafid_safe_drive_alerts"
 private const val SAFE_DRIVE_STATUS_ID = 9801
 private const val SAFE_DRIVE_INCIDENT_ID = 9802
 private const val SAFE_DRIVE_RESULT_ID = 9803
+private const val SAFE_DRIVE_REST_ID = 9804
+private const val SAFE_DRIVE_ARRIVAL_ID = 9805
 private const val SAFE_DRIVE_EVENT_BASE_ID = 9820
 
 const val ACTION_SAFE_DRIVE_START = "org.healthrenewal.rawafid.SAFE_DRIVE_START"
@@ -105,11 +107,14 @@ class SafeDriveService : Service(), LocationListener, SensorEventListener {
     private var incidentDetector: SafeDriveIncidentDetector? = null
     private var driveConfig = SafeDriveConfig()
     private var incidentConfig = SafeDriveIncidentConfig()
+    private var advancedConfig = SafeDriveAdvancedConfig()
+    private var voiceCoach: SafeDriveVoiceCoach? = null
     private var lastLocation: Location? = null
     private var incidentTimeoutJob: Job? = null
     private var sessionStartedWallMs = 0L
     private var sessionStartedElapsedMs = 0L
     private var lastStatusNotificationAt = 0L
+    private var lastRestReminderElapsedMs = 0L
     private var monitoring = false
 
     override fun onCreate() {
@@ -142,8 +147,12 @@ class SafeDriveService : Service(), LocationListener, SensorEventListener {
 
         driveConfig = SafeDriveStore.config(this)
         incidentConfig = SafeDriveIncidentStore.config(this)
+        advancedConfig = SafeDriveAdvancedStore.config(this)
+        voiceCoach?.shutdown()
+        voiceCoach = SafeDriveVoiceCoach(this, advancedConfig.spokenAlertsEnabled)
         sessionStartedWallMs = System.currentTimeMillis()
         sessionStartedElapsedMs = SystemClock.elapsedRealtime()
+        lastRestReminderElapsedMs = 0L
         analyzer = SafeDriveAnalyzer(driveConfig, sessionStartedWallMs, sessionStartedElapsedMs)
         incidentDetector = SafeDriveIncidentDetector(incidentConfig)
         lastLocation = null
@@ -153,6 +162,9 @@ class SafeDriveService : Service(), LocationListener, SensorEventListener {
         SafeDriveRuntime.update(SafeDriveLiveState(active = true, startedAtMs = sessionStartedWallMs, statusMessage = "جارٍ تثبيت إشارة الموقع..."))
         requestLocationUpdates()
         registerMotionSensor()
+        if (advancedConfig.nightGuardEnabled && SafeDriveAdvancedPolicy.isNightTime(sessionStartedWallMs)) {
+            voiceCoach?.speak("قيادة ليلية. حافظ على الانتباه وخذ استراحة أبكر عند الشعور بالتعب.")
+        }
     }
 
     @SuppressLint("MissingPermission")
@@ -201,7 +213,8 @@ class SafeDriveService : Service(), LocationListener, SensorEventListener {
         if (reliableLocation) {
             incidentDetector?.consume(sample, state.currentSpeedKmh, state.currentAccelerationMps2)?.let(::beginIncidentCheck)
         }
-        handleDrivingEvents(events, state, sample)
+        handleDrivingEvents(events, state)
+        maybeRestReminder(state)
         maybeUpdateStatusNotification(state)
     }
 
@@ -221,23 +234,28 @@ class SafeDriveService : Service(), LocationListener, SensorEventListener {
         SafeDriveRuntime.update(SafeDriveRuntime.state.value.copy(statusMessage = "خدمة موقع $provider غير متاحة حاليًا."))
     }
 
-    private fun handleDrivingEvents(events: List<SafeDriveEvent>, state: SafeDriveLiveState, sample: SafeDriveSample) {
+    private fun handleDrivingEvents(events: List<SafeDriveEvent>, state: SafeDriveLiveState) {
+        val highRiskTypes = setOf(
+            SafeDriveEventType.SPEEDING_PERSISTENT,
+            SafeDriveEventType.SEVERE_SPEED,
+            SafeDriveEventType.RISK_CLUSTER
+        )
         events.forEach { event ->
-            postDrivingEvent(event, state.provisionalScore)
-            if (driveConfig.shareLiveAlerts && event.type in setOf(
-                    SafeDriveEventType.SPEEDING_PERSISTENT,
-                    SafeDriveEventType.SEVERE_SPEED,
-                    SafeDriveEventType.RISK_CLUSTER
-                )) {
+            val highRisk = event.type in highRiskTypes
+            if (!advancedConfig.reduceDistractionEnabled || highRisk) {
+                postDrivingEvent(event, state.provisionalScore)
+            }
+            SafeDriveAdvancedPolicy.spokenEvent(event, advancedConfig.newDriverMode)?.let { voiceCoach?.speak(it) }
+            if (driveConfig.shareLiveAlerts && highRisk) {
                 val summary = SafeDriveScoring.alertSummary(event, state.provisionalScore)
                 serviceScope.launch(Dispatchers.IO) {
                     runCatching {
                         if (RawafidCircleApi.hasSession(this@SafeDriveService)) {
                             RawafidCircleApi.broadcastDriveAlert(
                                 this@SafeDriveService,
-                                sample.latitude,
-                                sample.longitude,
-                                sample.accuracyM.toDouble(),
+                                null,
+                                null,
+                                null,
                                 "risky_driving",
                                 summary
                             )
@@ -248,11 +266,23 @@ class SafeDriveService : Service(), LocationListener, SensorEventListener {
         }
     }
 
+    private fun maybeRestReminder(state: SafeDriveLiveState) {
+        val restMinutes = SafeDriveAdvancedPolicy.effectiveRestMinutes(advancedConfig, System.currentTimeMillis())
+        val thresholdMs = restMinutes * 60_000L
+        if (state.elapsedMs < thresholdMs) return
+        if (lastRestReminderElapsedMs != 0L && state.elapsedMs - lastRestReminderElapsedMs < 60 * 60_000L) return
+        lastRestReminderElapsedMs = state.elapsedMs
+        val text = "قدت قرابة $restMinutes دقيقة. توقف للاستراحة في مكان آمن قبل متابعة الرحلة."
+        postGuidance("استراحة السائق", text, SAFE_DRIVE_REST_ID)
+        voiceCoach?.speak("تذكير بالاستراحة. توقف في مكان آمن وخذ استراحة قبل متابعة القيادة.")
+    }
+
     private fun beginIncidentCheck(candidate: SafeDriveIncidentCandidate) {
         if (SafeDriveRuntime.pendingCheck.value != null) return
         val pending = SafeDrivePendingCheck(candidate, System.currentTimeMillis() + incidentConfig.responseSeconds * 1000L)
         SafeDriveRuntime.pending(pending)
         postIncidentCheck(pending)
+        voiceCoach?.speak("هل أنت بخير؟ افتح تنبيه روافد لتأكيد سلامتك أو طلب المساعدة.")
         incidentTimeoutJob?.cancel()
         if (incidentConfig.autoEscalateIfUnanswered) {
             incidentTimeoutJob = serviceScope.launch {
@@ -390,6 +420,11 @@ class SafeDriveService : Service(), LocationListener, SensorEventListener {
         } else {
             SafeDriveRuntime.update(SafeDriveLiveState(active = false, statusMessage = "انتهت الرحلة قبل توفر بيانات كافية للتقرير."))
         }
+        if (advancedConfig.arrivalPromptOnTripEnd && SafeArrivalStore.load(this).active) {
+            postArrivalPrompt()
+        }
+        voiceCoach?.shutdown()
+        voiceCoach = null
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
     }
@@ -398,6 +433,8 @@ class SafeDriveService : Service(), LocationListener, SensorEventListener {
         incidentTimeoutJob?.cancel()
         runCatching { locationManager.removeUpdates(this) }
         runCatching { sensorManager.unregisterListener(this) }
+        voiceCoach?.shutdown()
+        voiceCoach = null
         if (monitoring) {
             monitoring = false
             SafeDriveRuntime.update(SafeDriveLiveState(active = false, statusMessage = "توقفت جلسة القيادة الآمنة."))
@@ -424,13 +461,13 @@ class SafeDriveService : Service(), LocationListener, SensorEventListener {
         )
         val stop = PendingIntent.getService(
             this,
-            9804,
+            9814,
             Intent(this, SafeDriveService::class.java).setAction(ACTION_SAFE_DRIVE_STOP),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         val help = PendingIntent.getService(
             this,
-            9805,
+            9815,
             Intent(this, SafeDriveService::class.java).setAction(ACTION_SAFE_DRIVE_HELP_NOW),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
@@ -472,6 +509,51 @@ class SafeDriveService : Service(), LocationListener, SensorEventListener {
                 .setAutoCancel(true)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setCategory(NotificationCompat.CATEGORY_RECOMMENDATION)
+                .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
+                .build()
+        )
+    }
+
+    private fun postGuidance(title: String, text: String, notificationId: Int) {
+        val open = PendingIntent.getActivity(
+            this,
+            notificationId,
+            Intent(this, SafeDriveActivity::class.java),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        notificationManager().notify(
+            notificationId,
+            NotificationCompat.Builder(this, SAFE_DRIVE_ALERT_CHANNEL)
+                .setSmallIcon(R.drawable.ic_launcher)
+                .setContentTitle(title)
+                .setContentText(text)
+                .setStyle(NotificationCompat.BigTextStyle().bigText(text))
+                .setContentIntent(open)
+                .setAutoCancel(true)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setCategory(NotificationCompat.CATEGORY_RECOMMENDATION)
+                .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
+                .build()
+        )
+    }
+
+    private fun postArrivalPrompt() {
+        val open = PendingIntent.getActivity(
+            this,
+            SAFE_DRIVE_ARRIVAL_ID,
+            Intent(this, SafeArrivalActivity::class.java),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        notificationManager().notify(
+            SAFE_DRIVE_ARRIVAL_ID,
+            NotificationCompat.Builder(this, SAFE_DRIVE_ALERT_CHANNEL)
+                .setSmallIcon(R.drawable.ic_launcher)
+                .setContentTitle("انتهت رحلة القيادة")
+                .setContentText("لديك فحص «وصلت بالسلامة» نشط. أكد وصولك إذا كنت وصلت فعلًا.")
+                .setStyle(NotificationCompat.BigTextStyle().bigText("انتهاء جلسة القيادة لا يثبت الوصول تلقائيًا. افتح «وصلت بالسلامة» وأكد أنك بخير فقط إذا وصلت بالفعل."))
+                .setContentIntent(open)
+                .setAutoCancel(true)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
                 .build()
         )
