@@ -1,0 +1,44 @@
+name: Verify Quick Info Live Visual
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/verify-quick-info-live-visual.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  capture-live-images:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Capture production Quick Info images
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://healthrenewal.org'
+          slug='overthinking-check'
+          stamp="$(date +%s)"
+          curl -fsSL --compressed --retry 8 --retry-delay 2 --retry-all-errors \
+            -H 'Cache-Control: no-cache, no-store, max-age=0' \
+            "${base}/quick-info/og/${slug}.png?visual=${stamp}" \
+            -o quick-info-card.png
+          curl -fsSL --compressed --retry 8 --retry-delay 2 --retry-all-errors \
+            -H 'Cache-Control: no-cache, no-store, max-age=0' \
+            "${base}/quick-info/discover/${slug}.png?visual=${stamp}" \
+            -o quick-info-discover.png
+          file quick-info-card.png quick-info-discover.png
+          test -s quick-info-card.png
+          test -s quick-info-discover.png
+      - name: Upload live visual evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: quick-info-live-visual
+          path: |
+            quick-info-card.png
+            quick-info-discover.png
+          if-no-files-found: error
+          retention-days: 1
