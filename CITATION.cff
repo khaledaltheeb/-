@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use or reference Rawafid, please cite the platform using this metadata."
+title: "Rawafid — منصة روافد"
+type: software
+authors:
+  - family-names: "altheeb"
+    given-names: "Khaled"
+    name-particle: ""
+    alias: "خالد الذيب"
+url: "https://healthrenewal.org"
+repository-code: "https://github.com/khaledaltheeb/-"
+license: "NOASSERTION"
+abstract: "منصة عربية معرفية تنظّم المعرفة الصحية والنفسية والتربوية والخدمية، مع مسارات للأدلة والموارد والخدمات المهنية."
+keywords:
+  - Arabic knowledge platform
+  - mental health
+  - special education
+  - accessibility
+  - health information
