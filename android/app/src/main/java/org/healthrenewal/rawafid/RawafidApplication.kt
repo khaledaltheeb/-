@@ -17,6 +17,7 @@ class RawafidApplication : Application(), Application.ActivityLifecycleCallbacks
         ensureDiscoverableHomeDefaults()
         createPrivacyFirstWomenChannels()
         CirclePushRegistration.registerCurrentToken(this)
+        SafeDriveAgreementObserver.start(this)
     }
 
     /**
