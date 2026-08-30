@@ -129,25 +129,13 @@ object RawafidCircleApi {
     fun setPermission(context: Context, connectionId: String, permission: String, enabled: Boolean): Boolean = scalarBoolean(rpc(context, "circle_set_permission", JSONObject().put("p_connection_id", connectionId).put("p_permission", permission).put("p_enabled", enabled)))
     fun removeConnection(context: Context, connectionId: String): Boolean = scalarBoolean(rpc(context, "circle_remove_connection", JSONObject().put("p_connection_id", connectionId)))
 
-    fun driveAgreements(context: Context): List<CircleDriveAgreement> {
-        val a = JSONArray(rpc(context, "circle_get_drive_agreements", JSONObject()))
-        return buildList {
-            for (i in 0 until a.length()) {
-                val o = a.optJSONObject(i) ?: continue
-                add(
-                    CircleDriveAgreement(
-                        connectionId = o.optString("connection_id"),
-                        permissionEnabled = o.optBoolean("permission_enabled"),
-                        incidentsEnabled = o.optBoolean("incidents_enabled", true),
-                        riskAlertsEnabled = o.optBoolean("risk_alerts_enabled", true),
-                        tripReportsEnabled = o.optBoolean("trip_reports_enabled", true),
-                        speedThresholdKmh = o.optInt("speed_threshold_kmh", 120).coerceIn(50, 180),
-                        persistentSpeedSeconds = o.optInt("persistent_speed_seconds", 120).coerceIn(30, 900)
-                    )
-                )
-            }
-        }
-    }
+    fun driveAgreements(context: Context): List<CircleDriveAgreement> = parseDriveAgreements(
+        rpc(context, "circle_get_drive_agreements", JSONObject())
+    )
+
+    fun customDriveAgreements(context: Context): List<CircleDriveAgreement> = parseDriveAgreements(
+        rpc(context, "circle_get_custom_drive_agreements", JSONObject())
+    )
 
     fun setDriveAgreement(context: Context, agreement: CircleDriveAgreement): Boolean = scalarBoolean(
         rpc(
@@ -175,6 +163,26 @@ object RawafidCircleApi {
             "circle_send_drive_risk_to_connection",
             JSONObject()
                 .put("p_connection_id", connectionId)
+                .put("p_speed_kmh", speedKmh.coerceIn(0.0, 350.0))
+                .put("p_continuous_seconds", continuousSeconds.coerceIn(0, 7200))
+                .put("p_summary", summary.trim().take(900))
+        )
+    )
+
+    fun sendDriveAlertToConnection(
+        context: Context,
+        connectionId: String,
+        event: String,
+        speedKmh: Double,
+        continuousSeconds: Int,
+        summary: String
+    ): Boolean = scalarBoolean(
+        rpc(
+            context,
+            "circle_send_drive_alert_to_connection",
+            JSONObject()
+                .put("p_connection_id", connectionId)
+                .put("p_event", event.trim().lowercase().take(40))
                 .put("p_speed_kmh", speedKmh.coerceIn(0.0, 350.0))
                 .put("p_continuous_seconds", continuousSeconds.coerceIn(0, 7200))
                 .put("p_summary", summary.trim().take(900))
@@ -265,6 +273,26 @@ object RawafidCircleApi {
     fun unregisterPushDevice(context: Context, deviceId: String): Boolean = scalarBoolean(
         rpc(context, "circle_unregister_push_device", JSONObject().put("p_device_id", deviceId))
     )
+
+    private fun parseDriveAgreements(raw: String): List<CircleDriveAgreement> {
+        val a = JSONArray(raw)
+        return buildList {
+            for (i in 0 until a.length()) {
+                val o = a.optJSONObject(i) ?: continue
+                add(
+                    CircleDriveAgreement(
+                        connectionId = o.optString("connection_id"),
+                        permissionEnabled = o.optBoolean("permission_enabled"),
+                        incidentsEnabled = o.optBoolean("incidents_enabled", true),
+                        riskAlertsEnabled = o.optBoolean("risk_alerts_enabled", true),
+                        tripReportsEnabled = o.optBoolean("trip_reports_enabled", true),
+                        speedThresholdKmh = o.optInt("speed_threshold_kmh", 120).coerceIn(50, 180),
+                        persistentSpeedSeconds = o.optInt("persistent_speed_seconds", 120).coerceIn(30, 900)
+                    )
+                )
+            }
+        }
+    }
 
     private fun sendMessage(context: Context, connectionId: String, kind: String, body: String?, templateKey: String?, replyToId: String? = null, latitude: Double? = null, longitude: Double? = null, accuracyM: Double? = null): String {
         val args = JSONObject().put("p_connection_id", connectionId).put("p_kind", kind).put("p_body", body ?: JSONObject.NULL).put("p_template_key", templateKey ?: JSONObject.NULL).put("p_reply_to_id", replyToId ?: JSONObject.NULL).put("p_latitude", latitude ?: JSONObject.NULL).put("p_longitude", longitude ?: JSONObject.NULL).put("p_accuracy_m", accuracyM ?: JSONObject.NULL).put("p_client_token", UUID.randomUUID().toString())
