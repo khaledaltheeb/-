@@ -1,6 +1,7 @@
 package org.healthrenewal.rawafid
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
@@ -10,6 +11,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 
 private val LightColors = lightColorScheme(
     primary = Color(0xFF00696B),
@@ -118,8 +120,12 @@ fun RawafidTheme(content: @Composable () -> Unit) {
         dark -> DarkColors
         else -> LightColors
     }
+    val minimumTargetSize = if (accessibility.largeTargets) 56.dp else 48.dp
 
-    CompositionLocalProvider(LocalRawafidAccessibility provides accessibility) {
+    CompositionLocalProvider(
+        LocalRawafidAccessibility provides accessibility,
+        LocalMinimumInteractiveComponentSize provides minimumTargetSize
+    ) {
         MaterialTheme(
             colorScheme = colors,
             typography = scaledTypography(accessibility.textScale),
