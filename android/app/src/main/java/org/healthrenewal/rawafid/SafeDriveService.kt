@@ -341,7 +341,7 @@ class SafeDriveService : Service(), LocationListener, SensorEventListener {
 
     private fun sendLocalDriveSms(candidate: SafeDriveIncidentCandidate, summary: String): Int {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) return 0
-        val recipients = MyCircleStore.forPermission(this, CirclePermission.DRIVING_SAFETY)
+        val recipients = MyCircleStore.forPermission(this, CirclePermission.EMERGENCY)
             .map { it.phone.trim() }
             .filter { it.isNotBlank() }
             .distinct()
