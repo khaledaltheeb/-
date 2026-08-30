@@ -53,9 +53,6 @@ class TreatmentReminderReceiver : BroadcastReceiver() {
         val id = intent.getIntExtra("id", 0)
         val title = intent.getStringExtra("title").orEmpty().ifBlank { "موعد علاج" }
         val note = intent.getStringExtra("note").orEmpty()
-
-        // The reminder has fired, so clear the one-time local item even if Android
-        // notification permission is unavailable. This prevents stale expired reminders.
         LocalStore.removeTreatment(context, id)
 
         if (Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) return
@@ -91,6 +88,8 @@ class BootReceiver : BroadcastReceiver() {
             FlexibleReminderScheduler.syncAll(context)
             MedicationReminderScheduler.syncAll(context)
             FutureNoteScheduler.restore(context)
+            EmergencyBeaconManager.restore(context)
+            SafetyMonitorScheduler.resync(context, ensureService = true)
             val safeArrival = SafeArrivalStore.load(context)
             if (safeArrival.active && safeArrival.dueAt > System.currentTimeMillis()) {
                 SafeArrivalScheduler.schedule(context, safeArrival)
