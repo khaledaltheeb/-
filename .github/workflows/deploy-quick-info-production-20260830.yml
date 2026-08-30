@@ -34,9 +34,9 @@ jobs:
         run: test -n "${CLOUDFLARE_API_TOKEN:-}"
       - uses: actions/checkout@v7
         with:
-          ref: c61966a7ffcb0a483867f166cd1988e21e30d3ca
+          ref: 44e35505441aec888caa76a31d63f7cafa44f71a
       - name: Verify exact Quick Info release SHA
-        run: test "$(git rev-parse HEAD)" = 'c61966a7ffcb0a483867f166cd1988e21e30d3ca'
+        run: test "$(git rev-parse HEAD)" = '44e35505441aec888caa76a31d63f7cafa44f71a'
       - uses: actions/setup-node@v7
         with:
           node-version: 24
@@ -66,7 +66,7 @@ jobs:
         run: |
           set -euo pipefail
           base='https://healthrenewal.org'
-          stamp='c61966a7ffcb0a483867f166cd1988e21e30d3ca'
+          stamp='44e35505441aec888caa76a31d63f7cafa44f71a'
           stress_slug='overthinking-check'
           get() { curl -fsSL --compressed --retry 12 --retry-delay 3 --retry-all-errors -H 'Cache-Control: no-cache, no-store, max-age=0' "$1"; }
           hub="$(get "${base}/quick-info/?release=${stamp}")"
@@ -97,4 +97,4 @@ jobs:
           curl -fsSL --retry 12 --retry-delay 3 --retry-all-errors -H 'Cache-Control: no-cache, no-store, max-age=0' "${card_url}?release=${stamp}" -o /tmp/quick-info-card.png
           test "$(identify -format '%wx%h' /tmp/quick-info-discover.png)" = '1280x720'
           test "$(identify -format '%wx%h' /tmp/quick-info-card.png)" = '1200x630'
-          echo "Quick Info long-title release ${stamp} is live: ${page_url} | Discover ${discover_url} (1280x720) | Card ${card_url} (1200x630)"
+          echo "Quick Info balanced-title release ${stamp} is live: ${page_url} | Discover ${discover_url} (1280x720) | Card ${card_url} (1200x630)"
