@@ -92,7 +92,7 @@ class RawafidFirebaseMessagingService : FirebaseMessagingService() {
     }
 
     override fun onMessageReceived(message: RemoteMessage) {
-        if (message.data["scope"] != "circle") return
+        if (message.data["scope"] != "circle" || message.data["type"] != "circle_wake") return
         if (!RawafidCircleApi.hasSession(applicationContext)) return
         CircleNotificationScheduler.checkNow(applicationContext, expedited = true)
     }
