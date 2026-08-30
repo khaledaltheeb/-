@@ -25,6 +25,7 @@ CATEGORIES = [
 ]
 EXPECTED_PER_CATEGORY = 1000
 EXPECTED_TOTAL = len(CATEGORIES) * EXPECTED_PER_CATEGORY
+PARTS_PER_CATEGORY = 2
 
 
 def read_encoded(category: str) -> bytes:
@@ -32,7 +33,7 @@ def read_encoded(category: str) -> bytes:
     if single.exists():
         return single.read_bytes().strip()
 
-    parts = [ASSET_DIR / f"{category}.part{i:02d}.b64" for i in range(4)]
+    parts = [ASSET_DIR / f"{category}.part{i:02d}.b64" for i in range(PARTS_PER_CATEGORY)]
     missing = [str(p.relative_to(ROOT)) for p in parts if not p.exists()]
     if missing:
         raise AssertionError(f"{category}: missing asset(s): {', '.join(missing)}")
