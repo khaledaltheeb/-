@@ -150,6 +150,11 @@ private fun HomeScreen(onNavigate: (Destination) -> Unit) {
             QuickCard("فضفض", "اكتب ثم دعها تذهب", Icons.Default.AutoAwesome) { onNavigate(Destination.TOOLS) }
         }
         item {
+            QuickCard("جواز احتياجاتي", "شارك فقط طريقة التعامل التي تختارها", Icons.Default.Security) {
+                context.startActivity(Intent(context, SupportPassportActivity::class.java))
+            }
+        }
+        item {
             Card {
                 Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text("رفيقة روافد", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
@@ -343,10 +348,22 @@ private fun SafetyScreen() {
     var note by rememberSaveable { mutableStateOf(LocalStore.emergencyNote(context)) }
 
     LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        item { PageTitle("الأمان", "بطاقة طوارئ محلية قابلة للمشاركة.") }
+        item { PageTitle("الأمان", "بطاقة طوارئ محلية وأدوات تواصل باختيارك.") }
         item {
             Card {
                 Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text("جواز احتياجاتي", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                    Text("حدّد كيف تفضّل أن يتعامل معك الآخرون، ثم اختر كل معلومة تريد أن تظهر عند المشاركة.")
+                    Button(onClick = { context.startActivity(Intent(context, SupportPassportActivity::class.java)) }) {
+                        Text("فتح جواز احتياجاتي")
+                    }
+                }
+            }
+        }
+        item {
+            Card {
+                Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text("بطاقة الطوارئ الأساسية", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                     OutlinedTextField(name, { name = it.take(80) }, label = { Text("الاسم") }, modifier = Modifier.fillMaxWidth())
                     OutlinedTextField(contact, { contact = it.take(80) }, label = { Text("جهة اتصال للطوارئ") }, modifier = Modifier.fillMaxWidth())
                     OutlinedTextField(note, { note = it.take(600) }, label = { Text("معلومة مهمة") }, minLines = 4, modifier = Modifier.fillMaxWidth())
