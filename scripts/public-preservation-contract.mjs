@@ -98,32 +98,56 @@ async function withRetry(label, task, attempts = RETRY_DELAYS_MS.length + 1) {
   throw lastError instanceof Error ? lastError : new Error(`${label}: transient check failed: ${describeError(lastError)}`);
 }
 
-async function exactCount(table, configure) {
-  return withRetry(`${table} count`, async () => {
-    let query = supabase.from(table).select('id', { count: 'exact', head: true });
-    query = configure(query);
-    const { count, error } = await query;
-    if (error) throw new Error(`${table}: ${error.message || describeError(error)}`);
-    return count ?? 0;
+async function hasMinimumInventory(label, table, minimum, configure) {
+  return withRetry(`${label} baseline`, async () => {
+    // The contract only requires proving that the monotonic minimum still exists.
+    // Fetching the row at offset minimum-1 is logically equivalent to count >= minimum,
+    // while avoiding an expensive exact COUNT(*) across the entire public inventory.
+    let query = supabase.from(table).select('id');
+    query = configure(query).range(minimum - 1, minimum - 1);
+    const { data, error } = await query;
+    if (error) throw new Error(`${label}: ${error.message || describeError(error)}`);
+    return Array.isArray(data) && data.length === 1;
   });
 }
 
 try {
   // Keep preservation checks sequential: this is a safety gate, not a load test.
-  const publicSectors = await exactCount('sectors', (query) => query.eq('is_active', true).eq('visibility', 'public'));
-  const publicCategories = await exactCount('categories', (query) => query.eq('is_active', true).eq('visibility', 'public'));
-  const publishedContent = await exactCount('content', (query) => query.eq('status', 'published').lte('published_at', now));
-  const indexablePublishedContent = await exactCount('content', (query) => query.eq('status', 'published').lte('published_at', now).eq('robots_index', true));
+  const publicSectorsOk = await hasMinimumInventory(
+    'public sectors',
+    'sectors',
+    baseline.publicSectors,
+    (query) => query.eq('is_active', true).eq('visibility', 'public'),
+  );
+  const publicCategoriesOk = await hasMinimumInventory(
+    'public categories',
+    'categories',
+    baseline.publicCategories,
+    (query) => query.eq('is_active', true).eq('visibility', 'public'),
+  );
+  const publishedContentOk = await hasMinimumInventory(
+    'published content',
+    'content',
+    baseline.publishedContent,
+    (query) => query.eq('status', 'published').lte('published_at', now),
+  );
+  const indexablePublishedContentOk = await hasMinimumInventory(
+    'indexable published content',
+    'content',
+    baseline.indexablePublishedContent,
+    (query) => query.eq('status', 'published').lte('published_at', now).eq('robots_index', true),
+  );
+
+  if (!publicSectorsOk) fail(`public sectors decreased below baseline ${baseline.publicSectors}`);
+  if (!publicCategoriesOk) fail(`public categories decreased below baseline ${baseline.publicCategories}`);
+  if (!publishedContentOk) fail(`published content decreased below baseline ${baseline.publishedContent}`);
+  if (!indexablePublishedContentOk) fail(`indexable published content decreased below baseline ${baseline.indexablePublishedContent}`);
+
   const sectorRows = await withRetry('public sector list', async () => {
     const result = await supabase.from('sectors').select('slug').eq('is_active', true).eq('visibility', 'public').limit(100);
     if (result.error) throw new Error(`sectors: ${result.error.message || describeError(result.error)}`);
     return result.data ?? [];
   });
-
-  if (publicSectors < baseline.publicSectors) fail(`public sectors decreased: ${publicSectors} < ${baseline.publicSectors}`);
-  if (publicCategories < baseline.publicCategories) fail(`public categories decreased: ${publicCategories} < ${baseline.publicCategories}`);
-  if (publishedContent < baseline.publishedContent) fail(`published content decreased: ${publishedContent} < ${baseline.publishedContent}`);
-  if (indexablePublishedContent < baseline.indexablePublishedContent) fail(`indexable published content decreased: ${indexablePublishedContent} < ${baseline.indexablePublishedContent}`);
 
   const sectorSlugs = new Set(sectorRows.map((row) => row.slug));
   for (const slug of requiredSectorSlugs) {
@@ -159,7 +183,9 @@ try {
     process.exit(1);
   }
 
-  console.log(`Public preservation contract passed: ${publicSectors} sectors, ${publicCategories} categories, ${publishedContent} published pages, ${indexablePublishedContent} indexable published pages.`);
+  console.log(
+    `Public preservation contract passed: >=${baseline.publicSectors} sectors, >=${baseline.publicCategories} categories, >=${baseline.publishedContent} published pages, >=${baseline.indexablePublishedContent} indexable published pages; required sectors and critical searches preserved.`,
+  );
 } catch (error) {
   console.error(`PUBLIC PRESERVATION CONTRACT FAILED: ${describeError(error)}`);
   process.exit(1);
