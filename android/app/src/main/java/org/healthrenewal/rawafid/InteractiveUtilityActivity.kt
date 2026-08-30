@@ -36,7 +36,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
@@ -79,9 +79,11 @@ private fun InteractiveHeader(title: String, subtitle: String) {
 
 @Composable
 private fun OneMinuteInteractiveScreen() {
+    val context = LocalContext.current
     var choice by rememberSaveable { mutableStateOf("تنفس") }
     var remaining by rememberSaveable { mutableIntStateOf(60) }
     var running by rememberSaveable { mutableStateOf(false) }
+    var completionPlayed by rememberSaveable { mutableStateOf(false) }
     val choices = listOf("تنفس", "تمدد", "ماء", "صمت", "مشي", "كتابة")
 
     LaunchedEffect(running, remaining) {
@@ -90,42 +92,29 @@ private fun OneMinuteInteractiveScreen() {
             remaining -= 1
         } else if (remaining == 0) {
             running = false
+            if (!completionPlayed) {
+                completionPlayed = true
+                CompletionCue.play(context)
+            }
         }
     }
 
-    LazyColumn(
-        contentPadding = PaddingValues(RawafidSpacing.ScreenHorizontal),
-        verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Md)
-    ) {
-        item { InteractiveHeader("دقيقة لي", "اختر ما تحتاجه ثم ابدأ. المؤقت يكمل معك بدل الاكتفاء بالتعليمات.") }
+    LazyColumn(contentPadding = PaddingValues(RawafidSpacing.ScreenHorizontal), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Md)) {
+        item { InteractiveHeader("دقيقة لي", "اختر ما تحتاجه ثم ابدأ. سيصدر تنبيه صوتي عند انتهاء الدقيقة.") }
         item {
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs),
-                verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)
-            ) {
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
                 choices.forEach { option ->
-                    FilterChip(
-                        selected = choice == option,
-                        onClick = { if (!running) choice = option },
-                        label = { Text(option) }
-                    )
+                    FilterChip(selected = choice == option, onClick = { if (!running) choice = option }, label = { Text(option) })
                 }
             }
         }
-        item {
-            TimerCard(
-                remainingSeconds = remaining,
-                totalSeconds = 60,
-                title = if (remaining == 0) "اكتملت الدقيقة" else choice,
-                guidance = oneMinuteGuidance(choice, remaining)
-            )
-        }
+        item { TimerCard(remaining, 60, if (remaining == 0) "اكتملت الدقيقة" else choice, oneMinuteGuidance(choice, remaining)) }
         item {
             TimerControls(
                 running = running,
                 finished = remaining == 0,
                 onToggle = { running = !running },
-                onReset = { running = false; remaining = 60 }
+                onReset = { running = false; remaining = 60; completionPlayed = false }
             )
         }
     }
@@ -143,8 +132,10 @@ private fun oneMinuteGuidance(choice: String, remaining: Int): String = when {
 
 @Composable
 private fun BreathingMinuteScreen() {
+    val context = LocalContext.current
     var remaining by rememberSaveable { mutableIntStateOf(60) }
     var running by rememberSaveable { mutableStateOf(false) }
+    var completionPlayed by rememberSaveable { mutableStateOf(false) }
     val reduceMotion = LocalRawafidAccessibility.current.reduceMotion
     val elapsed = 60 - remaining
     val cycleSecond = elapsed % 10
@@ -159,14 +150,15 @@ private fun BreathingMinuteScreen() {
             remaining -= 1
         } else if (remaining == 0) {
             running = false
+            if (!completionPlayed) {
+                completionPlayed = true
+                CompletionCue.play(context)
+            }
         }
     }
 
-    LazyColumn(
-        contentPadding = PaddingValues(RawafidSpacing.ScreenHorizontal),
-        verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Lg)
-    ) {
-        item { InteractiveHeader("تنفس دقيقة", "إيقاع بصري بسيط: 4 ثوانٍ شهيق و6 ثوانٍ زفير. لا تحبس النفس وتوقف إذا شعرت بدوار.") }
+    LazyColumn(contentPadding = PaddingValues(RawafidSpacing.ScreenHorizontal), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Lg)) {
+        item { InteractiveHeader("تنفس دقيقة", "إيقاع بصري بسيط: 4 ثوانٍ شهيق و6 ثوانٍ زفير. سيصدر تنبيه صوتي عند انتهاء الدقيقة.") }
         item {
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(
@@ -175,14 +167,9 @@ private fun BreathingMinuteScreen() {
                     verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Md)
                 ) {
                     val circleSize = breathingCircleSize(inhale, phaseSecond, phaseTotal, reduceMotion)
-                    Box(
-                        modifier = Modifier.size(230.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
+                    Box(modifier = Modifier.size(230.dp), contentAlignment = Alignment.Center) {
                         Box(
-                            modifier = Modifier
-                                .size(circleSize)
-                                .background(MaterialTheme.colorScheme.primaryContainer, CircleShape),
+                            modifier = Modifier.size(circleSize).background(MaterialTheme.colorScheme.primaryContainer, CircleShape),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
@@ -193,11 +180,8 @@ private fun BreathingMinuteScreen() {
                             )
                         }
                     }
-                    if (remaining > 0) {
-                        Text("$phase · $phaseSecond / $phaseTotal", style = MaterialTheme.typography.titleMedium)
-                    } else {
-                        Text("اكتملت الدقيقة", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
-                    }
+                    if (remaining > 0) Text("$phase · $phaseSecond / $phaseTotal", style = MaterialTheme.typography.titleMedium)
+                    else Text("اكتملت الدقيقة", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
                     Text(formatSeconds(remaining), style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold)
                     Text(
                         if (reduceMotion) "تقليل الحركة مفعّل: يتغير النص والزمن دون تمدد بصري للحلقة." else "اتبع اتساع الدائرة في الشهيق وانكماشها في الزفير.",
@@ -211,7 +195,7 @@ private fun BreathingMinuteScreen() {
                 running = running,
                 finished = remaining == 0,
                 onToggle = { running = !running },
-                onReset = { running = false; remaining = 60 }
+                onReset = { running = false; remaining = 60; completionPlayed = false }
             )
         }
     }
@@ -228,8 +212,10 @@ private fun breathingCircleSize(inhale: Boolean, second: Int, total: Int, reduce
 
 @Composable
 private fun ScreenRestSession() {
+    val context = LocalContext.current
     var tenthsRemaining by rememberSaveable { mutableIntStateOf(300) }
     var running by rememberSaveable { mutableStateOf(false) }
+    var completionPlayed by rememberSaveable { mutableStateOf(false) }
     val reduceMotion = LocalRawafidAccessibility.current.reduceMotion
     val elapsedTenths = 300 - tenthsRemaining
     val secondsRemaining = (tenthsRemaining + 9) / 10
@@ -250,14 +236,15 @@ private fun ScreenRestSession() {
             tenthsRemaining -= 1
         } else if (tenthsRemaining == 0) {
             running = false
+            if (!completionPlayed) {
+                completionPlayed = true
+                CompletionCue.play(context)
+            }
         }
     }
 
-    LazyColumn(
-        contentPadding = PaddingValues(RawafidSpacing.ScreenHorizontal),
-        verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Lg)
-    ) {
-        item { InteractiveHeader("راحة الشاشة", "جلسة تفاعلية قصيرة بدل صفحة تعليمات: رمش، نظر بعيد، ثم إرخاء الكتفين.") }
+    LazyColumn(contentPadding = PaddingValues(RawafidSpacing.ScreenHorizontal), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Lg)) {
+        item { InteractiveHeader("راحة الشاشة", "جلسة رمش ونظر بعيد وإرخاء للكتفين، مع نغمة واضحة عند انتهاء الجلسة.") }
         item {
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(
@@ -268,11 +255,7 @@ private fun ScreenRestSession() {
                     Box(modifier = Modifier.size(220.dp), contentAlignment = Alignment.Center) {
                         if (phase == "ارمش ببطء" && tenthsRemaining > 0) {
                             val cueSize = blinkCueSize(elapsedTenths.coerceIn(0, 50), reduceMotion)
-                            Box(
-                                modifier = Modifier
-                                    .size(cueSize)
-                                    .background(MaterialTheme.colorScheme.tertiaryContainer, CircleShape)
-                            )
+                            Box(modifier = Modifier.size(cueSize).background(MaterialTheme.colorScheme.tertiaryContainer, CircleShape))
                         } else {
                             CircularProgressIndicator(
                                 progress = { tenthsRemaining / 300f },
@@ -281,11 +264,7 @@ private fun ScreenRestSession() {
                                 trackColor = MaterialTheme.colorScheme.surfaceVariant
                             )
                         }
-                        Text(
-                            if (tenthsRemaining == 0) "تم" else phase,
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold
-                        )
+                        Text(if (tenthsRemaining == 0) "تم" else phase, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                     }
                     Text(formatSeconds(secondsRemaining), style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold)
                     Text(guidance, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -297,7 +276,7 @@ private fun ScreenRestSession() {
                 running = running,
                 finished = tenthsRemaining == 0,
                 onToggle = { running = !running },
-                onReset = { running = false; tenthsRemaining = 300 }
+                onReset = { running = false; tenthsRemaining = 300; completionPlayed = false }
             )
         }
     }
@@ -332,21 +311,9 @@ private fun TimerCard(remainingSeconds: Int, totalSeconds: Int, title: String, g
 }
 
 @Composable
-private fun TimerControls(
-    running: Boolean,
-    finished: Boolean,
-    onToggle: () -> Unit,
-    onReset: () -> Unit
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)
-    ) {
-        Button(
-            onClick = onToggle,
-            enabled = !finished,
-            modifier = Modifier.weight(1f)
-        ) { Text(if (running) "إيقاف مؤقت" else "ابدأ") }
+private fun TimerControls(running: Boolean, finished: Boolean, onToggle: () -> Unit, onReset: () -> Unit) {
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)) {
+        Button(onClick = onToggle, enabled = !finished, modifier = Modifier.weight(1f)) { Text(if (running) "إيقاف مؤقت" else "ابدأ") }
         OutlinedButton(onClick = onReset, modifier = Modifier.weight(1f)) { Text("إعادة") }
     }
 }
