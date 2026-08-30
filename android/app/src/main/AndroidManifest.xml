@@ -33,6 +33,8 @@
         <activity android:name=".FamilyHubActivity" android:exported="false" android:label="مركز الأسرة" />
         <activity android:name=".SafeArrivalActivity" android:exported="false" android:label="وصلت بالسلامة" />
         <activity android:name=".SupportPassportActivity" android:exported="false" android:label="جواز احتياجاتي" />
+        <activity android:name=".LifeVaultActivity" android:exported="false" android:label="خزانة الحياة" />
+        <activity android:name=".TravelSafeActivity" android:exported="false" android:label="Travel Safe" />
 
         <activity android:name=".WomenPrivacyGateActivity" android:exported="false" android:excludeFromRecents="true" android:label="حماية قطاع المرأة" />
         <activity android:name=".WomenPrivacySettingsActivity" android:exported="true" android:label="خصوصية قطاع المرأة" />
