@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="safety_hotkey_service_description">اختصار أمان اختياري يراقب تسلسل أزرار الصوت فقط لتفعيل بطاقة المساعدة على شاشة القفل. لا يقرأ محتوى الشاشة ولا يرسل بيانات بنفسه.</string>
+</resources>
