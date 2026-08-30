@@ -4,6 +4,8 @@ import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Intent
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -310,8 +312,20 @@ private fun ToolsScreen() {
     var text by rememberSaveable { mutableStateOf("") }
     var lettingGo by remember { mutableStateOf(false) }
     var waterVersion by remember { mutableIntStateOf(0) }
-    val alpha by animateFloatAsState(if (lettingGo) 0f else 1f, label = "vent-fade")
-    LaunchedEffect(lettingGo) { if (lettingGo) { delay(700); text = ""; lettingGo = false } }
+    val reduceMotion = remember(context) { AccessibilityProfileStore.load(context).reduceMotion }
+    val motionDurationMillis = remember(reduceMotion) { MotionPolicy.durationMillis(reduceMotion) }
+    val alpha by animateFloatAsState(
+        targetValue = if (lettingGo) 0f else 1f,
+        animationSpec = if (reduceMotion) snap() else tween(durationMillis = motionDurationMillis),
+        label = "vent-fade"
+    )
+    LaunchedEffect(lettingGo, motionDurationMillis) {
+        if (lettingGo) {
+            if (motionDurationMillis > 0) delay(motionDurationMillis.toLong())
+            text = ""
+            lettingGo = false
+        }
+    }
 
     LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         item { PageTitle("الأدوات", "أدوات صغيرة للحظة التي تحتاجها.") }
