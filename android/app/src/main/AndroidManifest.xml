@@ -48,6 +48,7 @@
         <activity android:name=".SafeArrivalActivity" android:exported="false" android:label="وصلت بالسلامة" />
         <activity android:name=".SafetyMonitorActivity" android:exported="false" android:label="مراقبة الأمان والموقع" />
         <activity android:name=".SafeDriveActivity" android:exported="false" android:label="قيادة آمنة" />
+        <activity android:name=".SafeDriveAgreementsActivity" android:exported="false" android:label="اتفاق القيادة الآمنة" />
         <activity android:name=".EmergencyBeaconActivity" android:exported="false" android:label="بطاقة المساعدة" />
         <activity android:name=".LifeCardActivity" android:exported="false" android:label="بطاقة روافد للحياة" />
         <activity android:name=".WhatNowActivity" android:exported="false" android:label="ماذا أفعل الآن؟" />
