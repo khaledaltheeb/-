@@ -58,10 +58,11 @@ import java.util.Locale
 class SafeDriveActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val autoDetected = intent?.getBooleanExtra(EXTRA_SAFE_DRIVE_AUTO_DETECTED, false) == true
         setContent {
             RawafidTheme {
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                    Surface(Modifier.fillMaxSize()) { SafeDriveScreen() }
+                    Surface(Modifier.fillMaxSize()) { SafeDriveScreen(autoDetected = autoDetected) }
                 }
             }
         }
@@ -69,18 +70,21 @@ class SafeDriveActivity : ComponentActivity() {
 }
 
 @Composable
-private fun SafeDriveScreen() {
+private fun SafeDriveScreen(autoDetected: Boolean = false) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val live by SafeDriveRuntime.state.collectAsState()
     val pending by SafeDriveRuntime.pendingCheck.collectAsState()
     var driveConfig by remember { mutableStateOf(SafeDriveStore.config(context)) }
     var incidentConfig by remember { mutableStateOf(SafeDriveIncidentStore.config(context)) }
+    var advancedConfig by remember { mutableStateOf(SafeDriveAdvancedStore.config(context)) }
     var speedText by remember { mutableStateOf(driveConfig.personalSpeedAlertKmh.toString()) }
     var secondsText by remember { mutableStateOf(driveConfig.speedAlertAfterSeconds.toString()) }
     var responseText by remember { mutableStateOf(incidentConfig.responseSeconds.toString()) }
+    var restMinutesText by remember { mutableStateOf(advancedConfig.restReminderMinutes.toString()) }
     var status by remember { mutableStateOf("") }
     var configExpanded by remember { mutableStateOf(false) }
+    var advancedExpanded by remember { mutableStateOf(autoDetected) }
     var sharingExpanded by remember { mutableStateOf(false) }
     var reportsExpanded by remember { mutableStateOf(true) }
     var checksExpanded by remember { mutableStateOf(false) }
@@ -88,6 +92,7 @@ private fun SafeDriveScreen() {
     val drivePermission = remember { mutableStateMapOf<String, Boolean>() }
     var sharingBusy by remember { mutableStateOf(false) }
     val reports = remember(live.active, live.lastCompletedReport?.id) { SafeDriveStore.reports(context) }
+    val weekly = remember(reports) { SafeDriveWeeklyAnalytics.summarize(reports) }
     val incidentRecords = remember(pending?.candidate?.id, live.active) { SafeDriveIncidentStore.records(context) }
     val safeChecks = remember(incidentRecords) { incidentRecords.filter { it.outcome == SafeDriveIncidentOutcome.SAFE_CONFIRMED } }
     val helpChecks = remember(incidentRecords) { incidentRecords.filter { it.outcome != SafeDriveIncidentOutcome.SAFE_CONFIRMED } }
@@ -113,6 +118,18 @@ private fun SafeDriveScreen() {
         SafeDriveStore.saveConfig(context, driveConfig)
         SafeDriveIncidentStore.saveConfig(context, incidentConfig)
         status = "تم حفظ إعدادات القيادة الآمنة."
+        return true
+    }
+
+    fun saveAdvanced(next: SafeDriveAdvancedConfig = advancedConfig): Boolean {
+        val rest = restMinutesText.toIntOrNull()
+        if (rest == null || rest !in 60..240) {
+            status = "تذكير الاستراحة يجب أن يكون بين 60 و240 دقيقة."
+            return false
+        }
+        advancedConfig = next.copy(restReminderMinutes = rest).normalized()
+        SafeDriveAdvancedStore.save(context, advancedConfig)
+        status = "تم حفظ إعدادات المساعدة أثناء القيادة."
         return true
     }
 
@@ -151,8 +168,24 @@ private fun SafeDriveScreen() {
         }
     }
 
+    val autoDetectionPermissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
+        val recognitionGranted = SafeDriveAutoDetection.hasPermission(context)
+        val notificationGranted = Build.VERSION.SDK_INT < 33 ||
+            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+        if (recognitionGranted && notificationGranted) {
+            advancedConfig = advancedConfig.copy(autoDetectionEnabled = true)
+            SafeDriveAdvancedStore.save(context, advancedConfig)
+            SafeDriveAutoDetection.register(context) { _, message -> status = message }
+        } else {
+            advancedConfig = advancedConfig.copy(autoDetectionEnabled = false)
+            SafeDriveAdvancedStore.save(context, advancedConfig)
+            status = "لم يتم تفعيل الاكتشاف التلقائي. يحتاج إذن التعرّف على النشاط والإشعارات حتى يسألك التطبيق إن كنت السائق."
+        }
+    }
+
     fun startTrip() {
-        if (!saveConfig()) return
+        SafeDriveAutoDetection.clearPassengerMode(context)
+        if (!saveConfig() || !saveAdvanced()) return
         val required = buildList {
             if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 add(Manifest.permission.ACCESS_COARSE_LOCATION)
@@ -163,6 +196,24 @@ private fun SafeDriveScreen() {
             }
         }.distinct()
         if (required.isEmpty()) SafeDriveController.start(context) else permissionLauncher.launch(required.toTypedArray())
+    }
+
+    fun enableAutoDetection() {
+        val required = buildList {
+            if (Build.VERSION.SDK_INT >= 29 && ContextCompat.checkSelfPermission(context, Manifest.permission.ACTIVITY_RECOGNITION) != PackageManager.PERMISSION_GRANTED) {
+                add(Manifest.permission.ACTIVITY_RECOGNITION)
+            }
+            if (Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                add(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }.distinct()
+        if (required.isEmpty()) {
+            advancedConfig = advancedConfig.copy(autoDetectionEnabled = true)
+            SafeDriveAdvancedStore.save(context, advancedConfig)
+            SafeDriveAutoDetection.register(context) { _, message -> status = message }
+        } else {
+            autoDetectionPermissionLauncher.launch(required.toTypedArray())
+        }
     }
 
     LaunchedEffect(sharingExpanded) {
@@ -178,6 +229,17 @@ private fun SafeDriveScreen() {
             Column(verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
                 Text("قيادة آمنة", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
                 Text("متابعة اختيارية للسرعة والحركة والتوقف المفاجئ. لا يخزن روافد مسار الرحلة الكامل؛ يحتفظ محليًا بملخصات وتقارير مجمعة.")
+            }
+        }
+
+        if (autoDetected && !live.active) {
+            item {
+                Card {
+                    Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)) {
+                        Text("يبدو أنك داخل مركبة", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                        Text("الاكتشاف التلقائي لا يعني أنك السائق. اختر دورك قبل بدء أي قياس للقيادة.")
+                    }
+                }
             }
         }
 
@@ -233,10 +295,17 @@ private fun SafeDriveScreen() {
             item {
                 Card {
                     Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)) {
-                        Text("ابدأ رحلة", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                        Text("شغّل المراقبة فقط عندما تكون أنت السائق. إذا كنت راكبًا فلا تبدأ جلسة قيادة.")
-                        Button(onClick = ::startTrip, modifier = Modifier.fillMaxWidth()) { Text("ابدأ القيادة الآمنة") }
-                        Text("سيظهر إشعار مستمر طوال الرحلة ويمكنك إيقافها في أي وقت.", style = MaterialTheme.typography.bodySmall)
+                        Text("هل أنت السائق؟", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                        Text("لا يبدأ روافد جلسة القيادة إلا بعد اختيارك أنك السائق. إذا كنت راكبًا فلن تُسجل هذه الرحلة.")
+                        Button(onClick = ::startTrip, modifier = Modifier.fillMaxWidth()) { Text("أنا السائق — ابدأ القيادة الآمنة") }
+                        OutlinedButton(
+                            onClick = {
+                                SafeDriveAutoDetection.markPassenger(context)
+                                status = "تم اختيار «أنا راكب». لن تبدأ جلسة قيادة، وسيتم كتم اقتراح الاكتشاف لهذه الرحلة مؤقتًا."
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) { Text("أنا راكب — لا تسجل الرحلة") }
+                        Text("إذا بدأت القيادة، يظهر إشعار مستمر ويمكنك إنهاء الجلسة في أي وقت.", style = MaterialTheme.typography.bodySmall)
                     }
                 }
             }
@@ -287,10 +356,7 @@ private fun SafeDriveScreen() {
             items(incidentRecords.take(20), key = { it.id }) { record ->
                 Card {
                     Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
-                        Text(
-                            DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT).format(Date(record.detectedAtMs)),
-                            fontWeight = FontWeight.Bold
-                        )
+                        Text(DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT).format(Date(record.detectedAtMs)), fontWeight = FontWeight.Bold)
                         Text(
                             when (record.outcome) {
                                 SafeDriveIncidentOutcome.SAFE_CONFIRMED -> "نقطة اطمئنان — أكد المستخدم أنه بخير"
@@ -299,6 +365,78 @@ private fun SafeDriveScreen() {
                             }
                         )
                         Text("السرعة قبل التوقف: ${record.preStopSpeedKmh.toInt()} كم/س · التباطؤ: ${oneDecimal(record.decelerationMps2)} م/ث²", style = MaterialTheme.typography.bodySmall)
+                    }
+                }
+            }
+        }
+
+        item {
+            OutlinedButton(onClick = { advancedExpanded = !advancedExpanded }, modifier = Modifier.fillMaxWidth()) {
+                Text(if (advancedExpanded) "إخفاء مساعد القيادة" else "مساعد القيادة المتقدم")
+            }
+        }
+        if (advancedExpanded) {
+            item {
+                Card {
+                    Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)) {
+                        Text("مساعد القيادة", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                        PermissionSwitch(
+                            title = "اكتشاف وجود الهاتف داخل مركبة",
+                            subtitle = "اختياري. عند اكتشاف المركبة يسألك روافد إن كنت السائق؛ لا يبدأ GPS أو تسجيل الرحلة تلقائيًا.",
+                            checked = advancedConfig.autoDetectionEnabled,
+                            enabled = !live.active,
+                            onChange = { enabled ->
+                                if (enabled) enableAutoDetection() else {
+                                    advancedConfig = advancedConfig.copy(autoDetectionEnabled = false)
+                                    SafeDriveAdvancedStore.save(context, advancedConfig)
+                                    SafeDriveAutoDetection.unregister(context) { _, message -> status = message }
+                                }
+                            }
+                        )
+                        PermissionSwitch(
+                            title = "تنبيهات صوتية قصيرة",
+                            subtitle = "ينطق تنبيهات الأمان المهمة محليًا حتى لا تحتاج للنظر إلى الشاشة.",
+                            checked = advancedConfig.spokenAlertsEnabled,
+                            enabled = !live.active,
+                            onChange = { advancedConfig = advancedConfig.copy(spokenAlertsEnabled = it); SafeDriveAdvancedStore.save(context, advancedConfig) }
+                        )
+                        PermissionSwitch(
+                            title = "تقليل التشتيت",
+                            subtitle = "أثناء الرحلة يخفي إشعارات المؤشرات البسيطة ويُبقي التنبيهات عالية الخطورة؛ تظل المؤشرات محسوبة في التقرير.",
+                            checked = advancedConfig.reduceDistractionEnabled,
+                            enabled = !live.active,
+                            onChange = { advancedConfig = advancedConfig.copy(reduceDistractionEnabled = it); SafeDriveAdvancedStore.save(context, advancedConfig) }
+                        )
+                        PermissionSwitch(
+                            title = "وضع السائق الجديد",
+                            subtitle = "إرشاد صوتي أكثر تحفظًا وتذكير استراحة أبكر دون وصف السائق أو إصدار حكم قانوني.",
+                            checked = advancedConfig.newDriverMode,
+                            enabled = !live.active,
+                            onChange = { advancedConfig = advancedConfig.copy(newDriverMode = it); SafeDriveAdvancedStore.save(context, advancedConfig) }
+                        )
+                        PermissionSwitch(
+                            title = "حارس القيادة الليلية",
+                            subtitle = "من 10 مساءً إلى 5 صباحًا يجعل تذكير الاستراحة أبكر ويعطي تنبيهًا صوتيًا عند بدء الرحلة إذا كان الصوت مفعّلًا.",
+                            checked = advancedConfig.nightGuardEnabled,
+                            enabled = !live.active,
+                            onChange = { advancedConfig = advancedConfig.copy(nightGuardEnabled = it); SafeDriveAdvancedStore.save(context, advancedConfig) }
+                        )
+                        OutlinedTextField(
+                            value = restMinutesText,
+                            onValueChange = { restMinutesText = it.filter(Char::isDigit).take(3) },
+                            label = { Text("تذكير الاستراحة — دقيقة (60–240)") },
+                            enabled = !live.active,
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        PermissionSwitch(
+                            title = "تذكير «وصلت بالسلامة» بعد إنهاء الرحلة",
+                            subtitle = "إذا كان لديك فحص وصول نشط، يطلب منك تأكيد الوصول. لا يعتبر انتهاء القيادة دليلًا تلقائيًا على أنك وصلت.",
+                            checked = advancedConfig.arrivalPromptOnTripEnd,
+                            enabled = !live.active,
+                            onChange = { advancedConfig = advancedConfig.copy(arrivalPromptOnTripEnd = it); SafeDriveAdvancedStore.save(context, advancedConfig) }
+                        )
+                        Button(enabled = !live.active, onClick = { saveAdvanced() }) { Text("حفظ مساعد القيادة") }
                     }
                 }
             }
@@ -408,6 +546,33 @@ private fun SafeDriveScreen() {
         }
 
         item {
+            Card {
+                Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
+                    Text("ملخص آخر 7 أيام", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                    MetricLine("الرحلات", weekly.trips.toString())
+                    MetricLine("المسافة", oneDecimal(weekly.distanceKm) + " كم")
+                    MetricLine("المدة", SafeDriveScoring.formatDuration(weekly.durationMs))
+                    weekly.averageScore?.let { MetricLine("متوسط التقييم", "$it/100") }
+                    weekly.harshEventsPer100Km?.let { MetricLine("مؤشرات حادة / 100 كم", oneDecimal(it)) }
+                    Text(weekly.trend, style = MaterialTheme.typography.bodySmall)
+                    if (weekly.trips > 0) {
+                        OutlinedButton(onClick = {
+                            context.startActivity(
+                                Intent.createChooser(
+                                    Intent(Intent.ACTION_SEND).apply {
+                                        type = "text/plain"
+                                        putExtra(Intent.EXTRA_TEXT, weekly.shareText())
+                                    },
+                                    "مشاركة ملخص القيادة"
+                                )
+                            )
+                        }) { Text("مشاركة الملخص باختياري") }
+                    }
+                }
+            }
+        }
+
+        item {
             OutlinedButton(onClick = { reportsExpanded = !reportsExpanded }, modifier = Modifier.fillMaxWidth()) {
                 Text(if (reportsExpanded) "إخفاء تقارير الرحلات" else "سجل وتقارير الرحلات")
             }
@@ -417,10 +582,7 @@ private fun SafeDriveScreen() {
             items(reports.take(20), key = { it.id }) { report ->
                 Card {
                     Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
-                        Text(
-                            DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT).format(Date(report.startedAtMs)),
-                            fontWeight = FontWeight.Bold
-                        )
+                        Text(DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT).format(Date(report.startedAtMs)), fontWeight = FontWeight.Bold)
                         Text("${report.score}/100 — ${report.riskLabel}", style = MaterialTheme.typography.titleMedium)
                         Text("${SafeDriveScoring.formatDuration(report.durationMs)} · ${oneDecimal(report.distanceKm)} كم · أعلى سرعة ${report.maxSpeedKmh.toInt()} كم/س")
                         Text("فوق حد التنبيه: ${SafeDriveScoring.formatDuration(report.highSpeedDurationMs)} · تسارع ${report.harshAccelerationCount} · فرملة ${report.harshBrakingCount} · انعطاف ${report.hardTurnCount}", style = MaterialTheme.typography.bodySmall)
