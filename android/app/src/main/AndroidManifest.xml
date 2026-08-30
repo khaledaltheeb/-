@@ -25,73 +25,34 @@
                 android:resource="@xml/shortcuts" />
         </activity>
 
-        <activity
-            android:name=".ToolCatalogActivity"
-            android:exported="false"
-            android:label="أدوات روافد" />
-
-        <activity
-            android:name=".LifeUtilityActivity"
-            android:exported="false"
-            android:label="أدوات روافد" />
-
-        <activity
-            android:name=".SupportPassportActivity"
-            android:exported="false"
-            android:label="جواز احتياجاتي" />
+        <activity android:name=".ToolCatalogActivity" android:exported="false" android:label="أدوات روافد" />
+        <activity android:name=".LifeUtilityActivity" android:exported="false" android:label="أدوات روافد" />
+        <activity android:name=".HealthTimelineActivity" android:exported="false" android:label="دفتر الصحة الزمني" />
+        <activity android:name=".SafeArrivalActivity" android:exported="false" android:label="وصلت بالسلامة" />
+        <activity android:name=".SupportPassportActivity" android:exported="false" android:label="جواز احتياجاتي" />
 
         <activity
             android:name=".WomenPrivacyGateActivity"
             android:exported="false"
             android:excludeFromRecents="true"
             android:label="حماية قطاع المرأة" />
-
-        <activity
-            android:name=".WomenPrivacySettingsActivity"
-            android:exported="true"
-            android:label="خصوصية قطاع المرأة" />
-
-        <activity
-            android:name=".WomenActivity"
-            android:exported="true"
-            android:label="رفيقة روافد">
+        <activity android:name=".WomenPrivacySettingsActivity" android:exported="true" android:label="خصوصية قطاع المرأة" />
+        <activity android:name=".WomenActivity" android:exported="true" android:label="رفيقة روافد">
             <intent-filter>
                 <action android:name="org.healthrenewal.rawafid.OPEN_WOMEN" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+        <activity android:name=".WomenCalendarActivity" android:exported="false" android:label="تقويم المرأة" />
+        <activity android:name=".WomenCarePlannerActivity" android:exported="false" android:label="خطة العناية النسائية" />
+        <activity android:name=".WomenVisitPrepActivity" android:exported="false" android:label="جهزي زيارتي" />
+        <activity android:name=".WebActivity" android:exported="false" />
 
-        <activity
-            android:name=".WomenCalendarActivity"
-            android:exported="false"
-            android:label="تقويم المرأة" />
+        <receiver android:name=".TreatmentReminderReceiver" android:exported="false" />
+        <receiver android:name=".WomenCareReminderReceiver" android:exported="false" />
+        <receiver android:name=".SafeArrivalReceiver" android:exported="false" />
 
-        <activity
-            android:name=".WomenCarePlannerActivity"
-            android:exported="false"
-            android:label="خطة العناية النسائية" />
-
-        <activity
-            android:name=".WomenVisitPrepActivity"
-            android:exported="false"
-            android:label="جهزي زيارتي" />
-
-        <activity
-            android:name=".WebActivity"
-            android:exported="false" />
-
-        <receiver
-            android:name=".TreatmentReminderReceiver"
-            android:exported="false" />
-
-        <receiver
-            android:name=".WomenCareReminderReceiver"
-            android:exported="false" />
-
-        <receiver
-            android:name=".BootReceiver"
-            android:enabled="true"
-            android:exported="true">
+        <receiver android:name=".BootReceiver" android:enabled="true" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
