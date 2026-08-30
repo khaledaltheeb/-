@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
-import Image from 'next/image';
 import Link from 'next/link';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
+import QuickInfoCard from '@/components/quick-info-card';
 import { buildSeoMetadata, breadcrumbJsonLd, SITE_URL } from '@/lib/seo';
 import { getQuickInfoItems } from '@/lib/quick-info';
 
@@ -58,13 +58,7 @@ export default async function QuickInfoPage() {
           <strong>المحتوى قيد الترحيل والمراجعة</strong>
           <p>لا تُعرض صفحات قديمة تلقائيًا قبل اجتياز عقد الترحيل والمراجعة التحريرية.</p>
         </section> : <section className="related-content-grid" aria-label="صفحات المعلومات السريعة">
-          {items.map((item) => <article key={item.id}>
-            {item.featuredImageUrl && <Image src={item.featuredImageUrl} alt={item.title} width={640} height={336} sizes="(max-width: 760px) 100vw, 33vw" loading="lazy" unoptimized />}
-            <span>معلومات سريعة</span>
-            <h2><Link href={item.canonicalUrl}>{item.title}</Link></h2>
-            {item.excerpt && <p>{item.excerpt}</p>}
-            <Link href={item.canonicalUrl}>قراءة الصفحة ←</Link>
-          </article>)}
+          {items.map((item) => <QuickInfoCard key={item.id} title={item.title} description={item.excerpt} href={item.canonicalUrl} />)}
         </section>}
       </section>
     </main>

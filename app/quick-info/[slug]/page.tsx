@@ -1,14 +1,14 @@
 import type { Metadata } from 'next';
-import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import ContentRenderer from '@/components/content-renderer';
 import LegacyPreservedPageView from '@/components/legacy-preserved-page';
+import QuickInfoCard from '@/components/quick-info-card';
 import { buildSeoMetadata, breadcrumbJsonLd, SITE_URL } from '@/lib/seo';
 import { getLegacyPreservedPage, legacyPreservedMetadata } from '@/lib/legacy-preserved-page';
-import { getQuickInfoRecord, quickInfoCardPath, safeQuickInfoReferences, visibleQuickInfoFaq } from '@/lib/quick-info';
+import { getQuickInfoRecord, safeQuickInfoReferences, visibleQuickInfoFaq } from '@/lib/quick-info';
 import { contentReviewProvenance } from '@/lib/review-provenance';
 
 export const dynamic = 'force-dynamic';
@@ -97,7 +97,7 @@ export default async function QuickInfoDetailPage({ params }: { params: Params }
     <article><header className="article-hero"><span className="eyebrow">معلومات سريعة</span><h1>{record.title}</h1>{record.excerpt && <p>{record.excerpt}</p>}<div className="article-meta">
       {record.author_display_name && <span>إعداد: {record.author_display_name}</span>}{review.reviewerName && <span>مراجعة: {review.reviewerName}{review.reviewerCredentials ? ` — ${review.reviewerCredentials}` : ''}</span>}{record.published_at && <span>نُشر {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(record.published_at))}</span>}{review.lastReviewedAt && <span>آخر مراجعة {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(review.lastReviewedAt))}</span>}
     </div></header>
-    <div className="article-body">{quickInfoCardPath(slug) && <figure className="article-featured-image"><Image src={quickInfoCardPath(slug)} alt={record.featured_image_alt || record.title} width={1200} height={630} sizes="(max-width: 900px) 100vw, 900px" priority unoptimized /></figure>}<ContentRenderer bodyJson={record.body_json} bodyText={record.body_text} recordId={record.id} /></div>
+    <div className="article-body"><QuickInfoCard title={record.title} description={record.excerpt} variant="hero" showAction={false} /><ContentRenderer bodyJson={record.body_json} bodyText={record.body_text} recordId={record.id} /></div>
     {record.medical_disclaimer && <aside className="medical-disclaimer" aria-label="إخلاء المسؤولية الطبية"><strong>تنبيه</strong><p>{record.medical_disclaimer}</p><Link href="/disclaimer">إخلاء المسؤولية الكامل</Link></aside>}
     {references.length > 0 && <section className="article-references" aria-labelledby="references-title"><h2 id="references-title">المصادر والمراجع</h2><ol>{references.map((reference, index) => <li key={`${reference.url || reference.title}-${index}`}>{reference.url ? <a href={reference.url} target="_blank" rel="noopener noreferrer">{reference.title || reference.url}</a> : <span>{reference.title}</span>}{reference.publisher && <small>{reference.publisher}</small>}{reference.year && <small>{String(reference.year)}</small>}</li>)}</ol></section>}
     </article>

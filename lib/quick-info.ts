@@ -47,7 +47,6 @@ export type QuickInfoItem = {
   title: string;
   excerpt: string | null;
   canonicalUrl: string;
-  featuredImageUrl: string | null;
   updatedAt: string | null;
 };
 
@@ -73,19 +72,9 @@ function safeRouteSlug(value: string) {
   return /^[a-z0-9][a-z0-9-]*$/.test(slug) ? slug : '';
 }
 
-export function quickInfoCardPath(routeSlug: string) {
-  const slug = safeRouteSlug(routeSlug);
-  return slug ? `/quick-info/cards/${slug}.webp` : '';
-}
-
 export function quickInfoOgPath(routeSlug: string) {
   const slug = safeRouteSlug(routeSlug);
   return slug ? `/quick-info/og/${slug}.png` : '';
-}
-
-export function quickInfoCardUrl(routeSlug: string) {
-  const path = quickInfoCardPath(routeSlug);
-  return path ? `${SITE_URL}${path}` : '';
 }
 
 export function quickInfoOgUrl(routeSlug: string) {
@@ -119,11 +108,6 @@ function isKnownGeneratedParagraph(value: unknown) {
   return GENERATED_QUICK_INFO_PARAGRAPH_PREFIXES.some((prefix) => valueText.startsWith(prefix));
 }
 
-/**
- * Removes only the legacy generated expansion that was proven to be repetitive.
- * The database remains the source of record; this is a reader-facing safety net
- * until the five already-published wave-001 records are replaced editorially.
- */
 export function sanitizeQuickInfoBodyJson(value: unknown): unknown {
   const root = asRecord(value);
   const blocks = Array.isArray(root?.blocks) ? root.blocks : null;
@@ -175,7 +159,7 @@ export async function getQuickInfoRecord(routeSlug: string): Promise<QuickInfoRe
     ...record,
     body_json: sanitizeQuickInfoBodyJson(record.body_json),
     featured_image_url: quickInfoOgUrl(safeSlug),
-    featured_image_alt: `بطاقة معلومات سريعة: ${record.title}`,
+    featured_image_alt: `بطاقة مشاركة معلومات سريعة: ${record.title}`,
   };
 }
 
@@ -204,7 +188,6 @@ export async function getQuickInfoItems(limit = 500): Promise<QuickInfoItem[]> {
       title,
       excerpt: typeof row.excerpt === 'string' ? row.excerpt : null,
       canonicalUrl,
-      featuredImageUrl: quickInfoCardPath(routeSlug),
       updatedAt: typeof row.updated_at === 'string' ? row.updated_at : null,
     }];
   });
