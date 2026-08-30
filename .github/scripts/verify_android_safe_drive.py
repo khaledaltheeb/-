@@ -9,6 +9,7 @@ APP = ROOT / "android" / "app" / "src" / "main"
 JAVA = APP / "java" / "org" / "healthrenewal" / "rawafid"
 MANIFEST = APP / "AndroidManifest.xml"
 CATALOG = APP / "assets" / "rawafid_feature_catalog.json"
+GRADLE = ROOT / "android" / "app" / "build.gradle.kts"
 MIGRATIONS = ROOT / "supabase" / "migrations"
 ANDROID_NS = "{http://schemas.android.com/apk/res/android}"
 errors = []
@@ -25,8 +26,11 @@ engine = text(JAVA / "SafeDriveEngine.kt")
 incident = text(JAVA / "SafeDriveIncident.kt")
 service = text(JAVA / "SafeDriveService.kt")
 activity = text(JAVA / "SafeDriveActivity.kt")
+advanced = text(JAVA / "SafeDriveAdvanced.kt")
+auto_detection = text(JAVA / "SafeDriveAutoDetection.kt")
 circle = text(JAVA / "RawafidCircleApi.kt")
 my_circle = text(JAVA / "MyCircleActivity.kt")
+gradle = text(GRADLE)
 
 for token in [
     "SafeDriveAnalyzer",
@@ -53,6 +57,32 @@ for token in [
         errors.append(f"SafeDriveIncident.kt missing contract: {token}")
 
 for token in [
+    "autoDetectionEnabled",
+    "spokenAlertsEnabled",
+    "reduceDistractionEnabled",
+    "restReminderMinutes",
+    "newDriverMode",
+    "nightGuardEnabled",
+    "SafeDriveWeeklyAnalytics",
+    "SafeDriveVoiceCoach",
+    "EncryptedLocalStore.put",
+]:
+    if token not in advanced:
+        errors.append(f"SafeDriveAdvanced.kt missing contract: {token}")
+
+for token in [
+    "DetectedActivity.IN_VEHICLE",
+    "requestActivityTransitionUpdates",
+    "EXTRA_SAFE_DRIVE_AUTO_DETECTED",
+    "SafeDriveActivityTransitionReceiver",
+    "SafeDriveAutoRestoreReceiver",
+    "SafeDriveAdvancedStore.passengerSuppressed",
+    '"أنا راكب"',
+]:
+    if token not in auto_detection:
+        errors.append(f"SafeDriveAutoDetection.kt missing contract: {token}")
+
+for token in [
     'setContentTitle("هل أنت بخير؟")',
     '"نعم، أنا بخير"',
     '"لا، أحتاج مساعدة"',
@@ -63,9 +93,16 @@ for token in [
     'startForeground(',
     'location.accuracy in 0.1f..driveConfig.maxLocationAccuracyM',
     'CirclePermission.DRIVING_SAFETY',
+    'SafeDriveAdvancedPolicy.spokenEvent',
+    'maybeRestReminder',
+    'postArrivalPrompt',
 ]:
     if token not in service:
         errors.append(f"SafeDriveService.kt missing contract: {token}")
+
+risk_call = service.find('"risky_driving"')
+if risk_call < 0 or service[max(0, risk_call - 600):risk_call].count("null") < 3:
+    errors.append("ordinary risky-driving Circle alerts must omit live location")
 
 for token in [
     'Text("قيادة آمنة"',
@@ -76,6 +113,14 @@ for token in [
     'Manifest.permission.ACCESS_COARSE_LOCATION',
     'SafeDriveIncidentStore.records(context)',
     '"نقطة اطمئنان — أكد المستخدم أنه بخير"',
+    '"أنا السائق — ابدأ القيادة الآمنة"',
+    '"أنا راكب — لا تسجل الرحلة"',
+    '"اكتشاف وجود الهاتف داخل مركبة"',
+    '"تنبيهات صوتية قصيرة"',
+    '"تقليل التشتيت"',
+    '"وضع السائق الجديد"',
+    '"حارس القيادة الليلية"',
+    '"ملخص آخر 7 أيام"',
 ]:
     if token not in activity:
         errors.append(f"SafeDriveActivity.kt missing contract: {token}")
@@ -91,9 +136,14 @@ for token in [
     '"circle_broadcast_drive_alert"',
     '"circle_broadcast_drive_report"',
     'SafeDriveScoring.reportSummary(report)',
+    'latitude: Double?',
+    '.put("p_latitude", latitude ?: JSONObject.NULL)',
 ]:
     if token not in circle:
-        errors.append(f"RawafidCircleApi.kt missing Safe Drive RPC: {token}")
+        errors.append(f"RawafidCircleApi.kt missing Safe Drive RPC/privacy contract: {token}")
+
+if 'com.google.android.gms:play-services-location:21.4.0' not in gradle:
+    errors.append("Android build missing Google Play services location/activity-recognition dependency")
 
 try:
     catalog = json.loads(CATALOG.read_text(encoding="utf-8"))
@@ -117,6 +167,8 @@ try:
         "android.permission.ACCESS_FINE_LOCATION",
         "android.permission.FOREGROUND_SERVICE",
         "android.permission.FOREGROUND_SERVICE_LOCATION",
+        "android.permission.ACTIVITY_RECOGNITION",
+        "com.google.android.gms.permission.ACTIVITY_RECOGNITION",
     ]:
         if required not in permissions:
             errors.append(f"manifest missing {required}")
@@ -129,6 +181,10 @@ try:
         errors.append("manifest missing SafeDriveService")
     elif drive_service.attrib.get(ANDROID_NS + "foregroundServiceType") != "location":
         errors.append("SafeDriveService must declare foregroundServiceType=location")
+    receivers = {node.attrib.get(ANDROID_NS + "name", "") for node in app.findall("receiver")} if app is not None else set()
+    for required_receiver in [".SafeDriveActivityTransitionReceiver", ".SafeDriveAutoRestoreReceiver"]:
+        if required_receiver not in receivers:
+            errors.append(f"manifest missing {required_receiver}")
 except Exception as exc:
     errors.append(f"manifest parse failed: {exc}")
 
@@ -156,4 +212,4 @@ if errors:
         print(f"- {error}")
     sys.exit(1)
 
-print("Android Safe Drive contract OK: reliable foreground monitoring, encrypted aggregate reports, explicit responders, location minimization and sudden-stop safety checks verified")
+print("Android Safe Drive contract OK: consent-first vehicle detection, driver/passenger mode, spoken coaching, rest guard, encrypted weekly analytics, location minimization and sudden-stop safety checks verified")
