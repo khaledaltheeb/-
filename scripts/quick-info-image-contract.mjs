@@ -39,7 +39,7 @@ requireMatch('component CSS', files.componentCss, /@media\(max-width:760px\)/, '
 requireMatch('component CSS', files.componentCss, /\.quickBadge/, 'Quick Info badge styling missing.');
 requireMatch('component CSS', files.componentCss, /\.brandMark img/, 'official logo sizing contract missing.');
 forbid('component CSS', files.componentCss, /\.(?:visual|glyph|moon|personLarge|personSmall|pill|chatOne|mindRing)\b/, 'expressive Quick Info illustration CSS must be absent.');
-requireMatch('detail page', files.detail, /<QuickInfoCard[^>]*variant="hero"/, 'detail page must preserve the semantic HTML/CSS hero card.');
+requireMatch('detail page', files.detail, /<QuickInfoCard[^>]*variant="hero"/, 'detail page must preserve the semantic HTML\/CSS hero card.');
 requireMatch('detail page', files.detail, /quickInfoOgPath/, 'detail page must keep the current card image as the visible secondary image.');
 requireMatch('detail page', files.detail, /data-quick-info-indexable-image/, 'detail page must expose the existing real indexable card image.');
 requireMatch('detail page', files.detail, /imageWidth:\s*1280[\s\S]*imageHeight:\s*720/, 'Quick Info social metadata must declare the 1280x720 Discover dimensions.');
@@ -84,9 +84,13 @@ requireMatch('generator', files.generator, /const SITE_URL_LABEL = 'https:\/\/he
 requireMatch('generator', files.generator, /const CARD_PILL_BOTTOM = 222/, 'card badge-row lower boundary must remain explicit for collision prevention.');
 requireMatch('generator', files.generator, /const DISCOVER_PILL_BOTTOM = 248/, 'Discover badge-row lower boundary must remain explicit for collision prevention.');
 requireMatch('generator', files.generator, /const TITLE_CLEARANCE = 10/, 'generated Arabic titles must preserve a minimum protected vertical gap below badges.');
+requireMatch('generator', files.generator, /const CARD_TITLE_BALANCE_SHIFT = 12/, 'multi-line card titles must move down by exactly one visual spacing step.');
+requireMatch('generator', files.generator, /const titleBaseStart = cardHasThreeLines \? 274 : titleLines\.length === 2 \? 286 : 320/, 'card title baseline presets must remain stable before the balancing shift.');
+requireMatch('generator', files.generator, /const titleShift = titleLines\.length >= 2 \? CARD_TITLE_BALANCE_SHIFT : 0/, 'only multi-line card titles should receive the one-step downward shift.');
+requireMatch('generator', files.generator, /const titleStart = titleBaseStart \+ titleShift/, 'card title must apply the balancing shift.');
+requireMatch('generator', files.generator, /const excerptStart = titleBaseStart \+ titleLines\.length \* cardTitleLineHeight/, 'supporting copy must retain its previous position so one lower gap is transferred above the title.');
 requireMatch('generator', files.generator, /function assertTitleClearance\([\s\S]*titleStart - titleFontSize < pillBottom \+ TITLE_CLEARANCE/, 'generator must fail rather than emit a title that collides with the badge row.');
 requireMatch('generator', files.generator, /cardHasThreeLines \? Math\.min\(baseTitleSize, 40\)/, 'three-line card titles must use the compact protected font-size ceiling.');
-requireMatch('generator', files.generator, /cardHasThreeLines \? 274/, 'three-line card titles must start below the protected badge area.');
 requireMatch('generator', files.generator, /discoverHasThreeLines \? Math\.min\(baseTitleSize, 48\)/, 'three-line Discover titles must use the compact protected font-size ceiling.');
 requireMatch('generator', files.generator, /discoverHasThreeLines \? 306/, 'three-line Discover titles must start below the protected badge area.');
 forbid('generator', files.generator, />healthrenewal\.org<\/text>/, 'bare non-HTTPS site label must not return.');
@@ -102,4 +106,4 @@ if (errors.length) {
   for (const error of errors) console.error(`- ${error}`);
   process.exit(1);
 }
-console.log('Quick Info visual contract passed: the HTML card and 1200x630 visible image are preserved, every approved page receives a dedicated 1280x720 Discover image, and long three-line Arabic titles are protected by deterministic badge-clearance guards before rasterization.');
+console.log('Quick Info visual contract passed: the HTML card and 1200x630 visible image are preserved, multi-line card titles transfer one spacing step from below to above the title, every approved page retains its 1280x720 Discover image, and Arabic title clearance remains guarded before rasterization.');
