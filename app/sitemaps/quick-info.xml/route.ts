@@ -5,6 +5,7 @@ import { INDEXING_ENABLED, SITE_URL } from '@/lib/seo';
 export const dynamic = 'force-dynamic';
 const PAGE_SIZE = 5000;
 const DB_BATCH_SIZE = 1000;
+const QUICK_INFO_HUB = { path: '/quick-info/' } as const;
 
 type JsonRecord = Record<string, unknown>;
 
@@ -109,7 +110,7 @@ export async function GET(request: Request) {
       if (!item.updatedAt) return value;
       return !value || item.updatedAt > value ? item.updatedAt : value;
     }, null);
-    rows.push(`<url><loc>${escapeXml(absolute('/quick-info/'))}</loc>${latest ? `<lastmod>${escapeXml(new Date(latest).toISOString())}</lastmod>` : ''}<changefreq>weekly</changefreq><priority>0.8</priority></url>`);
+    rows.push(`<url><loc>${escapeXml(absolute(QUICK_INFO_HUB.path))}</loc>${latest ? `<lastmod>${escapeXml(new Date(latest).toISOString())}</lastmod>` : ''}<changefreq>weekly</changefreq><priority>0.8</priority></url>`);
   }
 
   for (const item of items) {
