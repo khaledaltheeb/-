@@ -150,8 +150,8 @@ object RawafidCircleApi {
 
     fun broadcastDriveAlert(
         context: Context,
-        latitude: Double,
-        longitude: Double,
+        latitude: Double?,
+        longitude: Double?,
         accuracyM: Double?,
         event: String,
         summary: String
@@ -160,8 +160,8 @@ object RawafidCircleApi {
             context,
             "circle_broadcast_drive_alert",
             JSONObject()
-                .put("p_latitude", latitude)
-                .put("p_longitude", longitude)
+                .put("p_latitude", latitude ?: JSONObject.NULL)
+                .put("p_longitude", longitude ?: JSONObject.NULL)
                 .put("p_accuracy_m", accuracyM ?: JSONObject.NULL)
                 .put("p_event", event.trim().lowercase().take(40))
                 .put("p_summary", summary.trim().take(900))
