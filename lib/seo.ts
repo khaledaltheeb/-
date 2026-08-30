@@ -173,7 +173,7 @@ export function organizationJsonLd() {
         '@type': 'Organization',
         '@id': `${SITE_URL}/#organization`,
         name: BRAND_NAME,
-        alternateName: [BRAND_SHORT, 'Rawafid', 'Rawafid Platform'],
+        alternateName: [BRAND_SHORT, 'Rawafid'],
         url: `${SITE_URL}/`,
         description: DEFAULT_DESCRIPTION,
         logo: {
@@ -193,7 +193,7 @@ export function organizationJsonLd() {
         '@type': 'WebSite',
         '@id': `${SITE_URL}/#website`,
         name: BRAND_NAME,
-        alternateName: [BRAND_SHORT, 'Rawafid', 'Rawafid Platform'],
+        alternateName: [BRAND_SHORT, 'Rawafid'],
         url: `${SITE_URL}/`,
         description: DEFAULT_DESCRIPTION,
         inLanguage: 'ar',
