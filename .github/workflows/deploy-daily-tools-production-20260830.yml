@@ -106,7 +106,7 @@ jobs:
           [[ "$sleep" == *'سجل'* ]]
 
           for page in "$hub" "$grounding" "$caffeine" "$sleep"; do
-            if printf '%s' "$page" | grep -Eqi '<meta[^>]+name=["'"']robots["'"'][^>]+content=["'"'][^"'"']*noindex'; then
+            if printf '%s' "$page" | grep -Eqi 'name="robots"[^>]*content="[^"]*noindex|content="[^"]*noindex[^"]*"[^>]*name="robots"'; then
               echo 'Unexpected noindex detected on Daily Tools production surface.' >&2
               exit 1
             fi
