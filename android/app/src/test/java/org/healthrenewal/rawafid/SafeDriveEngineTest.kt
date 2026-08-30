@@ -65,6 +65,16 @@ class SafeDriveEngineTest {
     }
 
     @Test
+    fun suddenStopRemembersHardDecelerationAcrossFollowingStopSample() {
+        val detector = SafeDriveIncidentDetector(SafeDriveIncidentConfig())
+        detector.consume(sample(0L), currentSpeedKmh = 72.0, currentAccelerationMps2 = 0.0)
+        detector.consume(sample(1_000L), currentSpeedKmh = 32.0, currentAccelerationMps2 = -5.8)
+        val candidate = detector.consume(sample(2_000L), currentSpeedKmh = 5.0, currentAccelerationMps2 = -1.0)
+        assertNotNull(candidate)
+        assertTrue(candidate!!.decelerationMps2 <= -5.8)
+    }
+
+    @Test
     fun configClampsUnsafeOrNonsensicalValues() {
         val config = SafeDriveConfig(
             personalSpeedAlertKmh = 5,
