@@ -25,6 +25,11 @@ data class CircleDriveAgreement(
     val speedThresholdKmh: Int,
     val persistentSpeedSeconds: Int
 )
+data class CircleDriveWeeklyPreference(
+    val connectionId: String,
+    val permissionEnabled: Boolean,
+    val weeklyReportsEnabled: Boolean
+)
 data class CircleCloudMessage(val messageId: String, val senderIsMe: Boolean, val kind: String, val body: String, val templateKey: String?, val latitude: Double?, val longitude: Double?, val accuracyM: Double?, val replyToId: String?, val createdAt: String, val answerCode: String?, val answeredAt: String?)
 data class CircleCloudNotification(val notificationId: String, val kind: String, val title: String, val body: String, val data: JSONObject, val readAt: String?, val createdAt: String)
 
@@ -50,6 +55,7 @@ object RawafidCircleApi {
         val response = JSONObject(request("POST", "/auth/v1/token?grant_type=password", JSONObject().put("email", email.trim()).put("password", password), null))
         val session = saveSessionFromAuthResponse(context, response, email.trim())
         CirclePushRegistration.registerCurrentToken(context)
+        SafeDriveWeeklyCircleScheduler.ensure(context)
         return session
     }
 
@@ -61,6 +67,7 @@ object RawafidCircleApi {
         if (token.isNotBlank()) {
             saveSessionFromAuthResponse(context, response, email.trim())
             CirclePushRegistration.registerCurrentToken(context)
+            SafeDriveWeeklyCircleScheduler.ensure(context)
         }
         return response.has("user")
     }
@@ -69,6 +76,7 @@ object RawafidCircleApi {
 
     @Synchronized
     fun signOut(context: Context) {
+        SafeDriveWeeklyCircleScheduler.cancel(context)
         runCatching { CirclePushRegistration.unregisterBlocking(context) }
         val token = runCatching { validAccessToken(context) }.getOrNull()
         if (token != null) runCatching { request("POST", "/auth/v1/logout", JSONObject(), token) }
@@ -99,6 +107,7 @@ object RawafidCircleApi {
         val current = loadSession(context) ?: throw CircleApiException("انتهت جلسة الحساب.")
         saveSessionFromAuthResponse(context, response, current.email)
         CirclePushRegistration.registerCurrentToken(context)
+        SafeDriveWeeklyCircleScheduler.ensure(context)
     }
 
     fun myIdentity(context: Context): String = scalarString(rpc(context, "circle_my_identity", JSONObject()))
@@ -148,6 +157,60 @@ object RawafidCircleApi {
                 .put("p_trip_reports_enabled", agreement.tripReportsEnabled)
                 .put("p_speed_threshold_kmh", agreement.speedThresholdKmh.coerceIn(50, 180))
                 .put("p_persistent_speed_seconds", agreement.persistentSpeedSeconds.coerceIn(30, 900))
+        )
+    )
+
+    fun driveWeeklyPreferences(context: Context): List<CircleDriveWeeklyPreference> {
+        val a = JSONArray(rpc(context, "circle_get_drive_weekly_preferences", JSONObject()))
+        return buildList {
+            for (i in 0 until a.length()) {
+                val o = a.optJSONObject(i) ?: continue
+                add(
+                    CircleDriveWeeklyPreference(
+                        connectionId = o.optString("connection_id"),
+                        permissionEnabled = o.optBoolean("permission_enabled"),
+                        weeklyReportsEnabled = o.optBoolean("weekly_reports_enabled")
+                    )
+                )
+            }
+        }
+    }
+
+    fun setDriveWeeklyReportEnabled(context: Context, connectionId: String, enabled: Boolean): Boolean {
+        val result = scalarBoolean(
+            rpc(
+                context,
+                "circle_set_drive_weekly_report_enabled",
+                JSONObject().put("p_connection_id", connectionId).put("p_enabled", enabled)
+            )
+        )
+        SafeDriveWeeklyCircleScheduler.ensure(context)
+        return result
+    }
+
+    fun sendDriveWeeklyReportToConnection(
+        context: Context,
+        connectionId: String,
+        weekKey: String,
+        summary: String,
+        tripCount: Int,
+        distanceKm: Double,
+        durationSeconds: Int,
+        averageScore: Int?,
+        harshRatePer100Km: Double?
+    ): Boolean = scalarBoolean(
+        rpc(
+            context,
+            "circle_send_drive_weekly_report_to_connection",
+            JSONObject()
+                .put("p_connection_id", connectionId)
+                .put("p_week_key", weekKey.trim().uppercase().take(8))
+                .put("p_summary", summary.trim().take(1500))
+                .put("p_trip_count", tripCount.coerceIn(1, 500))
+                .put("p_distance_km", distanceKm.coerceIn(0.0, 10000.0))
+                .put("p_duration_seconds", durationSeconds.coerceIn(0, 1_209_600))
+                .put("p_average_score", averageScore?.coerceIn(0, 100) ?: JSONObject.NULL)
+                .put("p_harsh_rate_per_100km", harshRatePer100Km?.coerceIn(0.0, 10000.0) ?: JSONObject.NULL)
         )
     )
 
