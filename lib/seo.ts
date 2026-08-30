@@ -67,6 +67,8 @@ export type SeoMetadataInput = {
   type?: 'website' | 'article' | 'profile';
   image?: string | null;
   imageAlt?: string | null;
+  imageWidth?: number | null;
+  imageHeight?: number | null;
   keywords?: string[];
   relatedTerms?: string[];
   searchIntents?: string[];
@@ -86,15 +88,20 @@ export function buildSeoMetadata(input: SeoMetadataInput): Metadata {
   const usesDefaultImage = !input.image;
   const image = absoluteSiteUrl(input.image || fallbackSocialImagePath(input.title, input.type));
   const imageAlt = (input.imageAlt || input.title).replace(/\s+/g, ' ').trim();
+  const imageWidth = input.imageWidth || (usesDefaultImage ? 1200 : undefined);
+  const imageHeight = input.imageHeight || (usesDefaultImage ? 630 : undefined);
   const languages = input.hreflang
     ? Object.fromEntries(Object.entries(input.hreflang).map(([key, value]) => [key, absoluteSiteUrl(value)]))
     : undefined;
 
   const semanticProfile = buildSemanticSeoProfile(input);
   const keywords = semanticProfile.topicKeywords.slice(0, 12);
-  const openGraphImages = usesDefaultImage
-    ? [{ url: image, width: 1200, height: 630, alt: imageAlt }]
-    : [{ url: image, alt: imageAlt }];
+  const openGraphImages = [{
+    url: image,
+    ...(imageWidth ? { width: imageWidth } : {}),
+    ...(imageHeight ? { height: imageHeight } : {}),
+    alt: imageAlt,
+  }];
 
   return {
     title: { absolute: title },
