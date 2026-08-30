@@ -2,6 +2,7 @@ package org.healthrenewal.rawafid
 
 import android.Manifest
 import android.app.AlarmManager
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -13,11 +14,13 @@ import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.provider.Settings
 import android.telephony.SmsManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -26,7 +29,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -38,7 +40,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -59,11 +60,16 @@ import java.text.DateFormat
 import java.util.Calendar
 import java.util.Date
 
-private const val SAFETY_CHANNEL = "rawafid_safety_monitor"
+private const val SAFETY_STATUS_CHANNEL = "rawafid_safety_monitor"
+private const val SAFETY_ALERT_CHANNEL = "rawafid_safety_alert"
 private const val ACTION_PRE_ALERT = "org.healthrenewal.rawafid.SAFETY_PRE_ALERT"
 private const val ACTION_SEND = "org.healthrenewal.rawafid.SAFETY_SEND"
 private const val ACTION_SKIP = "org.healthrenewal.rawafid.SAFETY_SKIP"
 private const val ACTION_SEND_NOW = "org.healthrenewal.rawafid.SAFETY_SEND_NOW"
+private const val SERVICE_START = "org.healthrenewal.rawafid.SAFETY_SERVICE_START"
+private const val SERVICE_CAPTURE = "org.healthrenewal.rawafid.SAFETY_SERVICE_CAPTURE"
+private const val SERVICE_STOP = "org.healthrenewal.rawafid.SAFETY_SERVICE_STOP"
+private const val STATUS_NOTIFICATION_ID = 8705
 
 data class SafetyMonitorConfig(
     val enabled: Boolean = false,
@@ -72,7 +78,10 @@ data class SafetyMonitorConfig(
     val endHour: Int = 6,
     val intervalHours: Int = 2,
     val warningMinutes: Int = 10,
-    val nextDueAt: Long = 0L
+    val nextDueAt: Long = 0L,
+    val lastAttemptAt: Long = 0L,
+    val lastSuccessAt: Long = 0L,
+    val lastResult: String = ""
 )
 
 object SafetyMonitorStore {
@@ -86,7 +95,10 @@ object SafetyMonitorStore {
         endHour = prefs(context).getInt("end_hour", 6),
         intervalHours = prefs(context).getInt("interval_hours", 2),
         warningMinutes = prefs(context).getInt("warning_minutes", 10),
-        nextDueAt = prefs(context).getLong("next_due", 0L)
+        nextDueAt = prefs(context).getLong("next_due", 0L),
+        lastAttemptAt = prefs(context).getLong("last_attempt", 0L),
+        lastSuccessAt = prefs(context).getLong("last_success", 0L),
+        lastResult = prefs(context).getString("last_result", "") ?: ""
     )
 
     fun save(context: Context, value: SafetyMonitorConfig) {
@@ -98,7 +110,23 @@ object SafetyMonitorStore {
             .putInt("interval_hours", value.intervalHours)
             .putInt("warning_minutes", value.warningMinutes)
             .putLong("next_due", value.nextDueAt)
+            .putLong("last_attempt", value.lastAttemptAt)
+            .putLong("last_success", value.lastSuccessAt)
+            .putString("last_result", value.lastResult)
             .apply()
+    }
+
+    fun recordResult(context: Context, success: Boolean, result: String) {
+        val now = System.currentTimeMillis()
+        val current = load(context)
+        save(
+            context,
+            current.copy(
+                lastAttemptAt = now,
+                lastSuccessAt = if (success) now else current.lastSuccessAt,
+                lastResult = result
+            )
+        )
     }
 
     fun disable(context: Context) = save(context, load(context).copy(enabled = false, nextDueAt = 0L))
@@ -109,12 +137,12 @@ object SafetyMonitorScheduler {
     private const val SEND_REQUEST = 8702
 
     fun start(context: Context, config: SafetyMonitorConfig) {
-        ensureChannel(context)
+        ensureChannels(context)
         val next = nextWindowTime(config, System.currentTimeMillis())
         val active = config.copy(enabled = true, nextDueAt = next)
         SafetyMonitorStore.save(context, active)
         scheduleCurrent(context, active)
-        postPersistentStatus(context, active)
+        startForegroundMonitor(context)
     }
 
     fun stop(context: Context) {
@@ -122,35 +150,146 @@ object SafetyMonitorScheduler {
         alarm.cancel(pending(context, ACTION_PRE_ALERT, PRE_REQUEST))
         alarm.cancel(pending(context, ACTION_SEND, SEND_REQUEST))
         SafetyMonitorStore.disable(context)
-        (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancel(8700)
-        (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancel(8703)
+        context.stopService(Intent(context, SafetyLocationService::class.java))
+        val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        manager.cancel(STATUS_NOTIFICATION_ID)
+        manager.cancel(8703)
     }
 
     fun advance(context: Context) {
         val current = SafetyMonitorStore.load(context)
         if (!current.enabled) return
-        val next = nextWindowTime(current, maxOf(System.currentTimeMillis() + current.intervalHours * 3_600_000L, current.nextDueAt + current.intervalHours * 3_600_000L))
+        val candidate = maxOf(
+            System.currentTimeMillis() + current.intervalHours * 3_600_000L,
+            current.nextDueAt + current.intervalHours * 3_600_000L
+        )
+        val next = nextWindowTime(current, candidate)
         val updated = current.copy(nextDueAt = next)
         SafetyMonitorStore.save(context, updated)
         scheduleCurrent(context, updated)
-        postPersistentStatus(context, updated)
+        updateStatusNotification(context, updated)
     }
 
-    fun resync(context: Context) {
+    fun resync(context: Context, ensureService: Boolean = false) {
         val current = SafetyMonitorStore.load(context)
         if (!current.enabled) return
-        val next = if (current.nextDueAt > System.currentTimeMillis()) current.nextDueAt else nextWindowTime(current, System.currentTimeMillis())
+        val next = if (current.nextDueAt > System.currentTimeMillis()) {
+            current.nextDueAt
+        } else {
+            nextWindowTime(current, System.currentTimeMillis())
+        }
         val updated = current.copy(nextDueAt = next)
         SafetyMonitorStore.save(context, updated)
         scheduleCurrent(context, updated)
-        postPersistentStatus(context, updated)
+        if (ensureService) runCatching { startForegroundMonitor(context) }
+        else updateStatusNotification(context, updated)
+    }
+
+    fun requestSendNow(context: Context) {
+        if (!SafetyMonitorStore.load(context).enabled) return
+        runCatching {
+            context.startService(Intent(context, SafetyLocationService::class.java).setAction(SERVICE_CAPTURE))
+        }.onFailure {
+            SafetyMonitorStore.recordResult(context, false, "تعذر الوصول إلى خدمة المراقبة. افتح مراقبة الأمان وأعد تشغيلها.")
+            postResult(context, "تعذر اختبار الإرسال", "افتح مراقبة الأمان وأعد تشغيلها ثم حاول مرة أخرى.")
+        }
+    }
+
+    fun ensureChannels(context: Context) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+        val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        manager.createNotificationChannels(
+            listOf(
+                NotificationChannel(SAFETY_STATUS_CHANNEL, "حالة مراقبة الأمان", NotificationManager.IMPORTANCE_LOW).apply {
+                    description = "إشعار دائم عندما تكون مراقبة الأمان والموقع نشطة"
+                },
+                NotificationChannel(SAFETY_ALERT_CHANNEL, "تنبيهات مراقبة الأمان", NotificationManager.IMPORTANCE_HIGH).apply {
+                    description = "تنبيه قبل إرسال الموقع ونتيجة محاولة الإرسال"
+                }
+            )
+        )
+    }
+
+    fun statusNotification(context: Context, config: SafetyMonitorConfig = SafetyMonitorStore.load(context)): Notification {
+        ensureChannels(context)
+        val open = PendingIntent.getActivity(
+            context,
+            8704,
+            Intent(context, SafetyMonitorActivity::class.java),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        val stop = PendingIntent.getBroadcast(
+            context,
+            8706,
+            Intent(context, SafetyMonitorReceiver::class.java).setAction(SERVICE_STOP),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        val text = if (config.nextDueAt > 0L) {
+            "نشطة · الإرسال التالي ${DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(Date(config.nextDueAt))}"
+        } else {
+            "مراقبة الأمان نشطة على هذا الهاتف"
+        }
+        return NotificationCompat.Builder(context, SAFETY_STATUS_CHANNEL)
+            .setSmallIcon(R.drawable.ic_launcher)
+            .setContentTitle(config.label)
+            .setContentText(text)
+            .setStyle(NotificationCompat.BigTextStyle().bigText("$text. سيصلك تنبيه قبل أي إرسال تلقائي."))
+            .setOngoing(true)
+            .setOnlyAlertOnce(true)
+            .setContentIntent(open)
+            .addAction(0, "إيقاف المراقبة", stop)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setCategory(NotificationCompat.CATEGORY_SERVICE)
+            .build()
+    }
+
+    fun postResult(context: Context, title: String, text: String) {
+        if (!canNotify(context)) return
+        ensureChannels(context)
+        val open = PendingIntent.getActivity(
+            context,
+            8715,
+            Intent(context, SafetyMonitorActivity::class.java),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        val notification = NotificationCompat.Builder(context, SAFETY_ALERT_CHANNEL)
+            .setSmallIcon(R.drawable.ic_launcher)
+            .setContentTitle(title)
+            .setContentText(text)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(text))
+            .setContentIntent(open)
+            .setAutoCancel(true)
+            .build()
+        (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).notify(8716, notification)
+    }
+
+    private fun startForegroundMonitor(context: Context) {
+        ContextCompat.startForegroundService(
+            context,
+            Intent(context, SafetyLocationService::class.java).setAction(SERVICE_START)
+        )
+    }
+
+    private fun updateStatusNotification(context: Context, config: SafetyMonitorConfig) {
+        if (!canNotify(context)) return
+        (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
+            .notify(STATUS_NOTIFICATION_ID, statusNotification(context, config))
     }
 
     private fun scheduleCurrent(context: Context, config: SafetyMonitorConfig) {
         val alarm = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val preAt = (config.nextDueAt - config.warningMinutes * 60_000L).coerceAtLeast(System.currentTimeMillis() + 1_000L)
-        alarm.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, preAt, pending(context, ACTION_PRE_ALERT, PRE_REQUEST))
-        alarm.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, config.nextDueAt, pending(context, ACTION_SEND, SEND_REQUEST))
+        val preAt = (config.nextDueAt - config.warningMinutes * 60_000L)
+            .coerceAtLeast(System.currentTimeMillis() + 1_000L)
+        alarm.setAndAllowWhileIdle(
+            AlarmManager.RTC_WAKEUP,
+            preAt,
+            pending(context, ACTION_PRE_ALERT, PRE_REQUEST)
+        )
+        alarm.setAndAllowWhileIdle(
+            AlarmManager.RTC_WAKEUP,
+            config.nextDueAt,
+            pending(context, ACTION_SEND, SEND_REQUEST)
+        )
     }
 
     private fun pending(context: Context, action: String, request: Int) = PendingIntent.getBroadcast(
@@ -163,83 +302,80 @@ object SafetyMonitorScheduler {
     private fun nextWindowTime(config: SafetyMonitorConfig, from: Long): Long {
         val cal = Calendar.getInstance().apply { timeInMillis = from }
         val hour = cal.get(Calendar.HOUR_OF_DAY)
-        val inside = if (config.startHour < config.endHour) hour in config.startHour until config.endHour else hour >= config.startHour || hour < config.endHour
+        val inside = if (config.startHour < config.endHour) {
+            hour in config.startHour until config.endHour
+        } else {
+            hour >= config.startHour || hour < config.endHour
+        }
         if (inside) return from.coerceAtLeast(System.currentTimeMillis() + 5_000L)
 
-        val next = Calendar.getInstance().apply {
+        return Calendar.getInstance().apply {
             timeInMillis = from
             set(Calendar.HOUR_OF_DAY, config.startHour)
             set(Calendar.MINUTE, 0)
             set(Calendar.SECOND, 0)
             set(Calendar.MILLISECOND, 0)
             if (timeInMillis <= from) add(Calendar.DAY_OF_YEAR, 1)
-        }
-        return next.timeInMillis
+        }.timeInMillis
     }
 
-    fun ensureChannel(context: Context) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
-        val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        manager.createNotificationChannel(
-            NotificationChannel(SAFETY_CHANNEL, "مراقبة الأمان", NotificationManager.IMPORTANCE_HIGH).apply {
-                description = "إشعارات واضحة أثناء مراقبة الأمان وقبل إرسال الموقع"
-            }
-        )
-    }
-
-    private fun postPersistentStatus(context: Context, config: SafetyMonitorConfig) {
-        if (Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) return
-        ensureChannel(context)
-        val open = PendingIntent.getActivity(context, 8704, Intent(context, SafetyMonitorActivity::class.java), PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-        val text = "نشطة · الإرسال التالي ${DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(Date(config.nextDueAt))}"
-        val notification = NotificationCompat.Builder(context, SAFETY_CHANNEL)
-            .setSmallIcon(R.drawable.ic_launcher)
-            .setContentTitle(config.label)
-            .setContentText(text)
-            .setOngoing(true)
-            .setContentIntent(open)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
-            .build()
-        (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).notify(8700, notification)
-    }
+    private fun canNotify(context: Context) =
+        Build.VERSION.SDK_INT < 33 ||
+            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
 }
 
 class SafetyMonitorReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val config = SafetyMonitorStore.load(context)
+        if (intent.action == SERVICE_STOP) {
+            SafetyMonitorScheduler.stop(context)
+            return
+        }
         if (!config.enabled) return
         when (intent.action) {
             ACTION_PRE_ALERT -> showPreAlert(context, config)
-            ACTION_SEND -> startSend(context)
+            ACTION_SEND -> SafetyMonitorScheduler.requestSendNow(context)
             ACTION_SKIP -> {
                 (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancel(8703)
+                SafetyMonitorStore.recordResult(context, false, "أُلغي الإرسال لهذه المرة: المستخدم أكد أنه بخير.")
                 SafetyMonitorScheduler.advance(context)
             }
             ACTION_SEND_NOW -> {
                 (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancel(8703)
-                startSend(context)
+                SafetyMonitorScheduler.requestSendNow(context)
             }
         }
     }
 
-    private fun startSend(context: Context) {
-        ContextCompat.startForegroundService(context, Intent(context, SafetyLocationService::class.java))
-    }
-
     private fun showPreAlert(context: Context, config: SafetyMonitorConfig) {
         if (Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) return
-        SafetyMonitorScheduler.ensureChannel(context)
-        val skip = PendingIntent.getBroadcast(context, 8710, Intent(context, SafetyMonitorReceiver::class.java).setAction(ACTION_SKIP), PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-        val send = PendingIntent.getBroadcast(context, 8711, Intent(context, SafetyMonitorReceiver::class.java).setAction(ACTION_SEND_NOW), PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-        val notification = NotificationCompat.Builder(context, SAFETY_CHANNEL)
+        SafetyMonitorScheduler.ensureChannels(context)
+        val skip = PendingIntent.getBroadcast(
+            context,
+            8710,
+            Intent(context, SafetyMonitorReceiver::class.java).setAction(ACTION_SKIP),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        val send = PendingIntent.getBroadcast(
+            context,
+            8711,
+            Intent(context, SafetyMonitorReceiver::class.java).setAction(ACTION_SEND_NOW),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        val notification = NotificationCompat.Builder(context, SAFETY_ALERT_CHANNEL)
             .setSmallIcon(R.drawable.ic_launcher)
             .setContentTitle("سيتم إرسال موقعك قريبًا")
             .setContentText("إذا كنت بخير، اضغط «أنا بخير — لا ترسل». إذا لم تتدخل سيُرسل موقع هذا الهاتف تلقائيًا.")
-            .setStyle(NotificationCompat.BigTextStyle().bigText("مراقبة الأمان ستُرسل موقع هذا الهاتف تلقائيًا إلى الجهات التي سمحت لها باستلام الموقع بعد ${config.warningMinutes} دقائق تقريبًا. ألغِ هذه المرة إذا لم تعد بحاجة للإرسال."))
+            .setStyle(
+                NotificationCompat.BigTextStyle().bigText(
+                    "مراقبة الأمان ستُرسل موقع هذا الهاتف تلقائيًا إلى الجهات التي سمحت لها باستلام الموقع بعد ${config.warningMinutes} دقائق تقريبًا. ألغِ هذه المرة إذا لم تعد بحاجة للإرسال."
+                )
+            )
             .addAction(0, "أنا بخير — لا ترسل", skip)
             .addAction(0, "أرسل الآن", send)
             .setAutoCancel(false)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setCategory(NotificationCompat.CATEGORY_ALARM)
             .build()
         (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).notify(8703, notification)
     }
@@ -248,24 +384,32 @@ class SafetyMonitorReceiver : BroadcastReceiver() {
 class SafetyLocationService : Service(), LocationListener {
     private lateinit var locationManager: LocationManager
     private val handler = Handler(Looper.getMainLooper())
+    private var locating = false
 
     override fun onCreate() {
         super.onCreate()
-        SafetyMonitorScheduler.ensureChannel(this)
-        val notification = NotificationCompat.Builder(this, SAFETY_CHANNEL)
-            .setSmallIcon(R.drawable.ic_launcher)
-            .setContentTitle("جارٍ تحديد الموقع")
-            .setContentText("يحدد روافد موقع هذا الهاتف لإرسال تنبيه الأمان الذي فعّلته.")
-            .setOngoing(true)
-            .build()
-        startForeground(8705, notification)
+        SafetyMonitorScheduler.ensureChannels(this)
         locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (!hasLocationPermission()) {
-            finishWithoutLocation("تعذر تحديد الموقع لأن إذن الموقع غير متاح.")
+        val config = SafetyMonitorStore.load(this)
+        if (!config.enabled || intent?.action == SERVICE_STOP) {
+            stopForeground(STOP_FOREGROUND_REMOVE)
+            stopSelf()
             return START_NOT_STICKY
+        }
+
+        startForeground(STATUS_NOTIFICATION_ID, SafetyMonitorScheduler.statusNotification(this, config))
+
+        if (intent.action == SERVICE_CAPTURE && !locating) requestCurrentLocation()
+        return START_STICKY
+    }
+
+    private fun requestCurrentLocation() {
+        if (!hasLocationPermission()) {
+            finishAttempt(false, "تعذر تحديد الموقع لأن إذن الموقع غير متاح.")
+            return
         }
         val provider = when {
             locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) -> LocationManager.GPS_PROVIDER
@@ -273,39 +417,46 @@ class SafetyLocationService : Service(), LocationListener {
             else -> null
         }
         if (provider == null) {
-            finishWithoutLocation("خدمات الموقع غير مفعلة على الهاتف.")
-            return START_NOT_STICKY
+            finishAttempt(false, "خدمات الموقع غير مفعلة على الهاتف.")
+            return
         }
+        locating = true
         @Suppress("MissingPermission")
         locationManager.requestLocationUpdates(provider, 0L, 0f, this, Looper.getMainLooper())
-        handler.postDelayed({ finishWithoutLocation("لم يتمكن الهاتف من الحصول على موقع حديث في الوقت المحدد.") }, 30_000L)
-        return START_NOT_STICKY
+        handler.postDelayed({
+            if (locating) finishAttempt(false, "لم يتمكن الهاتف من الحصول على موقع حديث خلال 30 ثانية.")
+        }, 30_000L)
     }
 
     override fun onLocationChanged(location: Location) {
+        if (!locating) return
+        locating = false
         handler.removeCallbacksAndMessages(null)
         runCatching { locationManager.removeUpdates(this) }
         sendLocation(location)
-        SafetyMonitorScheduler.advance(this)
-        stopForeground(STOP_FOREGROUND_REMOVE)
-        stopSelf()
     }
 
     private fun sendLocation(location: Location) {
-        val recipients = MyCircleStore.forPermission(this, CirclePermission.LOCATION_SAFETY).filter { it.phone.isNotBlank() }
+        val recipients = MyCircleStore.forPermission(this, CirclePermission.LOCATION_SAFETY)
+            .filter { it.phone.isNotBlank() }
         if (recipients.isEmpty()) {
-            notifyResult("لم يتم الإرسال", "لا توجد جهة موثوقة مفعّل لها «استلام موقع مراقبة الأمان».")
+            finishAttempt(false, "لا توجد جهة موثوقة مفعّل لها استلام موقع مراقبة الأمان.")
             return
         }
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
-            notifyResult("لم يتم الإرسال", "إذن إرسال SMS غير متاح. افتح مراقبة الأمان لمراجعة الأذونات.")
+            finishAttempt(false, "إذن إرسال SMS غير متاح. افتح مراقبة الأمان لمراجعة الأذونات.")
             return
         }
+        if (!packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY_MESSAGING)) {
+            finishAttempt(false, "هذا الجهاز لا يدعم إرسال SMS. اختر جهازًا يدعم الرسائل أو استخدم قناة أمان أخرى.")
+            return
+        }
+
         val config = SafetyMonitorStore.load(this)
         val mapUrl = "https://maps.google.com/?q=${location.latitude},${location.longitude}"
         val time = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT).format(Date())
         val message = "روافد · ${config.label}\nهذا تنبيه أمان تلقائي فعّله صاحب هذا الهاتف.\nموقعي الحالي: $mapUrl\nوقت الإرسال: $time"
-        val sms = SmsManager.getDefault()
+        val sms = getSystemService(SmsManager::class.java)
         var sent = 0
         recipients.forEach { person ->
             runCatching {
@@ -314,33 +465,42 @@ class SafetyLocationService : Service(), LocationListener {
                 sent++
             }
         }
-        notifyResult("تم إرسال موقع الأمان", "تم الإرسال إلى $sent من ${recipients.size} جهة محددة.")
+        val success = sent > 0
+        val result = if (success) {
+            "تم إرسال موقع الأمان إلى $sent من ${recipients.size} جهة محددة."
+        } else {
+            "تعذر إرسال SMS إلى الجهات المحددة. تحقق من الشريحة والشبكة والأذونات."
+        }
+        finishAttempt(success, result)
     }
 
-    private fun finishWithoutLocation(reason: String) {
+    private fun finishAttempt(success: Boolean, result: String) {
+        locating = false
         handler.removeCallbacksAndMessages(null)
         runCatching { locationManager.removeUpdates(this) }
-        notifyResult("تعذر إرسال موقع الأمان", reason)
+        SafetyMonitorStore.recordResult(this, success, result)
+        SafetyMonitorScheduler.postResult(
+            this,
+            if (success) "تم إرسال موقع الأمان" else "تعذر إرسال موقع الأمان",
+            result
+        )
         SafetyMonitorScheduler.advance(this)
-        stopForeground(STOP_FOREGROUND_REMOVE)
-        stopSelf()
+        val current = SafetyMonitorStore.load(this)
+        if (current.enabled) {
+            (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
+                .notify(STATUS_NOTIFICATION_ID, SafetyMonitorScheduler.statusNotification(this, current))
+        }
     }
 
-    private fun notifyResult(title: String, text: String) {
-        if (Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) return
-        val open = PendingIntent.getActivity(this, 8715, Intent(this, SafetyMonitorActivity::class.java), PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-        val notification = NotificationCompat.Builder(this, SAFETY_CHANNEL)
-            .setSmallIcon(R.drawable.ic_launcher)
-            .setContentTitle(title)
-            .setContentText(text)
-            .setStyle(NotificationCompat.BigTextStyle().bigText(text))
-            .setContentIntent(open)
-            .setAutoCancel(true)
-            .build()
-        (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).notify(8716, notification)
-    }
+    private fun hasLocationPermission() =
+        ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+            ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
 
-    private fun hasLocationPermission() = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+    override fun onDestroy() {
+        handler.removeCallbacksAndMessages(null)
+        if (::locationManager.isInitialized) runCatching { locationManager.removeUpdates(this) }
+        super.onDestroy()
+    }
 
     override fun onBind(intent: Intent?): IBinder? = null
 }
@@ -349,24 +509,42 @@ class SafetyMonitorActivity : ComponentActivity() {
     private var onPermissionsReady: ((Boolean) -> Unit)? = null
 
     private val basePermissions = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { grants ->
-        val locationGranted = grants[Manifest.permission.ACCESS_FINE_LOCATION] == true || grants[Manifest.permission.ACCESS_COARSE_LOCATION] == true || ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
-        val smsGranted = grants[Manifest.permission.SEND_SMS] == true || ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED
-        if (locationGranted && smsGranted && Build.VERSION.SDK_INT >= 29 && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        val locationGranted =
+            grants[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+                grants[Manifest.permission.ACCESS_COARSE_LOCATION] == true ||
+                hasForegroundLocation()
+        val smsGranted =
+            grants[Manifest.permission.SEND_SMS] == true ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED
+        val notificationsGranted =
+            Build.VERSION.SDK_INT < 33 ||
+                grants[Manifest.permission.POST_NOTIFICATIONS] == true ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+
+        if (!locationGranted || !smsGranted || !notificationsGranted) {
+            finishPermissionRequest(false)
+        } else if (Build.VERSION.SDK_INT == 29 && !hasBackgroundLocation()) {
             backgroundPermission.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+        } else if (Build.VERSION.SDK_INT >= 30 && !hasBackgroundLocation()) {
+            backgroundSettings.launch(
+                Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", packageName, null))
+            )
         } else {
-            onPermissionsReady?.invoke(locationGranted && smsGranted)
-            onPermissionsReady = null
+            finishPermissionRequest(true)
         }
     }
 
     private val backgroundPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        onPermissionsReady?.invoke(granted)
-        onPermissionsReady = null
+        finishPermissionRequest(granted || hasBackgroundLocation())
+    }
+
+    private val backgroundSettings = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        finishPermissionRequest(hasBackgroundLocation())
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        SafetyMonitorScheduler.ensureChannel(this)
+        SafetyMonitorScheduler.ensureChannels(this)
         setContent {
             RawafidTheme {
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
@@ -377,14 +555,55 @@ class SafetyMonitorActivity : ComponentActivity() {
     }
 
     private fun ensurePermissions(result: (Boolean) -> Unit) {
+        if (hasAllRequiredPermissions()) {
+            result(true)
+            return
+        }
         onPermissionsReady = result
         val permissions = buildList {
-            add(Manifest.permission.ACCESS_FINE_LOCATION)
-            add(Manifest.permission.ACCESS_COARSE_LOCATION)
-            add(Manifest.permission.SEND_SMS)
-            if (Build.VERSION.SDK_INT >= 33) add(Manifest.permission.POST_NOTIFICATIONS)
-        }.toTypedArray()
-        basePermissions.launch(permissions)
+            if (!hasForegroundLocation()) {
+                add(Manifest.permission.ACCESS_FINE_LOCATION)
+                add(Manifest.permission.ACCESS_COARSE_LOCATION)
+            }
+            if (ContextCompat.checkSelfPermission(this@SafetyMonitorActivity, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
+                add(Manifest.permission.SEND_SMS)
+            }
+            if (Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(this@SafetyMonitorActivity, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                add(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+        if (permissions.isEmpty()) {
+            if (Build.VERSION.SDK_INT >= 30 && !hasBackgroundLocation()) {
+                backgroundSettings.launch(
+                    Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", packageName, null))
+                )
+            } else if (Build.VERSION.SDK_INT == 29 && !hasBackgroundLocation()) {
+                backgroundPermission.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+            } else {
+                finishPermissionRequest(true)
+            }
+        } else {
+            basePermissions.launch(permissions.toTypedArray())
+        }
+    }
+
+    private fun hasForegroundLocation() =
+        ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+            ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+
+    private fun hasBackgroundLocation() =
+        Build.VERSION.SDK_INT < 29 ||
+            ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED
+
+    private fun hasAllRequiredPermissions() =
+        hasForegroundLocation() &&
+            hasBackgroundLocation() &&
+            ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED &&
+            (Build.VERSION.SDK_INT < 33 || ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED)
+
+    private fun finishPermissionRequest(granted: Boolean) {
+        onPermissionsReady?.invoke(granted)
+        onPermissionsReady = null
     }
 }
 
@@ -393,7 +612,9 @@ private fun SafetyMonitorScreen(requestPermissions: ((Boolean) -> Unit) -> Unit)
     val context = LocalContext.current
     var version by remember { mutableIntStateOf(0) }
     val config = remember(version) { SafetyMonitorStore.load(context) }
-    val recipients = remember(version) { MyCircleStore.forPermission(context, CirclePermission.LOCATION_SAFETY).filter { it.phone.isNotBlank() } }
+    val recipients = remember(version) {
+        MyCircleStore.forPermission(context, CirclePermission.LOCATION_SAFETY).filter { it.phone.isNotBlank() }
+    }
     var label by rememberSaveable(config.enabled) { mutableStateOf(config.label) }
     var startHour by rememberSaveable(config.enabled) { mutableIntStateOf(config.startHour) }
     var endHour by rememberSaveable(config.enabled) { mutableIntStateOf(config.endHour) }
@@ -408,15 +629,19 @@ private fun SafetyMonitorScreen(requestPermissions: ((Boolean) -> Unit) -> Unit)
         item {
             Column(verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
                 Text("مراقبة الأمان والموقع", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-                Text("ميزة اختيارية لهذا الهاتف: تنبّهك قبل الموعد، وإذا لم تلغِ الإرسال تُرسل موقع الهاتف تلقائيًا إلى الأشخاص الذين سمحت لهم بذلك.")
+                Text("فعّل جلسة أمان واضحة لهذا الهاتف. ستبقى المراقبة ظاهرة في الإشعارات، وتنبهك قبل أي إرسال تلقائي للموقع.")
             }
         }
 
         item {
             Card {
                 Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)) {
-                    Text("خصوصية وموافقة", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                    Text("عند تفعيل المراقبة سيظهر إشعار دائم، وستطلب روافد إذن الموقع في الخلفية وإرسال SMS. لا يمكن تشغيل هذه الميزة سرًا، ولا تُستخدم لتتبع هاتف شخص آخر دون موافقته.")
+                    Text("كيف تعمل؟", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                    Text("1. تختار الأشخاص الموثوقين والوقت والتكرار.")
+                    Text("2. تبدأ المراقبة بنفسك وتظل حالتها ظاهرة على الهاتف.")
+                    Text("3. قبل الإرسال يظهر تنبيه «أنا بخير — لا ترسل».")
+                    Text("4. إذا لم تُلغِ، يحدد الهاتف موقعه ويرسل رابط الموقع تلقائيًا عبر SMS إلى الجهات التي سمحت لها بذلك.")
+                    Text("لا يمكن تشغيل هذه الميزة سرًا لتتبع هاتف شخص آخر دون موافقته.", color = MaterialTheme.colorScheme.error)
                 }
             }
         }
@@ -426,9 +651,19 @@ private fun SafetyMonitorScreen(requestPermissions: ((Boolean) -> Unit) -> Unit)
                 Card {
                     Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
                         Text("المراقبة نشطة", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = RawafidSemanticColors.Success)
-                        Text("الإرسال التالي: ${DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT).format(Date(config.nextDueAt))}")
+                        Text("الإرسال التالي: ${formatSafetyTime(config.nextDueAt)}")
                         Text("الجهات المستلمة: ${recipients.size}")
-                        Button(modifier = Modifier.fillMaxWidth(), onClick = { SafetyMonitorScheduler.stop(context); version++ }) { Text("إيقاف المراقبة") }
+                        if (config.lastAttemptAt > 0L) Text("آخر محاولة: ${formatSafetyTime(config.lastAttemptAt)}")
+                        if (config.lastSuccessAt > 0L) Text("آخر إرسال ناجح: ${formatSafetyTime(config.lastSuccessAt)}")
+                        if (config.lastResult.isNotBlank()) Text(config.lastResult, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        OutlinedButton(
+                            modifier = Modifier.fillMaxWidth(),
+                            onClick = { SafetyMonitorScheduler.requestSendNow(context); permissionMessage = "بدأ اختبار تحديد الموقع والإرسال." }
+                        ) { Text("اختبار الإرسال الآن") }
+                        Button(
+                            modifier = Modifier.fillMaxWidth(),
+                            onClick = { SafetyMonitorScheduler.stop(context); version++ }
+                        ) { Text("إيقاف المراقبة") }
                     }
                 }
             }
@@ -439,11 +674,18 @@ private fun SafetyMonitorScreen(requestPermissions: ((Boolean) -> Unit) -> Unit)
                 Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)) {
                     Text("من سيستلم موقعي؟", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                     if (recipients.isEmpty()) {
-                        Text("لا توجد جهة مفعّل لها استلام موقع الأمان.", color = MaterialTheme.colorScheme.error)
-                        OutlinedButton(modifier = Modifier.fillMaxWidth(), onClick = { context.startActivity(Intent(context, MyCircleActivity::class.java)) }) { Text("اختيار شخص من دائرتي") }
+                        Text("لا توجد جهة مفعّل لها «استلام موقع مراقبة الأمان».", color = MaterialTheme.colorScheme.error)
+                        OutlinedButton(
+                            modifier = Modifier.fillMaxWidth(),
+                            onClick = { context.startActivity(Intent(context, MyCircleActivity::class.java)) }
+                        ) { Text("اختيار شخص من دائرتي") }
                     } else {
-                        recipients.forEach { Text("• ${it.name}${if (it.relation.isNotBlank()) " — ${it.relation}" else ""}") }
-                        OutlinedButton(onClick = { context.startActivity(Intent(context, MyCircleActivity::class.java)) }) { Text("تعديل الجهات") }
+                        recipients.forEach { person ->
+                            Text("• ${person.name}${if (person.relation.isNotBlank()) " — ${person.relation}" else ""}")
+                        }
+                        OutlinedButton(onClick = { context.startActivity(Intent(context, MyCircleActivity::class.java)) }) {
+                            Text("تعديل الجهات")
+                        }
                     }
                 }
             }
@@ -453,18 +695,35 @@ private fun SafetyMonitorScreen(requestPermissions: ((Boolean) -> Unit) -> Unit)
             Card {
                 Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)) {
                     Text("جدول المراقبة", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                    OutlinedTextField(label, { label = it.take(80) }, label = { Text("اسم واضح — مثال: خروج الوالد مساءً") }, modifier = Modifier.fillMaxWidth())
+                    OutlinedTextField(
+                        label,
+                        { label = it.take(80) },
+                        label = { Text("اسم واضح — مثال: خروج الوالد مساءً") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
                     Text("ابدأ الإرسال من الساعة")
                     HourChips(startHour) { startHour = it }
                     Text("أوقف نافذة الإرسال عند الساعة")
                     HourChips(endHour) { endHour = it }
                     Text("أرسل كل")
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
-                        listOf(1, 2, 3, 4).forEach { hours -> FilterChip(selected = interval == hours, onClick = { interval = hours }, label = { Text(if (hours == 1) "ساعة" else "$hours ساعات") }) }
+                        listOf(1, 2, 3, 4).forEach { hours ->
+                            FilterChip(
+                                selected = interval == hours,
+                                onClick = { interval = hours },
+                                label = { Text(if (hours == 1) "ساعة" else "$hours ساعات") }
+                            )
+                        }
                     }
                     Text("نبّهني قبل الإرسال")
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
-                        listOf(5, 10, 15).forEach { minutes -> FilterChip(selected = warning == minutes, onClick = { warning = minutes }, label = { Text("$minutes دقائق") }) }
+                        listOf(5, 10, 15).forEach { minutes ->
+                            FilterChip(
+                                selected = warning == minutes,
+                                onClick = { warning = minutes },
+                                label = { Text("$minutes دقائق") }
+                            )
+                        }
                     }
                 }
             }
@@ -486,30 +745,50 @@ private fun SafetyMonitorScreen(requestPermissions: ((Boolean) -> Unit) -> Unit)
                                     startHour = startHour,
                                     endHour = endHour,
                                     intervalHours = interval,
-                                    warningMinutes = warning
+                                    warningMinutes = warning,
+                                    lastAttemptAt = config.lastAttemptAt,
+                                    lastSuccessAt = config.lastSuccessAt,
+                                    lastResult = config.lastResult
                                 )
                             )
                             version++
                         } else {
-                            permissionMessage = "لم تبدأ المراقبة لأن أذونات الموقع/الخلفية/SMS المطلوبة لم تُمنح بالكامل."
+                            permissionMessage = "لم تبدأ المراقبة. يلزم السماح بالموقع، والموقع طوال الوقت، والإشعارات، وإرسال SMS. على Android 11 أو أحدث افتح أذونات الموقع واختر «السماح طوال الوقت» ثم عُد للتطبيق."
                         }
                     }
                 }
             ) { Text("مراجعة الأذونات وبدء المراقبة") }
         }
-        if (permissionMessage.isNotBlank()) item { Text(permissionMessage, color = MaterialTheme.colorScheme.error) }
+
+        if (permissionMessage.isNotBlank()) {
+            item { Text(permissionMessage, color = MaterialTheme.colorScheme.primary) }
+        }
 
         item {
-            Text("تنبيه: هذه ميزة مساعدة وليست بديلًا عن خدمات الطوارئ أو أجهزة التتبع الطبية المعتمدة. قد تؤثر قيود البطارية أو الشبكة أو إيقاف الموقع على التسليم.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(
+                "هذه ميزة مساعدة وليست بديلًا عن خدمات الطوارئ أو جهاز تتبع طبي معتمد. يعتمد الإرسال على تشغيل الهاتف والموقع والشريحة والشبكة والأذونات وعدم إيقاف التطبيق أو الخدمة بالقوة.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
 
 @Composable
 private fun HourChips(selected: Int, onSelect: (Int) -> Unit) {
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
+    FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs),
+        verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)
+    ) {
         listOf(0, 6, 8, 12, 18, 20, 22).forEach { hour ->
-            FilterChip(selected = selected == hour, onClick = { onSelect(hour) }, label = { Text(String.format("%02d:00", hour)) })
+            FilterChip(
+                selected = selected == hour,
+                onClick = { onSelect(hour) },
+                label = { Text(String.format("%02d:00", hour)) }
+            )
         }
     }
 }
+
+private fun formatSafetyTime(value: Long): String =
+    if (value <= 0L) "—" else DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT).format(Date(value))
