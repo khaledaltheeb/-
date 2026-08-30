@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import ContentRenderer from '@/components/content-renderer';
 import LegacyPreservedPageView from '@/components/legacy-preserved-page';
 import PublicPagination from '@/components/public-pagination';
@@ -26,6 +26,7 @@ const pageNo = (value: string) => { const n = Number(value); return Number.isInt
 const pagePath = (slug: string, page: number) => `/sectors/${slug}${page > 1 ? `?page=${page}` : ''}`;
 const pageHref = (slug: string, page: number) => `${pagePath(slug, page)}#sector-content`;
 const legacyRoute = (slug: string) => `/sectors/${slug}/`;
+const retryDelay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function metadataTerms(metadata: Record<string, unknown> | null, key: string) {
   const value = metadata?.[key];
@@ -79,7 +80,7 @@ export default async function SectorPage({ params, searchParams }: { params: Par
   let contentRows: PublishedItem[] = [];
   let totalContent = 0;
   if (categoryIds.length > 0) {
-    const { data, count, error } = await supabase
+    const loadContentPage = () => supabase
       .from('content')
       .select('id,slug,title,excerpt,content_type,published_at,canonical_url,content_categories!inner(category_id)', { count: 'exact' })
       .in('content_categories.category_id', categoryIds)
@@ -89,13 +90,24 @@ export default async function SectorPage({ params, searchParams }: { params: Par
       .order('published_at', { ascending: false })
       .order('title')
       .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
-    if (error) throw new Error(`sector content query failed: ${error.message}`);
-    contentRows = (data ?? []) as unknown as PublishedItem[];
-    totalContent = count ?? 0;
+    let result = await loadContentPage();
+    if (result.error) {
+      await retryDelay(150);
+      result = await loadContentPage();
+    }
+    if (result.error) {
+      await retryDelay(350);
+      result = await loadContentPage();
+    }
+    if (result.error) throw new Error(`sector content query failed after retries: ${result.error.message}`);
+    contentRows = (result.data ?? []) as unknown as PublishedItem[];
+    totalContent = result.count ?? 0;
   }
 
   const contentPages = Math.max(1, Math.ceil(totalContent / PAGE_SIZE));
-  if (page > contentPages && page > 1) notFound();
+  // Publishing agents can change the collection while a crawler or user is paging.
+  // A formerly-valid deep page should converge to the current last page, never become a broken link.
+  if (page > contentPages && page > 1) redirect(pagePath(sector.slug, contentPages));
   const roots = categoryRows.filter((category) => !category.parent_id);
   const canonicalPath = pagePath(sector.slug, page);
   const canonicalUrl = `${SITE_URL}${canonicalPath}`;
