@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import SiteHeader from '@/components/site-header';
@@ -8,8 +9,9 @@ import LegacyPreservedPageView from '@/components/legacy-preserved-page';
 import QuickInfoCard from '@/components/quick-info-card';
 import { buildSeoMetadata, breadcrumbJsonLd, SITE_URL } from '@/lib/seo';
 import { getLegacyPreservedPage, legacyPreservedMetadata } from '@/lib/legacy-preserved-page';
-import { getQuickInfoRecord, safeQuickInfoReferences, visibleQuickInfoFaq } from '@/lib/quick-info';
+import { getQuickInfoRecord, quickInfoOgPath, safeQuickInfoReferences, visibleQuickInfoFaq } from '@/lib/quick-info';
 import { contentReviewProvenance } from '@/lib/review-provenance';
+import imageStyles from './quick-info-image.module.css';
 
 export const dynamic = 'force-dynamic';
 type Params = Promise<{ slug: string }>;
@@ -30,6 +32,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     follow: record.robots_follow,
     type: 'article',
     image: record.featured_image_url,
+    imageAlt: record.featured_image_alt,
     keywords: [record.primary_keyword, ...(record.secondary_keywords ?? []), ...(record.semantic_terms ?? []).slice(0, 10)].filter(Boolean) as string[],
     publishedTime: record.published_at,
     modifiedTime: record.updated_at,
@@ -49,6 +52,9 @@ export default async function QuickInfoDetailPage({ params }: { params: Params }
 
   const canonical = record.canonical_url || `/quick-info/${slug}/`;
   const url = `${SITE_URL}${canonical}`;
+  const imagePath = quickInfoOgPath(slug);
+  const imageUrl = record.featured_image_url || undefined;
+  const imageAlt = record.featured_image_alt || `بطاقة معلومات سريعة من منصة روافد بعنوان «${record.title}»`;
   const references = safeQuickInfoReferences(record.references_json);
   const faqItems = visibleQuickInfoFaq(record.body_json);
   const review = contentReviewProvenance(record);
@@ -73,7 +79,16 @@ export default async function QuickInfoDetailPage({ params }: { params: Params }
     author: record.author_display_name ? { '@type': 'Organization', name: record.author_display_name } : { '@id': `${SITE_URL}/#organization` },
     reviewedBy: review.reviewedBySchema,
     publisher: { '@id': `${SITE_URL}/#organization` },
-    image: record.featured_image_url || undefined,
+    image: imageUrl ? {
+      '@type': 'ImageObject',
+      '@id': `${url}#primary-image`,
+      url: imageUrl,
+      contentUrl: imageUrl,
+      width: 1200,
+      height: 630,
+      caption: imageAlt,
+      representativeOfPage: true,
+    } : undefined,
     keywords: keywords.join(', '),
     wordCount,
     citation: references.flatMap((reference) => reference.url ? [reference.url] : []),
@@ -97,7 +112,14 @@ export default async function QuickInfoDetailPage({ params }: { params: Params }
     <article><header className="article-hero"><span className="eyebrow">معلومات سريعة</span><h1>{record.title}</h1>{record.excerpt && <p>{record.excerpt}</p>}<div className="article-meta">
       {record.author_display_name && <span>إعداد: {record.author_display_name}</span>}{review.reviewerName && <span>مراجعة: {review.reviewerName}{review.reviewerCredentials ? ` — ${review.reviewerCredentials}` : ''}</span>}{record.published_at && <span>نُشر {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(record.published_at))}</span>}{review.lastReviewedAt && <span>آخر مراجعة {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(review.lastReviewedAt))}</span>}
     </div></header>
-    <div className="article-body"><QuickInfoCard title={record.title} description={record.excerpt} variant="hero" showAction={false} /><ContentRenderer bodyJson={record.body_json} bodyText={record.body_text} recordId={record.id} /></div>
+    <div className="article-body">
+      <QuickInfoCard title={record.title} description={record.excerpt} variant="hero" showAction={false} />
+      <ContentRenderer bodyJson={record.body_json} bodyText={record.body_text} recordId={record.id} />
+      {imagePath && <figure className={imageStyles.figure} data-quick-info-indexable-image>
+        <Image className={imageStyles.image} src={imagePath} alt={imageAlt} width={1200} height={630} sizes="(max-width: 760px) calc(100vw - 36px), 640px" loading="lazy" unoptimized />
+        <figcaption className={imageStyles.caption}>نسخة مرئية قابلة للمشاركة والفهرسة من بطاقة معلومات سريعة — منصة روافد</figcaption>
+      </figure>}
+    </div>
     {record.medical_disclaimer && <aside className="medical-disclaimer" aria-label="إخلاء المسؤولية الطبية"><strong>تنبيه</strong><p>{record.medical_disclaimer}</p><Link href="/disclaimer">إخلاء المسؤولية الكامل</Link></aside>}
     {references.length > 0 && <section className="article-references" aria-labelledby="references-title"><h2 id="references-title">المصادر والمراجع</h2><ol>{references.map((reference, index) => <li key={`${reference.url || reference.title}-${index}`}>{reference.url ? <a href={reference.url} target="_blank" rel="noopener noreferrer">{reference.title || reference.url}</a> : <span>{reference.title}</span>}{reference.publisher && <small>{reference.publisher}</small>}{reference.year && <small>{String(reference.year)}</small>}</li>)}</ol></section>}
     </article>
