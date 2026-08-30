@@ -1,10 +1,13 @@
 package org.healthrenewal.rawafid
 
+import android.Manifest
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -39,6 +42,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import org.json.JSONArray
 import org.json.JSONObject
 import java.time.LocalDate
@@ -144,6 +148,12 @@ class MedicationReminderReceiver : BroadcastReceiver() {
         val id = intent?.getLongExtra("medication_id", -1L) ?: -1L
         val medication = MedicationStore.medications(context).firstOrNull { it.id == id } ?: return
         if (!medication.reminderEnabled) return
+
+        // Keep the next reminder alive even if notification permission is currently denied.
+        MedicationReminderScheduler.sync(context, medication)
+
+        if (Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) return
+
         NotificationChannels.create(context)
         val open = PendingIntent.getActivity(context, 9700 + id.toInt().and(0x0fff), Intent(context, MedicationCompanionActivity::class.java), PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
@@ -159,7 +169,6 @@ class MedicationReminderReceiver : BroadcastReceiver() {
                 .setAutoCancel(true)
                 .build()
         )
-        MedicationReminderScheduler.sync(context, medication)
     }
 }
 
