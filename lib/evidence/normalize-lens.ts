@@ -1,34 +1,5 @@
+import type { NormalizedEvidenceRecord } from '@/lib/evidence/types';
 import type { LensScholarlyRecord } from '@/lib/lens/types';
-
-export type NormalizedEvidenceRecord = {
-  provider: 'lens';
-  providerId: string | null;
-  title: string;
-  publicationType: string | null;
-  publicationYear: number | null;
-  publicationDate: string | null;
-  journalOrSource: string | null;
-  publisher: string | null;
-  authors: string[];
-  doi: string | null;
-  pmid: string | null;
-  identifiers: Array<{ type: string; value: string }>;
-  scholarlyCitations: number | null;
-  patentCitations: number | null;
-  referencesCount: number | null;
-  openAccess: boolean;
-  openAccessColour: string | null;
-  fieldsOfStudy: string[];
-  keywords: string[];
-  meshTerms: string[];
-  sourceUrls: string[];
-  isRetractedOrUpdated: boolean;
-  retractionUpdates: LensScholarlyRecord['retraction_updates'];
-  attribution: {
-    label: 'Data sourced from The Lens';
-    url: 'https://www.lens.org/';
-  };
-};
 
 function externalId(record: LensScholarlyRecord, wanted: string): string | null {
   const found = record.external_ids?.find((id) => id.type?.toLowerCase() === wanted.toLowerCase());
@@ -54,7 +25,7 @@ function openAccessUrls(record: LensScholarlyRecord): string[] {
 export function normalizeLensRecord(record: LensScholarlyRecord): NormalizedEvidenceRecord {
   const ids = (record.external_ids ?? [])
     .filter((id): id is { type: string; value: string } => Boolean(id.type?.trim() && id.value?.trim()))
-    .map((id) => ({ type: id.type.trim(), value: id.value.trim() }));
+    .map((id) => ({ type: id.type.trim().toLowerCase(), value: id.value.trim() }));
 
   const sourceUrls = [
     ...(record.source_urls ?? []).map((item) => item.url).filter((url): url is string => Boolean(url)),
