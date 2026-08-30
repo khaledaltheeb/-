@@ -56,6 +56,24 @@ function coveredByGeneratedFamily(route) {
     route.startsWith('/daily-tools/');
 }
 
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+async function withRetry(label, task, attempts = 4) {
+  let lastError;
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      return await task();
+    } catch (error) {
+      lastError = error;
+      if (attempt === attempts) break;
+      const delayMs = 750 * attempt;
+      console.warn(`STATIC SITEMAP COVERAGE CONTRACT RETRY: ${label} failed on attempt ${attempt}; retrying in ${delayMs}ms.`);
+      await sleep(delayMs);
+    }
+  }
+  throw lastError instanceof Error ? lastError : new Error(`${label}: transient check failed`);
+}
+
 async function dbBackedContentCanonicals() {
   const supabase = createClient(url, key, {
     auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
@@ -65,17 +83,19 @@ async function dbBackedContentCanonicals() {
   const batchSize = 1000;
 
   for (let start = 0; start < 20000; start += batchSize) {
-    const { data, error } = await supabase
-      .from('content')
-      .select('canonical_url')
-      .eq('status', 'published')
-      .neq('content_type', 'condition')
-      .eq('robots_index', true)
-      .lte('published_at', now)
-      .order('id', { ascending: true })
-      .range(start, start + batchSize - 1);
-    if (error) throw new Error(error.message);
-    const batch = Array.isArray(data) ? data : [];
+    const batch = await withRetry(`content canonical batch ${start}-${start + batchSize - 1}`, async () => {
+      const { data, error } = await supabase
+        .from('content')
+        .select('canonical_url')
+        .eq('status', 'published')
+        .neq('content_type', 'condition')
+        .eq('robots_index', true)
+        .lte('published_at', now)
+        .order('id', { ascending: true })
+        .range(start, start + batchSize - 1);
+      if (error) throw new Error(error.message);
+      return Array.isArray(data) ? data : [];
+    });
     for (const row of batch) {
       const route = normalizeRoute(row.canonical_url);
       if (route) routes.add(route);
