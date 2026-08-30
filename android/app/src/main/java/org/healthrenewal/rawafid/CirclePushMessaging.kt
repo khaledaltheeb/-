@@ -32,6 +32,11 @@ object CirclePushRegistration {
         return UUID.randomUUID().toString().also { EncryptedLocalStore.put(app, DEVICE_ID_KEY, it) }
     }
 
+    @Suppress("DEPRECATION")
+    private fun appVersion(context: Context): String = runCatching {
+        context.packageManager.getPackageInfo(context.packageName, 0).versionName.orEmpty()
+    }.getOrDefault("")
+
     fun registerCurrentToken(context: Context) {
         val app = context.applicationContext
         if (!RawafidCircleApi.hasSession(app)) return
@@ -61,7 +66,7 @@ object CirclePushRegistration {
                     context = app,
                     deviceId = deviceId(app),
                     pushToken = token,
-                    appVersion = BuildConfig.VERSION_NAME
+                    appVersion = appVersion(app)
                 )
             }
         }
