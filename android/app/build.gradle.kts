@@ -61,4 +61,5 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling")
     implementation("androidx.work:work-runtime-ktx:2.11.2")
     implementation("androidx.webkit:webkit:1.17.0")
+    implementation("androidx.health.connect:connect-client:1.1.0")
 }
