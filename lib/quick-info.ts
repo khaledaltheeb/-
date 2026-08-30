@@ -159,7 +159,7 @@ export async function getQuickInfoRecord(routeSlug: string): Promise<QuickInfoRe
     ...record,
     body_json: sanitizeQuickInfoBodyJson(record.body_json),
     featured_image_url: quickInfoOgUrl(safeSlug),
-    featured_image_alt: `بطاقة مشاركة معلومات سريعة: ${record.title}`,
+    featured_image_alt: `بطاقة معلومات سريعة من منصة روافد بعنوان «${record.title}»`,
   };
 }
 
