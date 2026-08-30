@@ -16,6 +16,7 @@ class MainActivity : ComponentActivity() {
         TreatmentReminderScheduler.rescheduleFuture(this)
         MedicationReminderScheduler.syncAll(this)
         SafetyMonitorScheduler.resync(this)
+        EmergencyBeaconManager.restore(this)
         val safeArrival = SafeArrivalStore.load(this)
         if (safeArrival.active && safeArrival.dueAt > System.currentTimeMillis()) {
             SafeArrivalScheduler.schedule(this, safeArrival)
