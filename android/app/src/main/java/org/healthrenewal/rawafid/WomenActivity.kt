@@ -63,8 +63,10 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import org.json.JSONArray
 import org.json.JSONObject
+import java.text.DateFormat
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.Date
 import java.util.concurrent.TimeUnit
 
 private data class WomenEntry(
@@ -87,11 +89,15 @@ private object WomenCompanionStore {
     fun reminderMinutes(context: Context) = prefs(context).getLong("reminder_minutes", 240L)
     fun reminderMax(context: Context) = prefs(context).getInt("reminder_max", 4)
     fun careDaysEnabled(context: Context) = prefs(context).getBoolean("care_days_enabled", true)
+    fun lastBreastAwarenessAt(context: Context) = prefs(context).getLong("last_breast_awareness_at", 0L)
+    fun lastSelfCareAt(context: Context) = prefs(context).getLong("last_self_care_at", 0L)
 
     fun setReminderEnabled(context: Context, enabled: Boolean) = prefs(context).edit().putBoolean("reminder_enabled", enabled).apply()
     fun setReminderMinutes(context: Context, minutes: Long) = prefs(context).edit().putLong("reminder_minutes", minutes.coerceAtLeast(60L)).apply()
     fun setReminderMax(context: Context, value: Int) = prefs(context).edit().putInt("reminder_max", value.coerceIn(1, 8)).apply()
     fun setCareDaysEnabled(context: Context, enabled: Boolean) = prefs(context).edit().putBoolean("care_days_enabled", enabled).apply()
+    fun markBreastAwarenessNow(context: Context) = prefs(context).edit().putLong("last_breast_awareness_at", System.currentTimeMillis()).apply()
+    fun markSelfCareNow(context: Context) = prefs(context).edit().putLong("last_self_care_at", System.currentTimeMillis()).apply()
 
     fun claimReminderSlot(context: Context): Boolean {
         val p = prefs(context)
@@ -172,8 +178,8 @@ class WomenCompanionWorker(context: Context, params: WorkerParameters) : Corouti
     override suspend fun doWork(): Result {
         if (!WomenCompanionStore.reminderEnabled(applicationContext)) return Result.success()
         if (LocalStore.isQuietHour(applicationContext, LocalDateTime.now().hour)) return Result.success()
-        if (!WomenCompanionStore.claimReminderSlot(applicationContext)) return Result.success()
         if (Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) return Result.success()
+        if (!WomenCompanionStore.claimReminderSlot(applicationContext)) return Result.success()
 
         WomenCompanionScheduler.ensureChannel(applicationContext)
         val tags = adaptiveTags(applicationContext)
@@ -234,7 +240,7 @@ class WomenCompanionWorker(context: Context, params: WorkerParameters) : Corouti
         "postpartum" in tags -> "رفيقة روافد · أنتِ أيضًا تحتاجين للرعاية"
         "perimenopause" in tags -> "رفيقة روافد · راقبي نمطك وراحتك"
         "sleep" in tags -> "رفيقة روافد · لنغلق اليوم بلطف"
-        "period" in tags -> "رفيقة روافد · مراجعة نمطك"
+        "period" in tags -> "رفيقة روافد · تنبيه الاستعداد الشخصي"
         else -> "رفيقة روافد · مررت لأطمئن عليكِ"
     }
 }
@@ -296,6 +302,8 @@ private fun WomenCompanionScreen(requestNotifications: ((Boolean) -> Unit) -> Un
     val careDaysEnabled = remember(version) { WomenCompanionStore.careDaysEnabled(context) }
     val reminderMinutes = remember(version) { WomenCompanionStore.reminderMinutes(context) }
     val reminderMax = remember(version) { WomenCompanionStore.reminderMax(context) }
+    val lastBreast = remember(version) { WomenCompanionStore.lastBreastAwarenessAt(context) }
+    val lastSelfCare = remember(version) { WomenCompanionStore.lastSelfCareAt(context) }
     val companion = remember(feeling, need, mood, energy, pain, bleeding, profile) {
         val tags = buildSet {
             add("warm")
@@ -427,6 +435,21 @@ private fun WomenCompanionScreen(requestNotifications: ((Boolean) -> Unit) -> Un
                         Text("وعي بصحة الثدي", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                         Text("الهدف معرفة الشكل والإحساس المعتاد لديك والانتباه إلى تغير جديد مثل كتلة، تغير الجلد أو الحلمة، إفراز جديد أو تغير مستمر، ثم التواصل مع مختصة بدل محاولة التشخيص بنفسك.")
                         Text("الوعي الذاتي لا يستبدل التصوير أو برامج التحري المناسبة للعمر والخطورة.", style = MaterialTheme.typography.bodySmall)
+                        if (lastBreast > 0L) Text("آخر تسجيل: ${DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT).format(Date(lastBreast))}", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Button(modifier = Modifier.fillMaxWidth(), onClick = { WomenCompanionStore.markBreastAwarenessNow(context); version++ }) { Text("تمت المراجعة الآن") }
+                    }
+                }
+            }
+        }
+
+        if (profile.wantsSelfCareDays) {
+            item {
+                Card {
+                    Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Text("العناية الشخصية", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                        Text("سجّلي لحظة العناية عندما تنتهين منها بدل الاعتماد على الذاكرة. لا يرسل هذا السجل أي معلومة خارج الهاتف.")
+                        if (lastSelfCare > 0L) Text("آخر مرة: ${DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT).format(Date(lastSelfCare))}", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Button(modifier = Modifier.fillMaxWidth(), onClick = { WomenCompanionStore.markSelfCareNow(context); version++ }) { Text("تمت العناية الآن") }
                     }
                 }
             }
