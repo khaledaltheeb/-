@@ -31,6 +31,16 @@ object FeatureCatalog {
         status = "stable",
         priority = 121
     )
+    private val safeDriveAgreementsFeature = RawafidFeature(
+        id = "safe_drive_agreements",
+        title = "اتفاق القيادة الآمنة",
+        subtitle = "حدد لكل شخص من دائرتك تنبيهات الحوادث والقيادة وتقارير الرحلات وحد السرعة الشخصي ومدة الاستمرار قبل التنبيه.",
+        category = "safety",
+        routeType = "activity",
+        routeTarget = "org.healthrenewal.rawafid.SafeDriveAgreementsActivity",
+        status = "beta",
+        priority = 103
+    )
     @Volatile private var cache: List<RawafidFeature>? = null
 
     fun all(context: Context): List<RawafidFeature> = cache ?: synchronized(this) {
@@ -57,7 +67,7 @@ object FeatureCatalog {
                     feature
                 }
             }
-        return (listOf(accountFeature) + published)
+        return (listOf(accountFeature, safeDriveAgreementsFeature) + published)
             .distinctBy { it.id }
             .sortedByDescending { it.priority }
     }
