@@ -1,5 +1,8 @@
+import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getPsychEncyclopediaReleaseIndex } from '@/lib/psych-encyclopedia-release';
+import { getPediatricOncologyReleasePreviewByToken } from '@/lib/pediatric-oncology-release-preview';
+import { IS_TEMPORARY_HOST, SITE_URL } from '@/lib/seo';
 import { sitemapIndexResponse } from '@/lib/sitemap-xml';
 
 export const dynamic = 'force-dynamic';
@@ -20,11 +23,30 @@ function inFilter(values: string[]) {
   return `(${values.join(',')})`;
 }
 
+function escapeXml(value: string) {
+  return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+}
+
+function releasePreviewSitemap(path?: string | null, lastModified?: string | null) {
+  const url = path ? `${SITE_URL}${path}` : null;
+  const row = url
+    ? `<url><loc>${escapeXml(url)}</loc>${lastModified ? `<lastmod>${new Date(lastModified).toISOString()}</lastmod>` : ''}</url>`
+    : '';
+  const xml = `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${row}</urlset>`;
+  return new NextResponse(xml, {
+    headers: {
+      'Content-Type': 'application/xml; charset=utf-8',
+      'Cache-Control': 'private, no-store, max-age=0',
+    },
+  });
+}
+
 function applyDedicatedSitemapExclusions<T extends {
   not: (column: string, operator: string, value: string) => T;
   neq: (column: string, value: string) => T;
 }>(query: T): T {
   let owned = query
+    .not('canonical_url', 'like', '/encyclopedia/%')
     .not('canonical_url', 'like', '/quick-info/%')
     .not('canonical_url', 'like', '/daily-tools/%')
     .not('canonical_url', 'like', '/addiction/substances/%')
@@ -35,7 +57,14 @@ function applyDedicatedSitemapExclusions<T extends {
   return owned;
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  const requestUrl = new URL(request.url);
+  const releaseVerify = IS_TEMPORARY_HOST ? requestUrl.searchParams.get('release_verify') : null;
+  if (releaseVerify) {
+    const preview = await getPediatricOncologyReleasePreviewByToken(releaseVerify);
+    return releasePreviewSitemap(preview?.canonical_url, preview?.updated_at);
+  }
+
   const supabase = await createClient();
   const now = new Date().toISOString();
   const encyclopediaRelease = await getPsychEncyclopediaReleaseIndex();
@@ -44,7 +73,8 @@ export async function GET() {
   let encyclopediaQuery = supabase
     .from('content')
     .select('id', { count: 'exact', head: true })
-    .eq('content_type', 'condition')
+    .in('content_type', ['glossary_term', 'condition'])
+    .like('canonical_url', '/encyclopedia/%')
     .eq('status', 'published')
     .lte('published_at', now)
     .eq('robots_index', true);
@@ -57,7 +87,6 @@ export async function GET() {
     .from('content')
     .select('id', { count: 'exact', head: true })
     .eq('status', 'published')
-    .neq('content_type', 'condition')
     .lte('published_at', now)
     .eq('robots_index', true);
   contentQuery = applyDedicatedSitemapExclusions(contentQuery);

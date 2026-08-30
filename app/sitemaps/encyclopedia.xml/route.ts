@@ -5,6 +5,7 @@ import { sitemapResponse } from '@/lib/sitemap-xml';
 export const dynamic = 'force-dynamic';
 const PAGE_SIZE = 5000;
 const DB_BATCH_SIZE = 1000;
+const REDIRECTED_LEGACY_SLUGS = ['fragile-x-syndrome-education'] as const;
 
 type RawItem = Record<string, unknown>;
 type SitemapItem = { slug: string; canonicalUrl: string; updatedAt: string | null };
@@ -12,9 +13,13 @@ type SitemapItem = { slug: string; canonicalUrl: string; updatedAt: string | nul
 function normalizeItem(row: RawItem): SitemapItem | null {
   const slug = typeof row.slug === 'string' ? row.slug.trim().toLowerCase() : '';
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) return null;
+  if ((REDIRECTED_LEGACY_SLUGS as readonly string[]).includes(slug)) return null;
+  const canonicalUrl = `/encyclopedia/${slug}/`;
+  const storedCanonical = typeof row.canonical_url === 'string' ? row.canonical_url.trim() : '';
+  if (storedCanonical !== canonicalUrl) return null;
   return {
     slug,
-    canonicalUrl: `/encyclopedia/${slug}/`,
+    canonicalUrl,
     updatedAt: typeof row.updated_at === 'string' ? row.updated_at : null,
   };
 }
@@ -48,10 +53,11 @@ export async function GET(request: Request) {
     const requestedRows = batchEnd - batchStart + 1;
     let query = supabase
       .from('content')
-      .select('slug,updated_at')
-      .eq('content_type', 'condition')
+      .select('slug,canonical_url,updated_at')
+      .in('content_type', ['glossary_term', 'condition'])
       .eq('status', 'published')
       .eq('robots_index', true)
+      .like('canonical_url', '/encyclopedia/%')
       .lte('published_at', now)
       .order('slug', { ascending: true })
       .range(batchStart, batchEnd);

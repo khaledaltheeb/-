@@ -34,6 +34,8 @@ const redirectExcludedPrefixes = [
   '/specialists-partners/admin',
   '/specialists-partners/portal',
   '/api',
+  '/seo-card',
+  '/quick-info/og',
 ];
 
 const encyclopediaConditionAliases = new Set([
@@ -206,7 +208,7 @@ export async function updateSession(request: NextRequest) {
     url.pathname = '/login';
     url.search = '';
     url.searchParams.set('next', `${request.nextUrl.pathname}${request.nextUrl.search}`);
-    return NextResponse.redirect(url);
+    return NextResponse.redirect(url, 307);
   }
 
   if (isProtected && claims?.sub) {

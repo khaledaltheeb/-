@@ -10,7 +10,7 @@ on:
 
 concurrency:
   group: rawafid-production-deploy
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 permissions:
   contents: read
@@ -30,6 +30,15 @@ jobs:
       NEXT_PUBLIC_ENABLE_DIRECT_GA: 'true'
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: 1910e1ad3c793fd568ba1caafe34f964
+      SEO_GATE_BASE_URL: http://127.0.0.1:3000
+      SEO_GATE_CONCURRENCY: '8'
+      SEO_GATE_TIMEOUT_MS: '20000'
+      SEO_GATE_PAGE_ATTEMPTS: '3'
+      SEO_GATE_PAGE_RETRY_DELAY_MS: '300'
+      SEO_TARGET_URLS: '10000'
+      SEO_REQUIRE_TARGET: 'false'
+      SEO_RICH_MIN_WORDS: '100'
+      EDITORIAL_REQUIRE_READY: 'true'
     steps:
       - name: Require Cloudflare API token
         shell: bash
@@ -49,6 +58,15 @@ jobs:
           cache: npm
       - name: Install locked dependencies
         run: npm ci --no-audit --no-fund
+      - name: Install deterministic Arabic image build dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends imagemagick fontconfig fonts-noto-core librsvg2-bin
+          convert -version
+          rsvg-convert --version
+          fc-match 'Noto Sans Arabic'
       - name: Type check
         run: npm run typecheck
       - name: Lint
@@ -89,24 +107,12 @@ jobs:
           fi
       - name: Build local production candidate
         run: npm run build
-      - name: Verify deploy candidate editorial SEO discovery and content quality
+      - name: Start local production candidate server
         shell: bash
-        env:
-          SEO_GATE_BASE_URL: http://127.0.0.1:3000
-          SEO_GATE_CONCURRENCY: '12'
-          SEO_GATE_TIMEOUT_MS: '20000'
-          SEO_GATE_PAGE_ATTEMPTS: '3'
-          SEO_GATE_PAGE_RETRY_DELAY_MS: '300'
-          SEO_TARGET_URLS: '10000'
-          SEO_REQUIRE_TARGET: 'false'
-          SEO_RICH_MIN_WORDS: '100'
-          EDITORIAL_REQUIRE_READY: 'true'
         run: |
           set -euo pipefail
           nohup npm run start -- --hostname 127.0.0.1 --port 3000 > /tmp/rawafid-production-candidate.log 2>&1 &
-          server_pid=$!
-          cleanup() { kill "$server_pid" 2>/dev/null || true; }
-          trap cleanup EXIT
+          echo "$!" > /tmp/rawafid-production-candidate.pid
           ready=0
           for i in $(seq 1 60); do
             if curl -fsS http://127.0.0.1:3000/ >/dev/null; then
@@ -119,12 +125,26 @@ jobs:
             cat /tmp/rawafid-production-candidate.log >&2 || true
             exit 1
           fi
-          npm run smoke
-          node scripts/editorial-seo-readiness.mjs
-          node scripts/seo-readiness-report.mjs
-          node scripts/seo-gate.mjs
-          node scripts/rich-discovery-gate.mjs
-          node scripts/content-richness-gate.mjs
+      - name: Production candidate smoke tests
+        run: npm run smoke
+      - name: Editorial SEO readiness gate
+        run: node scripts/editorial-seo-readiness.mjs
+      - name: Sitemap and canonical readiness report
+        run: node scripts/seo-readiness-report.mjs
+      - name: Full sitemap SEO gate
+        run: node scripts/seo-gate.mjs
+      - name: Rich discovery gate
+        run: node scripts/rich-discovery-gate.mjs
+      - name: Content richness gate
+        run: node scripts/content-richness-gate.mjs
+      - name: Stop local production candidate server
+        if: always()
+        shell: bash
+        run: |
+          set +e
+          if [ -f /tmp/rawafid-production-candidate.pid ]; then
+            kill "$(cat /tmp/rawafid-production-candidate.pid)" 2>/dev/null || true
+          fi
       - name: Build Cloudflare Worker with OpenNext production environment
         env:
           NEXT_PUBLIC_SITE_URL: https://healthrenewal.org

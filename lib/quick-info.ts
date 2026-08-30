@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { SITE_URL } from '@/lib/seo';
 
 type JsonRecord = Record<string, unknown>;
 
@@ -46,7 +47,6 @@ export type QuickInfoItem = {
   title: string;
   excerpt: string | null;
   canonicalUrl: string;
-  featuredImageUrl: string | null;
   updatedAt: string | null;
 };
 
@@ -67,56 +67,19 @@ function asString(value: unknown) {
   return typeof value === 'string' ? value.trim() : '';
 }
 
-function safeImageUrl(value: unknown) {
-  const raw = asString(value);
-  if (!raw) return '';
-  try {
-    const url = new URL(raw);
-    if (url.protocol !== 'https:') return '';
-    // Legacy Quick Info cards are first-party assets that will remain on the
-    // canonical healthrenewal.org domain after cutover.
-    if (url.hostname !== 'healthrenewal.org' && url.hostname !== 'www.healthrenewal.org') return '';
-    if (!url.pathname.startsWith('/assets/')) return '';
-    return url.toString();
-  } catch {
-    return '';
-  }
+function safeRouteSlug(value: string) {
+  const slug = asString(value);
+  return /^[a-z0-9][a-z0-9-]*$/.test(slug) ? slug : '';
 }
 
-function schemaImageCandidate(value: unknown): string {
-  const root = asRecord(value);
-  const legacySchemas = Array.isArray(root?.legacy_schema) ? root.legacy_schema : [];
-
-  for (const schemaValue of legacySchemas) {
-    const schema = asRecord(schemaValue);
-    if (!schema) continue;
-    const graph = Array.isArray(schema['@graph']) ? schema['@graph'] : [schema];
-    for (const nodeValue of graph) {
-      const node = asRecord(nodeValue);
-      if (!node) continue;
-      const image = node.image;
-      if (Array.isArray(image)) {
-        for (const item of image) {
-          const direct = safeImageUrl(item);
-          if (direct) return direct;
-          const objectUrl = safeImageUrl(asRecord(item)?.url ?? asRecord(item)?.contentUrl);
-          if (objectUrl) return objectUrl;
-        }
-      } else {
-        const direct = safeImageUrl(image);
-        if (direct) return direct;
-        const imageObject = asRecord(image);
-        const objectUrl = safeImageUrl(imageObject?.url ?? imageObject?.contentUrl);
-        if (objectUrl) return objectUrl;
-      }
-    }
-  }
-  return '';
+export function quickInfoOgPath(routeSlug: string) {
+  const slug = safeRouteSlug(routeSlug);
+  return slug ? `/quick-info/og/${slug}.png` : '';
 }
 
-function effectiveFeaturedImage(featuredImage: unknown, schema: unknown) {
-  const explicit = safeImageUrl(featuredImage);
-  return explicit || schemaImageCandidate(schema) || null;
+export function quickInfoOgUrl(routeSlug: string) {
+  const path = quickInfoOgPath(routeSlug);
+  return path ? `${SITE_URL}${path}` : '';
 }
 
 function publicationApproved(schema: unknown): boolean {
@@ -145,11 +108,6 @@ function isKnownGeneratedParagraph(value: unknown) {
   return GENERATED_QUICK_INFO_PARAGRAPH_PREFIXES.some((prefix) => valueText.startsWith(prefix));
 }
 
-/**
- * Removes only the legacy generated expansion that was proven to be repetitive.
- * The database remains the source of record; this is a reader-facing safety net
- * until the five already-published wave-001 records are replaced editorially.
- */
 export function sanitizeQuickInfoBodyJson(value: unknown): unknown {
   const root = asRecord(value);
   const blocks = Array.isArray(root?.blocks) ? root.blocks : null;
@@ -181,11 +139,13 @@ export function quickInfoRouteSlug(contentSlug: string) {
 }
 
 export async function getQuickInfoRecord(routeSlug: string): Promise<QuickInfoRecord | null> {
+  const safeSlug = safeRouteSlug(routeSlug);
+  if (!safeSlug) return null;
   const supabase = await createClient();
   const { data } = await supabase
     .from('content')
     .select('id,slug,title,excerpt,body_json,body_text,content_type,seo_title,seo_description,canonical_url,robots_index,robots_follow,published_at,updated_at,featured_image_url,featured_image_alt,primary_keyword,secondary_keywords,semantic_terms,author_display_name,reviewer_display_name,reviewer_credentials,last_reviewed_at,references_json,medical_disclaimer,schema_json')
-    .eq('slug', quickInfoContentSlug(routeSlug))
+    .eq('slug', quickInfoContentSlug(safeSlug))
     .eq('status', 'published')
     .lte('published_at', new Date().toISOString())
     .maybeSingle();
@@ -193,14 +153,13 @@ export async function getQuickInfoRecord(routeSlug: string): Promise<QuickInfoRe
   const record = data as QuickInfoRecord | null;
   if (!record) return null;
   if (!publicationApproved(record.schema_json)) return null;
-  const expectedCanonical = `/quick-info/${routeSlug}/`;
+  const expectedCanonical = `/quick-info/${safeSlug}/`;
   if (record.canonical_url && record.canonical_url !== expectedCanonical) return null;
-  const featuredImage = effectiveFeaturedImage(record.featured_image_url, record.schema_json);
   return {
     ...record,
     body_json: sanitizeQuickInfoBodyJson(record.body_json),
-    featured_image_url: featuredImage,
-    featured_image_alt: featuredImage ? (record.featured_image_alt || record.title) : record.featured_image_alt,
+    featured_image_url: quickInfoOgUrl(safeSlug),
+    featured_image_alt: `بطاقة مشاركة معلومات سريعة: ${record.title}`,
   };
 }
 
@@ -208,7 +167,7 @@ export async function getQuickInfoItems(limit = 500): Promise<QuickInfoItem[]> {
   const supabase = await createClient();
   const { data } = await supabase
     .from('content')
-    .select('id,slug,title,excerpt,canonical_url,featured_image_url,updated_at,schema_json')
+    .select('id,slug,title,excerpt,canonical_url,updated_at,schema_json')
     .like('slug', 'quick-info-%')
     .eq('status', 'published')
     .eq('robots_index', true)
@@ -218,17 +177,17 @@ export async function getQuickInfoItems(limit = 500): Promise<QuickInfoItem[]> {
 
   return (Array.isArray(data) ? data : []).flatMap((row): QuickInfoItem[] => {
     if (!publicationApproved(row.schema_json)) return [];
-    const routeSlug = quickInfoRouteSlug(asString(row.slug));
-    if (!routeSlug || !/^[a-z0-9][a-z0-9-]*$/.test(routeSlug)) return [];
+    const routeSlug = safeRouteSlug(quickInfoRouteSlug(asString(row.slug)));
+    if (!routeSlug) return [];
     const canonicalUrl = asString(row.canonical_url) || `/quick-info/${routeSlug}/`;
     if (canonicalUrl !== `/quick-info/${routeSlug}/`) return [];
+    const title = asString(row.title);
     return [{
       id: asString(row.id),
       routeSlug,
-      title: asString(row.title),
+      title,
       excerpt: typeof row.excerpt === 'string' ? row.excerpt : null,
       canonicalUrl,
-      featuredImageUrl: effectiveFeaturedImage(row.featured_image_url, row.schema_json),
       updatedAt: typeof row.updated_at === 'string' ? row.updated_at : null,
     }];
   });

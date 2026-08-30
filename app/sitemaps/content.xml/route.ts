@@ -31,11 +31,16 @@ type ContentSitemapRecord = {
   canonical_url: string | null;
 };
 
+type TaxonomySitemapRecord = {
+  slug: string;
+};
+
 function applyDedicatedSitemapExclusions<T extends {
   not: (column: string, operator: string, value: string) => T;
   neq: (column: string, value: string) => T;
 }>(query: T): T {
   let owned = query
+    .not('canonical_url', 'like', '/encyclopedia/%')
     .not('canonical_url', 'like', '/quick-info/%')
     .not('canonical_url', 'like', '/daily-tools/%')
     .not('canonical_url', 'like', '/addiction/substances/%')
@@ -44,6 +49,11 @@ function applyDedicatedSitemapExclusions<T extends {
     owned = owned.neq('canonical_url', canonical);
   }
   return owned;
+}
+
+function normalizeCanonicalPath(path: string) {
+  if (path === '/') return path;
+  return path.replace(/\/+$/, '');
 }
 
 export async function GET(request: Request) {
@@ -56,9 +66,38 @@ export async function GET(request: Request) {
   const now = new Date().toISOString();
   const data: ContentSitemapRecord[] = [];
 
-  // Canonical ownership is exclusive across child sitemaps. Only canonicals actually
-  // owned by Quick Info, Daily Tools, and the Addiction Atlas are excluded here.
-  // Other records may have legacy-looking slugs or namespaces but remain in this no-loss safety net.
+  // Taxonomy hub canonicals belong exclusively to taxonomy.xml. Content rows may
+  // still power those pages editorially, but must not emit a competing sitemap URL.
+  const [sectorResult, categoryResult] = await Promise.all([
+    supabase
+      .from('sectors')
+      .select('slug')
+      .eq('is_active', true)
+      .eq('visibility', 'public')
+      .limit(20000),
+    supabase
+      .from('categories')
+      .select('slug')
+      .eq('is_active', true)
+      .eq('visibility', 'public')
+      .limit(50000),
+  ]);
+
+  if (sectorResult.error) {
+    throw new Error(`content sitemap taxonomy sector query failed: ${sectorResult.error.message}`);
+  }
+  if (categoryResult.error) {
+    throw new Error(`content sitemap taxonomy category query failed: ${categoryResult.error.message}`);
+  }
+
+  const taxonomyOwnedCanonicals = new Set<string>([
+    ...((sectorResult.data ?? []) as TaxonomySitemapRecord[]).map((item) => `/sectors/${item.slug}`),
+    ...((categoryResult.data ?? []) as TaxonomySitemapRecord[]).map((item) => `/sections/${item.slug}`),
+  ]);
+
+  // Child-sitemap ownership is determined by the published canonical namespace,
+  // never by an internal content_type. This prevents non-encyclopedia conditions
+  // and glossary terms from being dropped or emitted under a competing URL.
   // Pagination is intentionally ordered by immutable row id; updated_at only feeds lastmod.
   for (let batchStart = pageStart; batchStart < pageEndExclusive; batchStart += DB_BATCH_SIZE) {
     const batchEnd = Math.min(batchStart + DB_BATCH_SIZE - 1, pageEndExclusive - 1);
@@ -67,7 +106,6 @@ export async function GET(request: Request) {
       .from('content')
       .select('id,slug,updated_at,canonical_url')
       .eq('status', 'published')
-      .neq('content_type', 'condition')
       .lte('published_at', now)
       .eq('robots_index', true);
     query = applyDedicatedSitemapExclusions(query);
@@ -86,12 +124,17 @@ export async function GET(request: Request) {
     if (batch.length < requestedRows) break;
   }
 
-  const databaseRows: SitemapRow[] = data.map((item) => ({
-    path: item.canonical_url || `/content/${item.slug}`,
-    lastModified: item.updated_at,
-    changeFrequency: 'monthly',
-    priority: .7,
-  }));
+  const databaseRows: SitemapRow[] = data
+    .filter((item) => {
+      const path = item.canonical_url || `/content/${item.slug}`;
+      return !taxonomyOwnedCanonicals.has(normalizeCanonicalPath(path));
+    })
+    .map((item) => ({
+      path: item.canonical_url || `/content/${item.slug}`,
+      lastModified: item.updated_at,
+      changeFrequency: 'monthly',
+      priority: .7,
+    }));
 
   let generatedRows: SitemapRow[] = [];
   if (page === 0) {
@@ -103,13 +146,18 @@ export async function GET(request: Request) {
         changeFrequency: 'monthly',
         priority: .72,
       })),
-      ...expandedIndex.map((item) => ({
-        path: item.canonical_url,
-        lastModified: item.updated_at,
-        changeFrequency: 'monthly',
-        priority: .74,
-      })),
-    ];
+      ...expandedIndex
+        // A published/indexable DB row owns this slug. Its canonical belongs to
+        // the DB-driven sitemap partition, so the static release must not emit a
+        // second legacy /content alias or duplicate that canonical elsewhere.
+        .filter((item) => item.canonical_source === 'static')
+        .map((item) => ({
+          path: item.canonical_url,
+          lastModified: item.updated_at,
+          changeFrequency: 'monthly',
+          priority: .74,
+        })),
+    ].filter((item) => !taxonomyOwnedCanonicals.has(normalizeCanonicalPath(item.path)));
   }
 
   const unique = new Map<string, SitemapRow>();

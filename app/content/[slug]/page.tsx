@@ -9,14 +9,14 @@ import { createClient } from '@/lib/supabase/server';
 import { buildSeoMetadata, breadcrumbJsonLd, SITE_URL } from '@/lib/seo';
 import { getCognitivePageBySlug, getCognitivePageIndex, getCognitivePageIndexItem } from '@/lib/cognitive-program';
 import { getExpandedEncyclopediaIndex, getExpandedEncyclopediaRecord } from '@/lib/expanded-encyclopedia';
-import { publicContentTypeLabel } from '@/lib/public-content-routing';
+import { publicContentHref, publicContentTypeLabel } from '@/lib/public-content-routing';
 import { contentReviewProvenance } from '@/lib/review-provenance';
 
 export const dynamic = 'force-dynamic';
 
 type Params = Promise<{ slug: string }>;
 type ReferenceItem = { title?: string; url?: string; publisher?: string; year?: string | number };
-type RelatedItem = { id: string; slug: string; title: string; excerpt: string | null; content_type: string; score: number };
+type RelatedItem = { id: string; slug: string; title: string; excerpt: string | null; content_type: string; score: number; canonical_url?: string | null };
 type TaxonomyNode = { slug: string; name_ar: string };
 type UnknownRecord = Record<string, unknown>;
 type FaqItem = { question: string; answer: string };
@@ -278,6 +278,26 @@ async function relatedContent(record: ContentRecord): Promise<RelatedItem[]> {
   return (data ?? []) as RelatedItem[];
 }
 
+async function resolveRelatedCanonicalUrls(items: RelatedItem[]): Promise<RelatedItem[]> {
+  if (!items.length) return items;
+  const slugs = [...new Set(items.map((item) => item.slug))];
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from('content')
+    .select('slug,canonical_url')
+    .in('slug', slugs)
+    .eq('status', 'published')
+    .eq('robots_index', true)
+    .lte('published_at', new Date().toISOString());
+  const canonicalBySlug = new Map((data ?? []).map((item) => [item.slug, item.canonical_url] as const));
+  return items.map((item) => ({
+    ...item,
+    canonical_url: canonicalBySlug.has(item.slug)
+      ? canonicalBySlug.get(item.slug) ?? null
+      : item.canonical_url ?? null,
+  }));
+}
+
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params;
   const record = await getPublishedRecord(slug);
@@ -307,7 +327,7 @@ export default async function PublishedContentPage({ params }: { params: Params 
   const category = taxonomyNode(record.categories);
   const audiences = Array.isArray(record.audience) ? record.audience.map(String) : [];
   const references = safeReferences(record.references_json);
-  const related = await relatedContent(record);
+  const related = await resolveRelatedCanonicalUrls(await relatedContent(record));
   const canonical = record.canonical_url || `/content/${record.slug}`;
   const url = canonical.startsWith('https://') ? canonical : `${SITE_URL}${canonical}`;
   const faqItems = visibleFaq(record.body_json);
@@ -444,9 +464,12 @@ export default async function PublishedContentPage({ params }: { params: Params 
         </nav>
         {related.length > 0 && <section className="article-related" aria-labelledby="related-title">
           <div className="section-mini-heading"><div><span className="eyebrow">روابط موضوعية</span><h2 id="related-title">محتوى مرتبط</h2></div><span>روابط منتقاة من خريطة المفاهيم ونية البحث</span></div>
-          <div className="related-content-grid">{related.map((item) => <article key={item.id}>
-            <span>{publicContentTypeLabel(item.content_type)}</span><h3><Link href={`/content/${item.slug}`}>{item.title}</Link></h3>{item.excerpt && <p>{item.excerpt}</p>}<Link href={`/content/${item.slug}`}>متابعة القراءة ←</Link>
-          </article>)}</div>
+          <div className="related-content-grid">{related.map((item) => {
+            const href = publicContentHref(item);
+            return <article key={item.id}>
+              <span>{publicContentTypeLabel(item.content_type)}</span><h3><Link href={href}>{item.title}</Link></h3>{item.excerpt && <p>{item.excerpt}</p>}<Link href={href}>متابعة القراءة ←</Link>
+            </article>;
+          })}</div>
         </section>}
         {references.length > 0 && <section className="article-references" aria-labelledby="references-title">
           <h2 id="references-title">المصادر والمراجع</h2><ol>{references.map((reference, index) => <li key={`${reference.url || reference.title}-${index}`}>

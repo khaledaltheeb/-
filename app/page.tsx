@@ -141,6 +141,7 @@ export default async function HomePage() {
           <div className="rawafid-platform-grid">
             <Link prefetch={false} className="rawafid-platform-card" href="/care-guides/"><div className="icon-shell"><PlatformIcon name="knowledge" /></div><h3>أدلة التعامل والرعاية</h3><p>أدلة عملية للأسرة والمريض ومقدم الرعاية، منظمة حسب الحاجة والموقف.</p><span>استكشف الأدلة ←</span></Link>
             <Link prefetch={false} className="rawafid-platform-card" href="/evidence-guides/"><div className="icon-shell"><PlatformIcon name="review" /></div><h3>الأدلة العلمية</h3><p>صفحات تلخص الأدلة والدراسات والمصادر مع سياق منهجي واضح.</p><span>استكشف الأدلة العلمية ←</span></Link>
+            <Link prefetch={false} className="rawafid-platform-card" href="/assessment-lab"><div className="icon-shell"><PlatformIcon name="tools" /></div><h3>مختبر روافد للمتابعة والفهم</h3><p>60 أداة متابعة عربية تعمل داخل المتصفح و10 صفحات مصدرية موثقة، دون حفظ الإجابات أو إنتاج تشخيص.</p><span>فتح المختبر ←</span></Link>
             <Link prefetch={false} className="rawafid-platform-card" href="/sectors/pediatric-oncology"><div className="icon-shell"><PlatformIcon name="community" /></div><h3>مركز سرطان الأطفال</h3><p>مسار موحد للتشخيص والعلاج والدعم النفسي والأسري والنجاة والمتابعة.</p><span>فتح المركز ←</span></Link>
           </div>
         </section>

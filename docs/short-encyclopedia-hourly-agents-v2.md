@@ -1,0 +1,136 @@
+# Short Encyclopedia — Hourly Agent Contract v3.0
+
+This contract governs automated publishing for `/sectors/short-encyclopedia`.
+
+## Global operating rule
+
+The production target is **up to 150 newly published pages per agent per hourly run**. Quality is a hard gate, not a soft preference. A candidate that fails scientific accuracy, source verification, duplicate/cannibalization review, editorial clarity, SEO validation, or post-publication verification must not be published merely to fill the quota. It remains in the backlog for correction or replacement.
+
+There is **no minimum word-count requirement**. Pages should be only as long as necessary to answer the search intent completely and accurately. Filler, generic prose, artificial expansion, keyword stuffing, and repeated boilerplate are prohibited.
+
+Every run must follow this pipeline:
+
+1. Inspect the live site and the **entire production content corpus, including published pages and drafts**, before choosing topics.
+2. Find genuine content/search gaps. Prioritize missing entities, unanswered Arabic queries, synonyms, English/Arabic naming variants, important syndromes/conditions, and high-value user questions. Do not publish alphabetically just to increase volume.
+3. Apply the mandatory Gap-first gate below. Reject candidates that would duplicate an existing page or create search-intent cannibalization. Prefer enriching/linking an existing canonical page when that is the correct action.
+4. Research each accepted candidate using current authoritative sources appropriate to the topic: international/public-health bodies, clinical guidance, university or government sources, systematic reviews, meta-analyses, peer-reviewed research, recognized reference works, and authoritative condition/syndrome databases. Never copy protected diagnostic manuals or proprietary tests verbatim.
+5. Write clear Arabic for the intended audience. Preserve the correct English term and recognized synonyms/aliases. State uncertainty and evidence limits where relevant.
+6. Run the scientific/editorial gate.
+7. Run the SEO/entity gate.
+8. Publish only passing pages to the correct short-encyclopedia category.
+9. Verify the live/public result: successful response, correct canonical, indexability, correct section mapping, valid metadata, valid internal links, and no duplicate title/slug/canonical.
+10. Record audit metadata, sources used, publication status, and failure reason for every rejected candidate.
+
+## Gap-first gate — mandatory before research or writing
+
+No candidate may be drafted merely because an agent knows the term. A new page is allowed only after the agent proves that the intended entity/search intent is not already adequately represented in the corpus.
+
+For every candidate, search and normalize all of the following across the complete production corpus:
+
+- Arabic title and normalized Arabic spelling;
+- English term and recognized English variants;
+- candidate slug and likely slug variants;
+- `search_aliases` and transliterations;
+- `primary_keyword`;
+- `secondary_keywords`;
+- `semantic_terms`;
+- stored `canonical_url`;
+- existing page titles/excerpts/body terminology where needed;
+- near-identical entity meaning and search intent, even when wording differs.
+
+If a published canonical page already covers the same entity or primary intent, **do not create a second page**. Improve, enrich, correct, cross-list, or internally link the existing canonical page instead. If a substantial draft already targets the same entity, repair/complete that draft rather than opening another one. A new page is justified only when it represents a distinct entity or a materially distinct user intent that deserves its own canonical.
+
+The deduplication decision must be logged so later agents do not repeat the same candidate-selection work.
+
+## Scientific/editorial gate — mandatory
+
+- Factual and terminological accuracy.
+- No unsupported causal claims.
+- Do not present screening information as diagnosis.
+- Symptoms/features must match the entity; if the concept has no symptoms or causes, explicitly use a scientifically appropriate heading such as “لا ينطبق” or explain why instead of inventing content.
+- Separate established evidence from emerging or uncertain evidence.
+- Advice must be useful, specific, safe, and proportionate; no generic filler.
+- Include when-to-seek-professional-help or urgent-safety guidance only when medically relevant.
+- Use respectful, non-stigmatizing Arabic.
+- References must support the claims actually made.
+- Content must add useful information beyond a definition copied from elsewhere.
+
+## SEO/entity gate — mandatory
+
+Each new page must have, as applicable:
+
+- unique Arabic page title and unique SEO title;
+- English term and recognized Arabic/English aliases;
+- concise unique meta description;
+- one clear primary search intent;
+- primary keyword plus natural secondary queries and semantic entities, without stuffing;
+- canonical URL and indexable robots state;
+- correct slug and no competing canonical/title/intent;
+- visible internal links to the section hub and closely related pages, plus reciprocal/contextual links when useful;
+- breadcrumbs;
+- structured data that truthfully matches the visible content and page type (`DefinedTerm`/`WebPage` for terminology and `MedicalCondition`/`MedicalWebPage` only for genuine clinical conditions, plus `BreadcrumbList` where appropriate);
+- source/review metadata and medical disclaimer where the subject is medical;
+- inclusion in the correct sitemap/indexation pipeline;
+- Arabic spelling variants and common transliterations only when they correspond to real searches and do not degrade the visible text.
+
+A visible FAQ is encouraged when it answers real user questions, but it must be written for users rather than manufactured for rich-result eligibility.
+
+## Agent A — Psychology Terms
+
+Category: `short-encyclopedia-psychology-terms`
+
+Public name: **مصطلحات علم النفس**
+
+Scope includes psychology terminology, mental-health conditions, psychological disorders, syndromes, states, constructs, symptoms-as-terms, therapeutic/research concepts, and closely related clinical terminology.
+
+Default page structure for an entity when clinically applicable:
+
+1. المصطلح
+2. المصطلح بالإنجليزية
+3. تعريف دقيق
+4. شرح واضح
+5. الأعراض أو السمات
+6. الأسباب وعوامل الخطورة/الارتباطات عندما يدعمها الدليل
+7. نصائح عملية وآمنة
+8. أسئلة وأجوبة حقيقية مبنية على نية البحث
+9. المراجع والمصادر
+
+Preferred source classes include WHO, NIMH, NICE/NHS, recognized professional/academic sources, systematic reviews, meta-analyses, clinical guidelines, and peer-reviewed literature. Diagnostic nomenclature may be accurately summarized but proprietary manuals must not be reproduced.
+
+## Agent B — Special Needs & Inclusive Education
+
+Category: `short-encyclopedia-special-needs-inclusive-education`
+
+Public name: **احتياجات خاصة وتربية دامجة**
+
+Scope includes developmental conditions and syndromes, learning differences/difficulties, communication, sensory and motor needs, special education, inclusive education, accommodations, accessibility, classroom participation, family support, and evidence-based educational/functional support.
+
+The section/category/navigation label must use **احتياجات خاصة وتربية دامجة** rather than a disability label. Within scientific prose, use respectful person-centered or identity-respecting language appropriate to the topic and community; formal clinical/legal terminology may be mentioned only when necessary for accuracy and explained neutrally.
+
+Default page structure when applicable:
+
+1. المصطلح أو الحالة
+2. المصطلح بالإنجليزية
+3. تعريف دقيق
+4. شرح واضح
+5. السمات/الأعراض عند انطباقها
+6. الأسباب أو العوامل المرتبطة عند ثبوتها
+7. الدعم والتكييفات والنصائح العملية
+8. أسئلة وأجوبة حقيقية مبنية على نية البحث
+9. المراجع والمصادر
+
+Preferred source classes include WHO, UNICEF, UNESCO, NICE/NHS, CDC/AAP where relevant, GeneReviews/Orphanet for appropriate genetic/rare conditions, evidence-based education/inclusion guidance, systematic reviews, and peer-reviewed literature.
+
+## Data, canonical, and routing rules
+
+- A genuinely new short-encyclopedia terminology page should normally use `content_type='glossary_term'`, canonical `/encyclopedia/{slug}/`, and the relevant short-encyclopedia root category as its primary category.
+- Use `content_type='condition'` only for an entity that is genuinely a clinical condition and only when the page/schema model matches that meaning. Its canonical may still be `/encyclopedia/{slug}/` when the Short Encyclopedia owns that page.
+- **Sitemap ownership is determined by the stored canonical namespace, not by `content_type`.** A row canonicalized to `/encyclopedia/...` belongs to the encyclopedia sitemap; a condition or glossary term canonicalized elsewhere must remain in the sitemap that owns that canonical.
+- Existing pages cross-listed into a new section must retain their existing primary taxonomy and canonical URL; do not create a duplicate page merely to move it into the short encyclopedia.
+- Never rewrite an existing canonical solely to force an old page into this sector. Cross-list it when appropriate.
+- Before any publish, search by normalized Arabic/English term, slug, aliases, canonical URL, primary/secondary keywords, semantic terms, and semantic/search intent.
+- Never delete, hide, de-index, or replace an existing published page as part of this workflow unless an explicit repair decision is separately justified and verified.
+
+## Throughput and parallelism
+
+The two agents are independent and may run concurrently once per hour. Each should aim to complete **150 passing pages per run**. Failed, unsupported, weak, or duplicate candidates do not count as published pages. If fewer than 150 defensible pages can be completed in a run, publish the passing set and retain/replace the rest rather than lowering the quality bar. The objective is sustained high throughput without sacrificing scientific integrity or creating SEO cannibalization.

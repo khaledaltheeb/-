@@ -1,5 +1,7 @@
 import { getCloudflareContext } from '@opennextjs/cloudflare';
 import categoriesJson from '@/data/expanded-encyclopedia/categories.json';
+import { publicContentHref } from '@/lib/public-content-routing';
+import { createClient } from '@/lib/supabase/server';
 
 export type ExpandedEncyclopediaCategory = {
   slug: string;
@@ -8,6 +10,7 @@ export type ExpandedEncyclopediaCategory = {
 };
 
 export type ExpandedEncyclopediaContentType = 'glossary_term' | 'intervention' | 'assessment' | 'condition';
+export type ExpandedEncyclopediaCanonicalSource = 'static' | 'database';
 
 export type ExpandedEncyclopediaIndexRecord = {
   id: string;
@@ -15,6 +18,7 @@ export type ExpandedEncyclopediaIndexRecord = {
   title: string;
   excerpt: string;
   canonical_url: string;
+  canonical_source: ExpandedEncyclopediaCanonicalSource;
   content_type: ExpandedEncyclopediaContentType;
   category_slug: string;
   category_name: string;
@@ -27,7 +31,7 @@ export type ExpandedEncyclopediaIndexRecord = {
   updated_at: string;
 };
 
-export type ExpandedEncyclopediaRecord = ExpandedEncyclopediaIndexRecord & {
+export type ExpandedEncyclopediaRecord = Omit<ExpandedEncyclopediaIndexRecord, 'canonical_source'> & {
   body_json: unknown;
   body_text: string;
   schema_json: Record<string, unknown>;
@@ -52,12 +56,14 @@ export const EXPANDED_ENCYCLOPEDIA_RELEASE_ID = 'expanded-encyclopedia-wave-001-
 export const EXPANDED_ENCYCLOPEDIA_RELEASED_AT = '2026-08-22T19:30:00.000Z';
 const ASSET_ROOT = '/expanded-encyclopedia-data';
 const VALID_CONTENT_TYPES = new Set<ExpandedEncyclopediaContentType>(['glossary_term', 'intervention', 'assessment', 'condition']);
+const OWNER_BATCH_SIZE = 100;
 
 const categories = (categoriesJson as ExpandedEncyclopediaCategory[]).map((item) => ({ ...item }));
 const categoryBySlug = new Map(categories.map((item) => [item.slug, item]));
 
 type AssetBinding = { fetch(input: Request | string | URL): Promise<Response> };
 type AssetEnvironment = { ASSETS?: AssetBinding };
+type PublishedCanonicalOwnerRow = { slug: string; canonical_url: string | null };
 
 const validSlug = (value: string) => /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value);
 const clean = (value: unknown) => typeof value === 'string' ? value.trim().replace(/\s+/gu, ' ') : '';
@@ -142,6 +148,7 @@ function validateIndex(value: unknown): ExpandedEncyclopediaIndexRecord[] {
       title: clean(row.title),
       excerpt: clean(row.excerpt),
       canonical_url: canonical,
+      canonical_source: 'static',
       content_type: contentType,
       category_slug: categorySlug,
       category_name: clean(row.category_name) || categoryBySlug.get(categorySlug)?.name || '',
@@ -157,9 +164,48 @@ function validateIndex(value: unknown): ExpandedEncyclopediaIndexRecord[] {
   return result;
 }
 
+async function reconcilePublishedCanonicalOwners(records: ExpandedEncyclopediaIndexRecord[]) {
+  if (records.length === 0) return records;
+  const supabase = await createClient();
+  const now = new Date().toISOString();
+  const slugs = [...new Set(records.map((item) => item.slug))];
+  const owners = new Map<string, string>();
+
+  for (let start = 0; start < slugs.length; start += OWNER_BATCH_SIZE) {
+    const batch = slugs.slice(start, start + OWNER_BATCH_SIZE);
+    const { data, error } = await supabase
+      .from('content')
+      .select('slug,canonical_url')
+      .in('slug', batch)
+      .eq('status', 'published')
+      .eq('robots_index', true)
+      .lte('published_at', now);
+
+    if (error) {
+      throw new Error(`expanded encyclopedia canonical ownership lookup failed: ${error.message}`);
+    }
+
+    for (const row of (data ?? []) as PublishedCanonicalOwnerRow[]) {
+      const ownerPath = publicContentHref({ slug: row.slug, canonical_url: row.canonical_url });
+      const existing = owners.get(row.slug);
+      if (existing && existing !== ownerPath) {
+        throw new Error(`conflicting published canonical owners for expanded encyclopedia slug: ${row.slug}`);
+      }
+      owners.set(row.slug, ownerPath);
+    }
+  }
+
+  return records.map((record) => {
+    const ownerPath = owners.get(record.slug);
+    return ownerPath
+      ? { ...record, canonical_url: ownerPath, canonical_source: 'database' as const }
+      : record;
+  });
+}
+
 export async function getExpandedEncyclopediaIndex(): Promise<ExpandedEncyclopediaIndexRecord[]> {
   const value = await readAsset<unknown>(`${ASSET_ROOT}/index.json`);
-  return validateIndex(value);
+  return reconcilePublishedCanonicalOwners(validateIndex(value));
 }
 
 export async function getExpandedEncyclopediaIndexItem(slugValue: string): Promise<ExpandedEncyclopediaIndexRecord | null> {
