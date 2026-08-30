@@ -44,7 +44,7 @@ requireMatch('detail page', files.detail, /quickInfoOgPath/, 'detail page must k
 requireMatch('detail page', files.detail, /data-quick-info-indexable-image/, 'detail page must expose the existing real indexable card image.');
 requireMatch('detail page', files.detail, /imageWidth:\s*1280[\s\S]*imageHeight:\s*720/, 'Quick Info social metadata must declare the 1280x720 Discover dimensions.');
 requireMatch('detail page', files.detail, /width:\s*1280[\s\S]*height:\s*720/, 'Article ImageObject must expose the 1280x720 Discover image.');
-requireMatch('detail page', files.detail, /thumbnailUrl:\s*imagePath/, 'Article schema must retain the visible card image as a thumbnail.');
+requireMatch('detail page', files.detail, /thumbnailUrl:\s*imagePath\s*\?\s*`\$\{SITE_URL\}\$\{imagePath\}`/, 'Article schema must retain the visible card image as a thumbnail.');
 requireMatch('detail page', files.detail, /<Image[^>]*src=\{imagePath\}[^>]*alt=\{imageAlt\}[^>]*width=\{1200\}[^>]*height=\{630\}/, 'visible Quick Info card image dimensions must stay 1200x630.');
 requireMatch('detail page', files.detail, /unoptimized/, 'generated card PNG URL must remain directly discoverable rather than replaced by an optimizer URL.');
 forbid('detail page', files.detail, /quickInfoCardPath/, 'detail page must not reintroduce the retired raster-card rendering path.');
