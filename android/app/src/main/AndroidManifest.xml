@@ -26,7 +26,10 @@
         <activity android:name=".ToolCatalogActivity" android:exported="false" android:label="أدوات روافد" />
         <activity android:name=".LifeUtilityActivity" android:exported="false" android:label="أدوات روافد" />
         <activity android:name=".CareHubActivity" android:exported="false" android:label="اهتم بي" />
+        <activity android:name=".AccessibilityProfileActivity" android:exported="false" android:label="ملف الوصولية" />
         <activity android:name=".HealthTimelineActivity" android:exported="false" android:label="دفتر الصحة الزمني" />
+        <activity android:name=".MedicationCompanionActivity" android:exported="false" android:label="رفيق العلاج" />
+        <activity android:name=".AppointmentCompanionActivity" android:exported="false" android:label="رفيق الموعد" />
         <activity android:name=".FamilyHubActivity" android:exported="false" android:label="مركز الأسرة" />
         <activity android:name=".SafeArrivalActivity" android:exported="false" android:label="وصلت بالسلامة" />
         <activity android:name=".SupportPassportActivity" android:exported="false" android:label="جواز احتياجاتي" />
@@ -45,6 +48,7 @@
         <activity android:name=".WebActivity" android:exported="false" />
 
         <receiver android:name=".TreatmentReminderReceiver" android:exported="false" />
+        <receiver android:name=".MedicationReminderReceiver" android:exported="false" />
         <receiver android:name=".WomenCareReminderReceiver" android:exported="false" />
         <receiver android:name=".SafeArrivalReceiver" android:exported="false" />
         <receiver android:name=".BootReceiver" android:enabled="true" android:exported="true">
