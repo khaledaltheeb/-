@@ -25,7 +25,8 @@
 
         <activity android:name=".ToolCatalogActivity" android:exported="false" android:label="أدوات روافد" />
         <activity android:name=".LifeUtilityActivity" android:exported="false" android:label="أدوات روافد" />
-        <activity android:name=".InteractiveUtilityActivity" android:exported="false" android:label="أدوات روافد التفاعلية" />
+        <activity android:name=".InteractiveUtilityActivity" android:exported="false" android:label="أداة تفاعلية" />
+        <activity android:name=".PresentationActivity" android:exported="false" android:excludeFromRecents="true" android:label="عرض مباشر" />
         <activity android:name=".CareHubActivity" android:exported="false" android:label="اهتم بي" />
         <activity android:name=".CareModeActivity" android:exported="false" android:label="Care Mode" />
         <activity android:name=".AccessibilityProfileActivity" android:exported="false" android:label="ملف الوصولية" />
