@@ -44,6 +44,7 @@ const groups = [
     title: 'الثقة والحقوق',
     links: [
       { href: '/about', label: 'من نحن' },
+      { href: '/press', label: 'المركز الإعلامي والهوية المؤسسية' },
       { href: '/open-source/arabic-rtl-a11y-toolkit', label: 'مشروع روافد المفتوح للعربية وRTL' },
       { href: '/medical-review-policy', label: 'المراجعة العلمية' },
       { href: '/editorial-policy', label: 'السياسة التحريرية' },
