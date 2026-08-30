@@ -3,6 +3,12 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+    <uses-permission android:name="android.permission.SEND_SMS" />
     <uses-permission android:name="android.permission.health.READ_STEPS" />
     <uses-permission android:name="android.permission.health.READ_SLEEP" />
 
@@ -29,7 +35,7 @@
         <activity android:name=".PresentationActivity" android:exported="false" android:excludeFromRecents="true" android:label="عرض مباشر" />
         <activity android:name=".CareHubActivity" android:exported="false" android:label="اهتم بي" />
         <activity android:name=".CareModeActivity" android:exported="false" android:label="Care Mode" />
-        <activity android:name=".AccessibilityProfileActivity" android:exported="false" android:label="ملف الوصولية" />
+        <activity android:name=".AccessibilityProfileActivity" android:exported="false" android:label="الإعدادات والوصولية" />
         <activity android:name=".HealthTimelineActivity" android:exported="false" android:label="دفتر الصحة الزمني" />
         <activity android:name=".HealthConnectActivity" android:exported="false" android:label="Health Connect" />
         <activity android:name=".MedicationCompanionActivity" android:exported="false" android:label="رفيق العلاج" />
@@ -37,6 +43,7 @@
         <activity android:name=".FamilyHubActivity" android:exported="false" android:label="مركز الأسرة" />
         <activity android:name=".MyCircleActivity" android:exported="false" android:label="دائرتي" />
         <activity android:name=".SafeArrivalActivity" android:exported="false" android:label="وصلت بالسلامة" />
+        <activity android:name=".SafetyMonitorActivity" android:exported="false" android:label="مراقبة الأمان والموقع" />
         <activity android:name=".LifeCardActivity" android:exported="false" android:label="بطاقة روافد للحياة" />
         <activity android:name=".WhatNowActivity" android:exported="false" android:label="ماذا أفعل الآن؟" />
         <activity android:name=".HelpNowActivity" android:exported="false" android:label="ساعدني الآن" />
@@ -79,6 +86,11 @@
         <activity android:name=".WomenVisitPrepActivity" android:exported="false" android:label="جهزي زيارتي" />
         <activity android:name=".WebActivity" android:exported="false" />
 
+        <service
+            android:name=".SafetyLocationService"
+            android:exported="false"
+            android:foregroundServiceType="location" />
+
         <receiver android:name=".RawafidWidgetProvider" android:exported="false">
             <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
             <meta-data android:name="android.appwidget.provider" android:resource="@xml/rawafid_widget_info" />
@@ -88,6 +100,7 @@
         <receiver android:name=".FutureNoteReceiver" android:exported="false" />
         <receiver android:name=".WomenCareReminderReceiver" android:exported="false" />
         <receiver android:name=".SafeArrivalReceiver" android:exported="false" />
+        <receiver android:name=".SafetyMonitorReceiver" android:exported="false" />
         <receiver android:name=".BootReceiver" android:enabled="true" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
