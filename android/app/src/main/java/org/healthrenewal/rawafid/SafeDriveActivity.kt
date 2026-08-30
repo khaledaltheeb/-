@@ -1,7 +1,6 @@
 package org.healthrenewal.rawafid
 
 import android.Manifest
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
@@ -30,7 +29,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -85,10 +83,14 @@ private fun SafeDriveScreen() {
     var configExpanded by remember { mutableStateOf(false) }
     var sharingExpanded by remember { mutableStateOf(false) }
     var reportsExpanded by remember { mutableStateOf(true) }
+    var checksExpanded by remember { mutableStateOf(false) }
     var connections by remember { mutableStateOf<List<CircleConnection>>(emptyList()) }
     val drivePermission = remember { mutableStateMapOf<String, Boolean>() }
     var sharingBusy by remember { mutableStateOf(false) }
     val reports = remember(live.active, live.lastCompletedReport?.id) { SafeDriveStore.reports(context) }
+    val incidentRecords = remember(pending?.candidate?.id, live.active) { SafeDriveIncidentStore.records(context) }
+    val safeChecks = remember(incidentRecords) { incidentRecords.filter { it.outcome == SafeDriveIncidentOutcome.SAFE_CONFIRMED } }
+    val helpChecks = remember(incidentRecords) { incidentRecords.filter { it.outcome != SafeDriveIncidentOutcome.SAFE_CONFIRMED } }
 
     fun saveConfig(): Boolean {
         val speed = speedText.toIntOrNull()
@@ -145,7 +147,7 @@ private fun SafeDriveScreen() {
         if (locationGranted) {
             if (saveConfig()) SafeDriveController.start(context)
         } else {
-            status = "يلزم الموقع الدقيق لقياس السرعة والمسافة ومؤشرات التوقف المفاجئ."
+            status = "يلزم الموقع الدقيق لقياس السرعة والمسافة ومؤشرات التوقف المفاجئ. يمكنك رفضه ولن تبدأ جلسة القيادة."
         }
     }
 
@@ -153,12 +155,13 @@ private fun SafeDriveScreen() {
         if (!saveConfig()) return
         val required = buildList {
             if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                add(Manifest.permission.ACCESS_COARSE_LOCATION)
                 add(Manifest.permission.ACCESS_FINE_LOCATION)
             }
             if (Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
                 add(Manifest.permission.POST_NOTIFICATIONS)
             }
-        }
+        }.distinct()
         if (required.isEmpty()) SafeDriveController.start(context) else permissionLauncher.launch(required.toTypedArray())
     }
 
@@ -252,7 +255,7 @@ private fun SafeDriveScreen() {
                             SafeDriveIncidentStore.saveConfig(context, incidentConfig)
                         })
                     }
-                    Text("إذا أجبت «نعم» تُسجل نقطة تحقق محلية فقط. إذا أجبت «لا» يُرسل تنبيه مع آخر موقع موثوق إلى الجهات التي سمحت لها بتلقي تنبيهات القيادة.")
+                    Text("إذا أجبت «نعم» تُسجل نقطة اطمئنان محلية مشفرة فقط. إذا أجبت «لا» يُرسل تنبيه مع آخر موقع موثوق إلى الأشخاص الذين منحتهم صلاحية القيادة الآمنة.")
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         Column(Modifier.weight(1f)) {
                             Text("التصعيد عند عدم الرد")
@@ -271,6 +274,32 @@ private fun SafeDriveScreen() {
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth()
                     )
+                    Text("نقاط الاطمئنان المسجلة: ${safeChecks.size} · طلبات/تصعيد المساعدة: ${helpChecks.size}", style = MaterialTheme.typography.bodySmall)
+                    OutlinedButton(onClick = { checksExpanded = !checksExpanded }) {
+                        Text(if (checksExpanded) "إخفاء سجل الاطمئنان" else "عرض سجل الاطمئنان")
+                    }
+                }
+            }
+        }
+
+        if (checksExpanded) {
+            if (incidentRecords.isEmpty()) item { Text("لم تُسجل نقاط توقف مفاجئ بعد.") }
+            items(incidentRecords.take(20), key = { it.id }) { record ->
+                Card {
+                    Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
+                        Text(
+                            DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT).format(Date(record.detectedAtMs)),
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            when (record.outcome) {
+                                SafeDriveIncidentOutcome.SAFE_CONFIRMED -> "نقطة اطمئنان — أكد المستخدم أنه بخير"
+                                SafeDriveIncidentOutcome.HELP_REQUESTED -> "طلب مساعدة — تم تشغيل مسار التواصل"
+                                SafeDriveIncidentOutcome.AUTO_ESCALATED -> "تصعيد أمان — لم يصل رد ضمن المهلة"
+                            }
+                        )
+                        Text("السرعة قبل التوقف: ${record.preStopSpeedKmh.toInt()} كم/س · التباطؤ: ${oneDecimal(record.decelerationMps2)} م/ث²", style = MaterialTheme.typography.bodySmall)
+                    }
                 }
             }
         }
@@ -304,7 +333,7 @@ private fun SafeDriveScreen() {
                         )
                         PermissionSwitch(
                             title = "مشاركة التنبيهات عالية الخطورة",
-                            subtitle = "يرسل فقط السرعة المستمرة/الشديدة أو تجمع مؤشرات الخطورة إلى الجهات التي اخترتها في دائرتك.",
+                            subtitle = "يرسل فقط السرعة المستمرة/الشديدة أو تجمع مؤشرات الخطورة إلى الجهات التي اخترتها في دائرتك، دون مشاركة الموقع الحي لهذه التنبيهات.",
                             checked = driveConfig.shareLiveAlerts,
                             enabled = !live.active,
                             onChange = { driveConfig = driveConfig.copy(shareLiveAlerts = it) }
@@ -333,6 +362,7 @@ private fun SafeDriveScreen() {
                     Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)) {
                         Text("اتفاق القيادة الآمنة", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                         Text("لا يستلم أحد شيئًا بمجرد ارتباطه بك. أنت تمنح صلاحية «القيادة الآمنة» لكل شخص على حدة ويمكن سحبها في أي وقت.")
+                        Text("إذا اخترت «لا، أحتاج مساعدة» بعد توقف مفاجئ، يتلقى هؤلاء الأشخاص تنبيه المساعدة وآخر موقع موثوق. أما تنبيهات أسلوب القيادة العادية فلا تتضمن موقعك الحي.", style = MaterialTheme.typography.bodySmall)
                         if (!RawafidCircleApi.hasSession(context)) {
                             Text("سجّل الدخول أولًا لاختيار أشخاص من دائرتك.")
                             Button(onClick = { context.startActivity(Intent(context, CircleAccountActivity::class.java)) }) { Text("حساب روافد") }
@@ -355,7 +385,7 @@ private fun SafeDriveScreen() {
                         Column(Modifier.weight(1f)) {
                             Text(connection.counterpartName, fontWeight = FontWeight.Bold)
                             if (connection.myLabel.isNotBlank()) Text(connection.myLabel, style = MaterialTheme.typography.bodySmall)
-                            Text("تنبيهات عالية الخطورة + طلبات المساعدة + التقرير إذا فعّلت مشاركته", style = MaterialTheme.typography.bodySmall)
+                            Text("تنبيهات عالية الخطورة + طلبات المساعدة والموقع عند الحاجة + التقرير إذا فعّلت مشاركته", style = MaterialTheme.typography.bodySmall)
                         }
                         Switch(
                             checked = drivePermission[connection.connectionId] == true,
@@ -419,7 +449,7 @@ private fun SafeDriveScreen() {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text("رصد روافد توقفًا مفاجئًا محتملاً.")
                     Text(check.candidate.reason)
-                    Text("إذا كنت بخير سجّل الاطمئنان. إذا احتجت مساعدة، سيرسل آخر موقع موثوق للجهات التي اخترتها.")
+                    Text("إذا كنت بخير سجّل نقطة الاطمئنان. إذا احتجت مساعدة، سيرسل آخر موقع موثوق للأشخاص الذين اخترتهم في اتفاق القيادة الآمنة.")
                     if (incidentConfig.autoEscalateIfUnanswered) {
                         Text("التصعيد التلقائي مفعل إذا لم يصل رد خلال ${incidentConfig.responseSeconds} ثانية.", fontWeight = FontWeight.Bold)
                     }
