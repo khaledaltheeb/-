@@ -31,6 +31,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     follow: record.robots_follow,
     type: 'article',
     image: record.featured_image_url,
+    imageAlt: record.featured_image_alt,
     keywords: [record.primary_keyword, ...(record.secondary_keywords ?? []), ...(record.semantic_terms ?? []).slice(0, 10)].filter(Boolean) as string[],
     publishedTime: record.published_at,
     modifiedTime: record.updated_at,
@@ -111,11 +112,11 @@ export default async function QuickInfoDetailPage({ params }: { params: Params }
     </div></header>
     <div className="article-body">
       <QuickInfoCard title={record.title} description={record.excerpt} variant="hero" showAction={false} />
+      <ContentRenderer bodyJson={record.body_json} bodyText={record.body_text} recordId={record.id} />
       {imageUrl && <figure className={imageStyles.figure} data-quick-info-indexable-image>
-        <img className={imageStyles.image} src={imageUrl} alt={imageAlt} width="1200" height="630" loading="eager" decoding="async" fetchPriority="high" />
+        <img className={imageStyles.image} src={imageUrl} alt={imageAlt} width="1200" height="630" loading="lazy" decoding="async" />
         <figcaption className={imageStyles.caption}>نسخة مرئية قابلة للمشاركة والفهرسة من بطاقة معلومات سريعة — منصة روافد</figcaption>
       </figure>}
-      <ContentRenderer bodyJson={record.body_json} bodyText={record.body_text} recordId={record.id} />
     </div>
     {record.medical_disclaimer && <aside className="medical-disclaimer" aria-label="إخلاء المسؤولية الطبية"><strong>تنبيه</strong><p>{record.medical_disclaimer}</p><Link href="/disclaimer">إخلاء المسؤولية الكامل</Link></aside>}
     {references.length > 0 && <section className="article-references" aria-labelledby="references-title"><h2 id="references-title">المصادر والمراجع</h2><ol>{references.map((reference, index) => <li key={`${reference.url || reference.title}-${index}`}>{reference.url ? <a href={reference.url} target="_blank" rel="noopener noreferrer">{reference.title || reference.url}</a> : <span>{reference.title}</span>}{reference.publisher && <small>{reference.publisher}</small>}{reference.year && <small>{String(reference.year)}</small>}</li>)}</ol></section>}
