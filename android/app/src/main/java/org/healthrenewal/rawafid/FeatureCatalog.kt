@@ -79,6 +79,7 @@ object FeatureCatalog {
 
 object FeatureRouter {
     private const val TAG = "RawafidFeatureRouter"
+    private val interactiveQuickTools = setOf("breathing", "one_minute", "screen_rest")
 
     fun open(context: Context, feature: RawafidFeature) {
         val intent = when (feature.routeType) {
@@ -90,8 +91,13 @@ object FeatureRouter {
             "main" -> Intent(context, MainActivity::class.java)
                 .putExtra("destination", feature.routeTarget)
                 .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-            "quick" -> Intent(context, LifeUtilityActivity::class.java)
-                .putExtra(LifeUtilityActivity.EXTRA_TOOL_ID, feature.routeTarget)
+            "quick" -> if (feature.routeTarget in interactiveQuickTools) {
+                Intent(context, InteractiveUtilityActivity::class.java)
+                    .putExtra(InteractiveUtilityActivity.EXTRA_TOOL_ID, feature.routeTarget)
+            } else {
+                Intent(context, LifeUtilityActivity::class.java)
+                    .putExtra(LifeUtilityActivity.EXTRA_TOOL_ID, feature.routeTarget)
+            }
             "activity" -> {
                 val clazz = runCatching { Class.forName(feature.routeTarget) }.getOrNull()
                 clazz?.let { Intent(context, it) }
