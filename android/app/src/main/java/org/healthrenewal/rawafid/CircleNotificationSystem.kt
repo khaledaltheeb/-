@@ -15,8 +15,10 @@ import androidx.core.content.ContextCompat
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.OutOfQuotaPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
@@ -28,6 +30,7 @@ import java.util.concurrent.TimeUnit
 
 private const val CIRCLE_CHANNEL_ID = "rawafid_circle"
 private const val CIRCLE_PERIODIC_WORK = "rawafid_circle_notification_poll"
+private const val CIRCLE_IMMEDIATE_WORK = "rawafid_circle_notification_refresh"
 private const val ACTION_CIRCLE_ANSWER = "org.healthrenewal.rawafid.CIRCLE_ANSWER"
 
 object CircleNotificationScheduler {
@@ -36,12 +39,15 @@ object CircleNotificationScheduler {
         val constraints = Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build()
         val periodic = PeriodicWorkRequestBuilder<CircleNotificationWorker>(15, TimeUnit.MINUTES).setConstraints(constraints).build()
         WorkManager.getInstance(context).enqueueUniquePeriodicWork(CIRCLE_PERIODIC_WORK, ExistingPeriodicWorkPolicy.UPDATE, periodic)
-        WorkManager.getInstance(context).enqueue(OneTimeWorkRequestBuilder<CircleNotificationWorker>().setConstraints(constraints).build())
+        checkNow(context)
     }
 
-    fun checkNow(context: Context) {
+    fun checkNow(context: Context, expedited: Boolean = false) {
         val constraints = Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build()
-        WorkManager.getInstance(context).enqueue(OneTimeWorkRequestBuilder<CircleNotificationWorker>().setConstraints(constraints).build())
+        val request = OneTimeWorkRequestBuilder<CircleNotificationWorker>().setConstraints(constraints).apply {
+            if (expedited) setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+        }.build()
+        WorkManager.getInstance(context).enqueueUniqueWork(CIRCLE_IMMEDIATE_WORK, ExistingWorkPolicy.REPLACE, request)
     }
 }
 
