@@ -109,6 +109,19 @@ function safeSearch(value: string | undefined) {
   return value?.trim().replace(/\s+/g, ' ').slice(0, 140) || '';
 }
 
+async function retryRead<T>(operation: () => Promise<T>, attempts = 3): Promise<T> {
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      return await operation();
+    } catch (error) {
+      lastError = error;
+      if (attempt < attempts) await new Promise((resolve) => setTimeout(resolve, attempt * 120));
+    }
+  }
+  throw lastError;
+}
+
 export function evidenceKind(item: Pick<MagazineRecord, 'schema_json'>) {
   const value = item.schema_json?.evidence_kind;
   return typeof value === 'string' && value.trim() ? value.trim() : 'دراسة بحثية';
@@ -122,17 +135,20 @@ export function sourceUrl(item: Pick<MagazineRecord, 'references_json' | 'schema
 }
 
 export async function getMagazineItems(): Promise<MagazineListingRecord[]> {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from('content')
-    .select(LISTING_FIELDS)
-    .eq('content_type', 'research')
-    .eq('status', 'published')
-    .like('canonical_url', '/magazine/%')
-    .order('published_at', { ascending: false })
-    .limit(1000);
-  if (error) throw error;
-  return ((data ?? []) as unknown as MagazineListingRecord[]).filter((item) => isPublishedNow(item.published_at));
+  const result = await retryRead(async () => {
+    const supabase = await createClient();
+    const response = await supabase
+      .from('content')
+      .select(LISTING_FIELDS)
+      .eq('content_type', 'research')
+      .eq('status', 'published')
+      .like('canonical_url', '/magazine/%')
+      .order('published_at', { ascending: false })
+      .limit(1000);
+    if (response.error) throw response.error;
+    return response;
+  });
+  return ((result.data ?? []) as unknown as MagazineListingRecord[]).filter((item) => isPublishedNow(item.published_at));
 }
 
 export async function getMagazinePage(options: {
@@ -147,22 +163,25 @@ export async function getMagazinePage(options: {
   const kind = options.kind?.trim().slice(0, 80) || '';
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
-  const supabase = await createClient();
 
-  let query = supabase
-    .from('content')
-    .select(LISTING_FIELDS, { count: 'exact' })
-    .eq('content_type', 'research')
-    .eq('status', 'published')
-    .like('canonical_url', '/magazine/%');
+  const { data, count } = await retryRead(async () => {
+    const supabase = await createClient();
+    let query = supabase
+      .from('content')
+      .select(LISTING_FIELDS, { count: 'exact' })
+      .eq('content_type', 'research')
+      .eq('status', 'published')
+      .like('canonical_url', '/magazine/%');
 
-  if (q) query = query.ilike('title', `%${q}%`);
-  if (kind) query = query.contains('schema_json', { evidence_kind: kind });
+    if (q) query = query.ilike('title', `%${q}%`);
+    if (kind) query = query.contains('schema_json', { evidence_kind: kind });
 
-  const { data, error, count } = await query
-    .order('published_at', { ascending: false })
-    .range(from, to);
-  if (error) throw error;
+    const response = await query
+      .order('published_at', { ascending: false })
+      .range(from, to);
+    if (response.error) throw response.error;
+    return response;
+  });
 
   const items = ((data ?? []) as unknown as MagazineListingRecord[]).filter((item) => isPublishedNow(item.published_at));
   const total = count ?? items.length;
@@ -170,24 +189,18 @@ export async function getMagazinePage(options: {
 }
 
 export async function getMagazineOverview() {
-  const supabase = await createClient();
-  const [{ count, error: countError }, { data, error: kindsError }] = await Promise.all([
-    supabase
+  const { data, count } = await retryRead(async () => {
+    const supabase = await createClient();
+    const response = await supabase
       .from('content')
-      .select('id', { count: 'exact', head: true })
-      .eq('content_type', 'research')
-      .eq('status', 'published')
-      .like('canonical_url', '/magazine/%'),
-    supabase
-      .from('content')
-      .select('schema_json')
+      .select('schema_json', { count: 'exact' })
       .eq('content_type', 'research')
       .eq('status', 'published')
       .like('canonical_url', '/magazine/%')
-      .limit(1000),
-  ]);
-  if (countError) throw countError;
-  if (kindsError) throw kindsError;
+      .limit(1000);
+    if (response.error) throw response.error;
+    return response;
+  });
 
   const kinds = Array.from(new Set(((data ?? []) as Array<{ schema_json: Record<string, unknown> | null }>).map((item) => {
     const value = item.schema_json?.evidence_kind;
@@ -211,21 +224,24 @@ export async function getResearchCatalogPage(options: {
   const workType = options.workType === 'article' || options.workType === 'dissertation' ? options.workType : '';
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
-  const supabase = await createClient();
 
-  let query = supabase
-    .from('research_catalog')
-    .select(RESEARCH_CATALOG_FIELDS, { count: 'exact' })
-    .eq('is_active', true);
+  const { data, count } = await retryRead(async () => {
+    const supabase = await createClient();
+    let query = supabase
+      .from('research_catalog')
+      .select(RESEARCH_CATALOG_FIELDS, { count: 'exact' })
+      .eq('is_active', true);
 
-  if (q) query = query.ilike('title', `%${q}%`);
-  if (cluster) query = query.eq('rawafid_cluster', cluster);
-  if (workType) query = query.eq('work_type', workType);
+    if (q) query = query.ilike('title', `%${q}%`);
+    if (cluster) query = query.eq('rawafid_cluster', cluster);
+    if (workType) query = query.eq('work_type', workType);
 
-  const { data, error, count } = await query
-    .order('catalog_rank', { ascending: true })
-    .range(from, to);
-  if (error) throw error;
+    const response = await query
+      .order('catalog_rank', { ascending: true })
+      .range(from, to);
+    if (response.error) throw response.error;
+    return response;
+  });
 
   const items = (data ?? []) as unknown as ResearchCatalogRecord[];
   const total = count ?? items.length;
@@ -233,9 +249,12 @@ export async function getResearchCatalogPage(options: {
 }
 
 export async function getResearchCatalogStats(): Promise<ResearchCatalogStats> {
-  const supabase = await createClient();
-  const { data, error } = await supabase.rpc('get_research_catalog_stats');
-  if (error) throw error;
+  const { data } = await retryRead(async () => {
+    const supabase = await createClient();
+    const response = await supabase.rpc('get_research_catalog_stats');
+    if (response.error) throw response.error;
+    return response;
+  });
 
   const raw = (data ?? {}) as Record<string, unknown>;
   const clusters = Array.isArray(raw.clusters)
