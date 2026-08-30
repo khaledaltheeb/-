@@ -5,15 +5,23 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
@@ -25,18 +33,22 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
 import org.json.JSONArray
 import org.json.JSONObject
 import java.time.LocalDateTime
@@ -100,11 +112,7 @@ class LifeUtilityActivity : ComponentActivity() {
 @Composable
 private fun LifeUtilityScreen(toolId: String) {
     when (toolId) {
-        "screen_rest" -> SimpleSteps(
-            "راحة الشاشة",
-            "دقيقة قصيرة لتخفيف إجهاد الشاشة.",
-            listOf("ارمش ببطء عدة مرات.", "انظر إلى نقطة بعيدة 20–30 ثانية.", "حرّك الرقبة والكتفين بلطف.", "غيّر وضعية الجلوس إذا بقيت ثابتًا طويلًا.")
-        )
+        "screen_rest" -> ScreenRestScreen()
         "one_minute" -> OneMinuteScreen()
         "calm_now" -> CalmNowScreen()
         "mood_to_action" -> MoodToActionScreen()
@@ -114,41 +122,269 @@ private fun LifeUtilityScreen(toolId: String) {
         "daily_review" -> DailyReviewScreen()
         "gentle_focus" -> GentleFocusScreen()
         "need_you" -> NeedYouScreen()
-        "breathing" -> SimpleSteps(
-            "تنفس دقيقة",
-            "تنفس بهدوء دون حبس النفس أو إجبار الجسد.",
-            listOf("خذ شهيقًا مريحًا.", "ازفر ببطء أطول قليلًا من الشهيق.", "كرر لدقيقة إذا كان ذلك مريحًا.", "توقف إذا شعرت بدوار أو عدم ارتياح.")
-        )
+        "breathing" -> BreathingScreen()
         else -> SimpleSteps("أداة روافد", "هذه الأداة قابلة للتوسعة من الكتالوج المركزي.", listOf("لا يوجد إعداد إضافي لهذه الأداة بعد."))
     }
 }
 
 @Composable
 private fun SimpleSteps(title: String, subtitle: String, steps: List<String>) {
-    LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+    LazyColumn(contentPadding = PaddingValues(RawafidSpacing.ScreenHorizontal), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Md)) {
         item { ToolHeader(title, subtitle) }
-        items(steps) { step -> Card { Text(step, Modifier.padding(18.dp)) } }
+        items(steps) { step -> Card { Text(step, Modifier.padding(RawafidSpacing.CardContent)) } }
     }
 }
 
 @Composable
 private fun ToolHeader(title: String, subtitle: String) {
-    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
         Text(title, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
         Text(subtitle, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
 @Composable
+private fun BreathingScreen() {
+    val reduceMotion = LocalRawafidAccessibility.current.reduceMotion
+    var secondsLeft by rememberSaveable { mutableIntStateOf(60) }
+    var running by rememberSaveable { mutableStateOf(false) }
+    val completed = secondsLeft == 0
+    val elapsed = 60 - secondsLeft
+    val cycleSecond = elapsed % 10
+    val inhale = cycleSecond < 4
+    val phaseSecondsLeft = if (inhale) 4 - cycleSecond else 10 - cycleSecond
+    val phaseLabel = if (completed) "اكتملت الدقيقة" else if (inhale) "شهيق مريح" else "زفير ببطء"
+    val targetSize = if (inhale) 220.dp else 132.dp
+    val phaseDuration = if (inhale) 4000 else 6000
+    val circleSize by animateDpAsState(
+        targetValue = if (running && !completed) targetSize else 164.dp,
+        animationSpec = if (reduceMotion) snap() else tween(MotionPolicy.durationMillis(reduceMotion, phaseDuration)),
+        label = "breathing-circle"
+    )
+
+    LaunchedEffect(running, secondsLeft) {
+        if (running && secondsLeft > 0) {
+            delay(1000)
+            secondsLeft -= 1
+            if (secondsLeft == 0) running = false
+        }
+    }
+
+    LazyColumn(
+        contentPadding = PaddingValues(RawafidSpacing.ScreenHorizontal),
+        verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Md)
+    ) {
+        item { ToolHeader("تنفس دقيقة", "جلسة تفاعلية: شهيق مريح 4 ثوانٍ ثم زفير هادئ 6 ثوانٍ، بلا حبس للنفس.") }
+        item {
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(
+                    modifier = Modifier.fillMaxWidth().padding(RawafidSpacing.Xl),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Md)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(circleSize)
+                            .background(MaterialTheme.colorScheme.primaryContainer, CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            phaseLabel,
+                            style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(RawafidSpacing.Md)
+                        )
+                    }
+                    Text(
+                        if (completed) "تمت الجلسة" else formatCountdown(secondsLeft),
+                        style = MaterialTheme.typography.headlineLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                    if (running && !completed) {
+                        Text("يتغير الإيقاع بعد $phaseSecondsLeft ث", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    if (reduceMotion) {
+                        Text("تقليل الحركة مفعّل: يتغير النص دون حركة تمدد وانكماش.", style = MaterialTheme.typography.bodySmall)
+                    }
+                }
+            }
+        }
+        item { TimerControls(running, completed, onStart = { running = true }, onPause = { running = false }, onRestart = { secondsLeft = 60; running = true }) }
+        item {
+            Text(
+                "تنفس براحة ولا تجبر نفسك على عمق معين. توقف إذا شعرت بدوار أو عدم ارتياح.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
 private fun OneMinuteScreen() {
     var choice by rememberSaveable { mutableStateOf("تنفس") }
+    var secondsLeft by rememberSaveable { mutableIntStateOf(60) }
+    var running by rememberSaveable { mutableStateOf(false) }
+    val completed = secondsLeft == 0
     val choices = listOf("تنفس", "تمدد", "ماء", "صمت", "مشي", "كتابة")
-    LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        item { ToolHeader("دقيقة لي", "اختر شيئًا صغيرًا يمكن فعله الآن بدل انتظار وقت مثالي.") }
-        item { Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { choices.take(3).forEach { FilterChip(selected = choice == it, onClick = { choice = it }, label = { Text(it) }) } } }
-        item { Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { choices.drop(3).forEach { FilterChip(selected = choice == it, onClick = { choice = it }, label = { Text(it) }) } } }
-        item { Card { Text("اختيارك الآن: $choice. امنح نفسك دقيقة واحدة فقط لهذا الشيء، ثم قرر إن كنت تريد الاستمرار.", Modifier.padding(18.dp)) } }
+
+    LaunchedEffect(running, secondsLeft) {
+        if (running && secondsLeft > 0) {
+            delay(1000)
+            secondsLeft -= 1
+            if (secondsLeft == 0) running = false
+        }
     }
+
+    LazyColumn(contentPadding = PaddingValues(RawafidSpacing.ScreenHorizontal), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Md)) {
+        item { ToolHeader("دقيقة لي", "اختر نشاطًا ثم ابدأ دقيقة فعلية. لا تحتاج إلى مراقبة الساعة.") }
+        item {
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs),
+                verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)
+            ) {
+                choices.forEach {
+                    FilterChip(
+                        selected = choice == it,
+                        onClick = { choice = it; secondsLeft = 60; running = false },
+                        enabled = !running,
+                        label = { Text(it) }
+                    )
+                }
+            }
+        }
+        item {
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(
+                    Modifier.fillMaxWidth().padding(RawafidSpacing.Xl),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)
+                ) {
+                    Text(if (completed) "اكتملت دقيقة $choice" else choice, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                    Text(formatCountdown(secondsLeft), style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold)
+                    Text(activityPrompt(choice), color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
+                }
+            }
+        }
+        item { TimerControls(running, completed, onStart = { running = true }, onPause = { running = false }, onRestart = { secondsLeft = 60; running = true }) }
+    }
+}
+
+@Composable
+private fun ScreenRestScreen() {
+    val reduceMotion = LocalRawafidAccessibility.current.reduceMotion
+    var secondsLeft by rememberSaveable { mutableIntStateOf(45) }
+    var running by rememberSaveable { mutableStateOf(false) }
+    val completed = secondsLeft == 0
+    val stage = when {
+        completed -> 4
+        secondsLeft > 40 -> 0
+        secondsLeft > 15 -> 1
+        secondsLeft > 5 -> 2
+        else -> 3
+    }
+    val title = when (stage) {
+        0 -> "ارمش ببطء"
+        1 -> "انظر إلى نقطة بعيدة"
+        2 -> "أرخِ كتفيك ورقبتك"
+        3 -> "استعد للعودة"
+        else -> "اكتملت الاستراحة"
+    }
+    val cueTarget = when (stage) {
+        0 -> 72.dp
+        1 -> 184.dp
+        2 -> 150.dp
+        3 -> 130.dp
+        else -> 160.dp
+    }
+    val cueSize by animateDpAsState(
+        targetValue = cueTarget,
+        animationSpec = if (reduceMotion) snap() else tween(MotionPolicy.durationMillis(reduceMotion, if (stage == 0) 3000 else 900)),
+        label = "screen-rest-cue"
+    )
+
+    LaunchedEffect(running, secondsLeft) {
+        if (running && secondsLeft > 0) {
+            delay(1000)
+            secondsLeft -= 1
+            if (secondsLeft == 0) running = false
+        }
+    }
+
+    LazyColumn(contentPadding = PaddingValues(RawafidSpacing.ScreenHorizontal), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Md)) {
+        item { ToolHeader("راحة الشاشة", "جلسة 45 ثانية تقودك خطوة بخطوة بدل الاكتفاء بتعليمات ثابتة.") }
+        item {
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(
+                    Modifier.fillMaxWidth().padding(RawafidSpacing.Xl),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Md)
+                ) {
+                    Box(
+                        Modifier.size(cueSize).background(MaterialTheme.colorScheme.secondaryContainer, CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            if (stage == 0) "ارمش" else "راحة",
+                            color = MaterialTheme.colorScheme.onSecondaryContainer,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    Text(title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+                    Text(formatCountdown(secondsLeft), style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold)
+                    Text(screenRestPrompt(stage), color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
+                    if (reduceMotion) Text("تقليل الحركة مفعّل؛ المؤشر يغيّر حجمه فورًا دون حركة تدريجية.", style = MaterialTheme.typography.bodySmall)
+                }
+            }
+        }
+        item { TimerControls(running, completed, onStart = { running = true }, onPause = { running = false }, onRestart = { secondsLeft = 45; running = true }) }
+        item {
+            Text(
+                "تذكير الرمش الدوري خارج هذه الشاشة يبقى إشعار Android ويمكن ضبط نغمته واهتزازه من إعدادات روافد.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+private fun TimerControls(
+    running: Boolean,
+    completed: Boolean,
+    onStart: () -> Unit,
+    onPause: () -> Unit,
+    onRestart: () -> Unit
+) {
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
+        Button(
+            onClick = if (running) onPause else if (completed) onRestart else onStart,
+            modifier = Modifier.weight(1f)
+        ) {
+            Text(if (running) "إيقاف مؤقت" else if (completed) "ابدأ من جديد" else "ابدأ")
+        }
+        OutlinedButton(onClick = onRestart, modifier = Modifier.weight(1f)) { Text("إعادة") }
+    }
+}
+
+private fun formatCountdown(seconds: Int): String = "%d:%02d".format(seconds / 60, seconds % 60)
+
+private fun activityPrompt(choice: String): String = when (choice) {
+    "تنفس" -> "تنفس براحة دون إجبار النفس أو حبسه."
+    "تمدد" -> "مدد كتفيك وذراعيك بلطف وبالقدر المريح لك."
+    "ماء" -> "خذ وقتك لشرب الماء إذا كان مناسبًا لحالتك وتعليماتك الطبية."
+    "صمت" -> "اترك الهاتف للحظة، واسمح للدقيقة أن تمر دون مهمة جديدة."
+    "مشي" -> "تحرك قليلًا في مكان آمن وبما يناسب قدرتك."
+    else -> "اكتب فكرة واحدة فقط؛ لا تحتاج إلى ترتيب كل شيء الآن."
+}
+
+private fun screenRestPrompt(stage: Int): String = when (stage) {
+    0 -> "دع الدائرة تضيق مرة واحدة كتذكير لطيف بالرمش، وارمش عدة مرات براحة."
+    1 -> "أبعد نظرك عن الشاشة نحو نقطة بعيدة قدر الإمكان."
+    2 -> "أرخِ الكتفين وحرك الرقبة بلطف إذا كان ذلك مريحًا."
+    3 -> "خذ لحظات أخيرة قبل العودة للشاشة."
+    else -> "يمكنك العودة الآن أو تمديد الراحة إذا أردت."
 }
 
 @Composable
