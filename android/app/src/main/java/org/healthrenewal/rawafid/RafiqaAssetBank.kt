@@ -34,7 +34,7 @@ private data class RafiqaAssetMessage(
 object RafiqaAssetBank {
     private const val HISTORY_PREFS = "rawafid_rafiqa_asset_history_v2"
     private const val EXPECTED_PER_CATEGORY = 1000
-    private const val PARTS_PER_CATEGORY = 2
+    private val supportedPartCounts = intArrayOf(4, 2)
 
     val categories = listOf(
         "confidence", "hard_day", "personal_checkin", "self_care",
@@ -78,19 +78,22 @@ object RafiqaAssetBank {
         return CompanionMessage("asset:${chosen.id}", tags + chosen.category + chosen.tone, chosen.text)
     }
 
-    fun availableCategories(context: Context): Set<String> = categories.filterTo(mutableSetOf()) { hasAllParts(context, it) }
+    fun availableCategories(context: Context): Set<String> = categories.filterTo(mutableSetOf()) { partCount(context, it) != null }
     fun totalBundledMessages(context: Context): Int = categories.sumOf { loadCategory(context, it).size }
+    fun categoryCount(context: Context, category: String): Int = loadCategory(context, category).size
     fun isComplete(context: Context): Boolean = categories.all { loadCategory(context, it).size == EXPECTED_PER_CATEGORY }
 
-    private fun hasAllParts(context: Context, category: String): Boolean = (0 until PARTS_PER_CATEGORY).all { index ->
-        runCatching { context.assets.open(partPath(category, index)).close(); true }.getOrDefault(false)
+    private fun partCount(context: Context, category: String): Int? = supportedPartCounts.firstOrNull { count ->
+        (0 until count).all { index ->
+            runCatching { context.assets.open(partPath(category, index)).close(); true }.getOrDefault(false)
+        }
     }
 
     private fun loadCategory(context: Context, category: String): List<RafiqaAssetMessage> = cache.getOrPut(category) {
-        if (!hasAllParts(context, category)) return@getOrPut emptyList()
+        val count = partCount(context, category) ?: return@getOrPut emptyList()
         runCatching {
             val encoded = buildString {
-                for (i in 0 until PARTS_PER_CATEGORY) {
+                for (i in 0 until count) {
                     context.assets.open(partPath(category, i)).bufferedReader(Charsets.US_ASCII).use { append(it.readText().trim()) }
                 }
             }
