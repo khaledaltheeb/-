@@ -58,6 +58,7 @@ private fun SafeDriveAgreementsScreen() {
     val scope = rememberCoroutineScope()
     var connections by remember { mutableStateOf<List<CircleConnection>>(emptyList()) }
     var agreements by remember { mutableStateOf<Map<String, CircleDriveAgreement>>(emptyMap()) }
+    var weeklyPreferences by remember { mutableStateOf<Map<String, CircleDriveWeeklyPreference>>(emptyMap()) }
     var loading by remember { mutableStateOf(false) }
     var status by remember { mutableStateOf("") }
 
@@ -67,14 +68,17 @@ private fun SafeDriveAgreementsScreen() {
         scope.launch {
             val result = withContext(Dispatchers.IO) {
                 runCatching {
-                    val people = RawafidCircleApi.connections(context)
-                    val rules = RawafidCircleApi.driveAgreements(context).associateBy { it.connectionId }
-                    people to rules
+                    Triple(
+                        RawafidCircleApi.connections(context),
+                        RawafidCircleApi.driveAgreements(context).associateBy { it.connectionId },
+                        RawafidCircleApi.driveWeeklyPreferences(context).associateBy { it.connectionId }
+                    )
                 }
             }
-            result.onSuccess { (people, rules) ->
+            result.onSuccess { (people, rules, weekly) ->
                 connections = people
                 agreements = rules
+                weeklyPreferences = weekly
                 status = ""
             }.onFailure { status = it.message ?: "تعذر تحميل اتفاقات القيادة الآمنة." }
             loading = false
@@ -129,9 +133,11 @@ private fun SafeDriveAgreementsScreen() {
                 speedThresholdKmh = 120,
                 persistentSpeedSeconds = 120
             )
+            val weeklyEnabled = weeklyPreferences[person.connectionId]?.weeklyReportsEnabled == true
             DriveAgreementCard(
                 person = person,
                 agreement = current,
+                weeklyEnabled = weeklyEnabled,
                 busy = loading,
                 onSave = { next ->
                     if (loading) return@DriveAgreementCard
@@ -156,8 +162,39 @@ private fun SafeDriveAgreementsScreen() {
                         }
                         result.onSuccess {
                             agreements = agreements + (person.connectionId to current.copy(permissionEnabled = enabled))
+                            weeklyPreferences = weeklyPreferences + (
+                                person.connectionId to CircleDriveWeeklyPreference(
+                                    connectionId = person.connectionId,
+                                    permissionEnabled = enabled,
+                                    weeklyReportsEnabled = weeklyEnabled
+                                )
+                            )
                             status = if (enabled) "تم تفعيل اتفاق القيادة مع ${person.counterpartName}." else "تم إيقاف مشاركة القيادة مع ${person.counterpartName}."
                         }.onFailure { status = it.message ?: "تعذر تحديث إذن القيادة الآمنة." }
+                        loading = false
+                    }
+                },
+                onWeeklyToggle = { enabled ->
+                    if (loading || !current.permissionEnabled) return@DriveAgreementCard
+                    loading = true
+                    scope.launch {
+                        val result = withContext(Dispatchers.IO) {
+                            runCatching { RawafidCircleApi.setDriveWeeklyReportEnabled(context, person.connectionId, enabled) }
+                        }
+                        result.onSuccess {
+                            weeklyPreferences = weeklyPreferences + (
+                                person.connectionId to CircleDriveWeeklyPreference(
+                                    connectionId = person.connectionId,
+                                    permissionEnabled = current.permissionEnabled,
+                                    weeklyReportsEnabled = enabled
+                                )
+                            )
+                            status = if (enabled) {
+                                "تم تفعيل الملخص الأسبوعي التلقائي مع ${person.counterpartName}."
+                            } else {
+                                "تم إيقاف الملخص الأسبوعي التلقائي مع ${person.counterpartName}."
+                            }
+                        }.onFailure { status = it.message ?: "تعذر تحديث الملخص الأسبوعي." }
                         loading = false
                     }
                 }
@@ -175,9 +212,11 @@ private fun SafeDriveAgreementsScreen() {
 private fun DriveAgreementCard(
     person: CircleConnection,
     agreement: CircleDriveAgreement,
+    weeklyEnabled: Boolean,
     busy: Boolean,
     onSave: (CircleDriveAgreement) -> Unit,
-    onMasterToggle: (Boolean) -> Unit
+    onMasterToggle: (Boolean) -> Unit,
+    onWeeklyToggle: (Boolean) -> Unit
 ) {
     var incidents by remember(agreement.connectionId, agreement.incidentsEnabled) { mutableStateOf(agreement.incidentsEnabled) }
     var risks by remember(agreement.connectionId, agreement.riskAlertsEnabled) { mutableStateOf(agreement.riskAlertsEnabled) }
@@ -218,6 +257,16 @@ private fun DriveAgreementCard(
                 enabled = !busy,
                 onChange = { reports = it }
             )
+            AgreementToggle(
+                title = "ملخص أسبوعي تلقائي",
+                subtitle = "اختياري ومعطل افتراضيًا. مرة أسبوعيًا يرسل ملخصًا مجمعًا من هذا الجهاز فقط؛ دون مسار GPS أو موقع حي.",
+                checked = weeklyEnabled,
+                enabled = !busy && agreement.permissionEnabled,
+                onChange = onWeeklyToggle
+            )
+            if (!agreement.permissionEnabled && weeklyEnabled) {
+                Text("الملخص الأسبوعي موقوف فعليًا لأن إذن «القيادة الآمنة» الرئيسي غير مفعّل لهذا الشخص.", style = MaterialTheme.typography.bodySmall)
+            }
 
             OutlinedTextField(
                 value = speed,
