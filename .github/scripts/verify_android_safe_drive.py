@@ -58,7 +58,7 @@ for token in [
     'RawafidCircleApi.broadcastDriveAlert',
     'SafeDriveReportShareWorker',
     'ACTION_SAFE_DRIVE_HELP_NOW',
-    'foreground',
+    'startForeground(',
 ]:
     if token not in service:
         errors.append(f"SafeDriveService.kt missing contract: {token}")
@@ -68,7 +68,7 @@ for token in [
     '"driving_safety"',
     '"التصعيد عند عدم الرد"',
     '"هذا ليس حد السرعة القانوني للطريق."',
-    '"لا يخزن روافد مسار الرحلة الكامل',
+    'لا يخزن روافد مسار الرحلة الكامل',
 ]:
     if token not in activity:
         errors.append(f"SafeDriveActivity.kt missing contract: {token}")
