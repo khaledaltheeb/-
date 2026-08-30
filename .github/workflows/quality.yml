@@ -97,6 +97,16 @@ jobs:
             exit 1
           fi
           VISUAL_CHROME_PATH="$CHROME_BIN" node scripts/visual-regression.mjs
+      - name: Daily Tools visual and interaction regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME_BIN="$(command -v google-chrome-stable || command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          if [ -z "$CHROME_BIN" ]; then
+            echo 'No Chrome/Chromium executable found for Daily Tools visual regression checks.' >&2
+            exit 1
+          fi
+          VISUAL_CHROME_PATH="$CHROME_BIN" node scripts/daily-tools-visual-regression.mjs
       - name: Production HTTP smoke
         run: npm run smoke
       - name: Full sitemap SEO gate
