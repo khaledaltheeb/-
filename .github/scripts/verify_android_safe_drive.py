@@ -28,6 +28,7 @@ service = text(JAVA / "SafeDriveService.kt")
 activity = text(JAVA / "SafeDriveActivity.kt")
 advanced = text(JAVA / "SafeDriveAdvanced.kt")
 auto_detection = text(JAVA / "SafeDriveAutoDetection.kt")
+sensor_fusion = text(JAVA / "SafeDriveSensorFusion.kt")
 agreement_activity = text(JAVA / "SafeDriveAgreementsActivity.kt")
 agreement_observer = text(JAVA / "SafeDriveAgreementObserver.kt")
 circle = text(JAVA / "RawafidCircleApi.kt")
@@ -85,6 +86,23 @@ for token in [
 ]:
     if token not in auto_detection:
         errors.append(f"SafeDriveAutoDetection.kt missing contract: {token}")
+
+for token in [
+    "Sensor.TYPE_GYROSCOPE",
+    "SafeDriveTurnFusionRule",
+    "DEFAULT_MAX_SIGNAL_AGE_MS",
+    "gyroCorroboratedTurnCount",
+    "gpsOnlyTurnCount",
+    "SafeDriveSensorFusionStore.save",
+    "EncryptedLocalStore.put(context, KEY",
+    "does not collect location",
+]:
+    if token not in sensor_fusion:
+        errors.append(f"SafeDriveSensorFusion.kt missing contract: {token}")
+
+for forbidden in ["latitude", "longitude", "route_points", "polyline"]:
+    if forbidden in sensor_fusion.lower():
+        errors.append(f"SafeDriveSensorFusion.kt must not persist or process location fields: {forbidden}")
 
 for token in [
     'setContentTitle("هل أنت بخير؟")',
@@ -149,13 +167,18 @@ for token in [
     'event = "persistent_speed"',
     '"severe_speed"',
     '"risk_cluster"',
-    'location is transmitted',
+    'No location is transmitted',
+    'ConcurrentHashMap.newKeySet',
 ]:
     if token not in agreement_observer:
         errors.append(f"SafeDriveAgreementObserver.kt missing contract: {token}")
 
-if 'SafeDriveAgreementObserver.start(this)' not in application:
-    errors.append("RawafidApplication.kt must start SafeDriveAgreementObserver")
+for token in [
+    'SafeDriveAgreementObserver.start(this)',
+    'SafeDriveSensorFusionObserver.start(this)',
+]:
+    if token not in application:
+        errors.append(f"RawafidApplication.kt missing Safe Drive process observer: {token}")
 
 for token in [
     'id = "safe_drive_agreements"',
@@ -249,6 +272,7 @@ for token in [
     "speed_threshold_kmh",
     "persistent_speed_seconds",
     "v_event='risky_driving' and da.connection_id is null",
+    "circle_drive_agreements_grantor_idx",
 ]:
     if token not in migration_text:
         errors.append(f"Safe Drive migration contract missing: {token}")
@@ -264,4 +288,4 @@ if errors:
         print(f"- {error}")
     sys.exit(1)
 
-print("Android Safe Drive contract OK: consent-first vehicle detection, driver/passenger mode, spoken coaching, rest guard, encrypted weekly analytics, per-person driving agreements, targeted thresholds, location minimization and sudden-stop safety checks verified")
+print("Android Safe Drive contract OK: consent-first vehicle detection, driver/passenger mode, spoken coaching, rest guard, encrypted weekly analytics, per-person driving agreements, targeted thresholds, active-trip gyroscope corroboration, location minimization and sudden-stop safety checks verified")
