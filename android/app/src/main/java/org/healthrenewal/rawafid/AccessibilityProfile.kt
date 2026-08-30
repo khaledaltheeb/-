@@ -17,6 +17,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilledTonalButton
@@ -25,6 +27,9 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -33,6 +38,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.LayoutDirection
@@ -87,7 +93,6 @@ data class AppPersonalization(
 object AppPersonalizationStore {
     private const val PREFS = "rawafid_app_personalization_v1"
     private val revision = mutableIntStateOf(0)
-
     private fun prefs(context: Context) = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 
     fun load(context: Context) = AppPersonalization(
@@ -130,18 +135,14 @@ class AccessibilityProfileActivity : ComponentActivity() {
 @Composable
 private fun SettingsAndAccessibilityScreen() {
     val context = androidx.compose.ui.platform.LocalContext.current
-    var profile by remember { mutableStateOf(AccessibilityProfileStore.load(context)) }
-    var appearance by remember { mutableStateOf(AppPersonalizationStore.load(context)) }
+    var savedProfile by remember { mutableStateOf(AccessibilityProfileStore.load(context)) }
+    var savedAppearance by remember { mutableStateOf(AppPersonalizationStore.load(context)) }
+    var draftProfile by remember { mutableStateOf(savedProfile) }
+    var draftAppearance by remember { mutableStateOf(savedAppearance) }
+    var showConfirm by remember { mutableStateOf(false) }
+    var savedMessage by remember { mutableStateOf("") }
 
-    fun saveProfile(next: AccessibilityProfile) {
-        profile = next
-        AccessibilityProfileStore.save(context, next)
-    }
-
-    fun saveAppearance(next: AppPersonalization) {
-        appearance = next
-        AppPersonalizationStore.save(context, next)
-    }
+    val dirty = draftProfile != savedProfile || draftAppearance != savedAppearance
 
     LazyColumn(
         contentPadding = PaddingValues(RawafidSpacing.ScreenHorizontal),
@@ -150,9 +151,17 @@ private fun SettingsAndAccessibilityScreen() {
         item {
             Column(verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
                 Text("الإعدادات والوصولية", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+                Text("جرّب التغييرات في المعاينة أولًا. لن تصبح إعدادات دائمة حتى تضغط «حفظ الإعدادات» وتؤكد.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
+
+        item {
+            SettingsSection("معاينة مباشرة — غير محفوظة") {
+                SettingsPreview(draftAppearance, draftProfile)
                 Text(
-                    "خصص مظهر روافد وطريقة التنبيه والوصولية. تبقى هذه التفضيلات على هذا الهاتف.",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    if (dirty) "لديك تغييرات غير محفوظة." else "المعاينة تطابق الإعدادات المحفوظة.",
+                    color = if (dirty) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontWeight = FontWeight.SemiBold
                 )
             }
         }
@@ -160,62 +169,54 @@ private fun SettingsAndAccessibilityScreen() {
         item {
             SettingsSection("المظهر") {
                 Text("الوضع", fontWeight = FontWeight.SemiBold)
-                PreferenceChips(
-                    options = listOf("system" to "حسب الهاتف", "light" to "نهاري", "dark" to "ليلي"),
-                    selected = appearance.themeMode,
-                    onSelect = { saveAppearance(appearance.copy(themeMode = it)) }
-                )
-
+                PreferenceChips(listOf("system" to "حسب الهاتف", "light" to "نهاري", "dark" to "ليلي"), draftAppearance.themeMode) {
+                    draftAppearance = draftAppearance.copy(themeMode = it); savedMessage = ""
+                }
                 Text("اللون الرئيسي", fontWeight = FontWeight.SemiBold)
-                PreferenceChips(
-                    options = listOf(
-                        "rawafid" to "روافد",
-                        "ocean" to "أزرق هادئ",
-                        "sage" to "أخضر طبيعي",
-                        "rose" to "وردي هادئ"
-                    ),
-                    selected = appearance.palette,
-                    onSelect = { saveAppearance(appearance.copy(palette = it)) }
-                )
-
+                PreferenceChips(listOf("rawafid" to "روافد", "ocean" to "أزرق هادئ", "sage" to "أخضر طبيعي", "rose" to "وردي هادئ"), draftAppearance.palette) {
+                    draftAppearance = draftAppearance.copy(palette = it); savedMessage = ""
+                }
                 Text("الخلفية", fontWeight = FontWeight.SemiBold)
-                PreferenceChips(
-                    options = listOf("soft" to "ناعمة", "pure" to "نقية", "warm" to "دافئة"),
-                    selected = appearance.backgroundTone,
-                    onSelect = { saveAppearance(appearance.copy(backgroundTone = it)) }
-                )
-
+                PreferenceChips(listOf("soft" to "ناعمة", "pure" to "نقية", "warm" to "دافئة"), draftAppearance.backgroundTone) {
+                    draftAppearance = draftAppearance.copy(backgroundTone = it); savedMessage = ""
+                }
                 Text("لون النص", fontWeight = FontWeight.SemiBold)
-                PreferenceChips(
-                    options = listOf("standard" to "متوازن", "strong" to "داكن قوي", "soft" to "أهدأ"),
-                    selected = appearance.textTone,
-                    onSelect = { saveAppearance(appearance.copy(textTone = it)) }
-                )
-
-                Card(modifier = Modifier.fillMaxWidth()) {
-                    Column(Modifier.padding(RawafidSpacing.Md), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
-                        Text("معاينة", style = MaterialTheme.typography.titleMedium)
-                        Text("هذا مثال لشكل النص والخلفية بعد اختيارك.")
-                        Text(
-                            "الألوان المتاحة مقيدة بمجموعات مقروءة بدل السماح بتركيبات قد تجعل النص غير واضح.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
+                PreferenceChips(listOf("standard" to "متوازن", "strong" to "داكن قوي", "soft" to "أهدأ"), draftAppearance.textTone) {
+                    draftAppearance = draftAppearance.copy(textTone = it); savedMessage = ""
                 }
             }
         }
 
         item {
+            SettingsSection("حجم النص") {
+                Text("${(draftProfile.textScale * 100).toInt()}%", style = MaterialTheme.typography.titleMedium)
+                Slider(value = draftProfile.textScale, onValueChange = { draftProfile = draftProfile.copy(textScale = it); savedMessage = "" }, valueRange = 0.9f..1.6f, steps = 6)
+                PreferenceChips(
+                    options = listOf("100" to "عادي", "120" to "كبير", "140" to "أكبر"),
+                    selected = when {
+                        kotlin.math.abs(draftProfile.textScale - 1.4f) < 0.06f -> "140"
+                        kotlin.math.abs(draftProfile.textScale - 1.2f) < 0.06f -> "120"
+                        else -> "100"
+                    }
+                ) {
+                    val scale = when (it) { "120" -> 1.2f; "140" -> 1.4f; else -> 1f }
+                    draftProfile = draftProfile.copy(textScale = scale); savedMessage = ""
+                }
+            }
+        }
+
+        item { AccessibilityToggle("تباين مرتفع", "ألوان أوضح وحدود أقوى عند الحاجة.", draftProfile.highContrast) { draftProfile = draftProfile.copy(highContrast = it); savedMessage = "" } }
+        item { AccessibilityToggle("تقليل الحركة", "يوقف أو يختصر الحركات البصرية غير الضرورية.", draftProfile.reduceMotion) { draftProfile = draftProfile.copy(reduceMotion = it); savedMessage = "" } }
+        item { AccessibilityToggle("أهداف لمس أكبر", "يزيد الحد الأدنى لمساحة لمس الأزرار والعناصر التفاعلية.", draftProfile.largeTargets) { draftProfile = draftProfile.copy(largeTargets = it); savedMessage = "" } }
+        item { AccessibilityToggle("الوضع الإدراكي", "أولوية للخطوات القصيرة وتقليل كثافة المعلومات في الشاشات التي تدعمه.", draftProfile.cognitiveMode) { draftProfile = draftProfile.copy(cognitiveMode = it); savedMessage = "" } }
+        item { AccessibilityToggle("تقليل المحفزات", "يقلل العناصر الثانوية والزحام البصري حيث تدعم الشاشة ذلك.", draftProfile.lowStimulation) { draftProfile = draftProfile.copy(lowStimulation = it); savedMessage = "" } }
+        item { AccessibilityToggle("أفضل القراءة الصوتية", "يسجل تفضيل Text-to-Speech لتستخدمه الأدوات والمحتوى الذي يدعمه.", draftProfile.textToSpeechPreferred) { draftProfile = draftProfile.copy(textToSpeechPreferred = it); savedMessage = "" } }
+        item { AccessibilityToggle("أفضل لغة أبسط", "يسجل تفضيل الشرح المباشر والمختصر دون تغيير الدقة.", draftProfile.simpleLanguagePreferred) { draftProfile = draftProfile.copy(simpleLanguagePreferred = it); savedMessage = "" } }
+
+        item {
             SettingsSection("الإشعارات والنغمة") {
-                Text(
-                    "Android يتحكم بصوت كل قناة إشعار بعد إنشائها. افتح القناة المطلوبة واختر النغمة والاهتزاز والظهور على الشاشة من إعدادات الهاتف.",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                FilledTonalButton(
-                    onClick = { openNotificationSettings(context, null) },
-                    modifier = Modifier.fillMaxWidth()
-                ) { Text("كل إعدادات إشعارات روافد") }
+                Text("صوت الإشعارات والاهتزاز والظهور على شاشة القفل تتحكم بها قنوات Android بعد إنشاء القناة.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                FilledTonalButton(onClick = { openNotificationSettings(context, null) }, modifier = Modifier.fillMaxWidth()) { Text("كل إعدادات إشعارات روافد") }
                 NotificationChannelButton(context, "راحة العين والرمش", NotificationChannels.EYE)
                 NotificationChannelButton(context, "العناية اليومية والماء والحركة", NotificationChannels.DAILY)
                 NotificationChannelButton(context, "الرسائل الداعمة", NotificationChannels.MOTIVATION)
@@ -224,46 +225,84 @@ private fun SettingsAndAccessibilityScreen() {
         }
 
         item {
-            SettingsSection("حجم النص") {
-                Text("${(profile.textScale * 100).toInt()}%", style = MaterialTheme.typography.titleMedium)
-                Slider(
-                    value = profile.textScale,
-                    onValueChange = { saveProfile(profile.copy(textScale = it)) },
-                    valueRange = 0.9f..1.6f,
-                    steps = 6
-                )
-                PreferenceChips(
-                    options = listOf("100" to "عادي", "120" to "كبير", "140" to "أكبر"),
-                    selected = when {
-                        kotlin.math.abs(profile.textScale - 1.4f) < 0.06f -> "140"
-                        kotlin.math.abs(profile.textScale - 1.2f) < 0.06f -> "120"
-                        else -> "100"
-                    },
-                    onSelect = {
-                        val scale = when (it) { "120" -> 1.2f; "140" -> 1.4f; else -> 1f }
-                        saveProfile(profile.copy(textScale = scale))
-                    }
-                )
+            Button(modifier = Modifier.fillMaxWidth(), enabled = dirty, onClick = { showConfirm = true }) {
+                Text(if (dirty) "حفظ الإعدادات" else "الإعدادات محفوظة")
             }
         }
-
-        item { AccessibilityToggle("تباين مرتفع", "ألوان أوضح وحدود أقوى عند الحاجة.", profile.highContrast) { saveProfile(profile.copy(highContrast = it)) } }
-        item { AccessibilityToggle("تقليل الحركة", "يوقف أو يختصر الحركات البصرية غير الضرورية، بما فيها مؤشرات الأدوات التفاعلية.", profile.reduceMotion) { saveProfile(profile.copy(reduceMotion = it)) } }
-        item { AccessibilityToggle("أهداف لمس أكبر", "يزيد الحد الأدنى لمساحة لمس الأزرار والعناصر التفاعلية.", profile.largeTargets) { saveProfile(profile.copy(largeTargets = it)) } }
-        item { AccessibilityToggle("الوضع الإدراكي", "أولوية للخطوات القصيرة وتقليل كثافة المعلومات في الشاشات التي تدعمه.", profile.cognitiveMode) { saveProfile(profile.copy(cognitiveMode = it)) } }
-        item { AccessibilityToggle("تقليل المحفزات", "يقلل العناصر الثانوية والزحام البصري حيث تدعم الشاشة ذلك.", profile.lowStimulation) { saveProfile(profile.copy(lowStimulation = it)) } }
-        item { AccessibilityToggle("أفضل القراءة الصوتية", "يسجل تفضيل Text-to-Speech لتستخدمه الأدوات والمحتوى الذي يدعمه.", profile.textToSpeechPreferred) { saveProfile(profile.copy(textToSpeechPreferred = it)) } }
-        item { AccessibilityToggle("أفضل لغة أبسط", "يسجل تفضيل الشرح المباشر والمختصر دون تغيير الدقة.", profile.simpleLanguagePreferred) { saveProfile(profile.copy(simpleLanguagePreferred = it)) } }
+        if (dirty) {
+            item {
+                FilledTonalButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = { draftProfile = savedProfile; draftAppearance = savedAppearance; savedMessage = "تم إلغاء التغييرات غير المحفوظة." }
+                ) { Text("إلغاء التغييرات") }
+            }
+        }
+        if (savedMessage.isNotBlank()) item { Text(savedMessage, color = MaterialTheme.colorScheme.primary) }
 
         item {
             Card {
                 Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
                     Text("الخصوصية", fontWeight = FontWeight.Bold)
-                    Text(
-                        "إعدادات المظهر والوصولية محلية، ولا ترسل نوع إعاقة أو تفضيلات شخصية إلى الخادم.",
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Text("إعدادات المظهر والوصولية محلية، ولا ترسل نوع إعاقة أو تفضيلات شخصية إلى الخادم.", color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
+            }
+        }
+    }
+
+    if (showConfirm) {
+        AlertDialog(
+            onDismissRequest = { showConfirm = false },
+            title = { Text("حفظ هذه الإعدادات؟") },
+            text = { Text("سيتم تطبيق الإعدادات التي راجعتها في المعاينة على التطبيق. يمكنك تعديلها لاحقًا في أي وقت.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    AccessibilityProfileStore.save(context, draftProfile)
+                    AppPersonalizationStore.save(context, draftAppearance)
+                    savedProfile = draftProfile
+                    savedAppearance = draftAppearance
+                    showConfirm = false
+                    savedMessage = "تم حفظ الإعدادات وتطبيقها."
+                }) { Text("حفظ") }
+            },
+            dismissButton = { TextButton(onClick = { showConfirm = false }) { Text("رجوع") } }
+        )
+    }
+}
+
+@Composable
+private fun SettingsPreview(appearance: AppPersonalization, profile: AccessibilityProfile) {
+    val dark = appearance.themeMode == "dark"
+    val primary = when (appearance.palette) {
+        "ocean" -> if (dark) Color(0xFF91CAF4) else Color(0xFF2C6483)
+        "sage" -> if (dark) Color(0xFFA4D8A7) else Color(0xFF3E7047)
+        "rose" -> if (dark) Color(0xFFF2B7C2) else Color(0xFF965365)
+        else -> if (dark) Color(0xFF7FD8D7) else Color(0xFF006A6B)
+    }
+    val background = when {
+        dark && appearance.backgroundTone == "pure" -> Color(0xFF080B0B)
+        dark && appearance.backgroundTone == "warm" -> Color(0xFF171411)
+        dark -> Color(0xFF0E1513)
+        appearance.backgroundTone == "pure" -> Color.White
+        appearance.backgroundTone == "warm" -> Color(0xFFFFF9F0)
+        else -> Color(0xFFF7FAF8)
+    }
+    val foreground = when {
+        dark && appearance.textTone == "soft" -> Color(0xFFC9D0CD)
+        dark -> Color.White
+        appearance.textTone == "strong" -> Color(0xFF080B0A)
+        appearance.textTone == "soft" -> Color(0xFF39423F)
+        else -> Color(0xFF151D1B)
+    }
+    val scheme = if (dark) darkColorScheme(primary = primary, background = background, surface = background, onBackground = foreground, onSurface = foreground)
+    else lightColorScheme(primary = primary, background = background, surface = background, onBackground = foreground, onSurface = foreground)
+
+    MaterialTheme(colorScheme = scheme) {
+        Surface(modifier = Modifier.fillMaxWidth(), tonalElevation = if (profile.highContrast) RawafidSpacing.Xxs else RawafidSpacing.Xxs) {
+            Column(Modifier.padding(RawafidSpacing.Lg), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)) {
+                Text("روافد — معاينة", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                Text("نص نموذجي لقياس وضوح اللون والخلفية قبل الحفظ.")
+                Text("حجم النص المختار: ${(profile.textScale * 100).toInt()}%")
+                Text(if (profile.highContrast) "التباين المرتفع: مفعّل" else "التباين المرتفع: غير مفعّل", color = MaterialTheme.colorScheme.primary)
             }
         }
     }
@@ -272,10 +311,7 @@ private fun SettingsAndAccessibilityScreen() {
 @Composable
 private fun SettingsSection(title: String, content: @Composable ColumnScope.() -> Unit) {
     Card(modifier = Modifier.fillMaxWidth()) {
-        Column(
-            modifier = Modifier.padding(RawafidSpacing.CardContent),
-            verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)
-        ) {
+        Column(modifier = Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)) {
             Text(title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
             content()
         }
@@ -283,31 +319,15 @@ private fun SettingsSection(title: String, content: @Composable ColumnScope.() -
 }
 
 @Composable
-private fun PreferenceChips(
-    options: List<Pair<String, String>>,
-    selected: String,
-    onSelect: (String) -> Unit
-) {
-    FlowRow(
-        horizontalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs),
-        verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)
-    ) {
-        options.forEach { (id, label) ->
-            FilterChip(
-                selected = selected == id,
-                onClick = { onSelect(id) },
-                label = { Text(label) }
-            )
-        }
+private fun PreferenceChips(options: List<Pair<String, String>>, selected: String, onSelect: (String) -> Unit) {
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
+        options.forEach { (id, label) -> FilterChip(selected = selected == id, onClick = { onSelect(id) }, label = { Text(label) }) }
     }
 }
 
 @Composable
 private fun NotificationChannelButton(context: Context, label: String, channelId: String) {
-    FilledTonalButton(
-        onClick = { openNotificationSettings(context, channelId) },
-        modifier = Modifier.fillMaxWidth()
-    ) { Text("نغمة $label") }
+    FilledTonalButton(onClick = { openNotificationSettings(context, channelId) }, modifier = Modifier.fillMaxWidth()) { Text("نغمة $label") }
 }
 
 private fun openNotificationSettings(context: Context, channelId: String?) {
@@ -318,9 +338,7 @@ private fun openNotificationSettings(context: Context, channelId: String?) {
             putExtra(Settings.EXTRA_CHANNEL_ID, channelId)
         }
     } else {
-        Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
-            putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
-        }
+        Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply { putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName) }
     }
     runCatching { context.startActivity(intent) }
 }
