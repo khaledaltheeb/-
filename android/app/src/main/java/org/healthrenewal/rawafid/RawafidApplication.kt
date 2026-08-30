@@ -31,20 +31,36 @@ class RawafidApplication : Application(), Application.ActivityLifecycleCallbacks
         else -> WomenPrivacyGate.TARGET_COMPANION
     }
 
-    override fun onActivityResumed(activity: Activity) {
-        if (!isWomenSensitive(activity)) return
+    /**
+     * Apply the women-sector privacy contract before a sensitive Activity can
+     * render a usable frame. The same check is repeated on resume so an expired
+     * local privacy session cannot be bypassed by leaving an Activity in the
+     * task stack and returning to it later.
+     */
+    private fun enforceWomenPrivacy(activity: Activity): Boolean {
+        if (!isWomenSensitive(activity) || activity.isFinishing) return false
 
-        if (WomenPrivacyStore.enabled(activity)) {
+        val enabled = WomenPrivacyStore.enabled(activity)
+        if (enabled) {
             activity.window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
         } else {
             activity.window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
         }
 
-        if (WomenPrivacyStore.enabled(activity) && !WomenPrivacyStore.sessionUnlocked(activity)) {
+        if (enabled && !WomenPrivacyStore.sessionUnlocked(activity)) {
             activity.startActivity(WomenPrivacyGate.intent(activity, targetFor(activity)))
             activity.finish()
-            return
+            return true
         }
+        return false
+    }
+
+    override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
+        enforceWomenPrivacy(activity)
+    }
+
+    override fun onActivityResumed(activity: Activity) {
+        if (enforceWomenPrivacy(activity)) return
 
         if (activity is WomenActivity && !WomenPrivacyStore.setupSeen(activity)) {
             activity.startActivity(Intent(activity, WomenPrivacySettingsActivity::class.java))
@@ -65,7 +81,6 @@ class RawafidApplication : Application(), Application.ActivityLifecycleCallbacks
         ).forEach(manager::createNotificationChannel)
     }
 
-    override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) = Unit
     override fun onActivityStarted(activity: Activity) = Unit
     override fun onActivityPaused(activity: Activity) = Unit
     override fun onActivityStopped(activity: Activity) = Unit
