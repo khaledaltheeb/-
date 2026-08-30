@@ -37,18 +37,18 @@ jobs:
           citation="$(curl -fsSL --compressed --retry 6 --retry-delay 2 --retry-all-errors --max-time 25 "${headers[@]}" "${base}/citation?identity-check=${stamp}")"
           sitemap="$(curl -fsSL --compressed --retry 6 --retry-delay 2 --retry-all-errors --max-time 25 "${headers[@]}" "${base}/sitemaps/static.xml?identity-check=${stamp}")"
 
-          printf '%s' "${home}" | grep -Fq 'خالد الذيب'
-          printf '%s' "${home}" | grep -Fq 'Khaled altheeb'
-          printf '%s' "${home}" | grep -Fq '"@type":"Person"'
-          printf '%s' "${home}" | grep -Fq 'https://healthrenewal.org/#founder'
+          grep -Fq 'خالد الذيب' <<< "${home}"
+          grep -Fq 'Khaled altheeb' <<< "${home}"
+          grep -Fq '"@type":"Person"' <<< "${home}"
+          grep -Fq 'https://healthrenewal.org/#founder' <<< "${home}"
 
-          printf '%s' "${press}" | grep -Fq 'المركز الإعلامي والهوية المؤسسية'
-          printf '%s' "${press}" | grep -Fq 'خالد الذيب'
-          printf '%s' "${press}" | grep -Fq 'Khaled altheeb'
+          grep -Fq 'المركز الإعلامي والهوية المؤسسية' <<< "${press}"
+          grep -Fq 'خالد الذيب' <<< "${press}"
+          grep -Fq 'Khaled altheeb' <<< "${press}"
 
-          printf '%s' "${citation}" | grep -Fq 'خالد الذيب'
-          printf '%s' "${citation}" | grep -Fq 'Khaled altheeb'
+          grep -Fq 'خالد الذيب' <<< "${citation}"
+          grep -Fq 'Khaled altheeb' <<< "${citation}"
 
-          printf '%s' "${sitemap}" | grep -Fq 'https://healthrenewal.org/press'
+          grep -Fq 'https://healthrenewal.org/press' <<< "${sitemap}"
 
           echo 'Founder production identity verified: homepage JSON-LD, press page, citation page, and static sitemap are live.'
