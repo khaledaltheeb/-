@@ -30,6 +30,7 @@ const DISCOVER_LEFT = 92;
 const DISCOVER_TITLE_LINE_HEIGHT = 78;
 const DISCOVER_PILL_BOTTOM = 248;
 const TITLE_CLEARANCE = 10;
+const CARD_TITLE_BALANCE_SHIFT = 12;
 
 const run = (cmd, args) => {
   const r = spawnSync(cmd, args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
@@ -146,8 +147,10 @@ function cardSvg(item) {
   const cardHasThreeLines = titleLines.length >= 3;
   const cardTitleFontSize = cardHasThreeLines ? Math.min(baseTitleSize, 40) : baseTitleSize;
   const cardTitleLineHeight = cardHasThreeLines ? 56 : TITLE_LINE_HEIGHT;
-  const titleStart = cardHasThreeLines ? 274 : titleLines.length === 2 ? 286 : 320;
-  const excerptStart = titleStart + titleLines.length * cardTitleLineHeight + (cardHasThreeLines ? 24 : 32);
+  const titleBaseStart = cardHasThreeLines ? 274 : titleLines.length === 2 ? 286 : 320;
+  const titleShift = titleLines.length >= 2 ? CARD_TITLE_BALANCE_SHIFT : 0;
+  const titleStart = titleBaseStart + titleShift;
+  const excerptStart = titleBaseStart + titleLines.length * cardTitleLineHeight + (cardHasThreeLines ? 24 : 32);
   assertTitleClearance('Quick Info card', titleStart, cardTitleFontSize, CARD_PILL_BOTTOM);
   const titleSpans = titleLines.map((line, index) => `<tspan x="${CARD_RIGHT}" y="${titleStart + index * cardTitleLineHeight}">${esc(line)}</tspan>`).join('');
   const excerptSpans = excerptLines.map((line, index) => `<tspan x="${CARD_RIGHT}" y="${excerptStart + index * EXCERPT_LINE_HEIGHT}">${esc(line)}</tspan>`).join('');
