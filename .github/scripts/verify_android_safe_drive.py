@@ -28,8 +28,12 @@ service = text(JAVA / "SafeDriveService.kt")
 activity = text(JAVA / "SafeDriveActivity.kt")
 advanced = text(JAVA / "SafeDriveAdvanced.kt")
 auto_detection = text(JAVA / "SafeDriveAutoDetection.kt")
+agreement_activity = text(JAVA / "SafeDriveAgreementsActivity.kt")
+agreement_observer = text(JAVA / "SafeDriveAgreementObserver.kt")
 circle = text(JAVA / "RawafidCircleApi.kt")
 my_circle = text(JAVA / "MyCircleActivity.kt")
+application = text(JAVA / "RawafidApplication.kt")
+feature_catalog_source = text(JAVA / "FeatureCatalog.kt")
 gradle = text(GRADLE)
 
 for token in [
@@ -126,6 +130,41 @@ for token in [
         errors.append(f"SafeDriveActivity.kt missing contract: {token}")
 
 for token in [
+    'Text("اتفاق القيادة الآمنة"',
+    'RawafidCircleApi.driveAgreements(context)',
+    'RawafidCircleApi.setDriveAgreement(context, next)',
+    'RawafidCircleApi.setPermission(context, person.connectionId, "driving_safety", enabled)',
+    '"تنبيهات طلب المساعدة والتوقف المفاجئ"',
+    '"تنبيهات القيادة عالية الخطورة"',
+    '"تقرير نهاية الرحلة"',
+    '"تنبيه السرعة لهذا الشخص — كم/س (50–180)"',
+    '"هذه سرعة اتفاق شخصية وليست حد السرعة القانوني للطريق."',
+]:
+    if token not in agreement_activity:
+        errors.append(f"SafeDriveAgreementsActivity.kt missing contract: {token}")
+
+for token in [
+    'RawafidCircleApi.customDriveAgreements(context)',
+    'RawafidCircleApi.sendDriveAlertToConnection',
+    'event = "persistent_speed"',
+    '"severe_speed"',
+    '"risk_cluster"',
+    'location is transmitted',
+]:
+    if token not in agreement_observer:
+        errors.append(f"SafeDriveAgreementObserver.kt missing contract: {token}")
+
+if 'SafeDriveAgreementObserver.start(this)' not in application:
+    errors.append("RawafidApplication.kt must start SafeDriveAgreementObserver")
+
+for token in [
+    'id = "safe_drive_agreements"',
+    'routeTarget = "org.healthrenewal.rawafid.SafeDriveAgreementsActivity"',
+]:
+    if token not in feature_catalog_source:
+        errors.append(f"FeatureCatalog.kt missing Safe Drive agreement feature: {token}")
+
+for token in [
     'DRIVING_SAFETY("driving_safety"',
     '"driving_safety" to "السماح له باستلام تنبيهات وتقارير القيادة الآمنة',
 ]:
@@ -135,6 +174,10 @@ for token in [
 for token in [
     '"circle_broadcast_drive_alert"',
     '"circle_broadcast_drive_report"',
+    '"circle_get_drive_agreements"',
+    '"circle_get_custom_drive_agreements"',
+    '"circle_set_drive_agreement"',
+    '"circle_send_drive_alert_to_connection"',
     'SafeDriveScoring.reportSummary(report)',
     'latitude: Double?',
     '.put("p_latitude", latitude ?: JSONObject.NULL)',
@@ -173,8 +216,9 @@ try:
         if required not in permissions:
             errors.append(f"manifest missing {required}")
     activities = {node.attrib.get(ANDROID_NS + "name", "") for node in app.findall("activity")} if app is not None else set()
-    if ".SafeDriveActivity" not in activities:
-        errors.append("manifest missing SafeDriveActivity")
+    for required_activity in [".SafeDriveActivity", ".SafeDriveAgreementsActivity"]:
+        if required_activity not in activities:
+            errors.append(f"manifest missing {required_activity}")
     services = app.findall("service") if app is not None else []
     drive_service = next((node for node in services if node.attrib.get(ANDROID_NS + "name") == ".SafeDriveService"), None)
     if drive_service is None:
@@ -197,6 +241,14 @@ for token in [
     "safe_drive_report",
     "safe_drive_risk",
     "'location_shared',false",
+    "circle_drive_agreements",
+    "circle_get_drive_agreements",
+    "circle_get_custom_drive_agreements",
+    "circle_set_drive_agreement",
+    "circle_send_drive_alert_to_connection",
+    "speed_threshold_kmh",
+    "persistent_speed_seconds",
+    "v_event='risky_driving' and da.connection_id is null",
 ]:
     if token not in migration_text:
         errors.append(f"Safe Drive migration contract missing: {token}")
@@ -212,4 +264,4 @@ if errors:
         print(f"- {error}")
     sys.exit(1)
 
-print("Android Safe Drive contract OK: consent-first vehicle detection, driver/passenger mode, spoken coaching, rest guard, encrypted weekly analytics, location minimization and sudden-stop safety checks verified")
+print("Android Safe Drive contract OK: consent-first vehicle detection, driver/passenger mode, spoken coaching, rest guard, encrypted weekly analytics, per-person driving agreements, targeted thresholds, location minimization and sudden-stop safety checks verified")
