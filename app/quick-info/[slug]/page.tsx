@@ -9,7 +9,7 @@ import LegacyPreservedPageView from '@/components/legacy-preserved-page';
 import QuickInfoCard from '@/components/quick-info-card';
 import { buildSeoMetadata, breadcrumbJsonLd, SITE_URL } from '@/lib/seo';
 import { getLegacyPreservedPage, legacyPreservedMetadata } from '@/lib/legacy-preserved-page';
-import { getQuickInfoRecord, safeQuickInfoReferences, visibleQuickInfoFaq } from '@/lib/quick-info';
+import { getQuickInfoRecord, quickInfoOgPath, safeQuickInfoReferences, visibleQuickInfoFaq } from '@/lib/quick-info';
 import { contentReviewProvenance } from '@/lib/review-provenance';
 import imageStyles from './quick-info-image.module.css';
 
@@ -52,6 +52,7 @@ export default async function QuickInfoDetailPage({ params }: { params: Params }
 
   const canonical = record.canonical_url || `/quick-info/${slug}/`;
   const url = `${SITE_URL}${canonical}`;
+  const imagePath = quickInfoOgPath(slug);
   const imageUrl = record.featured_image_url || undefined;
   const imageAlt = record.featured_image_alt || `بطاقة معلومات سريعة من منصة روافد بعنوان «${record.title}»`;
   const references = safeQuickInfoReferences(record.references_json);
@@ -114,8 +115,8 @@ export default async function QuickInfoDetailPage({ params }: { params: Params }
     <div className="article-body">
       <QuickInfoCard title={record.title} description={record.excerpt} variant="hero" showAction={false} />
       <ContentRenderer bodyJson={record.body_json} bodyText={record.body_text} recordId={record.id} />
-      {imageUrl && <figure className={imageStyles.figure} data-quick-info-indexable-image>
-        <Image className={imageStyles.image} src={imageUrl} alt={imageAlt} width={1200} height={630} sizes="(max-width: 760px) calc(100vw - 36px), 640px" loading="lazy" unoptimized />
+      {imagePath && <figure className={imageStyles.figure} data-quick-info-indexable-image>
+        <Image className={imageStyles.image} src={imagePath} alt={imageAlt} width={1200} height={630} sizes="(max-width: 760px) calc(100vw - 36px), 640px" loading="lazy" unoptimized />
         <figcaption className={imageStyles.caption}>نسخة مرئية قابلة للمشاركة والفهرسة من بطاقة معلومات سريعة — منصة روافد</figcaption>
       </figure>}
     </div>
