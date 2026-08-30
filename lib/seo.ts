@@ -66,6 +66,7 @@ export type SeoMetadataInput = {
   follow?: boolean;
   type?: 'website' | 'article' | 'profile';
   image?: string | null;
+  imageAlt?: string | null;
   keywords?: string[];
   relatedTerms?: string[];
   searchIntents?: string[];
@@ -84,18 +85,16 @@ export function buildSeoMetadata(input: SeoMetadataInput): Metadata {
   const canFollow = input.follow !== false;
   const usesDefaultImage = !input.image;
   const image = absoluteSiteUrl(input.image || fallbackSocialImagePath(input.title, input.type));
+  const imageAlt = (input.imageAlt || input.title).replace(/\s+/g, ' ').trim();
   const languages = input.hreflang
     ? Object.fromEntries(Object.entries(input.hreflang).map(([key, value]) => [key, absoluteSiteUrl(value)]))
     : undefined;
 
-  // Keep the full 50 topical + 50 intent profile for editorial/query-coverage validation.
-  // Google explicitly ignores <meta name="keywords">, so only a small, highly relevant
-  // topical subset is emitted for compatibility with secondary clients. No hidden copy is used.
   const semanticProfile = buildSemanticSeoProfile(input);
   const keywords = semanticProfile.topicKeywords.slice(0, 12);
   const openGraphImages = usesDefaultImage
-    ? [{ url: image, width: 1200, height: 630, alt: input.title }]
-    : [{ url: image, alt: input.title }];
+    ? [{ url: image, width: 1200, height: 630, alt: imageAlt }]
+    : [{ url: image, alt: imageAlt }];
 
   return {
     title: { absolute: title },
