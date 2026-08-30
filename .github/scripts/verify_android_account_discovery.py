@@ -42,7 +42,7 @@ required_account = [
     'Text("شروط كلمة المرور"',
     'CirclePasswordPolicy.isValid(password)',
     '"إنشاء الحساب والحصول على رقم RFD"',
-    '"Spam / Junk"',
+    'Spam / Junk',
 ]
 for token in required_account:
     if token not in account:
