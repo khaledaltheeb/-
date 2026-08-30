@@ -82,6 +82,16 @@ export function quickInfoOgUrl(routeSlug: string) {
   return path ? `${SITE_URL}${path}` : '';
 }
 
+export function quickInfoDiscoverPath(routeSlug: string) {
+  const slug = safeRouteSlug(routeSlug);
+  return slug ? `/quick-info/discover/${slug}.png` : '';
+}
+
+export function quickInfoDiscoverUrl(routeSlug: string) {
+  const path = quickInfoDiscoverPath(routeSlug);
+  return path ? `${SITE_URL}${path}` : '';
+}
+
 function publicationApproved(schema: unknown): boolean {
   const record = asRecord(schema);
   return Boolean(
@@ -158,8 +168,8 @@ export async function getQuickInfoRecord(routeSlug: string): Promise<QuickInfoRe
   return {
     ...record,
     body_json: sanitizeQuickInfoBodyJson(record.body_json),
-    featured_image_url: quickInfoOgUrl(safeSlug),
-    featured_image_alt: `بطاقة مشاركة معلومات سريعة: ${record.title}`,
+    featured_image_url: quickInfoDiscoverUrl(safeSlug),
+    featured_image_alt: `صورة معلومات سريعة مهيأة للاكتشاف من منصة روافد بعنوان «${record.title}»`,
   };
 }
 
