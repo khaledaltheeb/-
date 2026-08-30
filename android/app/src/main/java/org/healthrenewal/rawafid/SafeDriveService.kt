@@ -1,6 +1,7 @@
 package org.healthrenewal.rawafid
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -154,6 +155,7 @@ class SafeDriveService : Service(), LocationListener, SensorEventListener {
         registerMotionSensor()
     }
 
+    @SuppressLint("MissingPermission")
     private fun requestLocationUpdates() {
         if (!hasFineLocation()) return
         val providers = buildList {
@@ -191,11 +193,14 @@ class SafeDriveService : Service(), LocationListener, SensorEventListener {
             bearingDegrees = if (location.hasBearing()) location.bearing else null,
             bearingAccuracyDegrees = if (location.hasBearingAccuracy()) location.bearingAccuracyDegrees else null
         )
-        lastLocation = location
+        val reliableLocation = location.hasAccuracy() && location.accuracy in 0.1f..driveConfig.maxLocationAccuracyM
+        if (reliableLocation) lastLocation = location
         val events = engine.consume(sample)
-        val state = engine.liveState(statusMessage = if (sample.accuracyM <= driveConfig.maxLocationAccuracyM) "القياس نشط" else "إشارة GPS ضعيفة")
+        val state = engine.liveState(statusMessage = if (reliableLocation) "القياس نشط" else "إشارة GPS ضعيفة")
         SafeDriveRuntime.update(state)
-        incidentDetector?.consume(sample, state.currentSpeedKmh, state.currentAccelerationMps2)?.let(::beginIncidentCheck)
+        if (reliableLocation) {
+            incidentDetector?.consume(sample, state.currentSpeedKmh, state.currentAccelerationMps2)?.let(::beginIncidentCheck)
+        }
         handleDrivingEvents(events, state, sample)
         maybeUpdateStatusNotification(state)
     }
@@ -265,7 +270,7 @@ class SafeDriveService : Service(), LocationListener, SensorEventListener {
         SafeDriveIncidentStore.add(this, pending.candidate, SafeDriveIncidentOutcome.SAFE_CONFIRMED, "أكد المستخدم أنه بخير بعد التوقف المفاجئ.")
         SafeDriveRuntime.pending(null)
         notificationManager().cancel(SAFE_DRIVE_INCIDENT_ID)
-        postResult("تم تسجيل الاطمئنان", "تم تسجيل نقطة التحقق: أكدت أنك بخير، ولم يُرسل تنبيه مساعدة.")
+        postResult("تم تسجيل الاطمئنان", "تم تسجيل نقطة الاطمئنان: أكدت أنك بخير، ولم يُرسل تنبيه مساعدة.")
     }
 
     private fun resolveIncidentHelp(auto: Boolean) {
@@ -285,7 +290,7 @@ class SafeDriveService : Service(), LocationListener, SensorEventListener {
 
     private fun manualHelpRequest() {
         val location = lastLocation
-        if (location == null || !location.hasAccuracy()) {
+        if (location == null || !location.hasAccuracy() || location.accuracy > driveConfig.maxLocationAccuracyM) {
             postResult("أحتاج مساعدة", "لم يتوفر موقع موثوق بعد. أبقِ قيادة آمنة مفتوحة حتى يثبت GPS ثم أعد المحاولة.")
             return
         }
@@ -341,7 +346,7 @@ class SafeDriveService : Service(), LocationListener, SensorEventListener {
 
     private fun sendLocalDriveSms(candidate: SafeDriveIncidentCandidate, summary: String): Int {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) return 0
-        val recipients = MyCircleStore.forPermission(this, CirclePermission.EMERGENCY)
+        val recipients = MyCircleStore.forPermission(this, CirclePermission.DRIVING_SAFETY)
             .map { it.phone.trim() }
             .filter { it.isNotBlank() }
             .distinct()
