@@ -5,6 +5,7 @@ import android.app.Application
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.WindowManager
@@ -13,8 +14,24 @@ class RawafidApplication : Application(), Application.ActivityLifecycleCallbacks
     override fun onCreate() {
         super.onCreate()
         registerActivityLifecycleCallbacks(this)
+        ensureDiscoverableHomeDefaults()
         createPrivacyFirstWomenChannels()
         CirclePushRegistration.registerCurrentToken(this)
+    }
+
+    /**
+     * Keep account/Circle onboarding discoverable for new installs without
+     * overriding a user's existing home-category choices. HomePreferenceStore
+     * uses the same preference contract in AdaptiveShell.
+     */
+    private fun ensureDiscoverableHomeDefaults() {
+        val prefs = getSharedPreferences("rawafid_home_preferences_v1", Context.MODE_PRIVATE)
+        if (!prefs.contains("categories")) {
+            prefs.edit().putStringSet(
+                "categories",
+                setOf("daily", "health", "wellbeing", "safety", "knowledge", "family")
+            ).apply()
+        }
     }
 
     private fun isWomenSensitive(activity: Activity): Boolean =
