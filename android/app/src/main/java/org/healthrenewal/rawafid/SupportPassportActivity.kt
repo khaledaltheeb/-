@@ -7,6 +7,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,6 +18,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -36,25 +38,24 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.ui.unit.dp
 import org.json.JSONArray
 import org.json.JSONObject
 
 enum class SupportNeed(val id: String, val labelAr: String, val helperAr: String) {
     SHORT_INSTRUCTIONS("short_instructions", "تعليمات قصيرة وواضحة", "قسّم المطلوب إلى خطوات قليلة ومباشرة."),
     EXTRA_RESPONSE_TIME("extra_response_time", "أحتاج وقتًا أطول للإجابة", "لا تستعجل الرد واترك وقتًا لمعالجة السؤال."),
-    TEXT_PREFERRED("text_preferred", "أفضل التواصل النصي", "استخدم الكتابة متى كان ذلك ممكنًا."),
-    NO_UNANNOUNCED_TOUCH("no_unannounced_touch", "لا تلمسني دون تنبيه", "أخبرني قبل أي لمس أو مساعدة جسدية."),
-    LOW_NOISE("low_noise", "أحتاج بيئة أقل ضوضاء", "خفّض الأصوات والمحفزات قدر الإمكان."),
-    SIGN_LANGUAGE("sign_language", "أستخدم لغة الإشارة", "وفّر مترجم لغة إشارة إذا احتجت إلى تواصل مفصل."),
-    COMPANION("companion", "قد أحتاج مرافقًا", "اسمح بوجود شخص موثوق عندما يكون ذلك مناسبًا."),
-    READING_SUPPORT("reading_support", "أواجه صعوبة في القراءة", "استخدم لغة أبسط ونصًا أقصر واقرأه لي عند الحاجة."),
-    EYE_CONTACT_OPTIONAL("eye_contact_optional", "قد لا أنظر مباشرة إلى العين", "عدم التواصل البصري لا يعني عدم الانتباه."),
-    LARGE_TEXT("large_text", "أحتاج نصًا كبيرًا وواضحًا", "استخدم خطًا أكبر وتباينًا جيدًا."),
-    HEARING_SUPPORT("hearing_support", "لدي احتياج سمعي", "واجهني أثناء الكلام واستخدم النص أو الإشارات المرئية عند الحاجة."),
-    MOBILITY_SUPPORT("mobility_support", "لدي احتياج حركي", "اسأل قبل المساعدة واحترم طريقتي وأدواتي في الحركة."),
-    COGNITIVE_SUPPORT("cognitive_support", "أحتاج تبسيطًا إدراكيًا", "قدّم معلومة واحدة في كل مرة وتجنب الازدحام."),
-    SENSORY_SUPPORT("sensory_support", "لدي حساسية حسية", "اسأل عن الضوء والصوت واللمس والمحفزات التي تزعجني."),
+    TEXT_PREFERRED("text_preferred", "أفضل التواصل بالكتابة", "اكتب المعلومات أو الأسئلة المهمة متى كان ذلك ممكنًا."),
+    NO_UNANNOUNCED_TOUCH("no_unannounced_touch", "لا تلمسني دون تنبيه", "أخبرني قبل أي لمس أو مساعدة جسدية وانتظر موافقتي إن أمكن."),
+    LOW_NOISE("low_noise", "أحتاج مكانًا أقل ضوضاء", "خفّض الأصوات والمحفزات أو ساعدني في الانتقال إلى مكان أهدأ."),
+    SIGN_LANGUAGE("sign_language", "أستخدم لغة الإشارة", "وفّر مترجم لغة إشارة إذا كان التواصل التفصيلي مطلوبًا."),
+    COMPANION("companion", "قد أحتاج مرافقًا", "اسمح بوجود شخص موثوق عندما يكون ذلك مناسبًا ومسموحًا."),
+    READING_SUPPORT("reading_support", "أواجه صعوبة في القراءة", "استخدم نصًا أقصر ولغة مباشرة واقرأ المعلومات لي عند الحاجة."),
+    EYE_CONTACT_OPTIONAL("eye_contact_optional", "قد لا أنظر مباشرة إلى العين", "عدم التواصل البصري لا يعني أنني لا أستمع أو لا أفهم."),
+    LARGE_TEXT("large_text", "أحتاج نصًا كبيرًا وواضحًا", "استخدم خطًا أكبر وتباينًا واضحًا عندما تعرض معلومات مكتوبة."),
+    HEARING_SUPPORT("hearing_support", "لدي احتياج سمعي", "واجهني أثناء الكلام واستخدم الكتابة أو الإشارات المرئية عند الحاجة."),
+    MOBILITY_SUPPORT("mobility_support", "لدي احتياج حركي", "اسألني قبل المساعدة واحترم طريقتي وأدواتي في الحركة."),
+    COGNITIVE_SUPPORT("cognitive_support", "أحتاج تبسيطًا إدراكيًا", "قدّم معلومة واحدة في كل مرة وتأكد أن الخطوة التالية واضحة."),
+    SENSORY_SUPPORT("sensory_support", "لدي حساسية حسية", "اسأل عن الضوء والصوت واللمس والمحفزات التي قد تزعجني."),
     SAFE_PERSON("safe_person", "قد أحتاج شخصًا موثوقًا", "إذا طلبت ذلك ساعدني في التواصل مع الشخص الذي أحدده.")
 }
 
@@ -95,17 +96,19 @@ object SupportPassportStore {
         prefs(context).edit().remove(PROFILE_JSON).apply()
     }
 
+    fun visibleNeeds(profile: SupportPassportProfile): List<SupportNeed> =
+        SupportNeed.entries.filter { it in profile.enabledNeeds && it in profile.sharedNeeds }
+
     fun buildShareText(profile: SupportPassportProfile): String {
         val lines = mutableListOf("جواز احتياجاتي — روافد")
         if (profile.shareDisplayName && profile.displayName.isNotBlank()) lines += "الاسم الذي أفضله: ${profile.displayName.trim()}"
         if (profile.shareLanguage && profile.preferredLanguage.isNotBlank()) lines += "لغة التواصل: ${profile.preferredLanguage.trim()}"
         if (profile.shareContactMethod && profile.preferredContactMethod.isNotBlank()) lines += "طريقة التواصل المفضلة: ${profile.preferredContactMethod.trim()}"
-
-        val visibleNeeds = SupportNeed.entries.filter { it in profile.enabledNeeds && it in profile.sharedNeeds }
-        if (visibleNeeds.isNotEmpty()) {
+        val needs = visibleNeeds(profile)
+        if (needs.isNotEmpty()) {
             lines += ""
             lines += "ما يساعدني:"
-            visibleNeeds.forEach { need -> lines += "• ${need.labelAr} — ${need.helperAr}" }
+            needs.forEach { need -> lines += "• ${need.labelAr} — ${need.helperAr}" }
         }
         if (profile.shareCustomNotes && profile.customNotes.isNotBlank()) {
             lines += ""
@@ -114,6 +117,37 @@ object SupportPassportStore {
         lines += ""
         lines += "هذه البطاقة للتواصل والدعم وليست إثباتًا لتشخيص أو سجلًا طبيًا."
         return lines.joinToString("\n")
+    }
+
+    fun buildPresentationCards(profile: SupportPassportProfile): List<PresentationCard> {
+        val cards = mutableListOf<PresentationCard>()
+        val identityParts = buildList {
+            if (profile.shareDisplayName && profile.displayName.isNotBlank()) add("اسمي المفضل: ${profile.displayName.trim()}")
+            if (profile.shareLanguage && profile.preferredLanguage.isNotBlank()) add("لغة التواصل: ${profile.preferredLanguage.trim()}")
+            if (profile.shareContactMethod && profile.preferredContactMethod.isNotBlank()) add("أفضل التواصل بهذه الطريقة: ${profile.preferredContactMethod.trim()}")
+        }
+        if (identityParts.isNotEmpty()) {
+            cards += PresentationCard(
+                title = "قبل أن نبدأ",
+                body = identityParts.joinToString("\n"),
+                hint = "يمكنك الانتقال للبطاقة التالية لعرض الاحتياجات واحدًا واحدًا."
+            )
+        }
+        visibleNeeds(profile).forEach { need ->
+            cards += PresentationCard(
+                title = need.labelAr,
+                body = need.helperAr,
+                hint = "هذه المعلومة يختار صاحب الهاتف عرضها لك لتسهيل التواصل."
+            )
+        }
+        if (profile.shareCustomNotes && profile.customNotes.isNotBlank()) {
+            cards += PresentationCard(
+                title = "معلومة مهمة",
+                body = profile.customNotes.trim(),
+                hint = "معلومة كتبها صاحب الهاتف ويرغب في إظهارها لك."
+            )
+        }
+        return cards
     }
 
     private fun encode(profile: SupportPassportProfile): JSONObject = JSONObject()
@@ -180,20 +214,45 @@ private fun SupportPassportScreen() {
     }
 
     val preview = remember(profile) { SupportPassportStore.buildShareText(profile) }
+    val presentationCards = remember(profile) { SupportPassportStore.buildPresentationCards(profile) }
 
-    LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+    LazyColumn(
+        contentPadding = PaddingValues(RawafidSpacing.ScreenHorizontal),
+        verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Md)
+    ) {
         item {
-            Card {
-                Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("جواز احتياجاتي", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-                    Text("اختر كيف تفضّل أن يتعامل معك الآخرون. البيانات تبقى على الهاتف، ولا يخرج منها شيء إلا عند ضغطك على «مشاركة».")
+            Column(verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
+                Text("جواز احتياجاتي", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+                Text(
+                    "جهّز معلومات التواصل التي تريد إظهارها أو مشاركتها. لا يخرج شيء من الهاتف إلا عندما تختار ذلك.",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+
+        item {
+            Card(colors = androidx.compose.material3.CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)) {
+                Column(Modifier.padding(RawafidSpacing.Lg), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)) {
+                    Text("شخص أمامي", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                    Text("اعرض احتياجاتك على كامل الشاشة بدل إرسال رسالة لشخص يقف أمامك.")
+                    Button(
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = presentationCards.isNotEmpty(),
+                        onClick = {
+                            PresentationActivity.open(
+                                context = context,
+                                title = "جواز احتياجاتي",
+                                cards = presentationCards
+                            )
+                        }
+                    ) { Text(if (presentationCards.isEmpty()) "اختر ما تريد إظهاره أولًا" else "أرِ الشخص أمامي") }
                 }
             }
         }
 
         item {
             Card {
-                Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Column(Modifier.padding(RawafidSpacing.Lg), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)) {
                     Text("معلومات التواصل", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                     OutlinedTextField(
                         value = profile.displayName,
@@ -201,28 +260,28 @@ private fun SupportPassportScreen() {
                         label = { Text("الاسم الذي تفضله — اختياري") },
                         modifier = Modifier.fillMaxWidth()
                     )
-                    ShareToggle("مشاركة الاسم", profile.shareDisplayName) { update(profile.copy(shareDisplayName = it)) }
+                    ShareToggle("إظهار الاسم", profile.shareDisplayName) { update(profile.copy(shareDisplayName = it)) }
                     OutlinedTextField(
                         value = profile.preferredLanguage,
                         onValueChange = { update(profile.copy(preferredLanguage = it.take(60))) },
                         label = { Text("لغة التواصل") },
                         modifier = Modifier.fillMaxWidth()
                     )
-                    ShareToggle("مشاركة لغة التواصل", profile.shareLanguage) { update(profile.copy(shareLanguage = it)) }
+                    ShareToggle("إظهار لغة التواصل", profile.shareLanguage) { update(profile.copy(shareLanguage = it)) }
                     OutlinedTextField(
                         value = profile.preferredContactMethod,
                         onValueChange = { update(profile.copy(preferredContactMethod = it.take(120))) },
-                        label = { Text("طريقة التواصل المفضلة — مثال: كتابة، كلام بطيء") },
+                        label = { Text("طريقة التواصل المفضلة — مثال: اكتب لي، تكلم ببطء") },
                         modifier = Modifier.fillMaxWidth()
                     )
-                    ShareToggle("مشاركة طريقة التواصل", profile.shareContactMethod) { update(profile.copy(shareContactMethod = it)) }
+                    ShareToggle("إظهار طريقة التواصل", profile.shareContactMethod) { update(profile.copy(shareContactMethod = it)) }
                 }
             }
         }
 
         item {
-            Text("احتياجاتي", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-            Text("فعّل ما ينطبق عليك. خيار «يظهر عند المشاركة» مستقل لكل بند.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text("ما الذي يساعدني؟", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            Text("فعّل الاحتياج، ثم اختر إن كان سيظهر عند العرض أو المشاركة.", color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
 
         SupportNeed.entries.forEach { need ->
@@ -230,7 +289,7 @@ private fun SupportPassportScreen() {
                 val enabled = need in profile.enabledNeeds
                 val shared = need in profile.sharedNeeds
                 Card {
-                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Column(Modifier.padding(RawafidSpacing.Md), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                             Column(Modifier.weight(1f)) {
                                 Text(need.labelAr, fontWeight = FontWeight.Bold)
@@ -246,15 +305,13 @@ private fun SupportPassportScreen() {
                             )
                         }
                         if (enabled) {
-                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                Text("يظهر عند المشاركة")
-                                Checkbox(
-                                    checked = shared,
-                                    onCheckedChange = { checked ->
-                                        update(profile.copy(sharedNeeds = if (checked) profile.sharedNeeds + need else profile.sharedNeeds - need))
-                                    }
-                                )
-                            }
+                            FilterChip(
+                                selected = shared,
+                                onClick = {
+                                    update(profile.copy(sharedNeeds = if (shared) profile.sharedNeeds - need else profile.sharedNeeds + need))
+                                },
+                                label = { Text(if (shared) "سيظهر للشخص" else "خاص — لن يظهر") }
+                            )
                         }
                     }
                 }
@@ -263,16 +320,16 @@ private fun SupportPassportScreen() {
 
         item {
             Card {
-                Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Column(Modifier.padding(RawafidSpacing.Lg), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)) {
                     Text("ملاحظة شخصية", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                     OutlinedTextField(
                         value = profile.customNotes,
                         onValueChange = { update(profile.copy(customNotes = it.take(800))) },
-                        label = { Text("شيء آخر تريد أن يعرفه من يساعدك") },
+                        label = { Text("معلومة أخرى تريد أن يعرفها من يساعدك") },
                         minLines = 4,
                         modifier = Modifier.fillMaxWidth()
                     )
-                    ShareToggle("مشاركة هذه الملاحظة", profile.shareCustomNotes) { update(profile.copy(shareCustomNotes = it)) }
+                    ShareToggle("إظهار هذه الملاحظة", profile.shareCustomNotes) { update(profile.copy(shareCustomNotes = it)) }
                 }
             }
         }
@@ -285,16 +342,16 @@ private fun SupportPassportScreen() {
                     profile = SupportPassportStore.load(context)
                     saved = true
                 }
-            ) { Text(if (saved) "تم الحفظ محليًا" else "حفظ على هذا الهاتف") }
+            ) { Text(if (saved) "تم الحفظ على هذا الهاتف" else "حفظ التغييرات") }
         }
 
         item { HorizontalDivider() }
 
         item {
             Card {
-                Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text("معاينة ما ستشاركه", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                    Text(preview)
+                Column(Modifier.padding(RawafidSpacing.Lg), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)) {
+                    Text("المشاركة عن بُعد", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                    Text(preview, style = MaterialTheme.typography.bodySmall)
                     OutlinedButton(
                         modifier = Modifier.fillMaxWidth(),
                         onClick = {
@@ -304,7 +361,7 @@ private fun SupportPassportScreen() {
                             }
                             context.startActivity(Intent.createChooser(intent, "مشاركة جواز احتياجاتي"))
                         }
-                    ) { Text("مشاركة النسخة الظاهرة فقط") }
+                    ) { Text("مشاركة النسخة الظاهرة") }
                 }
             }
         }
@@ -318,7 +375,7 @@ private fun SupportPassportScreen() {
         AlertDialog(
             onDismissRequest = { confirmClear = false },
             title = { Text("حذف البيانات المحلية؟") },
-            text = { Text("سيُحذف جواز احتياجاتك من هذا الهاتف. لا يوجد خادم لاستعادته من هذه النسخة.") },
+            text = { Text("سيُحذف جواز الاحتياجات المحفوظ على هذا الهاتف. لا يمكن التراجع عن هذه الخطوة.") },
             confirmButton = {
                 TextButton(onClick = {
                     SupportPassportStore.clear(context)
@@ -335,7 +392,7 @@ private fun SupportPassportScreen() {
 @Composable
 private fun ShareToggle(label: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-        Text(label)
-        Switch(checked = checked, onCheckedChange = onCheckedChange)
+        Text(label, modifier = Modifier.weight(1f))
+        Checkbox(checked = checked, onCheckedChange = onCheckedChange)
     }
 }
