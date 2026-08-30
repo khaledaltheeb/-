@@ -8,20 +8,11 @@ import sys
 
 ASSET_DIR = Path(__file__).parent / "app" / "src" / "main" / "assets" / "rafiqa"
 CATEGORIES = (
-    "confidence",
-    "hard_day",
-    "personal_checkin",
-    "self_care",
-    "morning",
-    "midday",
-    "evening",
-    "boundaries",
-    "setback",
-    "achievement",
-    "cycle",
-    "low_confidence",
+    "confidence", "hard_day", "personal_checkin", "self_care",
+    "morning", "midday", "evening", "boundaries",
+    "setback", "achievement", "cycle", "low_confidence",
 )
-PARTS = 2
+PART_COUNTS = (4, 2)
 EXPECTED_PER_CATEGORY = 1000
 EXPECTED_TOTAL = len(CATEGORIES) * EXPECTED_PER_CATEGORY
 EXPECTED_COLUMNS = 20
@@ -33,15 +24,19 @@ def fail(message: str) -> None:
 
 
 def decode_category(category: str) -> list[str]:
-    chunks: list[str] = []
-    for index in range(PARTS):
-        path = ASSET_DIR / f"{category}.part{index:02d}.b64"
-        if not path.is_file():
-            fail(f"missing asset {path.relative_to(Path(__file__).parent)}")
-        text = "".join(path.read_text(encoding="ascii").split())
-        if not text:
-            fail(f"empty asset {path.name}")
-        chunks.append(text)
+    chunks: list[str] | None = None
+    for count in PART_COUNTS:
+        paths = [ASSET_DIR / f"{category}.part{index:02d}.b64" for index in range(count)]
+        if all(path.is_file() for path in paths):
+            chunks = []
+            for path in paths:
+                text = "".join(path.read_text(encoding="ascii").split())
+                if not text:
+                    fail(f"empty asset {path.name}")
+                chunks.append(text)
+            break
+    if chunks is None:
+        fail(f"{category}: missing complete 4-part or 2-part asset layout")
 
     try:
         packed = base64.b64decode("".join(chunks), validate=True)
@@ -58,7 +53,6 @@ def decode_category(category: str) -> list[str]:
 def main() -> None:
     all_ids: set[str] = set()
     total = 0
-
     for category in CATEGORIES:
         rows = decode_category(category)
         for row_no, row in enumerate(rows, start=1):
@@ -77,12 +71,10 @@ def main() -> None:
             all_ids.add(message_id)
         total += len(rows)
         print(f"OK {category}: {len(rows)}")
-
     if total != EXPECTED_TOTAL:
         fail(f"expected {EXPECTED_TOTAL} total rows, got {total}")
     if len(all_ids) != EXPECTED_TOTAL:
         fail(f"expected {EXPECTED_TOTAL} unique IDs, got {len(all_ids)}")
-
     print(f"RAFIQA BANK VERIFIED: {total} messages, {len(CATEGORIES)} categories, {len(all_ids)} unique IDs")
 
 
