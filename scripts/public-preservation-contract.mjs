@@ -129,13 +129,26 @@ try {
     'published content',
     'content',
     baseline.publishedContent,
-    (query) => query.eq('status', 'published').lte('published_at', now),
+    // These columns match content_published_at_published_idx. Explicit ordering lets
+    // PostgREST/Postgres prove the baseline through the partial covering index instead
+    // of choosing an expensive unordered high-offset scan under public RLS.
+    (query) => query
+      .eq('status', 'published')
+      .lte('published_at', now)
+      .order('published_at', { ascending: true })
+      .order('id', { ascending: true }),
   );
   const indexablePublishedContentOk = await hasMinimumInventory(
     'indexable published content',
     'content',
     baseline.indexablePublishedContent,
-    (query) => query.eq('status', 'published').lte('published_at', now).eq('robots_index', true),
+    // These columns match content_published_at_indexable_idx.
+    (query) => query
+      .eq('status', 'published')
+      .lte('published_at', now)
+      .eq('robots_index', true)
+      .order('published_at', { ascending: true })
+      .order('id', { ascending: true }),
   );
 
   if (!publicSectorsOk) fail(`public sectors decreased below baseline ${baseline.publicSectors}`);
