@@ -73,7 +73,7 @@ jobs:
           [[ "$hub" == *'/assets/brand/logo-mark.svg'* ]]
           [[ "$sitemap" == *'xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"'* ]]
           [[ "$sitemap" == *'<image:image><image:loc>'* ]]
-          page_url="$(printf '%s' "$sitemap" | grep -oE '<loc>https://healthrenewal\.org/quick-info/[a-z0-9-]+/</loc>' | head -n 1 | sed -E 's#</?loc>##g')"
+          page_url="$(printf '%s' "$sitemap" | awk 'match($0, /<loc>https:\/\/healthrenewal\.org\/quick-info\/[a-z0-9-]+\/<\/loc>/) { print substr($0, RSTART + 5, RLENGTH - 11); exit }')"
           test -n "$page_url"
           slug="$(printf '%s' "$page_url" | sed -E 's#https://healthrenewal\.org/quick-info/([^/]+)/#\1#')"
           page="$(get "${page_url}?release=${stamp}")"
@@ -83,6 +83,6 @@ jobs:
           [[ "$page" == *"/quick-info/og/${slug}.png"* ]]
           [[ "$page" == *'ImageObject'* ]]
           [[ "$page" == *'/assets/brand/logo-mark.svg'* ]]
-          printf '%s' "$image_headers" | head -n 1 | grep -Eq ' 200( |$)'
-          printf '%s' "$image_headers" | grep -Eqi '^content-type: image/png'
+          printf '%s\n' "$image_headers" | grep -m 1 -Eq '^HTTP/[0-9.]+ 200( |$)'
+          printf '%s\n' "$image_headers" | grep -m 1 -Eqi '^content-type: image/png'
           echo "Quick Info release ${stamp} is live: ${page_url} with ${image_url}"
