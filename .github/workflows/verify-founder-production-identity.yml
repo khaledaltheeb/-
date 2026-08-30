@@ -1,6 +1,15 @@
 name: Verify Founder Production Identity
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/verify-founder-production-identity.yml'
+      - 'app/layout.tsx'
+      - 'app/press/page.tsx'
+      - 'app/citation/page.tsx'
+      - 'app/sitemaps/static.xml/route.ts'
+      - 'lib/founder.ts'
   workflow_run:
     workflows: ['Deploy Analytics Production']
     types: [completed]
@@ -11,7 +20,7 @@ permissions:
 
 jobs:
   verify:
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
