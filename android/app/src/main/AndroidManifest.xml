@@ -37,6 +37,9 @@
         <activity android:name=".LifeCardActivity" android:exported="false" android:label="بطاقة روافد للحياة" />
         <activity android:name=".WhatNowActivity" android:exported="false" android:label="ماذا أفعل الآن؟" />
         <activity android:name=".HelpNowActivity" android:exported="false" android:label="ساعدني الآن" />
+        <activity android:name=".OfflineEmergencyActivity" android:exported="false" android:label="حزمة الطوارئ Offline" />
+        <activity android:name=".RoutinesActivity" android:exported="false" android:label="روتيناتي" />
+        <activity android:name=".FutureNoteActivity" android:exported="false" android:label="رسالة لنفسي لاحقًا" />
         <activity android:name=".SupportPassportActivity" android:exported="false" android:label="جواز احتياجاتي" />
         <activity android:name=".LifeVaultActivity" android:exported="false" android:label="خزانة الحياة" />
         <activity android:name=".TravelSafeActivity" android:exported="false" android:label="Travel Safe" />
@@ -60,6 +63,7 @@
         </receiver>
         <receiver android:name=".TreatmentReminderReceiver" android:exported="false" />
         <receiver android:name=".MedicationReminderReceiver" android:exported="false" />
+        <receiver android:name=".FutureNoteReceiver" android:exported="false" />
         <receiver android:name=".WomenCareReminderReceiver" android:exported="false" />
         <receiver android:name=".SafeArrivalReceiver" android:exported="false" />
         <receiver android:name=".BootReceiver" android:enabled="true" android:exported="true">
