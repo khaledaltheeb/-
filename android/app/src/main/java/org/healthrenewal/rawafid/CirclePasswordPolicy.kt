@@ -14,7 +14,7 @@ object CirclePasswordPolicy {
         CirclePasswordRequirement("10 أحرف على الأقل", password.length >= MIN_LENGTH),
         CirclePasswordRequirement("حرف إنجليزي كبير واحد على الأقل A-Z", password.any { it in 'A'..'Z' }),
         CirclePasswordRequirement("حرف إنجليزي صغير واحد على الأقل a-z", password.any { it in 'a'..'z' }),
-        CirclePasswordRequirement("رقم واحد على الأقل 0-9", password.any(Char::isDigit)),
+        CirclePasswordRequirement("رقم واحد على الأقل 0-9", password.any { it in '0'..'9' }),
         CirclePasswordRequirement("رمز خاص واحد على الأقل مثل ! @ # $ %", symbolRegex.containsMatchIn(password))
     )
 
