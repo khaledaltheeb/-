@@ -39,7 +39,9 @@ object RawafidCircleApi {
     @Synchronized
     fun signIn(context: Context, email: String, password: String): CircleSession {
         val response = JSONObject(request("POST", "/auth/v1/token?grant_type=password", JSONObject().put("email", email.trim()).put("password", password), null))
-        return saveSessionFromAuthResponse(context, response, email.trim())
+        val session = saveSessionFromAuthResponse(context, response, email.trim())
+        CirclePushRegistration.registerCurrentToken(context)
+        return session
     }
 
     @Synchronized
@@ -47,7 +49,10 @@ object RawafidCircleApi {
         val body = JSONObject().put("email", email.trim()).put("password", password).put("data", JSONObject().put("full_name", name.trim().take(120)))
         val response = JSONObject(request("POST", "/auth/v1/signup", body, null))
         val token = response.optString("access_token")
-        if (token.isNotBlank()) saveSessionFromAuthResponse(context, response, email.trim())
+        if (token.isNotBlank()) {
+            saveSessionFromAuthResponse(context, response, email.trim())
+            CirclePushRegistration.registerCurrentToken(context)
+        }
         return response.has("user")
     }
 
@@ -55,6 +60,7 @@ object RawafidCircleApi {
 
     @Synchronized
     fun signOut(context: Context) {
+        runCatching { CirclePushRegistration.unregisterBlocking(context) }
         val token = runCatching { validAccessToken(context) }.getOrNull()
         if (token != null) runCatching { request("POST", "/auth/v1/logout", JSONObject(), token) }
         clearSession(context)
@@ -83,6 +89,7 @@ object RawafidCircleApi {
         val response = JSONObject(request("POST", "/auth/v1/factors/$factorId/verify", JSONObject().put("challenge_id", challengeId).put("code", code.trim()), validAccessToken(context)))
         val current = loadSession(context) ?: throw CircleApiException("انتهت جلسة الحساب.")
         saveSessionFromAuthResponse(context, response, current.email)
+        CirclePushRegistration.registerCurrentToken(context)
     }
 
     fun myIdentity(context: Context): String = scalarString(rpc(context, "circle_my_identity", JSONObject()))
@@ -147,6 +154,21 @@ object RawafidCircleApi {
     }
 
     fun markNotificationRead(context: Context, notificationId: String) { rpc(context, "mark_notification_read", JSONObject().put("p_notification_id", notificationId).put("p_all", false)) }
+
+    fun registerPushDevice(context: Context, deviceId: String, pushToken: String, appVersion: String): String = scalarString(
+        rpc(
+            context,
+            "circle_register_push_device",
+            JSONObject()
+                .put("p_device_id", deviceId)
+                .put("p_push_token", pushToken)
+                .put("p_app_version", appVersion)
+        )
+    )
+
+    fun unregisterPushDevice(context: Context, deviceId: String): Boolean = scalarBoolean(
+        rpc(context, "circle_unregister_push_device", JSONObject().put("p_device_id", deviceId))
+    )
 
     private fun sendMessage(context: Context, connectionId: String, kind: String, body: String?, templateKey: String?, replyToId: String? = null, latitude: Double? = null, longitude: Double? = null, accuracyM: Double? = null): String {
         val args = JSONObject().put("p_connection_id", connectionId).put("p_kind", kind).put("p_body", body ?: JSONObject.NULL).put("p_template_key", templateKey ?: JSONObject.NULL).put("p_reply_to_id", replyToId ?: JSONObject.NULL).put("p_latitude", latitude ?: JSONObject.NULL).put("p_longitude", longitude ?: JSONObject.NULL).put("p_accuracy_m", accuracyM ?: JSONObject.NULL).put("p_client_token", UUID.randomUUID().toString())
