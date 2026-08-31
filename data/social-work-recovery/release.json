@@ -1,7 +1,9 @@
 {
-  "release": "social-work-recovery-2026-08-31",
+  "release": "social-work-recovery-2026-08-31-attempt-2",
+  "attempt": 2,
   "merged_pr": 485,
   "merge_sha": "ff0321cba3214dc04753ff3aaa203fa3a84d92a6",
+  "verification_workflow_patch_sha": "7efa450ae65ffd8bc763e55fdf0b6b423699738f",
   "legacy_source_repository": "khaledaltheeb/healthrenewal.org",
   "legacy_source_sha": "6911d5ee75bd6fc2dfa12f394d61efe46e87df17",
   "expected_live_urls": 56,
@@ -10,5 +12,5 @@
     "2015081211140160",
     "2016091213042605"
   ],
-  "purpose": "Trigger the dedicated production workflow and require post-deploy verification of all restored Social Work URLs."
+  "purpose": "Retry the dedicated production workflow with redirect-aware diagnostic live verification of all restored Social Work URLs."
 }
