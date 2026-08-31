@@ -33,6 +33,7 @@ jobs:
             advocacy-accountability
             digital-ethics-confidentiality
           )
+          inline_slugs=(human-dignity-social-justice self-determination-client-rights ethical-decision-making)
 
           for slug in "${slugs[@]}"; do
             route="/evidence-guides/social-work/${slug}/"
@@ -50,6 +51,8 @@ jobs:
             grep -Fq 'global-social-work-statement-of-ethical-principles' "$body"
             grep -Fq 'لا تعني اعتمادًا أو شراكة أو مصادقة' "$body"
             grep -Fq 'التشريع ونظام الخدمات الفنلندي' "$body"
+            grep -Fq 'data-rawafid-quality-note="scope"' "$body"
+            grep -Fq 'آخر مراجعة تحريرية ومصدرية: 31 أغسطس 2026' "$body"
             if grep -Eqi '<meta[^>]+noindex|x-robots-tag:[^\r\n]*noindex' "$body" "$headers"; then
               echo "Unexpected noindex on ${route}" >&2
               exit 1
@@ -57,6 +60,30 @@ jobs:
             rm -f "$headers" "$body"
             echo "LIVE OK ${route}"
           done
+
+          for slug in "${inline_slugs[@]}"; do
+            body="$(mktemp)"
+            curl -L -fsS --retry 10 --retry-delay 3 --retry-all-errors --max-time 45 \
+              -H 'Cache-Control: no-cache, no-store, max-age=0' \
+              -o "$body" "${base}/evidence-guides/social-work/${slug}/?talentia_inline_verify=${stamp}"
+            grep -Fq "data-talentia-inline-reference=\"${slug}\"" "$body"
+            grep -Fq 'https://talentia.lukusali.fi/index.html#/reader/c5aa171b-223d-43b7-9778-05a0d8cede8e' "$body"
+            grep -Fq 'https://www.talentia.fi/en/news/talentias-ethical-guidelines-are-now-available-in-english/' "$body"
+            grep -Fq 'data-rawafid-quality-note="editorial-tool"' "$body"
+            rm -f "$body"
+            echo "INLINE TALENTIA LINKS OK ${slug}"
+          done
+
+          body="$(mktemp)"
+          curl -L -fsS --retry 10 --retry-delay 3 --retry-all-errors --max-time 45 \
+            -H 'Cache-Control: no-cache, no-store, max-age=0' \
+            -o "$body" "${base}/evidence-guides/social-work/human-dignity-social-justice/?talentia_language_verify=${stamp}"
+          grep -Fq 'إذا تغيب أحد المستفيدين عن مواعيد متعددة' "$body"
+          if grep -Fq 'إذا missed أحد المستفيدين' "$body"; then
+            echo 'Mixed-language editorial error remains live.' >&2
+            exit 1
+          fi
+          rm -f "$body"
 
           headers="$(mktemp)"; body="$(mktemp)"
           curl -L -fsS --retry 10 --retry-delay 3 --retry-all-errors --max-time 45 \
@@ -80,4 +107,4 @@ jobs:
             exit 1
           fi
 
-          echo 'Talentia Social Work production verification passed: 7/7 new pages, legacy ethics enrichment, and dedicated sitemap.'
+          echo 'Talentia Social Work production verification passed: 7/7 new pages, 3/3 contextual Talentia link placements, editorial-quality guards, legacy ethics enrichment, and dedicated sitemap.'
