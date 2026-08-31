@@ -57,13 +57,31 @@ import java.time.LocalDateTime
 
 object LifeUtilityStore {
     private const val PREFS = "rawafid_life_utilities_v1"
-    private fun prefs(context: Context) = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+    private const val ENCRYPTED_PREFIX = "rawafid_life_utilities_v2_"
 
-    fun text(context: Context, key: String): String = prefs(context).getString(key, "") ?: ""
-    fun saveText(context: Context, key: String, value: String) = prefs(context).edit().putString(key, value).apply()
+    private fun encryptedKey(key: String): String = ENCRYPTED_PREFIX + key.trim().take(80)
+
+    fun text(context: Context, key: String): String = SensitiveLocalPayload.read(
+        context = context,
+        encryptedKey = encryptedKey(key),
+        legacyPrefsName = PREFS,
+        legacyKey = key,
+        defaultValue = ""
+    )
+
+    fun saveText(context: Context, key: String, value: String) {
+        SensitiveLocalPayload.write(context, encryptedKey(key), value, PREFS, key)
+    }
 
     fun list(context: Context, key: String): List<String> {
-        val raw = prefs(context).getString(key, "[]") ?: "[]"
+        val raw = SensitiveLocalPayload.read(
+            context = context,
+            encryptedKey = encryptedKey(key),
+            legacyPrefsName = PREFS,
+            legacyKey = key,
+            defaultValue = "[]",
+            validator = { runCatching { JSONArray(it) }.isSuccess }
+        )
         return runCatching {
             val array = JSONArray(raw)
             buildList { for (i in 0 until array.length()) add(array.optString(i)) }
@@ -72,11 +90,18 @@ object LifeUtilityStore {
 
     fun saveList(context: Context, key: String, values: List<String>) {
         val array = JSONArray(); values.forEach(array::put)
-        prefs(context).edit().putString(key, array.toString()).apply()
+        SensitiveLocalPayload.write(context, encryptedKey(key), array.toString(), PREFS, key)
     }
 
     fun objectList(context: Context, key: String): List<Pair<String, String>> {
-        val raw = prefs(context).getString(key, "[]") ?: "[]"
+        val raw = SensitiveLocalPayload.read(
+            context = context,
+            encryptedKey = encryptedKey(key),
+            legacyPrefsName = PREFS,
+            legacyKey = key,
+            defaultValue = "[]",
+            validator = { runCatching { JSONArray(it) }.isSuccess }
+        )
         return runCatching {
             val array = JSONArray(raw)
             buildList {
@@ -91,7 +116,7 @@ object LifeUtilityStore {
     fun saveObjectList(context: Context, key: String, values: List<Pair<String, String>>) {
         val array = JSONArray()
         values.forEach { (a, b) -> array.put(JSONObject().put("a", a).put("b", b)) }
-        prefs(context).edit().putString(key, array.toString()).apply()
+        SensitiveLocalPayload.write(context, encryptedKey(key), array.toString(), PREFS, key)
     }
 }
 
@@ -451,7 +476,7 @@ private fun BeforeLeaveScreen() {
     val items = remember(version) { LifeUtilityStore.list(context, "before_leave_items").ifEmpty { defaults } }
     var checked by remember(version) { mutableStateOf(emptySet<String>()) }
     LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        item { ToolHeader("قبل أن أخرج", "قائمة مرنة تحفظ الأشياء التي تهمك أنت.") }
+        item { ToolHeader("قبل أن أخرج", "قائمة مرنة تحفظ الأشياء التي تهمك أنت بشكل مشفر على الهاتف.") }
         items(items) { item ->
             Card {
                 Row(Modifier.fillMaxWidth().padding(14.dp), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -460,9 +485,7 @@ private fun BeforeLeaveScreen() {
                 }
             }
         }
-        item {
-            OutlinedTextField(newItem, { newItem = it.take(60) }, label = { Text("أضف شيئًا") }, modifier = Modifier.fillMaxWidth())
-        }
+        item { OutlinedTextField(newItem, { newItem = it.take(60) }, label = { Text("أضف شيئًا") }, modifier = Modifier.fillMaxWidth()) }
         item {
             Button(onClick = {
                 if (newItem.isNotBlank()) {
@@ -482,10 +505,10 @@ private fun WherePutItScreen() {
     var place by rememberSaveable { mutableStateOf("") }
     val entries = remember(version) { LifeUtilityStore.objectList(context, "where_put_it") }
     LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        item { ToolHeader("أين وضعتها؟", "ذاكرة محلية سريعة للأغراض المهمة.") }
+        item { ToolHeader("أين وضعتها؟", "ذاكرة محلية مشفرة للأغراض المهمة.") }
         item { OutlinedTextField(thing, { thing = it.take(80) }, label = { Text("ما الشيء؟") }, modifier = Modifier.fillMaxWidth()) }
         item { OutlinedTextField(place, { place = it.take(160) }, label = { Text("أين وضعته؟") }, modifier = Modifier.fillMaxWidth()) }
-        item { Button(onClick = { if (thing.isNotBlank() && place.isNotBlank()) { LifeUtilityStore.saveObjectList(context, "where_put_it", listOf(thing.trim() to place.trim()) + entries.take(49)); thing = ""; place = ""; version++ } }) { Text("حفظ محلي") } }
+        item { Button(onClick = { if (thing.isNotBlank() && place.isNotBlank()) { LifeUtilityStore.saveObjectList(context, "where_put_it", listOf(thing.trim() to place.trim()) + entries.take(49)); thing = ""; place = ""; version++ } }) { Text("حفظ محلي مشفر") } }
         items(entries) { (a, b) -> Card { Column(Modifier.padding(16.dp)) { Text(a, fontWeight = FontWeight.Bold); Text(b) } } }
     }
 }
@@ -497,9 +520,9 @@ private fun QuickCaptureScreen() {
     var note by rememberSaveable { mutableStateOf("") }
     val entries = remember(version) { LifeUtilityStore.list(context, "quick_capture") }
     LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        item { ToolHeader("ذاكرتي الصغيرة", "اكتب شيئًا لا تريد نسيانه. يبقى على هذا الهاتف.") }
+        item { ToolHeader("ذاكرتي الصغيرة", "اكتب شيئًا لا تريد نسيانه. يبقى مشفرًا على هذا الهاتف.") }
         item { OutlinedTextField(note, { note = it.take(500) }, label = { Text("ملاحظة سريعة") }, minLines = 3, modifier = Modifier.fillMaxWidth()) }
-        item { Button(onClick = { if (note.isNotBlank()) { val stamp = LocalDateTime.now().toString().replace('T', ' ').take(16); LifeUtilityStore.saveList(context, "quick_capture", listOf("$stamp — ${note.trim()}") + entries.take(99)); note = ""; version++ } }) { Text("حفظ") } }
+        item { Button(onClick = { if (note.isNotBlank()) { val stamp = LocalDateTime.now().toString().replace('T', ' ').take(16); LifeUtilityStore.saveList(context, "quick_capture", listOf("$stamp — ${note.trim()}") + entries.take(99)); note = ""; version++ } }) { Text("حفظ مشفر") } }
         items(entries) { Card { Text(it, Modifier.padding(16.dp)) } }
     }
 }
@@ -511,11 +534,11 @@ private fun DailyReviewScreen() {
     var pending by rememberSaveable { mutableStateOf(LifeUtilityStore.text(context, "review_pending")) }
     var tomorrow by rememberSaveable { mutableStateOf(LifeUtilityStore.text(context, "review_tomorrow")) }
     LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        item { ToolHeader("راجع يومي", "مراجعة قصيرة بدل تقرير طويل.") }
+        item { ToolHeader("راجع يومي", "مراجعة قصيرة مشفرة على الهاتف بدل تقرير طويل.") }
         item { OutlinedTextField(win, { win = it.take(500) }, label = { Text("ما الذي نجح اليوم؟") }, modifier = Modifier.fillMaxWidth()) }
         item { OutlinedTextField(pending, { pending = it.take(500) }, label = { Text("ما الذي بقي؟") }, modifier = Modifier.fillMaxWidth()) }
         item { OutlinedTextField(tomorrow, { tomorrow = it.take(300) }, label = { Text("أهم شيء للغد") }, modifier = Modifier.fillMaxWidth()) }
-        item { Button(onClick = { LifeUtilityStore.saveText(context, "review_win", win); LifeUtilityStore.saveText(context, "review_pending", pending); LifeUtilityStore.saveText(context, "review_tomorrow", tomorrow) }) { Text("حفظ المراجعة محليًا") } }
+        item { Button(onClick = { LifeUtilityStore.saveText(context, "review_win", win); LifeUtilityStore.saveText(context, "review_pending", pending); LifeUtilityStore.saveText(context, "review_tomorrow", tomorrow) }) { Text("حفظ المراجعة مشفرة") } }
     }
 }
 
