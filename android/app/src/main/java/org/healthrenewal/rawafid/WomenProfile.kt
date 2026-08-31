@@ -1,6 +1,7 @@
 package org.healthrenewal.rawafid
 
 import android.content.Context
+import org.json.JSONObject
 
 enum class WomenStage(val key: String, val label: String, val tags: Set<String>) {
     GENERAL("general", "متابعة عامة", setOf("general", "warm")),
@@ -23,35 +24,28 @@ data class WomenProfile(
 )
 
 object WomenProfileStore {
-    private const val PREFS = "rawafid_women_profile_v1"
-    private fun prefs(context: Context) = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+    private const val LEGACY_PREFS = "rawafid_women_profile_v1"
+    private const val ENCRYPTED_KEY = "rawafid_women_profile_v2"
+    private val legacyKeys = arrayOf(
+        "stage",
+        "irregular_cycles",
+        "breast_awareness",
+        "pelvic_health",
+        "mental_support",
+        "selfcare_days",
+        "sleep_support",
+        "relationship_boundaries"
+    )
 
     fun load(context: Context): WomenProfile {
-        val p = prefs(context)
-        val stage = WomenStage.entries.firstOrNull { it.key == p.getString("stage", WomenStage.GENERAL.key) } ?: WomenStage.GENERAL
-        return WomenProfile(
-            stage = stage,
-            irregularCycles = p.getBoolean("irregular_cycles", false),
-            wantsBreastAwareness = p.getBoolean("breast_awareness", true),
-            wantsPelvicHealth = p.getBoolean("pelvic_health", true),
-            wantsMentalSupport = p.getBoolean("mental_support", true),
-            wantsSelfCareDays = p.getBoolean("selfcare_days", true),
-            wantsSleepSupport = p.getBoolean("sleep_support", true),
-            wantsRelationshipBoundaries = p.getBoolean("relationship_boundaries", true)
-        )
+        val raw = EncryptedLocalStore.get(context, ENCRYPTED_KEY) ?: migrateLegacy(context)
+        if (raw.isNullOrBlank()) return WomenProfile()
+        return runCatching { decode(JSONObject(raw)) }.getOrDefault(WomenProfile())
     }
 
     fun save(context: Context, profile: WomenProfile) {
-        prefs(context).edit()
-            .putString("stage", profile.stage.key)
-            .putBoolean("irregular_cycles", profile.irregularCycles)
-            .putBoolean("breast_awareness", profile.wantsBreastAwareness)
-            .putBoolean("pelvic_health", profile.wantsPelvicHealth)
-            .putBoolean("mental_support", profile.wantsMentalSupport)
-            .putBoolean("selfcare_days", profile.wantsSelfCareDays)
-            .putBoolean("sleep_support", profile.wantsSleepSupport)
-            .putBoolean("relationship_boundaries", profile.wantsRelationshipBoundaries)
-            .apply()
+        EncryptedLocalStore.put(context, ENCRYPTED_KEY, encode(profile).toString())
+        clearLegacy(context)
     }
 
     fun adaptiveTags(context: Context): Set<String> {
@@ -67,4 +61,50 @@ object WomenProfileStore {
             if (profile.wantsRelationshipBoundaries) add("boundaries")
         }
     }
+
+    private fun migrateLegacy(context: Context): String? {
+        val prefs = context.getSharedPreferences(LEGACY_PREFS, Context.MODE_PRIVATE)
+        if (legacyKeys.none { prefs.contains(it) }) return null
+        val legacy = WomenProfile(
+            stage = WomenStage.entries.firstOrNull { it.key == prefs.getString("stage", WomenStage.GENERAL.key) } ?: WomenStage.GENERAL,
+            irregularCycles = prefs.getBoolean("irregular_cycles", false),
+            wantsBreastAwareness = prefs.getBoolean("breast_awareness", true),
+            wantsPelvicHealth = prefs.getBoolean("pelvic_health", true),
+            wantsMentalSupport = prefs.getBoolean("mental_support", true),
+            wantsSelfCareDays = prefs.getBoolean("selfcare_days", true),
+            wantsSleepSupport = prefs.getBoolean("sleep_support", true),
+            wantsRelationshipBoundaries = prefs.getBoolean("relationship_boundaries", true)
+        )
+        val raw = encode(legacy).toString()
+        EncryptedLocalStore.put(context, ENCRYPTED_KEY, raw)
+        clearLegacy(context)
+        return raw
+    }
+
+    private fun clearLegacy(context: Context) {
+        val edit = context.getSharedPreferences(LEGACY_PREFS, Context.MODE_PRIVATE).edit()
+        legacyKeys.forEach(edit::remove)
+        edit.apply()
+    }
+
+    private fun encode(profile: WomenProfile) = JSONObject()
+        .put("stage", profile.stage.key)
+        .put("irregular_cycles", profile.irregularCycles)
+        .put("breast_awareness", profile.wantsBreastAwareness)
+        .put("pelvic_health", profile.wantsPelvicHealth)
+        .put("mental_support", profile.wantsMentalSupport)
+        .put("selfcare_days", profile.wantsSelfCareDays)
+        .put("sleep_support", profile.wantsSleepSupport)
+        .put("relationship_boundaries", profile.wantsRelationshipBoundaries)
+
+    private fun decode(value: JSONObject): WomenProfile = WomenProfile(
+        stage = WomenStage.entries.firstOrNull { it.key == value.optString("stage", WomenStage.GENERAL.key) } ?: WomenStage.GENERAL,
+        irregularCycles = value.optBoolean("irregular_cycles", false),
+        wantsBreastAwareness = value.optBoolean("breast_awareness", true),
+        wantsPelvicHealth = value.optBoolean("pelvic_health", true),
+        wantsMentalSupport = value.optBoolean("mental_support", true),
+        wantsSelfCareDays = value.optBoolean("selfcare_days", true),
+        wantsSleepSupport = value.optBoolean("sleep_support", true),
+        wantsRelationshipBoundaries = value.optBoolean("relationship_boundaries", true)
+    )
 }
