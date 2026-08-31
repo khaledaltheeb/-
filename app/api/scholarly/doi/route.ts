@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { resolveCrossrefDoi } from '@/lib/scholarly-discovery';
+import { resolveCrossrefDoi } from '@/lib/crossref-discovery';
 
 export const dynamic = 'force-dynamic';
 
