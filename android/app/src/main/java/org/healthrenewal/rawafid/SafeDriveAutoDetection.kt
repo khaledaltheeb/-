@@ -1,6 +1,7 @@
 package org.healthrenewal.rawafid
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -29,11 +30,14 @@ object SafeDriveAutoDetection {
     fun hasPermission(context: Context): Boolean =
         Build.VERSION.SDK_INT < 29 || ContextCompat.checkSelfPermission(context, Manifest.permission.ACTIVITY_RECOGNITION) == PackageManager.PERMISSION_GRANTED
 
+    @SuppressLint("MissingPermission")
     fun register(context: Context, onResult: ((Boolean, String) -> Unit)? = null) {
         if (!SafeDriveAdvancedStore.config(context).autoDetectionEnabled) {
             onResult?.invoke(false, "اكتشاف الرحلة التلقائي غير مفعّل.")
             return
         }
+        // The Play services call is deliberately reached only after the runtime
+        // ACTIVITY_RECOGNITION gate below; lint cannot infer this helper contract.
         if (!hasPermission(context)) {
             onResult?.invoke(false, "يلزم إذن التعرّف على النشاط لتفعيل اكتشاف الرحلة.")
             return
@@ -54,7 +58,10 @@ object SafeDriveAutoDetection {
             .addOnFailureListener { onResult?.invoke(false, it.message ?: "تعذر تفعيل اكتشاف الرحلة.") }
     }
 
+    @SuppressLint("MissingPermission")
     fun unregister(context: Context, onResult: ((Boolean, String) -> Unit)? = null) {
+        // Keep the same explicit runtime gate as registration. The annotation is
+        // narrowly scoped to the Play services call that lint cannot prove safe.
         if (!hasPermission(context)) {
             onResult?.invoke(true, "تم إيقاف اكتشاف الرحلة.")
             return
