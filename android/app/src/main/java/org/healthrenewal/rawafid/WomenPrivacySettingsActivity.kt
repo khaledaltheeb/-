@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 class WomenPrivacySettingsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (!WomenPrivacyGate.requireUnlocked(this, WomenPrivacyGate.TARGET_SETTINGS)) return
         WomenPrivacyStore.markSetupSeen(this)
         setContent {
             RawafidTheme {
@@ -109,7 +110,7 @@ private fun WomenPrivacySettingsScreen() {
                 Card {
                     Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text("خصوصية الإشعارات", fontWeight = FontWeight.Bold)
-                        Text("قنوات إشعارات رفيقة روافد وخطة العناية مضبوطة بخصوصية شاشة قفل أعلى. التحكم التفصيلي بمعاينة كل نوع إشعار سيُربط لاحقًا بعد ربط بنك الرسائل الكبير بالكامل.", style = MaterialTheme.typography.bodySmall)
+                        Text("الإشعارات الحساسة تعرض نسخة عامة محايدة على شاشة القفل، بينما يبقى النص التفصيلي خاصًا بعد فتح الجهاز.", style = MaterialTheme.typography.bodySmall)
                     }
                 }
             }
@@ -128,7 +129,7 @@ private fun WomenPrivacySettingsScreen() {
 
         item {
             Text(
-                "بيانات قطاع المرأة تبقى محلية في هذه المرحلة. تفعيل القفل لا يغيّر قواعد المشاركة: لا تخرج بيانات الزيارة أو التقويم إلا بفعل صريح منك.",
+                "بيانات قطاع المرأة تبقى محلية في هذه المرحلة. عند تفعيل القفل تُحمى الشاشات من المعاينة/اللقطات، وتُخزّن السجلات الصحية الحساسة مشفرة على الجهاز. لا تخرج بيانات الزيارة أو التقويم إلا بفعل صريح منك.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
