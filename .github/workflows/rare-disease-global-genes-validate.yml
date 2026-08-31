@@ -1,0 +1,33 @@
+name: Rare Disease Global Genes Contract
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'lib/rare-disease-global-genes-pages.ts'
+      - 'app/evidence-guides/rare-disease/**'
+      - 'app/sitemaps/rare-disease.xml/**'
+      - 'app/sitemap.xml/route.ts'
+      - 'scripts/rare-disease-global-genes-contract.mjs'
+  push:
+    branches: [main]
+    paths:
+      - 'lib/rare-disease-global-genes-pages.ts'
+      - 'app/evidence-guides/rare-disease/**'
+      - 'app/sitemaps/rare-disease.xml/**'
+      - 'app/sitemap.xml/route.ts'
+      - 'scripts/rare-disease-global-genes-contract.mjs'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Validate source links routes geography and safety boundaries
+        run: node scripts/rare-disease-global-genes-contract.mjs
