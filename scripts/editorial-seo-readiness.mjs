@@ -15,6 +15,20 @@ function refCount(value) {
   return Array.isArray(value) ? value.filter((item) => item && typeof item === 'object').length : 0;
 }
 function nonEmpty(value) { return typeof value === 'string' && value.trim().length > 0; }
+function asRecord(value) { return value && typeof value === 'object' && !Array.isArray(value) ? value : null; }
+
+function reviewDateRequired(row, type) {
+  if (!reviewRequired.has(type)) return false;
+  const schema = asRecord(row.schema_json);
+  const approvedQuickInfoWithoutEditorialReview = Boolean(
+    String(row.slug || '').startsWith('quick-info-')
+    && String(row.canonical_url || '').startsWith('/quick-info/')
+    && schema?.page_role === 'quick-info'
+    && schema?.publication_ready === true
+    && schema?.editorial_review_required === false,
+  );
+  return !approvedQuickInfoWithoutEditorialReview;
+}
 
 async function loadRows() {
   const rows = [];
@@ -22,7 +36,7 @@ async function loadRows() {
     const to = from + pageSize - 1;
     const { data, error } = await supabase
       .from('content')
-      .select('id,slug,title,content_type,last_reviewed_at,references_json,seo_title,seo_description,canonical_url,primary_keyword')
+      .select('id,slug,title,content_type,last_reviewed_at,references_json,seo_title,seo_description,canonical_url,primary_keyword,schema_json')
       .eq('status', 'published')
       .eq('robots_index', true)
       .lte('published_at', new Date().toISOString())
@@ -44,7 +58,7 @@ for (const row of rows) {
   const stats = byType.get(type) || { total: 0, missingReview: 0, missingReferences: 0, seoMetadata: 0 };
   stats.total += 1;
 
-  const missingReview = reviewRequired.has(type) && !nonEmpty(row.last_reviewed_at);
+  const missingReview = reviewDateRequired(row, type) && !nonEmpty(row.last_reviewed_at);
   const missingReferences = referenceRequired.has(type) && refCount(row.references_json) < 1;
   const metadataOk = nonEmpty(row.seo_title) && nonEmpty(row.seo_description) && nonEmpty(row.canonical_url) && nonEmpty(row.primary_keyword);
 
