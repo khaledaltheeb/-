@@ -22,7 +22,8 @@ for (const slug of slugs) if (!pages.includes(`'${slug}'`)) failures.push(`missi
 if (!pages.includes("'': hub")) failures.push('missing rare-disease hub');
 if (!pages.includes('لا يشخّص مرضًا نادرًا')) failures.push('missing diagnosis safety boundary');
 if (!pages.includes('لا تعني أن Global Genes راجعت أو اعتمدت أو صادقت')) failures.push('missing non-endorsement boundary');
-if (!pages.includes('الولايات المتحدة') || !pages.includes('الأردن')) failures.push('missing geographic applicability boundary');
+const hasJordanBoundary = pages.includes('للأردن') || pages.includes('في الأردن') || pages.includes('الأردن');
+if (!pages.includes('الولايات المتحدة') || !hasJordanBoundary) failures.push('missing geographic applicability boundary');
 if (!route.includes('RARE_DISEASE_GLOBAL_GENES_PAGES')) failures.push('route registry missing');
 if (!route.includes('x-rawafid-source')) failures.push('provenance header missing');
 if (!sitemap.includes('RARE_DISEASE_GLOBAL_GENES_SLUGS')) failures.push('dedicated sitemap registry missing');
