@@ -11,6 +11,7 @@ account = (JAVA / "CircleAccountActivity.kt").read_text(encoding="utf-8")
 features = (JAVA / "FeatureCatalog.kt").read_text(encoding="utf-8")
 my_circle = (JAVA / "MyCircleActivity.kt").read_text(encoding="utf-8")
 qr_scanner = (JAVA / "CircleQrScanner.kt").read_text(encoding="utf-8")
+encrypted_store = (JAVA / "EncryptedLocalStore.kt").read_text(encoding="utf-8")
 gradle = (APP / "build.gradle.kts").read_text(encoding="utf-8")
 manifest = (APP / "src" / "main" / "AndroidManifest.xml").read_text(encoding="utf-8")
 
@@ -79,6 +80,24 @@ for token in [
     if token not in qr_scanner:
         errors.append(f"CircleQrScanner.kt missing privacy/scanner contract: {token}")
 
+for token in [
+    'private const val ENCRYPTED_PEOPLE_KEY = "my_circle_local_safety_people_v1"',
+    'EncryptedLocalStore.get(context, ENCRYPTED_PEOPLE_KEY)',
+    'EncryptedLocalStore.put(context, ENCRYPTED_PEOPLE_KEY, legacy)',
+    'EncryptedLocalStore.put(context, ENCRYPTED_PEOPLE_KEY, a.toString())',
+    '.remove(LEGACY_PEOPLE_KEY)',
+    'Android Keystore',
+]:
+    if token not in my_circle:
+        errors.append(f"MyCircleActivity.kt missing encrypted local-contact contract: {token}")
+
+if 'putString("people"' in my_circle or 'putString(LEGACY_PEOPLE_KEY' in my_circle:
+    errors.append("Local Circle safety contacts must never be written back to plaintext SharedPreferences")
+
+for token in ['AndroidKeyStore', 'AES/GCM/NoPadding']:
+    if token not in encrypted_store:
+        errors.append(f"EncryptedLocalStore.kt missing cryptographic contract: {token}")
+
 if 'com.google.android.gms:play-services-code-scanner:16.1.0' not in gradle:
     errors.append("Android build missing Google Code Scanner 16.1.0 dependency")
 if 'android:name="com.google.mlkit.vision.DEPENDENCIES"' not in manifest or 'android:value="barcode_ui"' not in manifest:
@@ -92,4 +111,4 @@ if errors:
         print(f"- {error}")
     sys.exit(1)
 
-print("Android account/Circle discoverability OK: Today + Account tab + onboarding/password/Spam guidance + privacy-first QR linking verified")
+print("Android account/Circle discoverability OK: Today + Account tab + onboarding/password/Spam guidance + privacy-first QR linking + encrypted local safety contacts verified")
