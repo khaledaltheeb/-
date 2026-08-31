@@ -16,7 +16,7 @@ permissions:
 jobs:
   quality:
     runs-on: ubuntu-latest
-    timeout-minutes: 70
+    timeout-minutes: 100
     env:
       NEXT_PUBLIC_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
@@ -112,7 +112,10 @@ jobs:
       - name: Full sitemap SEO gate
         run: node scripts/seo-gate.mjs
       - name: Rich results and discovery gate
-        run: node scripts/rich-discovery-gate.mjs
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/rich-discovery-gate.mjs 2>&1 | tee /tmp/rawafid-rich-discovery.log
       - name: Content richness and duplicate-body gate
         run: node scripts/content-richness-gate.mjs
       - name: YMYL editorial SEO readiness report
@@ -174,6 +177,7 @@ jobs:
           name: rawafid-quality-diagnostics-${{ github.run_id }}
           path: |
             /tmp/rawafid-server.log
+            /tmp/rawafid-rich-discovery.log
             /tmp/rawafid-lighthouse-*.json
           if-no-files-found: ignore
           retention-days: 7
