@@ -1,9 +1,9 @@
 {
-  "release": "social-work-talentia-inline-links-2026-08-31",
-  "attempt": 4,
-  "merged_pr": 487,
-  "merge_sha": "8a049948c0c970efc5362005dc1d3878481799bd",
-  "verification_workflow_patch_sha": "d149a6af1b1741fb6ed8636dd16c7444ad580bb2",
+  "release": "social-work-talentia-quality-hardening-2026-08-31",
+  "attempt": 5,
+  "merged_pr": 489,
+  "merge_sha": "84052d4120cc26913f76da63b2dc2b929a433b9c",
+  "verification_workflow_patch_sha": "84052d4120cc26913f76da63b2dc2b929a433b9c",
   "legacy_source_repository": "khaledaltheeb/healthrenewal.org",
   "legacy_source_sha": "6911d5ee75bd6fc2dfa12f394d61efe46e87df17",
   "expected_live_urls": 56,
@@ -12,10 +12,16 @@
   "talentia_source": "Work, Values and Ethics – Ethical Guidelines for Social Welfare Professionals",
   "talentia_reader": "https://talentia.lukusali.fi/index.html#/reader/c5aa171b-223d-43b7-9778-05a0d8cede8e",
   "talentia_english_page": "https://www.talentia.fi/en/news/talentias-ethical-guidelines-are-now-available-in-english/",
+  "quality_guards": [
+    "Rawafid-authored practical tools are explicitly distinguished from official Talentia material",
+    "scope and local-law warning is shown on all seven Talentia-backed pages",
+    "mixed Arabic-English editorial error corrected",
+    "production verification requires both Talentia links inside all three requested pages"
+  ],
   "required_source_fingerprints": [
     "DRUG4023",
     "2015081211140160",
     "2016091213042605"
   ],
-  "purpose": "Deploy contextual use of Talentia's official links inside three ethics guides while preserving and re-verifying all 56 recovered Social Work URLs."
+  "purpose": "Deploy the final Talentia Social Work editorial-quality hardening and independently verify 7/7 pages, 3/3 contextual Talentia link placements, source provenance, canonical/indexing, language quality, and preservation of all recovered Social Work URLs."
 }
