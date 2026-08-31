@@ -37,46 +37,36 @@ jobs:
           set -euo pipefail
           test -n "${CLOUDFLARE_API_TOKEN:-}"
           test -n "${CLOUDFLARE_ACCOUNT_ID:-}"
-
       - uses: actions/checkout@v7
         with:
           ref: main
           fetch-depth: 1
-
       - uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: npm
-
       - name: Install locked dependencies
         run: npm ci --no-audit --no-fund
-
       - name: Install deterministic Arabic build dependencies
         shell: bash
         run: |
           set -euo pipefail
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends imagemagick fontconfig fonts-noto-core librsvg2-bin
-
       - name: Verify exact Social Work recovery contract
         run: node scripts/social-work-recovery-contract.mjs
-
       - name: Type check
         run: npm run typecheck
-
       - name: Lint
         run: npm run lint
-
       - name: Architecture and public-preservation gates
         shell: bash
         run: |
           set -euo pipefail
           npm run architecture-check
           npm run live-preservation:validate
-
       - name: Build local production candidate
         run: npm run build
-
       - name: Start local candidate
         shell: bash
         run: |
@@ -89,7 +79,6 @@ jobs:
           done
           cat /tmp/social-work-production-candidate.log >&2 || true
           exit 1
-
       - name: Verify all 56 URLs on local production candidate
         shell: bash
         run: |
@@ -103,51 +92,39 @@ jobs:
           tested=0
           while IFS= read -r route; do
             [ -n "$route" ] || continue
-            headers="$(mktemp)"
-            body="$(mktemp)"
+            headers="$(mktemp)"; body="$(mktemp)"
             curl -fsS -D "$headers" -o "$body" "http://127.0.0.1:3000${route}"
             grep -Fqi 'content-language: ar' "$headers"
             grep -Fqi 'x-rawafid-source: healthrenewal.org@6911d5ee75bd6fc2dfa12f394d61efe46e87df17' "$headers"
             grep -Fq 'id=DRUG4023' "$body"
+            grep -Fq '2015081211140160' "$body"
             grep -Fq '2016091213042605' "$body"
             grep -Fq 'حدود الاستدلال' "$body"
             grep -Fq "<link rel=\"canonical\" href=\"https://healthrenewal.org${route}\">" "$body"
-            if grep -Eqi 'noindex' "$body"; then
-              echo "Unexpected noindex: ${route}" >&2
-              exit 1
-            fi
-            rm -f "$headers" "$body"
-            tested=$((tested+1))
+            if grep -Eqi 'noindex' "$body"; then echo "Unexpected noindex: ${route}" >&2; exit 1; fi
+            rm -f "$headers" "$body"; tested=$((tested+1))
           done < /tmp/social-work-routes.txt
           test "$tested" -eq 56
-          echo "Local candidate passed ${tested}/56 Social Work URLs."
-
+          echo "Local candidate passed ${tested}/56 Social Work URLs including exact emailed source provenance."
       - name: Stop local candidate
         if: always()
         shell: bash
         run: |
-          if [ -f /tmp/social-work-production-candidate.pid ]; then
-            kill "$(cat /tmp/social-work-production-candidate.pid)" 2>/dev/null || true
-          fi
-
+          if [ -f /tmp/social-work-production-candidate.pid ]; then kill "$(cat /tmp/social-work-production-candidate.pid)" 2>/dev/null || true; fi
       - name: Verify Cloudflare authentication
         shell: bash
         run: |
           set -euo pipefail
           npx wrangler whoami
-
       - name: Build Cloudflare Worker for production
         run: npx opennextjs-cloudflare build --env production
-
       - name: Deploy Cloudflare Worker to production
         run: npx opennextjs-cloudflare deploy --env production
-
       - name: Verify all 56 URLs live after deployment
         shell: bash
         run: |
           set -euo pipefail
-          base='https://healthrenewal.org'
-          release="${GITHUB_SHA}"
+          base='https://healthrenewal.org'; release="${GITHUB_SHA}"
           node - <<'NODE'
           const fs = require('node:fs');
           const m = JSON.parse(fs.readFileSync('data/social-work-recovery/manifest.json','utf8'));
@@ -156,28 +133,21 @@ jobs:
           tested=0
           while IFS= read -r route; do
             [ -n "$route" ] || continue
-            headers="$(mktemp)"
-            body="$(mktemp)"
-            curl -fsS --retry 12 --retry-delay 3 --retry-all-errors \
-              -H 'Cache-Control: no-cache, no-store, max-age=0' \
-              -D "$headers" -o "$body" "${base}${route}?release=${release}"
+            headers="$(mktemp)"; body="$(mktemp)"
+            curl -fsS --retry 12 --retry-delay 3 --retry-all-errors -H 'Cache-Control: no-cache, no-store, max-age=0' -D "$headers" -o "$body" "${base}${route}?release=${release}"
             head -n 1 "$headers" | grep -Eq ' 200( |$)'
             grep -Fqi 'content-language: ar' "$headers"
             grep -Fqi 'x-rawafid-source: healthrenewal.org@6911d5ee75bd6fc2dfa12f394d61efe46e87df17' "$headers"
             grep -Fq 'id=DRUG4023' "$body"
+            grep -Fq '2015081211140160' "$body"
             grep -Fq '2016091213042605' "$body"
             grep -Fq 'حدود الاستدلال' "$body"
             grep -Fq "<link rel=\"canonical\" href=\"${base}${route}\">" "$body"
-            if grep -Eqi 'noindex' "$body"; then
-              echo "Unexpected live noindex: ${route}" >&2
-              exit 1
-            fi
-            rm -f "$headers" "$body"
-            tested=$((tested+1))
+            if grep -Eqi 'noindex' "$body"; then echo "Unexpected live noindex: ${route}" >&2; exit 1; fi
+            rm -f "$headers" "$body"; tested=$((tested+1))
           done < /tmp/social-work-live-routes.txt
           test "$tested" -eq 56
-          echo "Production passed ${tested}/56 Social Work URLs."
-
+          echo "Production passed ${tested}/56 Social Work URLs including exact emailed source provenance."
       - name: Verify institutional source endpoints are still reachable
         shell: bash
         run: |
@@ -185,15 +155,13 @@ jobs:
           check_source() {
             url="$1"
             code="$(curl -L -sS -o /dev/null -w '%{http_code}' --max-time 30 --retry 3 --retry-delay 2 "$url" || true)"
-            case "$code" in
-              200|201|202|203|204|206|301|302|303|307|308|401|403) ;;
-              *) echo "Institutional source check failed: HTTP ${code} ${url}" >&2; exit 1 ;;
-            esac
+            case "$code" in 200|201|202|203|204|206|301|302|303|307|308|401|403) ;; *) echo "Institutional source check failed: HTTP ${code} ${url}" >&2; exit 1 ;; esac
           }
           check_source 'https://pisrs.si/pregledPredpisa?id=DRUG4023'
           check_source 'https://www.fsd.uni-lj.si/mma/-/2016091213042605/'
           check_source 'https://www.fsd.uni-lj.si/mma/monografija_ang_elektronska_verzija/2017092010392030/'
-
+          original_code="$(curl -L -sS -o /dev/null -w '%{http_code}' --max-time 30 --retry 2 'https://www.fsd.uni-lj.si/mma/Soustvarjanje_podpore_v_skupnosti_-_Angleska_izdaja.pdf/2015081211140160/?m=1439370841' || true)"
+          echo "Original emailed Ljubljana source availability (provenance-only, non-blocking): HTTP ${original_code}"
       - name: Verify hub promises and source disclosure
         shell: bash
         run: |
@@ -201,5 +169,6 @@ jobs:
           hub="$(curl -fsS --retry 8 --retry-delay 3 --retry-all-errors -H 'Cache-Control: no-cache' 'https://healthrenewal.org/evidence-guides/social-work/?final=1')"
           printf '%s' "$hub" | grep -Fq '55 دليلًا'
           printf '%s' "$hub" | grep -Fq 'مصادر أصلية قابلة للتتبع'
+          printf '%s' "$hub" | grep -Fq '2015081211140160'
           printf '%s' "$hub" | grep -Fq 'لا يعني اعتمادًا أو شراكة أو مصادقة'
           echo 'Social Work production release fully verified.'
