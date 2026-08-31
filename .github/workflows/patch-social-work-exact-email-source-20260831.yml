@@ -1,0 +1,113 @@
+name: Patch Exact Emailed Ljubljana Source 2026-08-31
+
+on:
+  push:
+    branches: [feat/social-work-recovery-20260831]
+    paths:
+      - '.github/workflows/patch-social-work-exact-email-source-20260831.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: feat/social-work-recovery-20260831
+          fetch-depth: 1
+
+      - name: Add exact source URL received by email to all release gates
+        shell: python
+        run: |
+          from pathlib import Path
+
+          email_url = 'https://www.fsd.uni-lj.si/mma/Soustvarjanje_podpore_v_skupnosti_-_Angleska_izdaja.pdf/2015081211140160/?m=1439370841'
+
+          def replace_once(path, old, new):
+              p = Path(path)
+              s = p.read_text()
+              if old not in s:
+                  raise SystemExit(f'Expected patch anchor missing in {path}: {old[:120]}')
+              p.write_text(s.replace(old, new, 1))
+
+          builder = 'scripts/recover-social-work-sector.mjs'
+          replace_once(
+              builder,
+              "const FSD_SLOVENE_URL = 'https://www.fsd.uni-lj.si/mma/-/2016091213042605/';",
+              "const FSD_EMAIL_URL = '" + email_url + "';\nconst FSD_SLOVENE_URL = 'https://www.fsd.uni-lj.si/mma/-/2016091213042605/';",
+          )
+          replace_once(
+              builder,
+              '      <p><a href="${FSD_SLOVENE_URL}" target="_blank" rel="noopener noreferrer">University of Ljubljana — Družine s številnimi izzivi: soustvarjanje pomoči v skupnosti</a></p>',
+              '      <p><a href="${FSD_EMAIL_URL}" target="_blank" rel="noopener noreferrer"><strong>الرابط الأصلي الذي شاركته الجهة المهنية معنا</strong> — Families with Multiple Challenges: Co-creating Support in the Community</a></p>\n      <p><a href="${FSD_SLOVENE_URL}" target="_blank" rel="noopener noreferrer">University of Ljubljana — Družine s številnimi izzivi: soustvarjanje pomoči v skupnosti</a></p>',
+          )
+          replace_once(
+              builder,
+              "  if (!enhanced.includes('2016091213042605')) fail(`University of Ljubljana source missing after recovery: ${route}`);",
+              "  if (!enhanced.includes('2015081211140160')) fail(`Original emailed Ljubljana source missing after recovery: ${route}`);\n  if (!enhanced.includes('2016091213042605')) fail(`University of Ljubljana source missing after recovery: ${route}`);",
+          )
+          replace_once(
+              builder,
+              "    { id: 'ljubljana-families-multiple-challenges-2016', title: 'Družine s številnimi izzivi: soustvarjanje pomoči v skupnosti', publisher: 'Faculty of Social Work, University of Ljubljana', url: FSD_SLOVENE_URL },",
+              "    { id: 'ljubljana-families-multiple-challenges-email-source', title: 'Families with Multiple Challenges: Co-creating Support in the Community — exact link shared by the professional association', publisher: 'Faculty of Social Work, University of Ljubljana', url: FSD_EMAIL_URL, provenance: 'Received from Slovenian Association of Social Workers by email on 2026-08-30' },\n    { id: 'ljubljana-families-multiple-challenges-2016', title: 'Družine s številnimi izzivi: soustvarjanje pomoči v skupnosti', publisher: 'Faculty of Social Work, University of Ljubljana', url: FSD_SLOVENE_URL },",
+          )
+
+          contract = 'scripts/social-work-recovery-contract.mjs'
+          replace_once(
+              contract,
+              "  if (!html.includes('2016091213042605')) fail(`Ljubljana source missing: ${page.route}`);",
+              "  if (!html.includes('2015081211140160')) fail(`original emailed Ljubljana source missing: ${page.route}`);\n  if (!html.includes('2016091213042605')) fail(`Ljubljana source missing: ${page.route}`);",
+          )
+
+          recovery = '.github/workflows/recover-social-work-sector-20260831.yml'
+          replace_once(
+              recovery,
+              "          test \"$(grep -RIl '2016091213042605' data/social-work-recovery/html --include='index.html' | wc -l | tr -d ' ')\" = '56'",
+              "          test \"$(grep -RIl '2015081211140160' data/social-work-recovery/html --include='index.html' | wc -l | tr -d ' ')\" = '56'\n          test \"$(grep -RIl '2016091213042605' data/social-work-recovery/html --include='index.html' | wc -l | tr -d ' ')\" = '56'",
+          )
+
+          validate = '.github/workflows/validate-social-work-recovery-20260831.yml'
+          replace_once(
+              validate,
+              "            printf '%s' \"$body\" | grep -Fq '2016091213042605'",
+              "            printf '%s' \"$body\" | grep -Fq '2015081211140160'\n            printf '%s' \"$body\" | grep -Fq '2016091213042605'",
+          )
+          replace_once(
+              validate,
+              "          check_source 'https://www.fsd.uni-lj.si/mma/monografija_ang_elektronska_verzija/2017092010392030/'",
+              "          check_source 'https://www.fsd.uni-lj.si/mma/monografija_ang_elektronska_verzija/2017092010392030/'\n          original_code=\"$(curl -L -sS -o /dev/null -w '%{http_code}' --max-time 30 --retry 2 '" + email_url + "' || true)\"\n          echo \"Original emailed Ljubljana source availability (provenance-only, non-blocking): HTTP ${original_code}\"",
+          )
+
+          deploy = '.github/workflows/deploy-social-work-recovery-production-20260831.yml'
+          # local candidate check
+          replace_once(
+              deploy,
+              "            grep -Fq '2016091213042605' \"$body\"",
+              "            grep -Fq '2015081211140160' \"$body\"\n            grep -Fq '2016091213042605' \"$body\"",
+          )
+          # live check (second occurrence)
+          replace_once(
+              deploy,
+              "            grep -Fq '2016091213042605' \"$body\"",
+              "            grep -Fq '2015081211140160' \"$body\"\n            grep -Fq '2016091213042605' \"$body\"",
+          )
+          replace_once(
+              deploy,
+              "          check_source 'https://www.fsd.uni-lj.si/mma/monografija_ang_elektronska_verzija/2017092010392030/'",
+              "          check_source 'https://www.fsd.uni-lj.si/mma/monografija_ang_elektronska_verzija/2017092010392030/'\n          original_code=\"$(curl -L -sS -o /dev/null -w '%{http_code}' --max-time 30 --retry 2 '" + email_url + "' || true)\"\n          echo \"Original emailed Ljubljana source availability (provenance-only, non-blocking): HTTP ${original_code}\"",
+          )
+
+          print('Patched exact emailed Ljubljana source into builder and all release gates.')
+
+      - name: Commit exact-source patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'rawafid-social-work-recovery'
+          git config user.email '63592172+khaledaltheeb@users.noreply.github.com'
+          git add scripts/recover-social-work-sector.mjs scripts/social-work-recovery-contract.mjs .github/workflows/recover-social-work-sector-20260831.yml .github/workflows/validate-social-work-recovery-20260831.yml .github/workflows/deploy-social-work-recovery-production-20260831.yml
+          git commit -m 'Require exact emailed Ljubljana source on all Social Work pages'
+          git push origin HEAD:feat/social-work-recovery-20260831
