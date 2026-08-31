@@ -1,13 +1,14 @@
 import type { Metadata } from 'next';
-import { lookupDoabPeerReview, OPEN_BOOK_SOURCE_INFO, searchOpenBooks, type OpenBookProvider } from '@/lib/open-book-discovery';
+import { lookupDoabPeerReview, OPEN_BOOK_SOURCE_INFO, searchOpenBooks, type OpenBookProvider, type OpenBookRecord } from '@/lib/open-book-discovery';
 
 export const metadata: Metadata = {
-  title: 'اكتشاف الكتب العلمية المفتوحة | روافد',
-  description: 'بحث عربي في OAPEN وDOAB مع الحفاظ على بيانات الناشر والترخيص والمعرفات والسجل الأصلي ومراجعة الأقران عند توفرها.',
+  title: 'اكتشاف الكتب العلمية المفتوحة | OAPEN وDOAB | روافد',
+  description: 'بحث عربي موحد في OAPEN وDOAB مع الناشر والترخيص والمعرفات والسجل الأصلي وفحص DOI عبر Crossref ومراجعة الأقران عند توفرها.',
   alternates: { canonical: 'https://healthrenewal.org/open-books/' },
 };
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
+type SourceChoice = OpenBookProvider | 'both';
 
 const styles = {
   shell: { maxWidth: 1120, margin: '0 auto', padding: '28px 18px 56px', lineHeight: 1.9 } as const,
@@ -24,89 +25,78 @@ function one(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] ?? '' : value ?? '';
 }
 
+function ResultCard({ book, q }: { book: OpenBookRecord; q: string }) {
+  return <article style={styles.card}>
+    <div><span style={styles.badge}>{book.provider === 'doab' ? 'DOAB' : 'OAPEN'}</span>{book.language && <span style={styles.badge}>{book.language}</span>}{book.issued && <span style={styles.badge}>{book.issued}</span>}</div>
+    <h3><a href={book.recordUrl} target="_blank" rel="noopener noreferrer">{book.title}</a></h3>
+    {book.subtitle && <p>{book.subtitle}</p>}
+    {book.creators.length > 0 && <p><strong>المؤلفون/المحررون:</strong> {book.creators.join('؛ ')}</p>}
+    {book.publisher && <p><strong>الناشر:</strong> {book.publisher}</p>}
+    {book.license && <p><strong>الترخيص/الحقوق المسجلة:</strong> {book.license}</p>}
+    {book.doi && <p><strong>DOI:</strong> <a href={`/research-tools/doi-resolver/?doi=${encodeURIComponent(book.doi)}`}>{book.doi} — فحص عبر Crossref</a></p>}
+    {book.isbn.length > 0 && <p><strong>ISBN:</strong> {book.isbn.join('، ')}</p>}
+    {book.subjects.length > 0 && <p><strong>الموضوعات:</strong> {book.subjects.join('، ')}</p>}
+    <p><a href={book.recordUrl} target="_blank" rel="noopener noreferrer"><strong>فتح السجل الأصلي</strong></a>{book.provider === 'doab' && book.doi && <> · <a href={`/open-books/?q=${encodeURIComponent(q)}&source=doab&peerDoi=${encodeURIComponent(book.doi)}`}>التحقق من مراجعة الأقران في PRISM</a></>}</p>
+  </article>;
+}
+
 export default async function OpenBooksPage({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams;
   const q = one(params.q).trim();
-  const source = (one(params.source) === 'oapen' ? 'oapen' : 'doab') as OpenBookProvider;
+  const rawSource = one(params.source);
+  const source: SourceChoice = rawSource === 'oapen' || rawSource === 'doab' ? rawSource : 'both';
   const peerDoi = one(params.peerDoi).trim();
   let error = '';
-  let records = [] as Awaited<ReturnType<typeof searchOpenBooks>>;
+  let doabRecords: OpenBookRecord[] = [];
+  let oapenRecords: OpenBookRecord[] = [];
   let peerReview: Awaited<ReturnType<typeof lookupDoabPeerReview>> | null = null;
 
   if (q) {
     try {
-      records = await searchOpenBooks(source, q, 24);
+      if (source === 'both') {
+        const [doab, oapen] = await Promise.allSettled([searchOpenBooks('doab', q, 16), searchOpenBooks('oapen', q, 16)]);
+        doabRecords = doab.status === 'fulfilled' ? doab.value : [];
+        oapenRecords = oapen.status === 'fulfilled' ? oapen.value : [];
+        if (doab.status === 'rejected' && oapen.status === 'rejected') error = 'تعذر الوصول إلى OAPEN وDOAB في هذه المحاولة.';
+      } else {
+        const records = await searchOpenBooks(source, q, 24);
+        if (source === 'doab') doabRecords = records; else oapenRecords = records;
+      }
     } catch (cause) {
       error = cause instanceof Error ? cause.message : 'تعذر إكمال البحث الآن.';
     }
   }
-  if (source === 'doab' && peerDoi) {
-    try {
-      peerReview = await lookupDoabPeerReview({ doi: peerDoi });
-    } catch {
-      peerReview = null;
-    }
+  if ((source === 'doab' || source === 'both') && peerDoi) {
+    try { peerReview = await lookupDoabPeerReview({ doi: peerDoi }); } catch { peerReview = null; }
   }
+  const records = [...doabRecords, ...oapenRecords];
 
   return <main dir="rtl" style={styles.shell}>
     <section style={styles.hero}>
-      <span style={styles.badge}>OAPEN</span><span style={styles.badge}>DOAB</span><span style={styles.badge}>Open Access</span>
+      <span style={styles.badge}>OAPEN</span><span style={styles.badge}>DOAB</span><span style={styles.badge}>Crossref</span><span style={styles.badge}>PRISM</span>
       <h1>اكتشاف الكتب العلمية المفتوحة</h1>
-      <p>واجهة عربية لاكتشاف الكتب الأكاديمية المفتوحة من السجلات الأصلية. لا نعيد استضافة الكتب، بل نحافظ على بيانات المصدر والناشر والترخيص والمعرفات ونرسل القارئ إلى السجل القانوني الأصلي.</p>
+      <p>واجهة عربية موحدة لاكتشاف الكتب الأكاديمية المفتوحة من السجلات الأصلية. نحافظ على بيانات المصدر والناشر والترخيص والمعرفات، ونربط DOI بمدقق Crossref، ونستخدم PRISM للتحقق من بيانات مراجعة الأقران عندما تتوفر في DOAB.</p>
       <form method="get" action="/open-books/" style={styles.form}>
         <input name="q" defaultValue={q} aria-label="موضوع أو عنوان أو مؤلف" placeholder="مثال: mental health, autism, social work" style={styles.input} />
         <select name="source" defaultValue={source} aria-label="المصدر" style={styles.input}>
-          <option value="doab">DOAB</option>
-          <option value="oapen">OAPEN Library</option>
+          <option value="both">OAPEN + DOAB</option><option value="doab">DOAB فقط</option><option value="oapen">OAPEN فقط</option>
         </select>
         <button type="submit" style={styles.button}>بحث</button>
       </form>
-      <p style={styles.meta}>يمكن البحث بكلمات موضوعية أو عنوان أو اسم مؤلف. تعرض النتائج البيانات كما ترد من السجل الخارجي وقد تختلف درجة اكتمال الحقول بين كتاب وآخر.</p>
+      <p style={styles.meta}>البحث الموحد هو الافتراضي. اكتمال metadata يختلف من كتاب لآخر، لذلك لا نخترع الحقول الناقصة ولا نستنتج الترخيص أو مراجعة الأقران.</p>
     </section>
 
-    {peerDoi && source === 'doab' && <section style={styles.card}>
-      <h2>تحقق مراجعة الأقران</h2>
-      {peerReview ? <p>{peerReview.found ? `وجد DOAB/PRISM ${peerReview.rawCount} سجل مراجعة مرتبطًا بالمعرف ${peerDoi}.` : `لم يُرجع DOAB/PRISM سجل مراجعة مطابقًا للمعرف ${peerDoi}.`}</p> : <p>تعذر التحقق من PRISM في هذه المحاولة؛ لا نفترض وجود مراجعة أقران من دون سجل.</p>}
+    {peerDoi && (source === 'doab' || source === 'both') && <section style={styles.card}><h2>تحقق مراجعة الأقران</h2>{peerReview ? <p>{peerReview.found ? `وجد DOAB/PRISM ${peerReview.rawCount} سجل مراجعة مرتبطًا بالمعرف ${peerDoi}.` : `لم يُرجع DOAB/PRISM سجل مراجعة مطابقًا للمعرف ${peerDoi}.`}</p> : <p>تعذر التحقق من PRISM في هذه المحاولة؛ لا نفترض وجود مراجعة أقران من دون سجل.</p>}</section>}
+    {error && <section style={styles.card}><h2>تعذر البحث</h2><p>{error}</p></section>}
+
+    {q && !error && <section><h2>النتائج: {records.length}</h2>
+      {source !== 'oapen' && <><h3>DOAB — {doabRecords.length}</h3>{doabRecords.map((book,index)=><ResultCard key={`doab-${book.uuid ?? book.handle ?? index}`} book={book} q={q}/>)}</>}
+      {source !== 'doab' && <><h3>OAPEN Library — {oapenRecords.length}</h3>{oapenRecords.map((book,index)=><ResultCard key={`oapen-${book.uuid ?? book.handle ?? index}`} book={book} q={q}/>)}</>}
+      {records.length === 0 && <p>لم تُرجع الواجهات نتائج. جرّب مصطلحًا أوسع أو باللغة الإنجليزية لأن بعض الفهرسة لا تتضمن كلمات عربية.</p>}
     </section>}
 
-    {error && <section style={styles.card}><h2>تعذر البحث</h2><p>{error}</p><p>يمكنك استخدام الروابط الأصلية أدناه مباشرة، ولا يعني تعطل الواجهة أن المصدر نفسه غير متاح.</p></section>}
+    <section style={styles.card}><h2>سلسلة التحقق التي نستخدمها</h2><ol><li>اكتشاف السجل من OAPEN أو DOAB.</li><li>الحفاظ على الناشر والمؤلفين واللغة وISBN/DOI والترخيص.</li><li>العودة إلى السجل الأصلي للوصول القانوني للكتاب.</li><li>عند وجود DOI: فحص metadata وعلاقات ما بعد النشر عبر Crossref.</li><li>في DOAB: فحص PRISM عند الحاجة بدل افتراض مراجعة الأقران.</li></ol></section>
 
-    {q && !error && <section>
-      <h2>النتائج: {records.length}</h2>
-      {records.length === 0 && <p>لم تُرجع الواجهة نتائج لهذا الاستعلام. جرّب مصطلحًا أوسع أو باللغة الإنجليزية لأن فهرسة بعض الكتب قد لا تتضمن كلمات عربية.</p>}
-      {records.map((book, index) => <article key={`${book.provider}-${book.uuid ?? book.handle ?? index}`} style={styles.card}>
-        <div><span style={styles.badge}>{book.provider === 'doab' ? 'DOAB' : 'OAPEN'}</span>{book.language && <span style={styles.badge}>{book.language}</span>}{book.issued && <span style={styles.badge}>{book.issued}</span>}</div>
-        <h3><a href={book.recordUrl} target="_blank" rel="noopener noreferrer">{book.title}</a></h3>
-        {book.subtitle && <p>{book.subtitle}</p>}
-        {book.creators.length > 0 && <p><strong>المؤلفون/المحررون:</strong> {book.creators.join('؛ ')}</p>}
-        {book.publisher && <p><strong>الناشر:</strong> {book.publisher}</p>}
-        {book.license && <p><strong>الترخيص/الحقوق المسجلة:</strong> {book.license}</p>}
-        {book.doi && <p><strong>DOI:</strong> {book.doi}</p>}
-        {book.isbn.length > 0 && <p><strong>ISBN:</strong> {book.isbn.join('، ')}</p>}
-        {book.subjects.length > 0 && <p><strong>الموضوعات:</strong> {book.subjects.join('، ')}</p>}
-        <p><a href={book.recordUrl} target="_blank" rel="noopener noreferrer"><strong>فتح السجل الأصلي</strong></a>{book.provider === 'doab' && book.doi && <> · <a href={`/open-books/?q=${encodeURIComponent(q)}&source=doab&peerDoi=${encodeURIComponent(book.doi)}`}>التحقق من بيانات مراجعة الأقران في PRISM</a></>}</p>
-      </article>)}
-    </section>}
-
-    <section style={styles.card}>
-      <h2>لماذا نحافظ على هذه الحقول؟</h2>
-      <ul>
-        <li><strong>الناشر والمعرفات:</strong> حتى لا يتحول الكتاب إلى عنوان مجهول المصدر.</li>
-        <li><strong>الترخيص:</strong> لأن «مفتوح الوصول» لا يعني تلقائيًا السماح بكل أنواع إعادة الاستخدام.</li>
-        <li><strong>السجل الأصلي:</strong> يبقى هو المرجع القانوني والتقني الأحدث.</li>
-        <li><strong>PRISM:</strong> نستخدمه للتحقق من بيانات مراجعة الأقران عند توفر DOI أو ISBN، ولا نستنتجها من اسم الناشر.</li>
-      </ul>
-    </section>
-
-    <section style={styles.card}>
-      <h2>المصادر التقنية الرسمية</h2>
-      <ul>
-        <li><a href={OPEN_BOOK_SOURCE_INFO.doab.metadata} target="_blank" rel="noopener noreferrer">DOAB — metadata harvesting and dissemination</a></li>
-        <li><a href={OPEN_BOOK_SOURCE_INFO.doab.api} target="_blank" rel="noopener noreferrer">DOAB — REST search API</a></li>
-        <li><a href={OPEN_BOOK_SOURCE_INFO.oapen.metadata} target="_blank" rel="noopener noreferrer">OAPEN Library — metadata</a></li>
-        <li><a href={OPEN_BOOK_SOURCE_INFO.oapen.api} target="_blank" rel="noopener noreferrer">OAPEN Library — REST search API</a></li>
-      </ul>
-      <p style={styles.meta}>OAPEN Foundation منحتنا في مراسلتها الإذن باستخدام metadata وAPI لكل من OAPEN Library وDOAB. هذه الواجهة تنفيذ مستقل من Health Renewal ولا تعني اعتمادًا أو شراكة أو مراجعة من OAPEN/DOAB.</p>
-    </section>
+    <section style={styles.card}><h2>المصادر التقنية الرسمية</h2><ul><li><a href={OPEN_BOOK_SOURCE_INFO.doab.metadata} target="_blank" rel="noopener noreferrer">DOAB — metadata harvesting and dissemination</a></li><li><a href={OPEN_BOOK_SOURCE_INFO.doab.api} target="_blank" rel="noopener noreferrer">DOAB — REST search API</a></li><li><a href={OPEN_BOOK_SOURCE_INFO.oapen.metadata} target="_blank" rel="noopener noreferrer">OAPEN Library — metadata</a></li><li><a href={OPEN_BOOK_SOURCE_INFO.oapen.api} target="_blank" rel="noopener noreferrer">OAPEN Library — REST search API</a></li><li><a href="https://www.crossref.org/documentation/retrieve-metadata/rest-api/" target="_blank" rel="noopener noreferrer">Crossref REST API</a></li></ul><p style={styles.meta}>OAPEN Foundation منحتنا في مراسلتها الإذن باستخدام metadata وAPI لكل من OAPEN Library وDOAB. هذا تنفيذ مستقل من Health Renewal ولا يعني اعتمادًا أو شراكة أو مراجعة من هذه الجهات.</p></section>
   </main>;
 }
