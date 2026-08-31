@@ -1,4 +1,3 @@
-const FRAZI_HOME='https://fraxi.org/';
 const FRAZI_HELP='https://fraxi.org/information/helping-someone-with-fragile-x-syndrome/';
 const FRAZI_RESEARCH='https://fraxi.org/research/';
 const FRAZI_PRIORITIES='https://fraxi.org/shape-research-change-lives-survey-report-top-research-priorities-for-fxs-as-told-by-our-community/';
