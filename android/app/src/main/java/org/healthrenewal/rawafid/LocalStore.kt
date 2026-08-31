@@ -22,6 +22,10 @@ data class TreatmentReminder(
 
 object LocalStore {
     private const val PREFS = "rawafid_life_os_v1"
+    private const val TREATMENTS = "treatments"
+    private const val ENCRYPTED_TREATMENTS = "rawafid_local_treatments_v2"
+    private const val ENCRYPTED_EMERGENCY_CARD = "rawafid_local_emergency_card_v2"
+    private val emergencyLegacyKeys = arrayOf("emergency_name", "emergency_contact", "emergency_note")
     private fun prefs(context: Context) = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 
     fun reminderEnabled(context: Context, type: ReminderType): Boolean =
@@ -79,7 +83,14 @@ object LocalStore {
     }
 
     fun treatments(context: Context): List<TreatmentReminder> {
-        val raw = prefs(context).getString("treatments", "[]") ?: "[]"
+        val raw = SensitiveLocalPayload.read(
+            context = context,
+            encryptedKey = ENCRYPTED_TREATMENTS,
+            legacyPrefsName = PREFS,
+            legacyKey = TREATMENTS,
+            defaultValue = "[]",
+            validator = { runCatching { JSONArray(it) }.isSuccess }
+        )
         return runCatching {
             val array = JSONArray(raw)
             buildList {
@@ -98,21 +109,29 @@ object LocalStore {
 
     fun saveTreatment(context: Context, reminder: TreatmentReminder) {
         val items = treatments(context).filterNot { it.id == reminder.id } + reminder
-        val array = JSONArray()
-        items.sortedBy { it.timeMillis }.forEach { item ->
-            array.put(JSONObject().apply {
-                put("id", item.id)
-                put("time", item.timeMillis)
-                put("title", item.title)
-                put("note", item.note)
-            })
-        }
-        prefs(context).edit().putString("treatments", array.toString()).apply()
+        writeTreatments(context, items)
     }
 
     fun removeTreatment(context: Context, id: Int) {
+        writeTreatments(context, treatments(context).filterNot { it.id == id })
+    }
+
+    fun emergencyName(context: Context): String = emergencyCard(context).optString("name")
+    fun emergencyContact(context: Context): String = emergencyCard(context).optString("contact")
+    fun emergencyNote(context: Context): String = emergencyCard(context).optString("note")
+
+    fun saveEmergencyCard(context: Context, name: String, contact: String, note: String) {
+        val value = JSONObject()
+            .put("name", name.trim())
+            .put("contact", contact.trim())
+            .put("note", note.trim())
+        EncryptedLocalStore.put(context, ENCRYPTED_EMERGENCY_CARD, value.toString())
+        clearLegacyEmergency(context)
+    }
+
+    private fun writeTreatments(context: Context, values: List<TreatmentReminder>) {
         val array = JSONArray()
-        treatments(context).filterNot { it.id == id }.forEach { item ->
+        values.sortedBy { it.timeMillis }.forEach { item ->
             array.put(JSONObject().apply {
                 put("id", item.id)
                 put("time", item.timeMillis)
@@ -120,17 +139,27 @@ object LocalStore {
                 put("note", item.note)
             })
         }
-        prefs(context).edit().putString("treatments", array.toString()).apply()
+        SensitiveLocalPayload.write(context, ENCRYPTED_TREATMENTS, array.toString(), PREFS, TREATMENTS)
     }
 
-    fun emergencyName(context: Context): String = prefs(context).getString("emergency_name", "") ?: ""
-    fun emergencyContact(context: Context): String = prefs(context).getString("emergency_contact", "") ?: ""
-    fun emergencyNote(context: Context): String = prefs(context).getString("emergency_note", "") ?: ""
-    fun saveEmergencyCard(context: Context, name: String, contact: String, note: String) {
-        prefs(context).edit()
-            .putString("emergency_name", name.trim())
-            .putString("emergency_contact", contact.trim())
-            .putString("emergency_note", note.trim())
-            .apply()
+    private fun emergencyCard(context: Context): JSONObject {
+        EncryptedLocalStore.get(context, ENCRYPTED_EMERGENCY_CARD)?.let { raw ->
+            return runCatching { JSONObject(raw) }.getOrDefault(JSONObject())
+        }
+        val p = prefs(context)
+        if (emergencyLegacyKeys.none { p.contains(it) }) return JSONObject()
+        val value = JSONObject()
+            .put("name", p.getString("emergency_name", "") ?: "")
+            .put("contact", p.getString("emergency_contact", "") ?: "")
+            .put("note", p.getString("emergency_note", "") ?: "")
+        EncryptedLocalStore.put(context, ENCRYPTED_EMERGENCY_CARD, value.toString())
+        clearLegacyEmergency(context)
+        return value
+    }
+
+    private fun clearLegacyEmergency(context: Context) {
+        val edit = prefs(context).edit()
+        emergencyLegacyKeys.forEach(edit::remove)
+        edit.apply()
     }
 }
