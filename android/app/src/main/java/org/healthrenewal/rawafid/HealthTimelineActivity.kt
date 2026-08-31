@@ -53,10 +53,17 @@ data class HealthTimelineEntry(
 object HealthTimelineStore {
     private const val PREFS = "rawafid_health_timeline_v1"
     private const val KEY = "entries"
-    private fun prefs(context: Context) = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+    private const val ENCRYPTED_KEY = "rawafid_health_timeline_entries_v2"
 
     fun entries(context: Context): List<HealthTimelineEntry> {
-        val raw = prefs(context).getString(KEY, "[]") ?: "[]"
+        val raw = SensitiveLocalPayload.read(
+            context = context,
+            encryptedKey = ENCRYPTED_KEY,
+            legacyPrefsName = PREFS,
+            legacyKey = KEY,
+            defaultValue = "[]",
+            validator = { runCatching { JSONArray(it) }.isSuccess }
+        )
         return runCatching {
             val array = JSONArray(raw)
             buildList {
@@ -78,36 +85,11 @@ object HealthTimelineStore {
     }
 
     fun add(context: Context, entry: HealthTimelineEntry) {
-        val all = (listOf(entry) + entries(context)).distinctBy { it.id }.take(1000)
-        val array = JSONArray()
-        all.forEach { item ->
-            array.put(
-                JSONObject()
-                    .put("id", item.id)
-                    .put("created_at", item.createdAt)
-                    .put("type", item.type)
-                    .put("title", item.title)
-                    .put("severity", item.severity)
-                    .put("note", item.note)
-            )
-        }
-        prefs(context).edit().putString(KEY, array.toString()).apply()
+        write(context, (listOf(entry) + entries(context)).distinctBy { it.id }.take(1000))
     }
 
     fun remove(context: Context, id: Long) {
-        val array = JSONArray()
-        entries(context).filterNot { it.id == id }.forEach { item ->
-            array.put(
-                JSONObject()
-                    .put("id", item.id)
-                    .put("created_at", item.createdAt)
-                    .put("type", item.type)
-                    .put("title", item.title)
-                    .put("severity", item.severity)
-                    .put("note", item.note)
-            )
-        }
-        prefs(context).edit().putString(KEY, array.toString()).apply()
+        write(context, entries(context).filterNot { it.id == id })
     }
 
     fun visitSummary(context: Context, limit: Int = 30): String {
@@ -126,6 +108,22 @@ object HealthTimelineStore {
         lines += ""
         lines += "اختر ما تريد مشاركته مع مقدم الرعاية، ولا تعتمد على هذا الملخص في حالة طارئة."
         return lines.joinToString("\n")
+    }
+
+    private fun write(context: Context, values: List<HealthTimelineEntry>) {
+        val array = JSONArray()
+        values.take(1000).forEach { item ->
+            array.put(
+                JSONObject()
+                    .put("id", item.id)
+                    .put("created_at", item.createdAt)
+                    .put("type", item.type)
+                    .put("title", item.title)
+                    .put("severity", item.severity)
+                    .put("note", item.note)
+            )
+        }
+        SensitiveLocalPayload.write(context, ENCRYPTED_KEY, array.toString(), PREFS, KEY)
     }
 
     private fun labelFor(type: String): String = when (type) {
@@ -167,7 +165,7 @@ private fun HealthTimelineScreen() {
         item {
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text("دفتر الصحة الزمني", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-                Text("سجّل ما حدث ومتى. روافد يعرض التسلسل ولا يستنتج سببًا أو تشخيصًا.")
+                Text("سجّل ما حدث ومتى. تحفظ السجلات محليًا بشكل مشفر؛ روافد يعرض التسلسل ولا يستنتج سببًا أو تشخيصًا.")
             }
         }
         item {
@@ -193,7 +191,7 @@ private fun HealthTimelineScreen() {
                             HealthTimelineStore.add(context, HealthTimelineEntry(now, now, type, title.trim(), severity, note.trim()))
                             title = ""; note = ""; severity = 0; version++
                         }
-                    }) { Text("حفظ محلي") }
+                    }) { Text("حفظ محلي مشفر") }
                 }
             }
         }
