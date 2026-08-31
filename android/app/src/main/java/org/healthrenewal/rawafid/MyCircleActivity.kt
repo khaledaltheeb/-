@@ -323,8 +323,24 @@ private fun MyCircleScreen() {
                                     clip.primaryClip?.getItemAt(0)?.coerceToText(context)?.toString().orEmpty()
                                 ).take(24)
                             }) { Text("لصق المعرّف") }
+                            OutlinedButton(
+                                enabled = !loading,
+                                onClick = {
+                                    error = ""
+                                    status = ""
+                                    CircleQrScanner.start(
+                                        context = context,
+                                        onSuccess = { scannedId ->
+                                            targetId = scannedId
+                                            status = "تمت قراءة معرّف RFD. راجعه وأدخل صلة الشخص ثم أرسل الطلب بنفسك."
+                                        },
+                                        onCanceled = { status = "تم إلغاء مسح QR." },
+                                        onFailure = { message -> error = message }
+                                    )
+                                }
+                            ) { Text("مسح QR") }
                         }
-                        Text("لن يبدأ التواصل قبل قبول الطرف الآخر واختياره الاسم الذي يسجلك به.", style = MaterialTheme.typography.bodySmall)
+                        Text("المسح يملأ معرّف RFD فقط ولا يرسل طلب ارتباط تلقائيًا. لن يبدأ التواصل قبل قبول الطرف الآخر واختياره الاسم الذي يسجلك به.", style = MaterialTheme.typography.bodySmall)
                     }
                 }
             }
