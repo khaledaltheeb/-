@@ -80,11 +80,27 @@ data class CirclePerson(
 )
 
 object MyCircleStore {
-    private const val PREFS = "rawafid_my_circle_v1"
-    private fun prefs(context: Context) = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+    private const val LEGACY_PREFS = "rawafid_my_circle_v1"
+    private const val LEGACY_PEOPLE_KEY = "people"
+    private const val ENCRYPTED_PEOPLE_KEY = "my_circle_local_safety_people_v1"
+
+    private fun legacyPrefs(context: Context) =
+        context.getSharedPreferences(LEGACY_PREFS, Context.MODE_PRIVATE)
+
+    private fun encryptedPayload(context: Context): String {
+        EncryptedLocalStore.get(context, ENCRYPTED_PEOPLE_KEY)?.let { return it }
+
+        // One-time privacy migration from the pre-encryption store. Encrypt first,
+        // then remove the legacy plaintext only after the encrypted write succeeds.
+        val legacy = legacyPrefs(context).getString(LEGACY_PEOPLE_KEY, null) ?: return "[]"
+        if (runCatching { JSONArray(legacy) }.isFailure) return "[]"
+        EncryptedLocalStore.put(context, ENCRYPTED_PEOPLE_KEY, legacy)
+        legacyPrefs(context).edit().remove(LEGACY_PEOPLE_KEY).apply()
+        return legacy
+    }
 
     fun people(context: Context): List<CirclePerson> {
-        val raw = prefs(context).getString("people", "[]") ?: "[]"
+        val raw = encryptedPayload(context)
         return runCatching {
             val a = JSONArray(raw)
             buildList {
@@ -122,7 +138,8 @@ object MyCircleStore {
                     .put("permissions", permissions)
             )
         }
-        prefs(context).edit().putString("people", a.toString()).apply()
+        EncryptedLocalStore.put(context, ENCRYPTED_PEOPLE_KEY, a.toString())
+        legacyPrefs(context).edit().remove(LEGACY_PEOPLE_KEY).apply()
     }
 
     fun forPermission(context: Context, permission: CirclePermission): List<CirclePerson> =
@@ -454,7 +471,7 @@ private fun MyCircleScreen() {
             Card {
                 Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)) {
                     Text("جهات الأمان المحلية على هذا الهاتف", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                    Text("مسار مستقل يعمل للاتصال وSMS ومراقبة الأمان والقيادة الآمنة عند تعذر الإنترنت. أنت تختار لكل رقم الوظائف المسموح بها، ولا يُرفع دفتر الأرقام إلى دائرة روافد.")
+                    Text("مسار مستقل يعمل للاتصال وSMS ومراقبة الأمان والقيادة الآمنة عند تعذر الإنترنت. أنت تختار لكل رقم الوظائف المسموح بها، ولا يُرفع دفتر الأرقام إلى دائرة روافد. تُحفظ هذه الجهات مشفرة محليًا باستخدام Android Keystore.")
                     OutlinedButton(onClick = { showLocal = !showLocal }) { Text(if (showLocal) "إخفاء" else "إدارة جهات الأمان المحلية") }
                 }
             }
@@ -481,21 +498,30 @@ private fun MyCircleScreen() {
                         Button(
                             enabled = localName.isNotBlank() && localPhone.isNotBlank(),
                             onClick = {
-                                MyCircleStore.save(
-                                    context,
-                                    localPeople + CirclePerson(
-                                        System.currentTimeMillis(),
-                                        localName.trim(),
-                                        localRelation.trim(),
-                                        localPhone.trim(),
-                                        localPermissions
+                                val result = runCatching {
+                                    MyCircleStore.save(
+                                        context,
+                                        localPeople + CirclePerson(
+                                            System.currentTimeMillis(),
+                                            localName.trim(),
+                                            localRelation.trim(),
+                                            localPhone.trim(),
+                                            localPermissions
+                                        )
                                     )
-                                )
-                                localName = ""
-                                localRelation = ""
-                                localPhone = ""
-                                localPermissions = setOf(CirclePermission.EMERGENCY, CirclePermission.LOCATION_SAFETY)
-                                localVersion++
+                                }
+                                result.onSuccess {
+                                    localName = ""
+                                    localRelation = ""
+                                    localPhone = ""
+                                    localPermissions = setOf(CirclePermission.EMERGENCY, CirclePermission.LOCATION_SAFETY)
+                                    localVersion++
+                                    error = ""
+                                    status = "تم حفظ جهة الأمان محليًا بشكل مشفر."
+                                }.onFailure {
+                                    status = ""
+                                    error = "تعذر حفظ جهة الأمان بشكل مشفر."
+                                }
                             }
                         ) { Text("حفظ الجهة") }
                     }
@@ -515,8 +541,16 @@ private fun MyCircleScreen() {
                             Button(onClick = { context.startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:${Uri.encode(person.phone)}"))) }) { Text("اتصال") }
                             OutlinedButton(onClick = { context.startActivity(Intent(Intent.ACTION_SENDTO, Uri.parse("smsto:${Uri.encode(person.phone)}"))) }) { Text("SMS") }
                             TextButton(onClick = {
-                                MyCircleStore.save(context, localPeople.filterNot { it.id == person.id })
-                                localVersion++
+                                runCatching { MyCircleStore.save(context, localPeople.filterNot { it.id == person.id }) }
+                                    .onSuccess {
+                                        localVersion++
+                                        error = ""
+                                        status = "تمت إزالة جهة الأمان."
+                                    }
+                                    .onFailure {
+                                        status = ""
+                                        error = "تعذر تحديث جهات الأمان المشفرة."
+                                    }
                             }) { Text("إزالة") }
                         }
                     }
