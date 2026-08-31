@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { buildSeoMetadata } from '@/lib/seo';
 import { lookupDoabPeerReview, OPEN_BOOK_SOURCE_INFO, searchOpenBooks, type OpenBookProvider, type OpenBookRecord } from '@/lib/open-book-discovery';
 
@@ -40,10 +41,10 @@ function ResultCard({ book, q }: { book: OpenBookRecord; q: string }) {
     {book.creators.length > 0 && <p><strong>المؤلفون/المحررون:</strong> {book.creators.join('؛ ')}</p>}
     {book.publisher && <p><strong>الناشر:</strong> {book.publisher}</p>}
     {book.license && <p><strong>الترخيص/الحقوق المسجلة:</strong> {book.license}</p>}
-    {book.doi && <p><strong>DOI:</strong> <a href={`/research-tools/doi-resolver/?doi=${encodeURIComponent(book.doi)}`}>{book.doi} — فحص عبر Crossref</a></p>}
+    {book.doi && <p><strong>DOI:</strong> <Link href={`/research-tools/doi-resolver/?doi=${encodeURIComponent(book.doi)}`}>{book.doi} — فحص عبر Crossref</Link></p>}
     {book.isbn.length > 0 && <p><strong>ISBN:</strong> {book.isbn.join('، ')}</p>}
     {book.subjects.length > 0 && <p><strong>الموضوعات:</strong> {book.subjects.join('، ')}</p>}
-    <p><a href={book.recordUrl} target="_blank" rel="noopener noreferrer"><strong>فتح السجل الأصلي</strong></a>{book.provider === 'doab' && book.doi && <> · <a href={`/open-books/?q=${encodeURIComponent(q)}&source=doab&peerDoi=${encodeURIComponent(book.doi)}`}>التحقق من مراجعة الأقران في PRISM</a></>}</p>
+    <p><a href={book.recordUrl} target="_blank" rel="noopener noreferrer"><strong>فتح السجل الأصلي</strong></a>{book.provider === 'doab' && book.doi && <> · <Link href={`/open-books/?q=${encodeURIComponent(q)}&source=doab&peerDoi=${encodeURIComponent(book.doi)}`}>التحقق من مراجعة الأقران في PRISM</Link></>}</p>
   </article>;
 }
 
@@ -124,7 +125,7 @@ export default async function OpenBooksPage({ searchParams }: { searchParams: Se
         <li><strong>Crossref:</strong> لفحص DOI والعلاقات والتمويل والترخيص والهوية الببليوغرافية عندما تكون مودعة.</li>
         <li><strong>DOAB PRISM:</strong> للتحقق من بيانات مراجعة الأقران عندما تتوفر، دون استنتاجها من اسم الناشر.</li>
       </ul>
-      <p><a href="/research-tools/doi-resolver/">فتح أداة فحص DOI عبر Crossref ←</a></p>
+      <p><Link href="/research-tools/doi-resolver/">فتح أداة فحص DOI عبر Crossref ←</Link></p>
     </section>
 
     <section style={styles.card}>
