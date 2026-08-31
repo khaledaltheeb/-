@@ -1,11 +1,18 @@
 import type { Metadata } from 'next';
+import { buildSeoMetadata } from '@/lib/seo';
 import { resolveCrossrefDoi } from '@/lib/crossref-discovery';
 
-export const metadata: Metadata = {
-  title: 'فحص DOI والبيانات الببليوغرافية عبر Crossref | روافد',
-  description: 'أداة عربية لفحص DOI عبر Crossref وعرض العنوان والناشر والمؤلفين والتاريخ والترخيص والتمويل والتحديثات ومعرفات ORCID وROR عندما تتوفر.',
-  alternates: { canonical: 'https://healthrenewal.org/research-tools/doi-resolver/' },
-};
+export function generateMetadata(): Metadata {
+  return buildSeoMetadata({
+    title: 'فحص DOI والبيانات الببليوغرافية عبر Crossref | روافد',
+    description: 'أداة عربية لفحص DOI عبر Crossref وعرض العنوان والناشر والمؤلفين والتاريخ والترخيص والتمويل والتحديثات ومعرفات ORCID وROR عندما تتوفر.',
+    path: '/research-tools/doi-resolver/',
+    index: true,
+    follow: true,
+    type: 'website',
+    keywords: ['فحص DOI', 'Crossref', 'بيانات ببليوغرافية', 'ORCID', 'ROR', 'الاستشهادات العلمية'],
+  });
+}
 
 type SearchParams = Promise<{ doi?: string }>;
 
