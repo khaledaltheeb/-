@@ -1,6 +1,7 @@
 import { SOCIAL_WORK_PAGES, SOCIAL_WORK_SOURCE_SHA } from '@/lib/social-work-pages.generated';
 import { SOCIAL_WORK_TALENTIA_PAGES, enrichSocialWorkPageWithTalentia } from '@/lib/social-work-talentia-pages';
 import { enrichTalentiaPageWithInlineLinks } from '@/lib/social-work-talentia-inline-links';
+import { hardenTalentiaPageQuality } from '@/lib/social-work-talentia-quality';
 
 type Params = Promise<{ slug?: string[] }>;
 
@@ -24,7 +25,8 @@ export async function GET(_request: Request, { params }: { params: Params }) {
   const key = slug[0] ?? '';
   const talentiaHtml = SOCIAL_WORK_TALENTIA_PAGES[key];
   if (talentiaHtml) {
-    return new Response(enrichTalentiaPageWithInlineLinks(talentiaHtml, key), { status: 200, headers: htmlHeaders });
+    const withInlineLinks = enrichTalentiaPageWithInlineLinks(talentiaHtml, key);
+    return new Response(hardenTalentiaPageQuality(withInlineLinks, key), { status: 200, headers: htmlHeaders });
   }
 
   const recoveredHtml = SOCIAL_WORK_PAGES[key];
