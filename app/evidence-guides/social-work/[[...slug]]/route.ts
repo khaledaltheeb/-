@@ -4,8 +4,10 @@ type Params = Promise<{ slug?: string[] }>;
 
 const htmlHeaders = {
   'content-type': 'text/html; charset=utf-8',
+  'content-language': 'ar',
   'cache-control': 'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400',
   'x-content-type-options': 'nosniff',
+  'x-robots-tag': 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1',
   'x-rawafid-source': `healthrenewal.org@${SOCIAL_WORK_SOURCE_SHA}`,
 };
 
