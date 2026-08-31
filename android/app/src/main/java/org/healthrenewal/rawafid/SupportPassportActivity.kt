@@ -76,11 +76,18 @@ data class SupportPassportProfile(
 object SupportPassportStore {
     private const val PREFS = "rawafid_support_passport_v1"
     private const val PROFILE_JSON = "profile_json"
-
-    private fun prefs(context: Context) = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+    private const val ENCRYPTED_PROFILE = "rawafid_support_passport_profile_v2"
 
     fun load(context: Context): SupportPassportProfile {
-        val raw = prefs(context).getString(PROFILE_JSON, null) ?: return SupportPassportProfile()
+        val raw = SensitiveLocalPayload.read(
+            context = context,
+            encryptedKey = ENCRYPTED_PROFILE,
+            legacyPrefsName = PREFS,
+            legacyKey = PROFILE_JSON,
+            defaultValue = "",
+            validator = { runCatching { JSONObject(it) }.isSuccess }
+        )
+        if (raw.isBlank()) return SupportPassportProfile()
         return runCatching { decode(JSONObject(raw)) }.getOrElse { SupportPassportProfile() }
     }
 
@@ -89,11 +96,11 @@ object SupportPassportStore {
             sharedNeeds = profile.sharedNeeds.intersect(profile.enabledNeeds),
             updatedAtEpochMs = System.currentTimeMillis()
         )
-        prefs(context).edit().putString(PROFILE_JSON, encode(normalized).toString()).apply()
+        SensitiveLocalPayload.write(context, ENCRYPTED_PROFILE, encode(normalized).toString(), PREFS, PROFILE_JSON)
     }
 
     fun clear(context: Context) {
-        prefs(context).edit().remove(PROFILE_JSON).apply()
+        SensitiveLocalPayload.remove(context, ENCRYPTED_PROFILE, PREFS, PROFILE_JSON)
     }
 
     fun visibleNeeds(profile: SupportPassportProfile): List<SupportNeed> =
@@ -224,7 +231,7 @@ private fun SupportPassportScreen() {
             Column(verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
                 Text("جواز احتياجاتي", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
                 Text(
-                    "جهّز معلومات التواصل التي تريد إظهارها أو مشاركتها. لا يخرج شيء من الهاتف إلا عندما تختار ذلك.",
+                    "جهّز معلومات التواصل التي تريد إظهارها أو مشاركتها. تحفظ بياناتك محليًا بشكل مشفر، ولا يخرج شيء من الهاتف إلا عندما تختار ذلك.",
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
@@ -342,7 +349,7 @@ private fun SupportPassportScreen() {
                     profile = SupportPassportStore.load(context)
                     saved = true
                 }
-            ) { Text(if (saved) "تم الحفظ على هذا الهاتف" else "حفظ التغييرات") }
+            ) { Text(if (saved) "تم الحفظ المشفر على هذا الهاتف" else "حفظ التغييرات") }
         }
 
         item { HorizontalDivider() }
