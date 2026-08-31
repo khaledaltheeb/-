@@ -66,6 +66,8 @@ for token in [
         errors.append(f"MyCircleActivity.kt missing QR linking contract: {token}")
 
 for token in [
+    'com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions',
+    'com.google.mlkit.vision.codescanner.GmsBarcodeScanning',
     'GmsBarcodeScannerOptions.Builder()',
     'Barcode.FORMAT_QR_CODE',
     '.enableAutoZoom()',
