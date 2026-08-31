@@ -1,9 +1,9 @@
 package org.healthrenewal.rawafid
 
 import android.content.Context
-import com.google.android.gms.codescanner.GmsBarcodeScannerOptions
-import com.google.android.gms.codescanner.GmsBarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
+import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
+import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
 
 /**
  * Privacy-minimized Rawafid ID scanner.
