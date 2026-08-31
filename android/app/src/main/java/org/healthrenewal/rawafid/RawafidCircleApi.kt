@@ -5,7 +5,9 @@ import android.util.Base64
 import org.json.JSONArray
 import org.json.JSONObject
 import org.json.JSONTokener
+import java.io.IOException
 import java.net.HttpURLConnection
+import java.net.SocketTimeoutException
 import java.net.URL
 import java.util.UUID
 
@@ -374,19 +376,46 @@ object RawafidCircleApi {
 
     private fun request(method: String, path: String, body: JSONObject?, accessToken: String?): String {
         val connection = URL(BASE_URL + path).openConnection() as HttpURLConnection
-        connection.requestMethod = method; connection.connectTimeout = 15000; connection.readTimeout = 20000
-        connection.setRequestProperty("apikey", PUBLISHABLE_KEY); connection.setRequestProperty("Accept", "application/json"); connection.setRequestProperty("Content-Type", "application/json")
-        if (!accessToken.isNullOrBlank()) connection.setRequestProperty("Authorization", "Bearer $accessToken")
-        if (body != null && method != "GET") { connection.doOutput = true; connection.outputStream.bufferedWriter(Charsets.UTF_8).use { it.write(body.toString()) } }
-        val code = connection.responseCode
-        val text = (if (code in 200..299) connection.inputStream else connection.errorStream)?.bufferedReader(Charsets.UTF_8)?.use { it.readText() }.orEmpty()
-        connection.disconnect()
-        if (code !in 200..299) throw CircleApiException(readableError(text, code))
-        return if (text.isBlank()) "null" else text
+        try {
+            connection.requestMethod = method
+            connection.connectTimeout = 15_000
+            connection.readTimeout = 20_000
+            connection.useCaches = false
+            connection.setRequestProperty("apikey", PUBLISHABLE_KEY)
+            connection.setRequestProperty("Accept", "application/json")
+            connection.setRequestProperty("Content-Type", "application/json")
+            connection.setRequestProperty("Cache-Control", "no-store")
+            if (!accessToken.isNullOrBlank()) connection.setRequestProperty("Authorization", "Bearer $accessToken")
+            if (body != null && method != "GET") {
+                connection.doOutput = true
+                connection.outputStream.bufferedWriter(Charsets.UTF_8).use { it.write(body.toString()) }
+            }
+            val code = connection.responseCode
+            val text = (if (code in 200..299) connection.inputStream else connection.errorStream)
+                ?.bufferedReader(Charsets.UTF_8)
+                ?.use { it.readText() }
+                .orEmpty()
+            if (code !in 200..299) throw CircleApiException(readableError(text, code))
+            return if (text.isBlank()) "null" else text
+        } catch (error: CircleApiException) {
+            throw error
+        } catch (_: SocketTimeoutException) {
+            throw CircleApiException("انتهت مهلة الاتصال بخدمة روافد. حاول مرة أخرى.")
+        } catch (_: IOException) {
+            throw CircleApiException("تعذر الاتصال بخدمة روافد. تحقق من الشبكة وحاول مرة أخرى.")
+        } finally {
+            connection.disconnect()
+        }
     }
 
     private fun readableError(raw: String, code: Int): String {
-        val message = runCatching { val o = JSONObject(raw); o.optString("msg").ifBlank { o.optString("message") }.ifBlank { o.optString("error_description") }.ifBlank { o.optString("error") } }.getOrNull().orEmpty()
+        val message = runCatching {
+            val o = JSONObject(raw)
+            o.optString("msg")
+                .ifBlank { o.optString("message") }
+                .ifBlank { o.optString("error_description") }
+                .ifBlank { o.optString("error") }
+        }.getOrNull().orEmpty()
         return when {
             message.contains("Invalid login credentials", true) -> "البريد الإلكتروني أو كلمة المرور غير صحيحة."
             message.contains("Email not confirmed", true) -> "أكد بريدك الإلكتروني أولًا ثم حاول تسجيل الدخول."
@@ -398,9 +427,11 @@ object RawafidCircleApi {
             message.contains("unable to create request", true) -> "تعذر العثور على هذا المعرّف أو لا يمكن إرسال الطلب إليه."
             message.contains("recipient permission disabled", true) -> "الطرف الآخر لم يمنح هذه الصلاحية."
             message.contains("messaging blocked", true) -> "التواصل غير متاح بين هذين الحسابين."
-            message.contains("rate limit", true) -> "تم الوصول إلى حد الحماية المؤقت. حاول لاحقًا."
-            message.isNotBlank() -> message
-            else -> "تعذر الاتصال بخدمة روافد (رمز $code)."
+            message.contains("rate limit", true) || code == 429 -> "تم الوصول إلى حد الحماية المؤقت. حاول لاحقًا."
+            code == 401 -> "انتهت جلسة الحساب أو لم تعد صالحة. سجّل الدخول من جديد."
+            code == 403 -> "هذه العملية غير مسموح بها لهذا الحساب أو لهذه الصلاحية."
+            code >= 500 -> "خدمة روافد غير متاحة مؤقتًا. حاول مرة أخرى بعد قليل."
+            else -> "تعذر إكمال العملية بأمان (رمز $code)."
         }
     }
 
