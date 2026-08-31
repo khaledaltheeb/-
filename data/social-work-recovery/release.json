@@ -1,0 +1,14 @@
+{
+  "release": "social-work-recovery-2026-08-31",
+  "merged_pr": 485,
+  "merge_sha": "ff0321cba3214dc04753ff3aaa203fa3a84d92a6",
+  "legacy_source_repository": "khaledaltheeb/healthrenewal.org",
+  "legacy_source_sha": "6911d5ee75bd6fc2dfa12f394d61efe46e87df17",
+  "expected_live_urls": 56,
+  "required_source_fingerprints": [
+    "DRUG4023",
+    "2015081211140160",
+    "2016091213042605"
+  ],
+  "purpose": "Trigger the dedicated production workflow and require post-deploy verification of all restored Social Work URLs."
+}
