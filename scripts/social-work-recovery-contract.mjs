@@ -27,6 +27,7 @@ if (manifest.version !== 2) fail(`unexpected manifest version ${manifest.version
 if (manifest.source?.repository !== 'khaledaltheeb/healthrenewal.org') fail('legacy repository identity mismatch');
 if (manifest.source?.commit !== '6911d5ee75bd6fc2dfa12f394d61efe46e87df17') fail('legacy source SHA mismatch');
 if (manifest.actual_page_count !== expectedCount || manifest.pages?.length !== expectedCount) fail(`expected ${expectedCount} pages`);
+if (!manifest.institutional_sources?.some((s) => String(s.url || '').includes('2015081211140160'))) fail('exact emailed Ljubljana source missing from manifest');
 
 const routes = new Set();
 let minimumWords = Infinity;
@@ -39,6 +40,7 @@ for (const page of manifest.pages) {
   const canonical = `https://healthrenewal.org${page.route}`;
   if (!html.includes(`<link rel="canonical" href="${canonical}">`)) fail(`canonical mismatch: ${page.route}`);
   if (!html.includes('id=DRUG4023')) fail(`DRUG4023 missing: ${page.route}`);
+  if (!html.includes('2015081211140160')) fail(`original emailed Ljubljana source missing: ${page.route}`);
   if (!html.includes('2016091213042605')) fail(`Ljubljana source missing: ${page.route}`);
   if (!html.includes('Social Chamber of Slovenia')) fail(`source publisher missing: ${page.route}`);
   if (!html.includes('Faculty of Social Work, University of Ljubljana')) fail(`university publisher missing: ${page.route}`);
@@ -51,7 +53,8 @@ for (const page of manifest.pages) {
 }
 
 const routeSource = fs.readFileSync(routePath, 'utf8');
-if (!routeSource.includes("SOCIAL_WORK_PAGES")) fail('route is not backed by recovered pages');
-if (!routeSource.includes("x-rawafid-source")) fail('source provenance response header missing');
+if (!routeSource.includes('SOCIAL_WORK_PAGES')) fail('route is not backed by recovered pages');
+if (!routeSource.includes('x-rawafid-source')) fail('source provenance response header missing');
+if (routeSource.includes('2015081211140160')) fail('exact emailed source must be persisted in artifacts, not injected at request time');
 
-console.log(`Social Work recovery contract passed: ${expectedCount} URLs; minimum ${minimumWords} words; institutional sources and evidence-boundary notice on every page.`);
+console.log(`Social Work recovery contract passed: ${expectedCount} persisted URLs; minimum ${minimumWords} words; exact emailed source, institutional sources and evidence-boundary notice on every page.`);
