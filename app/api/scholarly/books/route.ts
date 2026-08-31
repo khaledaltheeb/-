@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { searchBothBookIndexes, searchOpenBooks, type BookSource } from '@/lib/scholarly-discovery';
+import { searchOpenBooks, type OpenBookProvider } from '@/lib/open-book-discovery';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,16 +15,23 @@ export async function GET(request: Request) {
 
   try {
     if (source === 'oapen' || source === 'doab') {
-      const records = await searchOpenBooks(query, source as BookSource, limit);
+      const records = await searchOpenBooks(source as OpenBookProvider, query, limit);
       return NextResponse.json({ query, source, records }, {
         headers: { 'Cache-Control': 'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400' },
       });
     }
-    const result = await searchBothBookIndexes(query, limit);
-    return NextResponse.json({ query, source: 'both', ...result }, {
-      headers: { 'Cache-Control': 'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400' },
-    });
-  } catch (error) {
+    const [oapen, doab] = await Promise.allSettled([
+      searchOpenBooks('oapen', query, limit),
+      searchOpenBooks('doab', query, limit),
+    ]);
+    return NextResponse.json({
+      query,
+      source: 'both',
+      oapen: oapen.status === 'fulfilled' ? oapen.value : [],
+      doab: doab.status === 'fulfilled' ? doab.value : [],
+      errors: [oapen.status === 'rejected' ? 'oapen' : null, doab.status === 'rejected' ? 'doab' : null].filter(Boolean),
+    }, { headers: { 'Cache-Control': 'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400' } });
+  } catch {
     return NextResponse.json({ error: 'Open-book metadata service is temporarily unavailable' }, { status: 502 });
   }
 }
