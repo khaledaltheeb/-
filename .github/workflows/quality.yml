@@ -110,7 +110,10 @@ jobs:
       - name: Production HTTP smoke
         run: npm run smoke
       - name: Full sitemap SEO gate
-        run: node scripts/seo-gate.mjs
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/seo-gate.mjs 2>&1 | tee -a /tmp/rawafid-server.log
       - name: Rich results and discovery gate
         run: node scripts/rich-discovery-gate.mjs
       - name: Content richness and duplicate-body gate
