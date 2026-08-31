@@ -1,0 +1,33 @@
+name: Open Books OAPEN DOAB Contract
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'lib/open-book-discovery.ts'
+      - 'app/open-books/**'
+      - 'app/sitemaps/open-books.xml/**'
+      - 'app/sitemap.xml/route.ts'
+      - 'scripts/open-books-oapen-doab-contract.mjs'
+  push:
+    branches: [main]
+    paths:
+      - 'lib/open-book-discovery.ts'
+      - 'app/open-books/**'
+      - 'app/sitemaps/open-books.xml/**'
+      - 'app/sitemap.xml/route.ts'
+      - 'scripts/open-books-oapen-doab-contract.mjs'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Validate OAPEN DOAB discovery provenance rights and sitemap
+        run: node scripts/open-books-oapen-doab-contract.mjs
