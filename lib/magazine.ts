@@ -90,6 +90,7 @@ export type ResearchCatalogStats = {
 const FIELDS = 'id,slug,title,excerpt,body_json,body_text,seo_title,seo_description,canonical_url,robots_index,robots_follow,published_at,updated_at,primary_keyword,secondary_keywords,semantic_terms,author_display_name,reviewer_display_name,reviewer_credentials,last_reviewed_at,references_json,medical_disclaimer,schema_json';
 const LISTING_FIELDS = 'id,slug,title,excerpt,canonical_url,published_at,updated_at,schema_json';
 const RESEARCH_CATALOG_FIELDS = 'id,openalex_id,doi,source_url,title,publication_date,publication_year,work_type,evidence_kind_ar,language,authors,journal_title,publisher,cited_by_count,is_open_access,oa_status,primary_topic,rawafid_cluster,rawafid_cluster_ar,catalog_rank,source_api,last_synced_at';
+const MAGAZINE_CANONICAL_FILTER = 'canonical_url.like./magazine/%,canonical_url.like.https://healthrenewal.org/magazine/%';
 
 function isPublishedNow(value: string | null) {
   return !value || new Date(value).getTime() <= Date.now();
@@ -142,7 +143,7 @@ export async function getMagazineItems(): Promise<MagazineListingRecord[]> {
       .select(LISTING_FIELDS)
       .eq('content_type', 'research')
       .eq('status', 'published')
-      .like('canonical_url', '/magazine/%')
+      .or(MAGAZINE_CANONICAL_FILTER)
       .order('published_at', { ascending: false })
       .limit(1000);
     if (response.error) throw response.error;
@@ -171,7 +172,7 @@ export async function getMagazinePage(options: {
       .select(LISTING_FIELDS, { count: 'exact' })
       .eq('content_type', 'research')
       .eq('status', 'published')
-      .like('canonical_url', '/magazine/%');
+      .or(MAGAZINE_CANONICAL_FILTER);
 
     if (q) query = query.ilike('title', `%${q}%`);
     if (kind) query = query.contains('schema_json', { evidence_kind: kind });
@@ -196,7 +197,7 @@ export async function getMagazineOverview() {
       .select('schema_json', { count: 'exact' })
       .eq('content_type', 'research')
       .eq('status', 'published')
-      .like('canonical_url', '/magazine/%')
+      .or(MAGAZINE_CANONICAL_FILTER)
       .limit(1000);
     if (response.error) throw response.error;
     return response;
@@ -286,16 +287,19 @@ export async function getResearchCatalogStats(): Promise<ResearchCatalogStats> {
 export async function getMagazineRecord(routeSlug: string): Promise<MagazineRecord | null> {
   const safeSlug = decodeURIComponent(routeSlug).replace(/^\/+/, '');
   if (!safeSlug || safeSlug.includes('/') || !safeSlug.endsWith('.html')) return null;
+  const relativeCanonical = `/magazine/${safeSlug}`;
+  const absoluteCanonical = `https://healthrenewal.org${relativeCanonical}`;
   const supabase = await createClient();
   const { data, error } = await supabase
     .from('content')
     .select(FIELDS)
     .eq('content_type', 'research')
     .eq('status', 'published')
-    .eq('canonical_url', `/magazine/${safeSlug}`)
-    .maybeSingle();
+    .in('canonical_url', [relativeCanonical, absoluteCanonical])
+    .limit(2);
   if (error) throw error;
-  const record = data as unknown as MagazineRecord | null;
+  const rows = (data ?? []) as unknown as MagazineRecord[];
+  const record = rows.find((item) => item.canonical_url === relativeCanonical) ?? rows[0] ?? null;
   return record && isPublishedNow(record.published_at) ? record : null;
 }
 
@@ -327,7 +331,7 @@ export async function getRelatedMagazine(record: MagazineRecord, limit = 4): Pro
     .select(LISTING_FIELDS)
     .eq('content_type', 'research')
     .eq('status', 'published')
-    .like('canonical_url', '/magazine/%')
+    .or(MAGAZINE_CANONICAL_FILTER)
     .neq('id', record.id)
     .order('published_at', { ascending: false })
     .limit(Math.max(24, boundedLimit * 8));
