@@ -19,8 +19,8 @@ const sitemapIndex=fs.readFileSync(sitemapIndexPath,'utf8');
 const slugs=['professional-ethics','human-dignity-social-justice','self-determination-client-rights','ethical-decision-making','professional-boundaries-conflicts','advocacy-accountability','digital-ethics-confidentiality'];
 for(const slug of slugs){
   if(!pages.includes(`'${slug}'`)) fail(`missing page slug ${slug}`);
-  if(!pages.includes(`social-work/${slug}/`)) fail(`canonical missing for ${slug}`);
 }
+if(!pages.includes('https://healthrenewal.org/evidence-guides/social-work/${slug}/')) fail('dynamic canonical template missing');
 
 const requiredTokens=[
   'c5aa171b-223d-43b7-9778-05a0d8cede8e',
