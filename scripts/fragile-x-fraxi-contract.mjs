@@ -1,0 +1,13 @@
+import fs from 'node:fs';
+const pages=fs.readFileSync('lib/fragile-x-fraxi-pages.ts','utf8');
+const route=fs.readFileSync('app/evidence-guides/fragile-x-person-centred/[[...slug]]/route.ts','utf8');
+const sitemap=fs.readFileSync('app/sitemaps/fragile-x-person-centred.xml/route.ts','utf8');
+const index=fs.readFileSync('app/sitemap.xml/route.ts','utf8');
+const required=['strengths-first','autonomy-consent','relationships-safety','daily-life-adulthood','community-research-priorities'];
+for(const slug of required) if(!pages.includes(`'${slug}'`)) throw new Error(`missing ${slug}`);
+for(const url of ['fraxi.org/information/helping-someone-with-fragile-x-syndrome','fraxi.org/information/autonomy-and-consent','fraxi.org/shape-research-change-lives-survey-report']) if(!pages.includes(url)) throw new Error(`missing source ${url}`);
+for(const phrase of ['لا يعني مراجعة FraXI','الذكاء الاصطناعي','القانون المحلي','مركز Fragile X العلمي الكامل']) if(!pages.includes(phrase)) throw new Error(`missing boundary ${phrase}`);
+if(!route.includes('FRAGILE_X_FRAXI_PAGES')) throw new Error('route is not wired');
+if(!sitemap.includes('FRAGILE_X_FRAXI_SLUGS')) throw new Error('sitemap is not wired');
+if(!index.includes('/sitemaps/fragile-x-person-centred.xml')) throw new Error('sitemap index missing');
+console.log('Fragile X FraXI person-centred contract passed');
