@@ -1,0 +1,32 @@
+name: Scholarly Discovery Contract
+
+on:
+  pull_request:
+    paths:
+      - 'app/open-books/**'
+      - 'app/research-tools/doi-resolver/**'
+      - 'app/api/scholarly/**'
+      - 'lib/open-book-discovery.ts'
+      - 'lib/crossref-discovery.ts'
+      - 'scripts/scholarly-discovery-contract.mjs'
+      - 'app/sitemaps/static.xml/route.ts'
+  push:
+    branches: [main]
+    paths:
+      - 'app/open-books/**'
+      - 'app/research-tools/doi-resolver/**'
+      - 'app/api/scholarly/**'
+      - 'lib/open-book-discovery.ts'
+      - 'lib/crossref-discovery.ts'
+      - 'scripts/scholarly-discovery-contract.mjs'
+      - 'app/sitemaps/static.xml/route.ts'
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: node scripts/scholarly-discovery-contract.mjs
