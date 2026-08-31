@@ -1,0 +1,32 @@
+name: ALS MND Health Literacy Contract
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'app/evidence-guides/als-mnd/**'
+      - 'app/sitemaps/als-mnd.xml/**'
+      - 'scripts/als-mnd-health-literacy-contract.mjs'
+      - '.github/workflows/als-mnd-health-literacy.yml'
+  push:
+    branches: [als-mnd-health-literacy-20260831]
+    paths:
+      - 'app/evidence-guides/als-mnd/**'
+      - 'app/sitemaps/als-mnd.xml/**'
+      - 'scripts/als-mnd-health-literacy-contract.mjs'
+      - '.github/workflows/als-mnd-health-literacy.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Validate ALS/MND health-literacy source integration
+        run: node scripts/als-mnd-health-literacy-contract.mjs
