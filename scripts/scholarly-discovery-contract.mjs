@@ -7,7 +7,9 @@ const required = {
   'app/research-tools/doi-resolver/page.tsx': ['Crossref REST API', 'وجود DOI أو كثرة الاستشهادات لا يساوي جودة منهجية'],
   'app/api/scholarly/books/route.ts': ['searchOpenBooks', 'Cache-Control'],
   'app/api/scholarly/doi/route.ts': ['resolveCrossrefDoi', 'Cache-Control'],
-  'app/sitemaps/static.xml/route.ts': ['/open-books/', '/research-tools/doi-resolver/'],
+  'app/sitemaps/open-books.xml/route.ts': ['/open-books/'],
+  'app/sitemaps/static.xml/route.ts': ['/research-tools/doi-resolver/'],
+  'app/sitemap.xml/route.ts': ['/sitemaps/open-books.xml'],
 };
 
 for (const [path, needles] of Object.entries(required)) {
@@ -19,8 +21,10 @@ for (const [path, needles] of Object.entries(required)) {
 }
 
 const openBooks = fs.readFileSync('app/open-books/page.tsx', 'utf8');
-if (!openBooks.includes("<option value=\"both\">OAPEN + DOAB</option>")) throw new Error('Unified OAPEN + DOAB search must remain the default option.');
-if (!openBooks.includes('لا نستنتج الترخيص أو مراجعة الأقران')) throw new Error('Rights/peer-review non-inference safeguard is missing.');
+if (!openBooks.includes('<option value="both">OAPEN + DOAB</option>')) throw new Error('Unified OAPEN + DOAB search must remain the default option.');
+const hasRightsSafeguard = openBooks.includes('«مفتوح الوصول» لا يعني تلقائيًا السماح بكل أنواع إعادة الاستخدام') || openBooks.includes('لا نستنتج الترخيص أو مراجعة الأقران');
+const hasPeerReviewSafeguard = openBooks.includes('دون استنتاجها من اسم الناشر') || openBooks.includes('لا نستنتج الترخيص أو مراجعة الأقران');
+if (!hasRightsSafeguard || !hasPeerReviewSafeguard) throw new Error('Rights/peer-review non-inference safeguards are missing.');
 
 const crossref = fs.readFileSync('lib/crossref-discovery.ts', 'utf8');
 if (!crossref.includes("url.searchParams.set('mailto', CROSSREF_MAILTO)")) throw new Error('Crossref polite-pool mailto identification is missing.');
