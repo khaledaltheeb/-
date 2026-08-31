@@ -8,6 +8,7 @@ const LEGACY_REPOSITORY = 'khaledaltheeb/healthrenewal.org';
 const EXPECTED_PAGE_COUNT = 56; // hub + 55 guides
 
 const PISRS_URL = 'https://pisrs.si/pregledPredpisa?id=DRUG4023';
+const FSD_EMAIL_URL = 'https://www.fsd.uni-lj.si/mma/Soustvarjanje_podpore_v_skupnosti_-_Angleska_izdaja.pdf/2015081211140160/?m=1439370841';
 const FSD_SLOVENE_URL = 'https://www.fsd.uni-lj.si/mma/-/2016091213042605/';
 const FSD_ENGLISH_URL = 'https://www.fsd.uni-lj.si/mma/monografija_ang_elektronska_verzija/2017092010392030/';
 
@@ -77,7 +78,8 @@ function auditSection(key) {
     </article>
     <article>
       <h3>2) الأسر متعددة التحديات: التشارك في بناء المساعدة داخل المجتمع</h3>
-      <p>منشور أكاديمي من Faculty of Social Work, University of Ljubljana (2016). نستخدمه لفهم علاقة العمل التشاركية، مشروع المساعدة، النتائج المرغوبة، موارد الأسرة والمجتمع، والتنسيق عبر التحديات المتداخلة.</p>
+      <p>منشور أكاديمي من Faculty of Social Work, University of Ljubljana. نستخدمه لفهم علاقة العمل التشاركية، مشروع المساعدة، النتائج المرغوبة، موارد الأسرة والمجتمع، والتنسيق عبر التحديات المتداخلة.</p>
+      <p class="source-provenance-original"><a href="${FSD_EMAIL_URL}" target="_blank" rel="noopener noreferrer"><strong>الرابط الأصلي الذي شاركته الجهة المهنية معنا</strong> — Families with Multiple Challenges: Co-creating Support in the Community</a></p>
       <p><a href="${FSD_SLOVENE_URL}" target="_blank" rel="noopener noreferrer">University of Ljubljana — Družine s številnimi izzivi: soustvarjanje pomoči v skupnosti</a></p>
       <p><a href="${FSD_ENGLISH_URL}" target="_blank" rel="noopener noreferrer">University of Ljubljana — Co-creating Processes of Help: Collaboration with Families in the Community</a></p>
     </article>
@@ -100,7 +102,7 @@ function enhanceHtml(raw, key) {
   const route = routeForKey(key);
   const canonical = `https://healthrenewal.org${route}`;
 
-  if (!/<html\b[^>]*\blang=["']ar["'][^>]*\bdir=["']rtl["']/i.test(html)) {
+  if (!/<html\b[^>]*\blang=["']ar["']/i.test(html) || !/<html\b[^>]*\bdir=["']rtl["']/i.test(html)) {
     html = html.replace(/<html\b[^>]*>/i, '<html lang="ar" dir="rtl">');
   }
 
@@ -120,7 +122,7 @@ function enhanceHtml(raw, key) {
     html = html.replace(/<meta\s+property=["']og:url["'][^>]*>/i, `<meta property="og:url" content="${canonical}">`);
   }
 
-  const css = `.source-audit{background:#fff;border:1px solid #b8d6cc;border-radius:18px;padding:1.2rem;margin:1rem 0}.source-audit h2,.source-audit h3{color:#075d4d}.source-audit-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:.9rem}.source-audit-grid article,.source-audit-note{background:#f7fbf9;border:1px solid #d4e6df;border-radius:14px;padding:1rem}.source-audit-note{margin-top:.9rem}.source-audit a{overflow-wrap:anywhere}`;
+  const css = `.source-audit{background:#fff;border:1px solid #b8d6cc;border-radius:18px;padding:1.2rem;margin:1rem 0}.source-audit h2,.source-audit h3{color:#075d4d}.source-audit-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:.9rem}.source-audit-grid article,.source-audit-note{background:#f7fbf9;border:1px solid #d4e6df;border-radius:14px;padding:1rem}.source-audit-note{margin-top:.9rem}.source-audit a{overflow-wrap:anywhere}.source-provenance-original{border-inline-start:4px solid #0c7a63;padding-inline-start:.75rem}`;
   if (/<\/style>/i.test(html) && !html.includes('.source-audit{')) {
     html = html.replace(/<\/style>/i, `${css}</style>`);
   }
@@ -159,8 +161,10 @@ for (const file of discoverPages()) {
   const enhanced = enhanceHtml(raw, key);
   const text = stripTags(enhanced);
   const wordCount = text.split(/\s+/).filter(Boolean).length;
+
   if (wordCount < 120) fail(`content too thin after recovery (${wordCount} words): ${route}`);
   if (!enhanced.includes('DRUG4023')) fail(`PISRS source missing after recovery: ${route}`);
+  if (!enhanced.includes('2015081211140160')) fail(`original emailed Ljubljana source missing after recovery: ${route}`);
   if (!enhanced.includes('2016091213042605')) fail(`University of Ljubljana source missing after recovery: ${route}`);
   if (!enhanced.includes('RAWAFID_SOCIAL_WORK_SOURCE_AUDIT_V2_START')) fail(`source audit marker missing: ${route}`);
 
@@ -189,9 +193,31 @@ const manifest = {
   expected_page_count: EXPECTED_PAGE_COUNT,
   actual_page_count: manifestPages.length,
   institutional_sources: [
-    { id: 'slovenia-social-care-ethics-drug4023', title: 'Kodeks etičnih načel v socialnem varstvu', publisher: 'Social Chamber of Slovenia', url: PISRS_URL },
-    { id: 'ljubljana-families-multiple-challenges-2016', title: 'Družine s številnimi izzivi: soustvarjanje pomoči v skupnosti', publisher: 'Faculty of Social Work, University of Ljubljana', url: FSD_SLOVENE_URL },
-    { id: 'ljubljana-co-creating-processes-2016-en', title: 'Co-creating Processes of Help: Collaboration with Families in the Community', publisher: 'Faculty of Social Work, University of Ljubljana', url: FSD_ENGLISH_URL },
+    {
+      id: 'slovenia-social-care-ethics-drug4023',
+      title: 'Kodeks etičnih načel v socialnem varstvu',
+      publisher: 'Social Chamber of Slovenia',
+      url: PISRS_URL,
+    },
+    {
+      id: 'ljubljana-families-multiple-challenges-email-source',
+      title: 'Families with Multiple Challenges: Co-creating Support in the Community — exact link shared by the professional association',
+      publisher: 'Faculty of Social Work, University of Ljubljana',
+      url: FSD_EMAIL_URL,
+      provenance: 'Received from Slovenian Association of Social Workers by email on 2026-08-30',
+    },
+    {
+      id: 'ljubljana-families-multiple-challenges-2016',
+      title: 'Družine s številnimi izzivi: soustvarjanje pomoči v skupnosti',
+      publisher: 'Faculty of Social Work, University of Ljubljana',
+      url: FSD_SLOVENE_URL,
+    },
+    {
+      id: 'ljubljana-co-creating-processes-2016-en',
+      title: 'Co-creating Processes of Help: Collaboration with Families in the Community',
+      publisher: 'Faculty of Social Work, University of Ljubljana',
+      url: FSD_ENGLISH_URL,
+    },
   ],
   pages: manifestPages,
 };
@@ -201,4 +227,4 @@ const moduleText = `// AUTO-GENERATED by scripts/recover-social-work-sector.mjs\
 fs.writeFileSync(generatedModule, moduleText);
 
 console.log(`Recovered ${manifestPages.length} Social Work URLs from ${LEGACY_REPOSITORY}@${LEGACY_SHA}.`);
-console.log(`Output: ${path.relative(ROOT, outRoot)} and ${path.relative(ROOT, generatedModule)}`);
+console.log('Every recovered page contains DRUG4023, the exact emailed Ljubljana source, and current University of Ljubljana verification links.');
