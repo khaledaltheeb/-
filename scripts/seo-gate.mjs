@@ -64,15 +64,19 @@ async function getText(url) {
 }
 async function getTextWithRetry(url, attempts = pageAttempts) {
   let lastError;
+  let lastResult;
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
     try {
-      return await getText(url);
+      const result = await getText(url);
+      lastResult = result;
+      if (result.response.status < 500 || attempt === attempts) return result;
     } catch (error) {
       lastError = error;
       if (attempt === attempts) break;
-      await sleep(pageRetryDelayMs * attempt);
     }
+    await sleep(pageRetryDelayMs * attempt);
   }
+  if (lastResult) return lastResult;
   throw lastError;
 }
 function sitemapLocs(xml) {
@@ -104,7 +108,7 @@ async function discoverIndexableUrls() {
 function collectInternalLinks(html, pageUrl) {
   const links = new Set();
   for (const match of html.matchAll(/<a\b[^>]*\bhref\s*=\s*(["'])(.*?)\1/gi)) {
-    const href = match[2].trim();
+    const href = decodeXml(match[2].trim());
     if (!href || href.startsWith('#') || /^(mailto:|tel:|javascript:)/i.test(href)) continue;
     try {
       const url = new URL(href, pageUrl);
@@ -170,6 +174,10 @@ async function auditInternalLink(url) {
       try {
         let response = await fetchWithTimeout(url, { method: 'HEAD', redirect: 'follow' });
         if (response.status === 405 || response.status === 501) response = await fetchWithTimeout(url, { method: 'GET', redirect: 'follow' });
+        if (response.status >= 500 && attempt < internalLinkAttempts) {
+          await sleep(internalLinkRetryDelayMs * attempt);
+          continue;
+        }
         return response.status;
       } catch {
         if (attempt === internalLinkAttempts) return 0;
