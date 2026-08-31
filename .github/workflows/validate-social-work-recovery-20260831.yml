@@ -1,0 +1,98 @@
+name: Validate Social Work Recovery 2026-08-31
+
+on:
+  push:
+    branches:
+      - feat/social-work-recovery-20260831
+    paths:
+      - 'app/evidence-guides/social-work/**'
+      - 'data/social-work-recovery/**'
+      - 'lib/social-work-pages.generated.ts'
+      - 'scripts/social-work-recovery-contract.mjs'
+      - '.github/workflows/validate-social-work-recovery-20260831.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-social-work-recovery-20260831
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
+      NEXT_PUBLIC_SITE_URL: https://healthrenewal.org
+      NEXT_PUBLIC_ALLOW_INDEXING: 'true'
+      NEXT_PUBLIC_ENABLE_ANALYTICS: 'false'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Social Work provenance and content contract
+        run: node scripts/social-work-recovery-contract.mjs
+      - name: Type check
+        run: npm run typecheck
+      - name: Build production candidate
+        run: npm run build
+      - name: Start production candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          nohup npm run start -- --hostname 127.0.0.1 --port 3000 > /tmp/social-work-next.log 2>&1 &
+          echo "$!" > /tmp/social-work-next.pid
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:3000/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/social-work-next.log >&2 || true
+          exit 1
+      - name: Smoke test all 56 historical URLs
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const manifest = JSON.parse(fs.readFileSync('data/social-work-recovery/manifest.json','utf8'));
+          fs.writeFileSync('/tmp/social-work-routes.txt', manifest.pages.map(p => p.route).join('\n') + '\n');
+          NODE
+          tested=0
+          while IFS= read -r route; do
+            [ -n "$route" ] || continue
+            body="$(curl -fsS --max-time 20 "http://127.0.0.1:3000${route}")"
+            printf '%s' "$body" | grep -Fq 'id=DRUG4023'
+            printf '%s' "$body" | grep -Fq '2016091213042605'
+            printf '%s' "$body" | grep -Fq 'حدود الاستدلال'
+            printf '%s' "$body" | grep -Fq "https://healthrenewal.org${route}"
+            tested=$((tested+1))
+          done < /tmp/social-work-routes.txt
+          test "$tested" -eq 56
+          echo "Smoke-tested ${tested}/56 Social Work URLs."
+      - name: Verify institutional source endpoints
+        shell: bash
+        run: |
+          set -euo pipefail
+          check_source() {
+            url="$1"
+            code="$(curl -L -sS -o /dev/null -w '%{http_code}' --max-time 30 --retry 3 --retry-delay 2 "$url" || true)"
+            case "$code" in
+              200|201|202|203|204|206|301|302|303|307|308|401|403) ;;
+              *) echo "Source check failed: HTTP ${code} ${url}" >&2; exit 1 ;;
+            esac
+          }
+          check_source 'https://pisrs.si/pregledPredpisa?id=DRUG4023'
+          check_source 'https://www.fsd.uni-lj.si/mma/-/2016091213042605/'
+          check_source 'https://www.fsd.uni-lj.si/mma/monografija_ang_elektronska_verzija/2017092010392030/'
+      - name: Stop candidate server
+        if: always()
+        shell: bash
+        run: |
+          if [ -f /tmp/social-work-next.pid ]; then kill "$(cat /tmp/social-work-next.pid)" 2>/dev/null || true; fi
