@@ -65,10 +65,20 @@ data class MedicationLog(val medicationId: Long, val day: String, val status: St
 
 object MedicationStore {
     private const val PREFS = "rawafid_medication_companion_v1"
-    private fun prefs(context: Context) = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+    private const val MEDICATIONS = "medications"
+    private const val LOGS = "logs"
+    private const val ENCRYPTED_MEDICATIONS = "rawafid_medication_items_v2"
+    private const val ENCRYPTED_LOGS = "rawafid_medication_logs_v2"
 
     fun medications(context: Context): List<MedicationItem> {
-        val raw = prefs(context).getString("medications", "[]") ?: "[]"
+        val raw = SensitiveLocalPayload.read(
+            context,
+            ENCRYPTED_MEDICATIONS,
+            PREFS,
+            MEDICATIONS,
+            "[]",
+            validator = { runCatching { JSONArray(it) }.isSuccess }
+        )
         return runCatching {
             val a = JSONArray(raw)
             buildList {
@@ -85,11 +95,18 @@ object MedicationStore {
         values.take(100).forEach { m ->
             a.put(JSONObject().put("id", m.id).put("name", m.name).put("instruction", m.instruction).put("hour", m.hour).put("minute", m.minute).put("reminder", m.reminderEnabled).put("remaining", m.remaining ?: JSONObject.NULL))
         }
-        prefs(context).edit().putString("medications", a.toString()).apply()
+        SensitiveLocalPayload.write(context, ENCRYPTED_MEDICATIONS, a.toString(), PREFS, MEDICATIONS)
     }
 
     fun logs(context: Context): List<MedicationLog> {
-        val raw = prefs(context).getString("logs", "[]") ?: "[]"
+        val raw = SensitiveLocalPayload.read(
+            context,
+            ENCRYPTED_LOGS,
+            PREFS,
+            LOGS,
+            "[]",
+            validator = { runCatching { JSONArray(it) }.isSuccess }
+        )
         return runCatching {
             val a = JSONArray(raw)
             buildList {
@@ -106,7 +123,7 @@ object MedicationStore {
         val next = listOf(MedicationLog(medicationId, today, status, note)) + logs(context).filterNot { it.medicationId == medicationId && it.day == today }
         val a = JSONArray()
         next.take(1000).forEach { l -> a.put(JSONObject().put("medication_id", l.medicationId).put("day", l.day).put("status", l.status).put("note", l.note)) }
-        prefs(context).edit().putString("logs", a.toString()).apply()
+        SensitiveLocalPayload.write(context, ENCRYPTED_LOGS, a.toString(), PREFS, LOGS)
     }
 
     fun todayStatus(context: Context, medicationId: Long): String? = logs(context).firstOrNull { it.medicationId == medicationId && it.day == LocalDate.now().toString() }?.status
@@ -157,6 +174,11 @@ class MedicationReminderReceiver : BroadcastReceiver() {
         val open = PendingIntent.getActivity(context, 9700 + id.toInt().and(0x0fff), Intent(context, MedicationCompanionActivity::class.java), PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
         val body = if (medication.instruction.isBlank()) "تذكير بالعلاج الذي سجلته في روافد." else medication.instruction
+        val publicVersion = androidx.core.app.NotificationCompat.Builder(context, NotificationChannels.TREATMENT)
+            .setSmallIcon(R.drawable.ic_launcher)
+            .setContentTitle("روافد · تذكير صحي")
+            .setContentText("لديك تذكير محفوظ. افتح روافد لعرض التفاصيل.")
+            .build()
         manager.notify(
             9800 + id.toInt().and(0x0fff),
             androidx.core.app.NotificationCompat.Builder(context, NotificationChannels.TREATMENT)
@@ -165,6 +187,8 @@ class MedicationReminderReceiver : BroadcastReceiver() {
                 .setContentText(body)
                 .setStyle(androidx.core.app.NotificationCompat.BigTextStyle().bigText(body))
                 .setContentIntent(open)
+                .setVisibility(androidx.core.app.NotificationCompat.VISIBILITY_PRIVATE)
+                .setPublicVersion(publicVersion)
                 .setAutoCancel(true)
                 .build()
         )
@@ -199,7 +223,7 @@ private fun MedicationCompanionScreen() {
         item {
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text("رفيق العلاج", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-                Text("يسجل ويذكّر بما أدخلته أنت أو وصفه مختصك. لا يغيّر جرعة ولا يقترح علاجًا.")
+                Text("يسجل ويذكّر بما أدخلته أنت أو وصفه مختصك. تحفظ السجلات محليًا بشكل مشفر، ولا يغيّر روافد جرعة ولا يقترح علاجًا.")
             }
         }
         item {
