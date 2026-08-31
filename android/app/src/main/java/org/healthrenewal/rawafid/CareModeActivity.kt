@@ -44,10 +44,18 @@ private data class CareProfile(
 
 private object CareModeStore {
     private const val PREFS = "rawafid_care_mode_v1"
-    private fun prefs(context: android.content.Context) = context.getSharedPreferences(PREFS, android.content.Context.MODE_PRIVATE)
+    private const val LEGACY_KEY = "profiles"
+    private const val ENCRYPTED_KEY = "rawafid_care_mode_profiles_v2"
 
     fun load(context: android.content.Context): List<CareProfile> {
-        val raw = prefs(context).getString("profiles", "[]") ?: "[]"
+        val raw = SensitiveLocalPayload.read(
+            context = context,
+            encryptedKey = ENCRYPTED_KEY,
+            legacyPrefsName = PREFS,
+            legacyKey = LEGACY_KEY,
+            defaultValue = "[]",
+            validator = { runCatching { JSONArray(it) }.isSuccess }
+        )
         return runCatching {
             val a = JSONArray(raw)
             buildList {
@@ -77,7 +85,7 @@ private object CareModeStore {
                 .put("routine", p.routine)
                 .put("attention", p.attention))
         }
-        prefs(context).edit().putString("profiles", a.toString()).apply()
+        SensitiveLocalPayload.write(context, ENCRYPTED_KEY, a.toString(), PREFS, LEGACY_KEY)
     }
 }
 
@@ -112,7 +120,7 @@ private fun CareModeScreen() {
         item {
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text("Care Mode · أنا أهتم بك", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-                Text("ملف رعاية محلي للطفل أو كبير السن أو شخص يحتاج متابعة. لا يشارك أو يرسل أي بيانات تلقائيًا.")
+                Text("ملف رعاية محلي ومشفر للطفل أو كبير السن أو شخص يحتاج متابعة. لا يشارك أو يرسل أي بيانات تلقائيًا.")
             }
         }
         item {
