@@ -78,13 +78,14 @@ jobs:
             [ -n "$route" ] || continue
             body="$(curl -fsS --max-time 20 "http://127.0.0.1:3000${route}")"
             printf '%s' "$body" | grep -Fq 'id=DRUG4023'
+            printf '%s' "$body" | grep -Fq '2015081211140160'
             printf '%s' "$body" | grep -Fq '2016091213042605'
             printf '%s' "$body" | grep -Fq 'حدود الاستدلال'
             printf '%s' "$body" | grep -Fq "https://healthrenewal.org${route}"
             tested=$((tested+1))
           done < /tmp/social-work-routes.txt
           test "$tested" -eq 56
-          echo "Smoke-tested ${tested}/56 Social Work URLs."
+          echo "Smoke-tested ${tested}/56 Social Work URLs including exact emailed source provenance."
       - name: Verify institutional source endpoints
         shell: bash
         run: |
@@ -100,6 +101,8 @@ jobs:
           check_source 'https://pisrs.si/pregledPredpisa?id=DRUG4023'
           check_source 'https://www.fsd.uni-lj.si/mma/-/2016091213042605/'
           check_source 'https://www.fsd.uni-lj.si/mma/monografija_ang_elektronska_verzija/2017092010392030/'
+          original_code="$(curl -L -sS -o /dev/null -w '%{http_code}' --max-time 30 --retry 2 'https://www.fsd.uni-lj.si/mma/Soustvarjanje_podpore_v_skupnosti_-_Angleska_izdaja.pdf/2015081211140160/?m=1439370841' || true)"
+          echo "Original emailed Ljubljana source availability (provenance-only, non-blocking): HTTP ${original_code}"
       - name: Stop candidate server
         if: always()
         shell: bash
