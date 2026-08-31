@@ -1,16 +1,19 @@
 {
-  "release": "social-work-recovery-2026-08-31-attempt-2",
-  "attempt": 2,
-  "merged_pr": 485,
-  "merge_sha": "ff0321cba3214dc04753ff3aaa203fa3a84d92a6",
-  "verification_workflow_patch_sha": "7efa450ae65ffd8bc763e55fdf0b6b423699738f",
+  "release": "social-work-talentia-ethics-2026-08-31",
+  "attempt": 3,
+  "merged_pr": 486,
+  "merge_sha": "5e8ae3687db960bf27d72209b8b1fc4e098b7287",
+  "verification_workflow_patch_sha": "48fb787070e1574674e9e4106be731a79251e41c",
   "legacy_source_repository": "khaledaltheeb/healthrenewal.org",
   "legacy_source_sha": "6911d5ee75bd6fc2dfa12f394d61efe46e87df17",
   "expected_live_urls": 56,
+  "talentia_additive_pages": 7,
+  "talentia_source": "Work, Values and Ethics – Ethical Guidelines for Social Welfare Professionals",
+  "talentia_reader": "https://talentia.lukusali.fi/index.html#/reader/c5aa171b-223d-43b7-9778-05a0d8cede8e",
   "required_source_fingerprints": [
     "DRUG4023",
     "2015081211140160",
     "2016091213042605"
   ],
-  "purpose": "Retry the dedicated production workflow with redirect-aware diagnostic live verification of all restored Social Work URLs."
+  "purpose": "Deploy the merged Talentia-backed Social Work ethics expansion while preserving and re-verifying all 56 recovered Social Work URLs."
 }
