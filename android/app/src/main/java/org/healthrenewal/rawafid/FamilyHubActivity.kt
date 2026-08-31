@@ -54,10 +54,16 @@ data class CareTask(
 
 object FamilyHubStore {
     private const val PREFS = "rawafid_family_hub_v1"
-    private fun prefs(context: Context) = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+    private const val MEMBERS = "members"
+    private const val TASKS = "tasks"
+    private const val ENCRYPTED_MEMBERS = "rawafid_family_hub_members_v2"
+    private const val ENCRYPTED_TASKS = "rawafid_family_hub_tasks_v2"
 
     fun members(context: Context): List<FamilyMember> {
-        val raw = prefs(context).getString("members", "[]") ?: "[]"
+        val raw = SensitiveLocalPayload.read(
+            context, ENCRYPTED_MEMBERS, PREFS, MEMBERS, "[]",
+            validator = { runCatching { JSONArray(it) }.isSuccess }
+        )
         return runCatching {
             val a = JSONArray(raw)
             buildList {
@@ -72,11 +78,14 @@ object FamilyHubStore {
     fun saveMembers(context: Context, values: List<FamilyMember>) {
         val a = JSONArray()
         values.take(20).forEach { m -> a.put(JSONObject().put("id", m.id).put("name", m.name).put("role", m.role).put("note", m.note)) }
-        prefs(context).edit().putString("members", a.toString()).apply()
+        SensitiveLocalPayload.write(context, ENCRYPTED_MEMBERS, a.toString(), PREFS, MEMBERS)
     }
 
     fun tasks(context: Context): List<CareTask> {
-        val raw = prefs(context).getString("tasks", "[]") ?: "[]"
+        val raw = SensitiveLocalPayload.read(
+            context, ENCRYPTED_TASKS, PREFS, TASKS, "[]",
+            validator = { runCatching { JSONArray(it) }.isSuccess }
+        )
         return runCatching {
             val a = JSONArray(raw)
             buildList {
@@ -93,7 +102,7 @@ object FamilyHubStore {
         values.take(200).forEach { t ->
             a.put(JSONObject().put("id", t.id).put("member_id", t.memberId).put("title", t.title).put("note", t.note).put("done", t.done))
         }
-        prefs(context).edit().putString("tasks", a.toString()).apply()
+        SensitiveLocalPayload.write(context, ENCRYPTED_TASKS, a.toString(), PREFS, TASKS)
     }
 }
 
@@ -128,7 +137,7 @@ private fun FamilyHubScreen() {
         item {
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text("مركز الأسرة", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-                Text("ملفات رعاية محلية على هذا الهاتف. لا تتم مشاركة بيانات أي فرد تلقائيًا.")
+                Text("ملفات رعاية محلية ومشفرة على هذا الهاتف. لا تتم مشاركة بيانات أي فرد تلقائيًا.")
             }
         }
         item {
@@ -153,9 +162,7 @@ private fun FamilyHubScreen() {
             }
         }
         if (members.isNotEmpty()) {
-            item {
-                Text("من أرعاهم", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-            }
+            item { Text("من أرعاهم", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold) }
             items(members, key = { it.id }) { member ->
                 Card(onClick = { selectedMember = member.id }) {
                     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
