@@ -54,10 +54,18 @@ data class AppointmentNotes(
 
 object AppointmentCompanionStore {
     private const val PREFS = "rawafid_appointment_companion_v1"
-    private fun prefs(context: Context) = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+    private const val LEGACY_KEY = "notes"
+    private const val ENCRYPTED_KEY = "rawafid_appointment_companion_notes_v2"
 
     fun all(context: Context): List<AppointmentNotes> {
-        val raw = prefs(context).getString("notes", "[]") ?: "[]"
+        val raw = SensitiveLocalPayload.read(
+            context = context,
+            encryptedKey = ENCRYPTED_KEY,
+            legacyPrefsName = PREFS,
+            legacyKey = LEGACY_KEY,
+            defaultValue = "[]",
+            validator = { runCatching { JSONArray(it) }.isSuccess }
+        )
         return runCatching {
             val a = JSONArray(raw)
             buildList {
@@ -72,20 +80,19 @@ object AppointmentCompanionStore {
     fun get(context: Context, id: Int) = all(context).firstOrNull { it.appointmentId == id } ?: AppointmentNotes(id)
 
     fun save(context: Context, notes: AppointmentNotes) {
-        val values = listOf(notes) + all(context).filterNot { it.appointmentId == notes.appointmentId }
+        write(context, listOf(notes) + all(context).filterNot { it.appointmentId == notes.appointmentId })
+    }
+
+    fun remove(context: Context, id: Int) {
+        write(context, all(context).filterNot { it.appointmentId == id })
+    }
+
+    private fun write(context: Context, values: List<AppointmentNotes>) {
         val a = JSONArray()
         values.take(200).forEach { n ->
             a.put(JSONObject().put("id", n.appointmentId).put("questions", n.questions).put("symptoms", n.symptoms).put("medicines", n.medicines).put("files", n.filesToTake).put("plan", n.clinicianPlan).put("follow_up", n.followUp))
         }
-        prefs(context).edit().putString("notes", a.toString()).apply()
-    }
-
-    fun remove(context: Context, id: Int) {
-        val a = JSONArray()
-        all(context).filterNot { it.appointmentId == id }.forEach { n ->
-            a.put(JSONObject().put("id", n.appointmentId).put("questions", n.questions).put("symptoms", n.symptoms).put("medicines", n.medicines).put("files", n.filesToTake).put("plan", n.clinicianPlan).put("follow_up", n.followUp))
-        }
-        prefs(context).edit().putString("notes", a.toString()).apply()
+        SensitiveLocalPayload.write(context, ENCRYPTED_KEY, a.toString(), PREFS, LEGACY_KEY)
     }
 }
 
@@ -135,7 +142,7 @@ private fun AppointmentCompanionScreen() {
         item {
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text("رفيق الموعد", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-                Text("قبل الموعد: أسئلتك وأعراضك وأدويتك وملفاتك. بعده: ما قاله المختص والخطوة التالية. لا يفسر الخطة الطبية نيابة عن المختص.")
+                Text("قبل الموعد: أسئلتك وأعراضك وأدويتك وملفاتك. بعده: ما قاله المختص والخطوة التالية. تحفظ هذه البيانات محليًا بشكل مشفر، ولا يفسر روافد الخطة الطبية نيابة عن المختص.")
             }
         }
         item {
@@ -205,7 +212,7 @@ private fun AppointmentPrepCard(
             Text("بعد الموعد", fontWeight = FontWeight.Bold)
             OutlinedTextField(plan, { plan = it.take(1600) }, label = { Text("ما قاله المختص / الخطة كما فهمتها") }, minLines = 3, modifier = Modifier.fillMaxWidth())
             OutlinedTextField(followUp, { followUp = it.take(800) }, label = { Text("المتابعة أو الخطوة القادمة") }, minLines = 2, modifier = Modifier.fillMaxWidth())
-            Button(onClick = { onSaved(AppointmentNotes(appointment.id, questions, symptoms, medicines, files, plan, followUp)) }) { Text("حفظ محلي") }
+            Button(onClick = { onSaved(AppointmentNotes(appointment.id, questions, symptoms, medicines, files, plan, followUp)) }) { Text("حفظ محلي مشفر") }
             TextButton(onClick = onDelete) { Text("حذف الموعد وبيانات التحضير") }
         }
     }
