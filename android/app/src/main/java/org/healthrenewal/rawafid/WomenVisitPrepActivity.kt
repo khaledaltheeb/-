@@ -51,9 +51,19 @@ private data class VisitCalendarRow(
 )
 
 private object WomenVisitPrepData {
+    private const val LEGACY_CALENDAR_PREFS = "rawafid_women_calendar_native_v1"
+    private const val LEGACY_ENTRIES = "entries"
+    private const val ENCRYPTED_ENTRIES = "rawafid_women_calendar_entries_v2"
+
     fun recentCalendar(context: Context): List<VisitCalendarRow> {
-        val prefs = context.getSharedPreferences("rawafid_women_calendar_native_v1", Context.MODE_PRIVATE)
-        val raw = prefs.getString("entries", "[]") ?: "[]"
+        val raw = SensitiveLocalPayload.read(
+            context = context,
+            encryptedKey = ENCRYPTED_ENTRIES,
+            legacyPrefsName = LEGACY_CALENDAR_PREFS,
+            legacyKey = LEGACY_ENTRIES,
+            defaultValue = "[]",
+            validator = { runCatching { JSONArray(it) }.isSuccess }
+        )
         val today = LocalDate.now()
         return runCatching {
             val array = JSONArray(raw)
@@ -89,7 +99,7 @@ private object WomenVisitPrepData {
 
         return buildString {
             appendLine("ملخص روافد للتحضير للزيارة")
-            appendLine("تم إنشاؤه من بيانات محفوظة محليًا على الهاتف.")
+            appendLine("تم إنشاؤه من بيانات محفوظة محليًا ومشفرة على الهاتف.")
             appendLine()
             appendLine("المرحلة التي اختارتها المستخدمة: ${profile.stage.label}")
             appendLine("دورات غير منتظمة (حسب اختيار المستخدمة): ${if (profile.irregularCycles) "نعم" else "لا"}")
@@ -143,6 +153,7 @@ private object WomenVisitPrepData {
 class WomenVisitPrepActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (!WomenPrivacyGate.requireUnlocked(this, WomenPrivacyGate.TARGET_VISIT_PREP)) return
         setContent {
             RawafidTheme {
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
