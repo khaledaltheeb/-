@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { buildSeoMetadata } from '@/lib/seo';
 
@@ -21,9 +22,9 @@ const pages: Record<string, PageDef> = {
     description: 'مسار عربي عملي مستند إلى موارد Sightsavers لتحسين الاتصالات الرقمية، اختبار الوصول، وتدقيق إمكانية الوصول للمرافق الصحية.',
     body: <>
       <section style={note}><h2>لماذا هذا المسار؟</h2><p>المورد الذي أحالتنا إليه Sightsavers لا يُستخدم كزينة مرجعية. نحوله هنا إلى ثلاث طبقات تشغيلية: تصميم اتصالات مفهومة وقابلة للوصول، بروتوكول اختبار فعلي، ومنهج تدقيق للمرافق الصحية. يبقى المصدر الأصلي هو المرجع الكامل، ولا يعني هذا المسار مراجعة Sightsavers أو اعتمادها لروافد.</p></section>
-      <section style={box}><h2>اختر المهمة</h2><ul><li><a href="./inclusive-communications/"><strong>اتصالات ومحتوى رقمي شامل</strong></a> — بنية العناوين، النص البديل، الروابط، الألوان، القراءة، الوثائق والوسائط.</li><li><a href="./testing-protocol/"><strong>بروتوكول اختبار الوصول</strong></a> — لوحة مفاتيح، قارئ شاشة، هاتف، تكبير، تباين، PDF/HTML، وفحص بشري.</li><li><a href="./health-facility-audit/"><strong>تدقيق المرافق الصحية</strong></a> — التخطيط، الفريق، الموافقة، الجولة، التقرير، الأولويات والتكلفة وإعادة الفحص.</li></ul></section>
+      <section style={box}><h2>اختر المهمة</h2><ul><li><Link href="/accessibility/sightsavers/inclusive-communications/"><strong>اتصالات ومحتوى رقمي شامل</strong></Link> — بنية العناوين، النص البديل، الروابط، الألوان، القراءة، الوثائق والوسائط.</li><li><Link href="/accessibility/sightsavers/testing-protocol/"><strong>بروتوكول اختبار الوصول</strong></Link> — لوحة مفاتيح، قارئ شاشة، هاتف، تكبير، تباين، PDF/HTML، وفحص بشري.</li><li><Link href="/accessibility/sightsavers/health-facility-audit/"><strong>تدقيق المرافق الصحية</strong></Link> — التخطيط، الفريق، الموافقة، الجولة، التقرير، الأولويات والتكلفة وإعادة الفحص.</li></ul></section>
       <section style={box}><h2>قاعدة «لا شيء عنا بدوننا»</h2><p>التدقيق التقني وحده لا يكفي. Sightsavers تصف تطوير الاختبار بالتعاون مع موظفين ذوي إعاقات وخبرات معيشة مختلفة. لذلك نعامل مشاركة الأشخاص ذوي الإعاقة كجزء من عملية التصميم والاختبار، لا كمرحلة علاقات عامة بعد الانتهاء.</p></section>
-      <section style={box}><h2>الأدوات الهندسية المساندة</h2><p>هذه القوائم العملية تكمل ولا تستبدل الاختبارات البرمجية. لدى روافد أداة عربية/RTL مفتوحة المصدر تتضمن فحوص axe-core واختبارات متصفح واتجاهات مختلطة؛ يمكن استخدامها إلى جانب المراجعة اليدوية ومشاركة الأشخاص ذوي الإعاقة.</p><p><a href="/open-source/arabic-rtl-a11y-toolkit/">فتح أداة روافد للعربية وRTL والوصولية ←</a></p></section>
+      <section style={box}><h2>الأدوات الهندسية المساندة</h2><p>هذه القوائم العملية تكمل ولا تستبدل الاختبارات البرمجية. لدى روافد أداة عربية/RTL مفتوحة المصدر تتضمن فحوص axe-core واختبارات متصفح واتجاهات مختلطة؛ يمكن استخدامها إلى جانب المراجعة اليدوية ومشاركة الأشخاص ذوي الإعاقة.</p><p><Link href="/open-source/arabic-rtl-a11y-toolkit/">فتح أداة روافد للعربية وRTL والوصولية ←</Link></p></section>
     </>,
   },
   'inclusive-communications': {
@@ -91,7 +92,7 @@ export default async function SightsaversAccessibilityPage({ params }: { params:
   const page = pages[key];
   if (!page) notFound();
   return <main dir="rtl" style={{maxWidth:1050,margin:'0 auto',padding:'2rem 1rem',lineHeight:1.95,color:'#14251f'}}>
-    <nav aria-label="مسار الصفحة"><a href="/accessibility-statement/">بيان الوصول</a> · <a href="/accessibility/sightsavers/">موارد عملية مستندة إلى Sightsavers</a></nav>
+    <nav aria-label="مسار الصفحة"><Link href="/accessibility-statement/">بيان الوصول</Link> · <Link href="/accessibility/sightsavers/">موارد عملية مستندة إلى Sightsavers</Link></nav>
     <header style={{margin:'1rem 0 1.5rem'}}><p style={{color:'#0b6655',fontWeight:700}}>Sightsavers — تطبيق مستقل مع الإسناد للمصدر</p><h1>{page.title}</h1><p>{page.description}</p></header>
     {page.body}
     <section style={box}><h2>المصادر الأصلية</h2><ul><li><a href={SOURCE_COMMUNICATIONS} target="_blank" rel="noopener noreferrer">Sightsavers — Accessibility</a></li><li><a href={SOURCE_TESTING} target="_blank" rel="noopener noreferrer">Sightsavers — How in-house accessibility testing has evolved</a></li><li><a href={SOURCE_FACILITIES} target="_blank" rel="noopener noreferrer">Sightsavers — Accessibility standards and audit pack</a></li><li><a href={SOURCE_HEALTH_RESOURCES} target="_blank" rel="noopener noreferrer">Sightsavers — Inclusive health resources</a></li><li><a href={SOURCE_STATEMENT} target="_blank" rel="noopener noreferrer">Sightsavers — Website accessibility statement</a></li></ul><p>هذا المحتوى إعداد عربي مستقل من Health Renewal مستفيد من الموارد العامة التي أحالتنا إليها Sightsavers. لا نستخدم اسم أو شعار Sightsavers كاعتماد، ولا نزعم أن هذه الصفحات ترجمة رسمية أو أنها خضعت لمراجعتهم.</p></section>
