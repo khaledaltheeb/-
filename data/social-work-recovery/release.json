@@ -1,19 +1,21 @@
 {
-  "release": "social-work-talentia-ethics-2026-08-31",
-  "attempt": 3,
-  "merged_pr": 486,
-  "merge_sha": "5e8ae3687db960bf27d72209b8b1fc4e098b7287",
-  "verification_workflow_patch_sha": "48fb787070e1574674e9e4106be731a79251e41c",
+  "release": "social-work-talentia-inline-links-2026-08-31",
+  "attempt": 4,
+  "merged_pr": 487,
+  "merge_sha": "8a049948c0c970efc5362005dc1d3878481799bd",
+  "verification_workflow_patch_sha": "d149a6af1b1741fb6ed8636dd16c7444ad580bb2",
   "legacy_source_repository": "khaledaltheeb/healthrenewal.org",
   "legacy_source_sha": "6911d5ee75bd6fc2dfa12f394d61efe46e87df17",
   "expected_live_urls": 56,
   "talentia_additive_pages": 7,
+  "talentia_inline_link_pages": 3,
   "talentia_source": "Work, Values and Ethics – Ethical Guidelines for Social Welfare Professionals",
   "talentia_reader": "https://talentia.lukusali.fi/index.html#/reader/c5aa171b-223d-43b7-9778-05a0d8cede8e",
+  "talentia_english_page": "https://www.talentia.fi/en/news/talentias-ethical-guidelines-are-now-available-in-english/",
   "required_source_fingerprints": [
     "DRUG4023",
     "2015081211140160",
     "2016091213042605"
   ],
-  "purpose": "Deploy the merged Talentia-backed Social Work ethics expansion while preserving and re-verifying all 56 recovered Social Work URLs."
+  "purpose": "Deploy contextual use of Talentia's official links inside three ethics guides while preserving and re-verifying all 56 recovered Social Work URLs."
 }
