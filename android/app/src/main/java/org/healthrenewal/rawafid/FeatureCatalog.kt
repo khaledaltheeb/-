@@ -41,6 +41,16 @@ object FeatureCatalog {
         status = "beta",
         priority = 103
     )
+    private val safeDriveCalibrationFeature = RawafidFeature(
+        id = "safe_drive_calibration",
+        title = "جودة قياس القيادة",
+        subtitle = "راجع توافق GPS وGyroscope لكل رحلة بشفافية. هذه المعايرة لا تغيّر درجة القيادة حتى تكتمل الاختبارات الميدانية.",
+        category = "safety",
+        routeType = "activity",
+        routeTarget = "org.healthrenewal.rawafid.SafeDriveCalibrationActivity",
+        status = "beta",
+        priority = 102
+    )
     @Volatile private var cache: List<RawafidFeature>? = null
 
     fun all(context: Context): List<RawafidFeature> = cache ?: synchronized(this) {
@@ -67,7 +77,7 @@ object FeatureCatalog {
                     feature
                 }
             }
-        return (listOf(accountFeature, safeDriveAgreementsFeature) + published)
+        return (listOf(accountFeature, safeDriveAgreementsFeature, safeDriveCalibrationFeature) + published)
             .distinctBy { it.id }
             .sortedByDescending { it.priority }
     }
