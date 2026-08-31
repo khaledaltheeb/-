@@ -5,7 +5,9 @@ const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 const FIREBASE_PROJECT_ID = Deno.env.get("FIREBASE_PROJECT_ID") ?? "";
 const FIREBASE_CLIENT_EMAIL = Deno.env.get("FIREBASE_CLIENT_EMAIL") ?? "";
 const FIREBASE_PRIVATE_KEY = (Deno.env.get("FIREBASE_PRIVATE_KEY") ?? "").replace(/\\n/g, "\n");
-const VERSION = "2026-08-30.5";
+const VERSION = "2026-08-31.1";
+const MAX_REQUEST_BYTES = 4096;
+const OUTBOUND_TIMEOUT_MS = 12_000;
 
 type PushDevice = { device_id: string; token: string };
 type Claim = {
@@ -25,8 +27,19 @@ function json(data: unknown, status = 200): Response {
     headers: {
       "content-type": "application/json; charset=utf-8",
       "cache-control": "no-store",
+      "x-content-type-options": "nosniff",
     },
   });
+}
+
+async function timedFetch(input: string | URL | Request, init: RequestInit = {}): Promise<Response> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), OUTBOUND_TIMEOUT_MS);
+  try {
+    return await fetch(input, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 function base64Url(input: Uint8Array | string): string {
@@ -83,7 +96,7 @@ async function firebaseAccessToken(): Promise<string> {
   ));
   const assertion = `${signingInput}.${base64Url(signature)}`;
 
-  const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
+  const tokenResponse = await timedFetch("https://oauth2.googleapis.com/token", {
     method: "POST",
     headers: { "content-type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
@@ -104,7 +117,7 @@ async function rpc<T>(name: string, args: Record<string, unknown>): Promise<T> {
   if (!SUPABASE_URL || !SERVICE_ROLE) {
     throw new Error("supabase_runtime_secrets_missing");
   }
-  const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${name}`, {
+  const response = await timedFetch(`${SUPABASE_URL}/rest/v1/rpc/${name}`, {
     method: "POST",
     headers: {
       apikey: SERVICE_ROLE,
@@ -126,7 +139,7 @@ async function sendWake(
   notificationId: string,
 ): Promise<{ ok: boolean; invalid: boolean; error?: string }> {
   const accessToken = await firebaseAccessToken();
-  const response = await fetch(
+  const response = await timedFetch(
     `https://fcm.googleapis.com/v1/projects/${encodeURIComponent(FIREBASE_PROJECT_ID)}/messages:send`,
     {
       method: "POST",
@@ -166,27 +179,33 @@ async function sendWake(
 
 Deno.serve(async (req: Request) => {
   if (req.method === "GET") {
-    return json({
-      ok: true,
-      version: VERSION,
-      firebase_configured: Boolean(
-        FIREBASE_PROJECT_ID && FIREBASE_CLIENT_EMAIL && FIREBASE_PRIVATE_KEY
-      ),
-      supabase_runtime_configured: Boolean(SUPABASE_URL && SERVICE_ROLE),
-    });
+    return json({ ok: true, version: VERSION });
   }
 
   if (req.method !== "POST") {
     return json({ error: "method_not_allowed" }, 405);
   }
 
+  const contentType = req.headers.get("content-type")?.toLowerCase() ?? "";
+  if (!contentType.includes("application/json")) {
+    return json({ error: "unsupported_media_type" }, 415);
+  }
+  const declaredLength = Number(req.headers.get("content-length") ?? 0);
+  if (Number.isFinite(declaredLength) && declaredLength > MAX_REQUEST_BYTES) {
+    return json({ error: "payload_too_large" }, 413);
+  }
+
   try {
-    const body = await req.json().catch(() => ({}));
+    const rawBody = await req.text();
+    if (new TextEncoder().encode(rawBody).byteLength > MAX_REQUEST_BYTES) {
+      return json({ error: "payload_too_large" }, 413);
+    }
+    const body = rawBody ? JSON.parse(rawBody) : {};
     const notificationId = typeof body?.notification_id === "string"
       ? body.notification_id
       : "";
     const nonce = typeof body?.nonce === "string" ? body.nonce : "";
-    if (!notificationId || !nonce) {
+    if (!notificationId || notificationId.length > 128 || !nonce || nonce.length > 256) {
       return json({ error: "invalid_payload" }, 400);
     }
 
@@ -237,8 +256,6 @@ Deno.serve(async (req: Request) => {
     });
   } catch (error) {
     console.error("rawafid-circle-push", error);
-    return json({
-      error: error instanceof Error ? error.message : "push_failed",
-    }, 500);
+    return json({ error: "push_failed" }, 500);
   }
 });
