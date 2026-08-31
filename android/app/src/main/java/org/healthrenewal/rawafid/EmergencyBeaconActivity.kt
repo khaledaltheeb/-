@@ -53,6 +53,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.core.app.NotificationCompat
+import org.json.JSONObject
 import java.text.DateFormat
 import java.util.Date
 
@@ -78,23 +79,25 @@ data class EmergencyBeaconProfile(
 
 object EmergencyBeaconStore {
     private const val PREFS = "rawafid_emergency_beacon_v1"
-    private fun prefs(context: Context) = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+    private const val ENCRYPTED_PROFILE = "rawafid_emergency_beacon_profile_v2"
+    private val legacyKeys = arrayOf(
+        "condition",
+        "assistance",
+        "own_phone",
+        "emergency_name",
+        "emergency_phone",
+        "allow_location_safety",
+        "hardware_shortcut",
+        "hardware_duration_hours",
+        "active",
+        "expires_at",
+        "updated_at"
+    )
 
     fun load(context: Context): EmergencyBeaconProfile {
-        val p = prefs(context)
-        return EmergencyBeaconProfile(
-            condition = p.getString("condition", "") ?: "",
-            assistance = p.getString("assistance", "") ?: "",
-            ownPhone = p.getString("own_phone", "") ?: "",
-            emergencyContactName = p.getString("emergency_name", "") ?: "",
-            emergencyContactPhone = p.getString("emergency_phone", "") ?: "",
-            allowLocationSafety = p.getBoolean("allow_location_safety", false),
-            hardwareShortcutEnabled = p.getBoolean("hardware_shortcut", false),
-            hardwareDurationHours = p.getInt("hardware_duration_hours", 4).coerceIn(1, 24),
-            active = p.getBoolean("active", false),
-            expiresAt = p.getLong("expires_at", 0L),
-            updatedAt = p.getLong("updated_at", 0L)
-        )
+        val raw = EncryptedLocalStore.get(context, ENCRYPTED_PROFILE) ?: migrateLegacy(context)
+        if (raw.isNullOrBlank()) return EmergencyBeaconProfile()
+        return runCatching { decode(JSONObject(raw)) }.getOrDefault(EmergencyBeaconProfile())
     }
 
     fun save(context: Context, value: EmergencyBeaconProfile) {
@@ -107,19 +110,8 @@ object EmergencyBeaconStore {
             hardwareDurationHours = value.hardwareDurationHours.coerceIn(1, 24),
             updatedAt = System.currentTimeMillis()
         )
-        prefs(context).edit()
-            .putString("condition", normalized.condition)
-            .putString("assistance", normalized.assistance)
-            .putString("own_phone", normalized.ownPhone)
-            .putString("emergency_name", normalized.emergencyContactName)
-            .putString("emergency_phone", normalized.emergencyContactPhone)
-            .putBoolean("allow_location_safety", normalized.allowLocationSafety)
-            .putBoolean("hardware_shortcut", normalized.hardwareShortcutEnabled)
-            .putInt("hardware_duration_hours", normalized.hardwareDurationHours)
-            .putBoolean("active", normalized.active)
-            .putLong("expires_at", normalized.expiresAt)
-            .putLong("updated_at", normalized.updatedAt)
-            .apply()
+        EncryptedLocalStore.put(context, ENCRYPTED_PROFILE, encode(normalized).toString())
+        clearLegacy(context)
         syncEmergencyContact(context, normalized)
     }
 
@@ -127,6 +119,61 @@ object EmergencyBeaconStore {
         val current = load(context)
         save(context, current.copy(active = active, expiresAt = if (active) expiresAt else 0L))
     }
+
+    private fun migrateLegacy(context: Context): String? {
+        val p = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        if (legacyKeys.none { p.contains(it) }) return null
+        val legacy = EmergencyBeaconProfile(
+            condition = p.getString("condition", "") ?: "",
+            assistance = p.getString("assistance", "") ?: "",
+            ownPhone = p.getString("own_phone", "") ?: "",
+            emergencyContactName = p.getString("emergency_name", "") ?: "",
+            emergencyContactPhone = p.getString("emergency_phone", "") ?: "",
+            allowLocationSafety = p.getBoolean("allow_location_safety", false),
+            hardwareShortcutEnabled = p.getBoolean("hardware_shortcut", false),
+            hardwareDurationHours = p.getInt("hardware_duration_hours", 4).coerceIn(1, 24),
+            active = p.getBoolean("active", false),
+            expiresAt = p.getLong("expires_at", 0L),
+            updatedAt = p.getLong("updated_at", 0L)
+        )
+        val raw = encode(legacy).toString()
+        EncryptedLocalStore.put(context, ENCRYPTED_PROFILE, raw)
+        clearLegacy(context)
+        return raw
+    }
+
+    private fun clearLegacy(context: Context) {
+        val edit = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
+        legacyKeys.forEach(edit::remove)
+        edit.apply()
+    }
+
+    private fun encode(value: EmergencyBeaconProfile) = JSONObject()
+        .put("condition", value.condition)
+        .put("assistance", value.assistance)
+        .put("own_phone", value.ownPhone)
+        .put("emergency_name", value.emergencyContactName)
+        .put("emergency_phone", value.emergencyContactPhone)
+        .put("allow_location_safety", value.allowLocationSafety)
+        .put("hardware_shortcut", value.hardwareShortcutEnabled)
+        .put("hardware_duration_hours", value.hardwareDurationHours)
+        .put("active", value.active)
+        .put("expires_at", value.expiresAt)
+        .put("updated_at", value.updatedAt)
+
+    private fun decode(value: JSONObject) = EmergencyBeaconProfile(
+        condition = value.optString("condition"),
+        assistance = value.optString("assistance"),
+        ownPhone = value.optString("own_phone"),
+        emergencyContactName = value.optString("emergency_name"),
+        emergencyContactPhone = value.optString("emergency_phone"),
+        allowLocationSafety = value.optBoolean("allow_location_safety", false),
+        hardwareShortcutEnabled = value.optBoolean("hardware_shortcut", false),
+        hardwareDurationHours = value.optInt("hardware_duration_hours", 4).coerceIn(1, 24),
+        active = value.optBoolean("active", false),
+        expiresAt = value.optLong("expires_at", 0L),
+        updatedAt = value.optLong("updated_at", 0L)
+    )
 
     private fun syncEmergencyContact(context: Context, profile: EmergencyBeaconProfile) {
         if (profile.emergencyContactPhone.isBlank()) return
