@@ -1,6 +1,7 @@
 package org.healthrenewal.rawafid
 
 import android.Manifest
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -83,6 +84,7 @@ private data class WomenEntry(
 private object WomenCompanionStore {
     private const val PREFS = "rawafid_women_companion_v1"
     private const val ENTRIES = "entries"
+    private const val ENCRYPTED_ENTRIES = "rawafid_women_companion_entries_v2"
     private fun prefs(context: Context) = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 
     fun reminderEnabled(context: Context) = prefs(context).getBoolean("reminder_enabled", false)
@@ -109,7 +111,14 @@ private object WomenCompanionStore {
     }
 
     fun entries(context: Context): List<WomenEntry> {
-        val raw = prefs(context).getString(ENTRIES, "[]") ?: "[]"
+        val raw = SensitiveLocalPayload.read(
+            context = context,
+            encryptedKey = ENCRYPTED_ENTRIES,
+            legacyPrefsName = PREFS,
+            legacyKey = ENTRIES,
+            defaultValue = "[]",
+            validator = { runCatching { JSONArray(it) }.isSuccess }
+        )
         return runCatching {
             val array = JSONArray(raw)
             buildList {
@@ -140,7 +149,7 @@ private object WomenCompanionStore {
                 put("bleeding", value.bleeding); put("feeling", value.feeling); put("need", value.need); put("note", value.note)
             })
         }
-        prefs(context).edit().putString(ENTRIES, array.toString()).apply()
+        SensitiveLocalPayload.write(context, ENCRYPTED_ENTRIES, array.toString(), PREFS, ENTRIES)
     }
 }
 
@@ -167,6 +176,7 @@ private object WomenCompanionScheduler {
         manager.createNotificationChannel(
             NotificationChannel(CHANNEL, "رفيقة روافد", NotificationManager.IMPORTANCE_DEFAULT).apply {
                 description = "رسائل دعم وعناية يومية اختيارية للمرأة"
+                lockscreenVisibility = Notification.VISIBILITY_PRIVATE
             }
         )
     }
@@ -187,15 +197,22 @@ class WomenCompanionWorker(context: Context, params: WorkerParameters) : Corouti
         val openIntent = PendingIntent.getActivity(
             applicationContext,
             9401,
-            Intent(applicationContext, WomenActivity::class.java),
+            WomenPrivacyGate.intent(applicationContext, WomenPrivacyGate.TARGET_COMPANION),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
+        val publicVersion = NotificationCompat.Builder(applicationContext, WomenCompanionScheduler.channelId())
+            .setSmallIcon(R.drawable.ic_launcher)
+            .setContentTitle("رفيقة روافد")
+            .setContentText("لديك تذكير عناية جديد. افتحي روافد لعرضه.")
+            .build()
         val notification = NotificationCompat.Builder(applicationContext, WomenCompanionScheduler.channelId())
             .setSmallIcon(R.drawable.ic_launcher)
             .setContentTitle(titleFor(tags))
             .setContentText(message.text)
             .setStyle(NotificationCompat.BigTextStyle().bigText(message.text))
             .setContentIntent(openIntent)
+            .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
+            .setPublicVersion(publicVersion)
             .setAutoCancel(true)
             .build()
         (applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).notify(9400, notification)
@@ -253,6 +270,7 @@ class WomenActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (!WomenPrivacyGate.requireUnlocked(this, WomenPrivacyGate.TARGET_COMPANION)) return
         WomenCompanionScheduler.ensureChannel(this)
         WomenCompanionScheduler.sync(this)
         setContent {
@@ -380,7 +398,7 @@ private fun WomenCompanionScreen(requestNotifications: ((Boolean) -> Unit) -> Un
                     OutlinedTextField(note, { note = it.take(600) }, modifier = Modifier.fillMaxWidth(), minLines = 3, label = { Text("ملاحظة خاصة") })
                     Button(onClick = {
                         WomenCompanionStore.saveToday(context, WomenEntry(today, mood, energy, pain, bleeding, feeling, need, note.trim()))
-                        savedMessage = "تم حفظ متابعة اليوم محليًا."; version++
+                        savedMessage = "تم حفظ متابعة اليوم محليًا بشكل مشفر."; version++
                     }) { Text("حفظ متابعة اليوم") }
                     if (savedMessage.isNotBlank()) Text(savedMessage, color = MaterialTheme.colorScheme.primary)
                     if (pain >= 8 || bleeding == "heavy") Text("إذا كان الألم شديدًا جدًا أو النزف مختلفًا بوضوح عن المعتاد، أو ترافق مع دوخة شديدة أو إغماء، فاطلبي تقييمًا طبيًا مناسبًا.", color = MaterialTheme.colorScheme.error)
@@ -393,7 +411,7 @@ private fun WomenCompanionScreen(requestNotifications: ((Boolean) -> Unit) -> Un
                 Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text("تقويم المرأة المتقدم", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                     Text("الدورة والمزاج والطاقة والنوم والألم والصداع وألم الحوض والنزف واتجاهات 30 يومًا.")
-                    Button(onClick = { context.startActivity(Intent(context, WomenCalendarActivity::class.java)) }) {
+                    Button(onClick = { context.startActivity(WomenPrivacyGate.intent(context, WomenPrivacyGate.TARGET_CALENDAR)) }) {
                         Icon(Icons.Default.CalendarMonth, contentDescription = null); Spacer(Modifier.size(8.dp)); Text("فتح تقويم المرأة")
                     }
                 }
