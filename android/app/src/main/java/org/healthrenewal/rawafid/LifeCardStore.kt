@@ -78,7 +78,7 @@ data class LifeCardShareConfig(
 /**
  * Local-first storage for Rawafid Life Card.
  *
- * The profile is stored only in the app sandbox in this implementation.
+ * The profile is encrypted at rest with Android Keystore in this implementation.
  * QR/share payloads contain only fields explicitly selected by the user and
  * include an expiry timestamp so a displayed card can state its intended
  * validity window. No server token or remote lookup is required.
@@ -86,22 +86,28 @@ data class LifeCardShareConfig(
 object LifeCardStore {
     private const val PREFS = "rawafid_life_card_v1"
     private const val PROFILE_JSON = "profile_json"
-
-    private fun prefs(context: Context) =
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+    private const val ENCRYPTED_PROFILE = "rawafid_life_card_profile_v2"
 
     fun load(context: Context): LifeCardProfile {
-        val raw = prefs(context).getString(PROFILE_JSON, null) ?: return LifeCardProfile()
+        val raw = SensitiveLocalPayload.read(
+            context = context,
+            encryptedKey = ENCRYPTED_PROFILE,
+            legacyPrefsName = PREFS,
+            legacyKey = PROFILE_JSON,
+            defaultValue = "",
+            validator = { runCatching { JSONObject(it) }.isSuccess }
+        )
+        if (raw.isBlank()) return LifeCardProfile()
         return runCatching { decodeProfile(JSONObject(raw)) }.getOrElse { LifeCardProfile() }
     }
 
     fun save(context: Context, profile: LifeCardProfile) {
         val normalized = profile.copy(updatedAtEpochMs = System.currentTimeMillis())
-        prefs(context).edit().putString(PROFILE_JSON, encodeProfile(normalized).toString()).apply()
+        SensitiveLocalPayload.write(context, ENCRYPTED_PROFILE, encodeProfile(normalized).toString(), PREFS, PROFILE_JSON)
     }
 
     fun clear(context: Context) {
-        prefs(context).edit().remove(PROFILE_JSON).apply()
+        SensitiveLocalPayload.remove(context, ENCRYPTED_PROFILE, PREFS, PROFILE_JSON)
     }
 
     fun buildSharePayload(
