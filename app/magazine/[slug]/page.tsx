@@ -2,8 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import MagazineArticle from '@/components/magazine-article';
 import LegacyPreservedPageView from '@/components/legacy-preserved-page';
-import { getRelatedMagazine } from '@/lib/magazine';
-import { getMagazineRouteRecord } from '@/lib/magazine-route-record';
+import { getMagazineRecord, getRelatedMagazine } from '@/lib/magazine';
 import { getLegacyPreservedPage, legacyPreservedMetadata } from '@/lib/legacy-preserved-page';
 import { buildSeoMetadata } from '@/lib/seo';
 
@@ -13,7 +12,7 @@ const legacyRoute = (slug: string) => `/magazine/${slug}/`;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const record = await getMagazineRouteRecord(slug);
+  const record = await getMagazineRecord(slug);
   if (!record) {
     const route = legacyRoute(slug);
     return legacyPreservedMetadata(await getLegacyPreservedPage(route), route);
@@ -36,7 +35,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function MagazineResearchPage({ params }: Props) {
   const { slug } = await params;
-  const record = await getMagazineRouteRecord(slug);
+  const record = await getMagazineRecord(slug);
   if (!record) {
     const route = legacyRoute(slug);
     const preserved = await getLegacyPreservedPage(route);
