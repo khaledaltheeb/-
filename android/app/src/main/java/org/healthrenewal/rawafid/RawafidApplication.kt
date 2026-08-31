@@ -19,6 +19,7 @@ class RawafidApplication : Application(), Application.ActivityLifecycleCallbacks
         CirclePushRegistration.registerCurrentToken(this)
         SafeDriveAgreementObserver.start(this)
         SafeDriveSensorFusionObserver.start(this)
+        SafeDriveWeeklyCircleScheduler.ensure(this)
     }
 
     /**
