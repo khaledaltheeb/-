@@ -1,4 +1,5 @@
 import { SOCIAL_WORK_PAGES, SOCIAL_WORK_SOURCE_SHA } from '@/lib/social-work-pages.generated';
+import { SOCIAL_WORK_TALENTIA_PAGES, enrichSocialWorkPageWithTalentia } from '@/lib/social-work-talentia-pages';
 
 type Params = Promise<{ slug?: string[] }>;
 
@@ -8,7 +9,7 @@ const htmlHeaders = {
   'cache-control': 'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400',
   'x-content-type-options': 'nosniff',
   'x-robots-tag': 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1',
-  'x-rawafid-source': `healthrenewal.org@${SOCIAL_WORK_SOURCE_SHA}`,
+  'x-rawafid-source': `healthrenewal.org@${SOCIAL_WORK_SOURCE_SHA};talentia-ethics-20260831`,
 };
 
 export const dynamic = 'force-static';
@@ -20,10 +21,15 @@ export async function GET(_request: Request, { params }: { params: Params }) {
   }
 
   const key = slug[0] ?? '';
-  const html = SOCIAL_WORK_PAGES[key];
-  if (!html) {
+  const talentiaHtml = SOCIAL_WORK_TALENTIA_PAGES[key];
+  if (talentiaHtml) {
+    return new Response(talentiaHtml, { status: 200, headers: htmlHeaders });
+  }
+
+  const recoveredHtml = SOCIAL_WORK_PAGES[key];
+  if (!recoveredHtml) {
     return new Response('Not Found', { status: 404, headers: { 'content-type': 'text/plain; charset=utf-8' } });
   }
 
-  return new Response(html, { status: 200, headers: htmlHeaders });
+  return new Response(enrichSocialWorkPageWithTalentia(recoveredHtml, key), { status: 200, headers: htmlHeaders });
 }
