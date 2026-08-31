@@ -69,6 +69,7 @@ dependencies {
     implementation("androidx.webkit:webkit:1.17.0")
     implementation("androidx.health.connect:connect-client:1.1.0")
     implementation("com.google.android.gms:play-services-location:21.4.0")
+    implementation("com.google.android.gms:play-services-code-scanner:16.1.0")
     implementation("com.google.zxing:core:3.5.4")
 
     testImplementation("junit:junit:4.13.2")
