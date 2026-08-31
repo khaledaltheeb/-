@@ -4,7 +4,9 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.webkit.CookieManager
+import android.webkit.RenderProcessGoneDetail
 import android.webkit.WebResourceRequest
+import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.ComponentActivity
@@ -18,7 +20,7 @@ class WebActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val initialUri = safeUri(intent.getStringExtra(EXTRA_URL)) ?: Uri.parse("https://healthrenewal.org/")
         if (isWomenCalendar(initialUri)) {
-            startActivity(Intent(this, WomenCalendarActivity::class.java))
+            startActivity(WomenPrivacyGate.intent(this, WomenPrivacyGate.TARGET_CALENDAR))
             finish()
             return
         }
@@ -30,19 +32,30 @@ class WebActivity : ComponentActivity() {
             settings.allowContentAccess = false
             settings.javaScriptCanOpenWindowsAutomatically = false
             settings.setSupportMultipleWindows(false)
+            settings.mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
+            settings.safeBrowsingEnabled = true
             settings.userAgentString = settings.userAgentString + " RawafidAndroid/0.3"
             CookieManager.getInstance().setAcceptCookie(true)
+            CookieManager.getInstance().setAcceptThirdPartyCookies(this, false)
             webViewClient = object : WebViewClient() {
                 override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
                     val uri = request.url
                     if (isWomenCalendar(uri)) {
-                        startActivity(Intent(this@WebActivity, WomenCalendarActivity::class.java))
+                        startActivity(WomenPrivacyGate.intent(this@WebActivity, WomenPrivacyGate.TARGET_CALENDAR))
                         return true
                     }
                     return if (isRawafid(uri)) false else {
                         runCatching { startActivity(Intent(Intent.ACTION_VIEW, uri)) }
                         true
                     }
+                }
+
+                override fun onRenderProcessGone(view: WebView, detail: RenderProcessGoneDetail): Boolean {
+                    // The renderer is no longer usable. Tear down this activity instead
+                    // of letting the process crash or retaining a broken WebView.
+                    view.destroy()
+                    finish()
+                    return true
                 }
             }
             loadUrl(initialUri.toString())
@@ -57,9 +70,9 @@ class WebActivity : ComponentActivity() {
 
     override fun onDestroy() {
         if (::webView.isInitialized) {
-            webView.stopLoading()
-            webView.webViewClient = WebViewClient()
-            webView.destroy()
+            runCatching { webView.stopLoading() }
+            runCatching { webView.webViewClient = WebViewClient() }
+            runCatching { webView.destroy() }
         }
         super.onDestroy()
     }
