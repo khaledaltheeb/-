@@ -66,31 +66,44 @@ private data class CalendarEntry(
 private object WomenCalendarStore {
     private const val PREFS = "rawafid_women_calendar_native_v1"
     private const val ENTRIES = "entries"
+    private const val ENCRYPTED_ENTRIES = "rawafid_women_calendar_entries_v2"
+    private const val ENCRYPTED_SETTINGS = "rawafid_women_calendar_settings_v2"
+    private val legacySettingsKeys = arrayOf("last_period_start", "cycle_length", "bleed_length", "variability")
     private fun prefs(context: Context) = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 
     fun settings(context: Context): CycleSettings {
-        val p = prefs(context)
-        val start = p.getString("last_period_start", null)?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
-        return CycleSettings(
-            lastPeriodStart = start,
-            cycleLength = p.getInt("cycle_length", 28).coerceIn(15, 90),
-            bleedLength = p.getInt("bleed_length", 5).coerceIn(1, 14),
-            variability = p.getInt("variability", 2).coerceIn(0, 14)
-        )
+        val raw = EncryptedLocalStore.get(context, ENCRYPTED_SETTINGS) ?: migrateLegacySettings(context)
+        if (raw.isNullOrBlank()) return CycleSettings(null, 28, 5, 2)
+        return runCatching {
+            val value = JSONObject(raw)
+            CycleSettings(
+                lastPeriodStart = value.optString("last_period_start").takeIf { it.isNotBlank() }?.let { LocalDate.parse(it) },
+                cycleLength = value.optInt("cycle_length", 28).coerceIn(15, 90),
+                bleedLength = value.optInt("bleed_length", 5).coerceIn(1, 14),
+                variability = value.optInt("variability", 2).coerceIn(0, 14)
+            )
+        }.getOrDefault(CycleSettings(null, 28, 5, 2))
     }
 
     fun saveSettings(context: Context, settings: CycleSettings) {
-        val edit = prefs(context).edit()
-            .putInt("cycle_length", settings.cycleLength)
-            .putInt("bleed_length", settings.bleedLength)
-            .putInt("variability", settings.variability)
-        if (settings.lastPeriodStart == null) edit.remove("last_period_start")
-        else edit.putString("last_period_start", settings.lastPeriodStart.toString())
-        edit.apply()
+        val value = JSONObject()
+            .put("last_period_start", settings.lastPeriodStart?.toString() ?: "")
+            .put("cycle_length", settings.cycleLength.coerceIn(15, 90))
+            .put("bleed_length", settings.bleedLength.coerceIn(1, 14))
+            .put("variability", settings.variability.coerceIn(0, 14))
+        EncryptedLocalStore.put(context, ENCRYPTED_SETTINGS, value.toString())
+        clearLegacySettings(context)
     }
 
     fun entries(context: Context): List<CalendarEntry> {
-        val raw = prefs(context).getString(ENTRIES, "[]") ?: "[]"
+        val raw = SensitiveLocalPayload.read(
+            context = context,
+            encryptedKey = ENCRYPTED_ENTRIES,
+            legacyPrefsName = PREFS,
+            legacyKey = ENTRIES,
+            defaultValue = "[]",
+            validator = { runCatching { JSONArray(it) }.isSuccess }
+        )
         return runCatching {
             val array = JSONArray(raw)
             buildList {
@@ -130,13 +143,34 @@ private object WomenCalendarStore {
                 put("note", value.note)
             })
         }
-        prefs(context).edit().putString(ENTRIES, array.toString()).apply()
+        SensitiveLocalPayload.write(context, ENCRYPTED_ENTRIES, array.toString(), PREFS, ENTRIES)
+    }
+
+    private fun migrateLegacySettings(context: Context): String? {
+        val p = prefs(context)
+        if (legacySettingsKeys.none { p.contains(it) }) return null
+        val value = JSONObject()
+            .put("last_period_start", p.getString("last_period_start", "") ?: "")
+            .put("cycle_length", p.getInt("cycle_length", 28).coerceIn(15, 90))
+            .put("bleed_length", p.getInt("bleed_length", 5).coerceIn(1, 14))
+            .put("variability", p.getInt("variability", 2).coerceIn(0, 14))
+            .toString()
+        EncryptedLocalStore.put(context, ENCRYPTED_SETTINGS, value)
+        clearLegacySettings(context)
+        return value
+    }
+
+    private fun clearLegacySettings(context: Context) {
+        val edit = prefs(context).edit()
+        legacySettingsKeys.forEach(edit::remove)
+        edit.apply()
     }
 }
 
 class WomenCalendarActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (!WomenPrivacyGate.requireUnlocked(this, WomenPrivacyGate.TARGET_CALENDAR)) return
         setContent {
             RawafidTheme {
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
@@ -173,7 +207,7 @@ private fun WomenCalendarScreen() {
             Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)) {
                 Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text("تقويم المرأة المتقدم", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-                    Text("تتبّع محلي للنمط عبر الأيام: الدورة، المزاج، الطاقة، النوم، الألم، الصداع وألم الحوض. لا يرسل هذه البيانات إلى الخادم.")
+                    Text("تتبّع محلي ومشفر للنمط عبر الأيام: الدورة، المزاج، الطاقة، النوم، الألم، الصداع وألم الحوض. لا يرسل هذه البيانات إلى الخادم.")
                 }
             }
         }
@@ -254,7 +288,7 @@ private fun WomenCalendarScreen() {
                     )
                     Button(onClick = {
                         WomenCalendarStore.saveEntry(context, CalendarEntry(today, mood, energy, sleep, pain, headache, pelvicPain, bleeding, note.trim()))
-                        saved = "تم حفظ يومك محليًا."
+                        saved = "تم حفظ يومك محليًا بشكل مشفر."
                         version++
                     }) { Text("حفظ اليوم") }
                     if (saved.isNotBlank()) Text(saved, color = MaterialTheme.colorScheme.primary)
