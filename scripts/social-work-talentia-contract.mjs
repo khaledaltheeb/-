@@ -4,14 +4,16 @@ import path from 'node:path';
 // Contract for the Talentia-backed ethics expansion; keep independent from the historical recovery contract.
 const root=process.cwd();
 const pagesPath=path.join(root,'lib','social-work-talentia-pages.ts');
+const inlinePath=path.join(root,'lib','social-work-talentia-inline-links.ts');
 const routePath=path.join(root,'app','evidence-guides','social-work','[[...slug]]','route.ts');
 const sitemapPath=path.join(root,'app','sitemaps','social-work.xml','route.ts');
 const sitemapIndexPath=path.join(root,'app','sitemap.xml','route.ts');
 
 function fail(message){throw new Error(`SOCIAL WORK TALENTIA CONTRACT FAILED: ${message}`)}
-for(const p of [pagesPath,routePath,sitemapPath,sitemapIndexPath]) if(!fs.existsSync(p)) fail(`missing ${path.relative(root,p)}`);
+for(const p of [pagesPath,inlinePath,routePath,sitemapPath,sitemapIndexPath]) if(!fs.existsSync(p)) fail(`missing ${path.relative(root,p)}`);
 
 const pages=fs.readFileSync(pagesPath,'utf8');
+const inline=fs.readFileSync(inlinePath,'utf8');
 const route=fs.readFileSync(routePath,'utf8');
 const sitemap=fs.readFileSync(sitemapPath,'utf8');
 const sitemapIndex=fs.readFileSync(sitemapIndexPath,'utf8');
@@ -32,6 +34,14 @@ const requiredTokens=[
 ];
 for(const token of requiredTokens) if(!pages.includes(token)) fail(`required provenance/guard token missing: ${token}`);
 
+const inlineSlugs=['human-dignity-social-justice','self-determination-client-rights','ethical-decision-making'];
+for(const slug of inlineSlugs){
+  if(!inline.includes(`'${slug}'`)) fail(`missing inline Talentia reference for ${slug}`);
+  if(!inline.includes(`data-talentia-inline-reference=\"${slug}\"`)) fail(`missing inline marker for ${slug}`);
+}
+for(const token of ['TALENTIA_GUIDE','TALENTIA_NEWS','enrichTalentiaPageWithInlineLinks']) if(!inline.includes(token)) fail(`inline Talentia link contract missing ${token}`);
+if(!route.includes('enrichTalentiaPageWithInlineLinks')) fail('route does not inject contextual Talentia links into three guides');
+
 if(!route.includes('SOCIAL_WORK_TALENTIA_PAGES')) fail('route does not serve Talentia pages');
 if(!route.includes('enrichSocialWorkPageWithTalentia')) fail('existing guides are not enriched with Talentia layer');
 if(!route.includes('SOCIAL_WORK_PAGES')) fail('legacy Social Work pages are no longer preserved');
@@ -41,4 +51,4 @@ if(!sitemapIndex.includes('/sitemaps/social-work.xml')) fail('Social Work sitema
 const h1Count=(pages.match(/<h1>/g)||[]).length;
 if(h1Count!==slugs.length) fail(`expected ${slugs.length} h1 headings, found ${h1Count}`);
 
-console.log(`Talentia Social Work contract passed: ${slugs.length} new pages, legacy-route preservation, source provenance, Finnish-context guard, and dedicated sitemap coverage.`);
+console.log(`Talentia Social Work contract passed: ${slugs.length} new pages, contextual Talentia links in ${inlineSlugs.length} guides, legacy-route preservation, source provenance, Finnish-context guard, and dedicated sitemap coverage.`);
