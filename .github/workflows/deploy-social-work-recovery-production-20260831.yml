@@ -128,47 +128,74 @@ jobs:
           node - <<'NODE'
           const fs = require('node:fs');
           const m = JSON.parse(fs.readFileSync('data/social-work-recovery/manifest.json','utf8'));
+          if (m.pages.length !== 56) throw new Error(`Expected 56 live routes, got ${m.pages.length}`);
           fs.writeFileSync('/tmp/social-work-live-routes.txt', m.pages.map(p => p.route).join('\n') + '\n');
           NODE
+          fail_live() {
+            route="$1"; condition="$2"; meta="$3"; headers="$4"; body="$5"
+            echo "FAIL route=${route} condition=${condition} meta=${meta}" >&2
+            echo '--- response headers ---' >&2
+            grep -Ei '^(HTTP/|location:|content-language:|x-rawafid-source:|x-robots-tag:|content-type:|cf-cache-status:)' "$headers" >&2 || true
+            echo '--- body prefix ---' >&2
+            head -c 800 "$body" >&2 || true
+            echo >&2
+            exit 1
+          }
           tested=0
           while IFS= read -r route; do
             [ -n "$route" ] || continue
+            echo "VERIFY ${route}"
             headers="$(mktemp)"; body="$(mktemp)"
-            curl -fsS --retry 12 --retry-delay 3 --retry-all-errors -H 'Cache-Control: no-cache, no-store, max-age=0' -D "$headers" -o "$body" "${base}${route}?release=${release}"
-            head -n 1 "$headers" | grep -Eq ' 200( |$)'
-            grep -Fqi 'content-language: ar' "$headers"
-            grep -Fqi 'x-rawafid-source: healthrenewal.org@6911d5ee75bd6fc2dfa12f394d61efe46e87df17' "$headers"
-            grep -Fq 'id=DRUG4023' "$body"
-            grep -Fq '2015081211140160' "$body"
-            grep -Fq '2016091213042605' "$body"
-            grep -Fq 'حدود الاستدلال' "$body"
-            grep -Fq "<link rel=\"canonical\" href=\"${base}${route}\">" "$body"
-            if grep -Eqi 'noindex' "$body"; then echo "Unexpected live noindex: ${route}" >&2; exit 1; fi
-            rm -f "$headers" "$body"; tested=$((tested+1))
+            meta="$(curl -L -sS --retry 12 --retry-delay 3 --retry-all-errors --max-time 45 \
+              -H 'Cache-Control: no-cache, no-store, max-age=0' \
+              -D "$headers" -o "$body" -w '%{http_code}|%{url_effective}' \
+              "${base}${route}?release=${release}" || true)"
+            code="${meta%%|*}"
+            [ "$code" = '200' ] || fail_live "$route" 'final-http-status' "$meta" "$headers" "$body"
+            grep -Fqi 'content-language: ar' "$headers" || fail_live "$route" 'content-language' "$meta" "$headers" "$body"
+            grep -Fqi 'x-rawafid-source: healthrenewal.org@6911d5ee75bd6fc2dfa12f394d61efe46e87df17' "$headers" || fail_live "$route" 'x-rawafid-source' "$meta" "$headers" "$body"
+            grep -Fq 'id=DRUG4023' "$body" || fail_live "$route" 'DRUG4023' "$meta" "$headers" "$body"
+            grep -Fq '2015081211140160' "$body" || fail_live "$route" 'exact-emailed-ljubljana-source' "$meta" "$headers" "$body"
+            grep -Fq '2016091213042605' "$body" || fail_live "$route" 'current-ljubljana-source' "$meta" "$headers" "$body"
+            grep -Fq 'حدود الاستدلال' "$body" || fail_live "$route" 'evidence-boundary' "$meta" "$headers" "$body"
+            grep -Fq "<link rel=\"canonical\" href=\"${base}${route}\">" "$body" || fail_live "$route" 'canonical' "$meta" "$headers" "$body"
+            if grep -Eqi '<meta[^>]+noindex|x-robots-tag:[^\r\n]*noindex' "$body" "$headers"; then fail_live "$route" 'noindex' "$meta" "$headers" "$body"; fi
+            rm -f "$headers" "$body"
+            tested=$((tested+1))
           done < /tmp/social-work-live-routes.txt
-          test "$tested" -eq 56
+          [ "$tested" -eq 56 ] || { echo "FAIL expected=56 tested=${tested}" >&2; exit 1; }
           echo "Production passed ${tested}/56 Social Work URLs including exact emailed source provenance."
       - name: Verify institutional source endpoints are still reachable
         shell: bash
         run: |
           set -euo pipefail
           check_source() {
-            url="$1"
-            code="$(curl -L -sS -o /dev/null -w '%{http_code}' --max-time 30 --retry 3 --retry-delay 2 "$url" || true)"
-            case "$code" in 200|201|202|203|204|206|301|302|303|307|308|401|403) ;; *) echo "Institutional source check failed: HTTP ${code} ${url}" >&2; exit 1 ;; esac
+            label="$1"; url="$2"; required="$3"
+            meta="$(curl -L -sS -o /dev/null -w '%{http_code}|%{url_effective}' --max-time 45 --retry 3 --retry-delay 2 --retry-all-errors "$url" || true)"
+            code="${meta%%|*}"
+            case "$code" in
+              200|201|202|203|204|206|301|302|303|307|308|401|403) echo "SOURCE ${label}: ${meta}" ;;
+              *)
+                if [ "$required" = 'yes' ]; then echo "Institutional source check failed: ${label} ${meta} ${url}" >&2; exit 1; fi
+                echo "SOURCE provenance-only unavailable now: ${label} ${meta} ${url}" >&2
+                ;;
+            esac
           }
-          check_source 'https://pisrs.si/pregledPredpisa?id=DRUG4023'
-          check_source 'https://www.fsd.uni-lj.si/mma/-/2016091213042605/'
-          check_source 'https://www.fsd.uni-lj.si/mma/monografija_ang_elektronska_verzija/2017092010392030/'
-          original_code="$(curl -L -sS -o /dev/null -w '%{http_code}' --max-time 30 --retry 2 'https://www.fsd.uni-lj.si/mma/Soustvarjanje_podpore_v_skupnosti_-_Angleska_izdaja.pdf/2015081211140160/?m=1439370841' || true)"
-          echo "Original emailed Ljubljana source availability (provenance-only, non-blocking): HTTP ${original_code}"
+          check_source 'PISRS DRUG4023' 'https://pisrs.si/pregledPredpisa?id=DRUG4023' yes
+          check_source 'Ljubljana exact emailed URL' 'https://www.fsd.uni-lj.si/mma/Soustvarjanje_podpore_v_skupnosti_-_Angleska_izdaja.pdf/2015081211140160/?m=1439370841' no
+          check_source 'Ljubljana current verification URL' 'https://www.fsd.uni-lj.si/mma/-/2016091213042605/' yes
+          check_source 'Ljubljana English academic URL' 'https://www.fsd.uni-lj.si/mma/monografija_ang_elektronska_verzija/2017092010392030/' yes
       - name: Verify hub promises and source disclosure
         shell: bash
         run: |
           set -euo pipefail
-          hub="$(curl -fsS --retry 8 --retry-delay 3 --retry-all-errors -H 'Cache-Control: no-cache' 'https://healthrenewal.org/evidence-guides/social-work/?final=1')"
-          printf '%s' "$hub" | grep -Fq '55 دليلًا'
-          printf '%s' "$hub" | grep -Fq 'مصادر أصلية قابلة للتتبع'
-          printf '%s' "$hub" | grep -Fq '2015081211140160'
-          printf '%s' "$hub" | grep -Fq 'لا يعني اعتمادًا أو شراكة أو مصادقة'
+          headers="$(mktemp)"; body="$(mktemp)"
+          meta="$(curl -L -sS --retry 8 --retry-delay 3 --retry-all-errors --max-time 45 -H 'Cache-Control: no-cache' -D "$headers" -o "$body" -w '%{http_code}|%{url_effective}' 'https://healthrenewal.org/evidence-guides/social-work/?final=1' || true)"
+          code="${meta%%|*}"
+          [ "$code" = '200' ] || { echo "Hub HTTP failure: ${meta}" >&2; exit 1; }
+          grep -Fq '55 دليلًا' "$body" || { echo 'Hub promise missing: 55 guides' >&2; exit 1; }
+          grep -Fq 'مصادر أصلية قابلة للتتبع' "$body" || { echo 'Hub source traceability statement missing' >&2; exit 1; }
+          grep -Fq '2015081211140160' "$body" || { echo 'Hub exact emailed source missing' >&2; exit 1; }
+          grep -Fq 'لا يعني اعتمادًا أو شراكة أو مصادقة' "$body" || { echo 'Hub non-endorsement guard missing' >&2; exit 1; }
+          rm -f "$headers" "$body"
           echo 'Social Work production release fully verified.'
