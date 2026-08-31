@@ -40,7 +40,7 @@ object CircleQrScanner {
                     onSuccess(id)
                 }
             }
-            .addOnCanceledListener(onCanceled)
+            .addOnCanceledListener { onCanceled() }
             .addOnFailureListener {
                 onFailure("تعذر فتح قارئ QR الآن. يمكنك لصق معرّف RFD يدويًا.")
             }
