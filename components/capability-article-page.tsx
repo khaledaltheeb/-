@@ -35,6 +35,15 @@ function pageRole(value: unknown) {
   return typeof root?.page_role === 'string' ? root.page_role : '';
 }
 
+function namedAuthors(value: unknown, fallback?: string | null) {
+  const root = asRecord(value);
+  const authors = Array.isArray(root?.authors)
+    ? root.authors.filter((item): item is string => typeof item === 'string' && item.trim().length > 0).map((item) => item.trim())
+    : [];
+  if (authors.length > 0) return authors;
+  return fallback?.trim() ? [fallback.trim()] : [];
+}
+
 function protocolSteps(value: unknown) {
   const root = asRecord(value);
   const blocks = Array.isArray(root?.blocks) ? root.blocks : [];
@@ -71,6 +80,7 @@ export default function CapabilityArticlePage({ record, routeSlug, registryItems
   const faqItems = visibleCapabilityFaq(sanitizedBody);
   const role = pageRole(record.schema_json);
   const review = contentReviewProvenance(record);
+  const authors = namedAuthors(record.schema_json, record.author_display_name);
   const canonical = record.canonical_url || (routeSlug ? `/capabilities/${routeSlug}/` : '/capabilities/');
   const url = canonical.startsWith('https://') ? canonical : `${SITE_URL}${canonical}`;
   const bodyJson = role === 'registry' ? capabilityBodyWithoutRegistryCards(sanitizedBody) : sanitizedBody;
@@ -105,6 +115,9 @@ export default function CapabilityArticlePage({ record, routeSlug, registryItems
   };
 
   const steps = role === 'protocol' ? protocolSteps(bodyJson) : [];
+  const authorSchema = authors.length > 0
+    ? authors.map((name) => ({ '@type': 'Person', name }))
+    : { '@id': `${SITE_URL}/#organization` };
   const contentSchema: Record<string, unknown> = role === 'registry'
     ? {
         ...common,
@@ -136,6 +149,7 @@ export default function CapabilityArticlePage({ record, routeSlug, registryItems
         ? {
             ...common,
             '@type': 'HowTo',
+            author: authorSchema,
             step: steps.map((step) => ({
               '@type': 'HowToStep',
               position: step.position,
@@ -146,9 +160,7 @@ export default function CapabilityArticlePage({ record, routeSlug, registryItems
         : {
             ...common,
             '@type': 'Article',
-            author: record.author_display_name
-              ? { '@type': 'Organization', name: record.author_display_name }
-              : { '@id': `${SITE_URL}/#organization` },
+            author: authorSchema,
             reviewedBy: review.reviewedBySchema,
             citation: references.flatMap((reference) => (reference.url ? [reference.url] : [])),
           };
@@ -198,7 +210,7 @@ export default function CapabilityArticlePage({ record, routeSlug, registryItems
             <h1>{record.title}</h1>
             {record.excerpt ? <p>{record.excerpt}</p> : null}
             <div className="article-meta">
-              {record.author_display_name ? <span>إعداد: {record.author_display_name}</span> : null}
+              {authors.length > 0 ? <span>المؤلفات: {authors.join(' · ')}</span> : null}
               {review.reviewerName ? (
                 <span>مراجعة: {review.reviewerName}{review.reviewerCredentials ? ` — ${review.reviewerCredentials}` : ''}</span>
               ) : null}
