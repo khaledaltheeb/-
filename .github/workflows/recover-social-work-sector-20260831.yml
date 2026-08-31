@@ -1,0 +1,64 @@
+name: Recover Social Work Sector 2026-08-31
+
+on:
+  push:
+    branches:
+      - feat/social-work-recovery-20260831
+    paths:
+      - 'scripts/recover-social-work-sector.mjs'
+      - '.github/workflows/recover-social-work-sector-20260831.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: recover-social-work-sector-20260831
+  cancel-in-progress: false
+
+jobs:
+  recover:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout new platform branch
+        uses: actions/checkout@v7
+        with:
+          ref: feat/social-work-recovery-20260831
+          fetch-depth: 1
+
+      - name: Checkout pinned legacy source
+        uses: actions/checkout@v7
+        with:
+          repository: khaledaltheeb/healthrenewal.org
+          ref: 6911d5ee75bd6fc2dfa12f394d61efe46e87df17
+          path: .legacy-healthrenewal
+          fetch-depth: 1
+
+      - name: Recover and harden Social Work pages
+        run: node scripts/recover-social-work-sector.mjs "$GITHUB_WORKSPACE/.legacy-healthrenewal/evidence-guides/social-work"
+
+      - name: Verify recovered page count and source coverage
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(find data/social-work-recovery/html -name index.html -type f | wc -l | tr -d ' ')" = '56'
+          test "$(grep -RIl 'DRUG4023' data/social-work-recovery/html --include='index.html' | wc -l | tr -d ' ')" = '56'
+          test "$(grep -RIl '2016091213042605' data/social-work-recovery/html --include='index.html' | wc -l | tr -d ' ')" = '56'
+          test -s data/social-work-recovery/manifest.json
+          test -s lib/social-work-pages.generated.ts
+
+      - name: Commit recovered artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'rawafid-social-work-recovery'
+          git config user.email '63592172+khaledaltheeb@users.noreply.github.com'
+          git add data/social-work-recovery lib/social-work-pages.generated.ts
+          if git diff --cached --quiet; then
+            echo 'Recovery artifacts already up to date.'
+            exit 0
+          fi
+          git commit -m 'Recover and source-harden 56 social work URLs'
+          git push origin HEAD:feat/social-work-recovery-20260831
