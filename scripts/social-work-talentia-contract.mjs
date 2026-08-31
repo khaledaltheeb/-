@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
+// Contract for the Talentia-backed ethics expansion; keep independent from the historical recovery contract.
 const root=process.cwd();
 const pagesPath=path.join(root,'lib','social-work-talentia-pages.ts');
 const routePath=path.join(root,'app','evidence-guides','social-work','[[...slug]]','route.ts');
