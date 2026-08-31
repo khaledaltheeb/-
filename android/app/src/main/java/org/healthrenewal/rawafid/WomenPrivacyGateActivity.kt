@@ -40,8 +40,15 @@ object WomenPrivacyGate {
     fun intent(context: Context, target: String): Intent =
         Intent(context, WomenPrivacyGateActivity::class.java).putExtra(EXTRA_TARGET, target)
 
+    /**
+     * Every activity containing women-sector data calls this before rendering.
+     * When privacy is enabled we also block screenshots/recents captures for the
+     * protected screen, even during an already-unlocked session.
+     */
     fun requireUnlocked(activity: Activity, target: String): Boolean {
-        if (!WomenPrivacyStore.enabled(activity) || WomenPrivacyStore.sessionUnlocked(activity)) return true
+        if (!WomenPrivacyStore.enabled(activity)) return true
+        activity.window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
+        if (WomenPrivacyStore.sessionUnlocked(activity)) return true
         activity.startActivity(intent(activity, target))
         activity.finish()
         return false
