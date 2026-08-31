@@ -3,6 +3,7 @@ package org.healthrenewal.rawafid
 import android.Manifest
 import android.app.AlarmManager
 import android.app.DatePickerDialog
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -84,10 +85,17 @@ data class WomenCareItem(
 object WomenCarePlannerStore {
     private const val PREFS = "rawafid_women_care_planner_v1"
     private const val ITEMS = "items"
-    private fun prefs(context: Context) = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+    private const val ENCRYPTED_ITEMS = "rawafid_women_care_planner_items_v2"
 
     fun items(context: Context): List<WomenCareItem> {
-        val raw = prefs(context).getString(ITEMS, "[]") ?: "[]"
+        val raw = SensitiveLocalPayload.read(
+            context = context,
+            encryptedKey = ENCRYPTED_ITEMS,
+            legacyPrefsName = PREFS,
+            legacyKey = ITEMS,
+            defaultValue = "[]",
+            validator = { runCatching { JSONArray(it) }.isSuccess }
+        )
         return runCatching {
             val array = JSONArray(raw)
             buildList {
@@ -111,25 +119,22 @@ object WomenCarePlannerStore {
 
     fun save(context: Context, value: WomenCareItem) {
         val all = (items(context).filterNot { it.id == value.id } + value).sortedBy { it.atMillis }.take(80)
-        val array = JSONArray()
-        all.forEach { item ->
-            array.put(JSONObject().apply {
-                put("id", item.id); put("type", item.type.key); put("at", item.atMillis); put("title", item.title)
-                put("note", item.note); put("preparation", item.preparation)
-            })
-        }
-        prefs(context).edit().putString(ITEMS, array.toString()).apply()
+        write(context, all)
     }
 
     fun remove(context: Context, id: Int) {
+        write(context, items(context).filterNot { it.id == id })
+    }
+
+    private fun write(context: Context, values: List<WomenCareItem>) {
         val array = JSONArray()
-        items(context).filterNot { it.id == id }.forEach { item ->
+        values.forEach { item ->
             array.put(JSONObject().apply {
                 put("id", item.id); put("type", item.type.key); put("at", item.atMillis); put("title", item.title)
                 put("note", item.note); put("preparation", item.preparation)
             })
         }
-        prefs(context).edit().putString(ITEMS, array.toString()).apply()
+        SensitiveLocalPayload.write(context, ENCRYPTED_ITEMS, array.toString(), PREFS, ITEMS)
     }
 }
 
@@ -142,6 +147,7 @@ object WomenCareReminderScheduler {
         manager.createNotificationChannel(
             NotificationChannel(CHANNEL, "خطة العناية النسائية", NotificationManager.IMPORTANCE_HIGH).apply {
                 description = "مواعيد العناية والفحوصات والمتابعات التي تحفظها المستخدمة بنفسها"
+                lockscreenVisibility = Notification.VISIBILITY_PRIVATE
             }
         )
     }
@@ -169,11 +175,7 @@ object WomenCareReminderScheduler {
         return PendingIntent.getBroadcast(
             context,
             item.id,
-            Intent(context, WomenCareReminderReceiver::class.java)
-                .putExtra("id", item.id)
-                .putExtra("title", item.title)
-                .putExtra("note", item.note)
-                .putExtra("preparation", item.preparation),
+            Intent(context, WomenCareReminderReceiver::class.java).putExtra("id", item.id),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
     }
@@ -184,22 +186,28 @@ class WomenCareReminderReceiver : BroadcastReceiver() {
         if (Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) return
         WomenCareReminderScheduler.ensureChannel(context)
         val id = intent.getIntExtra("id", 0)
-        val title = intent.getStringExtra("title").orEmpty().ifBlank { "رفيقة روافد · موعد عناية" }
-        val note = intent.getStringExtra("note").orEmpty()
-        val preparation = intent.getStringExtra("preparation").orEmpty()
-        val body = listOf(note, preparation).filter { it.isNotBlank() }.joinToString(" · ").ifBlank { "هذا موعد حفظته أنتِ في خطة العناية." }
+        val item = WomenCarePlannerStore.items(context).firstOrNull { it.id == id } ?: return
+        val body = listOf(item.note, item.preparation).filter { it.isNotBlank() }.joinToString(" · ")
+            .ifBlank { "هذا موعد حفظته أنتِ في خطة العناية." }
         val openIntent = PendingIntent.getActivity(
             context,
             id,
-            Intent(context, WomenCarePlannerActivity::class.java),
+            WomenPrivacyGate.intent(context, WomenPrivacyGate.TARGET_PLANNER),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
+        val publicVersion = NotificationCompat.Builder(context, WomenCareReminderScheduler.CHANNEL)
+            .setSmallIcon(R.drawable.ic_launcher)
+            .setContentTitle("رفيقة روافد")
+            .setContentText("لديك موعد عناية محفوظ. افتحي روافد لعرض التفاصيل.")
+            .build()
         val notification = NotificationCompat.Builder(context, WomenCareReminderScheduler.CHANNEL)
             .setSmallIcon(R.drawable.ic_launcher)
-            .setContentTitle(title)
+            .setContentTitle(item.title)
             .setContentText(body)
             .setStyle(NotificationCompat.BigTextStyle().bigText(body))
             .setContentIntent(openIntent)
+            .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
+            .setPublicVersion(publicVersion)
             .setAutoCancel(true)
             .build()
         (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).notify(9800 + id, notification)
@@ -215,6 +223,7 @@ class WomenCarePlannerActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (!WomenPrivacyGate.requireUnlocked(this, WomenPrivacyGate.TARGET_PLANNER)) return
         WomenCareReminderScheduler.ensureChannel(this)
         setContent {
             RawafidTheme {
@@ -267,7 +276,7 @@ private fun WomenCarePlannerScreen(requestNotifications: ((Boolean) -> Unit) -> 
             Card {
                 Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text("خطة العناية النسائية", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-                    Text("احفظي المواعيد التي اخترتِها أو أوصت بها مختصتك. رفيقة روافد لا تخترع موعد فحص طبي من العمر وحده ولا تستبدل توصية الطبيبة.")
+                    Text("احفظي المواعيد التي اخترتِها أو أوصت بها مختصتك. تُحفظ التفاصيل محليًا بشكل مشفر. رفيقة روافد لا تخترع موعد فحص طبي من العمر وحده ولا تستبدل توصية الطبيبة.")
                 }
             }
         }
@@ -296,7 +305,7 @@ private fun WomenCarePlannerScreen(requestNotifications: ((Boolean) -> Unit) -> 
                     Text("قبل الموعد", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                     Text("اكتبي الأعراض الجديدة، متى بدأت، شدتها، الأدوية والمكملات التي تستخدمينها، والأسئلة التي لا تريدين نسيانها. اتبعي تعليمات التحضير التي أعطتك إياها الجهة الطبية.")
                     Text("بعد الموعد: سجلي الخطوة التالية والموعد القادم وما الذي يستوجب الرجوع للمختصة.", style = MaterialTheme.typography.bodySmall)
-                    OutlinedButton(onClick = { context.startActivity(Intent(context, WomenVisitPrepActivity::class.java)) }, modifier = Modifier.fillMaxWidth()) {
+                    OutlinedButton(onClick = { context.startActivity(WomenPrivacyGate.intent(context, WomenPrivacyGate.TARGET_VISIT_PREP)) }, modifier = Modifier.fillMaxWidth()) {
                         Text("جهزي ملخص الزيارة")
                     }
                 }
