@@ -1,6 +1,7 @@
 package org.healthrenewal.rawafid
 
 import android.Manifest
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -41,6 +42,7 @@ object NotificationChannels {
             },
             NotificationChannel(TREATMENT, "مواعيد العلاج", NotificationManager.IMPORTANCE_HIGH).apply {
                 description = "تذكيرات المواعيد العلاجية التي أضافها المستخدم"
+                lockscreenVisibility = Notification.VISIBILITY_PRIVATE
             }
         ))
     }
