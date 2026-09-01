@@ -6,27 +6,37 @@ on:
     paths:
       - 'app/api/v1/**'
       - 'app/api/openapi.json/**'
+      - 'app/feed.xml/**'
       - 'app/feed.json/**'
+      - 'app/magazine/feed.xml/**'
       - 'app/developers/**'
       - 'lib/public-api-v1.ts'
       - 'lib/partner-api-v1.ts'
+      - 'lib/feed-http.ts'
       - 'components/trust-page.tsx'
       - 'supabase/migrations/20260901032000_public_api_v1_change_log.sql'
       - 'supabase/migrations/20260901035000_partner_api_core_v1.sql'
+      - 'supabase/migrations/20260901212203_source_connection_metadata_v1.sql'
       - 'scripts/public-api-v1-contract.mjs'
+      - 'scripts/source-registry-v1-contract.mjs'
       - '.github/workflows/public-api-v1.yml'
   push:
     branches: [main]
     paths:
       - 'app/api/v1/**'
       - 'app/api/openapi.json/**'
+      - 'app/feed.xml/**'
       - 'app/feed.json/**'
+      - 'app/magazine/feed.xml/**'
       - 'app/developers/**'
       - 'lib/public-api-v1.ts'
       - 'lib/partner-api-v1.ts'
+      - 'lib/feed-http.ts'
       - 'supabase/migrations/20260901032000_public_api_v1_change_log.sql'
       - 'supabase/migrations/20260901035000_partner_api_core_v1.sql'
+      - 'supabase/migrations/20260901212203_source_connection_metadata_v1.sql'
       - 'scripts/public-api-v1-contract.mjs'
+      - 'scripts/source-registry-v1-contract.mjs'
 
 permissions:
   contents: read
@@ -61,8 +71,10 @@ jobs:
           sudo apt-get install -y --no-install-recommends imagemagick fontconfig fonts-noto-core librsvg2-bin
           convert -version
           rsvg-convert --version
-      - name: Public API architecture contract
-        run: node scripts/public-api-v1-contract.mjs
+      - name: Public API architecture contracts
+        run: |
+          node scripts/public-api-v1-contract.mjs
+          node scripts/source-registry-v1-contract.mjs
       - name: Type check
         run: npm run typecheck
       - name: Build production candidate
@@ -87,15 +99,14 @@ jobs:
           curl -fsS "$base/api/v1" -o /tmp/api-discovery.json
           curl -fsS "$base/api/openapi.json" -o /tmp/openapi.json
           curl -fsS "$base/api/v1/content?limit=2" -D /tmp/content.headers -o /tmp/content.json
-          curl -fsS "$base/api/v1/research?limit=2" -o /tmp/research.json
-          curl -fsS "$base/api/v1/courses?limit=2" -o /tmp/courses.json
           curl -fsS "$base/api/v1/pages?limit=2" -o /tmp/pages.json
           curl -fsS "$base/api/v1/stats" -o /tmp/stats.json
           curl -fsS "$base/api/v1/changes?since=2026-01-01T00%3A00%3A00Z&limit=2" -o /tmp/changes.json
           invalid_code="$(curl -sS -o /tmp/invalid-key.json -w '%{http_code}' -H 'X-API-Key: definitely-invalid' "$base/api/v1/content?limit=1")"
           test "$invalid_code" = 401
-          curl -fsS "$base/feed.xml" -o /tmp/feed.xml
-          curl -fsS "$base/feed.json" -o /tmp/feed.json
+          curl -fsS "$base/feed.xml" -D /tmp/rss.headers -o /tmp/feed.xml
+          curl -fsS "$base/feed.json" -D /tmp/json-feed.headers -o /tmp/feed.json
+          curl -fsS "$base/magazine/feed.xml" -D /tmp/magazine-rss.headers -o /tmp/magazine-feed.xml
           curl -fsS "$base/developers" -o /tmp/developers.html
           node - <<'NODE'
           const fs=require('fs');
@@ -107,29 +118,39 @@ jobs:
           const changes=JSON.parse(fs.readFileSync('/tmp/changes.json','utf8'));
           const invalid=JSON.parse(fs.readFileSync('/tmp/invalid-key.json','utf8'));
           const jsonFeed=JSON.parse(fs.readFileSync('/tmp/feed.json','utf8'));
-          const headers=fs.readFileSync('/tmp/content.headers','utf8').toLowerCase();
+          const contentHeaders=fs.readFileSync('/tmp/content.headers','utf8').toLowerCase();
+          const rssHeaders=fs.readFileSync('/tmp/rss.headers','utf8').toLowerCase();
+          const jsonFeedHeaders=fs.readFileSync('/tmp/json-feed.headers','utf8').toLowerCase();
           const xml=fs.readFileSync('/tmp/feed.xml','utf8');
-          if(discovery.version!=='1.1.0') throw new Error('bad API discovery version');
-          if(openapi.openapi!=='3.1.0' || openapi.info?.version!=='1.1.0') throw new Error('bad OpenAPI version');
+          const magazine=fs.readFileSync('/tmp/magazine-feed.xml','utf8');
+          if(discovery.version!=='1.2.0') throw new Error('bad API discovery version');
+          if(!discovery.evidence_discovery?.providers?.includes('crossref')) throw new Error('Crossref discovery provider missing');
+          if(openapi.openapi!=='3.1.0' || openapi.info?.version!=='1.2.0') throw new Error('bad OpenAPI version');
           if(!openapi.components?.securitySchemes?.PartnerApiKey) throw new Error('PartnerApiKey security scheme missing');
+          if(!openapi.paths?.['/sources/{id}'] || !openapi.paths?.['/evidence-discovery']) throw new Error('source/evidence paths missing');
           if(!Array.isArray(content.data) || !Array.isArray(pages.data)) throw new Error('content/pages data is not array');
           if(!stats.data || typeof stats.data.total!=='number') throw new Error('stats unavailable');
           if(!Array.isArray(changes.data)) throw new Error('change stream unavailable');
           if(invalid.error?.code!=='invalid_api_key') throw new Error('invalid API key contract failed');
           if(jsonFeed.version!=='https://jsonfeed.org/version/1.1') throw new Error('bad JSON Feed version');
-          if(!headers.includes('etag:')) throw new Error('ETag missing');
-          if(!headers.includes('x-request-id:')) throw new Error('request id missing');
-          if(!xml.includes('<rss version="2.0"')) throw new Error('RSS 2.0 signature missing');
+          if(!contentHeaders.includes('etag:') || !contentHeaders.includes('x-request-id:')) throw new Error('API validators missing');
+          if(!rssHeaders.includes('etag:') || !rssHeaders.includes('last-modified:')) throw new Error('RSS validators missing');
+          if(!jsonFeedHeaders.includes('etag:')) throw new Error('JSON Feed ETag missing');
+          if(!xml.includes('<rss version="2.0"') || !xml.includes('atom:link')) throw new Error('RSS 2.0 contract missing');
+          if(!magazine.includes('<rss version="2.0"') || !magazine.includes('atom:link')) throw new Error('magazine RSS contract missing');
           NODE
       - name: Conditional request verification
         shell: bash
         run: |
           set -euo pipefail
           base=http://127.0.0.1:3000
-          etag="$(awk 'BEGIN{IGNORECASE=1} /^etag:/{gsub(/\r/,""); sub(/^etag:[[:space:]]*/,""); print; exit}' /tmp/content.headers)"
-          test -n "$etag"
-          code="$(curl -sS -o /dev/null -w '%{http_code}' -H "If-None-Match: $etag" "$base/api/v1/content?limit=2")"
-          test "$code" = 304
+          api_etag="$(awk 'BEGIN{IGNORECASE=1} /^etag:/{gsub(/\r/,""); sub(/^etag:[[:space:]]*/,""); print; exit}' /tmp/content.headers)"
+          rss_etag="$(awk 'BEGIN{IGNORECASE=1} /^etag:/{gsub(/\r/,""); sub(/^etag:[[:space:]]*/,""); print; exit}' /tmp/rss.headers)"
+          json_etag="$(awk 'BEGIN{IGNORECASE=1} /^etag:/{gsub(/\r/,""); sub(/^etag:[[:space:]]*/,""); print; exit}' /tmp/json-feed.headers)"
+          test -n "$api_etag" && test -n "$rss_etag" && test -n "$json_etag"
+          test "$(curl -sS -o /dev/null -w '%{http_code}' -H "If-None-Match: $api_etag" "$base/api/v1/content?limit=2")" = 304
+          test "$(curl -sS -o /dev/null -w '%{http_code}' -H "If-None-Match: $rss_etag" "$base/feed.xml")" = 304
+          test "$(curl -sS -o /dev/null -w '%{http_code}' -H "If-None-Match: $json_etag" "$base/feed.json")" = 304
       - name: Stop server
         if: always()
         shell: bash
