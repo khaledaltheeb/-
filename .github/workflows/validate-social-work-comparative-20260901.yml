@@ -1,0 +1,28 @@
+name: Validate comparative Social Work evidence
+
+on:
+  pull_request:
+    paths:
+      - 'lib/social-work-comparative-pages.ts'
+      - 'lib/social-work-talentia-pages.ts'
+      - 'lib/social-work-talentia-inline-links.ts'
+      - 'lib/social-work-talentia-quality.ts'
+      - 'app/evidence-guides/social-work/**'
+      - 'app/sitemaps/social-work.xml/**'
+      - 'scripts/social-work-comparative-contract.mjs'
+      - 'scripts/social-work-talentia-contract.mjs'
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: node scripts/social-work-talentia-contract.mjs
+      - run: node scripts/social-work-comparative-contract.mjs
+      - run: npm run typecheck
