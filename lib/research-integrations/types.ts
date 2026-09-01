@@ -1,4 +1,4 @@
-export type EvidenceProvider = 'europe_pmc' | 'crossref' | 'lens';
+export type EvidenceProvider = 'europe_pmc' | 'crossref' | 'datacite' | 'lens';
 
 export type EvidenceIdentifiers = {
   doi?: string;
