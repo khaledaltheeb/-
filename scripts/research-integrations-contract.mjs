@@ -17,6 +17,7 @@ const required = [
   'supabase/migrations/20260901190000_ror_source_registry_v1.sql',
   'supabase/migrations/20260901192000_ror_registry_explicit_deny.sql',
   'supabase/migrations/20260901212203_source_connection_metadata_v1.sql',
+  'supabase/migrations/20260901215918_source_governance_provenance_v1.sql',
 ];
 
 for (const file of required) if (!fs.existsSync(file)) throw new Error(`Missing required research integration file: ${file}`);
@@ -32,10 +33,12 @@ const demo = fs.readFileSync('examples/lens-scholarly-demo/lens-demo.mjs', 'utf8
 const migration = fs.readFileSync('supabase/migrations/20260901190000_ror_source_registry_v1.sql', 'utf8');
 const denyMigration = fs.readFileSync('supabase/migrations/20260901192000_ror_registry_explicit_deny.sql', 'utf8');
 const connectionMigration = fs.readFileSync('supabase/migrations/20260901212203_source_connection_metadata_v1.sql', 'utf8');
+const governanceMigration = fs.readFileSync('supabase/migrations/20260901215918_source_governance_provenance_v1.sql', 'utf8');
 
 const lensRetractionGuard = lens.includes('function isRetracted') && lens.includes('update_nature') && lens.includes(".toLowerCase()") && lens.includes("nature === 'retraction'") && lens.includes('is_retracted: isRetracted(row.retraction_updates)');
 const crossrefContract = crossref.includes('https://api.crossref.org/works') && crossref.includes("'query.bibliographic'") && crossref.includes('mailto') && crossref.includes("'User-Agent'") && crossref.includes("cursor: options.cursor?.trim() || '*'") && crossref.includes('from-update-date') && crossref.includes('from-index-date') && crossref.includes('relations(row');
-const developerEvidenceContract = developers.includes('/api/v1/evidence-discovery') && developers.includes('europe_pmc') && developers.includes('crossref') && developers.includes('LENS_SCHOLARLY_API_TOKEN') && developers.includes('ROR') && developers.includes('ORCID') && developers.includes('related_identifiers') && developers.includes('503') && developers.includes('إعادة نشر');
+const developerEvidenceContract = developers.includes('/api/v1/evidence-discovery') && developers.includes('europe_pmc') && developers.includes('crossref') && developers.includes('LENS_SCHOLARLY_API_TOKEN') && developers.includes('ROR') && developers.includes('ORCID') && developers.includes('related_identifiers') && developers.includes('rights_profiles') && developers.includes('translations') && developers.includes('503') && developers.includes('إعادة نشر');
+const governanceContract = governanceMigration.includes('source_rights_profiles') && governanceMigration.includes('metadata_reuse_status') && governanceMigration.includes('content_reuse_status') && governanceMigration.includes('source_translation_provenance') && governanceMigration.includes('source_translation_human_attribution_check') && governanceMigration.includes('source_translation_machine_tool_check') && governanceMigration.includes("'rights_profiles'") && governanceMigration.includes("'translations'");
 
 const checks = [
   [lens.includes('https://api.lens.org/scholarly/search'), 'Lens Scholarly endpoint missing'],
@@ -54,7 +57,8 @@ const checks = [
   [route.includes('crossref_cursor'), 'Crossref independent cursor missing'],
   [openapi.includes("'/evidence-discovery'"), 'Evidence discovery OpenAPI path missing'],
   [openapi.includes("operationId: 'discoverEvidence'"), 'Evidence discovery OpenAPI operation missing'],
-  [developerEvidenceContract, 'Public developer evidence-discovery documentation is incomplete'],
+  [openapi.includes('SourceRightsProfile') && openapi.includes('SourceTranslationProvenance'), 'OpenAPI source governance schemas missing'],
+  [developerEvidenceContract, 'Public developer evidence-discovery/governance documentation is incomplete'],
   [migration.includes('enable row level security'), 'ROR registry RLS missing'],
   [migration.includes('source_organizations'), 'ROR source relationship table missing'],
   [denyMigration.includes('as restrictive'), 'ROR explicit restrictive RLS policy missing'],
@@ -62,6 +66,7 @@ const checks = [
   [connectionMigration.includes('source_related_identifiers'), 'RelatedIdentifier registry missing'],
   [connectionMigration.includes('source_contributors'), 'Contributor/ORCID registry missing'],
   [connectionMigration.includes('source_contributor_organizations'), 'Contributor/ROR relationship missing'],
+  [governanceContract, 'Rights/translation provenance governance contract missing'],
 ];
 
 for (const [ok, message] of checks) if (!ok) throw new Error(message);
