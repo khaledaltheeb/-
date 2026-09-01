@@ -6,6 +6,7 @@ const required = [
   'lib/research-integrations/ror.ts',
   'lib/research-integrations/europe-pmc.ts',
   'lib/research-integrations/crossref.ts',
+  'lib/research-integrations/datacite.ts',
   'lib/research-integrations/lens.ts',
   'lib/research-integrations/dedupe.ts',
   'lib/research-integrations/evidence-discovery.ts',
@@ -18,12 +19,14 @@ const required = [
   'supabase/migrations/20260901192000_ror_registry_explicit_deny.sql',
   'supabase/migrations/20260901212203_source_connection_metadata_v1.sql',
   'supabase/migrations/20260901215918_source_governance_provenance_v1.sql',
+  'supabase/migrations/20260901223500_datacite_content_relations_v1.sql',
 ];
 
 for (const file of required) if (!fs.existsSync(file)) throw new Error(`Missing required research integration file: ${file}`);
 
 const lens = fs.readFileSync('lib/research-integrations/lens.ts', 'utf8');
 const crossref = fs.readFileSync('lib/research-integrations/crossref.ts', 'utf8');
+const datacite = fs.readFileSync('lib/research-integrations/datacite.ts', 'utf8');
 const ror = fs.readFileSync('lib/research-integrations/ror.ts', 'utf8');
 const europe = fs.readFileSync('lib/research-integrations/europe-pmc.ts', 'utf8');
 const route = fs.readFileSync('app/api/v1/evidence-discovery/route.ts', 'utf8');
@@ -34,17 +37,21 @@ const migration = fs.readFileSync('supabase/migrations/20260901190000_ror_source
 const denyMigration = fs.readFileSync('supabase/migrations/20260901192000_ror_registry_explicit_deny.sql', 'utf8');
 const connectionMigration = fs.readFileSync('supabase/migrations/20260901212203_source_connection_metadata_v1.sql', 'utf8');
 const governanceMigration = fs.readFileSync('supabase/migrations/20260901215918_source_governance_provenance_v1.sql', 'utf8');
+const dataCiteRelationMigration = fs.readFileSync('supabase/migrations/20260901223500_datacite_content_relations_v1.sql', 'utf8');
 
 const lensRetractionGuard = lens.includes('function isRetracted') && lens.includes('update_nature') && lens.includes(".toLowerCase()") && lens.includes("nature === 'retraction'") && lens.includes('is_retracted: isRetracted(row.retraction_updates)');
 const crossrefContract = crossref.includes('https://api.crossref.org/works') && crossref.includes("'query.bibliographic'") && crossref.includes('mailto') && crossref.includes("'User-Agent'") && crossref.includes("cursor: options.cursor?.trim() || '*'") && crossref.includes('from-update-date') && crossref.includes('from-index-date') && crossref.includes('relations(row');
+const dataCiteContract = datacite.includes('https://api.datacite.org/dois') && datacite.includes("'page[cursor]'" ) && datacite.includes("affiliation: 'true'") && datacite.includes("publisher: 'true'") && datacite.includes("detail: 'true'") && datacite.includes('nameIdentifierScheme') && datacite.includes('relatedIdentifiers') && datacite.includes('affiliationIdentifierScheme');
 const developerEvidenceContract = developers.includes('/api/v1/evidence-discovery') && developers.includes('europe_pmc') && developers.includes('crossref') && developers.includes('LENS_SCHOLARLY_API_TOKEN') && developers.includes('ROR') && developers.includes('ORCID') && developers.includes('related_identifiers') && developers.includes('rights_profiles') && developers.includes('translations') && developers.includes('503') && developers.includes('إعادة نشر');
 const governanceContract = governanceMigration.includes('source_rights_profiles') && governanceMigration.includes('metadata_reuse_status') && governanceMigration.includes('content_reuse_status') && governanceMigration.includes('source_translation_provenance') && governanceMigration.includes('source_translation_human_attribution_check') && governanceMigration.includes('source_translation_machine_tool_check') && governanceMigration.includes("'rights_profiles'") && governanceMigration.includes("'translations'");
+const dataCiteRelationContract = dataCiteRelationMigration.includes("'IsReferencedBy'") && dataCiteRelationMigration.includes("'DataCite'") && dataCiteRelationMigration.includes('refresh_content_related_identifiers') && dataCiteRelationMigration.includes('source_related_identifiers_rawafid_content_idx') && dataCiteRelationMigration.includes("content_reuse_status") && dataCiteRelationMigration.includes("'unknown'");
 
 const checks = [
   [lens.includes('https://api.lens.org/scholarly/search'), 'Lens Scholarly endpoint missing'],
   [lens.includes('Bearer ${token}'), 'Lens Bearer authorization missing'],
   [lensRetractionGuard, 'Lens retraction semantic guard missing'],
   [crossrefContract, 'Crossref polite-pool/cursor/incremental contract missing'],
+  [dataCiteContract, 'DataCite REST/identifier/affiliation contract missing'],
   [ror.includes('https://api.ror.org/v2/organizations'), 'ROR v2 endpoint missing'],
   [ror.includes('candidate.chosen === true'), 'ROR chosen:true selection missing'],
   [ror.includes('resolveRorFromDataset'), 'ROR dataset resolution missing'],
@@ -53,8 +60,8 @@ const checks = [
   [europe.includes('normalizeOrcid'), 'Europe PMC typed ORCID normalization missing'],
   [europe.includes('rorFromOrgIdentifier'), 'Europe PMC ROR affiliation normalization missing'],
   [route.includes("withOptionalPartnerAccess(request, 'search:read')"), 'Partner search scope missing'],
-  [route.includes("['europe_pmc', 'crossref', 'lens']"), 'Unified provider list is incomplete'],
-  [route.includes('crossref_cursor'), 'Crossref independent cursor missing'],
+  [route.includes("['europe_pmc', 'crossref', 'datacite', 'lens']"), 'Unified provider list is incomplete'],
+  [route.includes('crossref_cursor') && route.includes('datacite_cursor'), 'Independent provider cursors missing'],
   [openapi.includes("'/evidence-discovery'"), 'Evidence discovery OpenAPI path missing'],
   [openapi.includes("operationId: 'discoverEvidence'"), 'Evidence discovery OpenAPI operation missing'],
   [openapi.includes('SourceRightsProfile') && openapi.includes('SourceTranslationProvenance'), 'OpenAPI source governance schemas missing'],
@@ -67,6 +74,7 @@ const checks = [
   [connectionMigration.includes('source_contributors'), 'Contributor/ORCID registry missing'],
   [connectionMigration.includes('source_contributor_organizations'), 'Contributor/ROR relationship missing'],
   [governanceContract, 'Rights/translation provenance governance contract missing'],
+  [dataCiteRelationContract, 'DataCite Rawafid citation materialization contract missing'],
 ];
 
 for (const [ok, message] of checks) if (!ok) throw new Error(message);
