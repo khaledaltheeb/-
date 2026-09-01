@@ -24,12 +24,7 @@ export const CONTENT_RESOURCE_TYPES: Record<string, string> = {
   glossary: 'glossary_term',
 };
 
-const CONTENT_FIELDS = [
-  'id','content_type','slug','title','excerpt','body_json','body_text','audience','seo_title','seo_description',
-  'canonical_url','schema_json','featured_image_url','featured_image_alt','published_at','updated_at','primary_keyword',
-  'secondary_keywords','semantic_terms','search_intent','author_display_name','reviewer_display_name','reviewer_credentials',
-  'last_reviewed_at','references_json','medical_disclaimer','sector_id','category_id',
-].join(',');
+const CONTENT_FIELDS = 'id,content_type,slug,title,excerpt,body_json,body_text,audience,seo_title,seo_description,canonical_url,schema_json,featured_image_url,featured_image_alt,published_at,updated_at,primary_keyword,secondary_keywords,semantic_terms,search_intent,author_display_name,reviewer_display_name,reviewer_credentials,last_reviewed_at,references_json,medical_disclaimer,sector_id,category_id' as const;
 
 export type ApiCursor = { published_at: string; id: string };
 
@@ -163,7 +158,7 @@ function responseHeaders(requestId: string, cacheControl = 'public, max-age=0, s
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET,HEAD,OPTIONS',
     'Access-Control-Allow-Headers': 'Accept,Authorization,Content-Type,If-None-Match,If-Modified-Since',
-    'Access-Control-Expose-Headers': 'ETag,Last-Modified,RateLimit-Limit,RateLimit-Remaining,RateLimit-Reset,X-Request-Id',
+    'Access-Control-Expose-Headers': 'ETag,Last-Modified,X-Request-Id',
     'Cache-Control': cacheControl,
     'Content-Type': 'application/json; charset=utf-8',
     'Referrer-Policy': 'no-referrer',
@@ -245,7 +240,7 @@ export async function listPublicContent(request: Request, forcedType?: string) {
     : null;
 
   return jsonResponse(request, {
-    data: page.map((row) => serializePublicContent(row as Record<string, unknown>, false)),
+    data: page.map((row) => serializePublicContent(row as unknown as Record<string, unknown>, false)),
     pagination: { limit, has_more: hasMore, next_cursor: nextCursor },
     meta: {
       api_version: PUBLIC_API_VERSION,
@@ -270,7 +265,7 @@ export async function getPublicContent(request: Request, slug: string, forcedTyp
   if (error) return apiError(request, 503, 'upstream_unavailable', 'The public content catalog is temporarily unavailable.');
   if (!data) return apiError(request, 404, 'not_found', 'The requested public resource was not found.');
   return jsonResponse(request, {
-    data: serializePublicContent(data as Record<string, unknown>, true),
+    data: serializePublicContent(data as unknown as Record<string, unknown>, true),
     meta: { api_version: PUBLIC_API_VERSION, generated_at: new Date().toISOString() },
   }, { lastModified: data.updated_at ? String(data.updated_at) : null });
 }
