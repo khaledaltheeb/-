@@ -47,7 +47,7 @@ export async function GET(request: Request) {
     jsonSchemaDialect: 'https://json-schema.org/draft/2020-12/schema',
     servers: [{ url: `${SITE_URL}/api/v1`, description: 'Canonical production API' }],
     tags: [
-      { name: 'Discovery' }, { name: 'Content' }, { name: 'Search' }, { name: 'Taxonomy' }, { name: 'Synchronization' }, { name: 'Operations' },
+      { name: 'Discovery' }, { name: 'Content' }, { name: 'Sources' }, { name: 'Search' }, { name: 'Taxonomy' }, { name: 'Synchronization' }, { name: 'Operations' },
     ],
     paths: {
       '/': {
@@ -67,8 +67,28 @@ export async function GET(request: Request) {
       },
       '/content/{slug}/sources': {
         get: {
-          tags: ['Content'], operationId: 'getContentSources', security: partnerSecurity, parameters: [{ name: 'slug', in: 'path', required: true, schema: { type: 'string' } }],
-          responses: { '200': { description: 'Machine-readable source registry for a public content item' }, '404': { $ref: '#/components/responses/NotFound' }, ...partnerResponses },
+          tags: ['Content','Sources'], operationId: 'getContentSources', security: partnerSecurity, parameters: [{ name: 'slug', in: 'path', required: true, schema: { type: 'string' } }],
+          responses: { '200': { description: 'Normalized source registry relationships for a public content item' }, '404': { $ref: '#/components/responses/NotFound' }, ...partnerResponses },
+        },
+      },
+      '/sources': {
+        get: {
+          tags: ['Sources'], operationId: 'listSources', security: partnerSecurity,
+          parameters: [
+            { name: 'limit', in: 'query', schema: { type: 'integer', minimum: 1, maximum: 100, default: 25 } },
+            { name: 'offset', in: 'query', schema: { type: 'integer', minimum: 0, default: 0 } },
+            { name: 'publisher', in: 'query', schema: { type: 'string', maxLength: 160 } },
+            { name: 'type', in: 'query', schema: { type: 'string', maxLength: 80 } },
+            { name: 'q', in: 'query', schema: { type: 'string', maxLength: 160 } },
+          ],
+          responses: { '200': { description: 'Normalized sources cited by published, indexable Rawafid content' }, ...partnerResponses },
+        },
+      },
+      '/sources/{id}': {
+        get: {
+          tags: ['Sources'], operationId: 'getSource', security: partnerSecurity,
+          parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+          responses: { '200': { description: 'Source metadata, observed versions, and published content relationships' }, '400': { $ref: '#/components/responses/BadRequest' }, '404': { $ref: '#/components/responses/NotFound' }, ...partnerResponses },
         },
       },
       '/search': {
