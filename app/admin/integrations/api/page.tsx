@@ -27,9 +27,10 @@ export default async function PartnerApiAdminPage() {
   if (!profile?.is_active || !['owner','admin'].includes(profile.role)) redirect('/account');
 
   const { data, error } = await supabase.rpc('admin_api_partner_dashboard');
-  const dashboard = (data || { generated_at: new Date().toISOString(), partners: [] }) as Dashboard;
+  const dashboard = (data || { generated_at: '1970-01-01T00:00:00.000Z', partners: [] }) as Dashboard;
   const partners = Array.isArray(dashboard.partners) ? dashboard.partners : [];
-  const activeKeys = partners.flatMap(p=>p.keys || []).filter(k=>k.status==='active' && new Date(k.expires_at).getTime()>Date.now()).length;
+  const snapshotTime = Date.parse(dashboard.generated_at || '1970-01-01T00:00:00.000Z');
+  const activeKeys = partners.flatMap(p=>p.keys || []).filter(k=>k.status==='active' && Date.parse(k.expires_at)>snapshotTime).length;
   const todayUsage = partners.reduce((sum,p)=>sum+Number(p.usage_today||0),0);
 
   return <main className="dashboard-shell"><section className="dashboard-card">
