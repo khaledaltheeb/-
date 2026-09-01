@@ -20,6 +20,7 @@ on:
       - 'supabase/migrations/20260901204500_partner_api_admin_acl_hardening_v2.sql'
       - 'scripts/public-api-v1-contract.mjs'
       - 'scripts/public-api-v1-http-contract.mjs'
+      - 'scripts/public-api-feed-contract.mjs'
       - '.github/workflows/public-api-v1.yml'
   push:
     branches: [main]
@@ -39,6 +40,7 @@ on:
       - 'supabase/migrations/20260901204500_partner_api_admin_acl_hardening_v2.sql'
       - 'scripts/public-api-v1-contract.mjs'
       - 'scripts/public-api-v1-http-contract.mjs'
+      - 'scripts/public-api-feed-contract.mjs'
 
 permissions:
   contents: read
@@ -96,8 +98,10 @@ jobs:
           done
           cat /tmp/public-api-v1.log >&2 || true
           exit 1
-      - name: Full HTTP, privacy, synchronization and feed contract
+      - name: Full HTTP, privacy and synchronization contract
         run: node scripts/public-api-v1-http-contract.mjs
+      - name: Feed observability contract
+        run: node scripts/public-api-feed-contract.mjs
       - name: Stop server
         if: always()
         shell: bash
