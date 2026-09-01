@@ -1,3 +1,4 @@
+import { searchCrossref } from '@/lib/research-integrations/crossref';
 import { deduplicateEvidence } from '@/lib/research-integrations/dedupe';
 import { searchEuropePmc } from '@/lib/research-integrations/europe-pmc';
 import { ExternalServiceError } from '@/lib/research-integrations/http';
@@ -25,11 +26,41 @@ function failed(provider: EvidenceProvider, error: unknown): ProviderStatus {
   };
 }
 
-export async function discoverEvidence(options: { query: string; providers: EvidenceProvider[]; limit: number; europe_pmc_cursor?: string | null }) {
+export async function discoverEvidence(options: {
+  query: string;
+  providers: EvidenceProvider[];
+  limit: number;
+  europe_pmc_cursor?: string | null;
+  crossref_cursor?: string | null;
+  crossref_from_update_date?: string | null;
+  crossref_from_index_date?: string | null;
+}) {
   const tasks = options.providers.map(async (provider) => {
     if (provider === 'europe_pmc') {
       try {
-        const page = await searchEuropePmc({ query: options.query, page_size: options.limit, cursor_mark: options.europe_pmc_cursor, result_type: 'core', email: process.env.RESEARCH_API_CONTACT_EMAIL || 'contact@healthrenewal.org' });
+        const page = await searchEuropePmc({
+          query: options.query,
+          page_size: options.limit,
+          cursor_mark: options.europe_pmc_cursor,
+          result_type: 'core',
+          email: process.env.RESEARCH_API_CONTACT_EMAIL || 'contact@healthrenewal.org',
+        });
+        return { records: page.records, status: { provider, status: 'ok', returned: page.records.length, total: page.total, next_cursor: page.next_cursor } as ProviderStatus };
+      } catch (error) {
+        return { records: [] as EvidenceRecord[], status: failed(provider, error) };
+      }
+    }
+
+    if (provider === 'crossref') {
+      try {
+        const page = await searchCrossref({
+          query: options.query,
+          rows: Math.min(options.limit, 100),
+          cursor: options.crossref_cursor,
+          mailto: process.env.RESEARCH_API_CONTACT_EMAIL || 'contact@healthrenewal.org',
+          from_update_date: options.crossref_from_update_date,
+          from_index_date: options.crossref_from_index_date,
+        });
         return { records: page.records, status: { provider, status: 'ok', returned: page.records.length, total: page.total, next_cursor: page.next_cursor } as ProviderStatus };
       } catch (error) {
         return { records: [] as EvidenceRecord[], status: failed(provider, error) };
