@@ -30,7 +30,8 @@ Crossref is a default discovery provider in Public API v1.2. The implementation 
 - `crossref_from_update_date` and `crossref_from_index_date` support incremental discovery;
 - DOI, title, publisher, publication date, journal, authors, ORCID and citation counts are normalized where supplied;
 - Crossref `relation` and `update-to` metadata are preserved as normalized evidence relationships;
-- provider failures remain isolated from Europe PMC and Lens.
+- provider failures remain isolated from Europe PMC and Lens;
+- repeated discovery responses are edge-cacheable for a short period, while large-scale recurring ingestion should use a controlled local synchronization/snapshot strategy instead of unnecessary repeated upstream calls.
 
 Implementation: `lib/research-integrations/crossref.ts`.
 
@@ -58,7 +59,7 @@ Implementation: `lib/research-integrations/ror.ts` and `supabase/migrations/2026
 
 ## DataCite-style connection metadata
 
-The source registry now has first-class connection metadata rather than storing work relationships inside unstructured JSON:
+The source registry has first-class connection metadata rather than storing work relationships inside unstructured JSON:
 
 - `public.source_related_identifiers` stores a related identifier, its identifier type, relation type and optional scheme metadata;
 - `public.source_contributors` stores named creators/contributors with canonical ORCID URLs when available;
@@ -69,6 +70,31 @@ The source registry now has first-class connection metadata rather than storing 
 The database deliberately does not enforce a frozen enum of DataCite relation types. `relation_type` remains explicit and provenance-bearing so future DataCite additions can be accepted without a destructive schema migration.
 
 Implementation: `supabase/migrations/20260901212203_source_connection_metadata_v1.sql`.
+
+## Rights profiles — discoverability is not reuse permission
+
+The source registry separates the visibility of a source from the legal/contractual ability to reuse its metadata or content. This prevents a public or discoverable record from being treated automatically as reusable.
+
+`public.source_rights_profiles` can describe rights at source level or for a specific source version. It records independently:
+
+- metadata access status and metadata reuse status;
+- metadata license and terms URL;
+- content/data access status and content/data reuse status;
+- content license and terms URL;
+- the basis for the rights assertion (`provider_terms`, `record_license`, direct permission, public domain or another documented basis);
+- a verification timestamp and internal provenance.
+
+Unknown remains the conservative default. The API does not infer `allowed` merely because a record is public. Direct table access is denied to `anon` and `authenticated`; the bounded source-detail projection exposes the verified structured profile when one exists.
+
+## Translation provenance — multilingual metadata without false attribution
+
+For translated or localized source metadata, `public.source_translation_provenance` records how each translated field was produced rather than mixing the Arabic value into upstream metadata without provenance.
+
+The record includes source/target language, field path, translation method (`human`, `machine`, `hybrid`, `unknown`), tool and version for machine-assisted work, translator identity and ORCID/ROR affiliation when available, reviewer identity and review status, review time, and an optional SHA-256 fingerprint of the translated value.
+
+Database constraints prevent claiming a human/hybrid translation without a translator name, prevent machine/hybrid translation without a named tool, and prevent a reviewed/approved state without reviewer identity and review time. This supports auditability while keeping original-provider metadata distinguishable from Rawafid localization.
+
+Implementation: `supabase/migrations/20260901215918_source_governance_provenance_v1.sql`.
 
 ## Unified endpoint
 
@@ -93,11 +119,25 @@ Cross-provider de-duplication uses persistent identifiers first, with normalized
 
 The public API and feeds expose deterministic validators. API v1.2 honors both `If-None-Match` and `If-Modified-Since` for successful cacheable responses. RSS and JSON Feed return `503` with `Retry-After` if the canonical content catalog cannot be read, rather than emitting a successful but empty feed.
 
-The evidence-discovery route is edge-cacheable for a short period. This reduces repeated upstream calls while keeping discovery metadata reasonably fresh.
+The evidence-discovery route is edge-cacheable for a short period. This reduces repeated upstream calls while keeping discovery metadata reasonably fresh. For future high-volume harvesting, provider-specific synchronization state should preserve the provider cursor/watermark, retrieval time and provider version so ingestion can be resumed without using the public query endpoint as a bulk crawler.
 
 ## Rights and provenance boundary
 
 Rawafid discovery metadata is not a license grant. Reuse of abstracts, full text, supplementary files and other record components remains governed by each upstream record/source license and the provider terms. The API therefore returns normalized discovery metadata and deep links rather than assuming redistribution rights.
+
+Public source detail now exposes structured `rights_profiles` and `translations` in addition to related identifiers, ORCID/ROR connections, versions and citations. Empty arrays mean Rawafid has no structured assertion yet; they must not be interpreted as permission or as evidence that no translation occurred.
+
+## Architecture boundaries from partner guidance
+
+Not every useful external standard belongs inside the scholarly discovery endpoint:
+
+- Hypothesis belongs to annotation/review workflows rather than becoming a literature provider.
+- Open Referral belongs to provider/service-directory interoperability, where maintenance and human verification are as important as schema conformance.
+- openEHR belongs to clinical-record architecture/archetype/template work, not the public evidence API.
+- SNOMED CT remains a terminology/licensing track until the pending support route provides a precise permitted integration model.
+- Orphanet remains a specialized rare-disease data/licensing integration rather than being silently mixed into general research discovery.
+
+These boundaries keep Public API v1 stable and prevent incompatible rights or domain semantics from being hidden behind a generic provider label.
 
 ## Focused partner questions after implementation
 
@@ -119,4 +159,4 @@ No generic support question is necessary after this implementation. Rawafid shou
 
 ### DataCite
 
-The connection-metadata recommendation is now represented in the production source registry. A useful future follow-up should show concrete populated examples (RelatedIdentifier + ORCID + ROR) rather than asking another general schema question.
+The connection-metadata recommendation is represented in the production source registry. A useful future follow-up should show concrete populated examples (RelatedIdentifier + ORCID + ROR), plus the separate rights/translation provenance layer, rather than asking another general schema question.
