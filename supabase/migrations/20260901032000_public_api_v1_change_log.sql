@@ -61,7 +61,8 @@ begin
   elsif tg_op = 'DELETE' and old_public then
     event_name := 'archived';
   else
-    return coalesce(new, old);
+    if tg_op = 'DELETE' then return old; end if;
+    return new;
   end if;
 
   insert into public.api_change_log(content_id,event_type,slug,content_type,canonical_url,occurred_at)
@@ -74,7 +75,8 @@ begin
     now()
   );
 
-  return coalesce(new, old);
+  if tg_op = 'DELETE' then return old; end if;
+  return new;
 end;
 $$;
 
