@@ -2,7 +2,6 @@ name: Institutional Exchange V1
 
 on:
   pull_request:
-    branches: [main]
     paths:
       - 'app/api/v1/integrations/**'
       - 'lib/partner-api-v1.ts'
