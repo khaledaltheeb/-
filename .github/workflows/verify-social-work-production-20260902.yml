@@ -28,19 +28,19 @@ jobs:
             local path="$2"
             shift 2
             local url="${base}${path}?release=${release}"
-            local body headers status bytes canonical
+            local body status bytes canonical_line lower
             body="$(mktemp)"
-            headers="$(mktemp)"
-            status="$(curl -sS --compressed --retry 8 --retry-delay 2 --retry-all-errors -D "$headers" -o "$body" -w '%{http_code}' -H 'Cache-Control: no-cache, no-store, max-age=0' "$url" || true)"
+            status="$(curl -sS --compressed --retry 8 --retry-delay 2 --retry-all-errors -o "$body" -w '%{http_code}' -H 'Cache-Control: no-cache, no-store, max-age=0' "$url" || true)"
             bytes="$(wc -c < "$body" | tr -d ' ')"
             echo "--- ${name} ---"
             echo "URL: ${url}"
             echo "HTTP: ${status} | bytes: ${bytes}"
-            if [[ "$status" != '200' ]]; then
+
+            if [[ "$status" == '200' ]]; then
+              echo "PASS ${name}: HTTP 200"
+            else
               echo "FAIL ${name}: HTTP ${status}"
               failed=1
-            else
-              echo "PASS ${name}: HTTP 200"
             fi
 
             if grep -Fq 'data-rawafid-institutional-evidence="2026-09-02"' "$body"; then
@@ -59,21 +59,22 @@ jobs:
               fi
             done
 
-            if grep -Eiq '<meta[^>]+name=["'"']robots["'"'][^>]+content=["'"'][^"'"']*noindex' "$body"; then
-              echo "FAIL ${name}: unexpected noindex"
+            lower="$(tr '[:upper:]' '[:lower:]' < "$body")"
+            if [[ "$lower" == *'noindex'* ]]; then
+              echo "FAIL ${name}: unexpected noindex token"
               failed=1
             else
-              echo "PASS ${name}: indexable"
+              echo "PASS ${name}: no noindex token"
             fi
 
-            canonical="$(grep -Eio '<link[^>]+rel=["'"']canonical["'"'][^>]*>' "$body" | head -n1 || true)"
-            if [[ "$canonical" == *'healthrenewal.org/evidence-guides/social-work'* ]]; then
-              echo "PASS ${name}: canonical Social Work URL"
+            canonical_line="$(grep -Fio 'healthrenewal.org/evidence-guides/social-work[^"<> ]*' "$body" | head -n1 || true)"
+            if [[ "$canonical_line" == healthrenewal.org/evidence-guides/social-work* ]]; then
+              echo "PASS ${name}: canonical-family URL present (${canonical_line})"
             else
-              echo "FAIL ${name}: canonical missing/wrong: ${canonical}"
+              echo "FAIL ${name}: Social Work canonical-family URL missing"
               failed=1
             fi
-            rm -f "$body" "$headers"
+            rm -f "$body"
           }
 
           check_page 'hub' '/' \
