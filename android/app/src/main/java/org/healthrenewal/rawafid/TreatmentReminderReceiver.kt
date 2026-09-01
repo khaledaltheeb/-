@@ -65,6 +65,11 @@ class TreatmentReminderReceiver : BroadcastReceiver() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         val body = note.ifBlank { "هذا موعد أضفته أنت في روافد. افتح التطبيق لمراجعته." }
+        val publicVersion = NotificationCompat.Builder(context, NotificationChannels.TREATMENT)
+            .setSmallIcon(R.drawable.ic_launcher)
+            .setContentTitle("روافد · تذكير صحي")
+            .setContentText("لديك تذكير محفوظ. افتح روافد لعرض التفاصيل.")
+            .build()
         val notification = NotificationCompat.Builder(context, NotificationChannels.TREATMENT)
             .setSmallIcon(R.drawable.ic_launcher)
             .setContentTitle(title)
@@ -74,6 +79,8 @@ class TreatmentReminderReceiver : BroadcastReceiver() {
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_REMINDER)
+            .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
+            .setPublicVersion(publicVersion)
             .build()
         (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).notify(9000 + id, notification)
     }
