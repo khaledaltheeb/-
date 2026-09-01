@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { SITE_URL } from '@/lib/seo';
 import { publicContentHref } from '@/lib/public-content-routing';
 
-export const PUBLIC_API_VERSION = '1.1.0';
+export const PUBLIC_API_VERSION = '1.2.0';
 export const PUBLIC_API_BASE = '/api/v1';
 export const DEFAULT_LIMIT = 25;
 export const MAX_LIMIT = 100;
