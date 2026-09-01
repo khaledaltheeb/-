@@ -1,0 +1,33 @@
+name: API SDK Contract
+
+on:
+  pull_request:
+    paths:
+      - 'sdk/typescript/**'
+      - 'docs/API_VERSIONING_AND_DEPRECATION.md'
+      - 'scripts/api-sdk-contract.mjs'
+      - '.github/workflows/api-sdk-contract.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'sdk/typescript/**'
+      - 'docs/API_VERSIONING_AND_DEPRECATION.md'
+      - 'scripts/api-sdk-contract.mjs'
+      - '.github/workflows/api-sdk-contract.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: SDK/versioning contract
+        run: node scripts/api-sdk-contract.mjs
+      - name: Type check
+        run: npm ci && npm run typecheck
