@@ -1,4 +1,5 @@
 import { searchCrossref } from '@/lib/research-integrations/crossref';
+import { searchDataCite } from '@/lib/research-integrations/datacite';
 import { deduplicateEvidence } from '@/lib/research-integrations/dedupe';
 import { searchEuropePmc } from '@/lib/research-integrations/europe-pmc';
 import { ExternalServiceError } from '@/lib/research-integrations/http';
@@ -32,6 +33,7 @@ export async function discoverEvidence(options: {
   limit: number;
   europe_pmc_cursor?: string | null;
   crossref_cursor?: string | null;
+  datacite_cursor?: string | null;
   crossref_from_update_date?: string | null;
   crossref_from_index_date?: string | null;
 }) {
@@ -60,6 +62,20 @@ export async function discoverEvidence(options: {
           mailto: process.env.RESEARCH_API_CONTACT_EMAIL || 'contact@healthrenewal.org',
           from_update_date: options.crossref_from_update_date,
           from_index_date: options.crossref_from_index_date,
+        });
+        return { records: page.records, status: { provider, status: 'ok', returned: page.records.length, total: page.total, next_cursor: page.next_cursor } as ProviderStatus };
+      } catch (error) {
+        return { records: [] as EvidenceRecord[], status: failed(provider, error) };
+      }
+    }
+
+    if (provider === 'datacite') {
+      try {
+        const page = await searchDataCite({
+          query: options.query,
+          page_size: Math.min(options.limit, 100),
+          cursor: options.datacite_cursor,
+          contact_email: process.env.RESEARCH_API_CONTACT_EMAIL || 'contact@healthrenewal.org',
         });
         return { records: page.records, status: { provider, status: 'ok', returned: page.records.length, total: page.total, next_cursor: page.next_cursor } as ProviderStatus };
       } catch (error) {
