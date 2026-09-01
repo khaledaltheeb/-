@@ -29,6 +29,7 @@ export async function GET() {
     { path:'/downloads', changeFrequency:'weekly', priority:.62 },
     { path:'/citation', changeFrequency:'monthly', priority:.58 },
     { path:'/sources', changeFrequency:'monthly', priority:.62 },
+    { path:'/developers', changeFrequency:'weekly', priority:.64 },
     { path:'/open-source', changeFrequency:'weekly', priority:.68 },
     { path:'/open-source/arabic-rtl-a11y-toolkit', changeFrequency:'weekly', priority:.66 },
     { path:'/join', changeFrequency:'monthly', priority:.55 },
