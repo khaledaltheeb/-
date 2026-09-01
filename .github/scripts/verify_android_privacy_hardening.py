@@ -45,6 +45,23 @@ helper_content = text(helper)
 if helper_content.index("EncryptedLocalStore.put(context, encryptedKey, legacy)") > helper_content.index("legacyPrefs.edit().remove(legacyKey).apply()"):
     raise AssertionError("SensitiveLocalPayload must encrypt before removing the legacy plaintext copy")
 
+# Circle credentials/MFA codes must not be persisted in Activity saved state, and
+# the account surface must resist screenshots/screen recording while credentials are visible.
+account_path = "android/app/src/main/java/org/healthrenewal/rawafid/CircleAccountActivity.kt"
+require(
+    account_path,
+    "WindowManager.LayoutParams.FLAG_SECURE",
+    'var password by remember { mutableStateOf("") }',
+    'var passwordConfirmation by remember { mutableStateOf("") }',
+    'var mfaCode by remember { mutableStateOf("") }',
+)
+forbid(
+    account_path,
+    "var password by rememberSaveable",
+    "var passwordConfirmation by rememberSaveable",
+    "var mfaCode by rememberSaveable",
+)
+
 # Sensitive local domains must remain on the encrypted storage path.
 encrypted_contracts = {
     "android/app/src/main/java/org/healthrenewal/rawafid/WomenProfile.kt": ["rawafid_women_profile_v2", "EncryptedLocalStore.put"],
