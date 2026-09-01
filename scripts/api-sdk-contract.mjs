@@ -12,7 +12,7 @@ for (const marker of [
   "'/changes'",
   "'/sources'",
   'X-API-Key',
-  'Retry-After',
+  "response.headers.get('retry-after')",
 ]) {
   if (!sdk.includes(marker)) throw new Error(`Missing SDK marker: ${marker}`);
 }
