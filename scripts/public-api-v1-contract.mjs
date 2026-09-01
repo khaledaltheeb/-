@@ -17,10 +17,13 @@ const required = [
   'app/feed.json/route.ts',
   'app/magazine/feed.xml/route.ts',
   'app/developers/page.tsx',
+  'scripts/public-api-v1-http-contract.mjs',
+  'scripts/public-api-feed-contract.mjs',
   'supabase/migrations/20260901032000_public_api_v1_change_log.sql',
   'supabase/migrations/20260901035000_partner_api_core_v1.sql',
   'supabase/migrations/20260901203000_public_api_change_log_semantics_v2.sql',
   'supabase/migrations/20260901204500_partner_api_admin_acl_hardening_v2.sql',
+  'supabase/migrations/20260901205500_public_api_source_relation_index_v2.sql',
 ];
 
 let failed = false;
@@ -126,6 +129,9 @@ for (const marker of [
   'admin_api_partner_dashboard() from anon, public',
   'to authenticated, service_role',
 ]) if (!aclMigration.includes(marker)) fail(`partner admin ACL hardening missing ${marker}`);
+
+const relationIndexMigration = fs.readFileSync('supabase/migrations/20260901205500_public_api_source_relation_index_v2.sql', 'utf8');
+if (!relationIndexMigration.includes('content_sources_source_version_idx')) fail('source version relationship index missing');
 
 const rss = fs.readFileSync('app/feed.xml/route.ts', 'utf8');
 const jsonFeed = fs.readFileSync('app/feed.json/route.ts', 'utf8');
