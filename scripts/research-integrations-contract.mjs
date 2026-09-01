@@ -10,6 +10,7 @@ const required = [
   'lib/research-integrations/evidence-discovery.ts',
   'app/api/v1/evidence-discovery/route.ts',
   'app/api/openapi.json/route.ts',
+  'app/developers/page.tsx',
   'examples/lens-scholarly-demo/lens-demo.mjs',
   'docs/integrations/research-evidence.md',
   'supabase/migrations/20260901190000_ror_source_registry_v1.sql',
@@ -25,6 +26,7 @@ const ror = fs.readFileSync('lib/research-integrations/ror.ts', 'utf8');
 const europe = fs.readFileSync('lib/research-integrations/europe-pmc.ts', 'utf8');
 const route = fs.readFileSync('app/api/v1/evidence-discovery/route.ts', 'utf8');
 const openapi = fs.readFileSync('app/api/openapi.json/route.ts', 'utf8');
+const developers = fs.readFileSync('app/developers/page.tsx', 'utf8');
 const demo = fs.readFileSync('examples/lens-scholarly-demo/lens-demo.mjs', 'utf8');
 const migration = fs.readFileSync('supabase/migrations/20260901190000_ror_source_registry_v1.sql', 'utf8');
 const denyMigration = fs.readFileSync('supabase/migrations/20260901192000_ror_registry_explicit_deny.sql', 'utf8');
@@ -35,6 +37,18 @@ const lensRetractionGuard =
   lens.includes(".toLowerCase()") &&
   lens.includes("nature === 'retraction'") &&
   lens.includes('is_retracted: isRetracted(row.retraction_updates)');
+
+const developerEvidenceContract =
+  developers.includes('/api/v1/evidence-discovery') &&
+  developers.includes('providers=europe_pmc,lens') &&
+  developers.includes('europe_pmc') &&
+  developers.includes('LENS_SCHOLARLY_API_TOKEN') &&
+  developers.includes('not_configured') &&
+  developers.includes('ROR ID') &&
+  developers.includes('ORCID') &&
+  developers.includes('provenance') &&
+  developers.includes('إعادة نشر') &&
+  developers.includes('مجموعة بيانات مزود خارجي');
 
 const checks = [
   [lens.includes('https://api.lens.org/scholarly/search'), 'Lens Scholarly endpoint missing'],
@@ -50,6 +64,7 @@ const checks = [
   [route.includes("withOptionalPartnerAccess(request, 'search:read')"), 'Partner search scope missing'],
   [openapi.includes("'/evidence-discovery'"), 'Evidence discovery OpenAPI path missing'],
   [openapi.includes("operationId: 'discoverEvidence'"), 'Evidence discovery OpenAPI operation missing'],
+  [developerEvidenceContract, 'Public developer evidence-discovery documentation is incomplete'],
   [migration.includes('enable row level security'), 'ROR registry RLS missing'],
   [migration.includes('source_organizations'), 'ROR source relationship table missing'],
   [denyMigration.includes('as restrictive'), 'ROR explicit restrictive RLS policy missing'],
