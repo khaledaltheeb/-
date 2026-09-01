@@ -28,7 +28,8 @@ jobs:
             local path="$2"
             shift 2
             local url="${base}${path}?release=${release}"
-            local body status bytes canonical_line lower
+            local expected="https://healthrenewal.org/evidence-guides/social-work${path}"
+            local body status bytes lower
             body="$(mktemp)"
             status="$(curl -sS --compressed --retry 8 --retry-delay 2 --retry-all-errors -o "$body" -w '%{http_code}' -H 'Cache-Control: no-cache, no-store, max-age=0' "$url" || true)"
             bytes="$(wc -c < "$body" | tr -d ' ')"
@@ -67,11 +68,10 @@ jobs:
               echo "PASS ${name}: no noindex token"
             fi
 
-            canonical_line="$(grep -Fio 'healthrenewal.org/evidence-guides/social-work[^"<> ]*' "$body" | head -n1 || true)"
-            if [[ "$canonical_line" == healthrenewal.org/evidence-guides/social-work* ]]; then
-              echo "PASS ${name}: canonical-family URL present (${canonical_line})"
+            if grep -Fq 'rel="canonical"' "$body" && grep -Fq "href=\"${expected}\"" "$body"; then
+              echo "PASS ${name}: canonical ${expected}"
             else
-              echo "FAIL ${name}: Social Work canonical-family URL missing"
+              echo "FAIL ${name}: canonical tag missing/wrong; expected ${expected}"
               failed=1
             fi
             rm -f "$body"
