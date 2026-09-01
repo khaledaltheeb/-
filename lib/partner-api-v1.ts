@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { createClient } from '@/lib/supabase/server';
 
 export type PartnerScope = 'content:read' | 'sources:read' | 'search:read' | 'changes:read' | 'stats:read';
@@ -13,6 +13,7 @@ export type PartnerAuthorization = {
   key_prefix?: string;
   scope?: PartnerScope;
   scopes?: PartnerScope[];
+  reset_at?: string;
   minute?: { limit: number; remaining: number; reset_at: string };
   day?: { limit: number; remaining: number; reset_at: string };
 };
@@ -25,7 +26,7 @@ function readApiKey(request: Request) {
   return match?.[1]?.trim() || null;
 }
 
-function scopeHeader(authorization: PartnerAuthorization) {
+function scopeHeaders(authorization: PartnerAuthorization) {
   const minute = authorization.minute;
   const day = authorization.day;
   return {
@@ -55,13 +56,20 @@ export async function authorizePartnerRequest(request: Request, scope: PartnerSc
   const { data, error } = await supabase.rpc('api_partner_authorize', { p_key_hash: keyHash, p_scope: scope });
   if (error) return { authorization: { authorized: false, reason: 'authorization_unavailable' } as PartnerAuthorization, headers: {} as Record<string, string> };
   const authorization = (data || { authorized: false, reason: 'invalid_key' }) as PartnerAuthorization;
-  return { authorization, headers: authorization.authorized ? scopeHeader(authorization) : {} };
+  return { authorization, headers: authorization.authorized ? scopeHeaders(authorization) : {} };
+}
+
+export function decoratePartnerResponse(response: Response, headers: Record<string, string>) {
+  if (!Object.keys(headers).length) return response;
+  const merged = new Headers(response.headers);
+  for (const [key, value] of Object.entries(headers)) merged.set(key, value);
+  return new Response(response.body, { status: response.status, statusText: response.statusText, headers: merged });
 }
 
 export function partnerAuthError(request: Request, authorization: PartnerAuthorization) {
-  const requestId = request.headers.get('x-request-id') || crypto.randomUUID();
+  const requestId = request.headers.get('x-request-id')?.slice(0, 120) || randomUUID();
   if (authorization.reason === 'rate_limited') {
-    const reset = String((authorization as unknown as { reset_at?: string }).reset_at || '');
+    const reset = authorization.reset_at || '';
     const retryAfter = reset ? Math.max(1, Math.ceil((new Date(reset).getTime() - Date.now()) / 1000)) : 60;
     return new Response(JSON.stringify({ error: { code: 'rate_limited', message: 'Partner API quota exceeded.', request_id: requestId } }), {
       status: 429,
@@ -76,15 +84,13 @@ export function partnerAuthError(request: Request, authorization: PartnerAuthori
   const status = authorization.reason === 'scope_denied' ? 403 : authorization.reason === 'authorization_unavailable' ? 503 : 401;
   const code = authorization.reason === 'scope_denied' ? 'insufficient_scope' : authorization.reason === 'authorization_unavailable' ? 'authorization_unavailable' : 'invalid_api_key';
   const message = authorization.reason === 'scope_denied' ? 'The supplied API key does not grant this scope.' : authorization.reason === 'authorization_unavailable' ? 'Partner authorization is temporarily unavailable.' : 'A valid Rawafid Partner API key is required.';
-  return new Response(JSON.stringify({ error: { code, message, request_id: requestId } }), {
-    status,
-    headers: {
-      'Content-Type': 'application/json; charset=utf-8',
-      'Cache-Control': 'no-store',
-      'WWW-Authenticate': status === 401 ? 'Bearer realm="Rawafid Partner API"' : '',
-      'X-Request-Id': requestId,
-    },
-  });
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json; charset=utf-8',
+    'Cache-Control': 'no-store',
+    'X-Request-Id': requestId,
+  };
+  if (status === 401) headers['WWW-Authenticate'] = 'Bearer realm="Rawafid Partner API"';
+  return new Response(JSON.stringify({ error: { code, message, request_id: requestId } }), { status, headers });
 }
 
 export async function withOptionalPartnerAccess(request: Request, scope: PartnerScope) {
