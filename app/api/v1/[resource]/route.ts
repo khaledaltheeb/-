@@ -20,8 +20,10 @@ export async function GET(request: Request, context: { params: Promise<{ resourc
   const taxonomy = TAXONOMIES[resource];
   if (!taxonomy) return apiError(request, 404, 'not_found', 'The requested API resource does not exist.');
 
-  const rawLimit = Number(new URL(request.url).searchParams.get('limit') || 100);
-  const limit = Number.isInteger(rawLimit) && rawLimit > 0 ? Math.min(rawLimit, 500) : 100;
+  const limitRaw = new URL(request.url).searchParams.get('limit');
+  const limit = limitRaw === null ? 100 : Number(limitRaw);
+  if (!Number.isInteger(limit) || limit < 1 || limit > 500) return apiError(request, 400, 'invalid_parameter', 'limit must be an integer between 1 and 500.', 'limit');
+
   const supabase = await createClient();
   const { data, error } = await supabase
     .from(taxonomy.table)
