@@ -19,7 +19,11 @@ const comparativeKeys = [...comparative.matchAll(/\{slug:'([^']+)'/g)].map((matc
 const allContentKeys = new Set([...recoveredKeys.filter(Boolean), ...talentiaKeys.filter(Boolean), ...comparativeKeys.filter(Boolean)]);
 
 if (!route.includes('enrichSocialWorkInstitutionalPage')) fail('route does not invoke the institutional enrichment layer');
-if ((route.match(/enrichSocialWorkInstitutionalPage\(/g) || []).length < 3) fail('institutional layer must cover comparative, Talentia and recovered routes');
+const directInstitutionalCalls = (route.match(/enrichSocialWorkInstitutionalPage\(/g) || []).length;
+const finalizerCalls = (route.match(/finalizeSocialWorkPage\(/g) || []).length;
+const centralizedCoverage = route.includes('function finalizeSocialWorkPage') && directInstitutionalCalls >= 1 && finalizerCalls >= 4;
+const legacyCoverage = directInstitutionalCalls >= 3;
+if (!centralizedCoverage && !legacyCoverage) fail('institutional layer must cover comparative, Talentia and recovered routes, directly or through a shared finalizer');
 if (!route.includes('institutional-evidence-${SOCIAL_WORK_INSTITUTIONAL_RELEASE}')) fail('response provenance header is missing institutional release');
 
 const requiredFingerprints = [
