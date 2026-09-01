@@ -16,7 +16,9 @@ function decodeChangeCursor(value: string | null): ChangeCursor | null {
     const parsed = JSON.parse(Buffer.from(value, 'base64url').toString('utf8')) as Partial<ChangeCursor>;
     if (!parsed.occurred_at || !parsed.id || Number.isNaN(Date.parse(parsed.occurred_at))) return null;
     if (!/^[1-9][0-9]*$/.test(parsed.id)) return null;
-    return { occurred_at: new Date(parsed.occurred_at).toISOString(), id: parsed.id };
+    // Preserve the exact PostgreSQL timestamp string. Converting through JS Date would
+    // truncate microseconds and can repeat events when many changes share a millisecond.
+    return { occurred_at: parsed.occurred_at, id: parsed.id };
   } catch { return null; }
 }
 
