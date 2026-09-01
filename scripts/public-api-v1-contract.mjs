@@ -75,7 +75,7 @@ for (const marker of ['withOptionalPartnerAccess', "'sources:read'", 'normalizeD
 }
 
 const openapi = fs.readFileSync('app/api/openapi.json/route.ts', 'utf8');
-for (const marker of ["openapi: '3.1.0'", "version: '1.1.0'", "'/content/{slug}/sources'", "'/changes'", "'/search'", "'/stats'", 'PartnerApiKey', 'PartnerBearer', "'pages'"]) {
+for (const marker of ["openapi: '3.1.0'", "version: '1.1.0'", "'/content/{slug}/sources'", "'/changes'", "'/search'", "'/stats'", "'/integrations/crossref/works'", 'PartnerApiKey', 'PartnerBearer', "'pages'"]) {
   if (!openapi.includes(marker)) fail(`OpenAPI contract missing ${marker}`);
 }
 
