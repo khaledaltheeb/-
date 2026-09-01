@@ -9,12 +9,13 @@ const required = [
   'app/api/v1/integrations/[resource]/route.ts',
   'supabase/migrations/20260901213000_institutional_exchange_v1.sql',
   'supabase/migrations/20260901214000_institutional_exchange_scope_admin_v1.sql',
+  'supabase/migrations/20260901214500_institutional_exchange_content_resources_v1.sql',
 ];
 for (const path of required) if (!fs.existsSync(path)) fail(`missing ${path}`);
 
 const partner = read('lib/partner-api-v1.ts');
 for (const scope of [
-  'people:submit','specialists:submit','organizations:submit','courses:submit',
+  'people:submit','specialists:submit','organizations:submit','courses:submit','pages:submit','learning:submit',
   'events:submit','schedules:submit','imports:read','webhooks:manage',
 ]) if (!partner.includes(`'${scope}'`)) fail(`partner scope missing ${scope}`);
 for (const marker of ['partnerCredentialHash', "createHash('sha256')", 'Idempotency-Key']) {
@@ -24,7 +25,7 @@ if (/SERVICE_ROLE|service_role_key|NEXT_PUBLIC_SUPABASE_SERVICE/i.test(partner))
 
 const route = read('app/api/v1/integrations/[resource]/route.ts');
 for (const marker of [
-  "new Set(['person', 'specialist', 'organization', 'course', 'event', 'schedule'])",
+  "new Set(['person', 'specialist', 'organization', 'course', 'page', 'learning_path', 'event', 'schedule'])",
   "request.headers.get('idempotency-key')",
   'MAX_BODY_BYTES',
   'api_partner_submit_integration',
@@ -41,44 +42,32 @@ if (/SERVICE_ROLE|service_role_key|NEXT_PUBLIC_SUPABASE_SERVICE/i.test(route)) f
 
 const migration = read('supabase/migrations/20260901213000_institutional_exchange_v1.sql');
 for (const marker of [
-  'api_integration_items',
-  'api_integration_requests',
-  'unique(partner_id,resource_type,external_id)',
-  'unique(partner_id,idempotency_key)',
-  'payload_sha256',
-  'api_partner_submit_integration',
-  'api_partner_integration_status',
-  'admin_review_api_integration_item',
-  'admin_mark_api_integration_published',
-  'enable row level security',
-  'api_integration_items_deny_direct',
-  'api_integration_requests_deny_direct',
-  "status='accepted'",
-  "^https://healthrenewal\\.org/",
-  'pg_advisory_xact_lock',
-  'extensions.digest',
-  "set search_path=''",
+  'api_integration_items','api_integration_requests','unique(partner_id,resource_type,external_id)',
+  'unique(partner_id,idempotency_key)','payload_sha256','api_partner_submit_integration','api_partner_integration_status',
+  'admin_review_api_integration_item','admin_mark_api_integration_published','enable row level security',
+  'api_integration_items_deny_direct','api_integration_requests_deny_direct',"status='accepted'",
+  "^https://healthrenewal\\.org/",'pg_advisory_xact_lock','extensions.digest',"set search_path=''",
 ]) if (!migration.includes(marker)) fail(`exchange migration missing ${marker}`);
 
 for (const liveTable of ['public.specialists', 'public.organizations', 'public.content', 'public.centers']) {
   const directWrite = new RegExp(`(?:insert\\s+into|update|delete\\s+from)\\s+${liveTable.replace('.', '\\.')}`, 'i');
   if (directWrite.test(migration)) fail(`exchange migration writes directly to live table ${liveTable}`);
 }
-
 if (!migration.includes("octet_length(p_payload::text)>262144")) fail('database payload size ceiling missing');
 if (!migration.includes("octet_length(p_provenance::text)>65536")) fail('database provenance size ceiling missing');
 
 const admin = read('supabase/migrations/20260901214000_institutional_exchange_scope_admin_v1.sql');
 for (const marker of [
-  'admin_create_api_partner',
-  'admin_set_api_partner_scopes',
-  "'people:submit'",
-  "'courses:submit'",
-  "'webhooks:manage'",
-  "status='revoked'",
-  'not (scopes <@ p_scopes)',
-  "set search_path=''",
+  'admin_create_api_partner','admin_set_api_partner_scopes',"'people:submit'", "'courses:submit'",
+  "'pages:submit'", "'learning:submit'", "'webhooks:manage'", "status='revoked'",'not (scopes <@ p_scopes)',"set search_path=''",
 ]) if (!admin.includes(marker)) fail(`partner scope administration missing ${marker}`);
+
+const contentResources = read('supabase/migrations/20260901214500_institutional_exchange_content_resources_v1.sql');
+for (const marker of [
+  "'page'", "'learning_path'", "'pages:submit'", "'learning:submit'",
+  "when 'page' then 'pages:submit'", "when 'learning_path' then 'learning:submit'",
+  'api_integration_items_resource_type_check', 'api_partner_submit_integration',
+]) if (!contentResources.includes(marker)) fail(`content-resource exchange migration missing ${marker}`);
 
 if (failed) process.exit(1);
 console.log('RAWAFID INSTITUTIONAL EXCHANGE V1 GOVERNANCE CONTRACT OK');
