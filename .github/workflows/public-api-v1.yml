@@ -13,12 +13,17 @@ on:
       - 'lib/public-api-v1.ts'
       - 'lib/partner-api-v1.ts'
       - 'lib/feed-http.ts'
+      - 'lib/research-integrations/**'
       - 'components/trust-page.tsx'
       - 'supabase/migrations/20260901032000_public_api_v1_change_log.sql'
       - 'supabase/migrations/20260901035000_partner_api_core_v1.sql'
       - 'supabase/migrations/20260901212203_source_connection_metadata_v1.sql'
+      - 'supabase/migrations/20260901215918_source_governance_provenance_v1.sql'
+      - 'supabase/migrations/20260901221854_source_governance_provenance_indexes_v1.sql'
+      - 'supabase/migrations/20260901223500_datacite_content_relations_v1.sql'
       - 'scripts/public-api-v1-contract.mjs'
       - 'scripts/source-registry-v1-contract.mjs'
+      - 'scripts/research-integrations-contract.mjs'
       - '.github/workflows/public-api-v1.yml'
   push:
     branches: [main]
@@ -32,11 +37,17 @@ on:
       - 'lib/public-api-v1.ts'
       - 'lib/partner-api-v1.ts'
       - 'lib/feed-http.ts'
+      - 'lib/research-integrations/**'
       - 'supabase/migrations/20260901032000_public_api_v1_change_log.sql'
       - 'supabase/migrations/20260901035000_partner_api_core_v1.sql'
       - 'supabase/migrations/20260901212203_source_connection_metadata_v1.sql'
+      - 'supabase/migrations/20260901215918_source_governance_provenance_v1.sql'
+      - 'supabase/migrations/20260901221854_source_governance_provenance_indexes_v1.sql'
+      - 'supabase/migrations/20260901223500_datacite_content_relations_v1.sql'
       - 'scripts/public-api-v1-contract.mjs'
       - 'scripts/source-registry-v1-contract.mjs'
+      - 'scripts/research-integrations-contract.mjs'
+      - '.github/workflows/public-api-v1.yml'
 
 permissions:
   contents: read
@@ -75,6 +86,7 @@ jobs:
         run: |
           node scripts/public-api-v1-contract.mjs
           node scripts/source-registry-v1-contract.mjs
+          node scripts/research-integrations-contract.mjs
       - name: Type check
         run: npm run typecheck
       - name: Build production candidate
@@ -124,10 +136,12 @@ jobs:
           const xml=fs.readFileSync('/tmp/feed.xml','utf8');
           const magazine=fs.readFileSync('/tmp/magazine-feed.xml','utf8');
           if(discovery.version!=='1.2.0') throw new Error('bad API discovery version');
-          if(!discovery.evidence_discovery?.providers?.includes('crossref')) throw new Error('Crossref discovery provider missing');
+          for (const provider of ['europe_pmc','crossref','datacite','lens']) if(!discovery.evidence_discovery?.providers?.includes(provider)) throw new Error(`${provider} discovery provider missing`);
           if(openapi.openapi!=='3.1.0' || openapi.info?.version!=='1.2.0') throw new Error('bad OpenAPI version');
           if(!openapi.components?.securitySchemes?.PartnerApiKey) throw new Error('PartnerApiKey security scheme missing');
           if(!openapi.paths?.['/sources/{id}'] || !openapi.paths?.['/evidence-discovery']) throw new Error('source/evidence paths missing');
+          const evidenceParams=openapi.paths['/evidence-discovery'].get?.parameters||[];
+          if(!evidenceParams.some((p)=>p.name==='datacite_cursor')) throw new Error('DataCite cursor missing from OpenAPI');
           if(!Array.isArray(content.data) || !Array.isArray(pages.data)) throw new Error('content/pages data is not array');
           if(!stats.data || typeof stats.data.total!=='number') throw new Error('stats unavailable');
           if(!Array.isArray(changes.data)) throw new Error('change stream unavailable');
