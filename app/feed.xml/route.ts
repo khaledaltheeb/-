@@ -58,7 +58,7 @@ export async function GET(request: Request) {
     return feedUnavailable(request, 'The Rawafid content feed cannot be generated from the canonical catalog right now.');
   }
 
-  const lastBuild = rows[0]?.updated_at || rows[0]?.published_at || new Date().toISOString();
+  const lastBuild = rows[0]?.updated_at || rows[0]?.published_at || null;
   const items = rows.flatMap((row) => {
     if (!row?.slug || !row?.title) return [];
     const url = absolute(publicContentHref(row));
@@ -66,7 +66,8 @@ export async function GET(request: Request) {
     return [`<item><title>${escapeXml(row.title)}</title><link>${escapeXml(url)}</link><guid isPermaLink="true">${escapeXml(url)}</guid>${date ? `<pubDate>${escapeXml(new Date(date).toUTCString())}</pubDate>` : ''}${row.excerpt ? `<description>${escapeXml(row.excerpt)}</description>` : ''}</item>`];
   }).join('');
 
-  const xml = `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>روافد — أحدث المحتوى</title><link>${escapeXml(`${SITE_URL}/`)}</link><description>أحدث الصفحات المنشورة والمراجعة في منصة روافد.</description><language>ar</language><lastBuildDate>${escapeXml(new Date(lastBuild).toUTCString())}</lastBuildDate><atom:link href="${escapeXml(`${SITE_URL}/feed.xml`)}" rel="self" type="application/rss+xml"/>${items}</channel></rss>`;
+  const buildDate = lastBuild ? `<lastBuildDate>${escapeXml(new Date(lastBuild).toUTCString())}</lastBuildDate>` : '';
+  const xml = `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>روافد — أحدث المحتوى</title><link>${escapeXml(`${SITE_URL}/`)}</link><description>أحدث الصفحات المنشورة والمراجعة في منصة روافد.</description><language>ar</language>${buildDate}<atom:link href="${escapeXml(`${SITE_URL}/feed.xml`)}" rel="self" type="application/rss+xml"/>${items}</channel></rss>`;
 
   return feedResponse(request, xml, {
     contentType: 'application/rss+xml; charset=utf-8',
