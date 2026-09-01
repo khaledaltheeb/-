@@ -29,10 +29,17 @@ const demo = fs.readFileSync('examples/lens-scholarly-demo/lens-demo.mjs', 'utf8
 const migration = fs.readFileSync('supabase/migrations/20260901190000_ror_source_registry_v1.sql', 'utf8');
 const denyMigration = fs.readFileSync('supabase/migrations/20260901192000_ror_registry_explicit_deny.sql', 'utf8');
 
+const lensRetractionGuard =
+  lens.includes('function isRetracted') &&
+  lens.includes('update_nature') &&
+  lens.includes(".toLowerCase()") &&
+  lens.includes("nature === 'retraction'") &&
+  lens.includes('is_retracted: isRetracted(row.retraction_updates)');
+
 const checks = [
   [lens.includes('https://api.lens.org/scholarly/search'), 'Lens Scholarly endpoint missing'],
   [lens.includes('Bearer ${token}'), 'Lens Bearer authorization missing'],
-  [lens.includes('updateNature === \'retraction\''), 'Lens retraction semantic guard missing'],
+  [lensRetractionGuard, 'Lens retraction semantic guard missing'],
   [ror.includes('https://api.ror.org/v2/organizations'), 'ROR v2 endpoint missing'],
   [ror.includes('candidate.chosen === true'), 'ROR chosen:true selection missing'],
   [ror.includes('resolveRorFromDataset'), 'ROR dataset resolution missing'],
