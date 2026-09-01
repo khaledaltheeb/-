@@ -11,6 +11,8 @@ export type PartnerScope =
   | 'specialists:submit'
   | 'organizations:submit'
   | 'courses:submit'
+  | 'pages:submit'
+  | 'learning:submit'
   | 'events:submit'
   | 'schedules:submit'
   | 'imports:read'
