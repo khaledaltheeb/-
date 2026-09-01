@@ -1,27 +1,31 @@
 {
-  "release": "social-work-talentia-quality-hardening-2026-08-31",
-  "attempt": 5,
-  "merged_pr": 489,
-  "merge_sha": "84052d4120cc26913f76da63b2dc2b929a433b9c",
-  "verification_workflow_patch_sha": "84052d4120cc26913f76da63b2dc2b929a433b9c",
+  "release": "social-work-comparative-ethics-2026-09-01",
+  "attempt": 6,
+  "previous_merged_pr": 489,
   "legacy_source_repository": "khaledaltheeb/healthrenewal.org",
   "legacy_source_sha": "6911d5ee75bd6fc2dfa12f394d61efe46e87df17",
   "expected_live_urls": 56,
   "talentia_additive_pages": 7,
-  "talentia_inline_link_pages": 3,
-  "talentia_source": "Work, Values and Ethics – Ethical Guidelines for Social Welfare Professionals",
-  "talentia_reader": "https://talentia.lukusali.fi/index.html#/reader/c5aa171b-223d-43b7-9778-05a0d8cede8e",
-  "talentia_english_page": "https://www.talentia.fi/en/news/talentias-ethical-guidelines-are-now-available-in-english/",
+  "comparative_additive_pages": 15,
+  "comparative_hub": "international-comparative-practice",
+  "comparative_sources": [
+    "AvenirSocial — Berufskodex Soziale Arbeit Schweiz / Code de déontologie, effective 2026-01-01",
+    "Lithuania e-TAR — Order A1-448, Code of Ethics for Social Services Sector Workers, effective 2023-07-06",
+    "Lithuanian Association of Social Workers / PKTC methodological materials",
+    "Talentia Finland — Work, Values and Ethics",
+    "IFSW — Global Social Work Statement of Ethical Principles"
+  ],
   "quality_guards": [
-    "Rawafid-authored practical tools are explicitly distinguished from official Talentia material",
-    "scope and local-law warning is shown on all seven Talentia-backed pages",
-    "mixed Arabic-English editorial error corrected",
-    "production verification requires both Talentia links inside all three requested pages"
+    "National legal rules are explicitly separated from transferable professional principles",
+    "No source is described as reviewing, approving, supervising, endorsing, or partnering with Rawafid",
+    "Comparative pages use original-source links and jurisdiction labels",
+    "Existing 56 recovered Social Work URLs and seven Talentia pages remain preserved",
+    "Comparative pathway is added to the Social Work sitemap and hub"
   ],
   "required_source_fingerprints": [
     "DRUG4023",
     "2015081211140160",
     "2016091213042605"
   ],
-  "purpose": "Deploy the final Talentia Social Work editorial-quality hardening and independently verify 7/7 pages, 3/3 contextual Talentia link placements, source provenance, canonical/indexing, language quality, and preservation of all recovered Social Work URLs."
+  "purpose": "Deploy the AvenirSocial/Lithuania comparative Social Work ethics and practice pathway while preserving the recovered sector and existing Talentia implementation."
 }
