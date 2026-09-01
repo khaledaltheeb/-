@@ -9,6 +9,7 @@ on:
       - 'supabase/migrations/*global_source_registry*'
       - 'supabase/migrations/*ror_source_registry*'
       - 'supabase/migrations/*source_connection_metadata*'
+      - 'supabase/migrations/*source_governance_provenance*'
       - 'scripts/source-registry-v1-contract.mjs'
       - '.github/workflows/source-registry-v1.yml'
   push:
@@ -20,6 +21,7 @@ on:
       - 'supabase/migrations/*global_source_registry*'
       - 'supabase/migrations/*ror_source_registry*'
       - 'supabase/migrations/*source_connection_metadata*'
+      - 'supabase/migrations/*source_governance_provenance*'
       - 'scripts/source-registry-v1-contract.mjs'
       - '.github/workflows/source-registry-v1.yml'
 
