@@ -20,6 +20,7 @@ const sources = [
   'https://www.sightsavers.org/about-us/accessibility/',
   'https://www.sightsavers.org/organisational-inclusion/2021/09/improving-accessibility-testing/',
   'https://www.sightsavers.org/disability-and-inclusion/health/accessibility-standards/',
+  'https://www.sightsavers.org/wp-content/uploads/2020/03/Permissions-and-pack-contents.pdf',
   'https://www.sightsavers.org/disability-and-inclusion/health/resources/',
   'https://www.sightsavers.org/website-accessibility-statement/',
 ];
@@ -36,6 +37,10 @@ const requiredText = [
   '200%',
   'النص البديل',
   'إعادة الاختبار',
+  'Pregel, A., Smith, K. and Bridger, K. (2019). Accessibility standards and audit pack. Haywards Heath: Sightsavers',
+  'مادة محمية بحقوق النشر',
+  'ولا يعني ذلك ترخيصًا عامًا غير مقيد',
+  'بدل نسخ الحزمة بالجملة',
 ];
 for (const text of requiredText) if (!page.includes(text)) failures.push(`missing safeguard/practice text: ${text}`);
 if (!index.includes("'/sitemaps/sightsavers-accessibility.xml'")) failures.push('dedicated sitemap missing from sitemap index');
