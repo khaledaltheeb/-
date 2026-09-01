@@ -10,6 +10,7 @@ const required = [
   'supabase/migrations/20260901213000_institutional_exchange_v1.sql',
   'supabase/migrations/20260901214000_institutional_exchange_scope_admin_v1.sql',
   'supabase/migrations/20260901214500_institutional_exchange_content_resources_v1.sql',
+  'supabase/migrations/20260901215000_institutional_exchange_idempotency_serialization_v1.sql',
 ];
 for (const path of required) if (!fs.existsSync(path)) fail(`missing ${path}`);
 
@@ -28,7 +29,7 @@ for (const marker of [
   "new Set(['person', 'specialist', 'organization', 'course', 'page', 'learning_path', 'event', 'schedule'])",
   "request.headers.get('idempotency-key')",
   'MAX_BODY_BYTES',
-  'api_partner_submit_integration',
+  'api_partner_submit_integration_serialized',
   'api_partner_integration_status',
   'review_required: true',
   "publication_boundary: 'Submissions enter governed staging",
@@ -68,6 +69,15 @@ for (const marker of [
   "when 'page' then 'pages:submit'", "when 'learning_path' then 'learning:submit'",
   'api_integration_items_resource_type_check', 'api_partner_submit_integration',
 ]) if (!contentResources.includes(marker)) fail(`content-resource exchange migration missing ${marker}`);
+
+const serialized = read('supabase/migrations/20260901215000_institutional_exchange_idempotency_serialization_v1.sql');
+for (const marker of [
+  'api_partner_submit_integration_serialized',
+  'pg_advisory_xact_lock',
+  "coalesce(v_partner_id::text,p_key_hash)||':'||p_idempotency_key",
+  'public.api_partner_submit_integration(',
+  "set search_path=''",
+]) if (!serialized.includes(marker)) fail(`serialized idempotency migration missing ${marker}`);
 
 if (failed) process.exit(1);
 console.log('RAWAFID INSTITUTIONAL EXCHANGE V1 GOVERNANCE CONTRACT OK');
