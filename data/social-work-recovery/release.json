@@ -1,12 +1,12 @@
 {
   "release": "social-work-comparative-ethics-2026-09-01",
-  "attempt": 6,
+  "attempt": 7,
   "previous_merged_pr": 489,
   "legacy_source_repository": "khaledaltheeb/healthrenewal.org",
   "legacy_source_sha": "6911d5ee75bd6fc2dfa12f394d61efe46e87df17",
   "expected_live_urls": 56,
   "talentia_additive_pages": 7,
-  "comparative_additive_pages": 15,
+  "comparative_additive_pages": 16,
   "comparative_hub": "international-comparative-practice",
   "comparative_sources": [
     "AvenirSocial — Berufskodex Soziale Arbeit Schweiz / Code de déontologie, effective 2026-01-01",
@@ -27,5 +27,5 @@
     "2015081211140160",
     "2016091213042605"
   ],
-  "purpose": "Deploy the AvenirSocial/Lithuania comparative Social Work ethics and practice pathway while preserving the recovered sector and existing Talentia implementation."
+  "purpose": "Deploy the 16-page AvenirSocial/Lithuania comparative Social Work ethics and practice pathway while preserving the recovered sector and existing Talentia implementation."
 }
