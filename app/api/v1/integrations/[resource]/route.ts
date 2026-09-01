@@ -4,7 +4,7 @@ import { partnerCredentialHash } from '@/lib/partner-api-v1';
 
 export const dynamic = 'force-dynamic';
 
-const RESOURCE_TYPES = new Set(['person', 'specialist', 'organization', 'course', 'event', 'schedule']);
+const RESOURCE_TYPES = new Set(['person', 'specialist', 'organization', 'course', 'page', 'learning_path', 'event', 'schedule']);
 const MAX_BODY_BYTES = 320 * 1024;
 
 function integrationHeaders(response: Response) {
