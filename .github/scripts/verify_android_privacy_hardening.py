@@ -27,6 +27,13 @@ def forbid(path: str, *markers: str) -> None:
 
 
 # Keystore-backed encrypted-at-rest foundation and migration ordering.
+require(
+    "android/app/src/main/java/org/healthrenewal/rawafid/EncryptedLocalStore.kt",
+    "AndroidKeyStore",
+    "AES/GCM/NoPadding",
+    ".commit()",
+    "@Synchronized",
+)
 helper = "android/app/src/main/java/org/healthrenewal/rawafid/SensitiveLocalPayload.kt"
 require(
     helper,
@@ -94,8 +101,14 @@ for path in [
     "android/app/src/main/java/org/healthrenewal/rawafid/WomenActivity.kt",
     "android/app/src/main/java/org/healthrenewal/rawafid/WomenCarePlannerActivity.kt",
     "android/app/src/main/java/org/healthrenewal/rawafid/MedicationCompanionActivity.kt",
+    "android/app/src/main/java/org/healthrenewal/rawafid/TreatmentReminderReceiver.kt",
 ]:
     require(path, "VISIBILITY_PRIVATE", "setPublicVersion")
+require(
+    "android/app/src/main/java/org/healthrenewal/rawafid/NotificationSystem.kt",
+    "NotificationChannel(TREATMENT",
+    "lockscreenVisibility = Notification.VISIBILITY_PRIVATE",
+)
 
 # Emergency Beacon is the explicit exception: the user turns it on specifically to show assistance data publicly.
 require(
@@ -144,8 +157,11 @@ require(
     'return json({ error: "push_failed" }, 500)',
 )
 
-# QR linking must not request direct camera permission from the app or auto-send a connection request.
+# Manifest-wide privacy defaults and QR linking must not regress.
 manifest = text("android/app/src/main/AndroidManifest.xml")
+for marker in ['android:allowBackup="false"', 'android:usesCleartextTraffic="false"']:
+    if marker not in manifest:
+        raise AssertionError(f"AndroidManifest.xml: missing privacy default {marker}")
 if "android.permission.CAMERA" in manifest:
     raise AssertionError("Google Code Scanner flow must remain camera-permissionless in the app manifest")
 
