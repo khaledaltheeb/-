@@ -42,6 +42,22 @@ requireMarkers('supabase/migrations/20260901212203_source_connection_metadata_v1
   'revoke all on table public.source_related_identifiers from anon, authenticated',
 ]);
 
+requireMarkers('supabase/migrations/20260901215918_source_governance_provenance_v1.sql', [
+  'create table if not exists public.source_rights_profiles',
+  'create table if not exists public.source_translation_provenance',
+  'metadata_reuse_status',
+  'content_reuse_status',
+  'source_translation_human_attribution_check',
+  'source_translation_machine_tool_check',
+  'source_translation_review_attribution_check',
+  "'rights_profiles'",
+  "'translations'",
+  'alter table public.source_rights_profiles enable row level security',
+  'alter table public.source_translation_provenance enable row level security',
+  'revoke all on table public.source_rights_profiles from anon, authenticated',
+  'revoke all on table public.source_translation_provenance from anon, authenticated',
+]);
+
 requireMarkers('app/api/v1/sources/route.ts', [
   "withOptionalPartnerAccess(request, 'sources:read')",
   "supabase.rpc('api_source_registry'",
@@ -55,4 +71,4 @@ requireMarkers('app/api/v1/content/[slug]/sources/route.ts', [
   "registry: 'normalized-v1'",
 ]);
 
-console.log('Source Registry V1 + connection metadata contract passed.');
+console.log('Source Registry V1 + connection metadata + rights/translation provenance contract passed.');
