@@ -285,8 +285,8 @@ export function enrichSocialWorkResearchDepth(inputHtml: string, key: string) {
   if (inputHtml.includes(MARKER)) return injectStyle(inputHtml);
   const profile = key ? PROFILES[key] : undefined;
   if (key && !profile) return inputHtml;
-  let html = injectStyle(inputHtml);
-  const layer = key ? pageLayer(profile as ResearchProfile) : hubLayer();
+  const html = injectStyle(inputHtml);
+  const layer = profile ? pageLayer(profile) : hubLayer();
   if (html.includes('</main>')) return html.replace('</main>', `${layer}</main>`);
   if (html.includes('</body>')) return html.replace('</body>', `<main>${layer}</main></body>`);
   return `${html}${layer}`;
