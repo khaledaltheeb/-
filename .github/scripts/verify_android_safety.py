@@ -30,6 +30,10 @@ android_text = "\n".join(
     if path.is_file() and path.suffix in {".kt", ".kts", ".xml", ".json", ".properties"}
 )
 
+circle_notifications = (SRC / "CircleNotificationSystem.kt").read_text(encoding="utf-8")
+treatment_notifications = (SRC / "TreatmentReminderReceiver.kt").read_text(encoding="utf-8")
+vault_files = (SRC / "LifeVaultFileStore.kt").read_text(encoding="utf-8")
+
 checks = {
     "manifest background location": "android.permission.ACCESS_BACKGROUND_LOCATION" in MANIFEST,
     "manifest foreground location service": 'android:foregroundServiceType="location"' in MANIFEST,
@@ -37,8 +41,10 @@ checks = {
     "safety monitor cloud RPC": "broadcastSafetyLocation" in (SRC / "SafetyMonitorActivity.kt").read_text(encoding="utf-8"),
     "safety monitor pre-alert cancel": "أنا بخير — لا ترسل" in (SRC / "SafetyMonitorActivity.kt").read_text(encoding="utf-8"),
     "safety monitor SMS optional policy": "requiresSmsPermission" in (SRC / "SafetyDeliveryPolicy.kt").read_text(encoding="utf-8"),
-    "circle boot restore": "CircleNotificationScheduler.ensureScheduled(context)" in (SRC / "TreatmentReminderReceiver.kt").read_text(encoding="utf-8"),
-    "circle lockscreen privacy": "VISIBILITY_PRIVATE" in (SRC / "CircleNotificationSystem.kt").read_text(encoding="utf-8"),
+    "circle boot restore": "CircleNotificationScheduler.ensureScheduled(context)" in treatment_notifications,
+    "circle lockscreen privacy": "VISIBILITY_PRIVATE" in circle_notifications and "setPublicVersion" in circle_notifications,
+    "circle notification actions require unlock": "setAuthenticationRequired(true)" in circle_notifications,
+    "treatment lockscreen privacy": "VISIBILITY_PRIVATE" in treatment_notifications and "setPublicVersion" in treatment_notifications,
     "Firebase config package": "org.healthrenewal.rawafid" in registered_packages,
     "Firebase Messaging dependency": 'implementation("com.google.firebase:firebase-messaging")' in APP_GRADLE,
     "Google Services Gradle plugin": 'id("com.google.gms.google-services")' in APP_GRADLE,
@@ -55,8 +61,9 @@ checks = {
     "Firebase Admin key downloads ignored": "firebase-adminsdk*.json" in GITIGNORE and "*serviceAccountKey*.json" in GITIGNORE,
     "no Firebase private key in Android": "BEGIN PRIVATE KEY" not in android_text and "FIREBASE_PRIVATE_KEY" not in android_text,
     "no Supabase service role secret in Android": "SUPABASE_SERVICE_ROLE_KEY" not in android_text,
-    "vault AES-GCM": "AES/GCM/NoPadding" in (SRC / "LifeVaultFileStore.kt").read_text(encoding="utf-8"),
-    "vault Android Keystore": "AndroidKeyStore" in (SRC / "LifeVaultFileStore.kt").read_text(encoding="utf-8"),
+    "vault AES-GCM": "AES/GCM/NoPadding" in vault_files,
+    "vault Android Keystore": "AndroidKeyStore" in vault_files,
+    "vault keystore initialization serialized": "@Synchronized" in vault_files,
     "vault encrypted import wired": "LifeVaultFileStore.importEncrypted" in (SRC / "LifeVaultActivity.kt").read_text(encoding="utf-8"),
 }
 
