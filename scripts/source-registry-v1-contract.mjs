@@ -30,6 +30,18 @@ requireMarkers('supabase/migrations/20260901081500_global_source_registry_conten
   'c.robots_index=true',
 ]);
 
+requireMarkers('supabase/migrations/20260901212203_source_connection_metadata_v1.sql', [
+  'create table if not exists public.source_related_identifiers',
+  'create table if not exists public.source_contributors',
+  'create table if not exists public.source_contributor_organizations',
+  'source_contributors_orcid_canonical',
+  "'related_identifiers'",
+  "'contributors'",
+  "'organizations'",
+  'enable row level security',
+  'revoke all on table public.source_related_identifiers from anon, authenticated',
+]);
+
 requireMarkers('app/api/v1/sources/route.ts', [
   "withOptionalPartnerAccess(request, 'sources:read')",
   "supabase.rpc('api_source_registry'",
@@ -43,4 +55,4 @@ requireMarkers('app/api/v1/content/[slug]/sources/route.ts', [
   "registry: 'normalized-v1'",
 ]);
 
-console.log('Source Registry V1 contract passed.');
+console.log('Source Registry V1 + connection metadata contract passed.');
