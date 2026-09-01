@@ -81,7 +81,7 @@ export async function POST(request: Request, context: { params: Promise<{ resour
   if (!provenance || typeof provenance !== 'object' || Array.isArray(provenance)) return errorResponse(request, 400, 'invalid_payload', 'provenance must be a JSON object.', 'provenance');
 
   const supabase = await createClient();
-  const { data, error } = await supabase.rpc('api_partner_submit_integration', {
+  const { data, error } = await supabase.rpc('api_partner_submit_integration_serialized', {
     p_key_hash: keyHash,
     p_resource_type: resourceType,
     p_external_id: externalId,
