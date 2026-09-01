@@ -4,7 +4,12 @@ const sitemap=fs.readFileSync('app/sitemaps/als-mnd.xml/route.ts','utf8');
 const failures=[];
 for(const token of ['فهم ALS/MND','العيش مع ALS/MND','العلاج والرعاية','اتخاذ إجراء','https://www.als-mnd.org/about-us/als-mnd-health-literacy-map/','https://www.als-mnd.org/find-als-mnd-association/','لا يعني أن Alliance راجعته أو اعتمدته']) if(!page.includes(token)) failures.push(`missing: ${token}`);
 for(const path of ['/evidence-guides/als-mnd/','/evidence-guides/als-mnd/understanding/','/evidence-guides/als-mnd/living/','/evidence-guides/als-mnd/treatment/','/evidence-guides/als-mnd/action/']) if(!sitemap.includes(path)) failures.push(`sitemap missing: ${path}`);
-if(!page.includes("buildSeoMetadata")) failures.push('central SEO metadata contract missing');
+if(!page.includes('buildSeoMetadata')) failures.push('central SEO metadata contract missing');
+if(!page.includes('application/ld+json')) failures.push('JSON-LD script missing');
+if(!page.includes("['MedicalWebPage', 'Article']")) failures.push('child evidence guides must expose MedicalWebPage + Article structured data');
+if(!page.includes("'CollectionPage'")) failures.push('ALS/MND landing page must expose CollectionPage structured data');
+if(!page.includes("inLanguage: 'ar'")) failures.push('structured data must declare Arabic language');
+if(!page.includes('citation: [MAP, DIRECTORY]')) failures.push('structured data must preserve Alliance source citations');
 if(!page.includes('/content/palliative-care-als-motor-neuron-disease')) failures.push('existing palliative-care content must be reused rather than duplicated');
 if(!page.includes('/capabilities/amyotrophic-lateral-sclerosis/')) failures.push('existing capabilities content must be reused rather than duplicated');
 if(failures.length){console.error(failures.join('\n'));process.exit(1)}
