@@ -129,6 +129,20 @@ function requestIdFor(request: Request) {
   return /^[A-Za-z0-9][A-Za-z0-9._:-]{0,63}$/.test(supplied) ? supplied : randomUUID();
 }
 
+function latestTimestamp(values: unknown[]) {
+  let latest: string | null = null;
+  let latestMs = -Infinity;
+  for (const value of values) {
+    if (typeof value !== 'string') continue;
+    const parsed = Date.parse(value);
+    if (!Number.isNaN(parsed) && parsed > latestMs) {
+      latestMs = parsed;
+      latest = value;
+    }
+  }
+  return latest;
+}
+
 export function serializePublicContent(row: Record<string, unknown>, includeBody = false) {
   const canonicalPath = publicContentHref({
     slug: asString(row.slug),
@@ -171,9 +185,11 @@ export function serializePublicContent(row: Record<string, unknown>, includeBody
 }
 
 export function parseLimit(request: Request) {
-  const raw = Number(new URL(request.url).searchParams.get('limit') || DEFAULT_LIMIT);
-  if (!Number.isInteger(raw) || raw < 1) return DEFAULT_LIMIT;
-  return Math.min(raw, MAX_LIMIT);
+  const value = new URL(request.url).searchParams.get('limit');
+  if (value === null) return DEFAULT_LIMIT;
+  const raw = Number(value);
+  if (!Number.isInteger(raw) || raw < 1 || raw > MAX_LIMIT) return null;
+  return raw;
 }
 
 export function encodeCursor(cursor: ApiCursor) {
@@ -253,11 +269,16 @@ export function jsonResponse(
 export async function listPublicContent(request: Request, forcedType?: string | string[]) {
   const url = new URL(request.url);
   const limit = parseLimit(request);
+  if (limit === null) return apiError(request, 400, 'invalid_parameter', `limit must be an integer between 1 and ${MAX_LIMIT}.`, 'limit');
+
   const cursorRaw = url.searchParams.get('cursor');
   const cursor = decodeCursor(cursorRaw);
   if (cursorRaw && !cursor) return apiError(request, 400, 'invalid_cursor', 'The cursor is invalid or expired.', 'cursor');
 
   const requestedType = forcedType || asString(url.searchParams.get('type'));
+  if (!Array.isArray(requestedType) && requestedType && !/^[a-z][a-z0-9_-]{0,79}$/.test(requestedType)) {
+    return apiError(request, 400, 'invalid_parameter', 'type must be a valid content type identifier.', 'type');
+  }
   const publishedAfterRaw = url.searchParams.get('published_after');
   const updatedAfterRaw = url.searchParams.get('updated_after');
   const publishedAfter = parseIsoDate(publishedAfterRaw);
@@ -289,6 +310,7 @@ export async function listPublicContent(request: Request, forcedType?: string | 
   const page = rows.slice(0, limit);
   const tail = page.at(-1);
   const nextCursor = hasMore && tail?.published_at && tail?.id ? encodeCursor({ published_at: String(tail.published_at), id: String(tail.id) }) : null;
+  const latestModified = latestTimestamp(page.map((row) => row.updated_at));
 
   return jsonResponse(request, {
     data: page.map((row) => serializePublicContent(row as unknown as Record<string, unknown>, false)),
@@ -298,7 +320,7 @@ export async function listPublicContent(request: Request, forcedType?: string | 
       generated_at: new Date().toISOString(),
       filters: { type: requestedType || null, published_after: publishedAfter, updated_after: updatedAfter },
     },
-  }, { lastModified: page[0]?.updated_at ? String(page[0].updated_at) : null });
+  }, { lastModified: latestModified });
 }
 
 export async function getPublicContent(request: Request, slug: string, forcedType?: string) {
