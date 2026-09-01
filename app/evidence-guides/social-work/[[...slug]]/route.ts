@@ -2,6 +2,7 @@ import { SOCIAL_WORK_PAGES, SOCIAL_WORK_SOURCE_SHA } from '@/lib/social-work-pag
 import { SOCIAL_WORK_TALENTIA_PAGES, enrichSocialWorkPageWithTalentia } from '@/lib/social-work-talentia-pages';
 import { enrichTalentiaPageWithInlineLinks } from '@/lib/social-work-talentia-inline-links';
 import { hardenTalentiaPageQuality } from '@/lib/social-work-talentia-quality';
+import { hardenEvidenceGuideHtml } from '@/lib/evidence-guide-html-seo';
 
 type Params = Promise<{ slug?: string[] }>;
 
@@ -16,6 +17,16 @@ const htmlHeaders = {
 
 export const dynamic = 'force-static';
 
+function finalizeHtml(html: string, key: string) {
+  const canonicalPath = key
+    ? `/evidence-guides/social-work/${key}/`
+    : '/evidence-guides/social-work/';
+  return hardenEvidenceGuideHtml(html, {
+    canonicalPath,
+    schemaType: key ? 'Article' : 'WebPage',
+  });
+}
+
 export async function GET(_request: Request, { params }: { params: Params }) {
   const { slug = [] } = await params;
   if (slug.length > 1) {
@@ -26,7 +37,8 @@ export async function GET(_request: Request, { params }: { params: Params }) {
   const talentiaHtml = SOCIAL_WORK_TALENTIA_PAGES[key];
   if (talentiaHtml) {
     const withInlineLinks = enrichTalentiaPageWithInlineLinks(talentiaHtml, key);
-    return new Response(hardenTalentiaPageQuality(withInlineLinks, key), { status: 200, headers: htmlHeaders });
+    const qualityHardened = hardenTalentiaPageQuality(withInlineLinks, key);
+    return new Response(finalizeHtml(qualityHardened, key), { status: 200, headers: htmlHeaders });
   }
 
   const recoveredHtml = SOCIAL_WORK_PAGES[key];
@@ -34,5 +46,6 @@ export async function GET(_request: Request, { params }: { params: Params }) {
     return new Response('Not Found', { status: 404, headers: { 'content-type': 'text/plain; charset=utf-8' } });
   }
 
-  return new Response(enrichSocialWorkPageWithTalentia(recoveredHtml, key), { status: 200, headers: htmlHeaders });
+  const enriched = enrichSocialWorkPageWithTalentia(recoveredHtml, key);
+  return new Response(finalizeHtml(enriched, key), { status: 200, headers: htmlHeaders });
 }

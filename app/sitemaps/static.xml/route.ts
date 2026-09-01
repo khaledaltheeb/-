@@ -19,6 +19,7 @@ export async function GET() {
     { path:'/resources/worksheets', changeFrequency:'monthly', priority:.66 },
     { path:'/resources/infographics', changeFrequency:'monthly', priority:.7 },
     ...infographics.map((item) => ({ path:`/resources/infographics/${item.slug}`, changeFrequency:'monthly' as const, priority:.68 })),
+    { path:'/research-tools/doi-resolver/', changeFrequency:'monthly', priority:.72 },
     { path:'/tools', changeFrequency:'weekly', priority:.7 },
     { path:'/tools/compare', changeFrequency:'monthly', priority:.64 },
     { path:'/tools/quiz', changeFrequency:'monthly', priority:.64 },
