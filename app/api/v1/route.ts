@@ -11,9 +11,10 @@ export async function GET(request: Request) {
     ],
     evidence_discovery: {
       href: '/api/v1/evidence-discovery',
-      providers: ['europe_pmc','lens'],
-      default_provider: 'europe_pmc',
+      providers: ['europe_pmc','crossref','lens'],
+      default_providers: ['europe_pmc','crossref','lens'],
       lens_requires_server_configuration: true,
+      provider_cursors_are_independent: true,
     },
   }, { cacheControl: 'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400' });
 }
