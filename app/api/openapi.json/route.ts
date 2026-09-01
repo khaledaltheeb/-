@@ -47,7 +47,7 @@ export async function GET(request: Request) {
     jsonSchemaDialect: 'https://json-schema.org/draft/2020-12/schema',
     servers: [{ url: `${SITE_URL}/api/v1`, description: 'Canonical production API' }],
     tags: [
-      { name: 'Discovery' }, { name: 'Content' }, { name: 'Sources' }, { name: 'Search' }, { name: 'Taxonomy' }, { name: 'Synchronization' }, { name: 'Operations' },
+      { name: 'Discovery' }, { name: 'Content' }, { name: 'Sources' }, { name: 'Search' }, { name: 'Evidence' }, { name: 'Taxonomy' }, { name: 'Synchronization' }, { name: 'Operations' },
     ],
     paths: {
       '/': {
@@ -98,6 +98,23 @@ export async function GET(request: Request) {
             { name: 'type', in: 'query', schema: { type: 'string' } },
             { name: 'limit', in: 'query', schema: { type: 'integer', minimum: 1, maximum: 100, default: 20 }, description: 'Anonymous maximum is 50; authenticated partner maximum is 100.' },
           ], responses: { '200': { description: 'Search results' }, '400': { $ref: '#/components/responses/BadRequest' }, ...partnerResponses },
+        },
+      },
+      '/evidence-discovery': {
+        get: {
+          tags: ['Evidence'], operationId: 'discoverEvidence', security: partnerSecurity,
+          description: 'Search normalized scholarly metadata across Europe PMC and, when configured, Lens Scholarly API. Europe PMC remains available if Lens is not configured or temporarily unavailable.',
+          parameters: [
+            { name: 'q', in: 'query', required: true, schema: { type: 'string', minLength: 2, maxLength: 500 } },
+            { name: 'providers', in: 'query', schema: { type: 'string', default: 'europe_pmc,lens' }, description: 'Comma-separated provider list. Allowed values: europe_pmc,lens.' },
+            { name: 'limit', in: 'query', schema: { type: 'integer', minimum: 1, maximum: 100, default: 20 }, description: 'Anonymous maximum is 50; authenticated partner maximum is 100.' },
+            { name: 'cursor', in: 'query', schema: { type: 'string' }, description: 'Europe PMC cursorMark returned in the provider status object.' },
+          ],
+          responses: {
+            '200': { description: 'Normalized scholarly evidence records with per-provider status and provenance.' },
+            '400': { $ref: '#/components/responses/BadRequest' },
+            ...partnerResponses,
+          },
         },
       },
       '/changes': {
