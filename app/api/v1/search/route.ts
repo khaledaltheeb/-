@@ -10,9 +10,14 @@ export async function GET(request: Request) {
   const url = new URL(request.url);
   const q = (url.searchParams.get('q') || '').trim();
   if (q.length < 2 || q.length > 160) return apiError(request, 400, 'invalid_parameter', 'q must contain between 2 and 160 characters.', 'q');
-  const rawLimit = Number(url.searchParams.get('limit') || 20);
-  const limit = Number.isInteger(rawLimit) && rawLimit > 0 ? Math.min(rawLimit, access.authorization?.authorized ? 100 : 50) : 20;
+
+  const max = access.authorization?.authorized ? 100 : 50;
+  const limitRaw = url.searchParams.get('limit');
+  const limit = limitRaw === null ? 20 : Number(limitRaw);
+  if (!Number.isInteger(limit) || limit < 1 || limit > max) return apiError(request, 400, 'invalid_parameter', `limit must be an integer between 1 and ${max}.`, 'limit');
+
   const requestedType = (url.searchParams.get('type') || '').trim();
+  if (requestedType && !/^[a-z][a-z0-9_-]{0,79}$/.test(requestedType)) return apiError(request, 400, 'invalid_parameter', 'type must be a valid content type identifier.', 'type');
 
   const supabase = await createClient();
   let query = supabase
