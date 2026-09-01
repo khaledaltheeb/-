@@ -1,8 +1,10 @@
 import { requestArrayBuffer, requestJson, requestText } from '@/lib/research-integrations/http';
-import type { EvidenceAuthor, EvidenceRecord, EvidenceSearchPage } from '@/lib/research-integrations/types';
+import { normalizeRorId } from '@/lib/research-integrations/ror';
+import type { EvidenceAffiliation, EvidenceAuthor, EvidenceRecord, EvidenceSearchPage } from '@/lib/research-integrations/types';
 
 const EUROPE_PMC_BASE = 'https://www.ebi.ac.uk/europepmc/webservices/rest';
 const EUROPE_PMC_WEB = 'https://europepmc.org/article';
+const ORCID_PATTERN = /^\d{4}-\d{4}-\d{4}-[\dX]{4}$/i;
 
 export type EuropePmcSearchOptions = {
   query: string;
@@ -27,6 +29,49 @@ function bool(value: unknown) {
 }
 function asArray(value: unknown) { return Array.isArray(value) ? value : []; }
 
+function typedIdentifier(value: unknown, expectedType?: string) {
+  if (typeof value === 'string') return value.trim() || null;
+  const row = record(value);
+  if (!row) return null;
+  const type = text(row.type)?.toUpperCase() || null;
+  if (expectedType && type && type !== expectedType.toUpperCase()) return null;
+  return text(row.value) || text(row.id) || text(row.identifier);
+}
+
+function normalizeOrcid(value: unknown) {
+  const candidate = typedIdentifier(value, 'ORCID')?.replace(/^https?:\/\/(?:www\.)?orcid\.org\//i, '') || null;
+  return candidate && ORCID_PATTERN.test(candidate) ? candidate.toUpperCase() : null;
+}
+
+function rorFromOrgIdentifier(value: unknown): string | null {
+  const candidates: unknown[] = Array.isArray(value) ? value : [value];
+  for (const candidate of candidates) {
+    const raw = typedIdentifier(candidate);
+    if (!raw) continue;
+    try { return normalizeRorId(raw); } catch { /* Other persistent IDs are valid Europe PMC data but not ROR. */ }
+  }
+  return null;
+}
+
+function affiliationsFromAuthor(author: JsonRecord): EvidenceAffiliation[] {
+  const details = record(author.authorAffiliationDetailsList);
+  const rows = asArray(details?.authorAffiliation);
+  const affiliations = rows.flatMap((item) => {
+    const affiliation = record(item);
+    if (!affiliation) return [];
+    const name = text(affiliation.affiliation);
+    const rorId = rorFromOrgIdentifier(affiliation.affiliationOrgId);
+    if (!name && !rorId) return [];
+    return [{ name: name || rorId as string, original: name, ror_id: rorId, country_code: null }];
+  });
+  if (affiliations.length) return affiliations;
+
+  const legacyName = text(author.affiliation);
+  const legacyRor = rorFromOrgIdentifier(author.affiliationOrgId);
+  if (!legacyName && !legacyRor) return [];
+  return [{ name: legacyName || legacyRor as string, original: legacyName, ror_id: legacyRor, country_code: null }];
+}
+
 function authorsFromResult(row: JsonRecord): EvidenceAuthor[] {
   const authorList = record(row.authorList);
   const authors = asArray(authorList?.author).flatMap((item) => {
@@ -34,7 +79,7 @@ function authorsFromResult(row: JsonRecord): EvidenceAuthor[] {
     if (!author) return [];
     const display = text(author.fullName) || [text(author.firstName), text(author.lastName)].filter(Boolean).join(' ');
     if (!display) return [];
-    return [{ display_name: display, orcid: text(author.authorId) }];
+    return [{ display_name: display, orcid: normalizeOrcid(author.authorId), affiliations: affiliationsFromAuthor(author) }];
   });
   if (authors.length) return authors;
   const authorString = text(row.authorString);
