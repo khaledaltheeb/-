@@ -1,0 +1,106 @@
+name: Verify Social Work Production 2026-09-02
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/verify-social-work-production-20260902.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Verify live Social Work institutional release
+        shell: bash
+        run: |
+          set -uo pipefail
+          base='https://healthrenewal.org/evidence-guides/social-work'
+          release='795e8a1734a16621d07affe10a633dd2809a429b'
+          failed=0
+
+          check_page() {
+            local name="$1"
+            local path="$2"
+            shift 2
+            local url="${base}${path}?release=${release}"
+            local body headers status bytes canonical
+            body="$(mktemp)"
+            headers="$(mktemp)"
+            status="$(curl -sS --compressed --retry 8 --retry-delay 2 --retry-all-errors -D "$headers" -o "$body" -w '%{http_code}' -H 'Cache-Control: no-cache, no-store, max-age=0' "$url" || true)"
+            bytes="$(wc -c < "$body" | tr -d ' ')"
+            echo "--- ${name} ---"
+            echo "URL: ${url}"
+            echo "HTTP: ${status} | bytes: ${bytes}"
+            if [[ "$status" != '200' ]]; then
+              echo "FAIL ${name}: HTTP ${status}"
+              failed=1
+            else
+              echo "PASS ${name}: HTTP 200"
+            fi
+
+            if grep -Fq 'data-rawafid-institutional-evidence="2026-09-02"' "$body"; then
+              echo "PASS ${name}: institutional release marker"
+            else
+              echo "FAIL ${name}: institutional release marker missing"
+              failed=1
+            fi
+
+            for marker in "$@"; do
+              if grep -Fq "$marker" "$body"; then
+                echo "PASS ${name}: ${marker}"
+              else
+                echo "FAIL ${name}: missing marker ${marker}"
+                failed=1
+              fi
+            done
+
+            if grep -Eiq '<meta[^>]+name=["'"']robots["'"'][^>]+content=["'"'][^"'"']*noindex' "$body"; then
+              echo "FAIL ${name}: unexpected noindex"
+              failed=1
+            else
+              echo "PASS ${name}: indexable"
+            fi
+
+            canonical="$(grep -Eio '<link[^>]+rel=["'"']canonical["'"'][^>]*>' "$body" | head -n1 || true)"
+            if [[ "$canonical" == *'healthrenewal.org/evidence-guides/social-work'* ]]; then
+              echo "PASS ${name}: canonical Social Work URL"
+            else
+              echo "FAIL ${name}: canonical missing/wrong: ${canonical}"
+              failed=1
+            fi
+            rm -f "$body" "$headers"
+          }
+
+          check_page 'hub' '/' \
+            '78 دليلًا ومسارًا' \
+            'berufskodex_de_2026-07.pdf' \
+            'f596df101af111eeb233e8b04dc9bb3d'
+          check_page 'co-created help plan' '/co-created-help-plan/' \
+            '2016091213042605' \
+            'University of Ljubljana'
+          check_page 'professional ethics' '/professional-ethics/' \
+            'c5aa171b-223d-43b7-9778-05a0d8cede8e' \
+            'Talentia'
+          check_page 'international comparative practice' '/international-comparative-practice/' \
+            'berufskodex_de_2026-07.pdf' \
+            'AvenirSocial'
+          check_page 'help plan quality audit' '/help-plan-quality-audit/' \
+            'pktc.lt/metodine-informacija/metodine-medziaga' \
+            'PKTC Lithuania'
+          check_page 'community resource map' '/community-resource-map/' \
+            'unhcr.org/what-we-do/protect-human-rights/protection/community-based-protection' \
+            'UNHCR'
+          check_page 'child voice family decisions' '/child-voice-family-decisions/' \
+            'unicef.org/child-rights-convention/convention-text' \
+            'UNICEF'
+
+          if [[ "$failed" -ne 0 ]]; then
+            echo 'One or more live Social Work checks failed.' >&2
+            exit 1
+          fi
+          echo 'ALL LIVE SOCIAL WORK CHECKS PASSED.'
