@@ -17,6 +17,10 @@ import javax.crypto.spec.GCMParameterSpec
  * into SharedPreferences. Payloads are encrypted with AES/GCM and stored as
  * IV + ciphertext. This is intentionally local-only; cloud sync requires a
  * separate key-management design and must not reuse this device-only key.
+ *
+ * Sensitive writes/removals use commit() intentionally: callers must never be
+ * told that a token, health record, or privacy migration was persisted or
+ * removed until the encrypted preference update is durable on disk.
  */
 object EncryptedLocalStore {
     private const val KEYSTORE = "AndroidKeyStore"
@@ -30,10 +34,11 @@ object EncryptedLocalStore {
         val ciphertext = cipher.doFinal(plaintext.toByteArray(Charsets.UTF_8))
         val encodedIv = Base64.encodeToString(cipher.iv, Base64.NO_WRAP)
         val encodedCiphertext = Base64.encodeToString(ciphertext, Base64.NO_WRAP)
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        val persisted = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
             .edit()
             .putString(key, "$encodedIv:$encodedCiphertext")
-            .apply()
+            .commit()
+        check(persisted) { "Unable to persist encrypted local data" }
     }
 
     fun get(context: Context, key: String): String? {
@@ -50,9 +55,14 @@ object EncryptedLocalStore {
     }
 
     fun remove(context: Context, key: String) {
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().remove(key).apply()
+        val removed = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .edit()
+            .remove(key)
+            .commit()
+        check(removed) { "Unable to remove encrypted local data" }
     }
 
+    @Synchronized
     private fun secretKey(): SecretKey {
         val keyStore = KeyStore.getInstance(KEYSTORE).apply { load(null) }
         val existing = keyStore.getKey(ALIAS, null) as? SecretKey
