@@ -6,6 +6,7 @@ on:
       - 'app/api/v1/integrations/**'
       - 'lib/partner-api-v1.ts'
       - 'supabase/migrations/20260901213000_institutional_exchange_v1.sql'
+      - 'supabase/migrations/20260901214000_institutional_exchange_scope_admin_v1.sql'
       - 'scripts/institutional-exchange-contract.mjs'
       - '.github/workflows/institutional-exchange-v1.yml'
   push:
@@ -14,6 +15,7 @@ on:
       - 'app/api/v1/integrations/**'
       - 'lib/partner-api-v1.ts'
       - 'supabase/migrations/20260901213000_institutional_exchange_v1.sql'
+      - 'supabase/migrations/20260901214000_institutional_exchange_scope_admin_v1.sql'
       - 'scripts/institutional-exchange-contract.mjs'
       - '.github/workflows/institutional-exchange-v1.yml'
 
