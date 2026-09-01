@@ -126,9 +126,37 @@ jobs:
         run: |
           set -euo pipefail
           base='https://healthrenewal.org'
-          url="${base}/api/v1/content?limit=2"
-          curl -fsS "$url" -D /tmp/live-etag.headers -o /tmp/live-content.json
-          etag="$(awk 'BEGIN{IGNORECASE=1} /^etag:/{gsub(/\r/,""); sub(/^etag:[[:space:]]*/,""); print; exit}' /tmp/live-etag.headers)"
-          test -n "$etag"
-          code="$(curl -sS -o /dev/null -w '%{http_code}' -H "If-None-Match: $etag" "$url")"
-          test "$code" = 304
+          stamp="${GITHUB_SHA}"
+
+          verify_304() {
+            local label="$1"
+            local url="$2"
+            local headers="/tmp/${label}.headers"
+            local body="/tmp/${label}.body"
+            local etag=''
+            local code=''
+            for attempt in $(seq 1 6); do
+              curl -fsS --retry 2 --retry-delay 1 --retry-all-errors -H 'Cache-Control: no-cache' "$url" -D "$headers" -o "$body"
+              etag="$(awk 'BEGIN{IGNORECASE=1} /^etag:/{gsub(/\r/,""); sub(/^etag:[[:space:]]*/,""); print; exit}' "$headers")"
+              if [ -z "$etag" ]; then
+                echo "${label}: ETag missing on attempt ${attempt}" >&2
+                sed -n '1,40p' "$headers" >&2
+                sleep 2
+                continue
+              fi
+              code="$(curl -sS -o /dev/null -w '%{http_code}' -H 'Cache-Control: no-cache' -H "If-None-Match: $etag" "$url")"
+              echo "${label}: conditional attempt ${attempt}, status=${code}, etag=${etag}"
+              if [ "$code" = 304 ]; then return 0; fi
+              sleep 2
+            done
+            echo "${label}: conditional GET never produced 304; last status=${code}, etag=${etag}" >&2
+            sed -n '1,60p' "$headers" >&2 || true
+            return 1
+          }
+
+          # OpenAPI is deterministic and isolates edge/HTTP validator behavior from live catalog mutations.
+          verify_304 openapi "${base}/api/openapi.json?conditional=${stamp}"
+
+          # The content catalog is mutable; retry protects the deployment gate from a legitimate publish/update
+          # occurring between validator acquisition and revalidation while still requiring a real live 304.
+          verify_304 content "${base}/api/v1/content?limit=2&conditional=${stamp}"
