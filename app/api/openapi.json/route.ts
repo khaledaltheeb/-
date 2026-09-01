@@ -103,7 +103,6 @@ export async function GET(request: Request) {
             '200': { description: 'Normalized Crossref metadata with provenance and operational policy' },
             '400': { $ref: '#/components/responses/BadRequest' },
             '404': { $ref: '#/components/responses/NotFound' },
-            '429': { $ref: '#/components/responses/RateLimited' },
             '503': { description: 'Crossref metadata is temporarily unavailable' },
             ...partnerResponses,
           },
