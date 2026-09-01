@@ -1,0 +1,34 @@
+name: Validate Social Work Institutional Evidence
+
+on:
+  pull_request:
+    paths:
+      - 'app/evidence-guides/social-work/**'
+      - 'lib/social-work-*.ts'
+      - 'data/social-work-recovery/**'
+      - 'scripts/social-work-institutional-contract.mjs'
+      - '.github/workflows/validate-social-work-institutional-20260902.yml'
+  push:
+    branches: [main, social-work-institutional-20260902]
+    paths:
+      - 'app/evidence-guides/social-work/**'
+      - 'lib/social-work-*.ts'
+      - 'data/social-work-recovery/**'
+      - 'scripts/social-work-institutional-contract.mjs'
+      - '.github/workflows/validate-social-work-institutional-20260902.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  institutional-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify source provenance, route coverage and jurisdiction boundaries
+        run: node scripts/social-work-institutional-contract.mjs
