@@ -7,7 +7,8 @@ export async function GET(request: Request) {
     ...apiDiscovery(),
     resources: [
       'content','articles','guides','research','conditions','comparisons','tools','courses','learning-paths',
-      'resources','protocols','interventions','assessments','glossary','sectors','categories','tags','search','evidence-discovery','changes','stats',
+      'resources','protocols','interventions','assessments','glossary','pages','sectors','categories','tags','sources',
+      'search','evidence-discovery','changes','stats',
     ],
     evidence_discovery: {
       href: '/api/v1/evidence-discovery',
