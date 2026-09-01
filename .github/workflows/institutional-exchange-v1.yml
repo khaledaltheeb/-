@@ -10,6 +10,7 @@ on:
       - 'supabase/migrations/20260901214500_institutional_exchange_content_resources_v1.sql'
       - 'supabase/migrations/20260901215000_institutional_exchange_idempotency_serialization_v1.sql'
       - 'scripts/institutional-exchange-contract.mjs'
+      - 'scripts/institutional-exchange-http-contract.mjs'
       - '.github/workflows/institutional-exchange-v1.yml'
   push:
     branches: [main]
@@ -21,6 +22,7 @@ on:
       - 'supabase/migrations/20260901214500_institutional_exchange_content_resources_v1.sql'
       - 'supabase/migrations/20260901215000_institutional_exchange_idempotency_serialization_v1.sql'
       - 'scripts/institutional-exchange-contract.mjs'
+      - 'scripts/institutional-exchange-http-contract.mjs'
       - '.github/workflows/institutional-exchange-v1.yml'
 
 permissions:
@@ -33,13 +35,14 @@ concurrency:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 45
     env:
       NEXT_PUBLIC_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
       NEXT_PUBLIC_SITE_URL: https://healthrenewal.org
       NEXT_PUBLIC_ALLOW_INDEXING: 'true'
       NEXT_PUBLIC_ENABLE_ANALYTICS: 'false'
+      INSTITUTIONAL_EXCHANGE_TEST_BASE_URL: http://127.0.0.1:3000
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -60,3 +63,23 @@ jobs:
         run: npm run lint
       - name: Build production candidate
         run: npm run build
+      - name: Start production candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          nohup npm run start -- --hostname 127.0.0.1 --port 3000 > /tmp/institutional-exchange.log 2>&1 &
+          echo $! > /tmp/institutional-exchange.pid
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:3000/api/v1/integrations >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/institutional-exchange.log >&2 || true
+          exit 1
+      - name: Institutional exchange HTTP boundary contract
+        run: node scripts/institutional-exchange-http-contract.mjs
+      - name: Stop production candidate
+        if: always()
+        shell: bash
+        run: |
+          if [ -f /tmp/institutional-exchange.pid ]; then kill "$(cat /tmp/institutional-exchange.pid)" 2>/dev/null || true; fi
+          cat /tmp/institutional-exchange.log 2>/dev/null || true
