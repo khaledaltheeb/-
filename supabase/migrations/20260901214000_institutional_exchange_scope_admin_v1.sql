@@ -23,7 +23,7 @@ declare
   v_allowed constant text[] := array[
     'content:read','sources:read','search:read','changes:read','stats:read',
     'people:submit','specialists:submit','organizations:submit','courses:submit',
-    'events:submit','schedules:submit','imports:read','webhooks:manage'
+    'pages:submit','learning:submit','events:submit','schedules:submit','imports:read','webhooks:manage'
   ]::text[];
 begin
   if trim(coalesce(p_name,''))='' or char_length(trim(p_name))>200 then raise exception 'invalid partner name'; end if;
@@ -61,7 +61,7 @@ declare
   v_allowed constant text[] := array[
     'content:read','sources:read','search:read','changes:read','stats:read',
     'people:submit','specialists:submit','organizations:submit','courses:submit',
-    'events:submit','schedules:submit','imports:read','webhooks:manage'
+    'pages:submit','learning:submit','events:submit','schedules:submit','imports:read','webhooks:manage'
   ]::text[];
 begin
   if p_scopes is null or cardinality(p_scopes)=0 or not (p_scopes <@ v_allowed) then raise exception 'invalid scopes'; end if;
