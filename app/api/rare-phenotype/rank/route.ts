@@ -11,7 +11,7 @@ type Body = {
   limit?: number;
 };
 
-function cleanPhenotypes(value: unknown) {
+export function cleanPhenotypes(value: unknown) {
   if (!Array.isArray(value)) return [];
   return [...new Set(value.filter((item): item is string => typeof item === 'string' && /^HP:\d{7}$/.test(item)).slice(0, 30))];
 }
