@@ -1,0 +1,38 @@
+name: Research integrations
+
+on:
+  pull_request:
+    paths:
+      - 'lib/research-integrations/**'
+      - 'app/api/v1/evidence-discovery/**'
+      - 'examples/lens-scholarly-demo/**'
+      - 'docs/integrations/research-evidence.md'
+      - 'scripts/research-integrations-contract.mjs'
+      - 'supabase/migrations/20260901190000_ror_source_registry_v1.sql'
+      - '.github/workflows/research-integrations.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'lib/research-integrations/**'
+      - 'app/api/v1/evidence-discovery/**'
+      - 'examples/lens-scholarly-demo/**'
+      - 'scripts/research-integrations-contract.mjs'
+      - 'supabase/migrations/20260901190000_ror_source_registry_v1.sql'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: node scripts/research-integrations-contract.mjs
+      - run: npm run typecheck
+      - run: npm run lint
