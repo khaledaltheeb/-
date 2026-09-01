@@ -31,6 +31,14 @@ export type ApiCursor = { published_at: string; id: string };
 
 type JsonRecord = Record<string, unknown>;
 
+const PUBLIC_SCHEMA_KEYS = new Set([
+  '@context', '@type', '@id', '@graph', 'name', 'headline', 'description', 'url', 'mainEntityOfPage',
+  'datePublished', 'dateModified', 'author', 'reviewedBy', 'publisher', 'image', 'keywords', 'inLanguage',
+  'about', 'mentions', 'breadcrumb', 'itemListElement', 'position', 'item', 'mainEntity', 'acceptedAnswer',
+  'suggestedAnswer', 'question', 'answer', 'text', 'sameAs', 'identifier', 'citation', 'isPartOf', 'hasPart',
+  'educationalLevel', 'learningResourceType', 'audience', 'medicalAudience', 'code', 'codingSystem',
+]);
+
 function asRecord(value: unknown): JsonRecord | null {
   return value && typeof value === 'object' && !Array.isArray(value) ? value as JsonRecord : null;
 }
@@ -82,6 +90,27 @@ function rightsFor(schema: unknown) {
   };
 }
 
+function sanitizeStructuredValue(value: unknown, depth = 0): unknown {
+  if (depth > 6) return null;
+  if (value === null || typeof value === 'string' || typeof value === 'boolean') return value;
+  if (typeof value === 'number') return Number.isFinite(value) ? value : null;
+  if (Array.isArray(value)) return value.slice(0, 100).map((item) => sanitizeStructuredValue(item, depth + 1));
+  const row = asRecord(value);
+  if (!row) return null;
+  return Object.fromEntries(
+    Object.entries(row)
+      .filter(([key]) => PUBLIC_SCHEMA_KEYS.has(key))
+      .map(([key, nested]) => [key, sanitizeStructuredValue(nested, depth + 1)]),
+  );
+}
+
+function publicSchema(value: unknown) {
+  const root = asRecord(value);
+  const structured = asRecord(root?.structured_data);
+  const sanitized = sanitizeStructuredValue(structured || root || {});
+  return asRecord(sanitized) || {};
+}
+
 function canonicalEtagValue(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(canonicalEtagValue);
   if (value && typeof value === 'object') {
@@ -93,6 +122,11 @@ function canonicalEtagValue(value: unknown): unknown {
     );
   }
   return value;
+}
+
+function requestIdFor(request: Request) {
+  const supplied = request.headers.get('x-request-id')?.trim() || '';
+  return /^[A-Za-z0-9][A-Za-z0-9._:-]{0,63}$/.test(supplied) ? supplied : randomUUID();
 }
 
 export function serializePublicContent(row: Record<string, unknown>, includeBody = false) {
@@ -127,7 +161,7 @@ export function serializePublicContent(row: Record<string, unknown>, includeBody
     search_intent: row.search_intent || null,
     references: safeReferences(row.references_json),
     rights: rightsFor(row.schema_json),
-    schema_json: row.schema_json || {},
+    schema_json: publicSchema(row.schema_json),
   };
   if (includeBody) {
     payload.body = { structured: row.body_json || {}, text: row.body_text || null };
@@ -166,7 +200,7 @@ function responseHeaders(requestId: string, cacheControl = 'public, max-age=0, s
   return {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET,HEAD,OPTIONS',
-    'Access-Control-Allow-Headers': 'Accept,Authorization,Content-Type,If-None-Match,If-Modified-Since,X-API-Key',
+    'Access-Control-Allow-Headers': 'Accept,Authorization,Content-Type,If-None-Match,If-Modified-Since,X-API-Key,X-Request-Id',
     'Access-Control-Expose-Headers': 'ETag,Last-Modified,X-Request-Id,X-Rawafid-Partner,X-Rawafid-Key-Prefix,X-RateLimit-Minute-Limit,X-RateLimit-Minute-Remaining,X-RateLimit-Minute-Reset,X-RateLimit-Day-Limit,X-RateLimit-Day-Remaining,X-RateLimit-Day-Reset',
     'Cache-Control': cacheControl,
     'Content-Type': 'application/json; charset=utf-8',
@@ -182,7 +216,7 @@ export function optionsResponse() {
 }
 
 export function apiError(request: Request, status: number, code: string, message: string, parameter?: string) {
-  const requestId = request.headers.get('x-request-id')?.slice(0, 120) || randomUUID();
+  const requestId = requestIdFor(request);
   return jsonResponse(request, {
     error: { code, message, parameter: parameter || null, request_id: requestId },
     meta: { api_version: PUBLIC_API_VERSION },
@@ -194,14 +228,25 @@ export function jsonResponse(
   payload: unknown,
   options: { status?: number; requestId?: string; cacheControl?: string; lastModified?: string | null } = {},
 ) {
-  const requestId = options.requestId || request.headers.get('x-request-id')?.slice(0, 120) || randomUUID();
+  const requestId = options.requestId || requestIdFor(request);
   const body = JSON.stringify(payload);
   const validatorBody = JSON.stringify(canonicalEtagValue(payload));
   const etag = `\"${createHash('sha256').update(validatorBody).digest('base64url')}\"`;
   const headers = new Headers(responseHeaders(requestId, options.cacheControl));
   headers.set('ETag', etag);
-  if (options.lastModified) headers.set('Last-Modified', new Date(options.lastModified).toUTCString());
+  let lastModifiedMs: number | null = null;
+  if (options.lastModified) {
+    const parsed = Date.parse(options.lastModified);
+    if (!Number.isNaN(parsed)) {
+      lastModifiedMs = parsed;
+      headers.set('Last-Modified', new Date(parsed).toUTCString());
+    }
+  }
   if (request.headers.get('if-none-match') === etag) return new Response(null, { status: 304, headers });
+  if (!request.headers.get('if-none-match') && lastModifiedMs !== null) {
+    const modifiedSince = Date.parse(request.headers.get('if-modified-since') || '');
+    if (!Number.isNaN(modifiedSince) && lastModifiedMs <= modifiedSince + 999) return new Response(null, { status: 304, headers });
+  }
   return new Response(body, { status: options.status || 200, headers });
 }
 
