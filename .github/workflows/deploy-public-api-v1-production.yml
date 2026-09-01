@@ -23,6 +23,9 @@ on:
       - 'supabase/migrations/20260901032000_public_api_v1_change_log.sql'
       - 'supabase/migrations/20260901035000_partner_api_core_v1.sql'
       - 'supabase/migrations/20260901212203_source_connection_metadata_v1.sql'
+      - 'supabase/migrations/20260901215918_source_governance_provenance_v1.sql'
+      - 'supabase/migrations/20260901221854_source_governance_provenance_indexes_v1.sql'
+      - 'supabase/migrations/20260901223500_datacite_content_relations_v1.sql'
       - '.github/workflows/deploy-public-api-v1-production.yml'
 
 concurrency:
@@ -122,9 +125,11 @@ jobs:
           const rssHeaders=fs.readFileSync('/tmp/rss.headers','utf8').toLowerCase();
           const jsonFeedHeaders=fs.readFileSync('/tmp/json-feed.headers','utf8').toLowerCase();
           if(discovery.version!=='1.2.0' || discovery.status!=='stable') throw new Error('Public API discovery is invalid');
-          if(!discovery.evidence_discovery?.providers?.includes('crossref')) throw new Error('Crossref provider is missing');
+          for (const provider of ['europe_pmc','crossref','datacite','lens']) if(!discovery.evidence_discovery?.providers?.includes(provider)) throw new Error(`${provider} provider is missing`);
           if(openapi.openapi!=='3.1.0' || openapi.info?.version!=='1.2.0') throw new Error('OpenAPI contract is invalid');
           if(!openapi.components?.securitySchemes?.PartnerApiKey || !openapi.paths?.['/sources/{id}']) throw new Error('Partner/source contract is missing');
+          const evidenceParams=openapi.paths?.['/evidence-discovery']?.get?.parameters||[];
+          if(!evidenceParams.some((p)=>p.name==='datacite_cursor')) throw new Error('DataCite OpenAPI cursor is missing');
           if(!Array.isArray(content.data) || !Array.isArray(pages.data)) throw new Error('Public content/pages endpoint is invalid');
           if(!stats.data || typeof stats.data.total!=='number') throw new Error('Stats endpoint is invalid');
           if(!Array.isArray(changes.data)) throw new Error('Delta endpoint is invalid');
@@ -132,7 +137,7 @@ jobs:
           if(jsonFeed.version!=='https://jsonfeed.org/version/1.1') throw new Error('JSON Feed is invalid');
           if(!rss.includes('<rss version="2.0"') || !rss.includes('atom:link')) throw new Error('RSS is invalid');
           if(!magazine.includes('<rss version="2.0"') || !magazine.includes('atom:link')) throw new Error('Magazine RSS is invalid');
-          if(!docs.includes('v1.2') || !docs.includes('Crossref') || !docs.includes('Partner')) throw new Error('Developer portal is invalid');
+          if(!docs.includes('v1.2') || !docs.includes('Crossref') || !docs.includes('DataCite') || !docs.includes('Partner')) throw new Error('Developer portal is invalid');
           if(!contentHeaders.includes('etag:') || !contentHeaders.includes('x-request-id:')) throw new Error('HTTP API validators are missing');
           if(!rssHeaders.includes('etag:') || !rssHeaders.includes('last-modified:')) throw new Error('RSS validators are missing');
           if(!jsonFeedHeaders.includes('etag:')) throw new Error('JSON Feed validator is missing');
