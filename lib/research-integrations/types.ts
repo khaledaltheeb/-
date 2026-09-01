@@ -1,4 +1,4 @@
-export type EvidenceProvider = 'europe_pmc' | 'lens';
+export type EvidenceProvider = 'europe_pmc' | 'crossref' | 'lens';
 
 export type EvidenceIdentifiers = {
   doi?: string;
@@ -21,6 +21,13 @@ export type EvidenceAuthor = {
   affiliations?: EvidenceAffiliation[];
 };
 
+export type EvidenceRelation = {
+  relation_type: string;
+  identifier: string;
+  identifier_type?: string | null;
+  source?: string | null;
+};
+
 export type EvidenceRecord = {
   provider: EvidenceProvider;
   provider_id: string;
@@ -33,6 +40,7 @@ export type EvidenceRecord = {
   publisher: string | null;
   authors: EvidenceAuthor[];
   identifiers: EvidenceIdentifiers;
+  relations?: EvidenceRelation[];
   cited_by_count: number | null;
   is_open_access: boolean | null;
   is_retracted: boolean | null;
