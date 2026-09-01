@@ -81,6 +81,19 @@ function rightsFor(schema: unknown) {
   };
 }
 
+function canonicalEtagValue(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(canonicalEtagValue);
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>)
+        .filter(([key]) => key !== 'generated_at' && key !== 'request_id')
+        .sort(([left], [right]) => left.localeCompare(right))
+        .map(([key, nested]) => [key, canonicalEtagValue(nested)]),
+    );
+  }
+  return value;
+}
+
 export function serializePublicContent(row: Record<string, unknown>, includeBody = false) {
   const canonicalPath = publicContentHref({
     slug: asString(row.slug),
@@ -190,7 +203,8 @@ export function jsonResponse(
 ) {
   const requestId = options.requestId || request.headers.get('x-request-id')?.slice(0, 120) || randomUUID();
   const body = JSON.stringify(payload);
-  const etag = `\"${createHash('sha256').update(body).digest('base64url')}\"`;
+  const validatorBody = JSON.stringify(canonicalEtagValue(payload));
+  const etag = `\"${createHash('sha256').update(validatorBody).digest('base64url')}\"`;
   const headers = new Headers(responseHeaders(requestId, options.cacheControl));
   headers.set('ETag', etag);
   if (options.lastModified) headers.set('Last-Modified', new Date(options.lastModified).toUTCString());
