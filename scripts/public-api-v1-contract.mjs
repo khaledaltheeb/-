@@ -20,6 +20,7 @@ const required = [
   'supabase/migrations/20260901032000_public_api_v1_change_log.sql',
   'supabase/migrations/20260901035000_partner_api_core_v1.sql',
   'supabase/migrations/20260901203000_public_api_change_log_semantics_v2.sql',
+  'supabase/migrations/20260901204500_partner_api_admin_acl_hardening_v2.sql',
 ];
 
 let failed = false;
@@ -32,7 +33,8 @@ for (const marker of [
   ".eq('status', 'published')",
   ".eq('robots_index', true)",
   "'ETag'",
-  "'If-Modified-Since'",
+  'If-Modified-Since',
+  "request.headers.get('if-modified-since')",
   "'X-Request-Id'",
   "'Access-Control-Allow-Origin': '*'",
   "reuse: reuse || 'link_and_citation_only'",
@@ -42,6 +44,7 @@ for (const marker of [
   'PUBLIC_SCHEMA_KEYS',
   'sanitizeStructuredValue',
   'requestIdFor',
+  'latestTimestamp',
 ]) if (!core.includes(marker)) fail(`core missing ${marker}`);
 
 for (const forbidden of ['SERVICE_ROLE', 'SUPABASE_SERVICE', 'service_role_key', 'NEXT_PUBLIC_SUPABASE_SERVICE']) {
@@ -113,6 +116,24 @@ for (const marker of [
   'enable row level security',
   'rawafid-partner-api-prune-v1',
 ]) if (!partnerMigration.includes(marker)) fail(`partner migration missing ${marker}`);
+
+const aclMigration = fs.readFileSync('supabase/migrations/20260901204500_partner_api_admin_acl_hardening_v2.sql', 'utf8');
+for (const marker of [
+  'admin_create_api_partner(text,text,text,text,text[],integer,integer) from anon, public',
+  'admin_issue_api_partner_key(uuid,text,text[],timestamptz) from anon, public',
+  'admin_revoke_api_partner_key(uuid) from anon, public',
+  'admin_set_api_partner_status(uuid,text) from anon, public',
+  'admin_api_partner_dashboard() from anon, public',
+  'to authenticated, service_role',
+]) if (!aclMigration.includes(marker)) fail(`partner admin ACL hardening missing ${marker}`);
+
+const rss = fs.readFileSync('app/feed.xml/route.ts', 'utf8');
+const jsonFeed = fs.readFileSync('app/feed.json/route.ts', 'utf8');
+for (const [name, text] of [['RSS', rss], ['JSON Feed', jsonFeed]]) {
+  for (const marker of ['X-Rawafid-Feed-Status', 'degraded', 'Retry-After', 'no-store']) {
+    if (!text.includes(marker)) fail(`${name} degradation contract missing ${marker}`);
+  }
+}
 
 const routeFiles = [
   'app/api/v1/content/route.ts',
