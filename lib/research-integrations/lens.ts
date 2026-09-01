@@ -46,6 +46,14 @@ function authors(value: unknown): EvidenceAuthor[] {
   });
 }
 
+function isRetracted(value: unknown) {
+  return asArray(value).some((item) => {
+    const update = record(item);
+    const nature = (text(update?.update_nature) || text(update?.nature) || '').toLowerCase();
+    return nature === 'retraction' || nature === 'retracted';
+  });
+}
+
 function normalizeLensResult(value: unknown, retrievedAt: string, queryDescription: string | null): EvidenceRecord | null {
   const row = record(value);
   const lensId = text(row?.lens_id);
@@ -53,7 +61,6 @@ function normalizeLensResult(value: unknown, retrievedAt: string, queryDescripti
   const external = ids(row.external_ids);
   const source = record(row.source);
   const openAccess = record(row.open_access);
-  const retractions = asArray(row.retraction_updates);
   return {
     provider: 'lens',
     provider_id: lensId,
@@ -68,7 +75,7 @@ function normalizeLensResult(value: unknown, retrievedAt: string, queryDescripti
     identifiers: { doi: external.doi, pmid: external.pmid, pmcid: external.pmcid, openalex: external.openalex, lens: lensId },
     cited_by_count: integer(row.scholarly_citations_count),
     is_open_access: typeof row.is_open_access === 'boolean' ? row.is_open_access : openAccess ? true : null,
-    is_retracted: retractions.length ? true : false,
+    is_retracted: isRetracted(row.retraction_updates),
     url: `https://www.lens.org/lens/scholar/article/${encodeURIComponent(lensId)}`,
     provenance: { retrieved_at: retrievedAt, endpoint: LENS_SCHOLARLY_ENDPOINT, query: queryDescription },
   };
