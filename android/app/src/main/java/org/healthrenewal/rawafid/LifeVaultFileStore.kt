@@ -152,6 +152,7 @@ object LifeVaultFileStore {
 
     private fun file(context: Context, itemId: Long): File = File(directory(context), "$itemId.rvlt")
 
+    @Synchronized
     private fun secretKey(): SecretKey {
         val keyStore = KeyStore.getInstance(KEYSTORE).apply { load(null) }
         val existing = keyStore.getKey(ALIAS, null) as? SecretKey
