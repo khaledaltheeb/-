@@ -31,7 +31,8 @@ requireMatch('component', files.component, /<h2/, 'Quick Info title must remain 
 requireMatch('component', files.component, /styles\.quickBadge/, 'Quick Info identity badge missing.');
 requireMatch('component', files.component, /معلومات سريعة/, 'Quick Info text identity missing.');
 requireMatch('component', files.component, /import Image from 'next\/image'/, 'official Rawafid logo must use optimized Next Image.');
-requireMatch('component', files.component, /<Image[^>]*src="\/assets\/brand\/logo-mark\.svg"[^>]*alt=""/, 'official Rawafid logo must replace the temporary letter mark.');
+requireMatch('component', files.component, /<Image[^>]*src="\/assets\/brand\/logo-mark\.svg"[^>]*alt="شعار منصة روافد"/, 'official Rawafid logo must expose descriptive alt text.');
+forbid('component', files.component, /<Image[^>]*src="\/assets\/brand\/logo-mark\.svg"[^>]*alt=""/, 'Quick Info logo must not render with an empty alt attribute.');
 forbid('component', files.component, /TopicGlyph|styles\.(?:visual|glyph|moon|personLarge|pill|chatOne|mindRing)/, 'Quick Info HTML card must remain text-first and free of expressive topic pictograms.');
 forbid('component', files.component, />\s*ر\s*</, 'temporary Rawafid letter mark must not return.');
 requireMatch('component CSS', files.componentCss, /--qi-accent/, 'topic-aware color tokens missing.');
