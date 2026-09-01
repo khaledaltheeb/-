@@ -58,6 +58,12 @@ requireMarkers('supabase/migrations/20260901215918_source_governance_provenance_
   'revoke all on table public.source_translation_provenance from anon, authenticated',
 ]);
 
+requireMarkers('supabase/migrations/20260901221854_source_governance_provenance_indexes_v1.sql', [
+  'source_rights_profiles_version_source_idx',
+  'source_translation_version_source_idx',
+  'source_version_id, source_id',
+]);
+
 requireMarkers('app/api/v1/sources/route.ts', [
   "withOptionalPartnerAccess(request, 'sources:read')",
   "supabase.rpc('api_source_registry'",
