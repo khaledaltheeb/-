@@ -18,6 +18,7 @@ on:
       - 'lib/research-integrations/**'
       - 'scripts/public-api-v1-contract.mjs'
       - 'scripts/public-api-v1-http-contract.mjs'
+      - 'scripts/public-api-feed-contract.mjs'
       - 'scripts/research-integrations-contract.mjs'
       - 'supabase/migrations/20260901032000_public_api_v1_change_log.sql'
       - 'supabase/migrations/20260901035000_partner_api_core_v1.sql'
@@ -93,5 +94,7 @@ jobs:
           done
           echo 'Production edge did not converge to API v1.2.0 in time.' >&2
           exit 1
-      - name: Full live HTTP, privacy, synchronization, evidence and feed contract
+      - name: Full live HTTP, privacy, synchronization and evidence contract
         run: node scripts/public-api-v1-http-contract.mjs
+      - name: Full live feed observability contract
+        run: node scripts/public-api-feed-contract.mjs
