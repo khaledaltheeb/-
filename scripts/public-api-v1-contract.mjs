@@ -24,6 +24,7 @@ const required = [
   'supabase/migrations/20260901203000_public_api_change_log_semantics_v2.sql',
   'supabase/migrations/20260901204500_partner_api_admin_acl_hardening_v2.sql',
   'supabase/migrations/20260901205500_public_api_source_relation_index_v2.sql',
+  'supabase/migrations/20260901210000_partner_api_crypto_schema_hardening_v2.sql',
 ];
 
 let failed = false;
@@ -132,6 +133,11 @@ for (const marker of [
 
 const relationIndexMigration = fs.readFileSync('supabase/migrations/20260901205500_public_api_source_relation_index_v2.sql', 'utf8');
 if (!relationIndexMigration.includes('content_sources_source_version_idx')) fail('source version relationship index missing');
+
+const cryptoMigration = fs.readFileSync('supabase/migrations/20260901210000_partner_api_crypto_schema_hardening_v2.sql', 'utf8');
+for (const marker of ['extensions.gen_random_bytes(32)', "extensions.digest(v_plain,'sha256')", "set search_path = ''"]) {
+  if (!cryptoMigration.includes(marker)) fail(`Partner API crypto schema hardening missing ${marker}`);
+}
 
 const rss = fs.readFileSync('app/feed.xml/route.ts', 'utf8');
 const jsonFeed = fs.readFileSync('app/feed.json/route.ts', 'utf8');
