@@ -1,5 +1,9 @@
 begin;
 
+create index if not exists source_related_identifiers_rawafid_content_idx
+on public.source_related_identifiers ((provenance->>'rawafid_content_id'))
+where relation_scheme = 'DataCite' and relation_type = 'IsReferencedBy';
+
 create or replace function private.refresh_content_related_identifiers(p_content_id uuid)
 returns void
 language plpgsql
