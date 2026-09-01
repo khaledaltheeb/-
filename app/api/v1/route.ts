@@ -7,8 +7,14 @@ export async function GET(request: Request) {
     ...apiDiscovery(),
     resources: [
       'content','articles','guides','research','conditions','comparisons','tools','courses','learning-paths',
-      'resources','protocols','interventions','assessments','glossary','sectors','categories','tags','search','changes','stats',
+      'resources','protocols','interventions','assessments','glossary','sectors','categories','tags','search','evidence-discovery','changes','stats',
     ],
+    evidence_discovery: {
+      href: '/api/v1/evidence-discovery',
+      providers: ['europe_pmc','lens'],
+      default_provider: 'europe_pmc',
+      lens_requires_server_configuration: true,
+    },
   }, { cacheControl: 'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400' });
 }
 
