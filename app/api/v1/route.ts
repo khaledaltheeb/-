@@ -11,8 +11,8 @@ export async function GET(request: Request) {
     ],
     evidence_discovery: {
       href: '/api/v1/evidence-discovery',
-      providers: ['europe_pmc','crossref','lens'],
-      default_providers: ['europe_pmc','crossref','lens'],
+      providers: ['europe_pmc','crossref','datacite','lens'],
+      default_providers: ['europe_pmc','crossref','datacite','lens'],
       lens_requires_server_configuration: true,
       provider_cursors_are_independent: true,
     },
