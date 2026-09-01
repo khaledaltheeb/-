@@ -28,13 +28,13 @@ jobs:
       NEXT_PUBLIC_ENABLE_DIRECT_GA: 'true'
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: 1910e1ad3c793fd568ba1caafe34f964
-      RELEASE_SHA: 795e8a1734a16621d07affe10a633dd2809a429b
+      RELEASE_SHA: 9c5d53884225bf648865b5a13a0550fe9d415f84
     steps:
       - name: Require Cloudflare token
         run: test -n "${CLOUDFLARE_API_TOKEN:-}"
       - uses: actions/checkout@v7
         with:
-          ref: 795e8a1734a16621d07affe10a633dd2809a429b
+          ref: 9c5d53884225bf648865b5a13a0550fe9d415f84
       - name: Verify exact release SHA
         run: test "$(git rev-parse HEAD)" = "${RELEASE_SHA}"
       - uses: actions/setup-node@v7
@@ -47,9 +47,10 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends imagemagick fontconfig fonts-noto-core librsvg2-bin
-      - name: Verify Social Work institutional contract and repository safety
+      - name: Verify Social Work evidence contracts and repository safety
         run: |
           node scripts/social-work-institutional-contract.mjs
+          node scripts/social-work-research-depth-contract.mjs
           npm run typecheck
           npm run lint
           npm run architecture-check
@@ -60,7 +61,7 @@ jobs:
         run: npx opennextjs-cloudflare build --env production
       - name: Deploy exact production Worker
         run: npx opennextjs-cloudflare deploy --env production
-      - name: Verify Social Work release on healthrenewal.org
+      - name: Verify Social Work research-depth release on healthrenewal.org
         shell: bash
         run: |
           set -euo pipefail
@@ -68,23 +69,22 @@ jobs:
           stamp="${RELEASE_SHA}"
           get() { curl -fsSL --compressed --retry 15 --retry-delay 3 --retry-all-errors -H 'Cache-Control: no-cache, no-store, max-age=0' "$1"; }
           hub="$(get "${base}/?release=${stamp}")"
-          plan="$(get "${base}/co-created-help-plan/?release=${stamp}")"
-          ethics="$(get "${base}/professional-ethics/?release=${stamp}")"
-          compare="$(get "${base}/international-comparative-practice/?release=${stamp}")"
-          quality="$(get "${base}/help-plan-quality-audit/?release=${stamp}")"
-          community="$(get "${base}/community-resource-map/?release=${stamp}")"
           child="$(get "${base}/child-voice-family-decisions/?release=${stamp}")"
+          decision="$(get "${base}/supported-decision-making/?release=${stamp}")"
+          caregiver="$(get "${base}/caregiver-role-burden/?release=${stamp}")"
+          referral="$(get "${base}/referral-with-continuity/?release=${stamp}")"
+          poverty="$(get "${base}/poverty-structural-barriers/?release=${stamp}")"
+          quality="$(get "${base}/help-plan-quality-audit/?release=${stamp}")"
           [[ "$hub" == *'78 دليلًا ومسارًا'* ]]
-          [[ "$hub" == *'خريطة المصادر المؤسسية التي بُني عليها القسم'* ]]
-          [[ "$hub" == *'berufskodex_de_2026-07.pdf'* ]]
-          [[ "$hub" == *'f596df101af111eeb233e8b04dc9bb3d'* ]]
-          [[ "$plan" == *'الدليل والمنطق المهني وراء'* && "$plan" == *'University of Ljubljana'* ]]
-          [[ "$ethics" == *'اختبار جودة سريع'* && "$ethics" == *'Talentia'* ]]
-          [[ "$compare" == *'AvenirSocial'* && "$compare" == *'berufskodex_de_2026-07.pdf'* ]]
-          [[ "$quality" == *'PKTC Lithuania'* && "$quality" == *'اختبار جودة سريع'* ]]
-          [[ "$community" == *'UNHCR'* && "$community" == *'حدود النقل'* ]]
-          [[ "$child" == *'UNICEF'* && "$child" == *'حق الطفل'* ]]
-          for page in "$hub" "$plan" "$ethics" "$compare" "$quality" "$community" "$child"; do
+          [[ "$hub" == *'طبقة الأدلة البحثية الحديثة 2023–2026'* ]]
+          [[ "$hub" == *'15 صفحة عالية الأولوية'* ]]
+          [[ "$child" == *'data-rawafid-research-depth="2026-09-02-r1"'* && "$child" == *'38971702'* && "$child" == *'growing-rights'* ]]
+          [[ "$decision" == *'data-rawafid-research-depth="2026-09-02-r1"'* && "$decision" == *'38433012'* && "$decision" == *'40936314'* ]]
+          [[ "$caregiver" == *'PMC12238300'* && "$caregiver" == *'9789240103726'* ]]
+          [[ "$referral" == *'36751899'* && "$referral" == *'الإحالة مع الاستمرارية'* ]]
+          [[ "$poverty" == *'/publications/b/67293'* && "$poverty" == *'9789240088320'* ]]
+          [[ "$quality" == *'مؤشرات متابعة قابلة للتدقيق'* && "$quality" == *'حدود الاستخدام'* ]]
+          for page in "$hub" "$child" "$decision" "$caregiver" "$referral" "$poverty" "$quality"; do
             lower="${page,,}"
             if [[ "$lower" =~ \<meta[^\>]*name=[\"\']robots[\"\'][^\>]*content=[\"\'][^\"\']*noindex ]]; then
               echo 'Unexpected noindex on a Social Work page.' >&2
@@ -92,4 +92,4 @@ jobs:
             fi
             [[ "$page" == *'healthrenewal.org/evidence-guides/social-work'* ]]
           done
-          echo 'Social Work institutional evidence release is live and verified on production.'
+          echo 'Social Work research-depth evidence release is live and verified on production.'
