@@ -6,7 +6,10 @@ const read = (path) => fs.readFileSync(path, 'utf8');
 
 const required = [
   'lib/partner-api-v1.ts',
+  'app/api/v1/integrations/route.ts',
   'app/api/v1/integrations/[resource]/route.ts',
+  'app/api/v1/integrations/openapi.json/route.ts',
+  'scripts/institutional-exchange-http-contract.mjs',
   'supabase/migrations/20260901213000_institutional_exchange_v1.sql',
   'supabase/migrations/20260901214000_institutional_exchange_scope_admin_v1.sql',
   'supabase/migrations/20260901214500_institutional_exchange_content_resources_v1.sql',
@@ -24,6 +27,16 @@ for (const marker of ['partnerCredentialHash', "createHash('sha256')", 'Idempote
 }
 if (/SERVICE_ROLE|service_role_key|NEXT_PUBLIC_SUPABASE_SERVICE/i.test(partner)) fail('partner runtime must not embed a service-role credential');
 
+const discovery = read('app/api/v1/integrations/route.ts');
+for (const marker of [
+  "model: 'governed_staging'",
+  "openapi: '/api/v1/integrations/openapi.json'",
+  "resource: 'page'",
+  "resource: 'learning_path'",
+  "status: 'preview'",
+  'Partner credentials never publish directly',
+]) if (!discovery.includes(marker)) fail(`integration discovery missing ${marker}`);
+
 const route = read('app/api/v1/integrations/[resource]/route.ts');
 for (const marker of [
   "new Set(['person', 'specialist', 'organization', 'course', 'page', 'learning_path', 'event', 'schedule'])",
@@ -40,6 +53,21 @@ if (/\.from\(['"](?:content|specialists|organizations|centers)['"]\)\.(?:insert|
   fail('integration HTTP route must never write directly to live publication/provider tables');
 }
 if (/SERVICE_ROLE|service_role_key|NEXT_PUBLIC_SUPABASE_SERVICE/i.test(route)) fail('integration runtime must not embed a service-role credential');
+
+const openapi = read('app/api/v1/integrations/openapi.json/route.ts');
+for (const marker of [
+  "openapi: '3.1.0'",
+  "'/{resource}'",
+  "name: 'Idempotency-Key'",
+  'PartnerApiKey',
+  'PartnerBearer',
+  "'202'",
+  "'409'",
+  "'413'",
+  "'429'",
+  "'learning_path'",
+  "additionalProperties: false",
+]) if (!openapi.includes(marker)) fail(`exchange OpenAPI contract missing ${marker}`);
 
 const migration = read('supabase/migrations/20260901213000_institutional_exchange_v1.sql');
 for (const marker of [
