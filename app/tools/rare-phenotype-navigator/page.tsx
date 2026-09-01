@@ -5,6 +5,7 @@ import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import { breadcrumbJsonLd, buildSeoMetadata, SITE_URL } from '@/lib/seo';
 import './rare-phenotype-navigator.css';
+import './rare-phenotype-navigator-v2.css';
 
 export const metadata: Metadata = buildSeoMetadata({
   title: 'مستكشف النمط الظاهري للأمراض النادرة',
