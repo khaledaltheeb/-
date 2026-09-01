@@ -7,6 +7,7 @@ on:
       - 'app/api/rare-phenotype/**'
       - 'components/rare-phenotype-navigator.tsx'
       - 'scripts/rare-phenotype-navigator-contract.mjs'
+      - 'scripts/rare-phenotype-generated-tests.mjs'
       - '.github/workflows/rare-phenotype-navigator-pr.yml'
 
 permissions:
@@ -31,6 +32,8 @@ jobs:
         run: npm ci --no-audit --no-fund
       - name: Rare phenotype contract
         run: node scripts/rare-phenotype-navigator-contract.mjs
+      - name: Generated phenotype sanitizer trials
+        run: node --experimental-strip-types scripts/rare-phenotype-generated-tests.mjs
       - name: Type check
         run: npm run typecheck
       - name: Lint
