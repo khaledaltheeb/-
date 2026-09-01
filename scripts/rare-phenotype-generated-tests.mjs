@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { cleanPhenotypes } from '../app/api/rare-phenotype/rank/route.ts';
+import { cleanPhenotypes } from '../lib/rare-phenotype.ts';
 
 let generatedTrials = 0;
 let acceptedCorrectAnswers = 0;
@@ -48,7 +48,6 @@ for (let i = 0; i < 500; i += 1) {
   }
 }
 
-// Capacity/abuse boundary: valid entries beyond 30 are never forwarded upstream.
 const overLimit = Array.from({ length: 80 }, (_, index) => validId(index + 100_000));
 assert.equal(cleanPhenotypes(overLimit).length, 30);
 
