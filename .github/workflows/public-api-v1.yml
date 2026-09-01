@@ -17,6 +17,7 @@ on:
       - 'supabase/migrations/20260901032000_public_api_v1_change_log.sql'
       - 'supabase/migrations/20260901035000_partner_api_core_v1.sql'
       - 'supabase/migrations/20260901203000_public_api_change_log_semantics_v2.sql'
+      - 'supabase/migrations/20260901204500_partner_api_admin_acl_hardening_v2.sql'
       - 'scripts/public-api-v1-contract.mjs'
       - 'scripts/public-api-v1-http-contract.mjs'
       - '.github/workflows/public-api-v1.yml'
@@ -35,6 +36,7 @@ on:
       - 'supabase/migrations/20260901032000_public_api_v1_change_log.sql'
       - 'supabase/migrations/20260901035000_partner_api_core_v1.sql'
       - 'supabase/migrations/20260901203000_public_api_change_log_semantics_v2.sql'
+      - 'supabase/migrations/20260901204500_partner_api_admin_acl_hardening_v2.sql'
       - 'scripts/public-api-v1-contract.mjs'
       - 'scripts/public-api-v1-http-contract.mjs'
 
@@ -94,7 +96,7 @@ jobs:
           done
           cat /tmp/public-api-v1.log >&2 || true
           exit 1
-      - name: Full HTTP and privacy contract
+      - name: Full HTTP, privacy, synchronization and feed contract
         run: node scripts/public-api-v1-http-contract.mjs
       - name: Stop server
         if: always()
