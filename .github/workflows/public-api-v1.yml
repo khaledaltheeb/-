@@ -45,6 +45,7 @@ on:
       - 'scripts/public-api-v1-contract.mjs'
       - 'scripts/public-api-v1-http-contract.mjs'
       - 'scripts/public-api-feed-contract.mjs'
+      - '.github/workflows/public-api-v1.yml'
 
 permissions:
   contents: read
@@ -72,6 +73,8 @@ jobs:
           cache: npm
       - name: Install locked dependencies
         run: npm ci --no-audit --no-fund
+      - name: Production dependency vulnerability gate
+        run: npm audit --omit=dev --audit-level=high
       - name: Install deterministic image build dependencies
         shell: bash
         run: |
