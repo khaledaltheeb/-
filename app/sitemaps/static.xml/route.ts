@@ -23,6 +23,7 @@ export async function GET() {
     { path:'/tools/compare', changeFrequency:'monthly', priority:.64 },
     { path:'/tools/quiz', changeFrequency:'monthly', priority:.64 },
     { path:'/tools/daily-term', changeFrequency:'daily', priority:.64 },
+    { path:'/tools/rare-phenotype-navigator', changeFrequency:'weekly', priority:.82 },
     { path:'/audiences', changeFrequency:'monthly', priority:.66 },
     { path:'/capabilities/ideas/', changeFrequency:'monthly', priority:.68 },
     { path:'/capabilities/printables/', changeFrequency:'monthly', priority:.68 },
