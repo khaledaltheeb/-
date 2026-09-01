@@ -32,6 +32,7 @@ export const metadata: Metadata = {
   alternates: {
     types: {
       'application/rss+xml': `${SITE_URL}/feed.xml`,
+      'application/feed+json': `${SITE_URL}/feed.json`,
     },
   },
   icons: {
@@ -141,7 +142,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <>
             <Script src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`} strategy="afterInteractive" />
             <Script id="rawafid-ga4" strategy="afterInteractive">
-              {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${gaId}');`}
+              {`window.dataLayer=window.dataLayer||[];function gtag(){window.dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${gaId}');`}
             </Script>
           </>
         ) : null}
