@@ -5,8 +5,8 @@ import { decoratePartnerResponse, withOptionalPartnerAccess } from '@/lib/partne
 export const dynamic = 'force-dynamic';
 
 const TAXONOMIES: Record<string, { table: 'sectors' | 'categories' | 'tags'; fields: string; order: string }> = {
-  sectors: { table: 'sectors', fields: 'id,slug,name_ar,description,seo_title,seo_description,audience,metadata,updated_at', order: 'sort_order' },
-  categories: { table: 'categories', fields: 'id,sector_id,parent_id,slug,name_ar,description,seo_title,seo_description,audience,metadata,updated_at', order: 'sort_order' },
+  sectors: { table: 'sectors', fields: 'id,slug,name_ar,description,seo_title,seo_description,audience,updated_at', order: 'sort_order' },
+  categories: { table: 'categories', fields: 'id,sector_id,parent_id,slug,name_ar,description,seo_title,seo_description,audience,updated_at', order: 'sort_order' },
   tags: { table: 'tags', fields: 'id,slug,name_ar,description,updated_at', order: 'name_ar' },
 };
 
