@@ -3,6 +3,7 @@ import fs from 'node:fs';
 const required = [
   'lib/public-api-v1.ts',
   'lib/partner-api-v1.ts',
+  'lib/crossref-metadata.ts',
   'app/api/v1/route.ts',
   'app/api/v1/content/route.ts',
   'app/api/v1/content/[slug]/route.ts',
@@ -11,6 +12,7 @@ const required = [
   'app/api/v1/search/route.ts',
   'app/api/v1/changes/route.ts',
   'app/api/v1/stats/route.ts',
+  'app/api/v1/integrations/crossref/works/route.ts',
   'app/api/openapi.json/route.ts',
   'app/feed.xml/route.ts',
   'app/feed.json/route.ts',
@@ -53,8 +55,27 @@ for (const marker of [
 ]) if (!partner.includes(marker)) fail(`partner API helper missing ${marker}`);
 if (/service.role|SERVICE_ROLE|service_role_key/i.test(partner)) fail('partner API runtime must not embed a service-role secret');
 
+const crossref = fs.readFileSync('lib/crossref-metadata.ts', 'utf8');
+for (const marker of [
+  "url.searchParams.set('mailto', CONTACT_EMAIL)",
+  "'User-Agent': USER_AGENT",
+  "next: { revalidate: 86400 }",
+  "local_title_ar: null",
+  "original_title:",
+  "owner_note:",
+  "relations:",
+  "updates,",
+  "protected_full_text_retrieval: false",
+]) if (!crossref.includes(marker)) fail(`Crossref client missing ${marker}`);
+if (/abstract\s*:/i.test(crossref)) fail('Crossref integration must not expose abstracts by default');
+
+const crossrefRoute = fs.readFileSync('app/api/v1/integrations/crossref/works/route.ts', 'utf8');
+for (const marker of ['withOptionalPartnerAccess', "'sources:read'", 'normalizeDoi', 's-maxage=86400', 'upstream_rate_limited']) {
+  if (!crossrefRoute.includes(marker)) fail(`Crossref route missing ${marker}`);
+}
+
 const openapi = fs.readFileSync('app/api/openapi.json/route.ts', 'utf8');
-for (const marker of ["openapi: '3.1.0'", "version: '1.1.0'", "'/content/{slug}/sources'", "'/changes'", "'/search'", "'/stats'", 'PartnerApiKey', 'PartnerBearer', "'pages'"]) {
+for (const marker of ["openapi: '3.1.0'", "version: '1.1.0'", "'/content/{slug}/sources'", "'/changes'", "'/search'", "'/stats'", "'/integrations/crossref/works'", 'PartnerApiKey', 'PartnerBearer', "'pages'"]) {
   if (!openapi.includes(marker)) fail(`OpenAPI contract missing ${marker}`);
 }
 

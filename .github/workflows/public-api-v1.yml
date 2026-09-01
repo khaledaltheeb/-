@@ -10,6 +10,7 @@ on:
       - 'app/developers/**'
       - 'lib/public-api-v1.ts'
       - 'lib/partner-api-v1.ts'
+      - 'lib/crossref-metadata.ts'
       - 'components/trust-page.tsx'
       - 'supabase/migrations/20260901032000_public_api_v1_change_log.sql'
       - 'supabase/migrations/20260901035000_partner_api_core_v1.sql'
@@ -24,6 +25,7 @@ on:
       - 'app/developers/**'
       - 'lib/public-api-v1.ts'
       - 'lib/partner-api-v1.ts'
+      - 'lib/crossref-metadata.ts'
       - 'supabase/migrations/20260901032000_public_api_v1_change_log.sql'
       - 'supabase/migrations/20260901035000_partner_api_core_v1.sql'
       - 'scripts/public-api-v1-contract.mjs'
@@ -121,6 +123,34 @@ jobs:
           if(!headers.includes('x-request-id:')) throw new Error('request id missing');
           if(!xml.includes('<rss version="2.0"')) throw new Error('RSS 2.0 signature missing');
           NODE
+      - name: Crossref metadata integration verification
+        shell: bash
+        run: |
+          set -euo pipefail
+          base=http://127.0.0.1:3000
+          endpoint="$base/api/v1/integrations/crossref/works?doi=10.1038%2Fs41586-020-2649-2"
+          curl -fsS "$endpoint" -D /tmp/crossref.headers -o /tmp/crossref.json
+          invalid_code="$(curl -sS -o /tmp/crossref-invalid.json -w '%{http_code}' "$base/api/v1/integrations/crossref/works?doi=not-a-doi")"
+          test "$invalid_code" = 400
+          node - <<'NODE'
+          const fs=require('fs');
+          const payload=JSON.parse(fs.readFileSync('/tmp/crossref.json','utf8'));
+          const invalid=JSON.parse(fs.readFileSync('/tmp/crossref-invalid.json','utf8'));
+          const data=payload.data;
+          if(data?.doi!=='10.1038/s41586-020-2649-2') throw new Error('normalized DOI mismatch');
+          if(!data.original_title || data.local_title_ar!==null) throw new Error('original/local title separation failed');
+          if(!data.member_id || !data.prefix || !data.owner_note) throw new Error('record ownership missing');
+          if(!data.stewardship?.includes('Crossref community of members')) throw new Error('Crossref stewardship attribution missing');
+          if(!data.relations || !Array.isArray(data.updates)) throw new Error('relations/updates contract missing');
+          if(payload.meta?.operational_policy?.contact_email!=='contact@healthrenewal.org') throw new Error('polite-pool contact missing');
+          if(payload.meta?.operational_policy?.cache_ttl_seconds!==86400) throw new Error('cache policy mismatch');
+          if(payload.meta?.operational_policy?.protected_full_text_retrieval!==false) throw new Error('full-text boundary missing');
+          if(invalid.error?.code!=='invalid_parameter') throw new Error('invalid DOI error contract failed');
+          NODE
+          etag="$(awk 'BEGIN{IGNORECASE=1} /^etag:/{gsub(/\r/,""); sub(/^etag:[[:space:]]*/,""); print; exit}' /tmp/crossref.headers)"
+          test -n "$etag"
+          code="$(curl -sS -o /dev/null -w '%{http_code}' -H "If-None-Match: $etag" "$endpoint")"
+          test "$code" = 304
       - name: Conditional request verification
         shell: bash
         run: |
