@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { buildSeoMetadata } from '@/lib/seo';
+import { absoluteSiteUrl, buildSeoMetadata } from '@/lib/seo';
 
 const MAP = 'https://www.als-mnd.org/about-us/als-mnd-health-literacy-map/';
 const DIRECTORY = 'https://www.als-mnd.org/find-als-mnd-association/';
@@ -62,5 +62,41 @@ const pages: Record<string, PageDef> = {
 };
 
 function key(slug?: string[]) { return (slug ?? []).join('/'); }
-export async function generateMetadata({params}:{params:Params}):Promise<Metadata>{ const {slug}=await params; const page=pages[key(slug)]; if(!page)return{}; const path=page.slug?`/evidence-guides/als-mnd/${page.slug}/`:'/evidence-guides/als-mnd/'; return buildSeoMetadata({title:page.title,description:page.description,path,index:true,follow:true,type:'website',keywords:['ALS','MND','التصلب الجانبي الضموري','مرض العصبون الحركي','محو الأمية الصحية']}); }
-export default async function AlsMndPage({params}:{params:Params}){const {slug}=await params;const page=pages[key(slug)];if(!page)notFound();return <main dir="rtl" style={{maxWidth:1050,margin:'0 auto',padding:'2rem 1rem',lineHeight:1.95,color:'#14251f'}}><nav><Link href="/evidence-guides/">أدلة المصادر</Link> · <Link href="/evidence-guides/als-mnd/">ALS/MND</Link></nav><header><p style={{color:'#0a6655',fontWeight:700}}>International Alliance of ALS/MND Associations — Health Literacy Map</p><h1>{page.title}</h1><p>{page.description}</p></header>{page.body}<section style={card}><h2>المصدر الهيكلي الأصلي</h2><p><a href={MAP} target="_blank" rel="noopener noreferrer">ALS/MND Health Literacy Map — International Alliance of ALS/MND Associations</a></p><p>أحالتنا Alliance مباشرة إلى هذه الخريطة ودليل الجمعيات. المحتوى العربي هنا إعداد مستقل من Health Renewal؛ لا يعني أن Alliance راجعته أو اعتمدته، ولا نعيد نشر الخريطة أو نقدم خدمات الجمعيات كأنها متاحة في الأردن.</p></section></main>}
+function pagePath(page: PageDef) { return page.slug ? `/evidence-guides/als-mnd/${page.slug}/` : '/evidence-guides/als-mnd/'; }
+function pageJsonLd(page: PageDef) {
+  const path = pagePath(page);
+  const url = absoluteSiteUrl(path);
+  return {
+    '@context': 'https://schema.org',
+    '@type': page.slug ? ['MedicalWebPage', 'Article'] : 'CollectionPage',
+    '@id': `${url}#page`,
+    url,
+    name: page.title,
+    headline: page.title,
+    description: page.description,
+    inLanguage: 'ar',
+    isPartOf: { '@type': 'WebSite', '@id': `${absoluteSiteUrl('/')}#website`, url: absoluteSiteUrl('/') },
+    citation: [MAP, DIRECTORY],
+  };
+}
+
+export async function generateMetadata({params}:{params:Params}):Promise<Metadata>{
+  const {slug}=await params;
+  const page=pages[key(slug)];
+  if(!page)return{};
+  return buildSeoMetadata({title:page.title,description:page.description,path:pagePath(page),index:true,follow:true,type:'website',keywords:['ALS','MND','التصلب الجانبي الضموري','مرض العصبون الحركي','محو الأمية الصحية']});
+}
+
+export default async function AlsMndPage({params}:{params:Params}){
+  const {slug}=await params;
+  const page=pages[key(slug)];
+  if(!page)notFound();
+  const schema=pageJsonLd(page);
+  return <main dir="rtl" style={{maxWidth:1050,margin:'0 auto',padding:'2rem 1rem',lineHeight:1.95,color:'#14251f'}}>
+    <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(schema).replace(/</g,'\\u003c')}} />
+    <nav><Link href="/evidence-guides/">أدلة المصادر</Link> · <Link href="/evidence-guides/als-mnd/">ALS/MND</Link></nav>
+    <header><p style={{color:'#0a6655',fontWeight:700}}>International Alliance of ALS/MND Associations — Health Literacy Map</p><h1>{page.title}</h1><p>{page.description}</p></header>
+    {page.body}
+    <section style={card}><h2>المصدر الهيكلي الأصلي</h2><p><a href={MAP} target="_blank" rel="noopener noreferrer">ALS/MND Health Literacy Map — International Alliance of ALS/MND Associations</a></p><p>أحالتنا Alliance مباشرة إلى هذه الخريطة ودليل الجمعيات. المحتوى العربي هنا إعداد مستقل من Health Renewal؛ لا يعني أن Alliance راجعته أو اعتمدته، ولا نعيد نشر الخريطة أو نقدم خدمات الجمعيات كأنها متاحة في الأردن.</p></section>
+  </main>;
+}
