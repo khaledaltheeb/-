@@ -5,14 +5,16 @@ import { decoratePartnerResponse, withOptionalPartnerAccess } from '@/lib/partne
 export const dynamic = 'force-dynamic';
 
 function boundedInteger(value: string | null, fallback: number, min: number, max: number) {
-  const parsed = Number(value ?? fallback);
-  if (!Number.isInteger(parsed)) return fallback;
-  return Math.max(min, Math.min(max, parsed));
+  if (value === null) return fallback;
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed < min || parsed > max) return null;
+  return parsed;
 }
 
 function clean(value: string | null, max = 160) {
   const text = value?.trim() || '';
-  return text ? text.slice(0, max) : null;
+  if (!text) return { value: null, valid: true };
+  return text.length <= max ? { value: text, valid: true } : { value: null, valid: false };
 }
 
 export async function GET(request: Request) {
@@ -21,18 +23,24 @@ export async function GET(request: Request) {
 
   const url = new URL(request.url);
   const limit = boundedInteger(url.searchParams.get('limit'), 25, 1, 100);
+  if (limit === null) return apiError(request, 400, 'invalid_parameter', 'limit must be an integer between 1 and 100.', 'limit');
   const offset = boundedInteger(url.searchParams.get('offset'), 0, 0, 100000);
-  const publisher = clean(url.searchParams.get('publisher'));
-  const type = clean(url.searchParams.get('type'), 80);
-  const q = clean(url.searchParams.get('q'));
+  if (offset === null) return apiError(request, 400, 'invalid_parameter', 'offset must be an integer between 0 and 100000.', 'offset');
+
+  const publisherInput = clean(url.searchParams.get('publisher'));
+  if (!publisherInput.valid) return apiError(request, 400, 'invalid_parameter', 'publisher must contain at most 160 characters.', 'publisher');
+  const typeInput = clean(url.searchParams.get('type'), 80);
+  if (!typeInput.valid) return apiError(request, 400, 'invalid_parameter', 'type must contain at most 80 characters.', 'type');
+  const qInput = clean(url.searchParams.get('q'));
+  if (!qInput.valid) return apiError(request, 400, 'invalid_parameter', 'q must contain at most 160 characters.', 'q');
 
   const supabase = await createClient();
   const { data, error } = await supabase.rpc('api_source_registry', {
     p_limit: limit,
     p_offset: offset,
-    p_publisher: publisher,
-    p_type: type,
-    p_q: q,
+    p_publisher: publisherInput.value,
+    p_type: typeInput.value,
+    p_q: qInput.value,
   });
 
   if (error) return apiError(request, 503, 'upstream_unavailable', 'The source registry is temporarily unavailable.');
@@ -43,7 +51,7 @@ export async function GET(request: Request) {
     meta: {
       api_version: PUBLIC_API_VERSION,
       generated_at: new Date().toISOString(),
-      filters: { publisher, type, q },
+      filters: { publisher: publisherInput.value, type: typeInput.value, q: qInput.value },
       provenance_note: 'السجل يعرض المصادر المرتبطة بمواد منشورة وقابلة للفهرسة فقط. وجود المصدر لا يمنح تلقائيًا حق إعادة نشره.',
     },
   });
