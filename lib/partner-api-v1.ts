@@ -1,7 +1,20 @@
 import { createHash, randomUUID } from 'node:crypto';
 import { createClient } from '@/lib/supabase/server';
 
-export type PartnerScope = 'content:read' | 'sources:read' | 'search:read' | 'changes:read' | 'stats:read';
+export type PartnerScope =
+  | 'content:read'
+  | 'sources:read'
+  | 'search:read'
+  | 'changes:read'
+  | 'stats:read'
+  | 'people:submit'
+  | 'specialists:submit'
+  | 'organizations:submit'
+  | 'courses:submit'
+  | 'events:submit'
+  | 'schedules:submit'
+  | 'imports:read'
+  | 'webhooks:manage';
 
 export type PartnerAuthorization = {
   authorized: boolean;
@@ -24,6 +37,12 @@ function readApiKey(request: Request) {
   const authorization = request.headers.get('authorization')?.trim() || '';
   const match = authorization.match(/^Bearer\s+(.+)$/i);
   return match?.[1]?.trim() || null;
+}
+
+export function partnerCredentialHash(request: Request) {
+  const rawKey = readApiKey(request);
+  if (!rawKey || !/^rawafid_live_[0-9a-f]{64}$/.test(rawKey)) return null;
+  return createHash('sha256').update(rawKey).digest('hex');
 }
 
 function requestIdFor(request: Request) {
@@ -76,7 +95,7 @@ export function decoratePartnerResponse(response: Response, headers: Record<stri
 function authErrorHeaders(requestId: string) {
   return {
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Accept,Authorization,Content-Type,If-None-Match,If-Modified-Since,X-API-Key,X-Request-Id',
+    'Access-Control-Allow-Headers': 'Accept,Authorization,Content-Type,Idempotency-Key,If-None-Match,If-Modified-Since,X-API-Key,X-Request-Id',
     'Access-Control-Expose-Headers': 'Retry-After,X-Request-Id',
     'Content-Type': 'application/json; charset=utf-8',
     'Cache-Control': 'private, no-store',
