@@ -32,8 +32,10 @@ export async function GET(request: Request) {
   const since = parseIsoDate(sinceRaw);
   if (!cursor && (!sinceRaw || !since)) return apiError(request, 400, 'invalid_parameter', 'since is required and must be an ISO-8601 date when cursor is not supplied.', 'since');
 
-  const rawLimit = Number(url.searchParams.get('limit') || 100);
-  const limit = Number.isInteger(rawLimit) && rawLimit > 0 ? Math.min(rawLimit, access.authorization?.authorized ? 1000 : 500) : 100;
+  const max = access.authorization?.authorized ? 1000 : 500;
+  const limitRaw = url.searchParams.get('limit');
+  const limit = limitRaw === null ? 100 : Number(limitRaw);
+  if (!Number.isInteger(limit) || limit < 1 || limit > max) return apiError(request, 400, 'invalid_parameter', `limit must be an integer between 1 and ${max}.`, 'limit');
 
   const supabase = await createClient();
   let query = supabase
