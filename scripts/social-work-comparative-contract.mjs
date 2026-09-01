@@ -64,9 +64,11 @@ if(!pages.includes('لا توجد هنا سلسلة صفحات متطابقة'))
 if(!pages.includes('Article')) fail('Article structured data missing');
 if(!pages.includes('canonical')) fail('canonical metadata missing');
 
-const expectedH1=newSlugs.length;
-const h1Count=(pages.match(/<h1>/g)||[]).length;
-if(h1Count!==expectedH1) fail(`expected ${expectedH1} h1 headings, found ${h1Count}`);
+// Pages are generated from one gap template plus one explicit hub template, so static
+// source H1 counting is invalid. Guard both render paths instead.
+if(!pages.includes('<h1>${spec.title}</h1>')) fail('gap-page H1 render template missing');
+if(!pages.includes('<h1>الممارسة والأخلاقيات في العمل الاجتماعي: مقارنة دولية</h1>')) fail('comparative hub H1 missing');
+if(!pages.includes('gapPages.map((spec)=>[spec.slug,buildGapPage(spec)])')) fail('gap pages are not rendered through the guarded builder');
 
 for(const token of [
   'SOCIAL_WORK_COMPARATIVE_PAGES',
