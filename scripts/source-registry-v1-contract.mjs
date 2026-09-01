@@ -64,6 +64,19 @@ requireMarkers('supabase/migrations/20260901221854_source_governance_provenance_
   'source_version_id, source_id',
 ]);
 
+requireMarkers('supabase/migrations/20260901223500_datacite_content_relations_v1.sql', [
+  'source_related_identifiers_rawafid_content_idx',
+  'private.refresh_content_related_identifiers',
+  'content_source_related_identifier_sync',
+  'content_related_identifier_refresh',
+  "'IsReferencedBy'",
+  "'DataCite'",
+  "'https://schema.datacite.org/'",
+  "'rawafid_content_citation'",
+  "content_reuse_status",
+  "'unknown'",
+]);
+
 requireMarkers('app/api/v1/sources/route.ts', [
   "withOptionalPartnerAccess(request, 'sources:read')",
   "supabase.rpc('api_source_registry'",
@@ -77,4 +90,4 @@ requireMarkers('app/api/v1/content/[slug]/sources/route.ts', [
   "registry: 'normalized-v1'",
 ]);
 
-console.log('Source Registry V1 + connection metadata + rights/translation provenance contract passed.');
+console.log('Source Registry V1 + DataCite relations + rights/translation provenance contract passed.');
