@@ -1,6 +1,7 @@
 package org.healthrenewal.rawafid
 
 import android.os.Bundle
+import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
@@ -44,6 +45,7 @@ import kotlinx.coroutines.withContext
 class CircleAccountActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
         setContent {
             RawafidTheme {
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
@@ -62,8 +64,10 @@ private fun CircleAccountScreen(onDone: () -> Unit) {
     var mode by rememberSaveable { mutableStateOf("signup") }
     var name by rememberSaveable { mutableStateOf("") }
     var email by rememberSaveable { mutableStateOf("") }
-    var password by rememberSaveable { mutableStateOf("") }
-    var passwordConfirmation by rememberSaveable { mutableStateOf("") }
+    // Credentials and MFA codes deliberately use remember rather than rememberSaveable:
+    // they must not be serialized into the Activity saved-state bundle.
+    var password by remember { mutableStateOf("") }
+    var passwordConfirmation by remember { mutableStateOf("") }
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
     var busy by remember { mutableStateOf(false) }
     var status by remember { mutableStateOf("") }
@@ -71,7 +75,7 @@ private fun CircleAccountScreen(onDone: () -> Unit) {
     var mfaFactors by remember { mutableStateOf<List<CircleMfaFactor>>(emptyList()) }
     var mfaRequired by remember { mutableStateOf(false) }
     var challengeId by remember { mutableStateOf<String?>(null) }
-    var mfaCode by rememberSaveable { mutableStateOf("") }
+    var mfaCode by remember { mutableStateOf("") }
     val signedIn = remember(sessionVersion) { RawafidCircleApi.hasSession(context) }
     val passwordRequirements = remember(password) { CirclePasswordPolicy.requirements(password) }
     val passwordMatches = password.isNotBlank() && password == passwordConfirmation
