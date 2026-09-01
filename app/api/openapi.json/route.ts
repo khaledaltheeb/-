@@ -47,7 +47,7 @@ export async function GET(request: Request) {
     jsonSchemaDialect: 'https://json-schema.org/draft/2020-12/schema',
     servers: [{ url: `${SITE_URL}/api/v1`, description: 'Canonical production API' }],
     tags: [
-      { name: 'Discovery' }, { name: 'Content' }, { name: 'Sources' }, { name: 'Search' }, { name: 'Taxonomy' }, { name: 'Synchronization' }, { name: 'Operations' },
+      { name: 'Discovery' }, { name: 'Content' }, { name: 'Sources' }, { name: 'Search' }, { name: 'Taxonomy' }, { name: 'Synchronization' }, { name: 'Operations' }, { name: 'External Metadata' },
     ],
     paths: {
       '/': {
@@ -89,6 +89,24 @@ export async function GET(request: Request) {
           tags: ['Sources'], operationId: 'getSource', security: partnerSecurity,
           parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
           responses: { '200': { description: 'Source metadata, observed versions, and published content relationships' }, '400': { $ref: '#/components/responses/BadRequest' }, '404': { $ref: '#/components/responses/NotFound' }, ...partnerResponses },
+        },
+      },
+      '/integrations/crossref/works': {
+        get: {
+          tags: ['External Metadata','Sources'],
+          operationId: 'resolveCrossrefWork',
+          security: partnerSecurity,
+          summary: 'Resolve governed Crossref bibliographic metadata for one DOI',
+          description: 'Uses the Crossref polite pool with identified mailto and User-Agent, 24-hour caching, original-title preservation, explicit member ownership, relations/updates, and no publisher full text or abstract redistribution.',
+          parameters: [{ name: 'doi', in: 'query', required: true, schema: { type: 'string', minLength: 7, maxLength: 300 }, examples: { doi: { value: '10.1038/s41586-020-2649-2' }, url: { value: 'https://doi.org/10.1038/s41586-020-2649-2' } } }],
+          responses: {
+            '200': { description: 'Normalized Crossref metadata with provenance and operational policy' },
+            '400': { $ref: '#/components/responses/BadRequest' },
+            '404': { $ref: '#/components/responses/NotFound' },
+            '429': { $ref: '#/components/responses/RateLimited' },
+            '503': { description: 'Crossref metadata is temporarily unavailable' },
+            ...partnerResponses,
+          },
         },
       },
       '/search': {
