@@ -111,15 +111,20 @@ object CircleNotificationSystem {
             .setPublicVersion(publicVersion)
 
         if (messageId.isNotBlank() && (item.kind == "circle_question" || kind == "yes_no_question")) {
-            builder.addAction(0, "نعم ✓", answerPendingIntent(context, item, messageId, "yes", 1))
-            builder.addAction(0, "لا ✕", answerPendingIntent(context, item, messageId, "no", 2))
+            builder.addAction(authenticatedAction("نعم ✓", answerPendingIntent(context, item, messageId, "yes", 1)))
+            builder.addAction(authenticatedAction("لا ✕", answerPendingIntent(context, item, messageId, "no", 2)))
         }
         if (messageId.isNotBlank() && (item.kind == "circle_location_request" || kind == "location_request")) {
-            builder.addAction(0, "فتح وإرسال موقعي", open)
-            builder.addAction(0, "رفض", answerPendingIntent(context, item, messageId, "decline", 3))
+            builder.addAction(authenticatedAction("فتح وإرسال موقعي", open))
+            builder.addAction(authenticatedAction("رفض", answerPendingIntent(context, item, messageId, "decline", 3)))
         }
         (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).notify(item.notificationId.hashCode(), builder.build())
     }
+
+    private fun authenticatedAction(title: String, pendingIntent: PendingIntent): NotificationCompat.Action =
+        NotificationCompat.Action.Builder(0, title, pendingIntent)
+            .setAuthenticationRequired(true)
+            .build()
 
     private fun answerPendingIntent(context: Context, item: CircleCloudNotification, messageId: String, answer: String, salt: Int): PendingIntent = PendingIntent.getBroadcast(
         context,
