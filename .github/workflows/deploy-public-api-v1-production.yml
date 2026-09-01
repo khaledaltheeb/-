@@ -16,6 +16,10 @@ on:
       - 'scripts/public-api-v1-contract.mjs'
       - 'supabase/migrations/20260901032000_public_api_v1_change_log.sql'
       - 'supabase/migrations/20260901035000_partner_api_core_v1.sql'
+      - 'supabase/migrations/20260901070000_global_source_registry_v1.sql'
+      - 'supabase/migrations/20260901070500_global_source_registry_backfill_links.sql'
+      - 'supabase/migrations/20260901071000_global_source_registry_public_rpc.sql'
+      - 'supabase/migrations/20260901071500_global_source_registry_sync.sql'
       - '.github/workflows/deploy-public-api-v1-production.yml'
 
 concurrency:
@@ -84,6 +88,8 @@ jobs:
               && curl -fsS --retry 2 --retry-delay 2 --retry-all-errors "${base}/api/v1/research?limit=2&deploy=${stamp}" -o /tmp/research.json \
               && curl -fsS --retry 2 --retry-delay 2 --retry-all-errors "${base}/api/v1/courses?limit=2&deploy=${stamp}" -o /tmp/courses.json \
               && curl -fsS --retry 2 --retry-delay 2 --retry-all-errors "${base}/api/v1/pages?limit=2&deploy=${stamp}" -o /tmp/pages.json \
+              && curl -fsS --retry 2 --retry-delay 2 --retry-all-errors "${base}/api/v1/sources?limit=2&deploy=${stamp}" -o /tmp/sources.json \
+              && curl -fsS --retry 2 --retry-delay 2 --retry-all-errors "${base}/api/v1/content/quick-info-fatigue-vs-sleepiness/sources?deploy=${stamp}" -o /tmp/content-sources.json \
               && curl -fsS --retry 2 --retry-delay 2 --retry-all-errors "${base}/api/v1/stats?deploy=${stamp}" -o /tmp/stats.json \
               && curl -fsS --retry 2 --retry-delay 2 --retry-all-errors "${base}/api/v1/changes?since=2026-01-01T00%3A00%3A00Z&limit=2&deploy=${stamp}" -o /tmp/changes.json \
               && curl -fsS --retry 2 --retry-delay 2 --retry-all-errors "${base}/feed.xml?deploy=${stamp}" -o /tmp/feed.xml \
@@ -102,6 +108,8 @@ jobs:
           const openapi=JSON.parse(fs.readFileSync('/tmp/openapi.json','utf8'));
           const content=JSON.parse(fs.readFileSync('/tmp/content.json','utf8'));
           const pages=JSON.parse(fs.readFileSync('/tmp/pages.json','utf8'));
+          const sources=JSON.parse(fs.readFileSync('/tmp/sources.json','utf8'));
+          const contentSources=JSON.parse(fs.readFileSync('/tmp/content-sources.json','utf8'));
           const stats=JSON.parse(fs.readFileSync('/tmp/stats.json','utf8'));
           const changes=JSON.parse(fs.readFileSync('/tmp/changes.json','utf8'));
           const invalid=JSON.parse(fs.readFileSync('/tmp/invalid-key.json','utf8'));
@@ -113,6 +121,8 @@ jobs:
           if(openapi.openapi!=='3.1.0' || openapi.info?.version!=='1.1.0') throw new Error('OpenAPI contract is invalid');
           if(!openapi.components?.securitySchemes?.PartnerApiKey) throw new Error('Partner API security contract is missing');
           if(!Array.isArray(content.data) || !Array.isArray(pages.data)) throw new Error('Public content/pages endpoint is invalid');
+          if(!Array.isArray(sources.data) || sources.data.length<1) throw new Error('Normalized source registry endpoint is invalid');
+          if(!contentSources.data || !Array.isArray(contentSources.data.sources) || contentSources.data.sources.length<1) throw new Error('Per-content source registry endpoint is invalid');
           if(!stats.data || typeof stats.data.total!=='number') throw new Error('Stats endpoint is invalid');
           if(!Array.isArray(changes.data)) throw new Error('Delta endpoint is invalid');
           if(invalid.error?.code!=='invalid_api_key') throw new Error('Invalid-key behavior is incorrect');
