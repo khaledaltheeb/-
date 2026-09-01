@@ -9,9 +9,11 @@ const required = [
   'lib/research-integrations/dedupe.ts',
   'lib/research-integrations/evidence-discovery.ts',
   'app/api/v1/evidence-discovery/route.ts',
+  'app/api/openapi.json/route.ts',
   'examples/lens-scholarly-demo/lens-demo.mjs',
   'docs/integrations/research-evidence.md',
   'supabase/migrations/20260901190000_ror_source_registry_v1.sql',
+  'supabase/migrations/20260901192000_ror_registry_explicit_deny.sql',
 ];
 
 for (const file of required) {
@@ -22,20 +24,29 @@ const lens = fs.readFileSync('lib/research-integrations/lens.ts', 'utf8');
 const ror = fs.readFileSync('lib/research-integrations/ror.ts', 'utf8');
 const europe = fs.readFileSync('lib/research-integrations/europe-pmc.ts', 'utf8');
 const route = fs.readFileSync('app/api/v1/evidence-discovery/route.ts', 'utf8');
+const openapi = fs.readFileSync('app/api/openapi.json/route.ts', 'utf8');
 const demo = fs.readFileSync('examples/lens-scholarly-demo/lens-demo.mjs', 'utf8');
 const migration = fs.readFileSync('supabase/migrations/20260901190000_ror_source_registry_v1.sql', 'utf8');
+const denyMigration = fs.readFileSync('supabase/migrations/20260901192000_ror_registry_explicit_deny.sql', 'utf8');
 
 const checks = [
   [lens.includes('https://api.lens.org/scholarly/search'), 'Lens Scholarly endpoint missing'],
   [lens.includes('Bearer ${token}'), 'Lens Bearer authorization missing'],
+  [lens.includes('updateNature === \'retraction\''), 'Lens retraction semantic guard missing'],
   [ror.includes('https://api.ror.org/v2/organizations'), 'ROR v2 endpoint missing'],
   [ror.includes('candidate.chosen === true'), 'ROR chosen:true selection missing'],
   [ror.includes('resolveRorFromDataset'), 'ROR dataset resolution missing'],
   [europe.includes('/fullTextXML'), 'Europe PMC full text XML support missing'],
   [europe.includes('/supplementaryFiles'), 'Europe PMC supplementary-files support missing'],
+  [europe.includes('normalizeOrcid'), 'Europe PMC typed ORCID normalization missing'],
+  [europe.includes('rorFromOrgIdentifier'), 'Europe PMC ROR affiliation normalization missing'],
   [route.includes("withOptionalPartnerAccess(request, 'search:read')"), 'Partner search scope missing'],
+  [openapi.includes("'/evidence-discovery'"), 'Evidence discovery OpenAPI path missing'],
+  [openapi.includes("operationId: 'discoverEvidence'"), 'Evidence discovery OpenAPI operation missing'],
   [migration.includes('enable row level security'), 'ROR registry RLS missing'],
   [migration.includes('source_organizations'), 'ROR source relationship table missing'],
+  [denyMigration.includes('as restrictive'), 'ROR explicit restrictive RLS policy missing'],
+  [denyMigration.includes('using (false)'), 'ROR explicit direct-access deny missing'],
 ];
 
 for (const [ok, message] of checks) if (!ok) throw new Error(message);
