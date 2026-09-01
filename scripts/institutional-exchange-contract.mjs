@@ -8,6 +8,7 @@ const required = [
   'lib/partner-api-v1.ts',
   'app/api/v1/integrations/[resource]/route.ts',
   'supabase/migrations/20260901213000_institutional_exchange_v1.sql',
+  'supabase/migrations/20260901214000_institutional_exchange_scope_admin_v1.sql',
 ];
 for (const path of required) if (!fs.existsSync(path)) fail(`missing ${path}`);
 
@@ -66,6 +67,18 @@ for (const liveTable of ['public.specialists', 'public.organizations', 'public.c
 
 if (!migration.includes("octet_length(p_payload::text)>262144")) fail('database payload size ceiling missing');
 if (!migration.includes("octet_length(p_provenance::text)>65536")) fail('database provenance size ceiling missing');
+
+const admin = read('supabase/migrations/20260901214000_institutional_exchange_scope_admin_v1.sql');
+for (const marker of [
+  'admin_create_api_partner',
+  'admin_set_api_partner_scopes',
+  "'people:submit'",
+  "'courses:submit'",
+  "'webhooks:manage'",
+  "status='revoked'",
+  'not (scopes <@ p_scopes)',
+  "set search_path=''",
+]) if (!admin.includes(marker)) fail(`partner scope administration missing ${marker}`);
 
 if (failed) process.exit(1);
 console.log('RAWAFID INSTITUTIONAL EXCHANGE V1 GOVERNANCE CONTRACT OK');
