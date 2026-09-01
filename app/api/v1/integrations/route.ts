@@ -19,6 +19,7 @@ export async function GET(request: Request) {
     api_version: PUBLIC_API_VERSION,
     status: 'preview',
     model: 'governed_staging',
+    openapi: '/api/v1/integrations/openapi.json',
     resources,
     submission: {
       endpoint_template: '/api/v1/integrations/{resource}',
