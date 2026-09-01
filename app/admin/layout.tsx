@@ -8,7 +8,7 @@ type AdminNavGroup = { label: string; items: AdminNavItem[] };
 const adminGroups: AdminNavGroup[] = [
  {label:'المحتوى والمعرفة',items:[['/admin','نظرة عامة'],['/admin/content','المحتوى وCMS'],['/admin/media','مكتبة الوسائط'],['/admin/taxonomy','القطاعات والأقسام'],['/admin/tags','الوسوم الدلالية'],['/admin/redirects','الروابط والتحويلات']]},
  {label:'الدليل والمجتمع',items:[['/admin/specialists','المختصون والتوثيق'],['/admin/centers','المراكز والفروع'],['/admin/community','المتدربون والمتطوعون'],['/admin/users','المستخدمون والصلاحيات']]},
- {label:'التشغيل والرقابة',items:[['/admin/appointments','المواعيد'],['/admin/reports','البلاغات'],['/admin/audit','سجل التدقيق'],['/admin/integrity','سلامة المنصة']]},
+ {label:'التشغيل والرقابة',items:[['/admin/appointments','المواعيد'],['/admin/reports','البلاغات'],['/admin/integrations/api','تكاملات API'],['/admin/audit','سجل التدقيق'],['/admin/integrity','سلامة المنصة']]},
 ];
 const editorialGroups: AdminNavGroup[] = [
  {label:'مساحة التحرير',items:[['/admin/content','المحتوى وCMS']]},
