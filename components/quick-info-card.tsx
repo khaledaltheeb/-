@@ -32,7 +32,7 @@ export default function QuickInfoCard({ title, description, href, variant = 'car
   return <section className={className} style={visualStyle} dir="rtl" data-quick-info-visual={visual.id}>
     <div className={styles.content}>
       <div className={styles.brandRow}>
-        <span className={styles.brandMark} aria-hidden="true"><Image src="/assets/brand/logo-mark.svg" alt="" width={42} height={42} /></span>
+        <span className={styles.brandMark} aria-hidden="true"><Image src="/assets/brand/logo-mark.svg" alt="شعار منصة روافد" width={42} height={42} /></span>
         <span className={styles.brandCopy}><strong>منصة روافد</strong><small>معرفة عربية موثوقة</small></span>
       </div>
       <div className={styles.badges}>
