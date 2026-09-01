@@ -1,0 +1,30 @@
+name: Validate Rare Phenotype Navigator
+
+on:
+  pull_request:
+    paths:
+      - 'app/tools/rare-phenotype-navigator/**'
+      - 'app/api/rare-phenotype/**'
+      - 'components/rare-phenotype-navigator*.tsx'
+      - 'scripts/rare-phenotype-navigator-contract.mjs'
+      - '.github/workflows/validate-rare-phenotype-navigator.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Contract
+        run: node scripts/rare-phenotype-navigator-contract.mjs
+      - name: TypeScript
+        run: npm run typecheck
