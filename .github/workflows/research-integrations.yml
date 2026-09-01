@@ -13,6 +13,7 @@ on:
       - 'supabase/migrations/20260901190000_ror_source_registry_v1.sql'
       - 'supabase/migrations/20260901192000_ror_registry_explicit_deny.sql'
       - 'supabase/migrations/20260901212203_source_connection_metadata_v1.sql'
+      - 'supabase/migrations/20260901215918_source_governance_provenance_v1.sql'
       - '.github/workflows/research-integrations.yml'
   push:
     branches: [main]
@@ -27,6 +28,8 @@ on:
       - 'supabase/migrations/20260901190000_ror_source_registry_v1.sql'
       - 'supabase/migrations/20260901192000_ror_registry_explicit_deny.sql'
       - 'supabase/migrations/20260901212203_source_connection_metadata_v1.sql'
+      - 'supabase/migrations/20260901215918_source_governance_provenance_v1.sql'
+      - '.github/workflows/research-integrations.yml'
 
 permissions:
   contents: read
