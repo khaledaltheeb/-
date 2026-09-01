@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { cleanPhenotypes } from '@/lib/rare-phenotype';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,11 +12,6 @@ type Body = {
   limit?: number;
 };
 
-export function cleanPhenotypes(value: unknown) {
-  if (!Array.isArray(value)) return [];
-  return [...new Set(value.filter((item): item is string => typeof item === 'string' && /^HP:\d{7}$/.test(item)).slice(0, 30))];
-}
-
 export async function POST(request: NextRequest) {
   let body: Body;
   try {
@@ -24,7 +20,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'طلب غير صالح.' }, { status: 400 });
   }
 
-  const phenotypes = cleanPhenotypes(body.phenotypes);
+  const phenotypes = cleanPhenotypes(body.phenotypes, 30);
   const group = ALLOWED_GROUPS.has(body.group ?? '') ? body.group! : 'Human Diseases';
   const limit = Math.min(20, Math.max(1, Number(body.limit ?? 10) || 10));
   if (!phenotypes.length) return NextResponse.json({ error: 'أضف نمطًا ظاهريًا واحدًا على الأقل.' }, { status: 400 });
