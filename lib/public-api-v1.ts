@@ -3,12 +3,12 @@ import { createClient } from '@/lib/supabase/server';
 import { SITE_URL } from '@/lib/seo';
 import { publicContentHref } from '@/lib/public-content-routing';
 
-export const PUBLIC_API_VERSION = '1.0.0';
+export const PUBLIC_API_VERSION = '1.1.0';
 export const PUBLIC_API_BASE = '/api/v1';
 export const DEFAULT_LIMIT = 25;
 export const MAX_LIMIT = 100;
 
-export const CONTENT_RESOURCE_TYPES: Record<string, string> = {
+export const CONTENT_RESOURCE_TYPES: Record<string, string | string[]> = {
   articles: 'article',
   guides: 'guide',
   research: 'research',
@@ -22,6 +22,7 @@ export const CONTENT_RESOURCE_TYPES: Record<string, string> = {
   interventions: 'intervention',
   assessments: 'assessment',
   glossary: 'glossary_term',
+  pages: ['landing_page', 'directory_page', 'sector_page'],
 };
 
 const CONTENT_FIELDS = 'id,content_type,slug,title,excerpt,body_json,body_text,audience,seo_title,seo_description,canonical_url,schema_json,featured_image_url,featured_image_alt,published_at,updated_at,primary_keyword,secondary_keywords,semantic_terms,search_intent,author_display_name,reviewer_display_name,reviewer_credentials,last_reviewed_at,references_json,medical_disclaimer,sector_id,category_id' as const;
@@ -129,10 +130,7 @@ export function serializePublicContent(row: Record<string, unknown>, includeBody
     schema_json: row.schema_json || {},
   };
   if (includeBody) {
-    payload.body = {
-      structured: row.body_json || {},
-      text: row.body_text || null,
-    };
+    payload.body = { structured: row.body_json || {}, text: row.body_text || null };
     payload.medical_disclaimer = row.medical_disclaimer || null;
   }
   return payload;
@@ -155,9 +153,7 @@ export function decodeCursor(value: string | null): ApiCursor | null {
     if (!parsed.published_at || !parsed.id || Number.isNaN(Date.parse(parsed.published_at))) return null;
     if (!/^[0-9a-f-]{36}$/i.test(parsed.id)) return null;
     return { published_at: parsed.published_at, id: parsed.id };
-  } catch {
-    return null;
-  }
+  } catch { return null; }
 }
 
 export function parseIsoDate(value: string | null) {
@@ -170,8 +166,8 @@ function responseHeaders(requestId: string, cacheControl = 'public, max-age=0, s
   return {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET,HEAD,OPTIONS',
-    'Access-Control-Allow-Headers': 'Accept,Authorization,Content-Type,If-None-Match,If-Modified-Since',
-    'Access-Control-Expose-Headers': 'ETag,Last-Modified,X-Request-Id',
+    'Access-Control-Allow-Headers': 'Accept,Authorization,Content-Type,If-None-Match,If-Modified-Since,X-API-Key',
+    'Access-Control-Expose-Headers': 'ETag,Last-Modified,X-Request-Id,X-Rawafid-Partner,X-Rawafid-Key-Prefix,X-RateLimit-Minute-Limit,X-RateLimit-Minute-Remaining,X-RateLimit-Minute-Reset,X-RateLimit-Day-Limit,X-RateLimit-Day-Remaining,X-RateLimit-Day-Reset',
     'Cache-Control': cacheControl,
     'Content-Type': 'application/json; charset=utf-8',
     'Referrer-Policy': 'no-referrer',
@@ -182,10 +178,7 @@ function responseHeaders(requestId: string, cacheControl = 'public, max-age=0, s
 }
 
 export function optionsResponse() {
-  return new Response(null, {
-    status: 204,
-    headers: responseHeaders(randomUUID(), 'public, max-age=86400'),
-  });
+  return new Response(null, { status: 204, headers: responseHeaders(randomUUID(), 'public, max-age=86400') });
 }
 
 export function apiError(request: Request, status: number, code: string, message: string, parameter?: string) {
@@ -212,7 +205,7 @@ export function jsonResponse(
   return new Response(body, { status: options.status || 200, headers });
 }
 
-export async function listPublicContent(request: Request, forcedType?: string) {
+export async function listPublicContent(request: Request, forcedType?: string | string[]) {
   const url = new URL(request.url);
   const limit = parseLimit(request);
   const cursorRaw = url.searchParams.get('cursor');
@@ -238,7 +231,8 @@ export async function listPublicContent(request: Request, forcedType?: string) {
     .order('id', { ascending: false })
     .limit(limit + 1);
 
-  if (requestedType) query = query.eq('content_type', requestedType);
+  if (Array.isArray(requestedType)) query = query.in('content_type', requestedType);
+  else if (requestedType) query = query.eq('content_type', requestedType);
   if (publishedAfter) query = query.gte('published_at', publishedAfter);
   if (updatedAfter) query = query.gte('updated_at', updatedAfter);
   if (cursor) query = query.or(`published_at.lt.${cursor.published_at},and(published_at.eq.${cursor.published_at},id.lt.${cursor.id})`);
@@ -249,9 +243,7 @@ export async function listPublicContent(request: Request, forcedType?: string) {
   const hasMore = rows.length > limit;
   const page = rows.slice(0, limit);
   const tail = page.at(-1);
-  const nextCursor = hasMore && tail?.published_at && tail?.id
-    ? encodeCursor({ published_at: String(tail.published_at), id: String(tail.id) })
-    : null;
+  const nextCursor = hasMore && tail?.published_at && tail?.id ? encodeCursor({ published_at: String(tail.published_at), id: String(tail.id) }) : null;
 
   return jsonResponse(request, {
     data: page.map((row) => serializePublicContent(row as unknown as Record<string, unknown>, false)),
@@ -293,11 +285,7 @@ export function apiDiscovery() {
     base_url: `${SITE_URL}${PUBLIC_API_BASE}`,
     documentation: `${SITE_URL}/developers`,
     openapi: `${SITE_URL}/api/openapi.json`,
-    feeds: {
-      rss: `${SITE_URL}/feed.xml`,
-      magazine_rss: `${SITE_URL}/magazine/feed.xml`,
-      json_feed: `${SITE_URL}/feed.json`,
-    },
+    feeds: { rss: `${SITE_URL}/feed.xml`, magazine_rss: `${SITE_URL}/magazine/feed.xml`, json_feed: `${SITE_URL}/feed.json` },
     principles: ['published-only','read-only','versioned','source-aware','accessibility-conscious','privacy-preserving'],
   };
 }
