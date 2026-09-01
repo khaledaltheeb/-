@@ -63,7 +63,22 @@ export function decoratePartnerResponse(response: Response, headers: Record<stri
   if (!Object.keys(headers).length) return response;
   const merged = new Headers(response.headers);
   for (const [key, value] of Object.entries(headers)) merged.set(key, value);
+  merged.set('Cache-Control', 'private, no-store');
+  merged.set('Vary', 'Authorization, X-API-Key');
   return new Response(response.body, { status: response.status, statusText: response.statusText, headers: merged });
+}
+
+function authErrorHeaders(requestId: string) {
+  return {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Accept,Authorization,Content-Type,If-None-Match,If-Modified-Since,X-API-Key',
+    'Access-Control-Expose-Headers': 'Retry-After,X-Request-Id',
+    'Content-Type': 'application/json; charset=utf-8',
+    'Cache-Control': 'private, no-store',
+    'Vary': 'Authorization, X-API-Key',
+    'X-Content-Type-Options': 'nosniff',
+    'X-Request-Id': requestId,
+  };
 }
 
 export function partnerAuthError(request: Request, authorization: PartnerAuthorization) {
@@ -73,22 +88,13 @@ export function partnerAuthError(request: Request, authorization: PartnerAuthori
     const retryAfter = reset ? Math.max(1, Math.ceil((new Date(reset).getTime() - Date.now()) / 1000)) : 60;
     return new Response(JSON.stringify({ error: { code: 'rate_limited', message: 'Partner API quota exceeded.', request_id: requestId } }), {
       status: 429,
-      headers: {
-        'Content-Type': 'application/json; charset=utf-8',
-        'Cache-Control': 'no-store',
-        'Retry-After': String(retryAfter),
-        'X-Request-Id': requestId,
-      },
+      headers: { ...authErrorHeaders(requestId), 'Retry-After': String(retryAfter) },
     });
   }
   const status = authorization.reason === 'scope_denied' ? 403 : authorization.reason === 'authorization_unavailable' ? 503 : 401;
   const code = authorization.reason === 'scope_denied' ? 'insufficient_scope' : authorization.reason === 'authorization_unavailable' ? 'authorization_unavailable' : 'invalid_api_key';
   const message = authorization.reason === 'scope_denied' ? 'The supplied API key does not grant this scope.' : authorization.reason === 'authorization_unavailable' ? 'Partner authorization is temporarily unavailable.' : 'A valid Rawafid Partner API key is required.';
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json; charset=utf-8',
-    'Cache-Control': 'no-store',
-    'X-Request-Id': requestId,
-  };
+  const headers: Record<string, string> = authErrorHeaders(requestId);
   if (status === 401) headers['WWW-Authenticate'] = 'Bearer realm="Rawafid Partner API"';
   return new Response(JSON.stringify({ error: { code, message, request_id: requestId } }), { status, headers });
 }
