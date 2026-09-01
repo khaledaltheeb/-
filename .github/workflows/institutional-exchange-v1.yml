@@ -1,0 +1,94 @@
+name: Institutional Exchange V1
+
+on:
+  pull_request:
+    paths:
+      - 'app/api/v1/integrations/**'
+      - 'lib/partner-api-v1.ts'
+      - 'supabase/migrations/20260901213000_institutional_exchange_v1.sql'
+      - 'supabase/migrations/20260901214000_institutional_exchange_scope_admin_v1.sql'
+      - 'supabase/migrations/20260901214500_institutional_exchange_content_resources_v1.sql'
+      - 'supabase/migrations/20260901215000_institutional_exchange_idempotency_serialization_v1.sql'
+      - 'scripts/institutional-exchange-contract.mjs'
+      - 'scripts/institutional-exchange-http-contract.mjs'
+      - '.github/workflows/institutional-exchange-v1.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'app/api/v1/integrations/**'
+      - 'lib/partner-api-v1.ts'
+      - 'supabase/migrations/20260901213000_institutional_exchange_v1.sql'
+      - 'supabase/migrations/20260901214000_institutional_exchange_scope_admin_v1.sql'
+      - 'supabase/migrations/20260901214500_institutional_exchange_content_resources_v1.sql'
+      - 'supabase/migrations/20260901215000_institutional_exchange_idempotency_serialization_v1.sql'
+      - 'scripts/institutional-exchange-contract.mjs'
+      - 'scripts/institutional-exchange-http-contract.mjs'
+      - '.github/workflows/institutional-exchange-v1.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: institutional-exchange-v1-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
+      NEXT_PUBLIC_SITE_URL: https://healthrenewal.org
+      NEXT_PUBLIC_ALLOW_INDEXING: 'true'
+      NEXT_PUBLIC_ENABLE_ANALYTICS: 'false'
+      INSTITUTIONAL_EXCHANGE_TEST_BASE_URL: http://127.0.0.1:3000
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Install deterministic Arabic image build dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends imagemagick fontconfig fonts-noto-core librsvg2-bin
+          convert -version
+          rsvg-convert --version
+          fc-match 'Noto Sans Arabic'
+      - name: Production dependency vulnerability gate
+        run: npm audit --omit=dev --audit-level=high
+      - name: Institutional exchange governance contract
+        run: node scripts/institutional-exchange-contract.mjs
+      - name: Public API architecture contract
+        run: node scripts/public-api-v1-contract.mjs
+      - name: Type check
+        run: npm run typecheck
+      - name: Lint
+        run: npm run lint
+      - name: Build production candidate
+        run: npm run build
+      - name: Start production candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          nohup npm run start -- --hostname 127.0.0.1 --port 3000 > /tmp/institutional-exchange.log 2>&1 &
+          echo $! > /tmp/institutional-exchange.pid
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:3000/api/v1/integrations >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/institutional-exchange.log >&2 || true
+          exit 1
+      - name: Institutional exchange HTTP boundary contract
+        run: node scripts/institutional-exchange-http-contract.mjs
+      - name: Stop production candidate
+        if: always()
+        shell: bash
+        run: |
+          if [ -f /tmp/institutional-exchange.pid ]; then kill "$(cat /tmp/institutional-exchange.pid)" 2>/dev/null || true; fi
+          cat /tmp/institutional-exchange.log 2>/dev/null || true
