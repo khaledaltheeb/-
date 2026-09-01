@@ -1,4 +1,5 @@
 import { PALLIATIVE_CARE_IAHPC_PAGES } from '@/lib/palliative-care-iahpc-pages';
+import { hardenEvidenceGuideHtml } from '@/lib/evidence-guide-html-seo';
 
 type Params = Promise<{ slug?: string[] }>;
 
@@ -25,5 +26,13 @@ export async function GET(_request: Request, { params }: { params: Params }) {
     return new Response('Not Found', { status: 404, headers: { 'content-type': 'text/plain; charset=utf-8' } });
   }
 
-  return new Response(html, { status: 200, headers });
+  const canonicalPath = key
+    ? `/evidence-guides/palliative-care/${key}/`
+    : '/evidence-guides/palliative-care/';
+  const hardened = hardenEvidenceGuideHtml(html, {
+    canonicalPath,
+    schemaType: 'MedicalWebPage',
+  });
+
+  return new Response(hardened, { status: 200, headers });
 }
