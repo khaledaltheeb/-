@@ -74,7 +74,7 @@ function ensureCanonical(html: string, canonicalUrl: string) {
 function shortenTitle(title: string) {
   if (title.length <= MAX_TITLE_LENGTH) return title;
 
-  let candidate = title
+  const candidate = title
     .replace(/\s*(?:\||–|—)\s*(?:روافد|Health Renewal(?:\s*\|\s*روافد)?)\s*$/iu, '')
     .trim();
   if (candidate.length <= MAX_TITLE_LENGTH) return candidate;
