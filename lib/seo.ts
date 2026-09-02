@@ -34,19 +34,15 @@ export function absoluteSiteUrl(pathOrUrl: string) {
   return `${SITE_URL}${path}`;
 }
 
-function clampTitle(value: string) {
+function normalizeTitle(value: string) {
   const clean = value.replace(/\s+/g, ' ').trim();
   const suffix = ` | ${BRAND_SHORT}`;
-  if (clean === BRAND_SHORT || clean === BRAND_NAME) return clean.slice(0, 60).trim();
-  if (clean.endsWith(suffix)) return clean.slice(0, 60).trim();
-  const available = Math.max(20, 60 - suffix.length);
-  const base = clean.length > available ? `${clean.slice(0, available - 1).trim()}…` : clean;
-  return `${base}${suffix}`;
+  if (clean === BRAND_SHORT || clean === BRAND_NAME || clean.endsWith(suffix)) return clean;
+  return `${clean}${suffix}`;
 }
 
-function clampDescription(value?: string | null) {
-  const clean = (value || DEFAULT_DESCRIPTION).replace(/\s+/g, ' ').trim();
-  return clean.length > 160 ? `${clean.slice(0, 159).trimEnd()}…` : clean;
+function normalizeDescription(value?: string | null) {
+  return (value || DEFAULT_DESCRIPTION).replace(/\s+/g, ' ').trim();
 }
 
 function fallbackSocialImagePath(title: string, type?: SeoMetadataInput['type']) {
@@ -80,8 +76,8 @@ export type SeoMetadataInput = {
 
 export function buildSeoMetadata(input: SeoMetadataInput): Metadata {
   const isHomepage = input.path === '/';
-  const title = isHomepage ? HOME_TITLE : clampTitle(input.title);
-  const description = isHomepage ? HOME_DESCRIPTION : clampDescription(input.description);
+  const title = isHomepage ? HOME_TITLE : normalizeTitle(input.title);
+  const description = isHomepage ? HOME_DESCRIPTION : normalizeDescription(input.description);
   const canonical = absoluteSiteUrl(input.path);
   const canIndex = INDEXING_ENABLED && input.index !== false;
   const canFollow = input.follow !== false;

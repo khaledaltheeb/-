@@ -6,13 +6,21 @@ const helperPath = 'lib/review-provenance.ts';
 const helper = fs.readFileSync(path.join(root, helperPath), 'utf8');
 
 const requiredHelperFragments = [
+  "type ReviewerEntityType = 'Organization' | 'Person' | null;",
   "const RAWAFID_REVIEW_TEAM = 'فريق روافد';",
+  'function reviewerEntityType(value: string | null): ReviewerEntityType',
+  "value.includes('منصة روافد')",
   'const hasRecordedReview = Boolean(recordedReviewDate);',
+  'const hasAttributableReviewer = Boolean(hasRecordedReview && explicitReviewer);',
+  'const reviewerType = hasAttributableReviewer ? reviewerEntityType(explicitReviewer) : null;',
   'const lastReviewedAt = hasRecordedReview ? recordedReviewDate : null;',
-  'const reviewerName = hasRecordedReview ? explicitReviewer || RAWAFID_REVIEW_TEAM : null;',
-  "const reviewerType = hasRecordedReview ? (explicitReviewer ? 'Person' : 'Organization') : null;",
+  'const reviewerName = hasAttributableReviewer ? explicitReviewer : null;',
+  "const reviewerCredentials = reviewerType === 'Person' ? explicitCredentials : null;",
+  'const reviewedBySchema = !hasAttributableReviewer || !reviewerType',
+  '? undefined',
+  "reviewerType === 'Organization'",
   "'@type': 'Organization'",
-  'name: RAWAFID_REVIEW_TEAM',
+  "'@type': 'Person'",
   'reviewedBySchema',
 ];
 
@@ -23,15 +31,49 @@ for (const fragment of requiredHelperFragments) {
 }
 
 const forbiddenHelperFragments = [
-  'const hasAttributableReview = Boolean(recordedReviewDate && explicitReviewer);',
-  'const reviewerName = hasAttributableReview ? explicitReviewer : null;',
-  'reject inferred team review attribution',
+  'explicitReviewer || RAWAFID_REVIEW_TEAM',
+  "reviewerType = hasRecordedReview ? (explicitReviewer ? 'Person' : 'Organization') : null",
+  'name: RAWAFID_REVIEW_TEAM',
+  'const reviewedBySchema = !hasAttributableReviewer\n    ? null',
+  'const institutionalReviewer = explicitReviewer === RAWAFID_REVIEW_TEAM',
+  'function isInstitutionalReviewerName',
 ];
 
 for (const fragment of forbiddenHelperFragments) {
   if (helper.includes(fragment)) {
-    throw new Error(`Review provenance helper contradicts the Rawafid review-team policy: ${fragment}`);
+    throw new Error(`Review provenance helper must not infer identity or turn review-process labels into entities: ${fragment}`);
   }
+}
+
+const entityTypeForRecordedLabel = (value) => {
+  if (!value) return null;
+  if (value === 'فريق روافد' || /^فريق(?:\s|$)/u.test(value)) return 'Organization';
+  if (/^مراجعة(?:\s|$)/u.test(value) && value.includes('منصة روافد')) return null;
+  return 'Person';
+};
+
+for (const label of [
+  'فريق روافد',
+  'فريق المراجعة العلمية والتحريرية في روافد',
+  'فريق تحرير منصة روافد',
+  'فريق تحرير منصة روافد — مراجعة المصادر',
+]) {
+  if (entityTypeForRecordedLabel(label) !== 'Organization') {
+    throw new Error(`Recorded team label must classify as Organization: ${label}`);
+  }
+}
+
+for (const label of [
+  'مراجعة تحريرية وعلمية — منصة روافد',
+  'مراجعة تحريرية ومصادر — منصة روافد',
+]) {
+  if (entityTypeForRecordedLabel(label) !== null) {
+    throw new Error(`Recorded review-process label must not be serialized as reviewedBy entity: ${label}`);
+  }
+}
+
+if (entityTypeForRecordedLabel('د. مثال المراجع') !== 'Person') {
+  throw new Error('Named individual reviewer example must remain Person.');
 }
 
 const surfaces = [
@@ -58,8 +100,8 @@ for (const file of surfaces) {
     throw new Error(`${file}: lastReviewed must be sourced from recorded review provenance`);
   }
   if (!source.includes('review.reviewerName')) {
-    throw new Error(`${file}: visible review attribution must use the resolved reviewer`);
+    throw new Error(`${file}: visible review attribution must use explicit recorded provenance`);
   }
 }
 
-console.log(`Review provenance contract passed: ${surfaces.length} public surfaces preserve lastReviewed as a real Rawafid review date, using a named reviewer when recorded and فريق روافد as the organization fallback.`);
+console.log(`Review provenance contract passed: ${surfaces.length} public surfaces preserve recorded review dates, omit unattributed reviewedBy, serialize only genuine reviewer entities, and never infer reviewer identity.`);

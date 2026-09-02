@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import './metadata-coverage-contract.mjs';
+import './seo-metadata-truncation-contract.mjs';
 
 function read(path) {
   return fs.readFileSync(path, 'utf8');
