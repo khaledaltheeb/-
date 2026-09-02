@@ -1,3 +1,6 @@
+import { mkdir, writeFile } from 'node:fs/promises';
+import { dirname } from 'node:path';
+
 const base = (process.env.SEO_GATE_BASE_URL || process.env.SMOKE_BASE_URL || 'http://127.0.0.1:3000').replace(/\/$/, '');
 const concurrency = Math.max(1, Math.min(32, Number(process.env.SEO_GATE_CONCURRENCY || 8)));
 const requestTimeoutMs = Math.max(1000, Number(process.env.SEO_GATE_TIMEOUT_MS || 15000));
@@ -9,6 +12,30 @@ const pageAttempts = Math.max(1, Math.min(5, Number(process.env.SEO_GATE_PAGE_AT
 const pageRetryDelayMs = Math.max(0, Number(process.env.SEO_GATE_PAGE_RETRY_DELAY_MS || 300));
 const internalLinkAttempts = 3;
 const internalLinkRetryDelayMs = 150;
+const reportPath = process.env.SEO_GATE_REPORT_PATH || 'reports/seo-gate-report.json';
+const reportSummary = { pages: 0, internalLinks: 0, failures: 0, seconds: 0 };
+
+async function persistReport(fatalError = null) {
+  reportSummary.failures = failures.length;
+  const report = {
+    generatedAt: new Date().toISOString(),
+    baseUrl: base,
+    configuration: {
+      concurrency,
+      timeoutMs: requestTimeoutMs,
+      pageAttempts,
+      pageRetryDelayMs,
+      internalLinkAttempts,
+      internalLinkRetryDelayMs,
+      maxUrls,
+    },
+    summary: { ...reportSummary },
+    failures: [...failures],
+    fatalError: fatalError ? (fatalError.stack || fatalError.message || String(fatalError)) : null,
+  };
+  await mkdir(dirname(reportPath), { recursive: true });
+  await writeFile(reportPath, `${JSON.stringify(report, null, 2)}\n`, 'utf8');
+}
 
 function decodeXml(value) {
   return value.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
@@ -197,20 +224,31 @@ async function runPool(items, worker) {
 async function main() {
   const started = Date.now();
   const urls = await discoverIndexableUrls();
+  reportSummary.pages = urls.length;
   if (!urls.length) throw new Error('No indexable URLs discovered from sitemap index');
   console.log(`SEO gate: auditing ${urls.length} sitemap URLs with concurrency=${concurrency}, pageAttempts=${pageAttempts}`);
   const pageLinks = await runPool(urls, auditPage);
   const allInternalLinks = [...new Set(pageLinks.flat().filter(Boolean))].sort();
+  reportSummary.internalLinks = allInternalLinks.length;
   console.log(`SEO gate: checking ${allInternalLinks.length} unique internal links`);
   const statuses = await runPool(allInternalLinks, async (url) => [url, await auditInternalLink(url)]);
   for (const [url, status] of statuses) if (status < 200 || status >= 400) failures.push(`${url}: broken internal link status ${status || 'request-failed'}`);
   const elapsed = ((Date.now() - started) / 1000).toFixed(1);
+  reportSummary.seconds = Number(elapsed);
+  reportSummary.failures = failures.length;
   console.log(`SEO gate summary: pages=${urls.length}, internalLinks=${allInternalLinks.length}, failures=${failures.length}, seconds=${elapsed}`);
+  await persistReport();
   if (failures.length) {
     for (const failure of failures.slice(0, 300)) console.error(`FAIL ${failure}`);
     if (failures.length > 300) console.error(`FAIL ... ${failures.length - 300} additional failures omitted`);
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
   console.log('Rawafid full sitemap SEO gate passed.');
 }
-main().catch((error) => { console.error('SEO gate fatal:', error); process.exit(1); });
+main().catch(async (error) => {
+  console.error('SEO gate fatal:', error);
+  try { await persistReport(error); }
+  catch (reportError) { console.error('SEO gate diagnostic report write failed:', reportError); }
+  process.exitCode = 1;
+});
