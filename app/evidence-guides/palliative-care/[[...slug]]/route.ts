@@ -1,5 +1,5 @@
 import { PALLIATIVE_CARE_IAHPC_PAGES } from '@/lib/palliative-care-iahpc-pages';
-import { hardenRawHtmlSeo } from '@/lib/raw-html-seo';
+import { hardenRawHtmlSeo } from '@/lib/html-seo-hardening';
 
 type Params = Promise<{ slug?: string[] }>;
 
@@ -14,7 +14,7 @@ const headers = {
 
 export const dynamic = 'force-static';
 
-export async function GET(request: Request, { params }: { params: Params }) {
+export async function GET(_request: Request, { params }: { params: Params }) {
   const { slug = [] } = await params;
   if (slug.length > 1) {
     return new Response('Not Found', { status: 404, headers: { 'content-type': 'text/plain; charset=utf-8' } });
@@ -26,6 +26,6 @@ export async function GET(request: Request, { params }: { params: Params }) {
     return new Response('Not Found', { status: 404, headers: { 'content-type': 'text/plain; charset=utf-8' } });
   }
 
-  const canonicalUrl = `https://healthrenewal.org${new URL(request.url).pathname}`;
-  return new Response(hardenRawHtmlSeo(html, { canonicalUrl, type: 'article' }), { status: 200, headers });
+  const pathname = `/evidence-guides/palliative-care/${key ? `${key}/` : ''}`;
+  return new Response(hardenRawHtmlSeo(html, pathname), { status: 200, headers });
 }
