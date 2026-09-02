@@ -20,6 +20,8 @@ export async function generateMetadata(): Promise<Metadata> {
   });
 }
 
+const GENERAL_EVIDENCE_PRIORITY = { A: 4, B: 3, C: 2, U: 1 } as const;
+
 export default async function AddictionEvidenceStandardsPage() {
   const atlas = await getAddictionAtlas();
   const adfCoverage = countAdfDrugFactReferences(atlas.substances);
@@ -35,6 +37,28 @@ export default async function AddictionEvidenceStandardsPage() {
     interactionCounts.set(interaction.a, (interactionCounts.get(interaction.a) ?? 0) + 1);
     interactionCounts.set(interaction.b, (interactionCounts.get(interaction.b) ?? 0) + 1);
   }
+  const evidenceGapRows = atlas.substances
+    .filter((item) => !getAtlasRiskEvidence(item.slug))
+    .map((item) => {
+      const adf = getAdfDrugFactReference(item);
+      const interactionCount = interactionCounts.get(item.slug) ?? 0;
+      const comparisonCount = comparisonCounts.get(item.slug) ?? 0;
+      const sourceCount = item.source_urls.length;
+      const operationalPriority = GENERAL_EVIDENCE_PRIORITY[item.evidence_grade]
+        + Math.min(interactionCount, 3) * 2
+        + Math.min(comparisonCount, 3)
+        + (adf ? 1 : 0)
+        + (sourceCount <= 1 ? 1 : 0);
+      const reasons = [
+        `الدليل العام ${item.evidence_grade}`,
+        interactionCount ? `${interactionCount} تفاعل مراجع` : 'لا تفاعلات مراجعة بعد',
+        comparisonCount ? `${comparisonCount} مقارنة تحريرية` : 'لا مقارنات تحريرية بعد',
+        `${sourceCount} مصدر مباشر`,
+        adf ? 'له مرجع ADF موازٍ' : 'لا مطابقة ADF مباشرة',
+      ];
+      return { item, adf, interactionCount, comparisonCount, sourceCount, operationalPriority, reasons };
+    })
+    .sort((a, b) => b.operationalPriority - a.operationalPriority || a.item.display_name_ar.localeCompare(b.item.display_name_ar, 'ar'));
   const schemas = [
     breadcrumbJsonLd([{ name: 'الرئيسية', path: '/' }, { name: 'الإدمان والتعافي', path: '/addiction/' }, { name: 'معايير الأدلة واللغة', path: '/addiction/evidence-standards/' }]),
     { '@context': 'https://schema.org', '@type': 'CollectionPage', '@id': `${SITE_URL}/addiction/evidence-standards/#collection`, url: `${SITE_URL}/addiction/evidence-standards/`, name: 'معايير أدلة الإدمان واللغة', description: 'مصفوفة شفافة لتغطية أطلس الإدمان ومصادره ومراجعاته.', inLanguage: 'ar', dateModified: atlas.updatedOn, publisher: { '@id': `${SITE_URL}/#organization` } },
@@ -54,8 +78,31 @@ export default async function AddictionEvidenceStandardsPage() {
       <article><strong>{atlas.substances.length}</strong><span>مادة/عائلة في الأطلس</span></article>
       <article><strong>{reviewedEvidence}</strong><span>سجلًا بدليل عام مصنف</span></article>
       <article><strong>{ADDICTION_ATLAS_AXIS_EVIDENCE_COUNT}</strong><span>سجلًا بتتبع محورًا بمحور</span></article>
+      <article><strong>{evidenceGapRows.length}</strong><span>فجوة تتبع محوري متبقية</span></article>
       <article><strong>{interactionSlugs.size}</strong><span>مادة مرتبطة بتفاعل مراجع</span></article>
       <article><strong>{adfCoverage}</strong><span>إحالة مباشرة إلى ADF Drug Facts</span></article>
+    </section>
+
+    <section className={styles.section} aria-labelledby="evidence-gap-registry-title">
+      <h2 id="evidence-gap-registry-title">سجل فجوات التتبع المحوري</h2>
+      <p>هذه القائمة تُولد مباشرة من بيانات الأطلس: أي مادة لا تملك بعد سجلًا في طبقة الدليل محورًا بمحور تظهر هنا تلقائيًا. ترتيب «الأولوية التشغيلية» يساعد فريق التحرير على اختيار ما يراجع أولًا اعتمادًا على حضور المادة داخل المقارنات والتفاعلات، قوة سجلها العام، عمق المصادر، ووجود مرجع ADF موازٍ.</p>
+      <aside className={styles.notice}><strong>ليست درجة خطورة سريرية</strong><p>الأولوية التشغيلية ليست مقياسًا لخطورة المادة، ولا احتمال ضرر، ولا ترتيبًا من «الأخطر إلى الأقل». هي أداة حوكمة للبحث فقط، ولا يجوز عرضها في صفحات المواد كدرجة صحية.</p></aside>
+      <div className={styles.tableWrap} tabIndex={0} aria-label="سجل المواد التي لم يكتمل لها التتبع محورًا بمحور">
+        <table className={styles.table}>
+          <thead><tr><th>المادة</th><th>أولوية تشغيلية</th><th>الدليل العام</th><th>تفاعلات</th><th>مقارنات</th><th>مصادر مباشرة</th><th>ADF</th><th>سبب الإدراج</th></tr></thead>
+          <tbody>{evidenceGapRows.map(({ item, adf, interactionCount, comparisonCount, sourceCount, operationalPriority, reasons }) => <tr key={item.slug}>
+            <td><Link className={styles.name} href={`/addiction/substances/${item.slug}/`}>{item.display_name_ar}<small dir="ltr">{item.display_name_en}</small></Link></td>
+            <td><strong>{operationalPriority}</strong></td>
+            <td><span className={styles.grade}>{item.evidence_grade}</span></td>
+            <td>{interactionCount}</td>
+            <td>{comparisonCount}</td>
+            <td>{sourceCount}</td>
+            <td>{adf ? <a href={adf.url} target="_blank" rel="noopener noreferrer">مرجع موازٍ</a> : '—'}</td>
+            <td>{reasons.join(' · ')}</td>
+          </tr>)}</tbody>
+        </table>
+      </div>
+      <p>يزول السجل من هذه القائمة تلقائيًا بمجرد إضافة مراجعة صحيحة لجميع محاور الخطر الثمانية إلى طبقة الأدلة. وجود مادة هنا لا يخفض تلقائيًا قوة مصادرها العامة ولا يعني أن معلوماتها الحالية خاطئة.</p>
     </section>
 
     <section className={styles.section} aria-labelledby="adf-standard-title">
