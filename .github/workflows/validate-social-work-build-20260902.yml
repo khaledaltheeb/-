@@ -1,0 +1,37 @@
+name: Validate Social Work Build
+
+on:
+  push:
+    branches: [social-work-institutional-20260902]
+  pull_request:
+    paths:
+      - 'app/evidence-guides/social-work/**'
+      - 'lib/social-work-*.ts'
+      - 'data/social-work-recovery/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  typecheck-and-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: TypeScript check
+        run: npm run typecheck
+      - name: Materialize deterministic build prerequisites
+        run: |
+          node scripts/build_psych_encyclopedia_assets.mjs
+          node scripts/build-daily-tools-route-manifest.mjs
+          node scripts/build_expanded_encyclopedia_assets.mjs
+          node scripts/materialize-legacy-static-assets.mjs
+      - name: Production Next.js application build
+        run: npx next build

@@ -1,0 +1,25 @@
+name: Validate Social Work Research Depth 2026-09-02
+
+on:
+  pull_request:
+    paths:
+      - 'lib/social-work-research-depth.ts'
+      - 'app/evidence-guides/social-work/**'
+      - 'scripts/social-work-research-depth-contract.mjs'
+      - '.github/workflows/validate-social-work-research-depth-20260902.yml'
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - run: npm ci
+      - name: Verify research-depth content contract
+        run: node scripts/social-work-research-depth-contract.mjs
+      - name: Typecheck
+        run: npm run typecheck

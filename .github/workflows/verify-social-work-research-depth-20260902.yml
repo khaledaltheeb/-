@@ -1,0 +1,105 @@
+name: Verify Social Work Research Depth Production 2026-09-02
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/verify-social-work-research-depth-20260902.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Verify production pages and evidence fingerprints
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://healthrenewal.org/evidence-guides/social-work'
+          stamp="$(date +%s)"
+
+          get() {
+            local url="$1"
+            echo "FETCH ${url}" >&2
+            curl -fsSL --compressed --retry 12 --retry-delay 2 --retry-all-errors \
+              -H 'Cache-Control: no-cache, no-store, max-age=0' \
+              -H 'Pragma: no-cache' \
+              "$url"
+          }
+
+          check_contains() {
+            local name="$1"
+            local body="$2"
+            local needle="$3"
+            if [[ "$body" != *"$needle"* ]]; then
+              echo "FAIL: ${name} missing: ${needle}" >&2
+              return 1
+            fi
+            echo "PASS: ${name} contains: ${needle}"
+          }
+
+          check_not_noindex() {
+            local name="$1"
+            local body="$2"
+            local lower="${body,,}"
+            if [[ "$lower" =~ \<meta[^\>]*name=[\"\']robots[\"\'][^\>]*content=[\"\'][^\"\']*noindex ]]; then
+              echo "FAIL: ${name} unexpectedly has noindex" >&2
+              return 1
+            fi
+            echo "PASS: ${name} is indexable"
+          }
+
+          declare -A pages
+          pages[hub]="$(get "${base}/?verify=${stamp}")"
+          pages[child]="$(get "${base}/child-voice-family-decisions/?verify=${stamp}")"
+          pages[participation]="$(get "${base}/participation-and-voice/?verify=${stamp}")"
+          pages[decision]="$(get "${base}/supported-decision-making/?verify=${stamp}")"
+          pages[older]="$(get "${base}/older-adults-family-support/?verify=${stamp}")"
+          pages[caregiver]="$(get "${base}/caregiver-role-burden/?verify=${stamp}")"
+          pages[coordination]="$(get "${base}/service-coordination/?verify=${stamp}")"
+          pages[referral]="$(get "${base}/referral-with-continuity/?verify=${stamp}")"
+          pages[failed_referral]="$(get "${base}/failed-referral-recovery/?verify=${stamp}")"
+          pages[resource_map]="$(get "${base}/community-resource-map/?verify=${stamp}")"
+          pages[poverty]="$(get "${base}/poverty-structural-barriers/?verify=${stamp}")"
+          pages[financial]="$(get "${base}/financial-crisis-family-plan/?verify=${stamp}")"
+          pages[advocacy]="$(get "${base}/institutional-advocacy/?verify=${stamp}")"
+          pages[quality]="$(get "${base}/help-plan-quality-audit/?verify=${stamp}")"
+          pages[feedback]="$(get "${base}/family-feedback-service-quality/?verify=${stamp}")"
+          pages[transition]="$(get "${base}/transition-to-adulthood/?verify=${stamp}")"
+
+          check_contains hub "${pages[hub]}" '78 دليلًا ومسارًا'
+          check_contains hub "${pages[hub]}" 'طبقة الأدلة البحثية الحديثة 2023–2026'
+          check_contains hub "${pages[hub]}" '15 صفحة عالية الأولوية'
+
+          marker='data-rawafid-research-depth="2026-09-02-r1"'
+          for name in child participation decision older caregiver coordination referral failed_referral resource_map poverty financial advocacy quality feedback transition; do
+            check_contains "$name" "${pages[$name]}" "$marker"
+            check_not_noindex "$name" "${pages[$name]}"
+            check_contains "$name" "${pages[$name]}" 'healthrenewal.org/evidence-guides/social-work'
+          done
+
+          check_contains child "${pages[child]}" '38971702'
+          check_contains child "${pages[child]}" 'growing-rights'
+          check_contains participation "${pages[participation]}" '107588'
+          check_contains decision "${pages[decision]}" '38433012'
+          check_contains decision "${pages[decision]}" '40936314'
+          check_contains older "${pages[older]}" '9789240103726'
+          check_contains caregiver "${pages[caregiver]}" 'PMC12238300'
+          check_contains coordination "${pages[coordination]}" '36751899'
+          check_contains referral "${pages[referral]}" 'الإحالة مع الاستمرارية'
+          check_contains failed_referral "${pages[failed_referral]}" '36751899'
+          check_contains resource_map "${pages[resource_map]}" '9789240088320'
+          check_contains poverty "${pages[poverty]}" '/publications/b/67293'
+          check_contains financial "${pages[financial]}" '/publications/b/67293'
+          check_contains advocacy "${pages[advocacy]}" '9789240088320'
+          check_contains quality "${pages[quality]}" 'مؤشرات متابعة قابلة للتدقيق'
+          check_contains feedback "${pages[feedback]}" 'تغذية الأسرة الراجعة'
+          check_contains transition "${pages[transition]}" 'growing-rights'
+
+          check_not_noindex hub "${pages[hub]}"
+          check_contains hub "${pages[hub]}" 'healthrenewal.org/evidence-guides/social-work'
+          echo 'SUCCESS: all 15 research-depth pages and the Social Work hub are live, indexable and source-fingerprinted.'

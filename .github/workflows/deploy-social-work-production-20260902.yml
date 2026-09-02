@@ -1,0 +1,95 @@
+name: Deploy Social Work Production 2026-09-02
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/deploy-social-work-production-20260902.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rawafid-production-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy-social-work:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
+      NEXT_PUBLIC_SITE_URL: https://healthrenewal.org
+      NEXT_PUBLIC_ALLOW_INDEXING: 'true'
+      NEXT_PUBLIC_ENABLE_ANALYTICS: 'true'
+      NEXT_PUBLIC_GTM_ID: GTM-WBLQVBG4
+      NEXT_PUBLIC_GA_MEASUREMENT_ID: G-VLZMV8Y4JP
+      NEXT_PUBLIC_ENABLE_DIRECT_GA: 'true'
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: 1910e1ad3c793fd568ba1caafe34f964
+      RELEASE_SHA: 9c5d53884225bf648865b5a13a0550fe9d415f84
+    steps:
+      - name: Require Cloudflare token
+        run: test -n "${CLOUDFLARE_API_TOKEN:-}"
+      - uses: actions/checkout@v7
+        with:
+          ref: 9c5d53884225bf648865b5a13a0550fe9d415f84
+      - name: Verify exact release SHA
+        run: test "$(git rev-parse HEAD)" = "${RELEASE_SHA}"
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Install deterministic Arabic image dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends imagemagick fontconfig fonts-noto-core librsvg2-bin
+      - name: Verify Social Work evidence contracts and repository safety
+        run: |
+          node scripts/social-work-institutional-contract.mjs
+          node scripts/social-work-research-depth-contract.mjs
+          npm run typecheck
+          npm run lint
+          npm run architecture-check
+          npm run live-preservation:validate
+      - name: Verify Cloudflare access
+        run: npx wrangler whoami
+      - name: Build exact production Worker
+        run: npx opennextjs-cloudflare build --env production
+      - name: Deploy exact production Worker
+        run: npx opennextjs-cloudflare deploy --env production
+      - name: Verify Social Work research-depth release on healthrenewal.org
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://healthrenewal.org/evidence-guides/social-work'
+          stamp="${RELEASE_SHA}"
+          get() { curl -fsSL --compressed --retry 15 --retry-delay 3 --retry-all-errors -H 'Cache-Control: no-cache, no-store, max-age=0' "$1"; }
+          hub="$(get "${base}/?release=${stamp}")"
+          child="$(get "${base}/child-voice-family-decisions/?release=${stamp}")"
+          decision="$(get "${base}/supported-decision-making/?release=${stamp}")"
+          caregiver="$(get "${base}/caregiver-role-burden/?release=${stamp}")"
+          referral="$(get "${base}/referral-with-continuity/?release=${stamp}")"
+          poverty="$(get "${base}/poverty-structural-barriers/?release=${stamp}")"
+          quality="$(get "${base}/help-plan-quality-audit/?release=${stamp}")"
+          [[ "$hub" == *'78 دليلًا ومسارًا'* ]]
+          [[ "$hub" == *'طبقة الأدلة البحثية الحديثة 2023–2026'* ]]
+          [[ "$hub" == *'15 صفحة عالية الأولوية'* ]]
+          [[ "$child" == *'data-rawafid-research-depth="2026-09-02-r1"'* && "$child" == *'38971702'* && "$child" == *'growing-rights'* ]]
+          [[ "$decision" == *'data-rawafid-research-depth="2026-09-02-r1"'* && "$decision" == *'38433012'* && "$decision" == *'40936314'* ]]
+          [[ "$caregiver" == *'PMC12238300'* && "$caregiver" == *'9789240103726'* ]]
+          [[ "$referral" == *'36751899'* && "$referral" == *'الإحالة مع الاستمرارية'* ]]
+          [[ "$poverty" == *'/publications/b/67293'* && "$poverty" == *'9789240088320'* ]]
+          [[ "$quality" == *'مؤشرات متابعة قابلة للتدقيق'* && "$quality" == *'حدود الاستخدام'* ]]
+          for page in "$hub" "$child" "$decision" "$caregiver" "$referral" "$poverty" "$quality"; do
+            lower="${page,,}"
+            if [[ "$lower" =~ \<meta[^\>]*name=[\"\']robots[\"\'][^\>]*content=[\"\'][^\"\']*noindex ]]; then
+              echo 'Unexpected noindex on a Social Work page.' >&2
+              exit 1
+            fi
+            [[ "$page" == *'healthrenewal.org/evidence-guides/social-work'* ]]
+          done
+          echo 'Social Work research-depth evidence release is live and verified on production.'
