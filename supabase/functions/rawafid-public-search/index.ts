@@ -64,6 +64,16 @@ async function rpc<T>(url: string, serviceRole: string, name: string, body: Reco
   }
 }
 
+type SearchRow = { entity_id?: string };
+type EvidenceRow = {
+  entity_id: string;
+  destination: string;
+  title: string;
+  heading: string;
+  evidence_text: string;
+  evidence_score: number;
+};
+
 Deno.serve(async (req: Request) => {
   const origin = req.headers.get("origin");
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: cors(origin) });
@@ -93,7 +103,7 @@ Deno.serve(async (req: Request) => {
   if (budget.data !== true) return json({ error: "rate_limited" }, 429, origin);
 
   const started = performance.now();
-  const search = await rpc<unknown[]>(supabaseUrl, serviceRole, "search_platform_v3_lexical", {
+  const search = await rpc<SearchRow[]>(supabaseUrl, serviceRole, "search_platform_v3_lexical", {
     p_query: q,
     p_limit: limit,
   });
@@ -103,11 +113,27 @@ Deno.serve(async (req: Request) => {
   }
 
   const results = Array.isArray(search.data) ? search.data : [];
+  const entityIds = results
+    .map((row) => String(row?.entity_id ?? ""))
+    .filter((value) => /^[0-9a-f-]{36}$/i.test(value))
+    .slice(0, Math.min(limit, 8));
+
+  let evidence: EvidenceRow[] = [];
+  if (entityIds.length) {
+    const evidenceRpc = await rpc<EvidenceRow[]>(supabaseUrl, serviceRole, "search_platform_v4_evidence_for_pages", {
+      p_query: q,
+      p_entity_ids: entityIds,
+      p_limit: Math.min(6, entityIds.length),
+    });
+    if (!evidenceRpc.error && Array.isArray(evidenceRpc.data)) evidence = evidenceRpc.data;
+  }
+
   return json({
     query: q,
     count: results.length,
-    mode: "v4-indexed-lexical",
+    mode: "v4-zero-api-extractive",
     elapsed_ms: Math.round(performance.now() - started),
+    evidence,
     results,
   }, 200, origin);
 });
