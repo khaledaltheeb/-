@@ -118,8 +118,6 @@ $$;
 
 revoke all on function internal_search_v2.search_lexical_v4_fast3(text,integer) from public,anon,authenticated;
 
-after_grants:
-
 create or replace function public.search_platform_v3_lexical(
   p_query text,
   p_limit integer default 30
