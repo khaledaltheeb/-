@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { cache } from 'react';
 import { notFound } from 'next/navigation';
 import CapabilityArticlePage from '@/components/capability-article-page';
 import LegacyPreservedPageView from '@/components/legacy-preserved-page';
@@ -9,6 +10,12 @@ import { buildSeoMetadata } from '@/lib/seo';
 export const dynamic = 'force-dynamic';
 type Params = Promise<{ slug: string }>;
 const legacyRoute = (slug: string) => `/capabilities/${slug}/`;
+
+const getCapabilityPage = cache(async (slug: string) => {
+  const record = await getCapabilityRecord(slug);
+  if (record) return { record, preserved: null };
+  return { record: null, preserved: await getLegacyPreservedPage(legacyRoute(slug)) };
+});
 
 function capabilityAuthors(schemaJson: unknown, fallback?: string | null) {
   const schema = schemaJson && typeof schemaJson === 'object' && !Array.isArray(schemaJson)
@@ -23,11 +30,9 @@ function capabilityAuthors(schemaJson: unknown, fallback?: string | null) {
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params;
-  const record = await getCapabilityRecord(slug);
-  if (!record) {
-    const route = legacyRoute(slug);
-    return legacyPreservedMetadata(await getLegacyPreservedPage(route), route);
-  }
+  const { record, preserved } = await getCapabilityPage(slug);
+  if (!record) return legacyPreservedMetadata(preserved, legacyRoute(slug));
+
   const authors = capabilityAuthors(record.schema_json, record.author_display_name);
   const metadata = buildSeoMetadata({
     title: record.seo_title || record.title,
@@ -48,10 +53,9 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 
 export default async function CapabilityDetailPage({ params }: { params: Params }) {
   const { slug } = await params;
-  const record = await getCapabilityRecord(slug);
+  const { record, preserved } = await getCapabilityPage(slug);
   if (!record) {
     const route = legacyRoute(slug);
-    const preserved = await getLegacyPreservedPage(route);
     if (!preserved) notFound();
     return <LegacyPreservedPageView page={preserved} route={route} />;
   }
