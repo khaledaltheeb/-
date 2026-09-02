@@ -17,9 +17,19 @@ type SearchRow = {
   score: number;
 };
 
+type EvidenceRow = {
+  entity_id: string;
+  destination: string;
+  title: string;
+  heading: string;
+  evidence_text: string;
+  evidence_score: number;
+};
+
 type EdgeSearchResponse = {
   mode?: string;
   results?: SearchRow[];
+  evidence?: EvidenceRow[];
 };
 
 function boundedLimit(value: string | null) {
@@ -43,9 +53,9 @@ function mergeResults(groups: SearchRow[][], limit: number) {
     .slice(0, limit);
 }
 
-async function searchViaPublicEdge(q: string, limit: number): Promise<SearchRow[]> {
+async function searchViaPublicEdge(q: string, limit: number): Promise<{ rows: SearchRow[]; evidence: EvidenceRow[] }> {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
-  if (!supabaseUrl) return [];
+  if (!supabaseUrl) return { rows: [], evidence: [] };
   try {
     const response = await fetch(`${supabaseUrl.replace(/\/$/, '')}/functions/v1/rawafid-public-search`, {
       method: 'POST',
@@ -54,12 +64,28 @@ async function searchViaPublicEdge(q: string, limit: number): Promise<SearchRow[
       cache: 'no-store',
       signal: AbortSignal.timeout(6000),
     });
-    if (!response.ok) return [];
+    if (!response.ok) return { rows: [], evidence: [] };
     const data = await response.json() as EdgeSearchResponse;
-    return Array.isArray(data.results) ? data.results : [];
+    return {
+      rows: Array.isArray(data.results) ? data.results : [],
+      evidence: Array.isArray(data.evidence) ? data.evidence : [],
+    };
   } catch {
-    return [];
+    return { rows: [], evidence: [] };
   }
+}
+
+async function backendEvidence(q: string, rows: SearchRow[]): Promise<EvidenceRow[]> {
+  const backend = createSearchBackendClient();
+  if (!backend) return [];
+  const ids = rows.map((row) => row.entity_id).filter(Boolean).slice(0, 8);
+  if (!ids.length) return [];
+  const { data, error } = await backend.rpc('search_platform_v4_evidence_for_pages', {
+    p_query: q,
+    p_entity_ids: ids,
+    p_limit: Math.min(6, ids.length),
+  });
+  return !error && Array.isArray(data) ? data as EvidenceRow[] : [];
 }
 
 async function searchDatabaseVariant(q: string, limit: number) {
@@ -70,19 +96,33 @@ async function searchDatabaseVariant(q: string, limit: number) {
       p_limit: Math.min(limit, 100),
     });
     if (!error && Array.isArray(data) && data.length > 0) {
-      return { mode: 'v4-backend', rows: data as SearchRow[] };
+      const rows = data as SearchRow[];
+      return { mode: 'v4-backend', rows, evidence: await backendEvidence(q, rows) };
     }
   }
 
-  const edgeRows = await searchViaPublicEdge(q, Math.min(limit, 20));
-  if (edgeRows.length > 0) return { mode: 'v4-edge', rows: edgeRows };
+  const edge = await searchViaPublicEdge(q, Math.min(limit, 20));
+  if (edge.rows.length > 0) return { mode: 'v4-edge', rows: edge.rows, evidence: edge.evidence };
 
   const publicClient = await createClient();
   const { data, error } = await publicClient.rpc('search_platform', {
     p_query: q,
     p_limit: Math.min(limit, 100),
   });
-  return { mode: 'legacy-fallback', rows: !error ? (data ?? []) as SearchRow[] : [] };
+  return { mode: 'legacy-fallback', rows: !error ? (data ?? []) as SearchRow[] : [], evidence: [] as EvidenceRow[] };
+}
+
+function evidenceAsResults(evidence: EvidenceRow[]): SearchRow[] {
+  return evidence.map((row) => ({
+    entity_type: 'content',
+    entity_id: row.entity_id,
+    slug: `evidence-${row.entity_id}`,
+    title: row.title,
+    subtitle: row.heading || null,
+    excerpt: row.evidence_text,
+    destination: row.destination,
+    score: Number(row.evidence_score) + 10000,
+  }));
 }
 
 export async function GET(request: Request) {
@@ -96,16 +136,17 @@ export async function GET(request: Request) {
 
   const variants = buildFreeQueryVariants(q);
   const dbGroups: SearchRow[][] = [];
+  const evidenceGroups: EvidenceRow[][] = [];
   const modes = new Set<string>();
 
   for (const [index, variant] of variants.entries()) {
     const searched = await searchDatabaseVariant(variant, Math.min(limit * 3, 60));
     modes.add(searched.mode);
-    const adjusted = searched.rows.map((row) => ({
+    dbGroups.push(searched.rows.map((row) => ({
       ...row,
       score: Number(row.score) + (index === 0 ? 140 : 0),
-    }));
-    dbGroups.push(adjusted);
+    })));
+    evidenceGroups.push(searched.evidence);
   }
 
   const staticGroups = variants.map((variant, index) =>
@@ -116,13 +157,18 @@ export async function GET(request: Request) {
   );
 
   const results = mergeResults([...dbGroups, ...staticGroups], limit);
-  const answer = buildExtractiveAnswer(q, results);
+  const rankedEvidence = evidenceGroups.flat()
+    .sort((a, b) => Number(b.evidence_score) - Number(a.evidence_score))
+    .filter((row, index, rows) => rows.findIndex((candidate) => candidate.destination === row.destination) === index)
+    .slice(0, 6);
+  const answerSource = rankedEvidence.length ? evidenceAsResults(rankedEvidence) : results;
+  const answer = buildExtractiveAnswer(q, answerSource);
   const mode = variants.length > 1
     ? `zero-api-expanded:${[...modes].join('+') || 'local'}`
     : `zero-api:${[...modes].join('+') || 'local'}`;
 
   return NextResponse.json(
-    { query: q, variants, mode, count: results.length, answer, results },
+    { query: q, variants, mode, count: results.length, evidence_count: rankedEvidence.length, answer, results },
     {
       status: 200,
       headers: {
