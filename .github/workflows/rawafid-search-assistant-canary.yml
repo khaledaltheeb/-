@@ -1,0 +1,79 @@
+name: Rawafid Search Assistant Canary
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rawafid-search-assistant-canary-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  canary:
+    if: github.head_ref == 'feat/enterprise-hybrid-search-rag'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
+      NEXT_PUBLIC_SITE_URL: https://rawafid-search-assistant-canary.khaledaltheeb.workers.dev
+      NEXT_PUBLIC_ALLOW_INDEXING: 'false'
+      NEXT_PUBLIC_ENABLE_ANALYTICS: 'false'
+      NEXT_PUBLIC_ENABLE_DIRECT_GA: 'false'
+      ENABLE_RAWAFID_ASSISTANT: 'true'
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: 1910e1ad3c793fd568ba1caafe34f964
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Install deterministic Arabic image build dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends imagemagick fontconfig fonts-noto-core librsvg2-bin
+      - name: Materialize generated route assets
+        run: node scripts/build-daily-tools-route-manifest.mjs
+      - name: Type check
+        run: npm run typecheck
+      - name: Build canary Worker
+        run: npx opennextjs-cloudflare build
+      - name: Validate isolated package
+        run: npx wrangler deploy --config wrangler.canary.jsonc --dry-run
+      - name: Deploy isolated canary only
+        run: npx wrangler deploy --config wrangler.canary.jsonc --keep-vars
+      - name: Verify noindex, assistant and zero-API search behavior
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://rawafid-search-assistant-canary.khaledaltheeb.workers.dev'
+          for attempt in $(seq 1 18); do
+            stamp="${GITHUB_SHA}-${attempt}-$(date +%s)"
+            home="$(curl -fsSL --compressed --max-time 25 -H 'Cache-Control: no-cache, no-store' "${base}/?canary=${stamp}" 2>/dev/null || true)"
+            reading="$(curl -fsSL --compressed --max-time 25 "${base}/api/search/v3?q=%D9%83%D9%8A%D9%81%20%D8%A7%D8%B3%D8%A7%D8%B9%D8%AF%20%D8%B7%D9%81%D9%84%D9%8A%20%D8%B9%D9%84%D9%89%20%D8%A7%D9%84%D9%82%D8%B1%D8%A7%D8%A1%D8%A9&limit=6" 2>/dev/null || true)"
+            dialect="$(curl -fsSL --compressed --max-time 25 "${base}/api/search/v3?q=%D8%B7%D9%81%D9%84%D9%8A%20%D9%85%D8%A7%20%D8%A8%D8%AD%D9%83%D9%8A&limit=6" 2>/dev/null || true)"
+            social="$(curl -fsSL --compressed --max-time 25 "${base}/api/search/v3?q=%D8%A7%D8%AE%D9%84%D8%A7%D9%82%D9%8A%D8%A7%D8%AA%20%D8%A7%D9%84%D8%B9%D9%85%D9%84%20%D8%A7%D9%84%D8%A7%D8%AC%D8%AA%D9%85%D8%A7%D8%B9%D9%8A&limit=6" 2>/dev/null || true)"
+            if [[ "$home" == *"noindex"* ]] \
+              && [[ "$reading" == *"zero-api"* ]] \
+              && [[ "$reading" == *"reading-difficulties-at-home"* ]] \
+              && [[ "$dialect" == *"speech"* || "$dialect" == *"يتكلم"* || "$dialect" == *"الكلام"* ]] \
+              && [[ "$social" == *"social-work"* ]] \
+              && [[ "$reading" != *"openai"* ]] \
+              && [[ "$dialect" != *"openai"* ]] \
+              && [[ "$social" != *"openai"* ]]; then
+              echo 'Zero-API assistant canary passed noindex, canonical search, dialect and social-work checks.'
+              exit 0
+            fi
+            echo "Canary verification attempt ${attempt} not ready yet."
+            sleep 5
+          done
+          echo 'Rawafid search assistant canary verification failed.' >&2
+          exit 1
