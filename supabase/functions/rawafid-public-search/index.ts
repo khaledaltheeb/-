@@ -1,5 +1,4 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from "npm:@supabase/supabase-js@2.57.0";
 
 const ALLOWED_ORIGINS = new Set([
   "https://healthrenewal.org",
@@ -35,32 +34,45 @@ function json(body: unknown, status = 200, origin: string | null = null) {
   });
 }
 
-async function digestBucket(req: Request) {
+async function digestBucket(req: Request, serviceRole: string) {
   const forwarded = req.headers.get("cf-connecting-ip")
     || req.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
     || "unknown";
   const ua = (req.headers.get("user-agent") || "unknown").slice(0, 160);
-  const salt = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "rawafid-search";
-  const bytes = new TextEncoder().encode(`${salt}:${forwarded}:${ua}`);
+  const bytes = new TextEncoder().encode(`${serviceRole}:${forwarded}:${ua}`);
   const hash = await crypto.subtle.digest("SHA-256", bytes);
   return Array.from(new Uint8Array(hash)).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+async function rpc<T>(url: string, serviceRole: string, name: string, body: Record<string, unknown>): Promise<{ data: T | null; error: string | null }> {
+  try {
+    const response = await fetch(`${url.replace(/\/$/, "")}/rest/v1/rpc/${name}`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "accept": "application/json",
+        "apikey": serviceRole,
+        "authorization": `Bearer ${serviceRole}`,
+      },
+      body: JSON.stringify(body),
+    });
+    const text = await response.text();
+    if (!response.ok) return { data: null, error: `HTTP ${response.status}: ${text.slice(0, 240)}` };
+    return { data: (text ? JSON.parse(text) : null) as T, error: null };
+  } catch (error) {
+    return { data: null, error: error instanceof Error ? error.message : "rpc_failure" };
+  }
 }
 
 Deno.serve(async (req: Request) => {
   const origin = req.headers.get("origin");
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: cors(origin) });
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405, origin);
-
-  if (origin && !ALLOWED_ORIGINS.has(origin)) {
-    return json({ error: "origin_not_allowed" }, 403, origin);
-  }
+  if (origin && !ALLOWED_ORIGINS.has(origin)) return json({ error: "origin_not_allowed" }, 403, origin);
 
   let payload: { q?: unknown; limit?: unknown };
-  try {
-    payload = await req.json();
-  } catch {
-    return json({ error: "invalid_json" }, 400, origin);
-  }
+  try { payload = await req.json(); }
+  catch { return json({ error: "invalid_json" }, 400, origin); }
 
   const q = String(payload.q ?? "").trim().replace(/\s+/g, " ").slice(0, MAX_QUERY);
   const rawLimit = Number(payload.limit ?? 10);
@@ -71,31 +83,31 @@ Deno.serve(async (req: Request) => {
   const serviceRole = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   if (!supabaseUrl || !serviceRole) return json({ error: "server_configuration_error" }, 503, origin);
 
-  const sb = createClient(supabaseUrl, serviceRole, { auth: { persistSession: false, autoRefreshToken: false } });
-  const bucket = await digestBucket(req);
-  const { data: allowed, error: budgetError } = await sb.rpc("consume_public_search_budget", {
+  const bucket = await digestBucket(req, serviceRole);
+  const budget = await rpc<boolean>(supabaseUrl, serviceRole, "consume_public_search_budget", {
     p_bucket_key: bucket,
     p_limit: RATE_LIMIT,
     p_window_seconds: RATE_WINDOW_SECONDS,
   });
-  if (budgetError) return json({ error: "rate_limit_unavailable" }, 503, origin);
-  if (allowed !== true) return json({ error: "rate_limited" }, 429, origin);
+  if (budget.error) return json({ error: "rate_limit_unavailable" }, 503, origin);
+  if (budget.data !== true) return json({ error: "rate_limited" }, 429, origin);
 
   const started = performance.now();
-  const { data, error } = await sb.rpc("search_platform_v3_lexical", {
+  const search = await rpc<unknown[]>(supabaseUrl, serviceRole, "search_platform_v3_lexical", {
     p_query: q,
     p_limit: limit,
   });
-  if (error) {
-    console.error("rawafid-public-search", error.message);
+  if (search.error) {
+    console.error("rawafid-public-search", search.error);
     return json({ error: "search_unavailable" }, 503, origin);
   }
 
+  const results = Array.isArray(search.data) ? search.data : [];
   return json({
     query: q,
-    count: Array.isArray(data) ? data.length : 0,
+    count: results.length,
     mode: "v4-indexed-lexical",
     elapsed_ms: Math.round(performance.now() - started),
-    results: data ?? [],
+    results,
   }, 200, origin);
 });
