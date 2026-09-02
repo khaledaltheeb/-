@@ -26,6 +26,8 @@ type ExtractiveAnswer = {
 
 type ApiResponse = {
   query: string;
+  resolved_query?: string;
+  contextual?: boolean;
   mode: string;
   count?: number;
   answer?: ExtractiveAnswer | null;
@@ -62,6 +64,7 @@ export default function RawafidAssistant() {
   const [status, setStatus] = useState('');
   const [safety, setSafety] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const conversationContextRef = useRef('');
 
   const quick = useMemo(() => {
     return CONTEXT_QUICK.find((item) => item.match.test(pathname ?? ''))?.values ?? DEFAULT_QUICK;
@@ -91,8 +94,9 @@ export default function RawafidAssistant() {
     };
   }, [open]);
 
-  async function search(nextQuery: string) {
+  async function search(nextQuery: string, resetContext = false) {
     const q = nextQuery.trim().replace(/\s+/g, ' ').slice(0, 160);
+    if (resetContext) conversationContextRef.current = '';
     setQuery(q);
     setResults([]);
     setAnswer(null);
@@ -108,7 +112,9 @@ export default function RawafidAssistant() {
     setLoading(true);
     setStatus('أحلل سؤالك وأبحث داخل محتوى روافد…');
     try {
-      const response = await fetch(`/api/search/v3?q=${encodeURIComponent(q)}&limit=6`, {
+      const context = conversationContextRef.current;
+      const contextParam = context ? `&context=${encodeURIComponent(context)}` : '';
+      const response = await fetch(`/api/search/v3?q=${encodeURIComponent(q)}&limit=6${contextParam}`, {
         method: 'GET',
         cache: 'no-store',
         headers: { accept: 'application/json' },
@@ -118,7 +124,12 @@ export default function RawafidAssistant() {
       const rows = Array.isArray(data.results) ? data.results : [];
       setResults(rows);
       setAnswer(data.answer ?? null);
-      setStatus(rows.length ? 'هذه أقرب المعلومات والصفحات لسؤالك.' : 'لم أجد نتيجة مطابقة بثقة. جرّب صياغة أقصر أو كلمة أكثر تحديدًا.');
+      conversationContextRef.current = String(data.resolved_query || q).slice(0, 160);
+      setStatus(
+        rows.length
+          ? (data.contextual ? 'فهمت سؤالك كمتابعة للسياق السابق. هذه أقرب المعلومات والصفحات.' : 'هذه أقرب المعلومات والصفحات لسؤالك.')
+          : 'لم أجد نتيجة مطابقة بثقة. جرّب صياغة أقصر أو كلمة أكثر تحديدًا.',
+      );
     } catch {
       setStatus('تعذر تنفيذ البحث الآن. يمكنك استخدام صفحة البحث الكاملة.');
     } finally {
@@ -140,17 +151,17 @@ export default function RawafidAssistant() {
               <span className={styles.mark} aria-hidden="true">ر</span>
               <div>
                 <h2 className={styles.title} id="rawafid-assistant-title">مساعد روافد</h2>
-                <p className={styles.subtitle}>بحث عربي ذكي داخل محتوى روافد دون نموذج خارجي مدفوع.</p>
+                <p className={styles.subtitle}>بحث عربي سياقي داخل محتوى روافد دون نموذج خارجي مدفوع.</p>
               </div>
             </div>
             <button className={styles.close} type="button" onClick={() => setOpen(false)} aria-label="إغلاق مساعد روافد">×</button>
           </header>
 
           <div className={styles.body}>
-            <p className={styles.intro}>اكتب سؤالك بطريقتك. أحلل الكلمات والمرادفات والنية، ثم أستخرج أقرب خلاصة من صفحات روافد مع روابطها.</p>
+            <p className={styles.intro}>اكتب سؤالك بطريقتك، ثم تابع بسؤال مثل «وماذا عن العلاج؟». أحلل الكلمات والمرادفات والنية والسياق القصير، ثم أستخرج أقرب خلاصة من صفحات روافد مع روابطها.</p>
             <div className={styles.quickGrid} aria-label="اقتراحات سريعة">
               {quick.map((item) => (
-                <button key={item} type="button" className={styles.quick} onClick={() => void search(item)}>{item}</button>
+                <button key={item} type="button" className={styles.quick} onClick={() => void search(item, true)}>{item}</button>
               ))}
             </div>
 
@@ -208,7 +219,7 @@ export default function RawafidAssistant() {
             ) : null}
           </div>
 
-          <footer className={styles.footer}>لا يستخدم مساعد روافد نموذج ذكاء اصطناعي خارجيًا مدفوعًا؛ يعتمد على فهرس المنصة ومحتواها المنشور.</footer>
+          <footer className={styles.footer}>السياق يبقى داخل جلسة الصفحة فقط. لا يستخدم مساعد روافد نموذج ذكاء اصطناعي خارجيًا مدفوعًا؛ يعتمد على فهرس المنصة ومحتواها المنشور.</footer>
         </section>
       ) : null}
 
