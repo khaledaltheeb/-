@@ -11,7 +11,7 @@ export type FreeSearchResult = {
 
 export type ExtractiveAnswer = {
   mode: 'extractive';
-  intent: 'definition' | 'assessment' | 'support' | 'treatment' | 'comparison' | 'professional' | 'general';
+  intent: 'definition' | 'assessment' | 'support' | 'treatment' | 'comparison' | 'professional' | 'school' | 'safety' | 'general';
   lead: string;
   points: Array<{ text: string; title: string; destination: string }>;
   note: string | null;
@@ -33,6 +33,54 @@ function normalize(value: string) {
     .replace(/\s+/gu, ' ');
 }
 
+const PHRASE_REWRITES: Array<[RegExp, string]> = [
+  [/\bما\s*(?:بحكي|بيحكي|بحكيش)\b/giu, 'لا يتكلم'],
+  [/\bمش\s*(?:بيركز|بركز|مركز)\b/giu, 'لا يركز'],
+  [/\bما\s*(?:بيركز|بركز)\b/giu, 'لا يركز'],
+  [/\bكتير\s+حركه\b/giu, 'فرط حركة'],
+  [/\bشو\s+(?:اعمل|اسوي)\b/giu, 'ماذا افعل'],
+  [/\bوين\s+(?:الاقي|اجد)\b/giu, 'اين اجد'],
+  [/\bدكتور\b/giu, 'طبيب'],
+  [/\bدكتوره\b/giu, 'طبيبة'],
+  [/\bاخصائيه\b/giu, 'اخصائية'],
+  [/\bروضه\b/giu, 'روضة مدرسة'],
+];
+
+const TOKEN_REWRITES = new Map<string, string>([
+  ['التوحدي', 'التوحد'],
+  ['التوحد', 'التوحد'],
+  ['اوتيزم', 'التوحد'],
+  ['اوتزم', 'التوحد'],
+  ['دسلكسيا', 'ديسلكسيا'],
+  ['دسلكسيا', 'ديسلكسيا'],
+  ['ديسليكسيا', 'ديسلكسيا'],
+  ['ديسلكسيا', 'ديسلكسيا'],
+  ['القراءه', 'القراءة'],
+  ['قراءه', 'قراءة'],
+  ['النطق', 'النطق'],
+  ['تاخر', 'تأخر'],
+  ['متاخر', 'متأخر'],
+  ['الوسواس', 'الوسواس'],
+  ['الاكتئاب', 'الاكتئاب'],
+  ['ادمان', 'إدمان'],
+  ['الادمان', 'الإدمان'],
+  ['اخلاقيات', 'أخلاقيات'],
+  ['اخصائي', 'أخصائي'],
+  ['اخصائيه', 'أخصائية'],
+]);
+
+function rewriteArabicQuery(value: string) {
+  let rewritten = value.trim().replace(/\s+/g, ' ');
+  for (const [pattern, replacement] of PHRASE_REWRITES) rewritten = rewritten.replace(pattern, replacement);
+  rewritten = rewritten
+    .split(/\s+/u)
+    .map((token) => TOKEN_REWRITES.get(normalize(token)) ?? token)
+    .join(' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return rewritten.slice(0, 160);
+}
+
 const EXPANSION_RULES: Array<{ test: RegExp; phrase: string }> = [
   { test: /(توحد|اوتيزم|autism)/iu, phrase: 'التوحد طيف التوحد autism' },
   { test: /(تشتت|فرط.?الحرك|ما.?يركز|لا.?يركز|adhd)/iu, phrase: 'ADHD اضطراب نقص الانتباه وفرط الحركة تشتت الانتباه' },
@@ -45,6 +93,7 @@ const EXPANSION_RULES: Array<{ test: RegExp; phrase: string }> = [
   { test: /(اكتئاب.?بعد.?الولاد|اكتئاب.?ما.?بعد.?الولاد|postpartum)/iu, phrase: 'اكتئاب ما بعد الولادة اكتئاب حول الولادة postpartum depression' },
   { test: /(ادمان|تعاطي|اضطراب.?استخدام.?المواد|addiction)/iu, phrase: 'الإدمان اضطراب استخدام المواد التعافي addiction' },
   { test: /(انسحاب.?الكحول|alcohol.?withdrawal)/iu, phrase: 'انسحاب الكحول سلامة الانسحاب alcohol withdrawal' },
+  { test: /(جرعه.?زائد|جرعة.?زائدة|overdose)/iu, phrase: 'جرعة زائدة تسمم طوارئ overdose' },
   { test: /(مرض.?نادر|امراض.?نادر|rare.?disease)/iu, phrase: 'الأمراض النادرة rare disease' },
   { test: /(علاج.?جيني|gene.?therapy)/iu, phrase: 'العلاج الجيني العلاج الخلوي gene therapy' },
   { test: /(سرطان.?الاطفال|اورام.?الاطفال|pediatric.?oncology)/iu, phrase: 'سرطان الأطفال أورام الأطفال pediatric oncology' },
@@ -52,27 +101,40 @@ const EXPANSION_RULES: Array<{ test: RegExp; phrase: string }> = [
   { test: /(عمل.?اجتماعي|خدمه.?اجتماعي|social.?work)/iu, phrase: 'العمل الاجتماعي الخدمة الاجتماعية social work' },
   { test: /(اخلاقيات|اخلاقي|ethics)/iu, phrase: 'الأخلاقيات المهنية الكرامة السرية تقرير المصير ethics' },
   { test: /(تربيه.?دامجه|تعليم.?دامج|inclusive.?education)/iu, phrase: 'التربية الدامجة التعليم الدامج inclusive education الدمج' },
+  { test: /(مدرسه|مدرسي|صف|معلم|معلمه|teacher|school)/iu, phrase: 'المدرسة التعليم المعلم التكييفات الصفية school support' },
+  { test: /(تنمر|bullying)/iu, phrase: 'التنمر الحماية المدرسية bullying' },
+  { test: /(متلازمه.?داون|down.?syndrome)/iu, phrase: 'متلازمة داون Down syndrome' },
+  { test: /(شلل.?دماغي|cerebral.?palsy)/iu, phrase: 'الشلل الدماغي cerebral palsy' },
+  { test: /(صعوبات.?التعلم|learning.?disabilit)/iu, phrase: 'صعوبات التعلم اضطرابات التعلم learning disabilities' },
 ];
 
 export function buildFreeQueryVariants(query: string) {
   const cleaned = query.trim().replace(/\s+/g, ' ').slice(0, 160);
-  const normalized = normalize(cleaned);
+  const rewritten = rewriteArabicQuery(cleaned);
+  const normalized = normalize(`${cleaned} ${rewritten}`);
   const expansions = EXPANSION_RULES
     .filter((rule) => rule.test.test(normalized))
     .map((rule) => rule.phrase);
 
-  if (expansions.length === 0) return [cleaned];
-  const expanded = [...new Set(expansions)].join(' ');
-  return [cleaned, expanded].filter((value, index, values) => values.indexOf(value) === index).slice(0, 2);
+  const semanticVariant = [...new Set([rewritten, ...expansions])]
+    .filter(Boolean)
+    .join(' ')
+    .slice(0, 160);
+
+  return [cleaned, semanticVariant]
+    .filter((value, index, values) => value && values.indexOf(value) === index)
+    .slice(0, 2);
 }
 
 function detectIntent(query: string): ExtractiveAnswer['intent'] {
   const q = normalize(query);
-  if (/(الفرق|مقارنه|مقارنه|ام .* ام |vs\b|مقابل)/u.test(q)) return 'comparison';
+  if (/(خطر|طوارئ|جرعه زائده|جرعة زائدة|نزيف|فقد الوعي|صعوبه التنفس|انسحاب شديد)/u.test(q)) return 'safety';
+  if (/(الفرق|مقارنه|ام .* ام |vs\b|مقابل)/u.test(q)) return 'comparison';
   if (/(علامات|اعراض|كيف اعرف|هل .* مصاب|تشخيص|تقييم|متي اطلب تقييم)/u.test(q)) return 'assessment';
   if (/(علاج|دواء|تدخل|رعايه|ماذا افعل|ما المفيد)/u.test(q)) return 'treatment';
-  if (/(كيف اساعد|دعم|مساعده|في المنزل|للاسره|للوالدين|للمدرسه)/u.test(q)) return 'support';
-  if (/(مختص|اخصائي|مركز|معالج|طبيب|جهه)/u.test(q)) return 'professional';
+  if (/(مدرسه|مدرسي|صف|معلم|معلمه|تكييف|امتحان|واجب)/u.test(q)) return 'school';
+  if (/(كيف اساعد|دعم|مساعده|في المنزل|للاسره|للوالدين)/u.test(q)) return 'support';
+  if (/(مختص|اخصائي|مركز|معالج|طبيب|جهه|اين اجد)/u.test(q)) return 'professional';
   if (/^(ما هو|ما هي|ما معنى|ما معني|تعريف|ما المقصود)/u.test(q)) return 'definition';
   return 'general';
 }
@@ -92,8 +154,9 @@ function splitSentences(text: string) {
 }
 
 function queryTokens(query: string) {
-  const STOP = new Set(['كيف', 'هل', 'ما', 'ماذا', 'من', 'في', 'على', 'الى', 'إلى', 'عن', 'مع', 'هذا', 'هذه', 'هو', 'هي', 'او', 'أو', 'عند', 'لدي', 'اريد', 'أريد']);
-  return [...new Set(normalize(query).split(' ').filter((token) => token.length >= 2 && !STOP.has(token)))];
+  const STOP = new Set(['كيف', 'هل', 'ما', 'ماذا', 'من', 'في', 'على', 'الى', 'إلى', 'عن', 'مع', 'هذا', 'هذه', 'هو', 'هي', 'او', 'أو', 'عند', 'لدي', 'اريد', 'أريد', 'شو', 'وين']);
+  const rewritten = rewriteArabicQuery(query);
+  return [...new Set(normalize(rewritten).split(' ').filter((token) => token.length >= 2 && !STOP.has(token)))];
 }
 
 function sentenceScore(sentence: string, tokens: string[], position: number) {
@@ -101,7 +164,7 @@ function sentenceScore(sentence: string, tokens: string[], position: number) {
   const hits = tokens.filter((token) => s.includes(token)).length;
   const coverage = tokens.length ? hits / tokens.length : 0;
   let score = coverage * 10 + hits * 2 - position * 0.15;
-  if (/(ينصح|يساعد|يحتاج|يشمل|يعتمد|يظهر|تظهر|يمكن|ينبغي|متى|عندما|علامات|تقييم|دعم|علاج)/u.test(s)) score += 1.5;
+  if (/(ينصح|يساعد|يحتاج|يشمل|يعتمد|يظهر|تظهر|يمكن|ينبغي|متى|عندما|علامات|تقييم|دعم|علاج|مدرسه|طوارئ)/u.test(s)) score += 1.5;
   if (/(اشترك|سجل الآن|اقرأ المزيد|حقوق النشر|المصدر:)/u.test(s)) score -= 5;
   return score;
 }
@@ -141,6 +204,8 @@ export function buildExtractiveAnswer(query: string, results: FreeSearchResult[]
     treatment: 'هذه أبرز معلومات الرعاية والعلاج المرتبطة بسؤالك داخل روافد:',
     comparison: 'هذه أقرب نقاط تساعد على فهم الفرق داخل روافد:',
     professional: 'هذه أقرب الموارد والجهات المرتبطة بما تبحث عنه داخل روافد:',
+    school: 'هذه أبرز المعلومات العملية المرتبطة بالمدرسة والدعم التعليمي:',
+    safety: 'هذه أبرز معلومات السلامة المرتبطة بسؤالك من محتوى روافد:',
     general: 'هذه الخلاصة الأقرب لسؤالك من محتوى روافد:',
   };
 
@@ -148,7 +213,9 @@ export function buildExtractiveAnswer(query: string, results: FreeSearchResult[]
     ? 'هذه معلومات تثقيفية مستخرجة من صفحات روافد، ولا تكفي وحدها لإثبات تشخيص.'
     : intent === 'treatment'
       ? 'اختيار العلاج يعتمد على الحالة الفردية والتقييم المهني؛ الروابط أدناه تعرض السياق الكامل.'
-      : null;
+      : intent === 'safety'
+        ? 'عند وجود خطر مباشر أو تدهور سريع، تُقدَّم خدمات الطوارئ والتقييم العاجل على استخدام البحث داخل الموقع.'
+        : null;
 
   return { mode: 'extractive', intent, lead: leadByIntent[intent], points, note };
 }
