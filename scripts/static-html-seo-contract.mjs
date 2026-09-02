@@ -9,17 +9,27 @@ const hardenedBare = hardenStaticHtmlSeo(bare);
 assert.equal(count(hardenedBare, 'property="og:title"'), 1);
 assert.equal(count(hardenedBare, 'property="og:description"'), 1);
 assert.equal(count(hardenedBare, 'property="og:url"'), 1);
+assert.equal(count(hardenedBare, 'property="og:site_name"'), 1);
+assert.equal(count(hardenedBare, 'property="og:image"'), 1);
+assert.equal(count(hardenedBare, 'property="og:image:alt"'), 1);
 assert.equal(count(hardenedBare, 'name="twitter:card"'), 1);
 assert.equal(count(hardenedBare, 'name="twitter:title"'), 1);
 assert.equal(count(hardenedBare, 'name="twitter:description"'), 1);
+assert.equal(count(hardenedBare, 'name="twitter:image"'), 1);
+assert.equal(count(hardenedBare, 'name="twitter:image:alt"'), 1);
+assert.ok(hardenedBare.includes('https://healthrenewal.org/seo-card?'), 'fallback social image must use the production origin');
 assert.equal(count(hardenedBare, 'type="application/ld+json"'), 1);
 assert.equal(hardenStaticHtmlSeo(hardenedBare), hardenedBare, 'hardening must be idempotent');
 
-const existing = '<!doctype html><html lang="ar"><head><title>صفحة موجودة | روافد</title><meta name="description" content="وصف موجود."><link rel="canonical" href="https://healthrenewal.org/evidence-guides/palliative-care/example/"><meta property="og:type" content="article"><meta property="og:locale" content="ar_AR"><meta property="og:title" content="صفحة موجودة"><meta property="og:description" content="وصف موجود."><meta property="og:url" content="https://healthrenewal.org/evidence-guides/palliative-care/example/"><script type="application/ld+json">{"@context":"https://schema.org","@type":"MedicalWebPage"}</script></head><body><h1>مثال</h1></body></html>';
+const existing = '<!doctype html><html lang="ar"><head><title>صفحة موجودة | روافد</title><meta name="description" content="وصف موجود."><link rel="canonical" href="https://healthrenewal.org/evidence-guides/palliative-care/example/"><meta property="og:type" content="article"><meta property="og:locale" content="ar_AR"><meta property="og:site_name" content="موقع موجود"><meta property="og:title" content="صفحة موجودة"><meta property="og:description" content="وصف موجود."><meta property="og:url" content="https://healthrenewal.org/evidence-guides/palliative-care/example/"><meta property="og:image" content="https://healthrenewal.org/custom-share.png"><meta name="twitter:image" content="https://healthrenewal.org/custom-share.png"><script type="application/ld+json">{"@context":"https://schema.org","@type":"MedicalWebPage"}</script></head><body><h1>مثال</h1></body></html>';
 const hardenedExisting = hardenStaticHtmlSeo(existing);
 assert.equal(count(hardenedExisting, 'property="og:title"'), 1, 'existing OpenGraph metadata must not be duplicated');
+assert.equal(count(hardenedExisting, 'property="og:site_name"'), 1, 'existing site name must not be duplicated');
+assert.equal(count(hardenedExisting, 'property="og:image"'), 1, 'existing social image must not be duplicated');
+assert.equal(count(hardenedExisting, 'name="twitter:image"'), 1, 'existing Twitter image must not be duplicated');
 assert.equal(count(hardenedExisting, 'type="application/ld+json"'), 1, 'existing JSON-LD must not be duplicated');
 assert.equal(count(hardenedExisting, 'name="twitter:card"'), 1, 'missing Twitter metadata must be added');
+assert.ok(hardenedExisting.includes('https://healthrenewal.org/custom-share.png'), 'existing social image URL must be preserved');
 
 const longTitle = 'هذا عنوان عربي طويل جدًا لاختبار تقصير عنوان الصفحة بطريقة تحافظ على الكلمات ولا تتجاوز الحد المسموح به في بوابة تحسين محركات البحث | روافد';
 const longHtml = `<!doctype html><html lang="ar"><head><title>${longTitle}</title><meta name="description" content="وصف اختبار."><link rel="canonical" href="https://healthrenewal.org/evidence-guides/rare-disease/example/"></head><body><h1>مثال</h1></body></html>`;
