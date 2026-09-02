@@ -1,0 +1,46 @@
+name: Addiction Axis Evidence Completion
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'data/addiction-atlas/risk-evidence-*.json'
+      - 'data/addiction-atlas/risk-evidence-manifest.json'
+      - 'data/addiction-atlas/source-registry-*.json'
+      - 'data/addiction-atlas/substances-*.json'
+      - 'lib/addiction-atlas-evidence.ts'
+      - 'scripts/addiction-atlas-contract.mjs'
+      - 'scripts/addiction-atlas-wave9-contract.mjs'
+      - '.github/workflows/addiction-axis-evidence-wave9.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'data/addiction-atlas/risk-evidence-*.json'
+      - 'data/addiction-atlas/risk-evidence-manifest.json'
+      - 'data/addiction-atlas/source-registry-*.json'
+      - 'data/addiction-atlas/substances-*.json'
+      - 'lib/addiction-atlas-evidence.ts'
+      - 'scripts/addiction-atlas-contract.mjs'
+      - 'scripts/addiction-atlas-wave9-contract.mjs'
+      - '.github/workflows/addiction-axis-evidence-wave9.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate-axis-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Historical addiction atlas contract
+        run: node scripts/addiction-atlas-contract.mjs
+      - name: Complete 71-substance axis evidence contract
+        run: node scripts/addiction-atlas-wave9-contract.mjs
+      - name: Type check
+        run: npm run typecheck

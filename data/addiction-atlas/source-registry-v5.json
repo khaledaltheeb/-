@@ -1,7 +1,7 @@
 {
   "schema_version": "rawafid-addiction-atlas-source-registry-v5",
-  "version": "5.0.0",
-  "updated_on": "2026-08-27",
+  "version": "5.1.0",
+  "updated_on": "2026-09-02",
   "sources": [
     {
       "id": "fda-tramadol-label-2023",
@@ -50,6 +50,102 @@
       "url": "https://nida.nih.gov/research-topics/synthetic-cannabinoids-k2spice",
       "verified_on": "2026-08-27",
       "notes_ar": "مرجع NIDA للقنبيات الصناعية، يستخدم مع EUDA لإظهار أن تأثيراتها قد تكون أقوى وأقل قابلية للتنبؤ من القنب الطبيعي، دون تعميم خصائص مركب واحد على كل الفئة."
+    },
+    {
+      "id": "nida-kratom-current",
+      "organization": "National Institute on Drug Abuse (NIDA)",
+      "title": "Kratom",
+      "publication_year": null,
+      "data_years": [],
+      "source_type": "federal-scientific-topic-review",
+      "geography": "United States / general clinical science",
+      "url": "https://nida.nih.gov/research-topics/kratom",
+      "verified_on": "2026-09-02",
+      "notes_ar": "مرجع NIDA المباشر للكراتوم؛ يستخدم لتوثيق التأثيرات الأفيونية/المنبهة، الاعتماد والانسحاب والتسمم وعدم يقين المنتجات. لا يساوي بين ورق الكراتوم الطبيعي ومنتجات 7-OH المركزة."
+    },
+    {
+      "id": "cdc-xylazine-2024",
+      "organization": "U.S. Centers for Disease Control and Prevention (CDC)",
+      "title": "Xylazine",
+      "publication_year": 2024,
+      "data_years": [2024],
+      "source_type": "public-health-safety-reference",
+      "geography": "United States",
+      "url": "https://www.cdc.gov/overdose-prevention/about/what-you-should-know-about-xylazine.html",
+      "verified_on": "2026-09-02",
+      "notes_ar": "مرجع CDC المباشر للزيلازين: التهدئة وصعوبة التنفس وانخفاض الضغط وبطء القلب والجروح والانسحاب الشديد والوجود المتكرر مع الأفيونات. النالوكسون يعكس المكوّن الأفيوني ولا يعكس الزيلازين نفسه."
+    },
+    {
+      "id": "nida-anabolic-steroids-current",
+      "organization": "National Institute on Drug Abuse (NIDA)",
+      "title": "Anabolic Steroids and Other Appearance and Performance Enhancing Drugs (APEDs)",
+      "publication_year": null,
+      "data_years": [],
+      "source_type": "federal-scientific-topic-review",
+      "geography": "United States / general clinical science",
+      "url": "https://nida.nih.gov/research-topics/anabolic-steroids",
+      "verified_on": "2026-09-02",
+      "notes_ar": "مرجع NIDA للستيرويدات البنائية ومضاعفات القلب والكبد والهرمونات والصحة النفسية والاعتماد. لا يستخدم لإعطاء أنظمة جرعات أو تحسين أداء."
+    },
+    {
+      "id": "medlineplus-dextromethorphan-2025",
+      "organization": "U.S. National Library of Medicine (MedlinePlus)",
+      "title": "Dextromethorphan: Drug Information and Overdose",
+      "publication_year": 2025,
+      "data_years": [],
+      "source_type": "federal-patient-drug-safety-reference",
+      "geography": "United States",
+      "url": "https://medlineplus.gov/druginfo/meds/a682492.html",
+      "verified_on": "2026-09-02",
+      "notes_ar": "مرجع دوائي اتحادي يصف أعراض الجرعة الزائدة من ديكستروميثورفان مثل صعوبة التنفس والاختلاجات والغيبوبة والخفقان والهلوسة. لا يقدم أساساً لاستخدام غير طبي."
+    },
+    {
+      "id": "medlineplus-barbiturate-overdose-2025",
+      "organization": "U.S. National Library of Medicine (MedlinePlus)",
+      "title": "Barbiturate intoxication and overdose",
+      "publication_year": 2025,
+      "data_years": [],
+      "source_type": "federal-medical-encyclopedia-toxicology-reference",
+      "geography": "United States",
+      "url": "https://medlineplus.gov/ency/article/000951.htm",
+      "verified_on": "2026-09-02",
+      "notes_ar": "مرجع سمية مباشر للباربيتورات يصف الجرعة الزائدة المهددة للحياة، الاعتماد الجسدي، خطورة الانسحاب المفاجئ، كبت التنفس وزيادة الخطر عند الخلط مع الكحول أو الأفيونات."
+    },
+    {
+      "id": "dailymed-phenobarbital-2026",
+      "organization": "U.S. National Library of Medicine (DailyMed)",
+      "title": "Phenobarbital tablet — prescribing information",
+      "publication_year": 2026,
+      "data_years": [2026],
+      "source_type": "official-drug-label",
+      "geography": "United States",
+      "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=e024b80b-c22f-44bc-b273-f9398f840ed0",
+      "verified_on": "2026-09-02",
+      "notes_ar": "ملصق دوائي رسمي يثبت الاعتماد وخطورة التوقف المفاجئ بما في ذلك الهذيان والاختلاجات واحتمال الوفاة، والتأثيرات التآزرية مع الكحول ومثبطات الجهاز العصبي المركزي. لا تنقل منه جرعات للجمهور."
+    },
+    {
+      "id": "who-khat-ecdd34",
+      "organization": "World Health Organization (WHO) Expert Committee on Drug Dependence",
+      "title": "WHO Expert Committee on Drug Dependence: thirty-fourth report — Khat review",
+      "publication_year": 2012,
+      "data_years": [],
+      "source_type": "expert-committee-technical-report",
+      "geography": "Global",
+      "url": "https://www.who.int/publications/i/item/9789241209427",
+      "verified_on": "2026-09-02",
+      "notes_ar": "مراجعة WHO للقات توثق الكاثينون والكاثين، زيادة اليقظة والضغط والنبض والحرارة، التفاعلات الذهانية وتقارير الانسحاب، مع عدم اتساق بيانات قابلية الاعتماد."
+    },
+    {
+      "id": "fda-caffeine-2024",
+      "organization": "U.S. Food and Drug Administration (FDA)",
+      "title": "Spilling the Beans: How Much Caffeine is Too Much?",
+      "publication_year": 2024,
+      "data_years": [],
+      "source_type": "regulatory-consumer-safety-reference",
+      "geography": "United States",
+      "url": "https://www.fda.gov/consumers/consumer-updates/spilling-beans-how-much-caffeine-too-much",
+      "verified_on": "2026-09-02",
+      "notes_ar": "مرجع FDA يصف آثار الإفراط في الكافيين، بما فيها الخفقان وارتفاع الضغط والقلق واضطراب النوم، ويذكر أن المنتجات شديدة التركيز قد تسبب اختلاجات ووفاة وأن الانسحاب غير خطير عادة لكنه مزعج."
     }
   ]
 }
