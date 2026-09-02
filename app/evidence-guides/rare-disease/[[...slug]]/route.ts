@@ -1,4 +1,5 @@
 import { RARE_DISEASE_GLOBAL_GENES_PAGES } from '@/lib/rare-disease-global-genes-pages';
+import { hardenRawHtmlSeo } from '@/lib/raw-html-seo';
 
 type Params = Promise<{ slug?: string[] }>;
 
@@ -13,10 +14,11 @@ const headers = {
 
 export const dynamic = 'force-static';
 
-export async function GET(_request: Request, { params }: { params: Params }) {
+export async function GET(request: Request, { params }: { params: Params }) {
   const { slug = [] } = await params;
   if (slug.length > 1) return new Response('Not Found', { status: 404, headers: { 'content-type': 'text/plain; charset=utf-8' } });
   const html = RARE_DISEASE_GLOBAL_GENES_PAGES[slug[0] ?? ''];
   if (!html) return new Response('Not Found', { status: 404, headers: { 'content-type': 'text/plain; charset=utf-8' } });
-  return new Response(html, { status: 200, headers });
+  const canonicalUrl = `https://healthrenewal.org${new URL(request.url).pathname}`;
+  return new Response(hardenRawHtmlSeo(html, { canonicalUrl, type: 'article' }), { status: 200, headers });
 }
