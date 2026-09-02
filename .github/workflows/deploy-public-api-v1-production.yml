@@ -12,6 +12,7 @@ on:
       - 'app/developers/**'
       - 'app/layout.tsx'
       - 'app/sitemaps/static.xml/route.ts'
+      - 'components/site-footer.tsx'
       - 'components/trust-page.tsx'
       - 'lib/public-api-v1.ts'
       - 'lib/partner-api-v1.ts'
@@ -91,7 +92,8 @@ jobs:
           base='https://healthrenewal.org'
           stamp="${GITHUB_SHA}"
           for attempt in $(seq 1 12); do
-            if curl -fsS --retry 2 --retry-delay 2 --retry-all-errors "${base}/api/v1?deploy=${stamp}" -o /tmp/api-v1.json \
+            if curl -fsS --retry 2 --retry-delay 2 --retry-all-errors "${base}/?deploy=${stamp}" -o /tmp/home.html \
+              && curl -fsS --retry 2 --retry-delay 2 --retry-all-errors "${base}/api/v1?deploy=${stamp}" -o /tmp/api-v1.json \
               && curl -fsS --retry 2 --retry-delay 2 --retry-all-errors "${base}/api/openapi.json?deploy=${stamp}" -o /tmp/openapi.json \
               && curl -fsS --retry 2 --retry-delay 2 --retry-all-errors "${base}/api/v1/content?limit=2&deploy=${stamp}" -D /tmp/content.headers -o /tmp/content.json \
               && curl -fsS --retry 2 --retry-delay 2 --retry-all-errors "${base}/api/v1/pages?limit=2&deploy=${stamp}" -o /tmp/pages.json \
@@ -110,6 +112,7 @@ jobs:
           test "$invalid_code" = 401
           node - <<'NODE'
           const fs=require('fs');
+          const home=fs.readFileSync('/tmp/home.html','utf8');
           const discovery=JSON.parse(fs.readFileSync('/tmp/api-v1.json','utf8'));
           const openapi=JSON.parse(fs.readFileSync('/tmp/openapi.json','utf8'));
           const content=JSON.parse(fs.readFileSync('/tmp/content.json','utf8'));
@@ -124,6 +127,7 @@ jobs:
           const contentHeaders=fs.readFileSync('/tmp/content.headers','utf8').toLowerCase();
           const rssHeaders=fs.readFileSync('/tmp/rss.headers','utf8').toLowerCase();
           const jsonFeedHeaders=fs.readFileSync('/tmp/json-feed.headers','utf8').toLowerCase();
+          if(!home.includes('href="/developers"') || !home.includes('واجهة المطورين وAPI')) throw new Error('Developer API footer link is missing from live home page');
           if(discovery.version!=='1.2.0' || discovery.status!=='stable') throw new Error('Public API discovery is invalid');
           for (const provider of ['europe_pmc','crossref','datacite','lens']) if(!discovery.evidence_discovery?.providers?.includes(provider)) throw new Error(`${provider} provider is missing`);
           if(openapi.openapi!=='3.1.0' || openapi.info?.version!=='1.2.0') throw new Error('OpenAPI contract is invalid');
