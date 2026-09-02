@@ -110,7 +110,10 @@ jobs:
       - name: Production HTTP smoke
         run: npm run smoke
       - name: Full sitemap SEO gate
-        run: node scripts/seo-gate.mjs
+        shell: bash
+        run: |
+          set -o pipefail
+          node scripts/seo-gate.mjs 2>&1 | tee /tmp/rawafid-seo-gate.log
       - name: Rich results and discovery gate
         run: node scripts/rich-discovery-gate.mjs
       - name: Content richness and duplicate-body gate
@@ -175,6 +178,7 @@ jobs:
           path: |
             reports/seo-gate-report.json
             /tmp/rawafid-server.log
+            /tmp/rawafid-seo-gate.log
             /tmp/rawafid-lighthouse-*.json
           if-no-files-found: ignore
           retention-days: 7

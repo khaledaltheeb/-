@@ -11,6 +11,7 @@ export async function GET() {
     { path: '/addiction/interactions/', lastModified: atlas.updatedOn, changeFrequency: 'monthly', priority: 0.8 },
     { path: '/addiction/prevalence/', lastModified: atlas.updatedOn, changeFrequency: 'monthly', priority: 0.75 },
     { path: '/addiction/mortality/', lastModified: atlas.updatedOn, changeFrequency: 'monthly', priority: 0.75 },
+    { path: '/addiction/evidence-standards/', lastModified: atlas.updatedOn, changeFrequency: 'monthly', priority: 0.7 },
     { path: '/addiction/methodology/', lastModified: atlas.updatedOn, changeFrequency: 'yearly', priority: 0.6 },
     ...atlas.substances.map((item) => ({ path: `/addiction/substances/${item.slug}/`, lastModified: atlas.updatedOn, changeFrequency: 'monthly', priority: 0.8 })),
     ...atlas.comparisons.filter((item) => item.indexable).map((item) => ({ path: `/addiction/compare/${item.slug}/`, lastModified: atlas.updatedOn, changeFrequency: 'monthly', priority: 0.7 })),

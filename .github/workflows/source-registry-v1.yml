@@ -5,7 +5,12 @@ on:
     paths:
       - 'app/api/v1/sources/**'
       - 'app/api/v1/content/[slug]/sources/**'
+      - 'app/api/openapi.json/**'
       - 'supabase/migrations/*global_source_registry*'
+      - 'supabase/migrations/*ror_source_registry*'
+      - 'supabase/migrations/*source_connection_metadata*'
+      - 'supabase/migrations/*source_governance_provenance*'
+      - 'supabase/migrations/*datacite_content_relations*'
       - 'scripts/source-registry-v1-contract.mjs'
       - '.github/workflows/source-registry-v1.yml'
   push:
@@ -13,7 +18,12 @@ on:
     paths:
       - 'app/api/v1/sources/**'
       - 'app/api/v1/content/[slug]/sources/**'
+      - 'app/api/openapi.json/**'
       - 'supabase/migrations/*global_source_registry*'
+      - 'supabase/migrations/*ror_source_registry*'
+      - 'supabase/migrations/*source_connection_metadata*'
+      - 'supabase/migrations/*source_governance_provenance*'
+      - 'supabase/migrations/*datacite_content_relations*'
       - 'scripts/source-registry-v1-contract.mjs'
       - '.github/workflows/source-registry-v1.yml'
 

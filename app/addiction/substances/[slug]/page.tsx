@@ -6,6 +6,7 @@ import SiteFooter from '@/components/site-footer';
 import PrintPageButton from '@/components/print-page-button';
 import { getAddictionAtlas, getAtlasSource, getAtlasSubstance, RISK_KEYS } from '@/lib/addiction-atlas';
 import { getAtlasRiskEvidence } from '@/lib/addiction-atlas-evidence';
+import { ADF_PROVENANCE_NOTE_AR, getAdfDrugFactReference } from '@/lib/adf-addiction';
 import { breadcrumbJsonLd, buildSeoMetadata, SITE_URL } from '@/lib/seo';
 import styles from '@/components/addiction-atlas.module.css';
 
@@ -38,6 +39,7 @@ export default async function SubstancePage({ params }: { params: Params }) {
   const [item, atlas] = await Promise.all([getAtlasSubstance(slug), getAddictionAtlas()]);
   if (!item) notFound();
   const riskEvidence = getAtlasRiskEvidence(item.slug);
+  const adfReference = getAdfDrugFactReference(item);
   const url = `${SITE_URL}/addiction/substances/${item.slug}/`;
   const relatedComparisons = atlas.comparisons.filter((comparison) => comparison.indexable && (comparison.a === item.slug || comparison.b === item.slug));
   const relatedInteractions = atlas.interactions.filter((interaction) => interaction.a === item.slug || interaction.b === item.slug);
@@ -56,6 +58,7 @@ export default async function SubstancePage({ params }: { params: Params }) {
     <section className={styles.section}><div className={styles.grid}><article className={styles.card}><h2>التأثيرات الحادة</h2><ul>{item.acute_effects_ar.map((value) => <li key={value}>{value}</li>)}</ul></article><article className={styles.card}><h2>الأضرار مع الاستخدام المتكرر</h2><ul>{item.long_term_harms_ar.map((value) => <li key={value}>{value}</li>)}</ul></article><article className={styles.card}><h2>هل يمكن أن يحدث ضرر من تعرض واحد؟</h2><p>{item.single_exposure_harm_ar}</p></article><article className={styles.card}><h2>الانسحاب</h2><p>{item.withdrawal_ar}</p></article><article className={styles.card}><h2>العلاج والرعاية</h2><p>{item.treatment_ar}</p></article><article className={styles.card}><h2>متى تكون الحالة طارئة؟</h2><p>{item.emergency_response_ar}</p></article></div></section>
     {relatedInteractions.length ? <section className={styles.section}><h2>تفاعلات عالية الأهمية تمت مراجعتها</h2><p>لا يعني عدم ظهور مادة أخرى هنا أنها آمنة مع {item.display_name_ar}؛ هذه القائمة تعرض الأزواج التي اكتملت مراجعتها فقط.</p><div className={styles.grid}>{relatedInteractions.map((interaction) => { const otherSlug = interaction.a === item.slug ? interaction.b : interaction.a; const other = bySlug.get(otherSlug); return <article className={styles.card} key={interaction.id}><h3>{item.display_name_ar} + <Link href={`/addiction/substances/${otherSlug}/`}>{other?.display_name_ar}</Link></h3><p><strong>{interaction.severity === 'critical' ? 'تنبيه حرج' : interaction.severity === 'high' ? 'تنبيه مرتفع' : 'تنبيه متوسط'}</strong> · دليل {interaction.evidence_grade}</p><p>{interaction.risk_ar}</p><p><Link href="/addiction/interactions/">افتح طبقة التفاعلات والتفسير الكامل</Link></p></article>; })}</div></section> : null}
     {relatedComparisons.length ? <section className={styles.section}><h2>مقارنات موثقة مرتبطة بهذه المادة</h2><div className={styles.grid}>{relatedComparisons.map((comparison) => <article className={styles.card} key={comparison.slug}><h3><Link href={`/addiction/compare/${comparison.slug}/`}>{comparison.title_ar}</Link></h3><p>{comparison.intent_ar}</p></article>)}</div></section> : null}
+    {adfReference ? <section className={styles.section}><div className={styles.card}><span className={styles.eyebrow}>Alcohol and Drug Foundation — cross-reference خارجي</span><h2>مرجع ADF موازٍ لهذه المادة</h2><p>يوجد لهذه المادة ملف مباشر في ADF Drug Facts يمكن استخدامه للمراجعة الموازية لبنية المعلومات، بما فيها التأثيرات والانسحاب والتداخلات ومعلومات تقليل الضرر حيثما يغطيها الملف.</p><p><a href={adfReference.url} target="_blank" rel="noopener noreferrer">فتح {adfReference.title} على موقع ADF</a></p><p>{ADF_PROVENANCE_NOTE_AR}</p><p><Link href="/addiction/evidence-standards/">راجع منهجية استخدام ADF وحدود حقوق النشر والنسب</Link></p></div></section> : null}
     <section className={styles.section}><h2>المصادر المباشرة</h2><ol className={styles.sources}>{item.source_urls.map((source) => <li key={source}><a href={source} target="_blank" rel="noopener noreferrer">{source}</a></li>)}</ol><p>قوة الدليل: <strong>{item.evidence_grade} — {atlas.methodology.evidence_grades[item.evidence_grade].label_ar}</strong>. {atlas.methodology.evidence_grades[item.evidence_grade].definition_ar}</p><p className={styles.updateLine}>آخر مراجعة لنسخة بيانات الأطلس: <time dateTime={atlas.updatedOn}>{atlas.updatedOn}</time>.</p></section>
   </main><SiteFooter /></>;
 }

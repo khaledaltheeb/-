@@ -5,7 +5,7 @@ import { decoratePartnerResponse, withOptionalPartnerAccess } from '@/lib/partne
 
 export const dynamic = 'force-dynamic';
 
-const ALLOWED = new Set<EvidenceProvider>(['europe_pmc', 'lens']);
+const ALLOWED = new Set<EvidenceProvider>(['europe_pmc', 'crossref', 'datacite', 'lens']);
 
 function bounded(value: string | null, fallback: number, max: number) {
   const parsed = Number(value ?? fallback);
@@ -14,10 +14,16 @@ function bounded(value: string | null, fallback: number, max: number) {
 }
 
 function parseProviders(value: string | null): EvidenceProvider[] | null {
-  if (!value) return ['europe_pmc', 'lens'];
+  if (!value) return ['europe_pmc', 'crossref', 'datacite', 'lens'];
   const list = [...new Set(value.split(',').map((item) => item.trim().toLowerCase()).filter(Boolean))];
   if (!list.length || list.some((item) => !ALLOWED.has(item as EvidenceProvider))) return null;
   return list as EvidenceProvider[];
+}
+
+function optionalDate(value: string | null) {
+  if (!value) return { value: null, valid: true };
+  const timestamp = Date.parse(value);
+  return Number.isNaN(timestamp) ? { value: null, valid: false } : { value: new Date(timestamp).toISOString(), valid: true };
 }
 
 export async function GET(request: Request) {
@@ -27,10 +33,24 @@ export async function GET(request: Request) {
   const q = url.searchParams.get('q')?.trim() || '';
   if (q.length < 2 || q.length > 500) return apiError(request, 400, 'invalid_parameter', 'q must contain 2-500 characters.', 'q');
   const providers = parseProviders(url.searchParams.get('providers'));
-  if (!providers) return apiError(request, 400, 'invalid_parameter', 'providers may contain europe_pmc and lens only.', 'providers');
+  if (!providers) return apiError(request, 400, 'invalid_parameter', 'providers may contain europe_pmc, crossref, datacite and lens only.', 'providers');
+  const fromUpdate = optionalDate(url.searchParams.get('crossref_from_update_date'));
+  if (!fromUpdate.valid) return apiError(request, 400, 'invalid_parameter', 'crossref_from_update_date must be a valid ISO date.', 'crossref_from_update_date');
+  const fromIndex = optionalDate(url.searchParams.get('crossref_from_index_date'));
+  if (!fromIndex.valid) return apiError(request, 400, 'invalid_parameter', 'crossref_from_index_date must be a valid ISO date.', 'crossref_from_index_date');
+
   const max = access.authorization?.authorized ? 100 : 50;
   const limit = bounded(url.searchParams.get('limit'), 20, max);
-  const result = await discoverEvidence({ query: q, providers, limit, europe_pmc_cursor: url.searchParams.get('cursor') });
+  const result = await discoverEvidence({
+    query: q,
+    providers,
+    limit,
+    europe_pmc_cursor: url.searchParams.get('europe_pmc_cursor') || url.searchParams.get('cursor'),
+    crossref_cursor: url.searchParams.get('crossref_cursor'),
+    datacite_cursor: url.searchParams.get('datacite_cursor'),
+    crossref_from_update_date: fromUpdate.value,
+    crossref_from_index_date: fromIndex.value,
+  });
   const response = jsonResponse(request, {
     data: result.records,
     providers: result.providers,
