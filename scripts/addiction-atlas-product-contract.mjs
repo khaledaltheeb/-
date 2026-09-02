@@ -38,6 +38,11 @@ assert(interactionBrowser.includes('سجل التفاعلات المراجعة')
 assert(interactionBrowser.includes('substanceFilter') && interactionBrowser.includes('severityFilter') && interactionBrowser.includes('scopeFilter'), 'interaction registry filters missing');
 assert(interactionBrowser.includes('نطاق الدليل') && interactionBrowser.includes('قوة الدليل'), 'interaction registry evidence columns missing');
 assert(evidenceStandards.includes('مصفوفة اكتمال الأطلس'), 'evidence coverage matrix missing');
+assert(evidenceStandards.includes('سجل فجوات التتبع المحوري'), 'axis evidence gap registry missing');
+assert(evidenceStandards.includes('!getAtlasRiskEvidence(item.slug)'), 'evidence gap registry must be generated from missing axis evidence');
+assert(evidenceStandards.includes('ليست درجة خطورة سريرية'), 'evidence gap registry must separate operational priority from clinical risk');
+assert(evidenceStandards.includes('فجوة تتبع محوري متبقية'), 'evidence gap count signal missing');
+assert(evidenceStandards.includes('operationalPriority'), 'evidence gap operational prioritization missing');
 assert(evidenceStandards.includes('لم ننقل جداول ADF أو نصوصها أو رسومها'), 'ADF copyright boundary missing');
 assert(adfLayer.includes('لا تعني الإحالة إلى ADF أن المؤسسة راجعت درجات الأطلس أو اعتمدتها'), 'ADF non-endorsement provenance missing');
 assert(substancePage.includes('getAdfDrugFactReference(item)'), 'substance pages missing direct ADF cross-reference lookup');
@@ -55,4 +60,4 @@ const oxyDiazepam = interactionData.records.find((item) => item.id === 'oxycodon
 assert(oxyDiazepam?.evidence_scope === 'class-to-class', 'oxycodone-diazepam must retain FDA class-to-class scope');
 assert(interactionData.policy_ar.includes('غير مراجع بعد'), 'interaction wave must preserve unreviewed-not-safe policy');
 
-console.log('addiction-atlas-product-contract: PASS | hub + sector discovery + substance ADF cross-reference + clinical comparison + reviewed interaction registry + evidence scope guards + ADF provenance + coverage matrix + interaction safety');
+console.log('addiction-atlas-product-contract: PASS | hub + sector discovery + substance ADF cross-reference + clinical comparison + reviewed interaction registry + evidence gap registry + evidence scope guards + ADF provenance + coverage matrix + interaction safety');
