@@ -1,0 +1,9 @@
+/* Keep the institutional footer compact on narrow phones as trust/navigation links grow.
+ * Preserve the fixed mobile-navigation clearance in .footer-bottom; only compress the
+ * footer content area's vertical whitespace. */
+@media (max-width: 480px) {
+  .site-footer-inner {
+    padding-block: 40px 28px;
+    gap: 26px;
+  }
+}
