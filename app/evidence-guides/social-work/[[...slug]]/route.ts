@@ -5,6 +5,7 @@ import { hardenTalentiaPageQuality } from '@/lib/social-work-talentia-quality';
 import { SOCIAL_WORK_COMPARATIVE_PAGES, enrichSocialWorkPageWithComparative } from '@/lib/social-work-comparative-pages';
 import { enrichSocialWorkInstitutionalPage, SOCIAL_WORK_INSTITUTIONAL_RELEASE } from '@/lib/social-work-institutional-enrichment';
 import { enrichSocialWorkResearchDepth, SOCIAL_WORK_RESEARCH_RELEASE } from '@/lib/social-work-research-depth';
+import { hardenRawHtmlSeo } from '@/lib/html-seo-hardening';
 
 type Params = Promise<{ slug?: string[] }>;
 
@@ -20,7 +21,9 @@ const htmlHeaders = {
 export const dynamic = 'force-static';
 
 function finalizeSocialWorkPage(html: string, key: string) {
-  return enrichSocialWorkResearchDepth(enrichSocialWorkInstitutionalPage(html, key), key);
+  const enriched = enrichSocialWorkResearchDepth(enrichSocialWorkInstitutionalPage(html, key), key);
+  const pathname = `/evidence-guides/social-work/${key ? `${key}/` : ''}`;
+  return hardenRawHtmlSeo(enriched, pathname);
 }
 
 export async function GET(_request: Request, { params }: { params: Params }) {
