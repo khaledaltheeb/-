@@ -12,6 +12,7 @@ export async function GET() {
     { path:'/about', changeFrequency:'monthly', priority:.7 },
     { path:'/press', changeFrequency:'monthly', priority:.66 },
     { path:'/start-here', changeFrequency:'monthly', priority:.78 },
+    { path:'/campaigns/all-families-reading-challenge-2026', changeFrequency:'weekly', priority:.78 },
     { path:'/guided-assessment', changeFrequency:'monthly', priority:.68 },
     { path:'/assessment-lab', changeFrequency:'monthly', priority:.76 },
     ...assessmentSlugs.map((slug) => ({ path:`/assessment-lab/${slug}`, changeFrequency:'monthly' as const, priority:.7 })),

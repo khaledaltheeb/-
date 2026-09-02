@@ -1,6 +1,6 @@
 'use client';
 
-import type { MouseEvent, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 type Placement = 'hero' | 'official_page' | 'vroom' | 'footer_cta';
 type Destination = 'campaign' | 'worldreader';
@@ -20,7 +20,7 @@ declare global {
 }
 
 export default function WorldreaderAfrcTrackedLink({ href, placement, destination, className, children }: Props) {
-  function track(_event: MouseEvent<HTMLAnchorElement>) {
+  function track() {
     if (typeof window === 'undefined') return;
     window.dataLayer = window.dataLayer || [];
     window.dataLayer.push({
