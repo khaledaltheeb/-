@@ -16,10 +16,19 @@ type Result = {
   score: number;
 };
 
+type ExtractiveAnswer = {
+  mode: 'extractive';
+  intent: string;
+  lead: string;
+  points: Array<{ text: string; title: string; destination: string }>;
+  note: string | null;
+};
+
 type ApiResponse = {
   query: string;
   mode: string;
   count?: number;
+  answer?: ExtractiveAnswer | null;
   results: Result[];
 };
 
@@ -49,6 +58,7 @@ export default function RawafidAssistant() {
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<Result[]>([]);
+  const [answer, setAnswer] = useState<ExtractiveAnswer | null>(null);
   const [status, setStatus] = useState('');
   const [safety, setSafety] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -85,20 +95,18 @@ export default function RawafidAssistant() {
     const q = nextQuery.trim().replace(/\s+/g, ' ').slice(0, 160);
     setQuery(q);
     setResults([]);
+    setAnswer(null);
     setStatus('');
     const isRisk = RISK_PATTERN.test(q);
     setSafety(isRisk);
-    if (isRisk) {
-      setStatus('');
-      return;
-    }
+    if (isRisk) return;
     if (q.length < 2) {
       setStatus('اكتب كلمتين على الأقل حتى أبحث داخل روافد.');
       return;
     }
 
     setLoading(true);
-    setStatus('أبحث داخل محتوى روافد…');
+    setStatus('أحلل سؤالك وأبحث داخل محتوى روافد…');
     try {
       const response = await fetch(`/api/search/v3?q=${encodeURIComponent(q)}&limit=6`, {
         method: 'GET',
@@ -109,7 +117,8 @@ export default function RawafidAssistant() {
       const data = await response.json() as ApiResponse;
       const rows = Array.isArray(data.results) ? data.results : [];
       setResults(rows);
-      setStatus(rows.length ? `وجدت ${rows.length} نتائج أقرب لسؤالك.` : 'لم أجد نتيجة مطابقة بثقة. جرّب صياغة أقصر أو كلمة أكثر تحديدًا.');
+      setAnswer(data.answer ?? null);
+      setStatus(rows.length ? 'هذه أقرب المعلومات والصفحات لسؤالك.' : 'لم أجد نتيجة مطابقة بثقة. جرّب صياغة أقصر أو كلمة أكثر تحديدًا.');
     } catch {
       setStatus('تعذر تنفيذ البحث الآن. يمكنك استخدام صفحة البحث الكاملة.');
     } finally {
@@ -131,14 +140,14 @@ export default function RawafidAssistant() {
               <span className={styles.mark} aria-hidden="true">ر</span>
               <div>
                 <h2 className={styles.title} id="rawafid-assistant-title">مساعد روافد</h2>
-                <p className={styles.subtitle}>أساعدك في الوصول إلى الأدلة والصفحات المناسبة داخل المنصة.</p>
+                <p className={styles.subtitle}>بحث عربي ذكي داخل محتوى روافد دون نموذج خارجي مدفوع.</p>
               </div>
             </div>
             <button className={styles.close} type="button" onClick={() => setOpen(false)} aria-label="إغلاق مساعد روافد">×</button>
           </header>
 
           <div className={styles.body}>
-            <p className={styles.intro}>ما الذي تبحث عنه؟ اكتب موضوعًا أو سؤالًا بلغة طبيعية، وسأعرض أقرب الموارد المنشورة في روافد.</p>
+            <p className={styles.intro}>اكتب سؤالك بطريقتك. أحلل الكلمات والمرادفات والنية، ثم أستخرج أقرب خلاصة من صفحات روافد مع روابطها.</p>
             <div className={styles.quickGrid} aria-label="اقتراحات سريعة">
               {quick.map((item) => (
                 <button key={item} type="button" className={styles.quick} onClick={() => void search(item)}>{item}</button>
@@ -156,7 +165,7 @@ export default function RawafidAssistant() {
                 aria-label="سؤالك لمساعد روافد"
                 placeholder="مثال: كيف أساعد طفلي على القراءة؟"
               />
-              <button className={styles.submit} type="submit" disabled={loading}>{loading ? 'بحث…' : 'ابحث'}</button>
+              <button className={styles.submit} type="submit" disabled={loading}>{loading ? 'بحث…' : 'اسأل'}</button>
             </form>
 
             {safety ? (
@@ -166,6 +175,21 @@ export default function RawafidAssistant() {
             ) : null}
 
             <div className={styles.status} role="status" aria-live="polite">{status}</div>
+
+            {answer ? (
+              <section className={styles.answer} aria-label="خلاصة من محتوى روافد">
+                <strong className={styles.answerLead}>{answer.lead}</strong>
+                <div className={styles.answerPoints}>
+                  {answer.points.map((point, index) => (
+                    <div className={styles.answerPoint} key={`${point.destination}:${index}`}>
+                      <p>{point.text}</p>
+                      <Link href={point.destination} onClick={() => setOpen(false)}>{point.title}</Link>
+                    </div>
+                  ))}
+                </div>
+                {answer.note ? <p className={styles.answerNote}>{answer.note}</p> : null}
+              </section>
+            ) : null}
 
             {results.length ? (
               <div className={styles.results} aria-label="نتائج مساعد روافد">
@@ -180,11 +204,11 @@ export default function RawafidAssistant() {
             ) : null}
 
             {!safety ? (
-              <div className={styles.notice}>المساعد حاليًا أداة لاكتشاف محتوى روافد، وليس خدمة تشخيص أو بديلًا عن التقييم المهني.</div>
+              <div className={styles.notice}>الخلاصة استخراجية من محتوى روافد وليست تشخيصًا أو وصفة علاجية. افتح المصدر لقراءة السياق الكامل.</div>
             ) : null}
           </div>
 
-          <footer className={styles.footer}>لا يرسل المساعد إجابة مولّدة في هذه المرحلة؛ يعرض روابط منشورة فقط حتى اكتمال طبقة RAG والتحقق منها.</footer>
+          <footer className={styles.footer}>لا يستخدم مساعد روافد نموذج ذكاء اصطناعي خارجيًا مدفوعًا؛ يعتمد على فهرس المنصة ومحتواها المنشور.</footer>
         </section>
       ) : null}
 
