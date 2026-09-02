@@ -1,0 +1,10 @@
+@media (max-width: 760px) {
+  /*
+   * Keep the fixed mobile bottom-nav clearance in .footer-bottom intact.
+   * This only removes excess vertical whitespace from the content block so
+   * the institutional footer stays within the visual-regression height guard.
+   */
+  .mobileInner.mobileInner {
+    padding-block: 36px 24px;
+  }
+}
