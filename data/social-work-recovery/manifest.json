@@ -1,0 +1,488 @@
+{
+  "version": 2,
+  "generated_at": "2026-08-31T06:40:40.968Z",
+  "source": {
+    "repository": "khaledaltheeb/healthrenewal.org",
+    "commit": "6911d5ee75bd6fc2dfa12f394d61efe46e87df17",
+    "directory": "evidence-guides/social-work"
+  },
+  "expected_page_count": 56,
+  "actual_page_count": 56,
+  "institutional_sources": [
+    {
+      "id": "slovenia-social-care-ethics-drug4023",
+      "title": "Kodeks etičnih načel v socialnem varstvu",
+      "publisher": "Social Chamber of Slovenia",
+      "url": "https://pisrs.si/pregledPredpisa?id=DRUG4023"
+    },
+    {
+      "id": "ljubljana-families-multiple-challenges-email-source",
+      "title": "Families with Multiple Challenges: Co-creating Support in the Community — exact link shared by the professional association",
+      "publisher": "Faculty of Social Work, University of Ljubljana",
+      "url": "https://www.fsd.uni-lj.si/mma/Soustvarjanje_podpore_v_skupnosti_-_Angleska_izdaja.pdf/2015081211140160/?m=1439370841",
+      "provenance": "Received from Slovenian Association of Social Workers by email on 2026-08-30"
+    },
+    {
+      "id": "ljubljana-families-multiple-challenges-2016",
+      "title": "Družine s številnimi izzivi: soustvarjanje pomoči v skupnosti",
+      "publisher": "Faculty of Social Work, University of Ljubljana",
+      "url": "https://www.fsd.uni-lj.si/mma/-/2016091213042605/"
+    },
+    {
+      "id": "ljubljana-co-creating-processes-2016-en",
+      "title": "Co-creating Processes of Help: Collaboration with Families in the Community",
+      "publisher": "Faculty of Social Work, University of Ljubljana",
+      "url": "https://www.fsd.uni-lj.si/mma/monografija_ang_elektronska_verzija/2017092010392030/"
+    }
+  ],
+  "pages": [
+    {
+      "key": "agreement-on-collaboration",
+      "route": "/evidence-guides/social-work/agreement-on-collaboration/",
+      "source_path": "evidence-guides/social-work/agreement-on-collaboration/index.html",
+      "original_sha256": "d6607e3df8888555d7b9fc2b4287212461fd6dd2ace3dc29cabf65204cb9c9ec",
+      "recovered_sha256": "b7115c890b4642dbeebcc8ee5afa41d97293be5c01d6559ba515fb80c8d529c2",
+      "word_count": 640
+    },
+    {
+      "key": "caregiver-role-burden",
+      "route": "/evidence-guides/social-work/caregiver-role-burden/",
+      "source_path": "evidence-guides/social-work/caregiver-role-burden/index.html",
+      "original_sha256": "e602d2ca6c77ad5ec9f7769ceada829470416a68f14a4b870ec163e0c3519f4c",
+      "recovered_sha256": "e2e60d447612f92ba975f92605ff94913ae639598da19cb118b4494e56a20000",
+      "word_count": 506
+    },
+    {
+      "key": "child-voice-family-decisions",
+      "route": "/evidence-guides/social-work/child-voice-family-decisions/",
+      "source_path": "evidence-guides/social-work/child-voice-family-decisions/index.html",
+      "original_sha256": "070c5f7563665eabf4ebb0e1371b2b7ddb5ac0a69d0c5dd3b46e8efcb7471e57",
+      "recovered_sha256": "d24e95ae9fc4d2a61e50f3a84a4c4900f1a1e47b7c9f23609056a72bbce0ae69",
+      "word_count": 474
+    },
+    {
+      "key": "co-created-help-plan",
+      "route": "/evidence-guides/social-work/co-created-help-plan/",
+      "source_path": "evidence-guides/social-work/co-created-help-plan/index.html",
+      "original_sha256": "ea8b2c6d7c6799748936c2e92c14003b42c92819cc75a123af204554f926ec7a",
+      "recovered_sha256": "a6e1fc0f9c05a40c0c8d345e0a52305016044717f6dfb79ee5292b9fc38f1d59",
+      "word_count": 551
+    },
+    {
+      "key": "collaborative-professional-interview",
+      "route": "/evidence-guides/social-work/collaborative-professional-interview/",
+      "source_path": "evidence-guides/social-work/collaborative-professional-interview/index.html",
+      "original_sha256": "f6d602ce8e872dd1d9bba45435bfcac0bc721bb477cc3d429a6d5203b0acc716",
+      "recovered_sha256": "b655ba0bccbf6f34b5bb8702600d940563e453266f396de6e1159b34571608f4",
+      "word_count": 648
+    },
+    {
+      "key": "community-help-project-methodology",
+      "route": "/evidence-guides/social-work/community-help-project-methodology/",
+      "source_path": "evidence-guides/social-work/community-help-project-methodology/index.html",
+      "original_sha256": "5ec3c3c95eb2b074d569ac729ac5c9ae1cb38004c88e87472f62e29c88b193d9",
+      "recovered_sha256": "b0e9199fee2322b1e7ef227923f423e31fe140d81210b5ae9a8a4f6c19121c24",
+      "word_count": 744
+    },
+    {
+      "key": "community-independence-plan",
+      "route": "/evidence-guides/social-work/community-independence-plan/",
+      "source_path": "evidence-guides/social-work/community-independence-plan/index.html",
+      "original_sha256": "fdeeb192cb6ffe131380e77e330f4ee3209d289fa1cb5ddd222c709c273e4801",
+      "recovered_sha256": "78413eb7d316fd507f965869877f112b6d55e00865a3d851a8d88195503b84ad",
+      "word_count": 346
+    },
+    {
+      "key": "community-partnership-family-support",
+      "route": "/evidence-guides/social-work/community-partnership-family-support/",
+      "source_path": "evidence-guides/social-work/community-partnership-family-support/index.html",
+      "original_sha256": "326bbc21bd365299565c98336eeb6bb49f7501b505e84d3084cf0d83d024d48f",
+      "recovered_sha256": "7e672ce5845afa7bca60d8d082246a895e7e107bf4d272d85033eb8ef1bf47d1",
+      "word_count": 767
+    },
+    {
+      "key": "community-resource-map",
+      "route": "/evidence-guides/social-work/community-resource-map/",
+      "source_path": "evidence-guides/social-work/community-resource-map/index.html",
+      "original_sha256": "9f51483a852414c82b18cf93e09b4fd7080693f9498bf89b5991628df1df8ebd",
+      "recovered_sha256": "395a92f9ad9f44254c29c51ca60ec2f82537760cfcd500747fa80ee844324807",
+      "word_count": 440
+    },
+    {
+      "key": "desired-outcomes",
+      "route": "/evidence-guides/social-work/desired-outcomes/",
+      "source_path": "evidence-guides/social-work/desired-outcomes/index.html",
+      "original_sha256": "5fa443b9897b388e1f4b52bc13fb5bf454c675e40986dc55e7a95533251ddf72",
+      "recovered_sha256": "4aeee26528458dc8602dd5c2a01e18a7a9c98cc80cc9b2759da0d45636ed9d67",
+      "word_count": 490
+    },
+    {
+      "key": "documenting-disagreement",
+      "route": "/evidence-guides/social-work/documenting-disagreement/",
+      "source_path": "evidence-guides/social-work/documenting-disagreement/index.html",
+      "original_sha256": "63bec6a750f792531f63df0cec74dab880e3af33688b99b62bd23317c15bec53",
+      "recovered_sha256": "736e98977dedf4cad01b3f877b949ca489bc4aa34d62de1f4d2c9736b84e411d",
+      "word_count": 518
+    },
+    {
+      "key": "ending-help-plan",
+      "route": "/evidence-guides/social-work/ending-help-plan/",
+      "source_path": "evidence-guides/social-work/ending-help-plan/index.html",
+      "original_sha256": "b8803199be3e31d00f148c334f84429dfc68e748c59abd0d977c1f929b38813e",
+      "recovered_sha256": "37486076d67ff2c0b2fa02229dd0e3d262004e59870051f41728fc5c06b638ef",
+      "word_count": 541
+    },
+    {
+      "key": "ethics-power-autonomy",
+      "route": "/evidence-guides/social-work/ethics-power-autonomy/",
+      "source_path": "evidence-guides/social-work/ethics-power-autonomy/index.html",
+      "original_sha256": "6f051197473b2531a8fde45e5db31af60385cd9c01289d5d62c5f31e5b4e3c6b",
+      "recovered_sha256": "38b55c0b173b73d5d47c9646fcdaeb329481890d83f60baaeb66fb1dde3ab07f",
+      "word_count": 543
+    },
+    {
+      "key": "failed-referral-recovery",
+      "route": "/evidence-guides/social-work/failed-referral-recovery/",
+      "source_path": "evidence-guides/social-work/failed-referral-recovery/index.html",
+      "original_sha256": "f04a8edad1496eaf380f4927e693b1eec265f25ed5c9cb9a85bf2b810bc62651",
+      "recovered_sha256": "e4ed9b5772e1247b466fca3f75ceaa5570c0f19bb30bb38cf709cee0f87e8667",
+      "word_count": 355
+    },
+    {
+      "key": "family-burden-monitoring",
+      "route": "/evidence-guides/social-work/family-burden-monitoring/",
+      "source_path": "evidence-guides/social-work/family-burden-monitoring/index.html",
+      "original_sha256": "5ebea94caa07cd5bedcbd00d2ff5e00c3204ea0ab36abc3b938ba4b92412fcff",
+      "recovered_sha256": "c0acb803d7e278a509f713b3896b77d224b20c6b829e40f8de6bf1c1c62251fc",
+      "word_count": 360
+    },
+    {
+      "key": "family-conflict-decision-map",
+      "route": "/evidence-guides/social-work/family-conflict-decision-map/",
+      "source_path": "evidence-guides/social-work/family-conflict-decision-map/index.html",
+      "original_sha256": "15736e539231dbc3fad18ebef4cdee0520a741e6da89ae084592081537475d09",
+      "recovered_sha256": "b8a1f0a41b642eef48696b0e0b1735500accd1997f820993b327d669b9ada413",
+      "word_count": 396
+    },
+    {
+      "key": "family-engagement-barriers",
+      "route": "/evidence-guides/social-work/family-engagement-barriers/",
+      "source_path": "evidence-guides/social-work/family-engagement-barriers/index.html",
+      "original_sha256": "04b56a9e31c78ea84278d3d7b4a7ef642fe506a2a86606507d1f349da428ee23",
+      "recovered_sha256": "275867e7e1df9b02fbef875afbff49499ea4e2a7f63b891735fa0897d2acfa57",
+      "word_count": 732
+    },
+    {
+      "key": "family-feedback-service-quality",
+      "route": "/evidence-guides/social-work/family-feedback-service-quality/",
+      "source_path": "evidence-guides/social-work/family-feedback-service-quality/index.html",
+      "original_sha256": "74676c41aa001aeaeedf971cda9e17dbec70eb682a37023e00973083dead75b6",
+      "recovered_sha256": "813313dcb31ef73668d90ddfbf6147692ea0109ff1ae042ea8376158ccdc607d",
+      "word_count": 402
+    },
+    {
+      "key": "family-life-course-transitions",
+      "route": "/evidence-guides/social-work/family-life-course-transitions/",
+      "source_path": "evidence-guides/social-work/family-life-course-transitions/index.html",
+      "original_sha256": "0efc5f0090adf327a14e99e99d87cc74e3ab061fc8ff5f3c9f3baf6f6b4d2558",
+      "recovered_sha256": "26523925994f44d9479c48fc6e15e98bb00884e48cc5c685be46d5352a40a659",
+      "word_count": 619
+    },
+    {
+      "key": "family-priority-setting",
+      "route": "/evidence-guides/social-work/family-priority-setting/",
+      "source_path": "evidence-guides/social-work/family-priority-setting/index.html",
+      "original_sha256": "cbe9a627d6c482b67323bc7f2be064b83deb1494d86f42fafda050a5df9572df",
+      "recovered_sha256": "efc31150bc06d937c7b7f102908059367c163234fa01a21a4f8de8b1c1fa8d13",
+      "word_count": 341
+    },
+    {
+      "key": "family-resilience",
+      "route": "/evidence-guides/social-work/family-resilience/",
+      "source_path": "evidence-guides/social-work/family-resilience/index.html",
+      "original_sha256": "b9eddb01839255b0f54b2595ed3222e5a5f239fe80e0aa744b6d010110afc553",
+      "recovered_sha256": "da4a6befc12e1dd808154d3e18d73bc621c69d869c6ec41703b57fc04c3f28df",
+      "word_count": 724
+    },
+    {
+      "key": "family-role-redistribution",
+      "route": "/evidence-guides/social-work/family-role-redistribution/",
+      "source_path": "evidence-guides/social-work/family-role-redistribution/index.html",
+      "original_sha256": "8a7c7d5434d939126cb7c9021c883b70fae8977cf65b088c76f3493409aa58d0",
+      "recovered_sha256": "034bb3c55e67e624784ba249174b7ca6bf2dfb04fb40fa0458a31221f12c28dd",
+      "word_count": 791
+    },
+    {
+      "key": "financial-crisis-family-plan",
+      "route": "/evidence-guides/social-work/financial-crisis-family-plan/",
+      "source_path": "evidence-guides/social-work/financial-crisis-family-plan/index.html",
+      "original_sha256": "b607cdf8008def1fd159616c0ea20ab8ef79e95666f757198e16e05272c006c7",
+      "recovered_sha256": "3b9c661435efd7cb6ff6fee4dbce08486f9a0f68f9ddefdcc08effb3c25c6f41",
+      "word_count": 812
+    },
+    {
+      "key": "foster-care-adoption-family-work",
+      "route": "/evidence-guides/social-work/foster-care-adoption-family-work/",
+      "source_path": "evidence-guides/social-work/foster-care-adoption-family-work/index.html",
+      "original_sha256": "5454fb221004bdc1f8a5fd498f1249f752fedaf543901bd7ec336c5f3d6926ee",
+      "recovered_sha256": "60f1f3e92f84943d7943de4eab2e5a1247afe1d0787e2b5283c3ba43b3e85029",
+      "word_count": 538
+    },
+    {
+      "key": "help-plan-quality-audit",
+      "route": "/evidence-guides/social-work/help-plan-quality-audit/",
+      "source_path": "evidence-guides/social-work/help-plan-quality-audit/index.html",
+      "original_sha256": "e332c177c20661574e50e3337ffdd535d4273b19e276bc30af23d823078b8bba",
+      "recovered_sha256": "91d015da7cc9fc8ba27e0af8e8dbd78d573d23f6358afcf2bf1639293ed64a2a",
+      "word_count": 354
+    },
+    {
+      "key": "home-based-family-social-work",
+      "route": "/evidence-guides/social-work/home-based-family-social-work/",
+      "source_path": "evidence-guides/social-work/home-based-family-social-work/index.html",
+      "original_sha256": "12a4ff970adb61d600114d17e85b35b57926c06346590c26c5d083c02ebba295",
+      "recovered_sha256": "1c12206707deec721ed236fd673cf8b5f0a66038767c950432fe8da90ae6e59a",
+      "word_count": 856
+    },
+    {
+      "key": "",
+      "route": "/evidence-guides/social-work/",
+      "source_path": "evidence-guides/social-work/index.html",
+      "original_sha256": "c04f4e0dfe5400d7c5b205234828d2768d19baf1ce3740b5425781eb8313146f",
+      "recovered_sha256": "78c18c855da286ff17f388b575d0af8048d665f4500c6dbc6b9912817b1fd083",
+      "word_count": 709
+    },
+    {
+      "key": "institutional-advocacy",
+      "route": "/evidence-guides/social-work/institutional-advocacy/",
+      "source_path": "evidence-guides/social-work/institutional-advocacy/index.html",
+      "original_sha256": "c1a203e1afc7b75cae3a7d407c7a443ab8939f59be9b9a4fb5e7dd6cc6b2c505",
+      "recovered_sha256": "2e8001c272765be7f096d08e6ebfedbbf1ebc7740eb2ca79d27efce66bc324e8",
+      "word_count": 512
+    },
+    {
+      "key": "involuntary-participation",
+      "route": "/evidence-guides/social-work/involuntary-participation/",
+      "source_path": "evidence-guides/social-work/involuntary-participation/index.html",
+      "original_sha256": "a5a6bac0dff4a35e25459894a236db0eb69b9fa957b886037ccdcebfc1e4934a",
+      "recovered_sha256": "5f82e30ef214ac74ec6618014e28a10ab0630cf2998a03b319013eee01be1307",
+      "word_count": 557
+    },
+    {
+      "key": "multi-challenged-families",
+      "route": "/evidence-guides/social-work/multi-challenged-families/",
+      "source_path": "evidence-guides/social-work/multi-challenged-families/index.html",
+      "original_sha256": "90d3339ec4eb7f6a7ec1d6b57ce1870638f3d712fdb6822a16faea19b522bbf3",
+      "recovered_sha256": "e7e23c2d44f51d391aecd7cabf5f55d62da8449a6b2a41c370e2899df8d45018",
+      "word_count": 483
+    },
+    {
+      "key": "multidisciplinary-family-meeting",
+      "route": "/evidence-guides/social-work/multidisciplinary-family-meeting/",
+      "source_path": "evidence-guides/social-work/multidisciplinary-family-meeting/index.html",
+      "original_sha256": "211021c786afdc21e502b48fe24b5a7ffdf182f91bdce7ad4f540fe9dadbabfb",
+      "recovered_sha256": "ca8eaa719f05b325e3d07e6462a282119bad0db1c8daa8701caee07bf183b1a9",
+      "word_count": 573
+    },
+    {
+      "key": "non-stigmatizing-professional-language",
+      "route": "/evidence-guides/social-work/non-stigmatizing-professional-language/",
+      "source_path": "evidence-guides/social-work/non-stigmatizing-professional-language/index.html",
+      "original_sha256": "119dfd4c57a4ba4ccf9269ba40858ff8f1ea78914abb56a69927005df5f9e460",
+      "recovered_sha256": "ee6257a516fe2251aa828fcbe8ad2ac5324207cc3e92c292854722e473d22fb4",
+      "word_count": 600
+    },
+    {
+      "key": "older-adults-family-support",
+      "route": "/evidence-guides/social-work/older-adults-family-support/",
+      "source_path": "evidence-guides/social-work/older-adults-family-support/index.html",
+      "original_sha256": "98c71aeb0ab0a5c3a05e1a223840e1b421e4e7b2f01cd7452f5c07fd5d6fda37",
+      "recovered_sha256": "e73b230a036c966d9c004b44bc1046f2b7b1f9fc36ef4f63256d43be2ae0e771",
+      "word_count": 537
+    },
+    {
+      "key": "participation-and-voice",
+      "route": "/evidence-guides/social-work/participation-and-voice/",
+      "source_path": "evidence-guides/social-work/participation-and-voice/index.html",
+      "original_sha256": "59e186ef820de8a32b6894e547a38b63738e32c1e7fb9118ab2fba2fa43d3ef8",
+      "recovered_sha256": "42968cc6ee9a955395a65347ea15f7c148d881a9ffc3a27552ec98cb7dc81033",
+      "word_count": 519
+    },
+    {
+      "key": "periodic-family-plan-review",
+      "route": "/evidence-guides/social-work/periodic-family-plan-review/",
+      "source_path": "evidence-guides/social-work/periodic-family-plan-review/index.html",
+      "original_sha256": "dfe3d99dab31cc33001d7cf73726ecf63321ed9d47ba53eabe37b5a9b50b10c7",
+      "recovered_sha256": "a4f2a6363838e917346effac30b2d6ca35374e9ecc6912554f572c195a6f9ffa",
+      "word_count": 416
+    },
+    {
+      "key": "physical-activity-quality-of-life-family-support",
+      "route": "/evidence-guides/social-work/physical-activity-quality-of-life-family-support/",
+      "source_path": "evidence-guides/social-work/physical-activity-quality-of-life-family-support/index.html",
+      "original_sha256": "b2f5db94098b132b359657db508f022a8d6a5b8e4a9516c0c9d94c92ab7e7fd0",
+      "recovered_sha256": "ecd80545d2213cd1d90081b56fcfa781485c4647d36f23355e90cbcf3e85e288",
+      "word_count": 613
+    },
+    {
+      "key": "post-closure-follow-up",
+      "route": "/evidence-guides/social-work/post-closure-follow-up/",
+      "source_path": "evidence-guides/social-work/post-closure-follow-up/index.html",
+      "original_sha256": "bb591c442450607c749c99d9a9cf1adc01248f0db7f0781e829d258cb4a77a27",
+      "recovered_sha256": "6d12bcb6a1becd8c421796fc6f4619e327632766bfb1246d5f4f8373caecfeb6",
+      "word_count": 341
+    },
+    {
+      "key": "poverty-structural-barriers",
+      "route": "/evidence-guides/social-work/poverty-structural-barriers/",
+      "source_path": "evidence-guides/social-work/poverty-structural-barriers/index.html",
+      "original_sha256": "5396367fd48b4ab0bd9e097d6b2f02e295a4c387c34a166960e7fe2f8558318a",
+      "recovered_sha256": "a92105f945d9b1a3d6d2a7a1eeb80a93fa0fd42a31df785213ae865cca3c1004",
+      "word_count": 593
+    },
+    {
+      "key": "privacy-information-sharing",
+      "route": "/evidence-guides/social-work/privacy-information-sharing/",
+      "source_path": "evidence-guides/social-work/privacy-information-sharing/index.html",
+      "original_sha256": "6ba363176c88b698205ea294bbfda621e18374a1a62111a5b99267821e4693bf",
+      "recovered_sha256": "ccea61007c273ffdaf85955ea0f17c4a1dedb08294be72ea69a5d2f4066af008",
+      "word_count": 367
+    },
+    {
+      "key": "professional-persistence",
+      "route": "/evidence-guides/social-work/professional-persistence/",
+      "source_path": "evidence-guides/social-work/professional-persistence/index.html",
+      "original_sha256": "52638997728baacc4bb9f471b92bb79cfde16e70e28de1e86de34704f9b98fb2",
+      "recovered_sha256": "867d82e9566cadae454d45c5f1614dabc20ffce480c038d10986c006253dc5b5",
+      "word_count": 576
+    },
+    {
+      "key": "progress-review",
+      "route": "/evidence-guides/social-work/progress-review/",
+      "source_path": "evidence-guides/social-work/progress-review/index.html",
+      "original_sha256": "0d0b4defa59839c1ded439bb82b403be9239e80487ff80bf1bf8910f2457b2e3",
+      "recovered_sha256": "e63ab3ea2796ea5955fdf59464ef8ab3c933e5edff2554fbf189b00b53de4218",
+      "word_count": 551
+    },
+    {
+      "key": "public-transport-social-inclusion-older-adults",
+      "route": "/evidence-guides/social-work/public-transport-social-inclusion-older-adults/",
+      "source_path": "evidence-guides/social-work/public-transport-social-inclusion-older-adults/index.html",
+      "original_sha256": "00c837a69186b4f0860457546c37b8b7fcc8632fdb454d8c2996f9eafd3f385a",
+      "recovered_sha256": "ab9ca91bb478c21a67ef93b8fe430ed3aca6bfcb910ab813025ae677b031888c",
+      "word_count": 603
+    },
+    {
+      "key": "rebuilding-trust-after-harm",
+      "route": "/evidence-guides/social-work/rebuilding-trust-after-harm/",
+      "source_path": "evidence-guides/social-work/rebuilding-trust-after-harm/index.html",
+      "original_sha256": "7e5f818c26921da606b789bda669915b02cd53430cff48683adc58cdcaa1a61d",
+      "recovered_sha256": "36855e5354289c97a78a9e42d965483e490e11a4fd8e1c286b521e00a6a634e5",
+      "word_count": 613
+    },
+    {
+      "key": "referral-with-continuity",
+      "route": "/evidence-guides/social-work/referral-with-continuity/",
+      "source_path": "evidence-guides/social-work/referral-with-continuity/index.html",
+      "original_sha256": "15d0915178f0e24e2c729c8a731b3175ef6dc71bbaa305703dc64d2ff83565da",
+      "recovered_sha256": "2a641e7ac76a6fadff2e6bba00202a1c61aa63faeafee6dceb68fbbe5926dc85",
+      "word_count": 532
+    },
+    {
+      "key": "school-family-collaboration",
+      "route": "/evidence-guides/social-work/school-family-collaboration/",
+      "source_path": "evidence-guides/social-work/school-family-collaboration/index.html",
+      "original_sha256": "85bcd82aa8fa2b166398531b20046b7e743f8c250b9e00e68947efde42b36dfe",
+      "recovered_sha256": "306add2ebc5b4b36c54733601e55d8f35df2ac274e78b2c74a799a3cf8013a69",
+      "word_count": 633
+    },
+    {
+      "key": "separation-divorce-family-support",
+      "route": "/evidence-guides/social-work/separation-divorce-family-support/",
+      "source_path": "evidence-guides/social-work/separation-divorce-family-support/index.html",
+      "original_sha256": "189d244c1338263ea1290387e920edcf630380cb3bd56f6684341a6173991639",
+      "recovered_sha256": "d24fdfc125bdc5457a631f2ff2ed37581b6338175a5fb8cafdba4c8597fcd97a",
+      "word_count": 518
+    },
+    {
+      "key": "service-coordination",
+      "route": "/evidence-guides/social-work/service-coordination/",
+      "source_path": "evidence-guides/social-work/service-coordination/index.html",
+      "original_sha256": "bec541f7f72b337c8b5e1482014df82e9099380d5eecfa3cf7982d4f71f8340e",
+      "recovered_sha256": "393d8fc3ea7f93a799889a082b5a2a8f7b8a998c8a3cae2639c91e0fd825ba26",
+      "word_count": 564
+    },
+    {
+      "key": "service-exit-plan",
+      "route": "/evidence-guides/social-work/service-exit-plan/",
+      "source_path": "evidence-guides/social-work/service-exit-plan/index.html",
+      "original_sha256": "babb0836918459d8612a14cc953fc13ceb977b6fada6833e0f717ae5cc4cde4f",
+      "recovered_sha256": "2505baed8e01795f53deab53bd876312ae3c526930d02472bf154fb1c8c75eca",
+      "word_count": 797
+    },
+    {
+      "key": "solution-focused-conversations",
+      "route": "/evidence-guides/social-work/solution-focused-conversations/",
+      "source_path": "evidence-guides/social-work/solution-focused-conversations/index.html",
+      "original_sha256": "5657aa1fbd45f9a90193114663eb9200ab515fce8a1c2a66dba89bd5e1828db2",
+      "recovered_sha256": "4f6794c92227d8423cb3813a4712bb58a63461385a61f8c9d752ea54000082b3",
+      "word_count": 563
+    },
+    {
+      "key": "strengths-perspective",
+      "route": "/evidence-guides/social-work/strengths-perspective/",
+      "source_path": "evidence-guides/social-work/strengths-perspective/index.html",
+      "original_sha256": "c6f22dfe2c66df446b0dd5c22af078511e0f23dbdc77ae1e47f8d0b825d51084",
+      "recovered_sha256": "6273d5727baba0474f11411e7122994290f0fde1717ecf6cd7b5f47d3b67fec1",
+      "word_count": 471
+    },
+    {
+      "key": "support-network-mapping",
+      "route": "/evidence-guides/social-work/support-network-mapping/",
+      "source_path": "evidence-guides/social-work/support-network-mapping/index.html",
+      "original_sha256": "5d8f2604bf10ece736053cedfe655b597a3e488218a173116c6f524a72bdf859",
+      "recovered_sha256": "6b49c4caf5b6d989000c7bf4d98c9c5e997ba35de39e8cc730a66283bbd79c8c",
+      "word_count": 510
+    },
+    {
+      "key": "supported-decision-making",
+      "route": "/evidence-guides/social-work/supported-decision-making/",
+      "source_path": "evidence-guides/social-work/supported-decision-making/index.html",
+      "original_sha256": "9310efd0c0c94b826929227af31a45fedcfaabeda1ad50f8aee9b71dc25e9ea6",
+      "recovered_sha256": "efb832de4d34fa709c230638ff3648e9d46b7ecb9109dc952debc85fad301b54",
+      "word_count": 511
+    },
+    {
+      "key": "synergetic-collaborative-family-model",
+      "route": "/evidence-guides/social-work/synergetic-collaborative-family-model/",
+      "source_path": "evidence-guides/social-work/synergetic-collaborative-family-model/index.html",
+      "original_sha256": "2c5066a0375138886d563f4d6fd3f88be6a3ee222c119886f968bb881c45a73b",
+      "recovered_sha256": "11d6a7a961adfad2c53b8408d64bb2b9790eddf423fd37eae2d87bac54eccd10",
+      "word_count": 556
+    },
+    {
+      "key": "transition-to-adulthood",
+      "route": "/evidence-guides/social-work/transition-to-adulthood/",
+      "source_path": "evidence-guides/social-work/transition-to-adulthood/index.html",
+      "original_sha256": "aa4152823c0e6ae58f37e8270d96e35348542de08b212a5605264b55975910b9",
+      "recovered_sha256": "8753c5f973d5a0045e55a8f97fd12503ceb76dca6e5d2aa1f6ced27229079303",
+      "word_count": 484
+    },
+    {
+      "key": "working-relationship",
+      "route": "/evidence-guides/social-work/working-relationship/",
+      "source_path": "evidence-guides/social-work/working-relationship/index.html",
+      "original_sha256": "3cc63cb388c2f4073e5859760751eb53e5f7ddbd5ef767d68eb513aa58d505bc",
+      "recovered_sha256": "8b847319bb7d8887df83a130ad21adfb8e28016f6054197d591996b6f7f89ca0",
+      "word_count": 474
+    },
+    {
+      "key": "youth-complex-behaviour-family-work",
+      "route": "/evidence-guides/social-work/youth-complex-behaviour-family-work/",
+      "source_path": "evidence-guides/social-work/youth-complex-behaviour-family-work/index.html",
+      "original_sha256": "20664b9d818c5ee83ce96daa848f4dc350406b942a5cb3933ca205e2cfdbd291",
+      "recovered_sha256": "324a67844c1212237e51a22bcc5a95e09f8c1462df6229468bcae614b7fcc814",
+      "word_count": 395
+    }
+  ]
+}

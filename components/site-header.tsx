@@ -24,6 +24,7 @@ const intentLinks = [
 ];
 
 const serviceLinks = [
+  { href: '/daily-tools/', label: 'الأدوات اليومية', icon: 'tools' as const },
   { href: '/specialists', label: 'العثور على مختص', icon: 'specialist' as const },
   { href: '/centers', label: 'العثور على مركز', icon: 'center' as const },
   { href: '/cognitive-lab', label: 'المختبر المعرفي', icon: 'tools' as const },

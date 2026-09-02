@@ -1,0 +1,4 @@
+healthrenewal.org production cutover target: Cloudflare Worker rawafid-platform-production
+legacy repository CNAME detached: yes
+authoritative source repository: khaledaltheeb/-
+cutover initiated: 2026-08-24

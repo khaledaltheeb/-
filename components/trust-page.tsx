@@ -8,6 +8,7 @@ type Section = { title: string; body: ReactNode };
 const trustLinks = [
   { href: '/about', label: 'عن روافد' },
   { href: '/sources', label: 'منهج المصادر' },
+  { href: '/developers', label: 'واجهة المطورين' },
   { href: '/medical-review-policy', label: 'المراجعة العلمية' },
   { href: '/editorial-policy', label: 'السياسة التحريرية' },
   { href: '/privacy', label: 'الخصوصية' },

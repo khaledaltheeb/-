@@ -1,0 +1,6 @@
+healthrenewal.org cutover execution requested: 2026-08-24
+source repository: khaledaltheeb/-
+production worker: rawafid-platform-production
+canonical origin: https://healthrenewal.org
+www policy: permanent redirect to canonical origin
+staging worker remains available only on workers.dev and must stay noindex

@@ -1,7 +1,8 @@
 import type { Metadata, Viewport } from 'next';
 import Script from 'next/script';
 import { Noto_Sans_Arabic } from 'next/font/google';
-import { BRAND_NAME, BRAND_SHORT, DEFAULT_DESCRIPTION, INDEXING_ENABLED, SITE_URL, organizationJsonLd } from '@/lib/seo';
+import { BRAND_NAME, DEFAULT_DESCRIPTION, INDEXING_ENABLED, SITE_URL, organizationJsonLd } from '@/lib/seo';
+import { founderJsonLd } from '@/lib/founder';
 import './rawafid-theme.css';
 
 /* Compatibility modules now live behind the central entry point:
@@ -31,6 +32,7 @@ export const metadata: Metadata = {
   alternates: {
     types: {
       'application/rss+xml': `${SITE_URL}/feed.xml`,
+      'application/feed+json': `${SITE_URL}/feed.json`,
     },
   },
   icons: {
@@ -62,7 +64,7 @@ export const metadata: Metadata = {
     : { index: false, follow: false, noarchive: true, nosnippet: true },
   openGraph: {
     type: 'website',
-    siteName: BRAND_SHORT,
+    siteName: BRAND_NAME,
     locale: 'ar_AR',
     title: BRAND_NAME,
     description: DEFAULT_DESCRIPTION,
@@ -71,7 +73,7 @@ export const metadata: Metadata = {
       url: DEFAULT_SOCIAL_IMAGE,
       width: 1200,
       height: 630,
-      alt: 'روافد — منصة عربية للمعرفة الصحية والنفسية الموثوقة',
+      alt: 'منصة روافد — معرفة عربية موثوقة للصحة النفسية والتربية الخاصة',
     }],
   },
   twitter: {
@@ -111,6 +113,7 @@ function validatedAnalyticsId(value: string | undefined, pattern: RegExp) {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const organizationSchema = organizationJsonLd();
+  const founderSchema = founderJsonLd(SITE_URL);
   const analyticsEnabled = process.env.NEXT_PUBLIC_ENABLE_ANALYTICS === 'true';
   const directGaEnabled = process.env.NEXT_PUBLIC_ENABLE_DIRECT_GA === 'true';
   const gtmId = validatedAnalyticsId(process.env.NEXT_PUBLIC_GTM_ID, /^GTM-[A-Z0-9]+$/i);
@@ -121,7 +124,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body id="top">
         {analyticsEnabled && gtmId ? (
           <>
-            <Script id="rawafid-gtm" strategy="afterInteractive">
+            <Script id="rawafid-gtm" strategy="beforeInteractive">
               {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${gtmId}');`}
             </Script>
             <noscript>
@@ -139,11 +142,12 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <>
             <Script src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`} strategy="afterInteractive" />
             <Script id="rawafid-ga4" strategy="afterInteractive">
-              {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${gaId}');`}
+              {`window.dataLayer=window.dataLayer||[];function gtag(){window.dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${gaId}');`}
             </Script>
           </>
         ) : null}
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema).replace(/</g, '\\u003c') }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(founderSchema).replace(/</g, '\\u003c') }} />
         {children}
         <script dangerouslySetInnerHTML={{ __html: serviceWorkerBootstrap }} />
       </body>

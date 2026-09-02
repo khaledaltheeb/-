@@ -5,6 +5,7 @@ const maxUrls = Math.max(0, Number(process.env.SEO_GATE_MAX_URLS || 0));
 const expectedOrigin = new URL(base).origin;
 const failures = [];
 const linkStatusCache = new Map();
+const internalLinkErrors = new Map();
 const pageAttempts = Math.max(1, Math.min(5, Number(process.env.SEO_GATE_PAGE_ATTEMPTS || 3)));
 const pageRetryDelayMs = Math.max(0, Number(process.env.SEO_GATE_PAGE_RETRY_DELAY_MS || 300));
 const internalLinkAttempts = 3;
@@ -41,12 +42,20 @@ function normalizeLinkCacheKey(value) {
   return url.toString();
 }
 function sleep(ms) { return new Promise((resolve) => setTimeout(resolve, ms)); }
-async function fetchWithTimeout(url, options = {}) {
+async function fetchStatusWithTimeout(url, options = {}) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), requestTimeoutMs);
   try {
-    return await fetch(url, { ...options, signal: controller.signal, headers: { 'user-agent': 'Rawafid-SEO-Gate/1.0', ...(options.headers || {}) } });
-  } finally { clearTimeout(timer); }
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+      headers: { 'user-agent': 'Rawafid-SEO-Gate/1.0', ...(options.headers || {}) },
+    });
+    if ((options.method || 'GET').toUpperCase() !== 'HEAD') await response.arrayBuffer();
+    return response.status;
+  } finally {
+    clearTimeout(timer);
+  }
 }
 async function getText(url) {
   const controller = new AbortController();
@@ -168,10 +177,13 @@ async function auditInternalLink(url) {
   const promise = (async () => {
     for (let attempt = 1; attempt <= internalLinkAttempts; attempt += 1) {
       try {
-        let response = await fetchWithTimeout(url, { method: 'HEAD', redirect: 'follow' });
-        if (response.status === 405 || response.status === 501) response = await fetchWithTimeout(url, { method: 'GET', redirect: 'follow' });
-        return response.status;
-      } catch {
+        let status = await fetchStatusWithTimeout(url, { method: 'HEAD', redirect: 'follow' });
+        if (status === 405 || status === 501) status = await fetchStatusWithTimeout(url, { method: 'GET', redirect: 'follow' });
+        internalLinkErrors.delete(cacheKey);
+        return status;
+      } catch (error) {
+        const detail = error?.name === 'AbortError' ? 'timeout' : error?.message || 'unknown error';
+        internalLinkErrors.set(cacheKey, `attempt ${attempt}/${internalLinkAttempts}: ${detail}`);
         if (attempt === internalLinkAttempts) return 0;
         await sleep(internalLinkRetryDelayMs * attempt);
       }
@@ -203,7 +215,12 @@ async function main() {
   const allInternalLinks = [...new Set(pageLinks.flat().filter(Boolean))].sort();
   console.log(`SEO gate: checking ${allInternalLinks.length} unique internal links`);
   const statuses = await runPool(allInternalLinks, async (url) => [url, await auditInternalLink(url)]);
-  for (const [url, status] of statuses) if (status < 200 || status >= 400) failures.push(`${url}: broken internal link status ${status || 'request-failed'}`);
+  for (const [url, status] of statuses) {
+    if (status < 200 || status >= 400) {
+      const detail = status === 0 ? internalLinkErrors.get(normalizeLinkCacheKey(url)) : '';
+      failures.push(`${url}: broken internal link status ${status || 'request-failed'}${detail ? ` (${detail})` : ''}`);
+    }
+  }
   const elapsed = ((Date.now() - started) / 1000).toFixed(1);
   console.log(`SEO gate summary: pages=${urls.length}, internalLinks=${allInternalLinks.length}, failures=${failures.length}, seconds=${elapsed}`);
   if (failures.length) {

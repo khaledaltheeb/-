@@ -1,0 +1,26 @@
+{
+  "release": "aac-peer-mediated-evidence-enrichment-2026-08-28",
+  "published_at": "2026-08-28",
+  "content_type": "care-guides",
+  "status": "published",
+  "source": {
+    "title": "Peer-mediated aided AAC modeling: a systematic review",
+    "canonical_url": "https://pubmed.ncbi.nlm.nih.gov/42119992/",
+    "year": 2026,
+    "evidence_type": "systematic-review"
+  },
+  "records": [
+    {
+      "slug": "aac-autism-guide",
+      "canonical_url": "/care-guides/aac/autism-guide/",
+      "change": "Added a bounded school-peer evidence section after the existing peer-participation guidance, explicitly preserving the review's limits: seven included studies, mostly inclusive nonacademic settings, limited participant diversity, and limited communication-outcome scope. Added the PubMed reference without reproducing protected full text."
+    }
+  ],
+  "verification": {
+    "database_status": "published",
+    "reference_count_for_source": 1,
+    "inserted_heading_count": 1,
+    "build_status": "not_run",
+    "build_note": "This content is production database-backed. The database structure and inserted block/reference were verified directly; no claim is made that a repository build ran for this database-only content edit."
+  }
+}

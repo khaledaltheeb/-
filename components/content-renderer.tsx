@@ -9,6 +9,54 @@ function stringArray(value: unknown, limit = 100, itemMax = 2000) { return Array
 function validHttpsUrl(value: unknown) { const url = text(value, 2000); return /^https:\/\//i.test(url) ? url : ''; }
 function dimension(value: unknown, fallback: number) { const number=Number(value); return Number.isFinite(number)&&number>=100&&number<=4000?Math.round(number):fallback; }
 function sectionAnchor(index: number) { return `section-${index + 1}`; }
+function countWords(value: string) { return value.split(/\s+/).filter((token) => /[A-Za-z0-9\u0600-\u06ff]/.test(token)).length; }
+function normalizeComparable(value: string) { return value.toLocaleLowerCase('ar').replace(/\s+/g, ' ').trim(); }
+
+function blockTextContent(blockValue: unknown) {
+  const block = asRecord(blockValue); if (!block) return '';
+  const type = text(block.type, 40).toLowerCase();
+  if (type === 'paragraph' || type === 'heading') return text(block.text);
+  if (type === 'definition' || type === 'answer') return [text(block.term ?? block.title ?? block.question, 500), text(block.definition ?? block.answer ?? block.text, 6000)].filter(Boolean).join(' ');
+  if (type === 'list') return stringArray(block.items, 100, 1000).join(' ');
+  if (type === 'steps') return [text(block.title, 500), ...stringArray(block.items ?? block.steps, 50, 1500)].filter(Boolean).join(' ');
+  if (type === 'quote') return [text(block.text, 5000), text(block.cite, 500)].filter(Boolean).join(' ');
+  if (type === 'callout') return [text(block.title, 300), text(block.text, 7000)].filter(Boolean).join(' ');
+  if (type === 'table') {
+    const headers = stringArray(block.headers, 12, 300);
+    const rows = (Array.isArray(block.rows) ? block.rows.slice(0, 100) : []).flatMap((row) => stringArray(row, 12, 1000));
+    return [text(block.caption, 300), ...headers, ...rows].filter(Boolean).join(' ');
+  }
+  if (type === 'resource') return [text(block.label, 500), text(block.description, 2000)].filter(Boolean).join(' ');
+  if (type === 'image') return [text(block.alt, 500), text(block.caption, 1000)].filter(Boolean).join(' ');
+  if (type === 'faq') {
+    const raw = Array.isArray(block.items) ? block.items.slice(0, 40) : [];
+    return raw.flatMap((item) => {
+      const entry = asRecord(item); if (!entry) return [];
+      return [text(entry.question, 500), text(entry.answer, 6000)].filter(Boolean);
+    }).join(' ');
+  }
+  return '';
+}
+
+function structuredBodyIsIncomplete(blocks: unknown[], bodyText?: string | null) {
+  const fullText = String(bodyText ?? '').trim();
+  const fullWords = countWords(fullText);
+  if (fullWords < 120 || blocks.length === 0) return false;
+  const structuredWords = countWords(blocks.map(blockTextContent).filter(Boolean).join(' '));
+  return structuredWords + 40 < fullWords && structuredWords < Math.ceil(fullWords * 0.7);
+}
+
+function renderBodyText(bodyText: string | null | undefined, recordId: string) {
+  const paragraphs = String(bodyText ?? '').split(/\n{2,}/).map((paragraph) => paragraph.trim()).filter(Boolean);
+  return paragraphs.map((paragraph, index) => {
+    const lines = paragraph.split(/\n+/).map((line) => line.trim()).filter(Boolean);
+    const first = lines[0] ?? '';
+    const rest = lines.slice(1).join(' ');
+    const headingLike = /^(?:\d+[.)]\s+.+|أسئلة شائعة|مراجع|المراجع)$/.test(first);
+    if (headingLike && rest) return <section key={`${recordId}-${index}`}><h2>{first}</h2><p>{rest}</p></section>;
+    return <p key={`${recordId}-${index}`}>{paragraph}</p>;
+  });
+}
 
 function renderBlock(blockValue: unknown, index: number) {
   const block = asRecord(blockValue); if (!block) return null;
@@ -66,9 +114,28 @@ function renderBlock(blockValue: unknown, index: number) {
 }
 
 export default function ContentRenderer({ bodyJson, bodyText, recordId }: ContentRendererProps) {
-  const root = asRecord(bodyJson); const blocks = Array.isArray(root?.blocks) ? root.blocks.slice(0, 1000) : []; const renderedBlocks = blocks.map(renderBlock).filter(Boolean);
+  const root = asRecord(bodyJson);
+  const blocks = Array.isArray(root?.blocks) ? root.blocks.slice(0, 1000) : [];
+  const renderedBlocks = blocks.map(renderBlock).filter(Boolean);
+  const fullText = String(bodyText ?? '').trim();
+  const structuredIncomplete = renderedBlocks.length > 0 && structuredBodyIsIncomplete(blocks, fullText);
+
+  if (renderedBlocks.length > 0 && !structuredIncomplete) return <>{renderedBlocks}</>;
+
+  const renderedBodyText = renderBodyText(fullText, recordId);
+  if (renderedBodyText.length > 0) {
+    if (!structuredIncomplete) return <>{renderedBodyText}</>;
+
+    const normalizedBody = normalizeComparable(fullText);
+    const supplementalBlocks = blocks
+      .map((block, index) => ({ block, index, comparable: normalizeComparable(blockTextContent(block)) }))
+      .filter(({ comparable }) => !comparable || !normalizedBody.includes(comparable))
+      .map(({ block, index }) => renderBlock(block, index))
+      .filter(Boolean);
+
+    return <>{renderedBodyText}{supplementalBlocks}</>;
+  }
+
   if (renderedBlocks.length > 0) return <>{renderedBlocks}</>;
-  const paragraphs = String(bodyText ?? '').split(/\n{2,}/).map((paragraph) => paragraph.trim()).filter(Boolean);
-  if (paragraphs.length > 0) return <>{paragraphs.map((paragraph, index) => <p key={`${recordId}-${index}`}>{paragraph}</p>)}</>;
   return <p>لا يتوفر نص منشور لهذه الصفحة.</p>;
 }

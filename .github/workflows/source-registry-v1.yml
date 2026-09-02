@@ -1,0 +1,40 @@
+name: Source Registry V1
+
+on:
+  pull_request:
+    paths:
+      - 'app/api/v1/sources/**'
+      - 'app/api/v1/content/[slug]/sources/**'
+      - 'supabase/migrations/*global_source_registry*'
+      - 'scripts/source-registry-v1-contract.mjs'
+      - '.github/workflows/source-registry-v1.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'app/api/v1/sources/**'
+      - 'app/api/v1/content/[slug]/sources/**'
+      - 'supabase/migrations/*global_source_registry*'
+      - 'scripts/source-registry-v1-contract.mjs'
+      - '.github/workflows/source-registry-v1.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Source registry architecture contract
+        run: node scripts/source-registry-v1-contract.mjs
+      - name: Type check
+        run: npm run typecheck
+      - name: Lint
+        run: npm run lint

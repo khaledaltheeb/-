@@ -17,8 +17,18 @@ const nextConfig: NextConfig = {
   // non-legacy trailing-slash requests to the platform's modern no-slash form.
   skipTrailingSlashRedirect: true,
   async redirects() {
-    // Migration policy: historical content renders on its original route.
-    return [];
+    return [
+      {
+        source: '/encyclopedia/fragile-x-syndrome-education',
+        destination: '/content/fragile-x-school-iep-inclusion',
+        permanent: true,
+      },
+      {
+        source: '/encyclopedia/fragile-x-syndrome-education/',
+        destination: '/content/fragile-x-school-iep-inclusion',
+        permanent: true,
+      },
+    ];
   },
   async rewrites() {
     // Migration policy: no hidden route substitution for historical content.

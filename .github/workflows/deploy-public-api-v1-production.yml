@@ -1,0 +1,162 @@
+name: Deploy Public API V1 Production
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'app/api/v1/**'
+      - 'app/api/openapi.json/**'
+      - 'app/feed.json/**'
+      - 'app/developers/**'
+      - 'app/layout.tsx'
+      - 'app/sitemaps/static.xml/route.ts'
+      - 'components/trust-page.tsx'
+      - 'lib/public-api-v1.ts'
+      - 'lib/partner-api-v1.ts'
+      - 'scripts/public-api-v1-contract.mjs'
+      - 'supabase/migrations/20260901032000_public_api_v1_change_log.sql'
+      - 'supabase/migrations/20260901035000_partner_api_core_v1.sql'
+      - '.github/workflows/deploy-public-api-v1-production.yml'
+
+concurrency:
+  group: rawafid-public-api-v1-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 70
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
+      NEXT_PUBLIC_SITE_URL: https://healthrenewal.org
+      NEXT_PUBLIC_ALLOW_INDEXING: 'true'
+      NEXT_PUBLIC_ENABLE_ANALYTICS: 'true'
+      NEXT_PUBLIC_GTM_ID: GTM-WBLQVBG4
+      NEXT_PUBLIC_GA_MEASUREMENT_ID: G-VLZMV8Y4JP
+      NEXT_PUBLIC_ENABLE_DIRECT_GA: 'true'
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: 1910e1ad3c793fd568ba1caafe34f964
+    steps:
+      - name: Require production Cloudflare credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${CLOUDFLARE_API_TOKEN:-}"
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Install deterministic image build dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends imagemagick fontconfig fonts-noto-core librsvg2-bin
+      - name: Verify API architecture contract
+        run: node scripts/public-api-v1-contract.mjs
+      - name: Type check
+        run: npm run typecheck
+      - name: Lint
+        run: npm run lint
+      - name: Build application
+        run: npm run build
+      - name: Build Cloudflare production Worker
+        run: npx opennextjs-cloudflare build --env production
+      - name: Deploy Cloudflare production Worker
+        run: npx opennextjs-cloudflare deploy --env production
+      - name: Verify live Public API and feeds repeatedly
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://healthrenewal.org'
+          stamp="${GITHUB_SHA}"
+          for attempt in $(seq 1 12); do
+            if curl -fsS --retry 2 --retry-delay 2 --retry-all-errors "${base}/api/v1?deploy=${stamp}" -o /tmp/api-v1.json \
+              && curl -fsS --retry 2 --retry-delay 2 --retry-all-errors "${base}/api/openapi.json?deploy=${stamp}" -o /tmp/openapi.json \
+              && curl -fsS --retry 2 --retry-delay 2 --retry-all-errors "${base}/api/v1/content?limit=2&deploy=${stamp}" -D /tmp/content.headers -o /tmp/content.json \
+              && curl -fsS --retry 2 --retry-delay 2 --retry-all-errors "${base}/api/v1/research?limit=2&deploy=${stamp}" -o /tmp/research.json \
+              && curl -fsS --retry 2 --retry-delay 2 --retry-all-errors "${base}/api/v1/courses?limit=2&deploy=${stamp}" -o /tmp/courses.json \
+              && curl -fsS --retry 2 --retry-delay 2 --retry-all-errors "${base}/api/v1/pages?limit=2&deploy=${stamp}" -o /tmp/pages.json \
+              && curl -fsS --retry 2 --retry-delay 2 --retry-all-errors "${base}/api/v1/stats?deploy=${stamp}" -o /tmp/stats.json \
+              && curl -fsS --retry 2 --retry-delay 2 --retry-all-errors "${base}/api/v1/changes?since=2026-01-01T00%3A00%3A00Z&limit=2&deploy=${stamp}" -o /tmp/changes.json \
+              && curl -fsS --retry 2 --retry-delay 2 --retry-all-errors "${base}/feed.xml?deploy=${stamp}" -o /tmp/feed.xml \
+              && curl -fsS --retry 2 --retry-delay 2 --retry-all-errors "${base}/feed.json?deploy=${stamp}" -o /tmp/feed.json \
+              && curl -fsS --retry 2 --retry-delay 2 --retry-all-errors "${base}/developers?deploy=${stamp}" -o /tmp/developers.html; then
+              break
+            fi
+            if [ "$attempt" -eq 12 ]; then exit 1; fi
+            sleep 5
+          done
+          invalid_code="$(curl -sS -o /tmp/invalid-key.json -w '%{http_code}' -H 'X-API-Key: definitely-invalid' "${base}/api/v1/content?limit=1&deploy=${stamp}")"
+          test "$invalid_code" = 401
+          node - <<'NODE'
+          const fs=require('fs');
+          const discovery=JSON.parse(fs.readFileSync('/tmp/api-v1.json','utf8'));
+          const openapi=JSON.parse(fs.readFileSync('/tmp/openapi.json','utf8'));
+          const content=JSON.parse(fs.readFileSync('/tmp/content.json','utf8'));
+          const pages=JSON.parse(fs.readFileSync('/tmp/pages.json','utf8'));
+          const stats=JSON.parse(fs.readFileSync('/tmp/stats.json','utf8'));
+          const changes=JSON.parse(fs.readFileSync('/tmp/changes.json','utf8'));
+          const invalid=JSON.parse(fs.readFileSync('/tmp/invalid-key.json','utf8'));
+          const jsonFeed=JSON.parse(fs.readFileSync('/tmp/feed.json','utf8'));
+          const rss=fs.readFileSync('/tmp/feed.xml','utf8');
+          const docs=fs.readFileSync('/tmp/developers.html','utf8');
+          const headers=fs.readFileSync('/tmp/content.headers','utf8').toLowerCase();
+          if(discovery.version!=='1.1.0' || discovery.status!=='stable') throw new Error('Public API discovery is invalid');
+          if(openapi.openapi!=='3.1.0' || openapi.info?.version!=='1.1.0') throw new Error('OpenAPI contract is invalid');
+          if(!openapi.components?.securitySchemes?.PartnerApiKey) throw new Error('Partner API security contract is missing');
+          if(!Array.isArray(content.data) || !Array.isArray(pages.data)) throw new Error('Public content/pages endpoint is invalid');
+          if(!stats.data || typeof stats.data.total!=='number') throw new Error('Stats endpoint is invalid');
+          if(!Array.isArray(changes.data)) throw new Error('Delta endpoint is invalid');
+          if(invalid.error?.code!=='invalid_api_key') throw new Error('Invalid-key behavior is incorrect');
+          if(jsonFeed.version!=='https://jsonfeed.org/version/1.1') throw new Error('JSON Feed is invalid');
+          if(!rss.includes('<rss version="2.0"')) throw new Error('RSS is invalid');
+          if(!docs.includes('v1.1') || !docs.includes('Partner')) throw new Error('Developer portal is invalid');
+          if(!headers.includes('etag:') || !headers.includes('x-request-id:')) throw new Error('HTTP API validators are missing');
+          NODE
+      - name: Verify live conditional GET
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://healthrenewal.org'
+          stamp="${GITHUB_SHA}"
+
+          verify_304() {
+            local label="$1"
+            local url="$2"
+            local headers="/tmp/${label}.headers"
+            local body="/tmp/${label}.body"
+            local etag=''
+            local code=''
+            for attempt in $(seq 1 6); do
+              curl -fsS --retry 2 --retry-delay 1 --retry-all-errors -H 'Cache-Control: no-cache' "$url" -D "$headers" -o "$body"
+              etag="$(awk 'BEGIN{IGNORECASE=1} /^etag:/{gsub(/\r/,""); sub(/^etag:[[:space:]]*/,""); print; exit}' "$headers")"
+              if [ -z "$etag" ]; then
+                echo "${label}: ETag missing on attempt ${attempt}" >&2
+                sed -n '1,40p' "$headers" >&2
+                sleep 2
+                continue
+              fi
+              code="$(curl -sS -o /dev/null -w '%{http_code}' -H 'Cache-Control: no-cache' -H "If-None-Match: $etag" "$url")"
+              echo "${label}: conditional attempt ${attempt}, status=${code}, etag=${etag}"
+              if [ "$code" = 304 ]; then return 0; fi
+              sleep 2
+            done
+            echo "${label}: conditional GET never produced 304; last status=${code}, etag=${etag}" >&2
+            sed -n '1,60p' "$headers" >&2 || true
+            return 1
+          }
+
+          # OpenAPI is deterministic and isolates edge/HTTP validator behavior from live catalog mutations.
+          verify_304 openapi "${base}/api/openapi.json?conditional=${stamp}"
+
+          # The content catalog is mutable; retry protects the deployment gate from a legitimate publish/update
+          # occurring between validator acquisition and revalidation while still requiring a real live 304.
+          verify_304 content "${base}/api/v1/content?limit=2&conditional=${stamp}"

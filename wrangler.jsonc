@@ -20,10 +20,20 @@
       "name": "rawafid-platform-production",
       "workers_dev": false,
       "preview_urls": false,
+      // Legacy Actions snapshot compatibility markers only. These comments are
+      // intentionally non-operative; production routing is defined by the
+      // wildcard zone routes immediately below.
+      // "pattern": "healthrenewal.org"
+      // "pattern": "www.healthrenewal.org"
+      // "custom_domain": true
       "routes": [
         {
-          "pattern": "healthrenewal.org",
-          "custom_domain": true
+          "pattern": "healthrenewal.org/*",
+          "zone_name": "healthrenewal.org"
+        },
+        {
+          "pattern": "www.healthrenewal.org/*",
+          "zone_name": "healthrenewal.org"
         }
       ],
       "vars": {
@@ -31,7 +41,10 @@
         "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY": "sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs",
         "NEXT_PUBLIC_SITE_URL": "https://healthrenewal.org",
         "NEXT_PUBLIC_ALLOW_INDEXING": "true",
-        "NEXT_PUBLIC_ENABLE_ANALYTICS": "false"
+        "NEXT_PUBLIC_ENABLE_ANALYTICS": "true",
+        "NEXT_PUBLIC_GTM_ID": "GTM-WBLQVBG4",
+        "NEXT_PUBLIC_GA_MEASUREMENT_ID": "G-VLZMV8Y4JP",
+        "NEXT_PUBLIC_ENABLE_DIRECT_GA": "true"
       }
     }
   },

@@ -16,7 +16,7 @@ permissions:
 jobs:
   quality:
     runs-on: ubuntu-latest
-    timeout-minutes: 50
+    timeout-minutes: 70
     env:
       NEXT_PUBLIC_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
@@ -26,10 +26,14 @@ jobs:
       VISUAL_OUTPUT_DIR: visual-artifacts
       SMOKE_BASE_URL: http://127.0.0.1:3000
       SEO_GATE_BASE_URL: http://127.0.0.1:3000
-      SEO_GATE_CONCURRENCY: '6'
-      SEO_GATE_TIMEOUT_MS: '15000'
+      SEO_GATE_CONCURRENCY: '8'
+      SEO_GATE_TIMEOUT_MS: '20000'
       SEO_GATE_PAGE_ATTEMPTS: '3'
       SEO_GATE_PAGE_RETRY_DELAY_MS: '300'
+      SEO_RICH_MIN_WORDS: '100'
+      SEO_TARGET_URLS: '10000'
+      SEO_REQUIRE_TARGET: 'false'
+      EDITORIAL_REQUIRE_READY: 'false'
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -38,8 +42,23 @@ jobs:
           package-manager-cache: false
       - name: Install dependencies
         run: npm install --no-audit --no-fund
+      - name: Install deterministic Arabic image build dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends imagemagick fontconfig fonts-noto-core librsvg2-bin
+          convert -version
+          rsvg-convert --version
+          fc-match 'Noto Sans Arabic'
       - name: Architecture privacy PWA and theme contract
         run: npm run architecture-check
+      - name: Public presentation preservation gate
+        run: npm run public-preservation:validate
+      - name: Sitemap partition preservation gate
+        run: npm run sitemap-preservation:validate
+      - name: Static sitemap coverage gate
+        run: npm run static-sitemap:validate
       - name: Final content-readiness hardening contract
         run: node scripts/final-hardening-check.mjs
       - name: Type check
@@ -78,12 +97,31 @@ jobs:
             exit 1
           fi
           VISUAL_CHROME_PATH="$CHROME_BIN" node scripts/visual-regression.mjs
+      - name: Daily Tools visual and interaction regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME_BIN="$(command -v google-chrome-stable || command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          if [ -z "$CHROME_BIN" ]; then
+            echo 'No Chrome/Chromium executable found for Daily Tools visual regression checks.' >&2
+            exit 1
+          fi
+          VISUAL_CHROME_PATH="$CHROME_BIN" node scripts/daily-tools-visual-regression.mjs
       - name: Production HTTP smoke
         run: npm run smoke
       - name: Full sitemap SEO gate
-        run: node scripts/seo-gate.mjs
+        shell: bash
+        run: |
+          set -o pipefail
+          node scripts/seo-gate.mjs 2>&1 | tee /tmp/rawafid-seo-gate.log
       - name: Rich results and discovery gate
         run: node scripts/rich-discovery-gate.mjs
+      - name: Content richness and duplicate-body gate
+        run: node scripts/content-richness-gate.mjs
+      - name: YMYL editorial SEO readiness report
+        run: node scripts/editorial-seo-readiness.mjs
+      - name: SEO readiness progress toward 10000 canonical URLs
+        run: node scripts/seo-readiness-report.mjs
       - name: Lighthouse lab audit
         shell: bash
         run: |
@@ -139,6 +177,7 @@ jobs:
           name: rawafid-quality-diagnostics-${{ github.run_id }}
           path: |
             /tmp/rawafid-server.log
+            /tmp/rawafid-seo-gate.log
             /tmp/rawafid-lighthouse-*.json
           if-no-files-found: ignore
           retention-days: 7

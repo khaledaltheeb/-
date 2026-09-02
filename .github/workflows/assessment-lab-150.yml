@@ -1,0 +1,33 @@
+name: Assessment Lab 70 Release Scope
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'data/assessment-lab/**'
+      - 'scripts/assessment-lab-roadmap-contract.mjs'
+      - '.assessment-lab-plan.md'
+      - '.github/workflows/assessment-lab-150.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'data/assessment-lab/**'
+      - 'scripts/assessment-lab-roadmap-contract.mjs'
+      - '.assessment-lab-plan.md'
+      - '.github/workflows/assessment-lab-150.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  release-scope-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Verify active 70-route scope and deferred backlog integrity
+        run: node scripts/assessment-lab-roadmap-contract.mjs

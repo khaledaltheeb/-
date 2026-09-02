@@ -1,0 +1,110 @@
+name: Verify Talentia Social Work Production 2026-08-31
+
+on:
+  workflow_run:
+    workflows: ['Deploy Social Work Recovery Production 2026-08-31']
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+      - name: Verify Talentia ethics expansion live
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://healthrenewal.org'
+          stamp="${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          slugs=(
+            professional-ethics
+            human-dignity-social-justice
+            self-determination-client-rights
+            ethical-decision-making
+            professional-boundaries-conflicts
+            advocacy-accountability
+            digital-ethics-confidentiality
+          )
+          inline_slugs=(human-dignity-social-justice self-determination-client-rights ethical-decision-making)
+
+          for slug in "${slugs[@]}"; do
+            route="/evidence-guides/social-work/${slug}/"
+            headers="$(mktemp)"; body="$(mktemp)"
+            meta="$(curl -L -sS --retry 10 --retry-delay 3 --retry-all-errors --max-time 45 \
+              -H 'Cache-Control: no-cache, no-store, max-age=0' \
+              -D "$headers" -o "$body" -w '%{http_code}|%{url_effective}' \
+              "${base}${route}?talentia_verify=${stamp}")"
+            code="${meta%%|*}"
+            test "$code" = '200'
+            grep -Fqi 'content-language: ar' "$headers"
+            grep -Fq "<link rel=\"canonical\" href=\"${base}${route}\">" "$body"
+            grep -Fq 'c5aa171b-223d-43b7-9778-05a0d8cede8e' "$body"
+            grep -Fq 'talentias-ethical-guidelines-are-now-available-in-english' "$body"
+            grep -Fq 'global-social-work-statement-of-ethical-principles' "$body"
+            grep -Fq 'لا تعني اعتمادًا أو شراكة أو مصادقة' "$body"
+            grep -Fq 'التشريع ونظام الخدمات الفنلندي' "$body"
+            grep -Fq 'data-rawafid-quality-note="scope"' "$body"
+            grep -Fq 'آخر مراجعة تحريرية ومصدرية: 31 أغسطس 2026' "$body"
+            if grep -Eqi '<meta[^>]+noindex|x-robots-tag:[^\r\n]*noindex' "$body" "$headers"; then
+              echo "Unexpected noindex on ${route}" >&2
+              exit 1
+            fi
+            rm -f "$headers" "$body"
+            echo "LIVE OK ${route}"
+          done
+
+          for slug in "${inline_slugs[@]}"; do
+            body="$(mktemp)"
+            curl -L -fsS --retry 10 --retry-delay 3 --retry-all-errors --max-time 45 \
+              -H 'Cache-Control: no-cache, no-store, max-age=0' \
+              -o "$body" "${base}/evidence-guides/social-work/${slug}/?talentia_inline_verify=${stamp}"
+            grep -Fq "data-talentia-inline-reference=\"${slug}\"" "$body"
+            grep -Fq 'https://talentia.lukusali.fi/index.html#/reader/c5aa171b-223d-43b7-9778-05a0d8cede8e' "$body"
+            grep -Fq 'https://www.talentia.fi/en/news/talentias-ethical-guidelines-are-now-available-in-english/' "$body"
+            grep -Fq 'data-rawafid-quality-note="editorial-tool"' "$body"
+            rm -f "$body"
+            echo "INLINE TALENTIA LINKS OK ${slug}"
+          done
+
+          body="$(mktemp)"
+          curl -L -fsS --retry 10 --retry-delay 3 --retry-all-errors --max-time 45 \
+            -H 'Cache-Control: no-cache, no-store, max-age=0' \
+            -o "$body" "${base}/evidence-guides/social-work/human-dignity-social-justice/?talentia_language_verify=${stamp}"
+          grep -Fq 'إذا تغيب أحد المستفيدين عن مواعيد متعددة' "$body"
+          if grep -Fq 'إذا missed أحد المستفيدين' "$body"; then
+            echo 'Mixed-language editorial error remains live.' >&2
+            exit 1
+          fi
+          rm -f "$body"
+
+          headers="$(mktemp)"; body="$(mktemp)"
+          curl -L -fsS --retry 10 --retry-delay 3 --retry-all-errors --max-time 45 \
+            -H 'Cache-Control: no-cache, no-store, max-age=0' \
+            -D "$headers" -o "$body" \
+            "${base}/evidence-guides/social-work/ethics-power-autonomy/?talentia_verify=${stamp}"
+          grep -Fq 'RAWAFID_TALENTIA_ETHICS_LAYER' "$body"
+          grep -Fq '/evidence-guides/social-work/professional-ethics/' "$body"
+          grep -Fq 'c5aa171b-223d-43b7-9778-05a0d8cede8e' "$body"
+          rm -f "$headers" "$body"
+
+          sitemap="$(curl -L -fsS --retry 10 --retry-delay 3 --retry-all-errors --max-time 45 \
+            -H 'Cache-Control: no-cache, no-store, max-age=0' \
+            "${base}/sitemaps/social-work.xml?talentia_verify=${stamp}")"
+          printf '%s' "$sitemap" | grep -Fq "${base}/evidence-guides/social-work/professional-ethics/"
+          for slug in "${slugs[@]}"; do
+            printf '%s' "$sitemap" | grep -Fq "${base}/evidence-guides/social-work/${slug}/"
+          done
+          if printf '%s' "$sitemap" | grep -q 'workers.dev'; then
+            echo 'Social Work sitemap leaked temporary host.' >&2
+            exit 1
+          fi
+
+          echo 'Talentia Social Work production verification passed: 7/7 new pages, 3/3 contextual Talentia link placements, editorial-quality guards, legacy ethics enrichment, and dedicated sitemap.'

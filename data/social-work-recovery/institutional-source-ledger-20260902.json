@@ -1,0 +1,162 @@
+{
+  "version": 1,
+  "updated_at": "2026-09-02",
+  "scope": "Health Renewal / Rawafid Social Work evidence guides",
+  "principles": [
+    "Preserve the original institutional source and the route by which it was received.",
+    "Separate source ownership from Rawafid's independent Arabic synthesis.",
+    "Do not imply review, endorsement, accreditation, supervision or partnership without explicit written confirmation.",
+    "Treat national law and regulatory text as jurisdiction-specific.",
+    "Send an implementation update only after the relevant public pages are verified live."
+  ],
+  "records": [
+    {
+      "organization": "Slovenian Association of Social Workers",
+      "contact": "Anja Tekavcic, President",
+      "received": "2026-08-30 to 2026-08-31",
+      "status": "sources received; implementation update sent; terminology/context feedback offered; network sharing offered; introduction to Slovenian Philanthropy offered and accepted",
+      "sources": [
+        {
+          "title": "Kodeks eticnih nacel v socialnem varstvu",
+          "publisher": "Social Chamber of Slovenia",
+          "url": "https://pisrs.si/pregledPredpisa?id=DRUG4023",
+          "use": ["dignity", "rights", "autonomy", "participation", "confidentiality", "professional responsibility", "professional and institutional authority"]
+        },
+        {
+          "title": "Families with Multiple Challenges: Co-creating Support in the Community",
+          "publisher": "Faculty of Social Work, University of Ljubljana",
+          "url": "https://www.fsd.uni-lj.si/mma/-/2016091213042605/",
+          "use": ["co-created help", "individual working project of help", "desired outcomes", "strengths perspective", "family participation", "community resources"]
+        },
+        {
+          "title": "Co-creating Processes of Help: Collaboration with Families in the Community",
+          "publisher": "Faculty of Social Work, University of Ljubljana",
+          "url": "https://www.fsd.uni-lj.si/mma/monografija_ang_elektronska_verzija/2017092010392030/",
+          "use": ["working relationship", "collaboration agreement", "family expertise", "action planning", "practice verification"]
+        }
+      ],
+      "correspondence_notes": [
+        "The Association explicitly welcomed a clear distinction between Slovenian originals and Rawafid's Arabic synthesis.",
+        "The Association offered to flag significant Slovenian terminology or contextual issues where possible.",
+        "The Association said relevant Arabic materials could be shared with members supporting Arabic-speaking individuals and families in Slovenia.",
+        "The Association proposed an introduction to Slovenian Philanthropy for possible practical knowledge exchange related to migrants, refugees and Arabic-speaking families."
+      ]
+    },
+    {
+      "organization": "Talentia - Union of Professional Social Workers, Finland",
+      "contact": "Jenny Suominen, Director of Public Affairs",
+      "received": "2026-08-31",
+      "status": "sources received; explicit permission to cite/link with attribution; implementation update sent 2026-08-31",
+      "sources": [
+        {
+          "title": "Work, Values and Ethics - Ethical Guidelines for Social Welfare Professionals",
+          "publisher": "Talentia",
+          "url": "https://talentia.lukusali.fi/index.html#/reader/c5aa171b-223d-43b7-9778-05a0d8cede8e",
+          "use": ["human dignity", "social justice", "client rights", "self-determination", "professional responsibility", "ethical decision-making"]
+        },
+        {
+          "title": "Talentia's ethical guidelines are now available in English",
+          "publisher": "Talentia",
+          "url": "https://www.talentia.fi/en/news/talentias-ethical-guidelines-are-now-available-in-english/",
+          "use": ["institutional provenance", "scope and purpose of the ethics guide"]
+        }
+      ],
+      "limits": [
+        "Finnish legislation and service-system-specific material must remain identified as Finnish context.",
+        "Citation/link permission does not constitute endorsement of Rawafid's Arabic pages."
+      ]
+    },
+    {
+      "organization": "AvenirSocial, Switzerland",
+      "received": "2026-09-01",
+      "status": "final 2026 code links and knowledge portal received; implementation correction prepared; implementation update not yet sent",
+      "sources": [
+        {
+          "title": "Berufskodex Soziale Arbeit Schweiz 2026",
+          "language": "German",
+          "url": "https://avenirsocial.ch/app/uploads/2025/12/berufskodex_de_2026-07.pdf",
+          "use": ["professional ethics", "professional identity", "power and responsibility", "comparative ethics"]
+        },
+        {
+          "title": "Code de deontologie du travail social en Suisse 2026",
+          "language": "French",
+          "url": "https://avenirsocial.ch/app/uploads/2025/12/code_de_deontologie_fr_2026-07.pdf",
+          "use": ["terminology cross-check", "professional ethics", "comparative ethics"]
+        },
+        {
+          "title": "AvenirSocial professional knowledge portal",
+          "url": "https://avenirsocial.ch/fachwissen/#broschure",
+          "use": ["future topic-specific professional sources"]
+        },
+        {
+          "title": "AvenirSocial expertise portal",
+          "url": "https://avenirsocial.ch/fr/expertise/#brochures",
+          "use": ["future topic-specific professional sources", "French source discovery"]
+        }
+      ],
+      "correction_required": "Replace the previously referenced 2025 draft PDF URL in the comparative implementation with the final 2026 code supplied directly by AvenirSocial."
+    },
+    {
+      "organization": "Lithuanian Association of Social Workers (LSDA)",
+      "contact": "Jurate Tamasauskiene, President",
+      "received": "2026-09-01",
+      "status": "methodological library and official national document received; expanded implementation prepared; implementation update not yet sent",
+      "sources": [
+        {
+          "title": "PKTC methodological materials",
+          "publisher": "Professional Competence Development / methodological resources in Lithuania",
+          "url": "https://pktc.lt/metodine-informacija/metodine-medziaga",
+          "use": ["competence models", "competence assessment and development", "selection of social-work methods", "supervision and organizational learning", "community and macro-level practice"]
+        },
+        {
+          "title": "Lithuanian official social-services ethics document - Order A1-448",
+          "publisher": "Lithuanian e-TAR official legal register",
+          "url": "https://www.e-tar.lt/portal/lt/legalAct/f596df101af111eeb233e8b04dc9bb3d",
+          "use": ["national ethics comparison", "professional conduct", "responsibility", "transparency", "confidentiality"]
+        }
+      ],
+      "limits": [
+        "The e-TAR document is Lithuania-specific and must not be presented as law outside Lithuania.",
+        "The PKTC library contains multiple documents; detailed claims should be traceable to the specific sub-document used."
+      ]
+    },
+    {
+      "organization": "Afghanistan Social Workers Professional Organization / IFSW Asia-Pacific representation",
+      "contact": "Massoud Ayoubi",
+      "received": "2026-09-01",
+      "status": "relationship open; no professional source received yet",
+      "notes": [
+        "Asked for a concise introduction to Rawafid's team, activities, audiences and how a future Afghan resource would be incorporated into Arabic guidance.",
+        "Should not be counted as an evidence source until a concrete resource is supplied and reviewed."
+      ]
+    },
+    {
+      "organization": "Botswana Association of Social Workers",
+      "received": "2026-08-31",
+      "status": "acknowledgement only; follow-up promised; no source received yet"
+    },
+    {
+      "organization": "Sri Lanka Association of Professional Social Workers",
+      "received": "2026-09-01",
+      "status": "acknowledgement only; no source received yet"
+    },
+    {
+      "organization": "Akademikerforbundet SSR, Sweden",
+      "received": "2026-08-30",
+      "status": "automatic acknowledgement only; no source received yet"
+    }
+  ],
+  "implementation": {
+    "release": "social-work-institutional-20260902",
+    "base_recovered_routes": 56,
+    "talentia_additive_pages": 7,
+    "comparative_additive_pages": 16,
+    "public_content_routes_excluding_collection_root": 78,
+    "architecture": [
+      "co-created family and community practice",
+      "ethics, rights and professional authority",
+      "coordination, referral, competence and quality",
+      "international comparative practice with jurisdiction boundaries"
+    ]
+  }
+}

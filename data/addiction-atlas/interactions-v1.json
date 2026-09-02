@@ -1,0 +1,80 @@
+{
+  "schema_version": "rawafid-addiction-atlas-interactions-v1",
+  "version": "1.0.0",
+  "updated_on": "2026-08-26",
+  "policy_ar": "هذه الطبقة لا تستنتج التفاعلات من درجات المخاطر ولا من التشابه الدوائي. لا يظهر حكم تفاعلي إلا إذا كان الزوج مدرجاً صراحة ومسنوداً بمصدر مباشر أو بتحذير تنظيمي/صحي ينطبق على الفئتين. غياب السجل يعني أن الزوج لم تتم مراجعته في هذه الطبقة، وليس أنه آمن.",
+  "records": [
+    {
+      "id": "fentanyl-diazepam",
+      "a": "fentanyl",
+      "b": "diazepam",
+      "severity": "critical",
+      "evidence_grade": "A",
+      "evidence_scope": "class-to-substance",
+      "mechanism_ar": "الفنتانيل أفيون قوي والديازيبام بنزوديازيبين مثبط للجهاز العصبي المركزي. التحذير التنظيمي للفئتين يصف زيادة التهدئة وتثبيط التنفس عند الجمع.",
+      "risk_ar": "قد يزداد النعاس الشديد وبطء أو صعوبة التنفس والغيبوبة والوفاة. لا تُفهم هذه الصفحة كطريقة لحساب كمية آمنة للجمع.",
+      "emergency_ar": "إذا ظهرت صعوبة في الإيقاظ أو بطء/توقف التنفس أو ازرقاق فهذه حالة طارئة. اطلب خدمات الطوارئ المحلية فوراً. عند الاشتباه بوجود أفيون يمكن للنالوكسون عكس المكوّن الأفيوني لكنه لا يعالج تأثير البنزوديازيبين نفسه.",
+      "source_urls": ["https://www.fda.gov/drugs/information-drug-class/new-safety-measures-announced-opioid-analgesics-prescription-opioid-cough-products-and-benzodiazepines"]
+    },
+    {
+      "id": "morphine-diazepam",
+      "a": "morphine",
+      "b": "diazepam",
+      "severity": "critical",
+      "evidence_grade": "A",
+      "evidence_scope": "class-to-substance",
+      "mechanism_ar": "المورفين أفيون والديازيبام بنزوديازيبين؛ وكلاهما قد يثبط الجهاز العصبي المركزي والتنفس. تضع FDA هذا الجمع ضمن التحذيرات البارزة الخاصة بالأفيونات والبنزوديازيبينات.",
+      "risk_ar": "يزداد خطر التهدئة العميقة وبطء أو صعوبة التنفس والغيبوبة والوفاة مقارنة باستخدام كل فئة منفردة.",
+      "emergency_ar": "عدم الاستجابة أو بطء التنفس أو ازرقاق الشفاه يستلزم طوارئ فورية. إذا كان الأفيون محتملاً، يستخدم النالوكسون وفق إرشادات الطوارئ المحلية مع استمرار طلب الرعاية الطبية.",
+      "source_urls": ["https://www.fda.gov/drugs/information-drug-class/new-safety-measures-announced-opioid-analgesics-prescription-opioid-cough-products-and-benzodiazepines"]
+    },
+    {
+      "id": "fentanyl-alcohol",
+      "a": "fentanyl",
+      "b": "alcohol",
+      "severity": "critical",
+      "evidence_grade": "A",
+      "evidence_scope": "class-to-substance",
+      "mechanism_ar": "الكحول مثبط للجهاز العصبي المركزي، والفنتانيل من الأفيونات. تحذر FDA من الجمع بين الأفيونات ومثبطات الجهاز العصبي المركزي بما فيها الكحول بسبب التأثيرات المضافة على الوعي والتنفس.",
+      "risk_ar": "قد يزداد خطر النعاس الشديد وبطء أو صعوبة التنفس والغيبوبة والوفاة. لا توجد في الأطلس عتبة كمية تُعرّف الجمع بأنه آمن.",
+      "emergency_ar": "في حال فقدان الوعي أو بطء/توقف التنفس اطلب الطوارئ فوراً. النالوكسون قد يعكس المكوّن الأفيوني عند الاشتباه به لكنه لا يعكس تسمم الكحول.",
+      "source_urls": ["https://www.fda.gov/drugs/information-drug-class/new-safety-measures-announced-opioid-analgesics-prescription-opioid-cough-products-and-benzodiazepines"]
+    },
+    {
+      "id": "fentanyl-gabapentin",
+      "a": "fentanyl",
+      "b": "gabapentin",
+      "severity": "high",
+      "evidence_grade": "A",
+      "evidence_scope": "class-to-substance",
+      "mechanism_ar": "تحذر FDA من صعوبات تنفسية خطيرة مع الغابابنتين عند وجود عوامل خطورة تنفسية، ومن بينها استعمال الأفيونات أو مثبطات الجهاز العصبي المركزي.",
+      "risk_ar": "الجمع قد يزيد التهدئة وتثبيط التنفس، وتزداد الأهمية السريرية لدى من لديهم مرض تنفسي أو عوامل خطورة أخرى.",
+      "emergency_ar": "النعاس الشديد غير المعتاد، الارتباك، عدم الاستجابة أو التنفس البطيء/السطحي/الصعب علامات تستدعي رعاية طبية عاجلة.",
+      "source_urls": ["https://www.fda.gov/safety/medical-product-safety-information/neurontin-gralise-horizant-gabapentin-and-lyrica-lyrica-cr-pregabalin-drug-safety-communication"]
+    },
+    {
+      "id": "fentanyl-pregabalin",
+      "a": "fentanyl",
+      "b": "pregabalin",
+      "severity": "high",
+      "evidence_grade": "A",
+      "evidence_scope": "class-to-substance",
+      "mechanism_ar": "تشمل تحذيرات FDA البريغابالين ضمن الغابابنتينويدات التي قد ترتبط بصعوبات تنفسية خطيرة خصوصاً مع الأفيونات ومثبطات الجهاز العصبي المركزي.",
+      "risk_ar": "قد يزيد خطر التهدئة وتثبيط التنفس، مع أهمية أكبر لدى كبار السن ومن لديهم مرض رئوي أو عوامل خطورة تنفسية.",
+      "emergency_ar": "عدم الاستجابة، النعاس الشديد أو بطء/صعوبة التنفس يستلزم تقييماً طبياً عاجلاً وخدمات الطوارئ عند الخطر المباشر.",
+      "source_urls": ["https://www.fda.gov/safety/medical-product-safety-information/neurontin-gralise-horizant-gabapentin-and-lyrica-lyrica-cr-pregabalin-drug-safety-communication"]
+    },
+    {
+      "id": "fentanyl-xylazine",
+      "a": "fentanyl",
+      "b": "xylazine",
+      "severity": "critical",
+      "evidence_grade": "A",
+      "evidence_scope": "direct-pair",
+      "mechanism_ar": "الزيلازين مهدئ غير أفيوني قد يبطئ الدماغ والتنفس والنبض ويخفض ضغط الدم. يذكر CDC أن وجوده مع أفيونات مثل الفنتانيل شديد الخطورة.",
+      "risk_ar": "قد تتداخل التأثيرات المهدئة والتنفسية، وقد تستمر آثار الزيلازين حتى بعد عكس المكوّن الأفيوني بالنالوكسون. يرتبط الزيلازين أيضاً بجروح جلدية قد تصبح شديدة أو مصابة بالعدوى.",
+      "emergency_ar": "عند الاشتباه بجرعة زائدة تحتوي أفيوناً وزيلازين: اطلب الطوارئ، وأعطِ النالوكسون إذا كان متاحاً وفق الإرشادات المحلية لعكس المكوّن الأفيوني، مع إدراك أنه لا يعكس تأثير الزيلازين نفسه وأن الرعاية الطبية تظل ضرورية.",
+      "source_urls": ["https://www.cdc.gov/overdose-prevention/about/what-you-should-know-about-xylazine.html", "https://www.cdc.gov/overdose-prevention/about/fentanyl.html"]
+    }
+  ]
+}

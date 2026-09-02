@@ -21,6 +21,13 @@ Publisher: منصة روافد
 - Medical review policy: https://healthrenewal.org/medical-review-policy
 - About: https://healthrenewal.org/about
 
+## Open-source engineering
+- Official toolkit page: https://healthrenewal.org/open-source/arabic-rtl-a11y-toolkit
+- Public source repository: https://github.com/khaledaltheeb/rawafid-arabic-rtl-a11y-toolkit
+- Scope: reusable Arabic/RTL, localization, Unicode bidi-safety, accessibility and direction-aware web engineering only; the repository does not contain Rawafid's scientific/editorial corpus or user data.
+- License: Apache-2.0.
+- Do not infer npm publication, third-party endorsement, partnership, certification or external audit unless the corresponding source explicitly verifies it.
+
 ## Discovery
 - Sitemap index: https://healthrenewal.org/sitemap.xml
 - Robots: https://healthrenewal.org/robots.txt

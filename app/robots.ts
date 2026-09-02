@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next';
-import { INDEXING_ENABLED, SITE_URL } from '@/lib/seo';
+import { SITE_HOSTNAME, SITE_URL } from '@/lib/seo';
 
 const PRIVATE_PATHS = [
   '/admin/',
@@ -34,10 +34,18 @@ const DISCOVERY_CRAWLERS = [
   'ClaudeBot',
   'PerplexityBot',
   'Perplexity-User',
+  'Amazonbot',
+  'Bytespider',
+  'CCBot',
+  'meta-externalagent',
+  'CloudflareBrowserRenderingCrawler',
 ];
 
 export default function robots(): MetadataRoute.Robots {
-  if (!INDEXING_ENABLED) {
+  // Temporary staging on workers.dev stays intentionally non-indexable.
+  // The canonical production hostname must never depend on an optional env flag
+  // to permit crawling.
+  if (SITE_HOSTNAME.endsWith('.workers.dev')) {
     return {
       rules: { userAgent: '*', disallow: '/' },
       host: SITE_URL,

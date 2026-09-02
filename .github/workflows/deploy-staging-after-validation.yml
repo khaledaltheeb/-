@@ -1,0 +1,179 @@
+name: Deploy Validated Staging
+
+on:
+  workflow_run:
+    workflows: ['Cloudflare Workers Validate']
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+  statuses: write
+
+# Only equivalent validated-main outcomes may supersede one another. A failed
+# validation (or a non-push run) must never cancel a valid staging deployment.
+concurrency:
+  group: rawafid-staging-deploy-${{ github.event.workflow_run.event }}-${{ github.event.workflow_run.head_branch }}-${{ github.event.workflow_run.conclusion }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      TARGET_SHA: ${{ github.event.workflow_run.head_sha }}
+      NEXT_PUBLIC_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
+      NEXT_PUBLIC_SITE_URL: https://rawafid-platform-staging.khaledaltheeb.workers.dev
+      NEXT_PUBLIC_ALLOW_INDEXING: 'false'
+      NEXT_PUBLIC_ENABLE_ANALYTICS: 'false'
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: 1910e1ad3c793fd568ba1caafe34f964
+      GH_TOKEN: ${{ github.token }}
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    steps:
+      - name: Mark staging deployment pending
+        shell: bash
+        run: |
+          set -euo pipefail
+          payload="$(printf '{\"state\":\"pending\",\"context\":\"deploy/staging\",\"description\":\"Deploying validated main commit to noindex staging\",\"target_url\":\"%s\"}' "$RUN_URL")"
+          curl --fail --silent --show-error -X POST \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H 'Accept: application/vnd.github+json' \
+            -H 'X-GitHub-Api-Version: 2022-11-28' \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${TARGET_SHA}" \
+            -d "$payload" >/dev/null
+
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Install deterministic Arabic image build dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends imagemagick fontconfig fonts-noto-core librsvg2-bin
+          convert -version
+          rsvg-convert --version
+          fc-match 'Noto Sans Arabic'
+
+      - name: Confirm Cloudflare credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${CLOUDFLARE_API_TOKEN:-}"
+          npx wrangler whoami
+
+      - name: Materialize generated route assets
+        run: node scripts/build-daily-tools-route-manifest.mjs
+
+      - name: Build validated staging Worker
+        run: npx opennextjs-cloudflare build
+
+      - name: Deploy staging Worker only
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx wrangler deploy --keep-vars
+
+      - name: Verify live staging, full-content renderer, and addiction atlas
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="${NEXT_PUBLIC_SITE_URL}"
+          for attempt in $(seq 1 18); do
+            stamp="${TARGET_SHA}-${attempt}-$(date +%s)"
+            cache_header='Cache-Control: no-cache, no-store, max-age=0'
+            home="$(curl -fsSL --compressed --max-time 25 -H "$cache_header" "${base}/?deploy=${stamp}" 2>/dev/null || true)"
+            article="$(curl -fsSL --compressed --max-time 25 -H "$cache_header" "${base}/content/concept-1618?deploy=${stamp}" 2>/dev/null || true)"
+            about_code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 25 -H "$cache_header" "${base}/about/?deploy=${stamp}" || true)"
+            atlas="$(curl -fsSL --compressed --max-time 25 -H "$cache_header" "${base}/addiction/substances/?deploy=${stamp}" 2>/dev/null || true)"
+            fentanyl="$(curl -fsSL --compressed --max-time 25 -H "$cache_header" "${base}/addiction/substances/fentanyl/?deploy=${stamp}" 2>/dev/null || true)"
+            comparison="$(curl -fsSL --compressed --max-time 25 -H "$cache_header" "${base}/addiction/compare/fentanyl-vs-heroin/?deploy=${stamp}" 2>/dev/null || true)"
+            methodology="$(curl -fsSL --compressed --max-time 25 -H "$cache_header" "${base}/addiction/methodology/?deploy=${stamp}" 2>/dev/null || true)"
+            root_sitemap="$(curl -fsSL --compressed --max-time 25 -H "$cache_header" "${base}/sitemap.xml?deploy=${stamp}" 2>/dev/null || true)"
+            atlas_sitemap="$(curl -fsSL --compressed --max-time 25 -H "$cache_header" "${base}/sitemaps/addiction-atlas.xml?deploy=${stamp}" 2>/dev/null || true)"
+
+            home_has_noindex=false
+            article_has_full_body=false
+            atlas_has_noindex=false
+            atlas_ready=false
+            fentanyl_ready=false
+            comparison_ready=false
+            methodology_ready=false
+            sitemap_ready=false
+            search_code=skipped
+
+            [[ "$home" == *"noindex"* ]] && home_has_noindex=true
+            [[ "$article" == *"أفضل خطة قد تجمع أكثر من مستوى"* ]] && article_has_full_body=true
+            [[ "$atlas" == *"noindex"* ]] && atlas_has_noindex=true
+            if [[ "$atlas" == *"Fentanyl"* && "$atlas" == *"Heroin"* && "$atlas" == *"54"* ]]; then atlas_ready=true; fi
+            if [[ "$fentanyl" == *"Fentanyl"* && "$fentanyl" == *"MedicalWebPage"* ]]; then fentanyl_ready=true; fi
+            if [[ "$comparison" == *"Fentanyl"* && "$comparison" == *"Heroin"* && "$comparison" == *"Article"* ]]; then comparison_ready=true; fi
+            if [[ "$methodology" == *"قوة الدليل"* ]]; then methodology_ready=true; fi
+
+            if [[ "$root_sitemap" == *"<sitemapindex"* \
+              && "$atlas_sitemap" == *"<urlset"* \
+              && "$root_sitemap" != *"<sitemap><loc>"* \
+              && "$atlas_sitemap" != *"<url><loc>"* ]]; then sitemap_ready=true; fi
+
+            if [ "$home_has_noindex" = 'true' ] \
+              && [ "$article_has_full_body" = 'true' ] \
+              && [ "$about_code" = '200' ] \
+              && [ "$atlas_has_noindex" = 'true' ] \
+              && [ "$atlas_ready" = 'true' ] \
+              && [ "$fentanyl_ready" = 'true' ] \
+              && [ "$comparison_ready" = 'true' ] \
+              && [ "$methodology_ready" = 'true' ] \
+              && [ "$sitemap_ready" = 'true' ]; then
+              search_code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 25 -H "$cache_header" "${base}/search?q=%D8%A7%D9%84%D8%B5%D8%AD%D8%A9%20%D8%A7%D9%84%D9%86%D9%81%D8%B3%D9%8A%D8%A9&deploy=${stamp}" || true)"
+            fi
+
+            if [ "$home_has_noindex" = 'true' ] \
+              && [ "$article_has_full_body" = 'true' ] \
+              && [ "$about_code" = '200' ] \
+              && [ "$search_code" = '200' ] \
+              && [ "$atlas_has_noindex" = 'true' ] \
+              && [ "$atlas_ready" = 'true' ] \
+              && [ "$fentanyl_ready" = 'true' ] \
+              && [ "$comparison_ready" = 'true' ] \
+              && [ "$methodology_ready" = 'true' ] \
+              && [ "$sitemap_ready" = 'true' ]; then
+              echo 'Validated noindex staging is live; preserved routes, search, full-body renderer, addiction atlas pages, and intentionally empty noindex sitemap containers passed.'
+              exit 0
+            fi
+            echo "Staging verification attempt ${attempt}: noindex=${home_has_noindex}, full_body=${article_has_full_body}, about=${about_code:-none}, search=${search_code:-none}, atlas_noindex=${atlas_has_noindex}, atlas=${atlas_ready}, fentanyl=${fentanyl_ready}, comparison=${comparison_ready}, methodology=${methodology_ready}, sitemap=${sitemap_ready}."
+            sleep 5
+          done
+          echo 'Post-deploy staging verification failed.' >&2
+          exit 1
+
+      - name: Mark staging deployment success
+        if: success()
+        shell: bash
+        run: |
+          payload="$(printf '{\"state\":\"success\",\"context\":\"deploy/staging\",\"description\":\"Validated main commit deployed and verified on noindex staging\",\"target_url\":\"%s\"}' "$RUN_URL")"
+          curl --fail --silent --show-error -X POST \
+            -H "Authorization: Bearer ${GH_TOKEN}" -H 'Accept: application/vnd.github+json' -H 'X-GitHub-Api-Version: 2022-11-28' \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${TARGET_SHA}" -d "$payload" >/dev/null
+
+      - name: Mark staging deployment failure
+        if: failure()
+        shell: bash
+        run: |
+          payload="$(printf '{\"state\":\"failure\",\"context\":\"deploy/staging\",\"description\":\"Staging deploy or live verification failed\",\"target_url\":\"%s\"}' "$RUN_URL")"
+          curl --silent --show-error -X POST \
+            -H "Authorization: Bearer ${GH_TOKEN}" -H 'Accept: application/vnd.github+json' -H 'X-GitHub-Api-Version: 2022-11-28' \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${TARGET_SHA}" -d "$payload" >/dev/null || true

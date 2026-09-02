@@ -2,7 +2,7 @@ import { capabilityOgImage, CAPABILITY_OG_SIZE } from '@/components/capability-o
 import { getCapabilityRecord } from '@/lib/capabilities';
 
 export const size = CAPABILITY_OG_SIZE;
-export const contentType = 'image/png';
+export const contentType = 'image/svg+xml';
 export const alt = 'دليل القدرات — منصة روافد';
 
 type Params = Promise<{ slug: string }>;

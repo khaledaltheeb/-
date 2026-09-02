@@ -9,14 +9,14 @@ import { createClient } from '@/lib/supabase/server';
 import { buildSeoMetadata, breadcrumbJsonLd, SITE_URL } from '@/lib/seo';
 import { getCognitivePageBySlug, getCognitivePageIndex, getCognitivePageIndexItem } from '@/lib/cognitive-program';
 import { getExpandedEncyclopediaIndex, getExpandedEncyclopediaRecord } from '@/lib/expanded-encyclopedia';
-import { publicContentTypeLabel } from '@/lib/public-content-routing';
+import { publicContentHref, publicContentTypeLabel } from '@/lib/public-content-routing';
 import { contentReviewProvenance } from '@/lib/review-provenance';
 
 export const dynamic = 'force-dynamic';
 
 type Params = Promise<{ slug: string }>;
 type ReferenceItem = { title?: string; url?: string; publisher?: string; year?: string | number };
-type RelatedItem = { id: string; slug: string; title: string; excerpt: string | null; content_type: string; score: number };
+type RelatedItem = { id: string; slug: string; title: string; excerpt: string | null; content_type: string; score: number; canonical_url?: string | null };
 type TaxonomyNode = { slug: string; name_ar: string };
 type UnknownRecord = Record<string, unknown>;
 type FaqItem = { question: string; answer: string };
@@ -96,7 +96,7 @@ function getCognitiveGeneratedRecord(slug: string): ContentRecord | null {
     secondary_keywords: page.secondaryKeywords,
     semantic_terms: page.semanticTerms,
     search_intent: page.searchIntent,
-    author_display_name: 'فريق روافد التحريري',
+    author_display_name: null,
     reviewer_display_name: null,
     reviewer_credentials: null,
     last_reviewed_at: null,
@@ -136,7 +136,7 @@ async function getExpandedGeneratedRecord(slug: string): Promise<ContentRecord |
     secondary_keywords: page.secondary_keywords,
     semantic_terms: page.semantic_terms,
     search_intent: page.search_intent,
-    author_display_name: page.author_display_name,
+    author_display_name: null,
     reviewer_display_name: page.reviewer_display_name,
     reviewer_credentials: page.reviewer_credentials,
     last_reviewed_at: page.last_reviewed_at,
@@ -278,6 +278,26 @@ async function relatedContent(record: ContentRecord): Promise<RelatedItem[]> {
   return (data ?? []) as RelatedItem[];
 }
 
+async function resolveRelatedCanonicalUrls(items: RelatedItem[]): Promise<RelatedItem[]> {
+  if (!items.length) return items;
+  const slugs = [...new Set(items.map((item) => item.slug))];
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from('content')
+    .select('slug,canonical_url')
+    .in('slug', slugs)
+    .eq('status', 'published')
+    .eq('robots_index', true)
+    .lte('published_at', new Date().toISOString());
+  const canonicalBySlug = new Map((data ?? []).map((item) => [item.slug, item.canonical_url] as const));
+  return items.map((item) => ({
+    ...item,
+    canonical_url: canonicalBySlug.has(item.slug)
+      ? canonicalBySlug.get(item.slug) ?? null
+      : item.canonical_url ?? null,
+  }));
+}
+
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params;
   const record = await getPublishedRecord(slug);
@@ -295,7 +315,6 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     keywords,
     publishedTime: record.published_at,
     modifiedTime: record.updated_at,
-    authors: record.generated_program ? undefined : record.author_display_name ? [{ name: record.author_display_name }] : undefined,
   });
 }
 
@@ -308,7 +327,7 @@ export default async function PublishedContentPage({ params }: { params: Params 
   const category = taxonomyNode(record.categories);
   const audiences = Array.isArray(record.audience) ? record.audience.map(String) : [];
   const references = safeReferences(record.references_json);
-  const related = await relatedContent(record);
+  const related = await resolveRelatedCanonicalUrls(await relatedContent(record));
   const canonical = record.canonical_url || `/content/${record.slug}`;
   const url = canonical.startsWith('https://') ? canonical : `${SITE_URL}${canonical}`;
   const faqItems = visibleFaq(record.body_json);
@@ -341,14 +360,10 @@ export default async function PublishedContentPage({ params }: { params: Params 
     datePublished: record.published_at || undefined,
     dateModified: record.updated_at || undefined,
     lastReviewed: review.lastReviewedAt || undefined,
-    author: record.generated_program
-      ? { '@id': `${SITE_URL}/#organization` }
-      : record.author_display_name
-        ? { '@type': 'Person', name: record.author_display_name }
-        : { '@id': `${SITE_URL}/#organization` },
+    author: { '@id': `${SITE_URL}/#organization` },
     reviewedBy: review.reviewedBySchema,
     publisher: { '@id': `${SITE_URL}/#organization` },
-    image: record.featured_image_url || undefined,
+    image: record.featured_image_url || `${SITE_URL}/seo-card`,
     keywords: [record.primary_keyword, ...record.secondary_keywords, ...record.semantic_terms.slice(0, 8)]
       .filter((item): item is string => typeof item === 'string' && item.length > 0)
       .join(', '),
@@ -425,8 +440,8 @@ export default async function PublishedContentPage({ params }: { params: Params 
           <h1>{record.title}</h1>
           {record.excerpt && <p>{record.excerpt}</p>}
           <div className="article-meta">
-            {record.author_display_name && <span>إعداد: {record.author_display_name}</span>}
-            {review.reviewerName && <span>مراجعة: {review.reviewerName}{review.reviewerCredentials ? ` — ${review.reviewerCredentials}` : ''}</span>}
+            <span>إعداد: منصة روافد</span>
+            {review.reviewerName && <span>مراجعة: {review.reviewerName}</span>}
             {record.published_at && <span>نُشر {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(record.published_at))}</span>}
             {review.lastReviewedAt && <span>آخر مراجعة {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(review.lastReviewedAt))}</span>}
           </div>
@@ -449,9 +464,12 @@ export default async function PublishedContentPage({ params }: { params: Params 
         </nav>
         {related.length > 0 && <section className="article-related" aria-labelledby="related-title">
           <div className="section-mini-heading"><div><span className="eyebrow">روابط موضوعية</span><h2 id="related-title">محتوى مرتبط</h2></div><span>روابط منتقاة من خريطة المفاهيم ونية البحث</span></div>
-          <div className="related-content-grid">{related.map((item) => <article key={item.id}>
-            <span>{publicContentTypeLabel(item.content_type)}</span><h3><Link href={`/content/${item.slug}`}>{item.title}</Link></h3>{item.excerpt && <p>{item.excerpt}</p>}<Link href={`/content/${item.slug}`}>متابعة القراءة ←</Link>
-          </article>)}</div>
+          <div className="related-content-grid">{related.map((item) => {
+            const href = publicContentHref(item);
+            return <article key={item.id}>
+              <span>{publicContentTypeLabel(item.content_type)}</span><h3><Link href={href}>{item.title}</Link></h3>{item.excerpt && <p>{item.excerpt}</p>}<Link href={href}>متابعة القراءة ←</Link>
+            </article>;
+          })}</div>
         </section>}
         {references.length > 0 && <section className="article-references" aria-labelledby="references-title">
           <h2 id="references-title">المصادر والمراجع</h2><ol>{references.map((reference, index) => <li key={`${reference.url || reference.title}-${index}`}>

@@ -28,7 +28,8 @@ export async function getPublicSectors(limit = 12): Promise<PublicSector[]> {
         Authorization: `Bearer ${publishableKey}`,
         Accept: 'application/json',
       },
-      next: { revalidate: 300, tags: ['public-taxonomy'] },
+      cache: 'force-cache',
+      next: { revalidate: false, tags: ['public-taxonomy'] },
     });
     if (!response.ok) return [];
     const data: unknown = await response.json();

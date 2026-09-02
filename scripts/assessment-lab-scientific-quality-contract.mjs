@@ -1,0 +1,193 @@
+import fs from 'node:fs';
+import { execFileSync } from 'node:child_process';
+
+const standard = JSON.parse(fs.readFileSync('data/assessment-lab/scientific-quality-standard.v1.json', 'utf8'));
+const monitors = JSON.parse(fs.readFileSync('data/assessment-lab/monitors.v1.json', 'utf8'));
+
+// Historical tailored banks remain available for dossier/traceability checks only.
+const banksCore = JSON.parse(fs.readFileSync('data/assessment-lab/question-banks.core-1-12.v1.json', 'utf8'));
+const banksCore13to24 = JSON.parse(fs.readFileSync('data/assessment-lab/question-banks.core-13-24.v1.json', 'utf8'));
+const banksCore25to28 = JSON.parse(fs.readFileSync('data/assessment-lab/question-banks.core-25-28.v1.json', 'utf8'));
+const banksCore29to32 = JSON.parse(fs.readFileSync('data/assessment-lab/question-banks.core-29-32.v1.json', 'utf8'));
+const banksCore33to36 = JSON.parse(fs.readFileSync('data/assessment-lab/question-banks.core-33-36.v1.json', 'utf8'));
+const banks49to54 = JSON.parse(fs.readFileSync('data/assessment-lab/question-banks.originals-49-54.v1.json', 'utf8'));
+const banks55to60 = JSON.parse(fs.readFileSync('data/assessment-lab/question-banks.originals-55-60.v1.json', 'utf8'));
+
+// These seven layers are the only question banks permitted at runtime.
+const clarityWave2Banks = JSON.parse(fs.readFileSync('data/assessment-lab/question-banks.clarity-wave2.v1.json', 'utf8'));
+const clarityWave3Banks = JSON.parse(fs.readFileSync('data/assessment-lab/question-banks.clarity-wave3.v1.json', 'utf8'));
+const clarityWave4Banks = JSON.parse(fs.readFileSync('data/assessment-lab/question-banks.clarity-wave4.v1.json', 'utf8'));
+const clarityWave5Banks = JSON.parse(fs.readFileSync('data/assessment-lab/question-banks.clarity-wave5.v1.json', 'utf8'));
+const clarityWave6Banks = JSON.parse(fs.readFileSync('data/assessment-lab/question-banks.clarity-wave6.v1.json', 'utf8'));
+const clarityWave7Banks = JSON.parse(fs.readFileSync('data/assessment-lab/question-banks.clarity-wave7.v1.json', 'utf8'));
+const safetyHardenedBanks = JSON.parse(fs.readFileSync('data/assessment-lab/question-banks.safety-hardening.v1.json', 'utf8'));
+
+const profilesWave1 = JSON.parse(fs.readFileSync('data/assessment-lab/scientific-profiles.wave1.v1.json', 'utf8')).profiles;
+const profilesCoreList = JSON.parse(fs.readFileSync('data/assessment-lab/scientific-profiles.core-1-12.v1.json', 'utf8')).profiles;
+const profilesCore13to24List = JSON.parse(fs.readFileSync('data/assessment-lab/scientific-profiles.core-13-24.v1.json', 'utf8')).profiles;
+const profilesCore25to36List = JSON.parse(fs.readFileSync('data/assessment-lab/scientific-profiles.core-25-36.v1.json', 'utf8')).profiles;
+const profiles49to54List = JSON.parse(fs.readFileSync('data/assessment-lab/scientific-profiles.originals-49-54.v1.json', 'utf8')).profiles;
+const profiles55to60List = JSON.parse(fs.readFileSync('data/assessment-lab/scientific-profiles.originals-55-60.v1.json', 'utf8')).profiles;
+const profilesCore = Object.fromEntries(profilesCoreList.map((row) => [row.slug, row]));
+const profilesCore13to24 = Object.fromEntries(profilesCore13to24List.map((row) => [row.slug, row]));
+const profilesCore25to36 = Object.fromEntries(profilesCore25to36List.map((row) => [row.slug, row]));
+const profiles49to60 = Object.fromEntries([...profiles49to54List, ...profiles55to60List].map((row) => [row.slug, row]));
+const banksCore25to36 = { ...banksCore25to28, ...banksCore29to32, ...banksCore33to36 };
+const banks49to60 = { ...banks49to54, ...banks55to60 };
+
+const finalReviewedBanks = {
+  ...clarityWave2Banks,
+  ...clarityWave3Banks,
+  ...clarityWave4Banks,
+  ...clarityWave5Banks,
+  ...clarityWave6Banks,
+  ...clarityWave7Banks,
+  ...safetyHardenedBanks,
+};
+
+const runner = fs.readFileSync('components/assessment-monitor-runner.tsx', 'utf8');
+const catalog = fs.readFileSync('lib/assessment-lab/catalog.ts', 'utf8');
+const fail = (message) => { console.error(`ASSESSMENT SCIENTIFIC QUALITY FAILED: ${message}`); process.exitCode = 1; };
+
+if (standard.status !== 'mandatory') fail('scientific quality standard must remain mandatory');
+for (const key of ['construct_definition','intended_population','intended_use','reference_period','response_scale_semantics','domain_map','item_rationale','language_clarity_review','content_validity_review','scientific_references','validation_stage']) {
+  if (!standard.minimum_requirements.includes(key)) fail(`missing minimum requirement ${key}`);
+}
+if (standard.publication_rules?.validated_label_requires_empirical_validation !== true) fail('validated label must require empirical validation');
+if (standard.publication_rules?.mixed_response_semantics_forbidden !== true) fail('mixed response semantics must remain forbidden');
+if (!catalog.includes("AssessmentResponseKind = 'frequency' | 'degree' | 'yes-no'")) fail('catalog must expose explicit response semantics');
+
+const runtimeBankPaths = [
+  'question-banks.clarity-wave2.v1.json',
+  'question-banks.clarity-wave3.v1.json',
+  'question-banks.clarity-wave4.v1.json',
+  'question-banks.clarity-wave5.v1.json',
+  'question-banks.clarity-wave6.v1.json',
+  'question-banks.clarity-wave7.v1.json',
+  'question-banks.safety-hardening.v1.json',
+];
+for (const path of runtimeBankPaths) {
+  if (!catalog.includes(path)) fail(`${path} must be loaded as a final reviewed runtime bank`);
+}
+for (const forbiddenRuntimePath of [
+  'question-banks.v1.json',
+  'question-banks.core-1-12.v1.json',
+  'question-banks.core-13-24.v1.json',
+  'question-banks.core-25-28.v1.json',
+  'question-banks.core-29-32.v1.json',
+  'question-banks.core-33-36.v1.json',
+  'question-banks.originals-49-54.v1.json',
+  'question-banks.originals-55-60.v1.json',
+]) {
+  if (catalog.includes(forbiddenRuntimePath)) fail(`${forbiddenRuntimePath} is historical and must not be loaded by the runtime catalog`);
+}
+
+if (!runner.includes("frequency: ['أبدًا', 'نادرًا', 'أحيانًا', 'غالبًا', 'دائمًا تقريبًا']")) fail('frequency response scale missing');
+if (!runner.includes("degree: ['إطلاقًا', 'بدرجة بسيطة', 'بدرجة متوسطة', 'بدرجة كبيرة', 'بدرجة كبيرة جدًا']")) fail('degree response scale missing');
+if (!runner.includes("'yes-no': ['لا', 'إلى حد ما', 'نعم']")) fail('yes/no response scale missing');
+
+if (Object.keys(finalReviewedBanks).length !== monitors.length) {
+  fail(`expected exactly ${monitors.length} final reviewed runtime banks, found ${Object.keys(finalReviewedBanks).length}`);
+}
+for (const monitor of monitors) {
+  if (!finalReviewedBanks[monitor.slug]) fail(`${monitor.slug} lacks a final reviewed runtime bank`);
+}
+
+const globalQuestionOwners = new Map();
+for (const [slug, questions] of Object.entries(finalReviewedBanks)) {
+  const monitor = monitors.find((row) => row.slug === slug);
+  if (!monitor) fail(`final question bank has no monitor: ${slug}`);
+  if (!Array.isArray(questions) || questions.length !== 16) fail(`${slug} must have exactly 16 reviewed items in its current v1 design`);
+  const normalized = questions.map((q) => q.text.trim().replace(/\s+/g, ' '));
+  if (new Set(normalized).size !== normalized.length) fail(`${slug} contains duplicate item text`);
+  for (let index = 0; index < questions.length; index += 1) {
+    const question = questions[index];
+    if (!question.text || question.text.trim().length < 18) fail(`${slug} contains an underspecified item`);
+    if (!monitor.axes.includes(question.axis)) fail(`${slug} question axis ${question.axis} is outside its domain map`);
+    if (!question.responseKind) fail(`${slug} item ${index + 1} must declare responseKind explicitly`);
+    if (!['frequency','degree','yes-no'].includes(question.responseKind)) fail(`${slug} contains an invalid response semantic`);
+    const key = normalized[index];
+    const previousOwner = globalQuestionOwners.get(key);
+    if (previousOwner && previousOwner !== slug) fail(`exact item duplication across tools: ${previousOwner} and ${slug}`);
+    globalQuestionOwners.set(key, slug);
+  }
+  for (const axis of monitor.axes) {
+    const count = questions.filter((q) => q.axis === axis).length;
+    if (count !== 4) fail(`${slug}/${axis} must contain exactly four items`);
+  }
+}
+
+function validateExplicitOverride(overrideBanks, expectedSlugs, label) {
+  if (Object.keys(overrideBanks).length !== expectedSlugs.length) fail(`${label} must contain exactly ${expectedSlugs.length} designated tools`);
+  for (const slug of expectedSlugs) {
+    const monitor = monitors.find((row) => row.slug === slug);
+    const questions = overrideBanks[slug];
+    if (!monitor || !Array.isArray(questions) || questions.length !== 16) fail(`${slug} ${label} coverage is incomplete`);
+    if (questions.some((question) => !question.responseKind)) fail(`${slug} ${label} items must declare responseKind explicitly`);
+    for (const axis of monitor?.axes ?? []) {
+      if (questions.filter((question) => question.axis === axis).length !== 4) fail(`${slug}/${axis} ${label} must retain four items`);
+    }
+  }
+}
+
+const clarityWave2Slugs = ['mood-daily','sleep-quality','stress-load','caregiver-strain','parenting-stress','family-communication'];
+const clarityWave3Slugs = ['breakup-recovery','grief-adjustment','emotional-regulation','self-compassion'];
+const clarityWave4Slugs = ['loneliness','social-support','burnout-risk','daily-function','sensory-overload','executive-function','attention-daily','school-wellbeing','autism-family-load','adhd-family-support'];
+const clarityWave5Slugs = ['learning-difficulty-support','speech-language-support','intellectual-disability-support','down-syndrome-family','cerebral-palsy-family','hearing-support-family','visual-support-family','chronic-illness-family','emotionally-detached','worry-cycle'];
+const clarityWave6Slugs = ['decision-fatigue','procrastination-cycle','perfectionism-pressure','study-overload','work-boundaries','return-to-work-readiness','digital-overload','social-media-impact','doomscrolling-pattern','gaming-balance','screen-sleep-interference','notification-stress'];
+const clarityWave7Slugs = ['anger-escalation','conflict-repair','assertiveness','boundary-setting','help-seeking','problem-solving','rumination-pattern','uncertainty-tolerance','avoidance-cycle','health-worry','social-anxiety-pattern','performance-anxiety'];
+const safetyHardenedSlugs = ['relationship-safety','trauma-recovery','postpartum-support','recovery-safety','panic-pattern','compulsive-pattern'];
+validateExplicitOverride(clarityWave2Banks, clarityWave2Slugs, 'clarity wave 2');
+validateExplicitOverride(clarityWave3Banks, clarityWave3Slugs, 'clarity wave 3');
+validateExplicitOverride(clarityWave4Banks, clarityWave4Slugs, 'clarity wave 4');
+validateExplicitOverride(clarityWave5Banks, clarityWave5Slugs, 'clarity wave 5');
+validateExplicitOverride(clarityWave6Banks, clarityWave6Slugs, 'clarity wave 6');
+validateExplicitOverride(clarityWave7Banks, clarityWave7Slugs, 'clarity wave 7');
+validateExplicitOverride(safetyHardenedBanks, safetyHardenedSlugs, 'safety hardening');
+
+const reviewedSlugs = [...clarityWave2Slugs, ...clarityWave3Slugs, ...clarityWave4Slugs, ...clarityWave5Slugs, ...clarityWave6Slugs, ...clarityWave7Slugs, ...safetyHardenedSlugs];
+if (reviewedSlugs.length !== monitors.length || new Set(reviewedSlugs).size !== monitors.length) fail('all 60 active Rawafid monitors must be covered exactly once by a clarity/safety review layer');
+for (const monitor of monitors) if (!reviewedSlugs.includes(monitor.slug)) fail(`${monitor.slug} lacks final manual item review coverage`);
+
+function validateProfileSet(slugs, profiles, bankSet, label) {
+  if (Object.keys(bankSet).length !== slugs.length) fail(`expected ${slugs.length} tailored ${label} banks, found ${Object.keys(bankSet).length}`);
+  if (Object.keys(profiles).length !== slugs.length) fail(`expected ${slugs.length} scientific ${label} profiles, found ${Object.keys(profiles).length}`);
+  for (const slug of slugs) {
+    const monitor = monitors.find((row) => row.slug === slug);
+    const profile = profiles[slug];
+    if (!profile) { fail(`missing scientific ${label} profile ${slug}`); continue; }
+    if (!bankSet[slug]) fail(`missing tailored ${label} historical bank ${slug}`);
+    const construct = profile.construct ?? profile.construct_definition;
+    if (!construct || construct.trim().length < 35) fail(`${slug} construct definition is too weak`);
+    if (!profile.intended_population || !profile.intended_use) fail(`${slug} intended population/use missing`);
+    const prohibited = profile.prohibited_uses ?? profile.not_for;
+    if (!Array.isArray(prohibited) || prohibited.length < 3) fail(`${slug} prohibited uses incomplete`);
+    if (!profile.reference_period) fail(`${slug} reference period missing`);
+    const domains = profile.domains ?? profile.domain_map;
+    if (JSON.stringify(domains) !== JSON.stringify(monitor.axes)) fail(`${slug} scientific domains drift from published axes`);
+    if (!profile.item_rationale || profile.item_rationale.trim().length < 45) fail(`${slug} item rationale is too weak`);
+    if (!profile.interpretation_boundary || profile.interpretation_boundary.trim().length < 45) fail(`${slug} interpretation boundary is too weak`);
+    if (!profile.safety || profile.safety.trim().length < 35) fail(`${slug} safety guidance is too weak`);
+    const refs = profile.references ?? profile.scientific_references;
+    if (!Array.isArray(refs) || refs.length < 2 || refs.some((ref) => !ref.url?.startsWith('https://'))) fail(`${slug} requires at least two traceable scientific references`);
+    if (profile.validation_stage === 'validated') fail(`${slug} cannot be marked validated without empirical psychometric evidence`);
+  }
+}
+
+const coreSlugs = ['mood-daily','sleep-quality','stress-load','caregiver-strain','parenting-stress','family-communication','relationship-safety','breakup-recovery','grief-adjustment','trauma-recovery','emotional-regulation','self-compassion'];
+validateProfileSet(coreSlugs, profilesCore, banksCore, 'core-1-12');
+const core13to24Slugs = ['loneliness','social-support','burnout-risk','daily-function','sensory-overload','executive-function','attention-daily','school-wellbeing','postpartum-support','recovery-safety','autism-family-load','adhd-family-support'];
+validateProfileSet(core13to24Slugs, profilesCore13to24, banksCore13to24, 'core-13-24');
+const core25to36Slugs = ['learning-difficulty-support','speech-language-support','intellectual-disability-support','down-syndrome-family','cerebral-palsy-family','hearing-support-family','visual-support-family','chronic-illness-family','emotionally-detached','panic-pattern','worry-cycle','compulsive-pattern'];
+validateProfileSet(core25to36Slugs, profilesCore25to36, banksCore25to36, 'core-25-36');
+const originals49to60Slugs = ['anger-escalation','conflict-repair','assertiveness','boundary-setting','help-seeking','problem-solving','rumination-pattern','uncertainty-tolerance','avoidance-cycle','health-worry','social-anxiety-pattern','performance-anxiety'];
+validateProfileSet(originals49to60Slugs, profiles49to60, banks49to60, 'originals-49-60');
+
+const allLegacyCoreSlugs = [...coreSlugs, ...core13to24Slugs, ...core25to36Slugs];
+if (allLegacyCoreSlugs.length !== 36 || new Set(allLegacyCoreSlugs).size !== 36) fail('all 36 legacy tools must be uniquely covered by scientific dossiers and historical tailored banks');
+for (const [slug, profile] of Object.entries(profilesWave1)) if (profile.validation_stage === 'validated') fail(`${slug} cannot be marked validated without empirical psychometric evidence`);
+
+if (!process.exitCode) {
+  console.log(`Assessment scientific quality gate passed: ${Object.keys(finalReviewedBanks).length} final reviewed runtime banks; all 60 Rawafid monitors have explicit response semantics and final manual clarity/safety review coverage; historical banks are excluded from runtime; exact cross-tool duplicates are forbidden; validated labels remain forbidden without empirical evidence.`);
+  execFileSync(process.execPath, ['scripts/assessment-lab-scientific-hardening-v2-contract.mjs'], { stdio: 'inherit' });
+}

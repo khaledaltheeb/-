@@ -2,13 +2,13 @@ const base=process.env.SMOKE_BASE_URL||'http://127.0.0.1:3000';
 const preservedRoutes=[
   ['/hubs/','من السؤال إلى مسار معرفة وخدمة متكامل',true],
   ['/hubs/angle-001/','القلق: التعريف والمفهوم',true],
-  ['/encyclopedia/concept-0001/','القلق: ما هو؟ ومتى يتحول من استجابة طبيعية إلى مشكلة تحتاج تقييمًا؟',true],
-  ['/addiction/','منظومة عربية مؤسسية للإدمان: من الطوارئ إلى التعافي الوظيفي',false],
-  ['/addiction/protocol-atlas/','أطلس علاج اضطرابات الإدمان: كيف تُبنى الخطة من التقييم إلى التعافي؟',true],
-  ['/family-guide/tools/behavior-log/','سجل السلوك والسياق الوظيفي',true],
 ];
 const upgradedRoutes=[
   ['/quick-info/accountability-vs-self-blame/','تحمل مسؤولية أم جلد ذات'],
+  ['/addiction/','منظومة عربية مؤسسية للإدمان: من الطوارئ إلى التعافي الوظيفي'],
+  ['/encyclopedia/concept-0001/','القلق: ما هو؟ ومتى يتحول من استجابة طبيعية إلى مشكلة تحتاج تقييمًا؟'],
+  ['/addiction/protocol-atlas/','أطلس علاج اضطرابات الإدمان: كيف تُبنى الخطة من التقييم إلى التعافي؟'],
+  ['/family-guide/tools/behavior-log/','سجل السلوك والسياق الوظيفي'],
 ];
 let failed=false;
 for(const [route,marker,requiresPreservedBanner] of preservedRoutes){
@@ -45,4 +45,4 @@ for(const unknownPath of ['/__legacy_preservation_route_that_never_existed__','/
   }catch(error){console.error(`LEGACY_PRESERVED_UNKNOWN ${unknownPath}:`,error);failed=true;}
 }
 if(failed)process.exit(1);
-console.log('Legacy preservation runtime smoke passed: upgraded and fallback production routes render directly, invented routes return true 404 responses.');
+console.log('Legacy preservation runtime smoke passed: reviewed canonical takeovers are indexable, unreviewed fallbacks stay noindex, and invented routes return true 404 responses.');

@@ -1,0 +1,30 @@
+name: Canonical Ownership Gate
+
+on:
+  pull_request:
+    branches: [main, cloudflare-workers-deploy]
+  push:
+    branches: [main, foundation-v3, final-hardening]
+
+concurrency:
+  group: canonical-ownership-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  canonical-ownership:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Atomic canonical ownership contract
+        run: node scripts/canonical-ownership-contract.mjs

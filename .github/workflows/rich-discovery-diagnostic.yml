@@ -1,0 +1,105 @@
+# Re-run after crawler-head curl fallback
+name: Rich Discovery Diagnostic
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/rich-discovery-diagnostic.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
+      NEXT_PUBLIC_SITE_URL: https://healthrenewal.org
+      NEXT_PUBLIC_ALLOW_INDEXING: 'true'
+      NEXT_PUBLIC_ENABLE_ANALYTICS: 'true'
+      NEXT_PUBLIC_GTM_ID: GTM-WBLQVBG4
+      NEXT_PUBLIC_GA_MEASUREMENT_ID: G-VLZMV8Y4JP
+      NEXT_PUBLIC_ENABLE_DIRECT_GA: 'true'
+      SEO_GATE_BASE_URL: http://127.0.0.1:3000
+      SEO_GATE_CONCURRENCY: '12'
+      SEO_GATE_TIMEOUT_MS: '60000'
+      SEO_GATE_MAX_URLS: '80'
+      SEO_GATE_PAGE_ATTEMPTS: '3'
+      SEO_GATE_PAGE_RETRY_DELAY_MS: '300'
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Install deterministic Arabic image build dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends imagemagick fontconfig fonts-noto-core librsvg2-bin
+      - name: Build local production candidate
+        run: npm run build
+      - name: Start local production candidate server
+        shell: bash
+        run: |
+          set -euo pipefail
+          nohup npm run start -- --hostname 127.0.0.1 --port 3000 > /tmp/rawafid-rich-candidate.log 2>&1 &
+          echo "$!" > /tmp/rawafid-rich-candidate.pid
+          ready=0
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:3000/ >/dev/null; then
+              ready=1
+              break
+            fi
+            sleep 1
+          done
+          if [ "$ready" -ne 1 ]; then
+            cat /tmp/rawafid-rich-candidate.log >&2 || true
+            exit 1
+          fi
+      - name: Inspect representative route heads
+        shell: bash
+        run: |
+          set -euo pipefail
+          for route in \
+            /accessibility-statement/ \
+            /accessibility/accessible-participation-travel/ \
+            /addiction/ \
+            /addiction/audiences/family/ \
+            /addiction/protocol-atlas/; do
+            echo "--- HEAD $route ---"
+            curl -fsS -A 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)' "http://127.0.0.1:3000${route}" \
+              | awk 'BEGIN{RS="</head>"} NR==1{print}' \
+              | sed 's/></>\n</g' \
+              | grep -Ei 'canonical|og:url|og:image|twitter:image|og:site_name|healthrenewal\.org|robots' \
+              | head -n 120 || true
+          done
+      - name: Run isolated rich discovery gate
+        shell: bash
+        run: |
+          set +e
+          node scripts/rich-discovery-gate.mjs > /tmp/rich-discovery.log 2>&1
+          status=$?
+          echo '--- rich discovery diagnostic ---'
+          tail -n 320 /tmp/rich-discovery.log
+          if [ "$status" -ne 0 ]; then
+            echo "Rich discovery diagnostic failed with status $status"
+            exit "$status"
+          fi
+      - name: Stop local candidate
+        if: always()
+        shell: bash
+        run: |
+          set +e
+          if [ -f /tmp/rawafid-rich-candidate.pid ]; then
+            kill "$(cat /tmp/rawafid-rich-candidate.pid)" 2>/dev/null || true
+          fi

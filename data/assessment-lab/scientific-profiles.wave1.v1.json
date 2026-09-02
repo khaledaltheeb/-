@@ -1,0 +1,174 @@
+{
+  "schema_version": 1,
+  "wave": "rawafid-original-37-48",
+  "profiles": {
+    "decision-fatigue": {
+      "construct_definition": "مراقبة صعوبة اتخاذ القرارات عندما تتكاثر الخيارات أو القرارات المتتابعة، مع التركيز على التأجيل والاستنزاف الذهني ووضوح الأولويات. لا تُعامل الظاهرة هنا كتشخيص مستقل ولا كقدرة ثابتة.",
+      "intended_population": "البالغون والطلاب القادرون على الإبلاغ الذاتي عن قراراتهم اليومية.",
+      "intended_use": "تحديد السياقات التي يصبح فيها اتخاذ القرار مرهقًا أو معطلاً، وتجربة استراتيجيات تبسيط وترتيب الأولويات.",
+      "not_for": ["التشخيص", "تقييم الأهلية القانونية لاتخاذ القرار", "قياس الذكاء أو القدرة التنفيذية"],
+      "reference_period": "الأسبوع الماضي",
+      "domains": ["كثرة الخيارات", "تأجيل القرار", "الاستنزاف الذهني", "وضوح الأولويات"],
+      "interpretation_boundary": "الأدبيات حول decision fatigue غير متجانسة، لذلك لا تُستخدم الأداة لإثبات وجود ظاهرة سريرية مستقلة أو سببية محددة.",
+      "scientific_references": [
+        {"title":"Decision fatigue: a conceptual analysis","url":"https://pubmed.ncbi.nlm.nih.gov/?term=decision+fatigue+conceptual+analysis"},
+        {"title":"Choice overload and decision making literature","url":"https://pubmed.ncbi.nlm.nih.gov/?term=choice+overload+decision+making+meta-analysis"}
+      ],
+      "validation_stage": "item-development"
+    },
+    "procrastination-cycle": {
+      "construct_definition": "مراقبة نمط التأجيل الطوعي لمهمة مقصودة رغم توقع عواقب سلبية، مع التركيز على بدء المهمة وتجنب عدم الراحة وضغط الموعد والعودة للمهمة.",
+      "intended_population": "البالغون والطلاب.",
+      "intended_use": "تمييز أين تحدث دورة التسويف وما الذي يحافظ عليها وظيفيًا.",
+      "not_for": ["تشخيص اضطراب نفسي", "الحكم الأخلاقي على الدافعية"],
+      "reference_period": "الأسبوع الماضي",
+      "domains": ["تأجيل البدء", "تجنب عدم الراحة", "ضغط الموعد", "العودة للمهمة"],
+      "interpretation_boundary": "التسويف سلوك متعدد الأسباب وقد يرتبط بالقلق أو الاكتئاب أو ADHD أو ظروف البيئة؛ الأداة لا تحدد السبب السريري.",
+      "scientific_references": [
+        {"title":"The nature of procrastination: a meta-analytic and theoretical review","url":"https://pubmed.ncbi.nlm.nih.gov/?term=procrastination+meta-analysis+Steel"},
+        {"title":"Procrastination and self-regulation research","url":"https://pubmed.ncbi.nlm.nih.gov/?term=procrastination+self-regulation+review"}
+      ],
+      "validation_stage": "item-development"
+    },
+    "perfectionism-pressure": {
+      "construct_definition": "مراقبة الضغط الناتج عن معايير شديدة الصرامة والخوف من الخطأ وإعادة العمل وصعوبة الاكتفاء بمستوى مناسب من الجودة.",
+      "intended_population": "المراهقون الأكبر سنًا والبالغون، خصوصًا في سياقات الدراسة والعمل.",
+      "intended_use": "ملاحظة أنماط الكمالية التي ترفع التكلفة النفسية أو تعطل الإنجاز.",
+      "not_for": ["تشخيص اضطراب", "إعادة إنتاج مقاييس كمالية محمية"],
+      "reference_period": "الأسبوع الماضي",
+      "domains": ["معايير قاسية", "الخوف من الخطأ", "إعادة العمل", "الاكتفاء بالجيد"],
+      "interpretation_boundary": "الكمالية متعددة الأبعاد؛ بعض السعي للجودة قد يكون تكيفيًا، ولذلك يتركز التفسير على الصرامة والضيق والتعطيل الوظيفي لا على الطموح وحده.",
+      "scientific_references": [
+        {"title":"Perfectionism and psychopathology meta-analysis","url":"https://pubmed.ncbi.nlm.nih.gov/?term=perfectionism+psychopathology+meta-analysis"},
+        {"title":"Clinical perfectionism literature","url":"https://pubmed.ncbi.nlm.nih.gov/?term=clinical+perfectionism+review"}
+      ],
+      "validation_stage": "item-development"
+    },
+    "study-overload": {
+      "construct_definition": "مراقبة اختلال التوازن بين المتطلبات الأكاديمية والوقت والطاقة والقدرة على الاستعادة، مع التركيز على التراكم ووضوح الخطة والاستراحة والأثر على الأداء.",
+      "intended_population": "طلاب المدارس الثانوية والجامعات والبرامج التدريبية مع تكييف اللغة حسب العمر.",
+      "intended_use": "كشف أنماط الحمل الدراسي القابل للتعديل وتنظيم الأولويات وطلب الدعم.",
+      "not_for": ["تشخيص الاحتراق الأكاديمي", "تحديد القدرة الأكاديمية"],
+      "reference_period": "الأسبوع الماضي",
+      "domains": ["تراكم المتطلبات", "وضوح الخطة", "الاستراحة", "الأثر على النوم"],
+      "interpretation_boundary": "الحمل الدراسي يعتمد على السياق والموارد والدعم، لذلك لا يفسر العدد الخام للمهام وحده بوصفه مشكلة.",
+      "scientific_references": [
+        {"title":"Academic stress and student wellbeing systematic review","url":"https://pubmed.ncbi.nlm.nih.gov/?term=academic+stress+students+systematic+review"},
+        {"title":"Academic burnout and workload literature","url":"https://pubmed.ncbi.nlm.nih.gov/?term=academic+burnout+workload+systematic+review"}
+      ],
+      "validation_stage": "item-development"
+    },
+    "work-boundaries": {
+      "construct_definition": "مراقبة قدرة الشخص على الفصل العملي والنفسي بين متطلبات العمل والحياة خارج العمل، بما يشمل الاستجابة بعد الدوام والاستعادة والانفصال النفسي.",
+      "intended_population": "العاملون البالغون، بما في ذلك العمل عن بعد والعمل الهجين.",
+      "intended_use": "تحديد مواطن تسرب العمل إلى وقت الاستعادة وما إذا كانت الحدود الحالية قابلة للتنفيذ.",
+      "not_for": ["تشخيص الاحتراق المهني", "تقييم أداء الموظف"],
+      "reference_period": "الأسبوع الماضي",
+      "domains": ["وقت التوقف", "التوفر خارج الدوام", "الاستعادة", "حماية الوقت الشخصي"],
+      "interpretation_boundary": "الحدود المفضلة تختلف بين الأفراد والثقافات والوظائف؛ التفسير يركز على التوافق والضيق والاستعادة لا على نموذج واحد مثالي.",
+      "scientific_references": [
+        {"title":"Psychological detachment from work and recovery meta-analysis","url":"https://pubmed.ncbi.nlm.nih.gov/?term=psychological+detachment+work+recovery+meta-analysis"},
+        {"title":"Work-home boundary management literature","url":"https://pubmed.ncbi.nlm.nih.gov/?term=work+home+boundary+management+review"}
+      ],
+      "validation_stage": "item-development"
+    },
+    "return-to-work-readiness": {
+      "construct_definition": "مراقبة الاستعداد الوظيفي العملي للعودة إلى العمل بعد انقطاع، عبر الطاقة والثقة بالقدرة والمتطلبات المتوقعة والدعم والتدرج الممكن.",
+      "intended_population": "بالغون يستعدون للعودة إلى العمل بعد إجازة مرضية أو انقطاع طويل أو تغيير صحي/حياتي.",
+      "intended_use": "تنظيم النقاش حول التدرج والتعديلات والدعم قبل العودة.",
+      "not_for": ["إقرار اللياقة الطبية", "تحديد صلاحية قانونية أو مهنية للعمل", "استبدال طب العمل"],
+      "reference_period": "الأسبوعان الماضيان مع توقعات الأسبوعين القادمين",
+      "domains": ["الطاقة الوظيفية", "تحمل المهام", "الدعم المتوقع", "التدرج في العودة"],
+      "interpretation_boundary": "الاستعداد الذاتي لا يساوي الجاهزية الطبية أو المهنية الرسمية، ويجب فصل التقييم الذاتي عن قرارات الطبيب أو جهة العمل.",
+      "scientific_references": [
+        {"title":"Return-to-work self-efficacy systematic review","url":"https://pubmed.ncbi.nlm.nih.gov/?term=return+to+work+self-efficacy+systematic+review"},
+        {"title":"Return to work rehabilitation literature","url":"https://pubmed.ncbi.nlm.nih.gov/?term=return+to+work+rehabilitation+systematic+review"}
+      ],
+      "validation_stage": "item-development"
+    },
+    "digital-overload": {
+      "construct_definition": "مراقبة الحمل الناتج عن كثافة المعلومات والتنقل بين التطبيقات والمقاطعات الرقمية وصعوبة الانفصال، مع التركيز على أثرها في الانتباه والاستعادة والوظيفة.",
+      "intended_population": "المراهقون الأكبر سنًا والبالغون المستخدمون المنتظمون للأجهزة الرقمية.",
+      "intended_use": "تحديد أنماط الحمل الرقمي القابلة للتعديل في البيئة والسلوك.",
+      "not_for": ["تشخيص إدمان", "الحكم على مقدار شاشة ثابت باعتباره ضارًا للجميع"],
+      "reference_period": "الأسبوع الماضي",
+      "domains": ["تعدد المنصات", "تشتت الانتباه", "الإرهاق البصري", "وقت الانفصال"],
+      "interpretation_boundary": "الضرر لا يُستنتج من زمن الاستخدام وحده؛ السياق ونوع النشاط والإجبارية والأثر الوظيفي أكثر أهمية.",
+      "scientific_references": [
+        {"title":"Technostress and information overload literature","url":"https://pubmed.ncbi.nlm.nih.gov/?term=technostress+information+overload+systematic+review"},
+        {"title":"Digital wellbeing literature","url":"https://pubmed.ncbi.nlm.nih.gov/?term=digital+wellbeing+systematic+review"}
+      ],
+      "validation_stage": "item-development"
+    },
+    "social-media-impact": {
+      "construct_definition": "مراقبة أثر نمط استخدام وسائل التواصل في المزاج والمقارنة الاجتماعية والنوم والعلاقات والقدرة على التحكم بالاستخدام، بدل قياس الزمن وحده.",
+      "intended_population": "المراهقون الأكبر سنًا والبالغون.",
+      "intended_use": "التمييز بين استخدام عادي واستخدام يرتبط بضيق أو تعطيل وظيفي أو فقدان سيطرة.",
+      "not_for": ["تشخيص إدمان وسائل التواصل", "اعتبار كل استخدام مرتفع الوقت مرضيًا"],
+      "reference_period": "الأسبوع الماضي",
+      "domains": ["المقارنة الاجتماعية", "المزاج بعد الاستخدام", "الوقت المستهلك", "التحكم بالاختيار"],
+      "interpretation_boundary": "الروابط بين الاستخدام والصحة النفسية تعتمد على نوع الاستخدام والفرد والسياق، وكثير من الأدلة رصدية ولا تثبت السببية.",
+      "scientific_references": [
+        {"title":"Problematic social media use and mental health systematic review","url":"https://pubmed.ncbi.nlm.nih.gov/?term=problematic+social+media+use+mental+health+systematic+review"},
+        {"title":"Social media use and wellbeing meta-analysis","url":"https://pubmed.ncbi.nlm.nih.gov/?term=social+media+wellbeing+meta-analysis"}
+      ],
+      "validation_stage": "item-development"
+    },
+    "doomscrolling-pattern": {
+      "construct_definition": "مراقبة نمط الاستمرار في استهلاك أخبار أو محتوى سلبي رغم ازدياد الضيق وصعوبة التوقف، مع ربطه بالمحفزات والأثر على النوم والانتباه.",
+      "intended_population": "البالغون والمراهقون الأكبر سنًا الذين يستخدمون الأخبار والمنصات الرقمية بانتظام.",
+      "intended_use": "تحديد الحلقة السلوكية بين القلق والبحث المتكرر عن المعلومات والضيق اللاحق.",
+      "not_for": ["تشخيص اضطراب قلق", "منع متابعة الأخبار المهمة"],
+      "reference_period": "الأسبوع الماضي",
+      "domains": ["الاندفاع للمتابعة", "صعوبة التوقف", "القلق بعد التصفح", "العودة للنشاط"],
+      "interpretation_boundary": "مصطلح doomscrolling حديث نسبيًا وأدلته أقل نضجًا من بناءات نفسية أقدم؛ لذلك تبقى الأداة وصفية/سلوكية.",
+      "scientific_references": [
+        {"title":"Doomscrolling and mental health literature","url":"https://pubmed.ncbi.nlm.nih.gov/?term=doomscrolling+mental+health"},
+        {"title":"Problematic news consumption literature","url":"https://pubmed.ncbi.nlm.nih.gov/?term=problematic+news+consumption+mental+health"}
+      ],
+      "validation_stage": "item-development"
+    },
+    "gaming-balance": {
+      "construct_definition": "مراقبة توازن اللعب الرقمي مع النوم والدراسة/العمل والعلاقات والقدرة على التوقف، مع عدم مساواة كثرة اللعب تلقائيًا بالاضطراب.",
+      "intended_population": "المراهقون والبالغون الذين يمارسون الألعاب الرقمية.",
+      "intended_use": "رصد الأثر الوظيفي وفقدان السيطرة والأولويات المتزاحمة.",
+      "not_for": ["تشخيص gaming disorder", "وصم اللعب الترفيهي"],
+      "reference_period": "الأسبوعان الماضيان",
+      "domains": ["مدة اللعب", "التحكم بالتوقف", "تأثير اللعب على الالتزامات", "التعافي بعد اللعب"],
+      "interpretation_boundary": "التشخيص الرسمي لاضطراب الألعاب يتطلب نمطًا مستمرًا واختلالًا وظيفيًا ملحوظًا وتقييمًا مناسبًا؛ هذه الأداة لا تطبق معايير تشخيصية.",
+      "scientific_references": [
+        {"title":"WHO Gaming disorder","url":"https://www.who.int/standards/classifications/frequently-asked-questions/gaming-disorder"},
+        {"title":"Gaming disorder research review","url":"https://pubmed.ncbi.nlm.nih.gov/?term=gaming+disorder+systematic+review"}
+      ],
+      "validation_stage": "item-development"
+    },
+    "screen-sleep-interference": {
+      "construct_definition": "مراقبة الطرق التي قد يتداخل بها استخدام الشاشة قرب وقت النوم مع توقيت النوم والاستثارة والتأخير والمقاطعات، دون افتراض أن الضوء الأزرق هو الآلية الوحيدة.",
+      "intended_population": "المراهقون الأكبر سنًا والبالغون.",
+      "intended_use": "تحديد سلوكيات رقمية مسائية قابلة للتجربة والتعديل ومراقبة علاقتها بالنوم.",
+      "not_for": ["تشخيص الأرق", "إرجاع كل مشكلات النوم للشاشات"],
+      "reference_period": "الأسبوع الماضي",
+      "domains": ["الشاشة قبل النوم", "تأخير موعد النوم", "الاستيقاظ للشاشة", "النشاط الصباحي"],
+      "interpretation_boundary": "العلاقة بين الشاشات والنوم متعددة الآليات وتشمل إزاحة الوقت والاستثارة والمحتوى والإشعارات إضافة إلى الضوء؛ الأداة لا تحدد السببية.",
+      "scientific_references": [
+        {"title":"Portable screen media use and sleep systematic review/meta-analysis","url":"https://pubmed.ncbi.nlm.nih.gov/?term=screen+media+sleep+systematic+review+meta-analysis"},
+        {"title":"Bedtime media use and sleep literature","url":"https://pubmed.ncbi.nlm.nih.gov/?term=bedtime+screen+use+sleep+review"}
+      ],
+      "validation_stage": "item-development"
+    },
+    "notification-stress": {
+      "construct_definition": "مراقبة أثر الإشعارات والمقاطعات الرقمية في تحويل الانتباه والتوتر المتوقع وصعوبة استعادة التركيز والشعور بالحاجة للاستجابة الفورية.",
+      "intended_population": "المراهقون الأكبر سنًا والبالغون مستخدمو الهواتف والأجهزة المتصلة.",
+      "intended_use": "تحديد أنواع الإشعارات والسياقات التي ترفع تكلفة المقاطعة وتجربة سياسات إشعار أكثر ملاءمة.",
+      "not_for": ["تشخيص اضطراب انتباه", "اعتبار كل إشعار ضارًا"],
+      "reference_period": "الأسبوع الماضي",
+      "domains": ["تواتر المقاطعة", "الاستجابة التلقائية", "التوتر عند التنبيه", "إدارة الإشعارات"],
+      "interpretation_boundary": "تكلفة المقاطعة تتغير بحسب المهمة والسياق ونوع الإشعار؛ الأداة تراقب النمط الشخصي ولا تقيس قدرة انتباه سريرية.",
+      "scientific_references": [
+        {"title":"Attentional cost of cell phone notifications","url":"https://pubmed.ncbi.nlm.nih.gov/?term=cell+phone+notifications+attention"},
+        {"title":"Digital interruptions and attention literature","url":"https://pubmed.ncbi.nlm.nih.gov/?term=digital+interruptions+attention+review"}
+      ],
+      "validation_stage": "item-development"
+    }
+  }
+}

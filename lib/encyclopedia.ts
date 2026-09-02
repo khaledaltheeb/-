@@ -76,10 +76,22 @@ function asString(value: unknown) {
   return typeof value === 'string' ? value.trim() : '';
 }
 
+function canonicalPath(value: unknown) {
+  const raw = asString(value);
+  if (!raw) return '';
+  if (raw.startsWith('/')) return raw.endsWith('/') ? raw : `${raw}/`;
+  try {
+    const url = new URL(raw);
+    return url.pathname.endsWith('/') ? url.pathname : `${url.pathname}/`;
+  } catch {
+    return '';
+  }
+}
+
 function normalizeItem(row: Record<string, unknown>): EncyclopediaItem | null {
   const slug = asString(row.slug);
   const canonicalUrl = encyclopediaCanonical(slug);
-  if (!canonicalUrl) return null;
+  if (!canonicalUrl || canonicalPath(row.canonical_url) !== canonicalUrl) return null;
   return {
     id: String(row.id),
     slug,
@@ -110,7 +122,7 @@ async function fetchPublishedDbItems(): Promise<EncyclopediaItem[]> {
       const { data, error } = await supabase
         .from('content')
         .select('id,slug,title,excerpt,canonical_url,primary_keyword,updated_at')
-        .eq('content_type', 'condition')
+        .in('content_type', ['glossary_term', 'condition'])
         .eq('status', 'published')
         .eq('robots_index', true)
         .lte('published_at', now)
@@ -179,12 +191,12 @@ export async function getEncyclopediaRecord(slug: string): Promise<EncyclopediaR
       .from('content')
       .select('id,slug,title,excerpt,body_json,body_text,schema_json,content_type,audience,seo_title,seo_description,canonical_url,robots_index,robots_follow,published_at,updated_at,featured_image_url,featured_image_alt,primary_keyword,secondary_keywords,semantic_terms,search_intent,author_display_name,reviewer_display_name,reviewer_credentials,last_reviewed_at,references_json,medical_disclaimer')
       .eq('slug', slug)
-      .eq('content_type', 'condition')
+      .in('content_type', ['glossary_term', 'condition'])
       .eq('status', 'published')
       .lte('published_at', new Date().toISOString())
       .maybeSingle();
 
-    if (!error && data) return data as EncyclopediaRecord;
+    if (!error && data && canonicalPath(data.canonical_url) === canonical) return data as EncyclopediaRecord;
   } catch {
     // The audited static-asset release remains available if Supabase is unavailable.
   }

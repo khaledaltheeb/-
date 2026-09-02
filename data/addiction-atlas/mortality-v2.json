@@ -1,0 +1,26 @@
+{
+  "schema_version": "rawafid-addiction-atlas-mortality-v2",
+  "version": "2.0.0",
+  "updated_on": "2026-08-27",
+  "rules_ar": [
+    "السجل يصف وفيات كُشف فيها الكارفنتانيل ضمن بيانات مراقبة الجرعات الزائدة ولا يثبت أن الكارفنتانيل كان السبب الوحيد في كل وفاة.",
+    "بيانات النصف الأول من 2024 أولية وغير مكتملة كما يذكر CDC، لذلك تعرض الصفة بوضوح ولا تعامل كحصيلة نهائية سنوية.",
+    "لا تحول أعداد الوفيات السكانية إلى احتمال وفاة فردي."
+  ],
+  "records": [
+    {
+      "id": "us-carfentanil-detected-overdose-deaths-h1-2024",
+      "scope_type": "substance",
+      "scope_slug": "carfentanil",
+      "metric_type": "overdose_deaths_with_detection",
+      "value": 238,
+      "qualifier": "at_least; January-June 2024; preliminary/incomplete",
+      "unit": "deaths",
+      "geography": "United States",
+      "year": 2024,
+      "status": "preliminary-incomplete",
+      "definition_ar": "أبلغ CDC عن ما لا يقل عن 238 وفاة جرعة زائدة كُشف فيها الكارفنتانيل خلال يناير–يونيو 2024، مقارنة بـ29 وفاة في الفترة نفسها من 2023. بيانات 2024 كانت أولية وغير مكتملة وقت التقرير ولا تعني أن الكارفنتانيل كان السبب الوحيد في كل وفاة.",
+      "source_id": "cdc-carfentanil-mmwr-2024"
+    }
+  ]
+}

@@ -6,10 +6,12 @@ import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import ContentRenderer from '@/components/content-renderer';
 import LegacyPreservedPageView from '@/components/legacy-preserved-page';
+import QuickInfoCard from '@/components/quick-info-card';
 import { buildSeoMetadata, breadcrumbJsonLd, SITE_URL } from '@/lib/seo';
 import { getLegacyPreservedPage, legacyPreservedMetadata } from '@/lib/legacy-preserved-page';
-import { getQuickInfoRecord, safeQuickInfoReferences, visibleQuickInfoFaq } from '@/lib/quick-info';
+import { getQuickInfoRecord, quickInfoOgPath, safeQuickInfoReferences, visibleQuickInfoFaq } from '@/lib/quick-info';
 import { contentReviewProvenance } from '@/lib/review-provenance';
+import imageStyles from './quick-info-image.module.css';
 
 export const dynamic = 'force-dynamic';
 type Params = Promise<{ slug: string }>;
@@ -30,6 +32,9 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     follow: record.robots_follow,
     type: 'article',
     image: record.featured_image_url,
+    imageAlt: record.featured_image_alt,
+    imageWidth: 1280,
+    imageHeight: 720,
     keywords: [record.primary_keyword, ...(record.secondary_keywords ?? []), ...(record.semantic_terms ?? []).slice(0, 10)].filter(Boolean) as string[],
     publishedTime: record.published_at,
     modifiedTime: record.updated_at,
@@ -49,6 +54,10 @@ export default async function QuickInfoDetailPage({ params }: { params: Params }
 
   const canonical = record.canonical_url || `/quick-info/${slug}/`;
   const url = `${SITE_URL}${canonical}`;
+  const imagePath = quickInfoOgPath(slug);
+  const discoverImageUrl = record.featured_image_url || undefined;
+  const imageAlt = `بطاقة معلومات سريعة من منصة روافد بعنوان «${record.title}»`;
+  const discoverAlt = record.featured_image_alt || `صورة معلومات سريعة مهيأة للاكتشاف من منصة روافد بعنوان «${record.title}»`;
   const references = safeQuickInfoReferences(record.references_json);
   const faqItems = visibleQuickInfoFaq(record.body_json);
   const review = contentReviewProvenance(record);
@@ -73,7 +82,17 @@ export default async function QuickInfoDetailPage({ params }: { params: Params }
     author: record.author_display_name ? { '@type': 'Organization', name: record.author_display_name } : { '@id': `${SITE_URL}/#organization` },
     reviewedBy: review.reviewedBySchema,
     publisher: { '@id': `${SITE_URL}/#organization` },
-    image: record.featured_image_url || `${SITE_URL}/seo-card`,
+    image: discoverImageUrl ? {
+      '@type': 'ImageObject',
+      '@id': `${url}#primary-image`,
+      url: discoverImageUrl,
+      contentUrl: discoverImageUrl,
+      width: 1280,
+      height: 720,
+      caption: discoverAlt,
+      representativeOfPage: true,
+    } : undefined,
+    thumbnailUrl: imagePath ? `${SITE_URL}${imagePath}` : undefined,
     keywords: keywords.join(', '),
     wordCount,
     citation: references.flatMap((reference) => reference.url ? [reference.url] : []),
@@ -91,13 +110,20 @@ export default async function QuickInfoDetailPage({ params }: { params: Params }
   } : null;
   const schemas = [breadcrumbs, articleSchema, ...(faqSchema ? [faqSchema] : [])];
 
-  return <><SiteHeader /><main className="article-shell">
+  return <><SiteHeader /><main className="article-shell" dir="rtl">
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schemas).replace(/</g, '\\u003c') }} />
     <nav className="breadcrumbs" aria-label="مسار الصفحة"><Link href="/">الرئيسية</Link><span>/</span><Link href="/quick-info/">معلومات سريعة</Link><span>/</span><span aria-current="page">{record.title}</span></nav>
     <article><header className="article-hero"><span className="eyebrow">معلومات سريعة</span><h1>{record.title}</h1>{record.excerpt && <p>{record.excerpt}</p>}<div className="article-meta">
       {record.author_display_name && <span>إعداد: {record.author_display_name}</span>}{review.reviewerName && <span>مراجعة: {review.reviewerName}{review.reviewerCredentials ? ` — ${review.reviewerCredentials}` : ''}</span>}{record.published_at && <span>نُشر {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(record.published_at))}</span>}{review.lastReviewedAt && <span>آخر مراجعة {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(review.lastReviewedAt))}</span>}
     </div></header>
-    <div className="article-body">{record.featured_image_url && <figure className="article-featured-image"><Image src={record.featured_image_url} alt={record.featured_image_alt || record.title} width={1280} height={720} sizes="(max-width: 900px) 100vw, 900px" priority unoptimized /></figure>}<ContentRenderer bodyJson={record.body_json} bodyText={record.body_text} recordId={record.id} /></div>
+    <div className="article-body">
+      <QuickInfoCard title={record.title} description={record.excerpt} variant="hero" showAction={false} />
+      <ContentRenderer bodyJson={record.body_json} bodyText={record.body_text} recordId={record.id} />
+      {imagePath && <figure className={imageStyles.figure} data-quick-info-indexable-image>
+        <Image className={imageStyles.image} src={imagePath} alt={imageAlt} width={1200} height={630} sizes="(max-width: 760px) calc(100vw - 36px), 640px" loading="lazy" unoptimized />
+        <figcaption className={imageStyles.caption}>نسخة مرئية قابلة للمشاركة والفهرسة من بطاقة معلومات سريعة — منصة روافد</figcaption>
+      </figure>}
+    </div>
     {record.medical_disclaimer && <aside className="medical-disclaimer" aria-label="إخلاء المسؤولية الطبية"><strong>تنبيه</strong><p>{record.medical_disclaimer}</p><Link href="/disclaimer">إخلاء المسؤولية الكامل</Link></aside>}
     {references.length > 0 && <section className="article-references" aria-labelledby="references-title"><h2 id="references-title">المصادر والمراجع</h2><ol>{references.map((reference, index) => <li key={`${reference.url || reference.title}-${index}`}>{reference.url ? <a href={reference.url} target="_blank" rel="noopener noreferrer">{reference.title || reference.url}</a> : <span>{reference.title}</span>}{reference.publisher && <small>{reference.publisher}</small>}{reference.year && <small>{String(reference.year)}</small>}</li>)}</ol></section>}
     </article>

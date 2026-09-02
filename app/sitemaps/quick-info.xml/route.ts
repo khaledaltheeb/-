@@ -1,39 +1,31 @@
+import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { sitemapResponse } from '@/lib/sitemap-xml';
+import { INDEXING_ENABLED, SITE_URL } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
 const PAGE_SIZE = 5000;
 const DB_BATCH_SIZE = 1000;
+const QUICK_INFO_HUB = { path: '/quick-info/' } as const;
 
 type JsonRecord = Record<string, unknown>;
+type QuickInfoSitemapRecord = { id: string; slug: string; canonical_url: string | null; updated_at: string | null; schema_json: JsonRecord | null };
 
-type QuickInfoSitemapRecord = {
-  id: string;
-  slug: string;
-  canonical_url: string | null;
-  updated_at: string | null;
-  schema_json: JsonRecord | null;
-};
-
-function asRecord(value: unknown): JsonRecord | null {
-  return value && typeof value === 'object' && !Array.isArray(value) ? value as JsonRecord : null;
-}
-
-function asString(value: unknown) {
-  return typeof value === 'string' ? value.trim() : '';
-}
-
+function asRecord(value: unknown): JsonRecord | null { return value && typeof value === 'object' && !Array.isArray(value) ? value as JsonRecord : null; }
+function asString(value: unknown) { return typeof value === 'string' ? value.trim() : ''; }
+function escapeXml(value: string) { return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;'); }
+function absolute(path: string) { return `${SITE_URL}${path.startsWith('/') ? path : `/${path}`}`; }
 function publicationApproved(schema: unknown): boolean {
   const record = asRecord(schema);
-  return Boolean(
-    record
-    && asString(record.page_role) === 'quick-info'
-    && record.publication_ready === true
-    && record.editorial_review_required === false,
-  );
+  return Boolean(record && asString(record.page_role) === 'quick-info' && record.publication_ready === true && record.editorial_review_required === false);
+}
+function response(rows: string) {
+  return new NextResponse(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">${rows}</urlset>`, {
+    headers: { 'Content-Type': 'application/xml; charset=utf-8', 'Cache-Control': 'public, max-age=0, s-maxage=900, stale-while-revalidate=3600' },
+  });
 }
 
 export async function GET(request: Request) {
+  if (!INDEXING_ENABLED) return response('');
   const url = new URL(request.url);
   const raw = Number(url.searchParams.get('page') ?? '0');
   const page = Number.isInteger(raw) && raw >= 0 && raw < 10000 ? raw : 0;
@@ -53,17 +45,10 @@ export async function GET(request: Request) {
       .eq('status', 'published')
       .eq('robots_index', true)
       .lte('published_at', now)
-      .order('title', { ascending: true })
       .order('id', { ascending: true })
       .range(batchStart, batchEnd);
-
-    if (error) {
-      throw new Error(`quick-info sitemap query failed at rows ${batchStart}-${batchEnd}: ${error.message}`);
-    }
-    if (!Array.isArray(batch)) {
-      throw new Error('quick-info sitemap query returned no data array');
-    }
-
+    if (error) throw new Error(`quick-info sitemap query failed at rows ${batchStart}-${batchEnd}: ${error.message}`);
+    if (!Array.isArray(batch)) throw new Error('quick-info sitemap query returned no data array');
     data.push(...(batch as QuickInfoSitemapRecord[]));
     if (batch.length < requestedRows) break;
   }
@@ -75,28 +60,20 @@ export async function GET(request: Request) {
     if (!routeSlug || !/^[a-z0-9][a-z0-9-]*$/.test(routeSlug)) return [];
     const canonicalUrl = asString(row.canonical_url) || `/quick-info/${routeSlug}/`;
     if (canonicalUrl !== `/quick-info/${routeSlug}/`) return [];
-    return [{ canonicalUrl, updatedAt: typeof row.updated_at === 'string' ? row.updated_at : null }];
+    return [{ routeSlug, canonicalUrl, updatedAt: typeof row.updated_at === 'string' ? row.updated_at : null }];
   });
 
-  const hub = page === 0
-    ? [{
-        path: '/quick-info/',
-        lastModified: items.reduce<string | null>((latest, item) => {
-          if (!item.updatedAt) return latest;
-          return !latest || item.updatedAt > latest ? item.updatedAt : latest;
-        }, null),
-        changeFrequency: 'weekly' as const,
-        priority: .82,
-      }]
-    : [];
+  const rows: string[] = [];
+  if (page === 0) {
+    const latest = items.reduce<string | null>((value, item) => !item.updatedAt ? value : !value || item.updatedAt > value ? item.updatedAt : value, null);
+    rows.push(`<url><loc>${escapeXml(absolute(QUICK_INFO_HUB.path))}</loc>${latest ? `<lastmod>${escapeXml(new Date(latest).toISOString())}</lastmod>` : ''}<changefreq>weekly</changefreq><priority>0.8</priority></url>`);
+  }
 
-  return sitemapResponse([
-    ...hub,
-    ...items.map((item) => ({
-      path: item.canonicalUrl,
-      lastModified: item.updatedAt,
-      changeFrequency: 'monthly' as const,
-      priority: .74,
-    })),
-  ]);
+  for (const item of items) {
+    const discoverUrl = absolute(`/quick-info/discover/${item.routeSlug}.png`);
+    const cardUrl = absolute(`/quick-info/og/${item.routeSlug}.png`);
+    rows.push(`<url><loc>${escapeXml(absolute(item.canonicalUrl))}</loc>${item.updatedAt ? `<lastmod>${escapeXml(new Date(item.updatedAt).toISOString())}</lastmod>` : ''}<changefreq>monthly</changefreq><priority>0.7</priority><image:image><image:loc>${escapeXml(discoverUrl)}</image:loc></image:image><image:image><image:loc>${escapeXml(cardUrl)}</image:loc></image:image></url>`);
+  }
+
+  return response(rows.join(''));
 }

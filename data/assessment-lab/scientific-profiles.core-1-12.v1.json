@@ -1,0 +1,221 @@
+{
+  "schema_version": 1,
+  "profiles": [
+    {
+      "slug": "mood-daily",
+      "construct": "التغيرات اليومية في المزاج والطاقة والاهتمام والأداء الوظيفي بوصفها مؤشرات متابعة لا تشخيصًا للاكتئاب",
+      "construct_confidence": "established-domain_nonstandard-instrument",
+      "intended_population": "البالغون والمراهقون الأكبر سنًا القادرون على وصف حالتهم خلال الأسبوع الماضي",
+      "intended_use": "تنظيم الملاحظة الذاتية وتحديد أنماط التغير والسياقات والأثر الوظيفي",
+      "prohibited_uses": ["تشخيص الاكتئاب", "تحديد شدة اضطراب نفسي", "اتخاذ قرار دوائي", "استبدال تقييم مهني"],
+      "reference_period": "الأسبوع الماضي",
+      "domains": ["المزاج", "الطاقة", "الاهتمام", "القدرة على أداء المهام"],
+      "interpretation_boundary": "ارتفاع الصعوبة في محور أو أكثر يعني أن هذا الجانب يستحق المتابعة أو النقاش المهني إذا كان مستمرًا أو معطلًا، ولا يثبت اضطرابًا بعينه.",
+      "item_rationale": "يغطي المزاج الوجداني والطاقة والدافعية/الاهتمام والأداء لأن التغير النفسي المفيد سريريًا لا يُفهم من الشعور وحده دون أثره على الوظيفة والسياق.",
+      "safety": "أي أفكار بإيذاء النفس أو فقدان القدرة على الرعاية الأساسية تتجاوز الأداة وتحتاج تقييمًا عاجلًا مناسبًا.",
+      "validation_stage": "item-development",
+      "references": [
+        {"name":"WHO Depression","url":"https://www.who.int/news-room/fact-sheets/detail/depression"},
+        {"name":"FDA PRO Guidance","url":"https://www.fda.gov/regulatory-information/search-fda-guidance-documents/patient-reported-outcome-measures-use-medical-product-development-support-labeling-claims"}
+      ]
+    },
+    {
+      "slug": "sleep-quality",
+      "construct": "جودة نمط النوم المدركة عبر الانتظام وبدء النوم والاستيقاظ والأثر النهاري",
+      "construct_confidence": "established-domain_nonstandard-instrument",
+      "intended_population": "الأشخاص الذين يريدون متابعة نمط نومهم خلال أسبوع",
+      "intended_use": "تحديد أنماط نوم قابلة للملاحظة والسياقات المرتبطة بها والأثر النهاري",
+      "prohibited_uses": ["تشخيص الأرق", "تشخيص انقطاع النفس النومي", "إعطاء درجة بديلة عن PSQI", "تحديد علاج طبي"],
+      "reference_period": "الأسبوع الماضي",
+      "domains": ["انتظام النوم", "بدء النوم", "الاستيقاظ", "النشاط النهاري"],
+      "interpretation_boundary": "النتيجة وصفية؛ النعاس الشديد، الشخير مع اختناق، أو أعراض مستمرة تستدعي تقييمًا طبيًا بدل الاعتماد على المتابعة.",
+      "item_rationale": "يفصل بين توقيت النوم واستمراره والبدء به والنتائج النهارية لتجنب اختزال جودة النوم في عدد الساعات فقط.",
+      "safety": "النعاس الذي يهدد القيادة أو العمل الخطِر أو الاشتباه باضطراب تنفس أثناء النوم يتطلب تقييمًا مهنيًا.",
+      "validation_stage": "item-development",
+      "references": [
+        {"name":"CDC About Sleep","url":"https://www.cdc.gov/sleep/about/index.html"},
+        {"name":"American Academy of Sleep Medicine Sleep Education","url":"https://sleepeducation.org/healthy-sleep/healthy-sleep-habits/"}
+      ]
+    },
+    {
+      "slug": "stress-load",
+      "construct": "الحمل النفسي المدرك بوصفه تفاعلًا بين المتطلبات والسيطرة والاستجابة الجسدية وفرص الاستعادة",
+      "construct_confidence": "established-domain_nonstandard-instrument",
+      "intended_population": "البالغون والمراهقون الأكبر سنًا تحت ضغوط حياتية أو دراسية أو مهنية",
+      "intended_use": "تفكيك مصادر الضغط إلى مكونات قابلة للتصرف بدل إنتاج درجة ضغط كلية غير مقننة",
+      "prohibited_uses": ["تشخيص اضطراب قلق", "تشخيص اضطراب تكيف", "تحديد شدة سريرية", "استبدال تقييم طبي للأعراض الجسدية"],
+      "reference_period": "الأسبوع الماضي",
+      "domains": ["المتطلبات", "الشعور بالسيطرة", "التوتر الجسدي", "الاستعادة"],
+      "interpretation_boundary": "تكرر الضغط مع تدهور النوم أو الوظيفة أو الصحة يستحق تدخلًا مناسبًا، لكن الأداة لا تحدد سببه الطبي أو النفسي.",
+      "item_rationale": "يجمع بين مصادر الضغط والإحساس بالقدرة على التعامل معه والاستجابة الجسدية والاستعادة لأن هذه المكونات تقدم صورة عملية أكثر من سؤال عام عن التوتر.",
+      "safety": "الألم الصدري أو ضيق النفس أو الأعراض الحادة لا تُنسب تلقائيًا إلى الضغط ويجب تقييمها طبيًا حسب السياق.",
+      "validation_stage": "item-development",
+      "references": [
+        {"name":"WHO Stress Q&A","url":"https://www.who.int/news-room/questions-and-answers/item/stress"},
+        {"name":"WHO Doing What Matters in Times of Stress","url":"https://www.who.int/publications/i/item/9789240003927"}
+      ]
+    },
+    {
+      "slug": "caregiver-strain",
+      "construct": "الحمل الوظيفي والعاطفي المرتبط بدور مقدم الرعاية مع التركيز على الإنهاك والوقت والدعم العملي والراحة",
+      "construct_confidence": "established-domain_nonstandard-instrument",
+      "intended_population": "مقدمو الرعاية غير المدفوعي الأجر لأفراد الأسرة أو المقربين",
+      "intended_use": "تحديد جوانب الحمل التي يمكن تعديلها أو طلب دعم بشأنها",
+      "prohibited_uses": ["تشخيص احتراق نفسي", "تقييم جودة الرعاية المقدمة", "الحكم على أهلية مقدم الرعاية", "استبدال أدوات عبء مقدم الرعاية المقننة"],
+      "reference_period": "الأسبوع الماضي",
+      "domains": ["الإنهاك", "الوقت", "الدعم العملي", "الراحة"],
+      "interpretation_boundary": "المشكلة قد تكون في نقص الموارد أو كثافة الرعاية لا في قدرة الشخص؛ لا يجوز استخدام الإجابات للوم مقدم الرعاية.",
+      "item_rationale": "يركز على عناصر قابلة للتدخل: الاستنزاف وضيق الوقت وغياب المساندة وفقدان فترات الراحة.",
+      "safety": "إذا أصبح الإرهاق يهدد سلامة مقدم الرعاية أو الشخص الذي يتلقى الرعاية فيجب ترتيب دعم أو بديل آمن سريعًا.",
+      "validation_stage": "item-development",
+      "references": [
+        {"name":"NIH National Institute on Aging Caregiving","url":"https://www.nia.nih.gov/health/caregiving"},
+        {"name":"CDC Caregiving","url":"https://www.cdc.gov/caregiving/about/index.html"}
+      ]
+    },
+    {
+      "slug": "parenting-stress",
+      "construct": "ضغط الدور الوالدي كما يظهر في الصبر واتساق القواعد والدعم وفرص الاستعادة",
+      "construct_confidence": "established-domain_nonstandard-instrument",
+      "intended_population": "الوالدان أو مقدمو الرعاية الأساسيون للأطفال",
+      "intended_use": "مساعدة الوالد على ملاحظة مصادر الضغط والسلوكيات القابلة للتعديل",
+      "prohibited_uses": ["تشخيص اضطراب لدى الوالد أو الطفل", "تقييم صلاحية الوالدية", "تقرير إساءة أو إهمال اعتمادًا على الدرجة", "استبدال تقييم أسري"],
+      "reference_period": "الأسبوع الماضي",
+      "domains": ["الصبر", "القواعد", "الدعم", "وقت الاستعادة"],
+      "interpretation_boundary": "الضغط الوالدي يتأثر بخصائص الطفل والبيئة والموارد وصحة الوالد؛ لا تُفسر الإجابات كعيب شخصي.",
+      "item_rationale": "تربط الانفعال الوالدي بالبنية المنزلية والدعم والراحة بدل التركيز على لوم الوالد أو سلوك الطفل وحده.",
+      "safety": "إذا كان هناك خوف من فقدان السيطرة أو إيذاء الطفل فيجب تأمين الطفل وطلب مساعدة فورية مناسبة.",
+      "validation_stage": "item-development",
+      "references": [
+        {"name":"CDC Positive Parenting Tips","url":"https://www.cdc.gov/child-development/positive-parenting-tips/index.html"},
+        {"name":"WHO Parenting for Lifelong Health","url":"https://www.who.int/teams/social-determinants-of-health/parenting-for-lifelong-health"}
+      ]
+    },
+    {
+      "slug": "family-communication",
+      "construct": "جودة عمليات التواصل الأسري من خلال الاستماع والاحترام وإصلاح الخلاف ووضوح الطلب",
+      "construct_confidence": "established-domain_nonstandard-instrument",
+      "intended_population": "البالغون والمراهقون الأكبر سنًا داخل أنظمة أسرية",
+      "intended_use": "تحديد أنماط تواصل محددة يمكن مناقشتها أو تدريبها",
+      "prohibited_uses": ["تحديد من المخطئ في الأسرة", "تشخيص اضطراب أسري", "استخدامه كدليل قانوني", "تسوية حالات عنف على أنها مشكلة تواصل متبادل"],
+      "reference_period": "الأسبوع الماضي",
+      "domains": ["الاستماع", "الاحترام", "إصلاح الخلاف", "وضوح الطلب"],
+      "interpretation_boundary": "الأداة تفحص عملية التواصل لا النوايا ولا الشخصية، ولا ينبغي استخدامها لاقتراح وساطة متبادلة عندما توجد إساءة أو سيطرة قسرية.",
+      "item_rationale": "المحاور تغطي استقبال الرسالة وحدود الكرامة وما يحدث بعد الخلاف وكيف تتحول الاحتياجات إلى طلبات واضحة.",
+      "safety": "العنف أو التهديد أو السيطرة القسرية ينقل الحالة إلى مسار أمان لا إلى تدريب تواصل فقط.",
+      "validation_stage": "item-development",
+      "references": [
+        {"name":"WHO Violence Against Women","url":"https://www.who.int/news-room/fact-sheets/detail/violence-against-women"},
+        {"name":"CDC Preventing Intimate Partner Violence","url":"https://www.cdc.gov/intimate-partner-violence/about/index.html"}
+      ]
+    },
+    {
+      "slug": "relationship-safety",
+      "construct": "مؤشرات الأمان والاحترام والحدود وحرية التعبير داخل علاقة قريبة، مع حساسية للعنف والسيطرة القسرية",
+      "construct_confidence": "safety-screen_nonstandard-instrument",
+      "intended_population": "البالغون في العلاقات الحميمة أو القريبة",
+      "intended_use": "مساعدة الشخص على ملاحظة إشارات أمان أو خطر تستحق خطة أمان أو دعمًا مهنيًا",
+      "prohibited_uses": ["إثبات أو نفي وقوع عنف", "إجراء تقييم خطورة جنائي", "مواجهة الطرف المسيء بالنتيجة", "الوساطة الزوجية عند وجود خطر"],
+      "reference_period": "الأسبوع الماضي مع الانتباه لأي حدث خطِر حديث أو متكرر",
+      "domains": ["الاحترام", "الحدود", "حرية التعبير", "الأمان"],
+      "interpretation_boundary": "وجود مؤشر خطر واحد خطير قد يكون أهم من مجموع البنود؛ لا تُجمع الإجابات في درجة كلية ولا يُفسر انخفاض العدد على أنه أمان مضمون.",
+      "item_rationale": "يفصل بين جودة العلاقة وبين مؤشرات السيطرة والخوف والعنف، ويعطي الأولوية للسلامة بدل حساب متوسط.",
+      "safety": "الخنق أو السلاح أو التهديد بالقتل أو الإجبار الجنسي أو التصاعد السريع مؤشرات تستوجب مسار أمان عاجل وفق الخدمات المحلية المناسبة.",
+      "validation_stage": "item-development",
+      "references": [
+        {"name":"WHO Violence Against Women","url":"https://www.who.int/news-room/fact-sheets/detail/violence-against-women"},
+        {"name":"CDC Intimate Partner Violence","url":"https://www.cdc.gov/intimate-partner-violence/about/index.html"}
+      ]
+    },
+    {
+      "slug": "breakup-recovery",
+      "construct": "التكيف الوظيفي والعاطفي بعد انتهاء علاقة عبر الاجترار والاندفاع للتواصل والروتين واستعادة الهوية الذاتية",
+      "construct_confidence": "emerging-composite_nonstandard-instrument",
+      "intended_population": "البالغون والمراهقون الأكبر سنًا بعد انتهاء علاقة عاطفية",
+      "intended_use": "تنظيم المتابعة الذاتية خلال مرحلة التكيف دون مرضنة الحزن الطبيعي",
+      "prohibited_uses": ["تشخيص اضطراب نفسي", "تحديد مدة طبيعية موحدة للتعافي", "الحكم على ضرورة العودة للعلاقة", "تقييم الطرف الآخر"],
+      "reference_period": "الأسبوع الماضي",
+      "domains": ["الاجترار", "الاندفاع للتواصل", "الروتين", "استعادة الذات"],
+      "interpretation_boundary": "الحزن والاشتياق بعد الانفصال متوقعان بدرجات مختلفة؛ الأهمية تزداد عندما يكون هناك تعطيل مستمر أو خطر أو فقدان شديد للوظيفة.",
+      "item_rationale": "يركز على عمليات يمكن ملاحظتها عمليًا بدل محاولة قياس «نجاح التعافي» كمفهوم واحد غير ثابت.",
+      "safety": "المطاردة أو التهديد أو العنف أو أفكار إيذاء النفس تحتاج مسار أمان منفصلًا عن هذه المتابعة.",
+      "validation_stage": "item-development",
+      "references": [
+        {"name":"APA Stress Effects","url":"https://www.apa.org/topics/stress/body"},
+        {"name":"WHO Self-care for health and well-being","url":"https://www.who.int/news-room/questions-and-answers/item/self-care-for-health-and-well-being"}
+      ]
+    },
+    {
+      "slug": "grief-adjustment",
+      "construct": "التكيف مع الفقد عبر شدة موجات الحزن والأداء اليومي والدعم وطريقة حمل الذكرى",
+      "construct_confidence": "established-domain_nonstandard-instrument",
+      "intended_population": "الأشخاص في حالة حزن بعد وفاة أو فقد ذي معنى",
+      "intended_use": "متابعة التكيف والوظيفة واحتياجات الدعم دون تحديد جدول زمني إلزامي للحزن",
+      "prohibited_uses": ["تشخيص اضطراب الحزن المطول", "تحديد أن الحزن غير طبيعي من مدة قصيرة", "فرض مراحل ثابتة للحزن", "استبدال التقييم السريري"],
+      "reference_period": "الأسبوع الماضي",
+      "domains": ["شدة الحزن", "الوظيفة اليومية", "الدعم", "حمل الذكرى"],
+      "interpretation_boundary": "الحزن الطبيعي قد يكون شديدًا ومتذبذبًا؛ التركيز على الاستمرار والوظيفة والدعم والخطر لا على إجبار الشخص على الوصول إلى مرحلة معينة.",
+      "item_rationale": "يتجنب نموذج المراحل الجامد ويقيس التذبذب الوظيفي والدعم واستمرار الارتباط بالذكرى إلى جانب الانخراط في الحياة.",
+      "safety": "أفكار إيذاء النفس أو العجز عن تلبية الاحتياجات الأساسية أو تدهور شديد مستمر تستدعي تقييمًا مهنيًا.",
+      "validation_stage": "item-development",
+      "references": [
+        {"name":"WHO ICD-11 Prolonged Grief Disorder overview via ICD","url":"https://icd.who.int/"},
+        {"name":"WHO mhGAP","url":"https://www.who.int/teams/mental-health-and-substance-use/treatment-care/mental-health-gap-action-programme"}
+      ]
+    },
+    {
+      "slug": "trauma-recovery",
+      "construct": "الاستقرار والتعافي الوظيفي بعد تجربة صادمة عبر الأمان والاستثارة والتجنب والعودة التدريجية للحياة",
+      "construct_confidence": "established-domain_nonstandard-instrument",
+      "intended_population": "البالغون والمراهقون الأكبر سنًا بعد تجربة صادمة مع قدرة على استخدام الأداة دون زيادة خطر فوري",
+      "intended_use": "متابعة أنماط الأمان والاستثارة والتجنب والوظيفة، لا استدعاء تفاصيل الصدمة",
+      "prohibited_uses": ["تشخيص PTSD", "إجراء تعريض علاجي ذاتي", "مطالبة المستخدم بسرد الصدمة", "تقرير الاستعداد لعلاج صدمة متخصص"],
+      "reference_period": "الأسبوع الماضي",
+      "domains": ["الأمان", "الاستثارة", "التجنب", "العودة للحياة"],
+      "interpretation_boundary": "وجود أعراض مشابهة للصدمة لا يثبت PTSD؛ الأولوية للخطر الحالي والاستقرار والوظيفة قبل أي تفسير أوسع.",
+      "item_rationale": "تتبع مكونات شائعة بعد الصدمة دون نسخ مقياس تشخيصي ودون إدخال المستخدم في تفاصيل قد ترفع الضيق.",
+      "safety": "إذا كان الخطر الحالي مستمرًا أو ظهرت أفكار إيذاء النفس أو انفصال شديد عن الواقع، تتوقف المتابعة ويطلب دعم مناسب.",
+      "validation_stage": "item-development",
+      "references": [
+        {"name":"WHO PTSD fact resources","url":"https://www.who.int/news-room/fact-sheets/detail/post-traumatic-stress-disorder"},
+        {"name":"WHO mhGAP","url":"https://www.who.int/teams/mental-health-and-substance-use/treatment-care/mental-health-gap-action-programme"}
+      ]
+    },
+    {
+      "slug": "emotional-regulation",
+      "construct": "تنظيم الانفعال عبر ملاحظة التصاعد والتهدئة وتحديد الشعور واختيار السلوك",
+      "construct_confidence": "established-domain_nonstandard-instrument",
+      "intended_population": "البالغون والمراهقون الأكبر سنًا الراغبون في متابعة مهارات تنظيم الانفعال",
+      "intended_use": "تحديد مواضع القوة والصعوبة في دورة الانفعال والسلوك",
+      "prohibited_uses": ["تشخيص اضطراب شخصية", "تشخيص اضطراب مزاج", "الحكم على السيطرة الذاتية كصفة ثابتة", "احتساب درجة سريرية"],
+      "reference_period": "الأسبوع الماضي",
+      "domains": ["التصاعد", "التهدئة", "تسمية الشعور", "اختيار السلوك"],
+      "interpretation_boundary": "تنظيم الانفعال مهارة تتأثر بالسياق والنوم والضغط والعلاقات، ولا تُفسر الصعوبة كصفة شخصية ثابتة.",
+      "item_rationale": "يفصل بين اكتشاف بداية الانفعال وخفض شدته وفهم نوعه ثم اختيار السلوك، وهي مراحل عملية يمكن تدريبها وملاحظتها.",
+      "safety": "السلوك العنيف أو إيذاء النفس أو فقدان السيطرة المتكرر يحتاج تقييمًا مهنيًا وليس متابعة ذاتية فقط.",
+      "validation_stage": "item-development",
+      "references": [
+        {"name":"Gross JJ Emotion Regulation: Current Status and Future Prospects","url":"https://doi.org/10.1080/1047840X.2014.940781"},
+        {"name":"NIMH Caring for Your Mental Health","url":"https://www.nimh.nih.gov/health/topics/caring-for-your-mental-health"}
+      ]
+    },
+    {
+      "slug": "self-compassion",
+      "construct": "طريقة تعامل الشخص مع نفسه عند الألم أو الخطأ عبر لغة الذات وتقبل النقص والرعاية والمرونة",
+      "construct_confidence": "established-domain_nonstandard-instrument",
+      "intended_population": "البالغون والمراهقون الأكبر سنًا القادرون على التأمل في حديثهم الذاتي",
+      "intended_use": "متابعة أنماط النقد والرعاية والعودة للمحاولة دون نسخ مقياس Self-Compassion Scale",
+      "prohibited_uses": ["إعادة إنتاج Self-Compassion Scale", "تشخيص ضعف تقدير الذات", "اعتبار اللطف تبريرًا للسلوك الضار", "إعطاء درجة معيارية"],
+      "reference_period": "الأسبوع الماضي",
+      "domains": ["لغة الذات", "تقبل النقص", "الرعاية", "المرونة"],
+      "interpretation_boundary": "التعاطف مع الذات لا يعني إنكار الخطأ أو إلغاء المسؤولية؛ الهدف دعم الاستجابة الواقعية والقدرة على الإصلاح.",
+      "item_rationale": "الصياغة مستقلة وتركز على سلوكيات قابلة للملاحظة: الحديث الذاتي، رؤية النقص بصورة إنسانية، الاستجابة للحاجة، والعودة للمحاولة.",
+      "safety": "الاكتئاب الشديد أو إيذاء النفس أو العار الساحق يحتاج تقييمًا يتجاوز أداة المتابعة.",
+      "validation_stage": "item-development",
+      "references": [
+        {"name":"Neff 2003 Self-Compassion","url":"https://doi.org/10.1080/15298860309027"},
+        {"name":"NIMH Caring for Your Mental Health","url":"https://www.nimh.nih.gov/health/topics/caring-for-your-mental-health"}
+      ]
+    }
+  ]
+}

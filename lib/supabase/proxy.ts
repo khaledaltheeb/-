@@ -34,6 +34,8 @@ const redirectExcludedPrefixes = [
   '/specialists-partners/admin',
   '/specialists-partners/portal',
   '/api',
+  '/seo-card',
+  '/quick-info/og',
 ];
 
 const encyclopediaConditionAliases = new Set([
@@ -107,6 +109,16 @@ function applyPreservedAliasSeoHeaders(response: NextResponse, pathname: string)
 }
 
 export async function updateSession(request: NextRequest) {
+  // Canonical host enforcement must happen before auth and database redirect work.
+  // Preserve path/query while permanently consolidating www signals into healthrenewal.org.
+  if (request.nextUrl.hostname.toLowerCase() === 'www.healthrenewal.org') {
+    const canonicalHost = request.nextUrl.clone();
+    canonicalHost.protocol = 'https:';
+    canonicalHost.hostname = 'healthrenewal.org';
+    canonicalHost.port = '';
+    return NextResponse.redirect(canonicalHost, 308);
+  }
+
   const trustedPathname = decodedPathname(request.nextUrl.pathname);
   const forwardedHeaders = () => {
     const headers = new Headers(request.headers);
@@ -134,26 +146,26 @@ export async function updateSession(request: NextRequest) {
   );
 
   const pathname = trustedPathname;
+  // The preservation lookup treats `/legacy` and `/legacy/` as the same historical
+  // production route, matching the database function. Normalizing the cache/RPC key
+  // keeps both boundary variants protected without using noindex for slash handling.
+  const legacyLookupPathname = pathname.length > 1 && pathname.endsWith('/')
+    ? pathname.slice(0, -1)
+    : pathname;
   let legacyExists: boolean | null = null;
   async function isLegacyProductionRoute() {
     if (legacyExists !== null) return legacyExists;
-    const cached = legacyRouteCache.get(pathname);
+    const cached = legacyRouteCache.get(legacyLookupPathname);
     if (cached && cached.expiresAt > Date.now()) {
       legacyExists = cached.exists;
       return legacyExists;
     }
-    const { data, error } = await supabase.rpc('legacy_preserved_route_exists', { p_route: pathname });
+    const { data, error } = await supabase.rpc('legacy_preserved_route_exists', { p_route: legacyLookupPathname });
     legacyExists = !error && data === true;
     if (legacyRouteCache.size >= LEGACY_ROUTE_CACHE_LIMIT) legacyRouteCache.clear();
-    legacyRouteCache.set(pathname, { exists: legacyExists, expiresAt: Date.now() + LEGACY_ROUTE_TTL_MS });
+    legacyRouteCache.set(legacyLookupPathname, { exists: legacyExists, expiresAt: Date.now() + LEGACY_ROUTE_TTL_MS });
     return legacyExists;
   }
-
-  const modernTrailingSlashVariant =
-    ['GET', 'HEAD'].includes(request.method)
-    && pathname.length > 1
-    && pathname.endsWith('/')
-    && !(await isLegacyProductionRoute());
 
   if (canResolveRedirect(request)) {
     const cached = redirectCache.get(request.nextUrl.pathname);
@@ -196,7 +208,7 @@ export async function updateSession(request: NextRequest) {
     url.pathname = '/login';
     url.search = '';
     url.searchParams.set('next', `${request.nextUrl.pathname}${request.nextUrl.search}`);
-    return NextResponse.redirect(url);
+    return NextResponse.redirect(url, 307);
   }
 
   if (isProtected && claims?.sub) {
@@ -213,6 +225,9 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
-  if (modernTrailingSlashVariant) response.headers.set('X-Robots-Tag', 'noindex, follow');
+  // Do not use noindex as a URL-normalization mechanism. Several first-class public
+  // routes intentionally use a trailing slash as their self-canonical URL. Duplicate
+  // variants are consolidated by each page's canonical tag instead of risking a
+  // contradictory X-Robots-Tag on the canonical URL itself.
   return applyPreservedAliasSeoHeaders(response, request.nextUrl.pathname);
 }

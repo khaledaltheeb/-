@@ -1,0 +1,82 @@
+import fs from 'node:fs';
+
+const required = [
+  'lib/research-integrations/http.ts',
+  'lib/research-integrations/types.ts',
+  'lib/research-integrations/ror.ts',
+  'lib/research-integrations/europe-pmc.ts',
+  'lib/research-integrations/lens.ts',
+  'lib/research-integrations/dedupe.ts',
+  'lib/research-integrations/evidence-discovery.ts',
+  'app/api/v1/evidence-discovery/route.ts',
+  'app/api/openapi.json/route.ts',
+  'app/developers/page.tsx',
+  'examples/lens-scholarly-demo/lens-demo.mjs',
+  'docs/integrations/research-evidence.md',
+  'supabase/migrations/20260901190000_ror_source_registry_v1.sql',
+  'supabase/migrations/20260901192000_ror_registry_explicit_deny.sql',
+];
+
+for (const file of required) {
+  if (!fs.existsSync(file)) throw new Error(`Missing required research integration file: ${file}`);
+}
+
+const lens = fs.readFileSync('lib/research-integrations/lens.ts', 'utf8');
+const ror = fs.readFileSync('lib/research-integrations/ror.ts', 'utf8');
+const europe = fs.readFileSync('lib/research-integrations/europe-pmc.ts', 'utf8');
+const route = fs.readFileSync('app/api/v1/evidence-discovery/route.ts', 'utf8');
+const openapi = fs.readFileSync('app/api/openapi.json/route.ts', 'utf8');
+const developers = fs.readFileSync('app/developers/page.tsx', 'utf8');
+const demo = fs.readFileSync('examples/lens-scholarly-demo/lens-demo.mjs', 'utf8');
+const migration = fs.readFileSync('supabase/migrations/20260901190000_ror_source_registry_v1.sql', 'utf8');
+const denyMigration = fs.readFileSync('supabase/migrations/20260901192000_ror_registry_explicit_deny.sql', 'utf8');
+
+const lensRetractionGuard =
+  lens.includes('function isRetracted') &&
+  lens.includes('update_nature') &&
+  lens.includes(".toLowerCase()") &&
+  lens.includes("nature === 'retraction'") &&
+  lens.includes('is_retracted: isRetracted(row.retraction_updates)');
+
+const developerEvidenceContract =
+  developers.includes('/api/v1/evidence-discovery') &&
+  developers.includes('providers=europe_pmc,lens') &&
+  developers.includes('europe_pmc') &&
+  developers.includes('LENS_SCHOLARLY_API_TOKEN') &&
+  developers.includes('not_configured') &&
+  developers.includes('ROR ID') &&
+  developers.includes('ORCID') &&
+  developers.includes('provenance') &&
+  developers.includes('إعادة نشر') &&
+  developers.includes('مجموعة بيانات مزود خارجي');
+
+const checks = [
+  [lens.includes('https://api.lens.org/scholarly/search'), 'Lens Scholarly endpoint missing'],
+  [lens.includes('Bearer ${token}'), 'Lens Bearer authorization missing'],
+  [lensRetractionGuard, 'Lens retraction semantic guard missing'],
+  [ror.includes('https://api.ror.org/v2/organizations'), 'ROR v2 endpoint missing'],
+  [ror.includes('candidate.chosen === true'), 'ROR chosen:true selection missing'],
+  [ror.includes('resolveRorFromDataset'), 'ROR dataset resolution missing'],
+  [europe.includes('/fullTextXML'), 'Europe PMC full text XML support missing'],
+  [europe.includes('/supplementaryFiles'), 'Europe PMC supplementary-files support missing'],
+  [europe.includes('normalizeOrcid'), 'Europe PMC typed ORCID normalization missing'],
+  [europe.includes('rorFromOrgIdentifier'), 'Europe PMC ROR affiliation normalization missing'],
+  [route.includes("withOptionalPartnerAccess(request, 'search:read')"), 'Partner search scope missing'],
+  [openapi.includes("'/evidence-discovery'"), 'Evidence discovery OpenAPI path missing'],
+  [openapi.includes("operationId: 'discoverEvidence'"), 'Evidence discovery OpenAPI operation missing'],
+  [developerEvidenceContract, 'Public developer evidence-discovery documentation is incomplete'],
+  [migration.includes('enable row level security'), 'ROR registry RLS missing'],
+  [migration.includes('source_organizations'), 'ROR source relationship table missing'],
+  [denyMigration.includes('as restrictive'), 'ROR explicit restrictive RLS policy missing'],
+  [denyMigration.includes('using (false)'), 'ROR explicit direct-access deny missing'],
+];
+
+for (const [ok, message] of checks) if (!ok) throw new Error(message);
+
+const combined = [lens, demo].join('\n');
+const obviousSecretPatterns = [/Bearer\s+[A-Za-z0-9_-]{24,}/, /LENS_SCHOLARLY_API_TOKEN\s*=\s*['\"][^.'\"]{12,}/];
+for (const pattern of obviousSecretPatterns) {
+  if (pattern.test(combined)) throw new Error('Possible hard-coded Lens credential detected.');
+}
+
+console.log('research-integrations-contract: PASS');

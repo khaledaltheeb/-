@@ -1,0 +1,33 @@
+name: Palliative Care IAHPC Contract
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'lib/palliative-care-iahpc-pages.ts'
+      - 'app/evidence-guides/palliative-care/**'
+      - 'app/sitemaps/palliative-care.xml/**'
+      - 'app/sitemap.xml/route.ts'
+      - 'scripts/palliative-care-iahpc-contract.mjs'
+  push:
+    branches: [main]
+    paths:
+      - 'lib/palliative-care-iahpc-pages.ts'
+      - 'app/evidence-guides/palliative-care/**'
+      - 'app/sitemaps/palliative-care.xml/**'
+      - 'app/sitemap.xml/route.ts'
+      - 'scripts/palliative-care-iahpc-contract.mjs'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Validate palliative care sources routes and safety boundaries
+        run: node scripts/palliative-care-iahpc-contract.mjs

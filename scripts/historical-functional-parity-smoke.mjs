@@ -12,10 +12,14 @@ async function fetchInPlace(route,marker){
 }
 const index=await fetch(`${base}/daily-tools/`,{redirect:'manual'});const indexBody=await index.text();
 if(index.status!==200||index.headers.get('location')){console.error(`PARITY /daily-tools/: expected direct 200, got ${index.status}`);failed=true;}
-const toolRoutes=[...new Set([...indexBody.matchAll(/href=["'](\/daily-tools\/[^/"'#?]+\/)["']/g)].map(match=>match[1]))].sort();
-if(toolRoutes.length!==150){console.error(`PARITY daily-tools directory: expected 150 tools, found ${toolRoutes.length}`);failed=true;}
-for(let i=0;i<toolRoutes.length;i+=10){await Promise.all(toolRoutes.slice(i,i+10).map(route=>fetchInPlace(route,'أداة يومية محلية غير تشخيصية')));}
+const visibleToolRoutes=[...new Set([...indexBody.matchAll(/href=["'](\/daily-tools\/[^/"'#?]+\/)["']/g)].map(match=>match[1]))].sort();
+const expectedInitialTools=12;
+if(visibleToolRoutes.length!==expectedInitialTools){console.error(`PARITY daily-tools directory: expected ${expectedInitialTools} initially rendered tools, found ${visibleToolRoutes.length}`);failed=true;}
+for(const marker of ['150 أداة عملية','عرض 12 أداة إضافية','البحث والتصفية يعملان داخل المتصفح.']){
+ if(!indexBody.includes(marker)){console.error(`PARITY daily-tools directory: missing V2 marker ${marker}`);failed=true;}
+}
+for(let i=0;i<visibleToolRoutes.length;i+=10){await Promise.all(visibleToolRoutes.slice(i,i+10).map(route=>fetchInPlace(route,'أداة يومية محلية غير تشخيصية')));}
 for(const route of ['/assessments/gad-7/','/assessments/phq-9/','/assessments/who-5/'])await fetchInPlace(route,'فحص ذاتي محلي');
 for(const route of ['/cognitive-tests/digit-span/','/cognitive-tests/matrix-reasoning/','/cognitive-tests/n-back/','/cognitive-tests/number-series/','/cognitive-tests/reaction-time/','/cognitive-tests/spatial-rotation/','/cognitive-tests/stroop/','/cognitive-tests/verbal-analogies/'])await fetchInPlace(route,'نسخة المسار التاريخي');
 if(failed)process.exit(1);
-console.log(`Historical functional parity smoke passed: ${toolRoutes.length} daily tools + 3 assessments + 8 cognitive tests all render in place.`);
+console.log(`Historical functional parity smoke passed: Daily Tools V2 progressive directory (${visibleToolRoutes.length} initial tools; 150-tool inventory enforced by architecture contract) + 3 assessments + 8 cognitive tests render in place.`);

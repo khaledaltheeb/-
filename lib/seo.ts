@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { RAWAFID_BRAND_NAME, RAWAFID_BRAND_SHORT } from '@/lib/theme';
-import { buildSemanticSeoProfile } from '@/lib/semantic-seo';
+import { buildSemanticSeoProfile } from '@/lib/semantic-seo-safe';
 
 export const PRODUCTION_SITE_URL = 'https://healthrenewal.org';
 export const STAGING_SITE_URL = 'https://rawafid-platform-staging.khaledaltheeb.workers.dev';
@@ -25,9 +25,8 @@ export const BRAND_SHORT = RAWAFID_BRAND_SHORT;
 export const DEFAULT_LOCALE = 'ar_AR';
 export const DEFAULT_DESCRIPTION = 'روافد منصة عربية للمعرفة الموثوقة في الصحة النفسية والتربية الخاصة والتوحد وصعوبات التعلم وسرطان الأطفال والتعافي، مع أدلة عملية ومختصين ومراكز.';
 
-const HOME_TITLE = 'روافد | الصحة النفسية والتربية الخاصة وسرطان الأطفال';
+const HOME_TITLE = 'منصة روافد | الصحة النفسية والتربية الخاصة وسرطان الأطفال';
 const HOME_DESCRIPTION = DEFAULT_DESCRIPTION;
-const DEFAULT_SOCIAL_IMAGE_PATH = '/seo-card';
 
 export function absoluteSiteUrl(pathOrUrl: string) {
   if (/^https?:\/\//i.test(pathOrUrl)) return pathOrUrl;
@@ -50,6 +49,15 @@ function clampDescription(value?: string | null) {
   return clean.length > 160 ? `${clean.slice(0, 159).trimEnd()}…` : clean;
 }
 
+function fallbackSocialImagePath(title: string, type?: SeoMetadataInput['type']) {
+  const context = type === 'article'
+    ? 'مقال موثق · مصادر قابلة للتتبع · قراءة عربية واضحة'
+    : type === 'profile'
+      ? 'ملف موثق · معلومات عامة · منصة روافد'
+      : 'معرفة موثوقة · مصادر قابلة للتتبع · مسارات عملية';
+  return `/seo-card?title=${encodeURIComponent(title)}&context=${encodeURIComponent(context)}`;
+}
+
 export type SeoMetadataInput = {
   title: string;
   description?: string | null;
@@ -58,6 +66,9 @@ export type SeoMetadataInput = {
   follow?: boolean;
   type?: 'website' | 'article' | 'profile';
   image?: string | null;
+  imageAlt?: string | null;
+  imageWidth?: number | null;
+  imageHeight?: number | null;
   keywords?: string[];
   relatedTerms?: string[];
   searchIntents?: string[];
@@ -75,19 +86,22 @@ export function buildSeoMetadata(input: SeoMetadataInput): Metadata {
   const canIndex = INDEXING_ENABLED && input.index !== false;
   const canFollow = input.follow !== false;
   const usesDefaultImage = !input.image;
-  const image = absoluteSiteUrl(input.image || DEFAULT_SOCIAL_IMAGE_PATH);
+  const image = absoluteSiteUrl(input.image || fallbackSocialImagePath(input.title, input.type));
+  const imageAlt = (input.imageAlt || input.title).replace(/\s+/g, ' ').trim();
+  const imageWidth = input.imageWidth || (usesDefaultImage ? 1200 : undefined);
+  const imageHeight = input.imageHeight || (usesDefaultImage ? 630 : undefined);
   const languages = input.hreflang
     ? Object.fromEntries(Object.entries(input.hreflang).map(([key, value]) => [key, absoluteSiteUrl(value)]))
     : undefined;
 
-  // Per-page semantic inventory: 50 page/topic terms + 50 search-intent/question phrases.
-  // Google does not use the meta-keywords tag as a ranking signal; these terms remain a
-  // compatibility/editorial/query-coverage inventory. No hidden copy is injected into pages.
   const semanticProfile = buildSemanticSeoProfile(input);
-  const keywords = semanticProfile.keywords;
-  const openGraphImages = usesDefaultImage
-    ? [{ url: image, width: 1200, height: 630, alt: 'روافد — منصة عربية للمعرفة الصحية والنفسية الموثوقة' }]
-    : [{ url: image, alt: input.title }];
+  const keywords = semanticProfile.topicKeywords.slice(0, 12);
+  const openGraphImages = [{
+    url: image,
+    ...(imageWidth ? { width: imageWidth } : {}),
+    ...(imageHeight ? { height: imageHeight } : {}),
+    alt: imageAlt,
+  }];
 
   return {
     title: { absolute: title },
@@ -117,7 +131,7 @@ export function buildSeoMetadata(input: SeoMetadataInput): Metadata {
       url: canonical,
       title,
       description,
-      siteName: BRAND_SHORT,
+      siteName: BRAND_NAME,
       locale: DEFAULT_LOCALE,
       images: openGraphImages,
       ...(input.type === 'article'
@@ -159,7 +173,7 @@ export function organizationJsonLd() {
         '@type': 'Organization',
         '@id': `${SITE_URL}/#organization`,
         name: BRAND_NAME,
-        alternateName: BRAND_SHORT,
+        alternateName: [BRAND_SHORT, 'Rawafid'],
         url: `${SITE_URL}/`,
         description: DEFAULT_DESCRIPTION,
         logo: {
@@ -169,7 +183,7 @@ export function organizationJsonLd() {
           contentUrl: logoUrl,
           width: 512,
           height: 512,
-          caption: BRAND_SHORT,
+          caption: BRAND_NAME,
         },
         image: { '@id': `${SITE_URL}/#logo` },
         knowsAbout: topics,
@@ -177,8 +191,8 @@ export function organizationJsonLd() {
       {
         '@type': 'WebSite',
         '@id': `${SITE_URL}/#website`,
-        name: BRAND_SHORT,
-        alternateName: BRAND_NAME,
+        name: BRAND_NAME,
+        alternateName: [BRAND_SHORT, 'Rawafid', SITE_HOSTNAME],
         url: `${SITE_URL}/`,
         description: DEFAULT_DESCRIPTION,
         inLanguage: 'ar',
