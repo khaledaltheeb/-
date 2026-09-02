@@ -45,6 +45,7 @@ const groups = [
     links: [
       { href: '/about', label: 'من نحن' },
       { href: '/press', label: 'المركز الإعلامي والهوية المؤسسية' },
+      { href: '/developers', label: 'واجهة المطورين وAPI' },
       { href: '/open-source/arabic-rtl-a11y-toolkit', label: 'مشروع روافد المفتوح للعربية وRTL' },
       { href: '/medical-review-policy', label: 'المراجعة العلمية' },
       { href: '/editorial-policy', label: 'السياسة التحريرية' },
