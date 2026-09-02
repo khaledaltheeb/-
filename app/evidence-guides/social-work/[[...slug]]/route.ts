@@ -3,6 +3,8 @@ import { SOCIAL_WORK_TALENTIA_PAGES, enrichSocialWorkPageWithTalentia } from '@/
 import { enrichTalentiaPageWithInlineLinks } from '@/lib/social-work-talentia-inline-links';
 import { hardenTalentiaPageQuality } from '@/lib/social-work-talentia-quality';
 import { SOCIAL_WORK_COMPARATIVE_PAGES, enrichSocialWorkPageWithComparative } from '@/lib/social-work-comparative-pages';
+import { enrichSocialWorkInstitutionalPage, SOCIAL_WORK_INSTITUTIONAL_RELEASE } from '@/lib/social-work-institutional-enrichment';
+import { enrichSocialWorkResearchDepth, SOCIAL_WORK_RESEARCH_RELEASE } from '@/lib/social-work-research-depth';
 import { hardenStaticHtmlSeo } from '@/lib/static-html-seo';
 
 type Params = Promise<{ slug?: string[] }>;
@@ -12,14 +14,19 @@ const htmlHeaders = {
   'content-language': 'ar',
   'cache-control': 'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400',
   'x-content-type-options': 'nosniff',
-  'x-robots-tag': 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1',
-  'x-rawafid-source': `healthrenewal.org@${SOCIAL_WORK_SOURCE_SHA};talentia-ethics-20260831;comparative-ethics-20260901`,
+  'x-robots-tag': 'index, follow, max-snippet:-1, max-image-preview:large,max-video-preview:-1',
+  'x-rawafid-source': `healthrenewal.org@${SOCIAL_WORK_SOURCE_SHA};talentia-ethics-20260831;comparative-ethics-20260901;institutional-evidence-${SOCIAL_WORK_INSTITUTIONAL_RELEASE};research-depth-${SOCIAL_WORK_RESEARCH_RELEASE}`,
 };
 
 export const dynamic = 'force-static';
 
+function finalizeSocialWorkPage(html: string, key: string) {
+  const enriched = enrichSocialWorkResearchDepth(enrichSocialWorkInstitutionalPage(html, key), key);
+  return hardenStaticHtmlSeo(enriched, { collection: key === '' });
+}
+
 function htmlResponse(html: string, key: string) {
-  return new Response(hardenStaticHtmlSeo(html, { collection: key === '' }), { status: 200, headers: htmlHeaders });
+  return new Response(finalizeSocialWorkPage(html, key), { status: 200, headers: htmlHeaders });
 }
 
 export async function GET(_request: Request, { params }: { params: Params }) {
@@ -38,7 +45,8 @@ export async function GET(_request: Request, { params }: { params: Params }) {
   if (talentiaHtml) {
     const withInlineLinks = enrichTalentiaPageWithInlineLinks(talentiaHtml, key);
     const hardened = hardenTalentiaPageQuality(withInlineLinks, key);
-    return htmlResponse(enrichSocialWorkPageWithComparative(hardened, key), key);
+    const compared = enrichSocialWorkPageWithComparative(hardened, key);
+    return htmlResponse(compared, key);
   }
 
   const recoveredHtml = SOCIAL_WORK_PAGES[key];
@@ -47,5 +55,6 @@ export async function GET(_request: Request, { params }: { params: Params }) {
   }
 
   const enriched = enrichSocialWorkPageWithTalentia(recoveredHtml, key);
-  return htmlResponse(enrichSocialWorkPageWithComparative(enriched, key), key);
+  const compared = enrichSocialWorkPageWithComparative(enriched, key);
+  return htmlResponse(compared, key);
 }
