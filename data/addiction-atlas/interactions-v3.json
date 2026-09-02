@@ -1,44 +1,20 @@
 {
   "schema_version": "rawafid-addiction-atlas-interactions-v3",
-  "version": "3.0.0",
-  "updated_on": "2026-08-27",
-  "policy_ar": "هذه الموجة تضيف تفاعلات فقط عندما يذكر المرجع المؤسسي الجمع أو الفئات ذات الصلة بصورة صريحة. عدم وجود سجل لأي زوج آخر يعني غير مراجع بعد، وليس آمناً.",
+  "version": "3.1.1",
+  "updated_on": "2026-09-02",
+  "policy_ar": "تضيف هذه الطبقة تفاعلات فقط عندما يذكر المرجع المؤسسي الجمع أو الفئات ذات الصلة بصورة صريحة. يوضح evidence_scope ما إذا كان الدليل مباشراً للزوج، أو فئوياً مطبقاً على مادة محددة، أو فئوياً بين فئتين. عدم وجود سجل لأي زوج آخر يعني غير مراجع بعد، وليس آمناً.",
   "records": [
-    {
-      "id": "carisoprodol-fentanyl",
-      "a": "carisoprodol",
-      "b": "fentanyl",
-      "severity": "critical",
-      "evidence_grade": "A",
-      "evidence_scope": "class-to-substance",
-      "mechanism_ar": "كاريسوبرودول مثبط مركزي، والفنتانيل أفيون قوي. مراجعة WHO تشير إلى تفاقم التهدئة مع الأفيونات، وتحذيرات FDA للفئة الأفيونية تؤكد خطورة الجمع مع مثبطات الجهاز العصبي المركزي.",
-      "risk_ar": "قد يزداد النعاس الشديد وفقدان الوعي وكبت التنفس والغيبوبة والوفاة. لا توجد في الأطلس كمية تجعل هذا الجمع آمناً.",
-      "emergency_ar": "عدم الاستجابة أو بطء/توقف التنفس حالة طارئة. اطلب خدمات الطوارئ فوراً، ويستخدم النالوكسون عند الاشتباه بمكوّن أفيوني وفق الإرشادات المحلية مع استمرار دعم التنفس والرعاية الطبية.",
-      "source_urls": ["https://www.who.int/publications/i/item/9789240107649", "https://www.fda.gov/drugs/information-drug-class/new-safety-measures-announced-opioid-analgesics-prescription-opioid-cough-products-and-benzodiazepines"]
-    },
-    {
-      "id": "carisoprodol-diazepam",
-      "a": "carisoprodol",
-      "b": "diazepam",
-      "severity": "high",
-      "evidence_grade": "A",
-      "evidence_scope": "class-to-substance",
-      "mechanism_ar": "كاريسوبرودول والديازيبام كلاهما يثبط الجهاز العصبي المركزي. توثق مراجعة WHO أن البنزوديازيبينات قد تزيد التهدئة المرتبطة بكاريسوبرودول.",
-      "risk_ar": "قد يزداد النعاس والدوخة وضعف التنسيق واضطراب الوعي، وقد تصبح السمية أخطر في وجود مثبطات إضافية أو عوامل تنفسية.",
-      "emergency_ar": "فقدان الوعي أو صعوبة التنفس أو الاختلاج يستلزم رعاية طارئة. لا تُدار الأعراض الشديدة بالمراقبة المنزلية وحدها.",
-      "source_urls": ["https://www.who.int/publications/i/item/9789240107649", "https://www.fda.gov/drugs/drug-safety-and-availability/fda-requiring-boxed-warning-updated-improve-safe-use-benzodiazepine-drug-class"]
-    },
-    {
-      "id": "carisoprodol-alcohol",
-      "a": "carisoprodol",
-      "b": "alcohol",
-      "severity": "high",
-      "evidence_grade": "A",
-      "evidence_scope": "direct-pair",
-      "mechanism_ar": "الكحول وكاريسوبرودول لهما تأثيرات مثبطة مركزية، وتذكر مراجعة WHO زيادة التهدئة عند المشاركة مع الكحول.",
-      "risk_ar": "قد يزداد اضطراب الوعي وضعف التنسيق والتهدئة الشديدة ومضاعفات التسمم. لا يحدد الأطلس عتبة شرب تجعل الجمع آمناً.",
-      "emergency_ar": "عدم القدرة على الإيقاظ أو التنفس البطيء/الصعب أو الاختلاج يستلزم خدمات الطوارئ فوراً.",
-      "source_urls": ["https://www.who.int/publications/i/item/9789240107649"]
-    }
+    {"id":"carisoprodol-fentanyl","a":"carisoprodol","b":"fentanyl","severity":"critical","evidence_grade":"A","evidence_scope":"class-to-substance","mechanism_ar":"كاريسوبرودول مثبط مركزي، والفنتانيل أفيون قوي. مراجعة WHO تشير إلى تفاقم التهدئة مع الأفيونات، وتحذيرات FDA للفئة الأفيونية تؤكد خطورة الجمع مع مثبطات الجهاز العصبي المركزي.","risk_ar":"قد يزداد النعاس الشديد وفقدان الوعي وكبت التنفس والغيبوبة والوفاة. لا توجد في الأطلس كمية تجعل هذا الجمع آمناً.","emergency_ar":"عدم الاستجابة أو بطء/توقف التنفس حالة طارئة. اطلب خدمات الطوارئ فوراً، ويستخدم النالوكسون عند الاشتباه بمكوّن أفيوني وفق الإرشادات المحلية مع استمرار دعم التنفس والرعاية الطبية.","source_urls":["https://www.who.int/publications/i/item/9789240107649","https://www.fda.gov/drugs/information-drug-class/new-safety-measures-announced-opioid-analgesics-prescription-opioid-cough-products-and-benzodiazepines"]},
+    {"id":"carisoprodol-diazepam","a":"carisoprodol","b":"diazepam","severity":"high","evidence_grade":"A","evidence_scope":"class-to-substance","mechanism_ar":"كاريسوبرودول والديازيبام كلاهما يثبط الجهاز العصبي المركزي. توثق مراجعة WHO أن البنزوديازيبينات قد تزيد التهدئة المرتبطة بكاريسوبرودول.","risk_ar":"قد يزداد النعاس والدوخة وضعف التنسيق واضطراب الوعي، وقد تصبح السمية أخطر في وجود مثبطات إضافية أو عوامل تنفسية.","emergency_ar":"فقدان الوعي أو صعوبة التنفس أو الاختلاج يستلزم رعاية طارئة. لا تُدار الأعراض الشديدة بالمراقبة المنزلية وحدها.","source_urls":["https://www.who.int/publications/i/item/9789240107649","https://www.fda.gov/drugs/drug-safety-and-availability/fda-requiring-boxed-warning-updated-improve-safe-use-benzodiazepine-drug-class"]},
+    {"id":"carisoprodol-alcohol","a":"carisoprodol","b":"alcohol","severity":"high","evidence_grade":"A","evidence_scope":"direct-pair","mechanism_ar":"الكحول وكاريسوبرودول لهما تأثيرات مثبطة مركزية، وتذكر مراجعة WHO زيادة التهدئة عند المشاركة مع الكحول.","risk_ar":"قد يزداد اضطراب الوعي وضعف التنسيق والتهدئة الشديدة ومضاعفات التسمم. لا يحدد الأطلس عتبة شرب تجعل الجمع آمناً.","emergency_ar":"عدم القدرة على الإيقاظ أو التنفس البطيء/الصعب أو الاختلاج يستلزم خدمات الطوارئ فوراً.","source_urls":["https://www.who.int/publications/i/item/9789240107649"]},
+    {"id":"alcohol-diazepam","a":"alcohol","b":"diazepam","severity":"high","evidence_grade":"B","evidence_scope":"class-to-substance","mechanism_ar":"الكحول والبنزوديازيبينات مثبطات للجهاز العصبي المركزي. تذكر ADF أن الجمع بين الكحول والبنزوديازيبينات يرفع خطر الجرعة الزائدة وصعوبة التنفس وفقدان الوعي.","risk_ar":"قد يزداد النعاس الشديد واضطراب التنسيق والذاكرة وكبت التنفس والجرعة الزائدة. لا يعني استخدام الديازيبام بوصفة طبية أن تناوله مع الكحول يصبح آمناً.","emergency_ar":"صعوبة التنفس أو عدم القدرة على الإيقاظ أو فقدان الوعي يستلزم خدمات الطوارئ فوراً.","source_urls":["https://adf.org.au/drug-facts/alcohol/","https://adf.org.au/drug-facts/benzodiazepines/"]},
+    {"id":"heroin-diazepam","a":"heroin","b":"diazepam","severity":"critical","evidence_grade":"B","evidence_scope":"class-to-substance","mechanism_ar":"الهيروين أفيون، والديازيبام من البنزوديازيبينات. تذكر ADF صراحة أن البنزوديازيبينات مع الأفيونات مثل الهيروين قد تسبب صعوبة التنفس وتزيد خطر الجرعة الزائدة والوفاة.","risk_ar":"الخطر الأساسي هو تضاعف التثبيط المركزي والتنفسـي مع فقدان الوعي والاختناق والوفاة المحتملة.","emergency_ar":"بطء أو توقف التنفس أو عدم الاستجابة حالة طارئة. اطلب الطوارئ فوراً، ويستخدم النالوكسون عند الاشتباه بمكوّن أفيوني وفق الإرشادات المحلية.","source_urls":["https://adf.org.au/drug-facts/benzodiazepines/","https://adf.org.au/drug-facts/heroin/"]},
+    {"id":"oxycodone-diazepam","a":"oxycodone","b":"diazepam","severity":"critical","evidence_grade":"A","evidence_scope":"class-to-class","mechanism_ar":"الأوكسيكودون أفيون، والديازيبام بنزوديازيبين. تحذير FDA هنا فئوي للأفيونات مع البنزوديازيبينات، لذلك يُسجل نطاق الدليل كفئة إلى فئة لا كدليل مباشر على هذا الزوج بعينه.","risk_ar":"قد يزداد النعاس الشديد وكبت التنفس والغيبوبة والوفاة، حتى عندما يكون أحد الدواءين أو كلاهما موصوفاً طبياً.","emergency_ar":"صعوبة التنفس أو عدم الاستجابة تستلزم الطوارئ فوراً. النالوكسون قد يعكس المكوّن الأفيوني لكنه لا يعالج تأثير البنزوديازيبين.","source_urls":["https://www.fda.gov/drugs/information-drug-class/new-safety-measures-announced-opioid-analgesics-prescription-opioid-cough-products-and-benzodiazepines"]},
+    {"id":"fentanyl-ketamine","a":"fentanyl","b":"ketamine","severity":"critical","evidence_grade":"B","evidence_scope":"class-to-substance","mechanism_ar":"تذكر ADF أن الأفيونات مع الكيتامين قد تسبب الغثيان والقيء وفقدان الوعي والوفاة. الفنتانيل أفيون شديد الفعالية.","risk_ar":"قد يحدث فقدان وعي وقيء مع خطر اختناق ومضاعفات تنفسية ووفاة محتملة، خصوصاً مع مواد مثبطة إضافية.","emergency_ar":"فقدان الوعي أو التنفس البطيء/الصعب أو القيء مع ضعف الاستجابة حالة طارئة. النالوكسون قد يفيد المكوّن الأفيوني فقط.","source_urls":["https://adf.org.au/drug-facts/fentanyl/","https://adf.org.au/drug-facts/opioids/"]},
+    {"id":"fentanyl-cocaine","a":"fentanyl","b":"cocaine","severity":"critical","evidence_grade":"B","evidence_scope":"class-to-substance","mechanism_ar":"تذكر ADF أن الأفيونات مع المنبهات مثل الكوكايين قد تخفي تأثيرات بعضها وتزيد إجهاد القلب ومخاطر الجرعة الزائدة ومشكلات التنفس أو القلب.","risk_ar":"قد تتزامن سمية أفيونية تنفسية مع إجهاد قلبي وعائي منبه، وقد يصبح التدهور واضحاً عندما يزول تأثير أحد المكونين قبل الآخر.","emergency_ar":"ألم الصدر أو اضطراب الوعي أو الاختلاج أو التنفس البطيء/المتوقف يستلزم الطوارئ فوراً. النالوكسون يعالج المكوّن الأفيوني فقط.","source_urls":["https://adf.org.au/drug-facts/fentanyl/","https://adf.org.au/drug-facts/opioids/"]},
+    {"id":"fentanyl-methamphetamine","a":"fentanyl","b":"methamphetamine","severity":"critical","evidence_grade":"B","evidence_scope":"class-to-substance","mechanism_ar":"تذكر ADF أن الأفيونات مع المنبهات مثل الميثامفيتامين قد تخفي تأثيرات بعضها وتزيد إجهاد القلب ومخاطر الجرعة الزائدة ومشكلات القلب أو التنفس.","risk_ar":"قد يجتمع كبت التنفس الأفيوني مع ارتفاع النبض والضغط والإجهاد القلبي الوعائي.","emergency_ar":"ألم الصدر أو اضطراب الوعي أو الاختلاج أو التنفس البطيء/المتوقف يستلزم الطوارئ فوراً. النالوكسون يعالج المكوّن الأفيوني فقط.","source_urls":["https://adf.org.au/drug-facts/fentanyl/","https://adf.org.au/drug-facts/opioids/"]},
+    {"id":"alcohol-cocaine","a":"alcohol","b":"cocaine","severity":"high","evidence_grade":"B","evidence_scope":"direct-pair","mechanism_ar":"تذكر ADF أن الكوكايين قد يجعل الشخص يشعر بدرجة أقل من التسمم بالكحول، ما قد يدفع إلى شرب المزيد ويزيد خطر التسمم الكحولي.","risk_ar":"قد تُحجب علامات التسمم بالكحول جزئياً مع استمرار الخطر الفسيولوجي، وقد يزداد العبء القلبي الوعائي واضطراب الحكم.","emergency_ar":"فقدان الوعي أو القيء المتكرر أو الاختلاج أو ألم الصدر أو صعوبة التنفس يستلزم الطوارئ فوراً.","source_urls":["https://adf.org.au/drug-facts/alcohol/"]},
+    {"id":"alcohol-methamphetamine","a":"alcohol","b":"methamphetamine","severity":"high","evidence_grade":"B","evidence_scope":"direct-pair","mechanism_ar":"تذكر ADF أن الميثامفيتامين قد يقلل الإحساس الذاتي بالتسمم بالكحول ويدفع إلى شرب المزيد، مع ارتفاع خطر التسمم الكحولي.","risk_ar":"قد يحدث تقدير خاطئ لشدة التسمم مع زيادة الاستهلاك، بينما يستمر العبء على القلب والجهاز العصبي.","emergency_ar":"فقدان الوعي أو الاختلاج أو ألم الصدر أو ارتفاع الحرارة الشديد أو صعوبة التنفس يستلزم الطوارئ فوراً.","source_urls":["https://adf.org.au/drug-facts/alcohol/"]},
+    {"id":"heroin-alcohol","a":"heroin","b":"alcohol","severity":"critical","evidence_grade":"B","evidence_scope":"direct-pair","mechanism_ar":"تذكر ADF أن الكحول مع الهيروين يرتبط بخطر مرتفع للجرعة الزائدة والتنفس السطحي وفقدان الوعي والوفاة المحتملة.","risk_ar":"قد يتضاعف كبت الجهاز العصبي المركزي والتنفس، مع ارتفاع خطر الاختناق والغيبوبة والوفاة.","emergency_ar":"بطء أو توقف التنفس أو عدم الاستجابة حالة طارئة. اطلب الطوارئ فوراً، ويستخدم النالوكسون عند الاشتباه بمكوّن أفيوني وفق الإرشادات المحلية.","source_urls":["https://adf.org.au/drug-facts/alcohol/","https://adf.org.au/drug-facts/heroin/"]}
   ]
 }

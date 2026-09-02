@@ -4,7 +4,7 @@ function assert(condition, message) {
   if (!condition) throw new Error(`addiction-atlas-product-contract: ${message}`);
 }
 
-const [hub, compare, sector, atlasBrowser, interactionBrowser, comparisonExplorer, evidenceStandards, adfLayer, substancePage] = await Promise.all([
+const [hub, compare, sector, atlasBrowser, interactionBrowser, comparisonExplorer, evidenceStandards, adfLayer, substancePage, interactionsV3] = await Promise.all([
   readFile('components/addiction-atlas-hub-portal.tsx', 'utf8'),
   readFile('app/addiction/compare/page.tsx', 'utf8'),
   readFile('app/sectors/[slug]/page.tsx', 'utf8'),
@@ -14,6 +14,7 @@ const [hub, compare, sector, atlasBrowser, interactionBrowser, comparisonExplore
   readFile('app/addiction/evidence-standards/page.tsx', 'utf8'),
   readFile('lib/adf-addiction.ts', 'utf8'),
   readFile('app/addiction/substances/[slug]/page.tsx', 'utf8'),
+  readFile('data/addiction-atlas/interactions-v3.json', 'utf8'),
 ]);
 
 for (const route of ['/addiction/substances/', '/addiction/compare/', '/addiction/interactions/', '/addiction/prevalence/', '/addiction/mortality/', '/addiction/methodology/']) {
@@ -33,6 +34,9 @@ assert(comparisonExplorer.includes('تفاعلات مراجعة مرتبطة'), 
 assert(atlasBrowser.includes('مقارنة تفاعلية بين مادتين'), 'substance atlas interactive comparison regressed');
 assert(atlasBrowser.includes('مرجع ADF الموازٍ'), 'atlas ADF cross-reference filter missing');
 assert(interactionBrowser.includes('عدم ظهور تفاعل يعني «غير مراجع بعد» وليس «آمناً»'), 'interaction absence safety rule regressed');
+assert(interactionBrowser.includes('سجل التفاعلات المراجعة'), 'filterable reviewed interaction registry missing');
+assert(interactionBrowser.includes('substanceFilter') && interactionBrowser.includes('severityFilter') && interactionBrowser.includes('scopeFilter'), 'interaction registry filters missing');
+assert(interactionBrowser.includes('نطاق الدليل') && interactionBrowser.includes('قوة الدليل'), 'interaction registry evidence columns missing');
 assert(evidenceStandards.includes('مصفوفة اكتمال الأطلس'), 'evidence coverage matrix missing');
 assert(evidenceStandards.includes('لم ننقل جداول ADF أو نصوصها أو رسومها'), 'ADF copyright boundary missing');
 assert(adfLayer.includes('لا تعني الإحالة إلى ADF أن المؤسسة راجعت درجات الأطلس أو اعتمدتها'), 'ADF non-endorsement provenance missing');
@@ -41,4 +45,14 @@ assert(substancePage.includes('مرجع ADF موازٍ لهذه المادة'), 
 assert(substancePage.includes('ADF_PROVENANCE_NOTE_AR'), 'substance pages missing ADF non-endorsement provenance');
 assert(substancePage.includes('/addiction/evidence-standards/'), 'substance pages missing ADF methodology/copyright route');
 
-console.log('addiction-atlas-product-contract: PASS | hub + sector discovery + substance ADF cross-reference + clinical comparison + ADF provenance + coverage matrix + interaction safety');
+const interactionData = JSON.parse(interactionsV3);
+const interactionIds = new Set(interactionData.records.map((item) => item.id));
+for (const required of ['alcohol-diazepam','heroin-diazepam','oxycodone-diazepam','fentanyl-ketamine','fentanyl-cocaine','fentanyl-methamphetamine','alcohol-cocaine','alcohol-methamphetamine','heroin-alcohol']) {
+  assert(interactionIds.has(required), `reviewed interaction wave missing ${required}`);
+}
+assert(interactionData.records.length >= 12, `expected at least 12 interactions in v3, got ${interactionData.records.length}`);
+const oxyDiazepam = interactionData.records.find((item) => item.id === 'oxycodone-diazepam');
+assert(oxyDiazepam?.evidence_scope === 'class-to-class', 'oxycodone-diazepam must retain FDA class-to-class scope');
+assert(interactionData.policy_ar.includes('غير مراجع بعد'), 'interaction wave must preserve unreviewed-not-safe policy');
+
+console.log('addiction-atlas-product-contract: PASS | hub + sector discovery + substance ADF cross-reference + clinical comparison + reviewed interaction registry + evidence scope guards + ADF provenance + coverage matrix + interaction safety');
