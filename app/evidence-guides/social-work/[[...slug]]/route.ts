@@ -26,6 +26,10 @@ function finalizeSocialWorkPage(html: string, key: string) {
   return hardenRawHtmlSeo(enriched, pathname);
 }
 
+function htmlResponse(html: string, key: string) {
+  return new Response(finalizeSocialWorkPage(html, key), { status: 200, headers: htmlHeaders });
+}
+
 export async function GET(_request: Request, { params }: { params: Params }) {
   const { slug = [] } = await params;
   if (slug.length > 1) {
@@ -35,7 +39,7 @@ export async function GET(_request: Request, { params }: { params: Params }) {
   const key = slug[0] ?? '';
   const comparativeHtml = SOCIAL_WORK_COMPARATIVE_PAGES[key];
   if (comparativeHtml) {
-    return new Response(finalizeSocialWorkPage(comparativeHtml, key), { status: 200, headers: htmlHeaders });
+    return htmlResponse(comparativeHtml, key);
   }
 
   const talentiaHtml = SOCIAL_WORK_TALENTIA_PAGES[key];
@@ -43,7 +47,7 @@ export async function GET(_request: Request, { params }: { params: Params }) {
     const withInlineLinks = enrichTalentiaPageWithInlineLinks(talentiaHtml, key);
     const hardened = hardenTalentiaPageQuality(withInlineLinks, key);
     const compared = enrichSocialWorkPageWithComparative(hardened, key);
-    return new Response(finalizeSocialWorkPage(compared, key), { status: 200, headers: htmlHeaders });
+    return htmlResponse(compared, key);
   }
 
   const recoveredHtml = SOCIAL_WORK_PAGES[key];
@@ -53,5 +57,5 @@ export async function GET(_request: Request, { params }: { params: Params }) {
 
   const enriched = enrichSocialWorkPageWithTalentia(recoveredHtml, key);
   const compared = enrichSocialWorkPageWithComparative(enriched, key);
-  return new Response(finalizeSocialWorkPage(compared, key), { status: 200, headers: htmlHeaders });
+  return htmlResponse(compared, key);
 }

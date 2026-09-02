@@ -5,19 +5,37 @@ on:
     paths:
       - 'lib/research-integrations/**'
       - 'app/api/v1/evidence-discovery/**'
+      - 'app/api/openapi.json/**'
+      - 'app/developers/**'
       - 'examples/lens-scholarly-demo/**'
       - 'docs/integrations/research-evidence.md'
       - 'scripts/research-integrations-contract.mjs'
+      - 'scripts/source-registry-v1-contract.mjs'
       - 'supabase/migrations/20260901190000_ror_source_registry_v1.sql'
+      - 'supabase/migrations/20260901192000_ror_registry_explicit_deny.sql'
+      - 'supabase/migrations/20260901212203_source_connection_metadata_v1.sql'
+      - 'supabase/migrations/20260901215918_source_governance_provenance_v1.sql'
+      - 'supabase/migrations/20260901221854_source_governance_provenance_indexes_v1.sql'
+      - 'supabase/migrations/20260901223500_datacite_content_relations_v1.sql'
       - '.github/workflows/research-integrations.yml'
   push:
     branches: [main]
     paths:
       - 'lib/research-integrations/**'
       - 'app/api/v1/evidence-discovery/**'
+      - 'app/api/openapi.json/**'
+      - 'app/developers/**'
       - 'examples/lens-scholarly-demo/**'
+      - 'docs/integrations/research-evidence.md'
       - 'scripts/research-integrations-contract.mjs'
+      - 'scripts/source-registry-v1-contract.mjs'
       - 'supabase/migrations/20260901190000_ror_source_registry_v1.sql'
+      - 'supabase/migrations/20260901192000_ror_registry_explicit_deny.sql'
+      - 'supabase/migrations/20260901212203_source_connection_metadata_v1.sql'
+      - 'supabase/migrations/20260901215918_source_governance_provenance_v1.sql'
+      - 'supabase/migrations/20260901221854_source_governance_provenance_indexes_v1.sql'
+      - 'supabase/migrations/20260901223500_datacite_content_relations_v1.sql'
+      - '.github/workflows/research-integrations.yml'
 
 permissions:
   contents: read
@@ -25,7 +43,7 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -34,5 +52,6 @@ jobs:
           cache: npm
       - run: npm ci --ignore-scripts
       - run: node scripts/research-integrations-contract.mjs
+      - run: node scripts/source-registry-v1-contract.mjs
       - run: npm run typecheck
       - run: npm run lint
