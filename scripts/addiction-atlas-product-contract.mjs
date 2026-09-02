@@ -4,7 +4,7 @@ function assert(condition, message) {
   if (!condition) throw new Error(`addiction-atlas-product-contract: ${message}`);
 }
 
-const [hub, compare, sector, atlasBrowser, interactionBrowser, comparisonExplorer, evidenceStandards, adfLayer] = await Promise.all([
+const [hub, compare, sector, atlasBrowser, interactionBrowser, comparisonExplorer, evidenceStandards, adfLayer, substancePage] = await Promise.all([
   readFile('components/addiction-atlas-hub-portal.tsx', 'utf8'),
   readFile('app/addiction/compare/page.tsx', 'utf8'),
   readFile('app/sectors/[slug]/page.tsx', 'utf8'),
@@ -13,6 +13,7 @@ const [hub, compare, sector, atlasBrowser, interactionBrowser, comparisonExplore
   readFile('components/addiction-comparison-explorer.tsx', 'utf8'),
   readFile('app/addiction/evidence-standards/page.tsx', 'utf8'),
   readFile('lib/adf-addiction.ts', 'utf8'),
+  readFile('app/addiction/substances/[slug]/page.tsx', 'utf8'),
 ]);
 
 for (const route of ['/addiction/substances/', '/addiction/compare/', '/addiction/interactions/', '/addiction/prevalence/', '/addiction/mortality/', '/addiction/methodology/']) {
@@ -35,5 +36,9 @@ assert(interactionBrowser.includes('عدم ظهور تفاعل يعني «غير
 assert(evidenceStandards.includes('مصفوفة اكتمال الأطلس'), 'evidence coverage matrix missing');
 assert(evidenceStandards.includes('لم ننقل جداول ADF أو نصوصها أو رسومها'), 'ADF copyright boundary missing');
 assert(adfLayer.includes('لا تعني الإحالة إلى ADF أن المؤسسة راجعت درجات الأطلس أو اعتمدتها'), 'ADF non-endorsement provenance missing');
+assert(substancePage.includes('getAdfDrugFactReference(item)'), 'substance pages missing direct ADF cross-reference lookup');
+assert(substancePage.includes('مرجع ADF موازٍ لهذه المادة'), 'substance pages missing visible ADF cross-reference section');
+assert(substancePage.includes('ADF_PROVENANCE_NOTE_AR'), 'substance pages missing ADF non-endorsement provenance');
+assert(substancePage.includes('/addiction/evidence-standards/'), 'substance pages missing ADF methodology/copyright route');
 
-console.log('addiction-atlas-product-contract: PASS | hub + sector discovery + clinical comparison + ADF provenance + coverage matrix + interaction safety');
+console.log('addiction-atlas-product-contract: PASS | hub + sector discovery + substance ADF cross-reference + clinical comparison + ADF provenance + coverage matrix + interaction safety');
