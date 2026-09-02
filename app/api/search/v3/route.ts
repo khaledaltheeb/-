@@ -16,6 +16,11 @@ type SearchRow = {
   score: number;
 };
 
+type EdgeSearchResponse = {
+  mode?: string;
+  results?: SearchRow[];
+};
+
 function boundedLimit(value: string | null) {
   const n = Number(value ?? 30);
   return Number.isFinite(n) ? Math.max(1, Math.min(Math.trunc(n), 100)) : 30;
@@ -37,6 +42,25 @@ function mergeResults(groups: SearchRow[][], limit: number) {
     .slice(0, limit);
 }
 
+async function searchViaPublicEdge(q: string, limit: number): Promise<SearchRow[]> {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+  if (!supabaseUrl) return [];
+  try {
+    const response = await fetch(`${supabaseUrl.replace(/\/$/, '')}/functions/v1/rawafid-public-search`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', accept: 'application/json' },
+      body: JSON.stringify({ q, limit: Math.min(limit, 20) }),
+      cache: 'no-store',
+      signal: AbortSignal.timeout(6000),
+    });
+    if (!response.ok) return [];
+    const data = await response.json() as EdgeSearchResponse;
+    return Array.isArray(data.results) ? data.results : [];
+  } catch {
+    return [];
+  }
+}
+
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const q = normalizeQuery(url.searchParams.get('q'));
@@ -56,10 +80,15 @@ export async function GET(request: Request) {
       p_query: q,
       p_limit: Math.min(limit * 3, 100),
     });
-    if (!error) {
-      dbRows = (data ?? []) as SearchRow[];
-      mode = 'v3';
+    if (!error && Array.isArray(data) && data.length > 0) {
+      dbRows = data as SearchRow[];
+      mode = 'v4-backend';
     }
+  }
+
+  if (dbRows.length === 0) {
+    dbRows = await searchViaPublicEdge(q, Math.min(limit * 3, 20));
+    if (dbRows.length > 0) mode = 'v4-edge';
   }
 
   if (dbRows.length === 0) {
