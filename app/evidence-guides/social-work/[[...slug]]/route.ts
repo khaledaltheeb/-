@@ -5,7 +5,7 @@ import { hardenTalentiaPageQuality } from '@/lib/social-work-talentia-quality';
 import { SOCIAL_WORK_COMPARATIVE_PAGES, enrichSocialWorkPageWithComparative } from '@/lib/social-work-comparative-pages';
 import { enrichSocialWorkInstitutionalPage, SOCIAL_WORK_INSTITUTIONAL_RELEASE } from '@/lib/social-work-institutional-enrichment';
 import { enrichSocialWorkResearchDepth, SOCIAL_WORK_RESEARCH_RELEASE } from '@/lib/social-work-research-depth';
-import { SOCIAL_WORK_CURATED_PAGES, SOCIAL_WORK_CURATED_RELEASE } from '@/lib/social-work-curated-pages';
+import { SOCIAL_WORK_CURATED_PAGES, SOCIAL_WORK_CURATED_RELEASE } from '@/lib/social-work-curated-registry';
 import { repairSocialWorkSourceProvenance, SOCIAL_WORK_PROVENANCE_REPAIR_RELEASE } from '@/lib/social-work-provenance-repair';
 import { hardenRawHtmlSeo } from '@/lib/html-seo-hardening';
 
