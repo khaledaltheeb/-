@@ -84,7 +84,7 @@ export function hardenRawHtmlSeo(html: string, options: RawHtmlSeoOptions) {
   const canonical = canonicalHref(html) || options.canonicalUrl;
   const type = options.type || 'article';
 
-  let output = originalTitle.length > 65 ? replaceTitle(html, title) : html;
+  const output = originalTitle.length > 65 ? replaceTitle(html, title) : html;
   const tags: string[] = [];
 
   if (!canonicalHref(output)) tags.push(`<link rel="canonical" href="${escapeAttribute(canonical)}">`);
