@@ -5,7 +5,6 @@ import { BRAND_NAME, DEFAULT_DESCRIPTION, INDEXING_ENABLED, SITE_URL, organizati
 import { founderJsonLd } from '@/lib/founder';
 import RawafidAssistant from '@/components/rawafid-assistant';
 import './rawafid-theme.css';
-import './footer-responsive-guard.css';
 
 /* Compatibility modules now live behind the central entry point:
  './theme-empty.css' './dashboard-v3.css' './theme-preview.css'
