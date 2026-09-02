@@ -69,7 +69,7 @@ export function hardenStaticHtmlSeo(html: string, options: StaticHtmlSeoOptions 
   const socialTitle = title.replace(BRAND_SUFFIX, '').trim();
   const decodedDescription = decodeCommonEntities(description);
 
-  let output = html.replace(/<title>[\s\S]*?<\/title>/i, `<title>${escapeHtml(title)}</title>`);
+  const output = html.replace(/<title>[\s\S]*?<\/title>/i, `<title>${escapeHtml(title)}</title>`);
   const additions: string[] = [];
 
   if (!hasMetaProperty(output, 'og:type')) additions.push(`<meta property="og:type" content="${options.collection ? 'website' : 'article'}">`);
