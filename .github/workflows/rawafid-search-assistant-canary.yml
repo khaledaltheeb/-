@@ -61,15 +61,19 @@ jobs:
             reading="$(curl -fsSL --compressed --max-time 25 "${base}/api/search/v3?q=%D9%83%D9%8A%D9%81%20%D8%A7%D8%B3%D8%A7%D8%B9%D8%AF%20%D8%B7%D9%81%D9%84%D9%8A%20%D8%B9%D9%84%D9%89%20%D8%A7%D9%84%D9%82%D8%B1%D8%A7%D8%A1%D8%A9&limit=6" 2>/dev/null || true)"
             dialect="$(curl -fsSL --compressed --max-time 25 "${base}/api/search/v3?q=%D8%B7%D9%81%D9%84%D9%8A%20%D9%85%D8%A7%20%D8%A8%D8%AD%D9%83%D9%8A&limit=6" 2>/dev/null || true)"
             social="$(curl -fsSL --compressed --max-time 25 "${base}/api/search/v3?q=%D8%A7%D8%AE%D9%84%D8%A7%D9%82%D9%8A%D8%A7%D8%AA%20%D8%A7%D9%84%D8%B9%D9%85%D9%84%20%D8%A7%D9%84%D8%A7%D8%AC%D8%AA%D9%85%D8%A7%D8%B9%D9%8A&limit=6" 2>/dev/null || true)"
+            followup="$(curl -fsSL --compressed --max-time 25 "${base}/api/search/v3?q=%D9%88%D9%85%D8%A7%D8%B0%D8%A7%20%D8%B9%D9%86%20%D8%A7%D9%84%D8%B9%D9%84%D8%A7%D8%AC&context=%D8%B9%D9%84%D8%A7%D9%85%D8%A7%D8%AA%20%D8%A7%D9%84%D8%AA%D9%88%D8%AD%D8%AF&limit=6" 2>/dev/null || true)"
             if [[ "$home" == *"noindex"* ]] \
               && [[ "$reading" == *"zero-api"* ]] \
               && [[ "$reading" == *"reading-difficulties-at-home"* ]] \
               && [[ "$dialect" == *"speech"* || "$dialect" == *"يتكلم"* || "$dialect" == *"الكلام"* ]] \
               && [[ "$social" == *"social-work"* ]] \
+              && [[ "$followup" == *'"contextual":true'* ]] \
+              && [[ "$followup" == *"التوحد"* || "$followup" == *"autism"* ]] \
               && [[ "$reading" != *"openai"* ]] \
               && [[ "$dialect" != *"openai"* ]] \
-              && [[ "$social" != *"openai"* ]]; then
-              echo 'Zero-API assistant canary passed noindex, canonical search, dialect and social-work checks.'
+              && [[ "$social" != *"openai"* ]] \
+              && [[ "$followup" != *"openai"* ]]; then
+              echo 'Zero-API assistant canary passed noindex, canonical search, dialect, contextual follow-up and social-work checks.'
               exit 0
             fi
             echo "Canary verification attempt ${attempt} not ready yet."
