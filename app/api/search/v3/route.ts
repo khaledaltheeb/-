@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createSearchBackendClient } from '@/lib/supabase/search-backend';
 import { searchSocialWorkStaticPages } from '@/lib/social-work-search-index';
+import { buildExtractiveAnswer, buildFreeQueryVariants } from '@/lib/free-search-intelligence';
 
 export const dynamic = 'force-dynamic';
 
@@ -61,48 +62,67 @@ async function searchViaPublicEdge(q: string, limit: number): Promise<SearchRow[
   }
 }
 
+async function searchDatabaseVariant(q: string, limit: number) {
+  const backend = createSearchBackendClient();
+  if (backend) {
+    const { data, error } = await backend.rpc('search_platform_v3_lexical', {
+      p_query: q,
+      p_limit: Math.min(limit, 100),
+    });
+    if (!error && Array.isArray(data) && data.length > 0) {
+      return { mode: 'v4-backend', rows: data as SearchRow[] };
+    }
+  }
+
+  const edgeRows = await searchViaPublicEdge(q, Math.min(limit, 20));
+  if (edgeRows.length > 0) return { mode: 'v4-edge', rows: edgeRows };
+
+  const publicClient = await createClient();
+  const { data, error } = await publicClient.rpc('search_platform', {
+    p_query: q,
+    p_limit: Math.min(limit, 100),
+  });
+  return { mode: 'legacy-fallback', rows: !error ? (data ?? []) as SearchRow[] : [] };
+}
+
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const q = normalizeQuery(url.searchParams.get('q'));
   const limit = boundedLimit(url.searchParams.get('limit'));
 
   if (q.length < 2) {
-    return NextResponse.json({ query: q, mode: 'empty', results: [] }, { status: 200 });
+    return NextResponse.json({ query: q, mode: 'empty', results: [], answer: null }, { status: 200 });
   }
 
-  const staticRows = searchSocialWorkStaticPages(q, Math.min(limit * 2, 100)) as SearchRow[];
-  let dbRows: SearchRow[] = [];
-  let mode = 'legacy-fallback';
+  const variants = buildFreeQueryVariants(q);
+  const dbGroups: SearchRow[][] = [];
+  const modes = new Set<string>();
 
-  const backend = createSearchBackendClient();
-  if (backend) {
-    const { data, error } = await backend.rpc('search_platform_v3_lexical', {
-      p_query: q,
-      p_limit: Math.min(limit * 3, 100),
-    });
-    if (!error && Array.isArray(data) && data.length > 0) {
-      dbRows = data as SearchRow[];
-      mode = 'v4-backend';
-    }
+  for (const [index, variant] of variants.entries()) {
+    const searched = await searchDatabaseVariant(variant, Math.min(limit * 3, 60));
+    modes.add(searched.mode);
+    const adjusted = searched.rows.map((row) => ({
+      ...row,
+      score: Number(row.score) + (index === 0 ? 140 : 0),
+    }));
+    dbGroups.push(adjusted);
   }
 
-  if (dbRows.length === 0) {
-    dbRows = await searchViaPublicEdge(q, Math.min(limit * 3, 20));
-    if (dbRows.length > 0) mode = 'v4-edge';
-  }
+  const staticGroups = variants.map((variant, index) =>
+    searchSocialWorkStaticPages(variant, Math.min(limit * 2, 100)).map((row) => ({
+      ...row,
+      score: Number(row.score) + (index === 0 ? 140 : 0),
+    })) as SearchRow[],
+  );
 
-  if (dbRows.length === 0) {
-    const publicClient = await createClient();
-    const { data, error } = await publicClient.rpc('search_platform', {
-      p_query: q,
-      p_limit: Math.min(limit * 3, 100),
-    });
-    if (!error) dbRows = (data ?? []) as SearchRow[];
-  }
+  const results = mergeResults([...dbGroups, ...staticGroups], limit);
+  const answer = buildExtractiveAnswer(q, results);
+  const mode = variants.length > 1
+    ? `zero-api-expanded:${[...modes].join('+') || 'local'}`
+    : `zero-api:${[...modes].join('+') || 'local'}`;
 
-  const results = mergeResults([dbRows, staticRows], limit);
   return NextResponse.json(
-    { query: q, mode, count: results.length, results },
+    { query: q, variants, mode, count: results.length, answer, results },
     {
       status: 200,
       headers: {
