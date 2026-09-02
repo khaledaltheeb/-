@@ -26,6 +26,11 @@ function readApiKey(request: Request) {
   return match?.[1]?.trim() || null;
 }
 
+function requestIdFor(request: Request) {
+  const supplied = request.headers.get('x-request-id')?.trim() || '';
+  return /^[A-Za-z0-9][A-Za-z0-9._:-]{0,63}$/.test(supplied) ? supplied : randomUUID();
+}
+
 function scopeHeaders(authorization: PartnerAuthorization) {
   const minute = authorization.minute;
   const day = authorization.day;
@@ -71,7 +76,7 @@ export function decoratePartnerResponse(response: Response, headers: Record<stri
 function authErrorHeaders(requestId: string) {
   return {
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Accept,Authorization,Content-Type,If-None-Match,If-Modified-Since,X-API-Key',
+    'Access-Control-Allow-Headers': 'Accept,Authorization,Content-Type,If-None-Match,If-Modified-Since,X-API-Key,X-Request-Id',
     'Access-Control-Expose-Headers': 'Retry-After,X-Request-Id',
     'Content-Type': 'application/json; charset=utf-8',
     'Cache-Control': 'private, no-store',
@@ -82,7 +87,7 @@ function authErrorHeaders(requestId: string) {
 }
 
 export function partnerAuthError(request: Request, authorization: PartnerAuthorization) {
-  const requestId = request.headers.get('x-request-id')?.slice(0, 120) || randomUUID();
+  const requestId = requestIdFor(request);
   if (authorization.reason === 'rate_limited') {
     const reset = authorization.reset_at || '';
     const retryAfter = reset ? Math.max(1, Math.ceil((new Date(reset).getTime() - Date.now()) / 1000)) : 60;

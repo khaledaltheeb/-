@@ -23,10 +23,12 @@ type FeedRow = {
   updated_at: string | null;
 };
 
-async function latestRows(): Promise<FeedRow[]> {
+type FeedLoad = { rows: FeedRow[]; ok: boolean };
+
+async function latestRows(): Promise<FeedLoad> {
   const projectUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-  if (!projectUrl || !publishableKey) return [];
+  if (!projectUrl || !publishableKey) return { rows: [], ok: false };
 
   const params = new URLSearchParams({
     select: 'slug,title,excerpt,content_type,canonical_url,published_at,updated_at',
@@ -45,16 +47,17 @@ async function latestRows(): Promise<FeedRow[]> {
       },
       next: { revalidate: 900, tags: ['rawafid-feed'] },
     });
-    if (!response.ok) return [];
+    if (!response.ok) return { rows: [], ok: false };
     const data: unknown = await response.json();
-    return Array.isArray(data) ? data as FeedRow[] : [];
+    return { rows: Array.isArray(data) ? data as FeedRow[] : [], ok: Array.isArray(data) };
   } catch {
-    return [];
+    return { rows: [], ok: false };
   }
 }
 
 export async function GET() {
-  const rows = await latestRows();
+  const loaded = await latestRows();
+  const rows = loaded.rows;
   const lastBuild = rows[0]?.updated_at || rows[0]?.published_at || new Date().toISOString();
   const items = rows.flatMap((row) => {
     if (!row?.slug || !row?.title) return [];
@@ -66,9 +69,12 @@ export async function GET() {
   const xml = `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>روافد — أحدث المحتوى</title><link>${escapeXml(`${SITE_URL}/`)}</link><description>أحدث الصفحات المنشورة والمراجعة في منصة روافد.</description><language>ar</language><lastBuildDate>${escapeXml(new Date(lastBuild).toUTCString())}</lastBuildDate><atom:link href="${escapeXml(`${SITE_URL}/feed.xml`)}" rel="self" type="application/rss+xml"/>${items}</channel></rss>`;
 
   return new NextResponse(xml, {
+    status: loaded.ok ? 200 : 503,
     headers: {
       'Content-Type': 'application/rss+xml; charset=utf-8',
-      'Cache-Control': 'public, max-age=0, s-maxage=900, stale-while-revalidate=3600',
+      'Cache-Control': loaded.ok ? 'public, max-age=0, s-maxage=900, stale-while-revalidate=3600' : 'no-store',
+      ...(loaded.ok ? {} : { 'Retry-After': '60' }),
+      'X-Rawafid-Feed-Status': loaded.ok ? 'ok' : 'degraded',
     },
   });
 }

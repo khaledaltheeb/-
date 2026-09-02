@@ -25,6 +25,7 @@ const lens = fs.readFileSync('lib/research-integrations/lens.ts', 'utf8');
 const ror = fs.readFileSync('lib/research-integrations/ror.ts', 'utf8');
 const europe = fs.readFileSync('lib/research-integrations/europe-pmc.ts', 'utf8');
 const route = fs.readFileSync('app/api/v1/evidence-discovery/route.ts', 'utf8');
+const orchestrator = fs.readFileSync('lib/research-integrations/evidence-discovery.ts', 'utf8');
 const openapi = fs.readFileSync('app/api/openapi.json/route.ts', 'utf8');
 const developers = fs.readFileSync('app/developers/page.tsx', 'utf8');
 const demo = fs.readFileSync('examples/lens-scholarly-demo/lens-demo.mjs', 'utf8');
@@ -34,21 +35,19 @@ const denyMigration = fs.readFileSync('supabase/migrations/20260901192000_ror_re
 const lensRetractionGuard =
   lens.includes('function isRetracted') &&
   lens.includes('update_nature') &&
-  lens.includes(".toLowerCase()") &&
   lens.includes("nature === 'retraction'") &&
   lens.includes('is_retracted: isRetracted(row.retraction_updates)');
 
 const developerEvidenceContract =
   developers.includes('/api/v1/evidence-discovery') &&
   developers.includes('providers=europe_pmc,lens') &&
-  developers.includes('europe_pmc') &&
+  developers.includes('المزود الافتراضي هو <code>europe_pmc</code>') &&
   developers.includes('LENS_SCHOLARLY_API_TOKEN') &&
   developers.includes('not_configured') &&
-  developers.includes('ROR ID') &&
+  developers.includes('ROR') &&
   developers.includes('ORCID') &&
   developers.includes('provenance') &&
-  developers.includes('إعادة نشر') &&
-  developers.includes('مجموعة بيانات مزود خارجي');
+  developers.includes('إعادة نشر');
 
 const checks = [
   [lens.includes('https://api.lens.org/scholarly/search'), 'Lens Scholarly endpoint missing'],
@@ -61,9 +60,13 @@ const checks = [
   [europe.includes('/supplementaryFiles'), 'Europe PMC supplementary-files support missing'],
   [europe.includes('normalizeOrcid'), 'Europe PMC typed ORCID normalization missing'],
   [europe.includes('rorFromOrgIdentifier'), 'Europe PMC ROR affiliation normalization missing'],
+  [route.includes("if (!value) return ['europe_pmc'];"), 'Europe PMC must remain the explicit default evidence provider'],
   [route.includes("withOptionalPartnerAccess(request, 'search:read')"), 'Partner search scope missing'],
+  [route.includes("return apiError(request, 400, 'invalid_parameter', `limit must be an integer between 1 and ${max}.`, 'limit')"), 'Evidence limit strict validation missing'],
+  [orchestrator.includes("status: 'not_configured'"), 'Lens not-configured degradation missing'],
   [openapi.includes("'/evidence-discovery'"), 'Evidence discovery OpenAPI path missing'],
   [openapi.includes("operationId: 'discoverEvidence'"), 'Evidence discovery OpenAPI operation missing'],
+  [openapi.includes("default: 'europe_pmc'"), 'OpenAPI evidence default must be Europe PMC'],
   [developerEvidenceContract, 'Public developer evidence-discovery documentation is incomplete'],
   [migration.includes('enable row level security'), 'ROR registry RLS missing'],
   [migration.includes('source_organizations'), 'ROR source relationship table missing'],

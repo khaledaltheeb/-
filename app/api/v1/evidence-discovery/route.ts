@@ -8,13 +8,14 @@ export const dynamic = 'force-dynamic';
 const ALLOWED = new Set<EvidenceProvider>(['europe_pmc', 'lens']);
 
 function bounded(value: string | null, fallback: number, max: number) {
-  const parsed = Number(value ?? fallback);
-  if (!Number.isInteger(parsed) || parsed < 1) return fallback;
-  return Math.min(parsed, max);
+  if (value === null) return fallback;
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed < 1 || parsed > max) return null;
+  return parsed;
 }
 
 function parseProviders(value: string | null): EvidenceProvider[] | null {
-  if (!value) return ['europe_pmc', 'lens'];
+  if (!value) return ['europe_pmc'];
   const list = [...new Set(value.split(',').map((item) => item.trim().toLowerCase()).filter(Boolean))];
   if (!list.length || list.some((item) => !ALLOWED.has(item as EvidenceProvider))) return null;
   return list as EvidenceProvider[];
@@ -30,6 +31,7 @@ export async function GET(request: Request) {
   if (!providers) return apiError(request, 400, 'invalid_parameter', 'providers may contain europe_pmc and lens only.', 'providers');
   const max = access.authorization?.authorized ? 100 : 50;
   const limit = bounded(url.searchParams.get('limit'), 20, max);
+  if (limit === null) return apiError(request, 400, 'invalid_parameter', `limit must be an integer between 1 and ${max}.`, 'limit');
   const result = await discoverEvidence({ query: q, providers, limit, europe_pmc_cursor: url.searchParams.get('cursor') });
   const response = jsonResponse(request, {
     data: result.records,
