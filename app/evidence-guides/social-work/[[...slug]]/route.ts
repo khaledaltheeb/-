@@ -3,6 +3,7 @@ import { SOCIAL_WORK_TALENTIA_PAGES, enrichSocialWorkPageWithTalentia } from '@/
 import { enrichTalentiaPageWithInlineLinks } from '@/lib/social-work-talentia-inline-links';
 import { hardenTalentiaPageQuality } from '@/lib/social-work-talentia-quality';
 import { SOCIAL_WORK_COMPARATIVE_PAGES, enrichSocialWorkPageWithComparative } from '@/lib/social-work-comparative-pages';
+import { hardenStaticHtmlSeo } from '@/lib/static-html-seo';
 
 type Params = Promise<{ slug?: string[] }>;
 
@@ -17,6 +18,10 @@ const htmlHeaders = {
 
 export const dynamic = 'force-static';
 
+function htmlResponse(html: string, key: string) {
+  return new Response(hardenStaticHtmlSeo(html, { collection: key === '' }), { status: 200, headers: htmlHeaders });
+}
+
 export async function GET(_request: Request, { params }: { params: Params }) {
   const { slug = [] } = await params;
   if (slug.length > 1) {
@@ -26,14 +31,14 @@ export async function GET(_request: Request, { params }: { params: Params }) {
   const key = slug[0] ?? '';
   const comparativeHtml = SOCIAL_WORK_COMPARATIVE_PAGES[key];
   if (comparativeHtml) {
-    return new Response(comparativeHtml, { status: 200, headers: htmlHeaders });
+    return htmlResponse(comparativeHtml, key);
   }
 
   const talentiaHtml = SOCIAL_WORK_TALENTIA_PAGES[key];
   if (talentiaHtml) {
     const withInlineLinks = enrichTalentiaPageWithInlineLinks(talentiaHtml, key);
     const hardened = hardenTalentiaPageQuality(withInlineLinks, key);
-    return new Response(enrichSocialWorkPageWithComparative(hardened, key), { status: 200, headers: htmlHeaders });
+    return htmlResponse(enrichSocialWorkPageWithComparative(hardened, key), key);
   }
 
   const recoveredHtml = SOCIAL_WORK_PAGES[key];
@@ -42,5 +47,5 @@ export async function GET(_request: Request, { params }: { params: Params }) {
   }
 
   const enriched = enrichSocialWorkPageWithTalentia(recoveredHtml, key);
-  return new Response(enrichSocialWorkPageWithComparative(enriched, key), { status: 200, headers: htmlHeaders });
+  return htmlResponse(enrichSocialWorkPageWithComparative(enriched, key), key);
 }
