@@ -42,13 +42,6 @@ function normalizeLinkCacheKey(value) {
   return url.toString();
 }
 function sleep(ms) { return new Promise((resolve) => setTimeout(resolve, ms)); }
-async function fetchWithTimeout(url, options = {}) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), requestTimeoutMs);
-  try {
-    return await fetch(url, { ...options, signal: controller.signal, headers: { 'user-agent': 'Rawafid-SEO-Gate/1.0', ...(options.headers || {}) } });
-  } finally { clearTimeout(timer); }
-}
 async function fetchStatusWithTimeout(url, options = {}) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), requestTimeoutMs);
