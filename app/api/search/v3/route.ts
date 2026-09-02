@@ -32,6 +32,9 @@ type EdgeSearchResponse = {
   evidence?: EvidenceRow[];
 };
 
+const EXPLICIT_TOPIC_PATTERN = /(توحد|autism|adhd|فرط\s*الحرك|تشتت|ديسلكس|عسر\s*القراء|تأخر\s*(?:الكلام|النطق)|وسواس|ocd|erp|aac|قلق\s*اجتماعي|رهاب\s*اجتماعي|اكتئاب|ادمان|إدمان|انسحاب|مرض\s*نادر|علاج\s*جيني|سرطان|صرع|عمل\s*اجتماعي|خدمه\s*اجتماعي|خدمة\s*اجتماعي|تربيه\s*دامج|تربية\s*دامج|تعليم\s*دامج|متلازمه\s*داون|متلازمة\s*داون|شلل\s*دماغي|صعوبات\s*التعلم)/iu;
+const FOLLOW_UP_PATTERN = /^(?:و?ماذا(?:\s+عن)?|و?ما(?:\s+عن)?|طيب|تمام|و?كيف|و?هل|و?العلاج|و?التشخيص|و?التقييم|و?الاعراض|و?الأعراض|و?الدعم|و?المدرسه|و?المدرسة|و?الدواء|و?الادويه|و?الأدوية|و?الاسره|و?الأسرة|و?المضاعفات|و?الاسباب|و?الأسباب)\b/iu;
+
 function boundedLimit(value: string | null) {
   const n = Number(value ?? 30);
   return Number.isFinite(n) ? Math.max(1, Math.min(Math.trunc(n), 100)) : 30;
@@ -39,6 +42,14 @@ function boundedLimit(value: string | null) {
 
 function normalizeQuery(value: string | null) {
   return String(value ?? '').trim().replace(/\s+/g, ' ').slice(0, 160);
+}
+
+function contextualizeQuery(query: string, context: string) {
+  if (!context || context === query || EXPLICIT_TOPIC_PATTERN.test(query)) return query;
+  const tokenCount = query.split(/\s+/u).filter(Boolean).length;
+  const looksLikeFollowUp = FOLLOW_UP_PATTERN.test(query) || tokenCount <= 4;
+  if (!looksLikeFollowUp) return query;
+  return `${context} ${query}`.replace(/\s+/g, ' ').trim().slice(0, 160);
 }
 
 function mergeResults(groups: SearchRow[][], limit: number) {
@@ -128,13 +139,15 @@ function evidenceAsResults(evidence: EvidenceRow[]): SearchRow[] {
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const q = normalizeQuery(url.searchParams.get('q'));
+  const context = normalizeQuery(url.searchParams.get('context'));
+  const resolvedQuery = contextualizeQuery(q, context);
   const limit = boundedLimit(url.searchParams.get('limit'));
 
   if (q.length < 2) {
-    return NextResponse.json({ query: q, mode: 'empty', results: [], answer: null }, { status: 200 });
+    return NextResponse.json({ query: q, resolved_query: q, mode: 'empty', results: [], answer: null }, { status: 200 });
   }
 
-  const variants = buildFreeQueryVariants(q);
+  const variants = buildFreeQueryVariants(resolvedQuery);
   const dbGroups: SearchRow[][] = [];
   const evidenceGroups: EvidenceRow[][] = [];
   const modes = new Set<string>();
@@ -163,12 +176,12 @@ export async function GET(request: Request) {
     .slice(0, 6);
   const answerSource = rankedEvidence.length ? evidenceAsResults(rankedEvidence) : results;
   const answer = buildExtractiveAnswer(q, answerSource);
-  const mode = variants.length > 1
-    ? `zero-api-expanded:${[...modes].join('+') || 'local'}`
-    : `zero-api:${[...modes].join('+') || 'local'}`;
+  const contextual = resolvedQuery !== q;
+  const modePrefix = contextual ? 'zero-api-contextual' : variants.length > 1 ? 'zero-api-expanded' : 'zero-api';
+  const mode = `${modePrefix}:${[...modes].join('+') || 'local'}`;
 
   return NextResponse.json(
-    { query: q, variants, mode, count: results.length, evidence_count: rankedEvidence.length, answer, results },
+    { query: q, resolved_query: resolvedQuery, contextual, variants, mode, count: results.length, evidence_count: rankedEvidence.length, answer, results },
     {
       status: 200,
       headers: {
