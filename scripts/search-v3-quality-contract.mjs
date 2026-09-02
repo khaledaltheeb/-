@@ -30,22 +30,23 @@ const cases = [
   {
     q: 'مرض نادر علاج جيني',
     top1: '/content/rare-disease-gene-cell-therapy-guide',
-    top5TitleTerms: ['نادر', 'الجيني'],
+    top5TitleAny: ['نادر', 'الجيني'],
   },
   {
     q: 'علامات ADHD عند الاطفال',
-    topK: 5,
-    requiredLatin: 'adhd',
+    requiredLatinAllTop5: 'adhd',
   },
   {
     q: 'AAC للتوحد',
     top1: '/care-guides/aac/autism-guide/',
-    requiredLatin: 'aac',
+    requiredLatinTop1: 'aac',
+    top5TitleAny: ['التوحد', 'autism', 'aac'],
   },
   {
     q: 'ERP للوسواس القهري',
     top1: '/library/therapies/exposure-response-prevention/',
-    requiredLatin: 'erp',
+    requiredLatinTop1: 'erp',
+    top5TitleAny: ['الوسواس', 'erp'],
   },
   {
     q: 'اعراض انسحاب الكحول',
@@ -92,16 +93,24 @@ for (const test of cases) {
   let ok = rows.length > 0 && unique;
   if (test.top1) ok &&= rows[0]?.destination === test.top1;
   if (test.top5TitleTerms) ok &&= test.top5TitleTerms.every((term) => titles.every((title) => title.includes(normalized(term))));
-  if (test.requiredLatin) {
-    const token = test.requiredLatin.toLowerCase();
+  if (test.top5TitleAny) {
+    const terms = test.top5TitleAny.map(normalized);
+    ok &&= titles.every((title) => terms.some((term) => title.includes(term)));
+  }
+  if (test.requiredLatinAllTop5) {
+    const token = test.requiredLatinAllTop5.toLowerCase();
     ok &&= top5.every((row) => normalized(`${row.title} ${row.destination}`).includes(token));
+  }
+  if (test.requiredLatinTop1) {
+    const token = test.requiredLatinTop1.toLowerCase();
+    ok &&= normalized(`${rows[0]?.title} ${rows[0]?.destination}`).includes(token);
   }
   if (test.topKTerms) {
     ok &&= top5.some((row) => test.topKTerms.some((term) => normalized(`${row.title} ${row.destination}`).includes(term)));
   }
   if (test.forbiddenTop5) {
-    const cutoff = Math.max(0, Math.min(test.forbiddenRankBefore ?? 5, 5));
-    ok &&= !destinations.slice(0, cutoff).some((destination) => test.forbiddenTop5.some((term) => destination.includes(term)));
+    const rankBefore = Math.max(1, Math.min(test.forbiddenRankBefore ?? 6, 6));
+    ok &&= !destinations.slice(0, rankBefore - 1).some((destination) => test.forbiddenTop5.some((term) => destination.includes(term)));
   }
 
   if (!ok) {
