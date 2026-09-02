@@ -173,6 +173,7 @@ jobs:
         with:
           name: rawafid-quality-diagnostics-${{ github.run_id }}
           path: |
+            reports/seo-gate-report.json
             /tmp/rawafid-server.log
             /tmp/rawafid-lighthouse-*.json
           if-no-files-found: ignore
