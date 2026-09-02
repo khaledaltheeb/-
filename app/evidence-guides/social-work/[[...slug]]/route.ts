@@ -5,6 +5,8 @@ import { hardenTalentiaPageQuality } from '@/lib/social-work-talentia-quality';
 import { SOCIAL_WORK_COMPARATIVE_PAGES, enrichSocialWorkPageWithComparative } from '@/lib/social-work-comparative-pages';
 import { enrichSocialWorkInstitutionalPage, SOCIAL_WORK_INSTITUTIONAL_RELEASE } from '@/lib/social-work-institutional-enrichment';
 import { enrichSocialWorkResearchDepth, SOCIAL_WORK_RESEARCH_RELEASE } from '@/lib/social-work-research-depth';
+import { SOCIAL_WORK_CURATED_PAGES, SOCIAL_WORK_CURATED_RELEASE } from '@/lib/social-work-curated-pages';
+import { repairSocialWorkSourceProvenance, SOCIAL_WORK_PROVENANCE_REPAIR_RELEASE } from '@/lib/social-work-provenance-repair';
 import { hardenRawHtmlSeo } from '@/lib/html-seo-hardening';
 
 type Params = Promise<{ slug?: string[] }>;
@@ -15,14 +17,23 @@ const htmlHeaders = {
   'cache-control': 'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400',
   'x-content-type-options': 'nosniff',
   'x-robots-tag': 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1',
-  'x-rawafid-source': `healthrenewal.org@${SOCIAL_WORK_SOURCE_SHA};talentia-ethics-20260831;comparative-ethics-20260901;institutional-evidence-${SOCIAL_WORK_INSTITUTIONAL_RELEASE};research-depth-${SOCIAL_WORK_RESEARCH_RELEASE}`,
+  'x-rawafid-source': `healthrenewal.org@${SOCIAL_WORK_SOURCE_SHA};talentia-ethics-20260831;comparative-ethics-20260901;institutional-evidence-${SOCIAL_WORK_INSTITUTIONAL_RELEASE};research-depth-${SOCIAL_WORK_RESEARCH_RELEASE};curated-${SOCIAL_WORK_CURATED_RELEASE};provenance-repair-${SOCIAL_WORK_PROVENANCE_REPAIR_RELEASE}`,
 };
 
 export const dynamic = 'force-static';
 
-function finalizeSocialWorkPage(html: string, key: string) {
-  const enriched = enrichSocialWorkResearchDepth(enrichSocialWorkInstitutionalPage(html, key), key);
+function finalizeSocialWorkPage(inputHtml: string, key: string) {
   const pathname = `/evidence-guides/social-work/${key ? `${key}/` : ''}`;
+  const repaired = repairSocialWorkSourceProvenance(inputHtml);
+
+  // Curated pages are complete editorial replacements. Do not append the generic
+  // institutional/research layers again: that would reintroduce duplication and
+  // weaken the page-specific evidence hierarchy.
+  if (repaired.includes('data-rawafid-curated-page=')) {
+    return hardenRawHtmlSeo(repaired, pathname);
+  }
+
+  const enriched = enrichSocialWorkResearchDepth(enrichSocialWorkInstitutionalPage(repaired, key), key);
   return hardenRawHtmlSeo(enriched, pathname);
 }
 
@@ -37,6 +48,12 @@ export async function GET(_request: Request, { params }: { params: Params }) {
   }
 
   const key = slug[0] ?? '';
+
+  const curatedHtml = SOCIAL_WORK_CURATED_PAGES[key];
+  if (curatedHtml) {
+    return htmlResponse(curatedHtml, key);
+  }
+
   const comparativeHtml = SOCIAL_WORK_COMPARATIVE_PAGES[key];
   if (comparativeHtml) {
     return htmlResponse(comparativeHtml, key);
