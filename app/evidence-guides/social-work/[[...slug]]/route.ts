@@ -5,7 +5,7 @@ import { hardenTalentiaPageQuality } from '@/lib/social-work-talentia-quality';
 import { SOCIAL_WORK_COMPARATIVE_PAGES, enrichSocialWorkPageWithComparative } from '@/lib/social-work-comparative-pages';
 import { enrichSocialWorkInstitutionalPage, SOCIAL_WORK_INSTITUTIONAL_RELEASE } from '@/lib/social-work-institutional-enrichment';
 import { enrichSocialWorkResearchDepth, SOCIAL_WORK_RESEARCH_RELEASE } from '@/lib/social-work-research-depth';
-import { hardenRawHtmlSeo } from '@/lib/raw-html-seo';
+import { hardenRawHtmlSeo } from '@/lib/html-seo-hardening';
 
 type Params = Promise<{ slug?: string[] }>;
 
@@ -20,22 +20,26 @@ const htmlHeaders = {
 
 export const dynamic = 'force-static';
 
-function finalizeSocialWorkPage(html: string, key: string, canonicalUrl: string) {
+function finalizeSocialWorkPage(html: string, key: string) {
   const enriched = enrichSocialWorkResearchDepth(enrichSocialWorkInstitutionalPage(html, key), key);
-  return hardenRawHtmlSeo(enriched, { canonicalUrl, type: 'article' });
+  const pathname = `/evidence-guides/social-work/${key ? `${key}/` : ''}`;
+  return hardenRawHtmlSeo(enriched, pathname);
 }
 
-export async function GET(request: Request, { params }: { params: Params }) {
+function htmlResponse(html: string, key: string) {
+  return new Response(finalizeSocialWorkPage(html, key), { status: 200, headers: htmlHeaders });
+}
+
+export async function GET(_request: Request, { params }: { params: Params }) {
   const { slug = [] } = await params;
   if (slug.length > 1) {
     return new Response('Not Found', { status: 404, headers: { 'content-type': 'text/plain; charset=utf-8' } });
   }
 
   const key = slug[0] ?? '';
-  const canonicalUrl = `https://healthrenewal.org${new URL(request.url).pathname}`;
   const comparativeHtml = SOCIAL_WORK_COMPARATIVE_PAGES[key];
   if (comparativeHtml) {
-    return new Response(finalizeSocialWorkPage(comparativeHtml, key, canonicalUrl), { status: 200, headers: htmlHeaders });
+    return htmlResponse(comparativeHtml, key);
   }
 
   const talentiaHtml = SOCIAL_WORK_TALENTIA_PAGES[key];
@@ -43,7 +47,7 @@ export async function GET(request: Request, { params }: { params: Params }) {
     const withInlineLinks = enrichTalentiaPageWithInlineLinks(talentiaHtml, key);
     const hardened = hardenTalentiaPageQuality(withInlineLinks, key);
     const compared = enrichSocialWorkPageWithComparative(hardened, key);
-    return new Response(finalizeSocialWorkPage(compared, key, canonicalUrl), { status: 200, headers: htmlHeaders });
+    return htmlResponse(compared, key);
   }
 
   const recoveredHtml = SOCIAL_WORK_PAGES[key];
@@ -53,5 +57,5 @@ export async function GET(request: Request, { params }: { params: Params }) {
 
   const enriched = enrichSocialWorkPageWithTalentia(recoveredHtml, key);
   const compared = enrichSocialWorkPageWithComparative(enriched, key);
-  return new Response(finalizeSocialWorkPage(compared, key, canonicalUrl), { status: 200, headers: htmlHeaders });
+  return htmlResponse(compared, key);
 }
