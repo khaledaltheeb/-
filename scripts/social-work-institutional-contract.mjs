@@ -21,9 +21,16 @@ const allContentKeys = new Set([...recoveredKeys.filter(Boolean), ...talentiaKey
 if (!route.includes('enrichSocialWorkInstitutionalPage')) fail('route does not invoke the institutional enrichment layer');
 const directInstitutionalCalls = (route.match(/enrichSocialWorkInstitutionalPage\(/g) || []).length;
 const finalizerCalls = (route.match(/finalizeSocialWorkPage\(/g) || []).length;
-const centralizedCoverage = route.includes('function finalizeSocialWorkPage') && directInstitutionalCalls >= 1 && finalizerCalls >= 4;
+const htmlResponseCalls = (route.match(/htmlResponse\(/g) || []).length;
+const centralizedCoverage =
+  route.includes('function finalizeSocialWorkPage') &&
+  route.includes('function htmlResponse') &&
+  route.includes('new Response(finalizeSocialWorkPage(html, key)') &&
+  directInstitutionalCalls >= 1 &&
+  finalizerCalls >= 2 &&
+  htmlResponseCalls >= 4;
 const legacyCoverage = directInstitutionalCalls >= 3;
-if (!centralizedCoverage && !legacyCoverage) fail('institutional layer must cover comparative, Talentia and recovered routes, directly or through a shared finalizer');
+if (!centralizedCoverage && !legacyCoverage) fail('institutional layer must cover comparative, Talentia and recovered routes, directly or through the shared response/finalizer chain');
 if (!route.includes('institutional-evidence-${SOCIAL_WORK_INSTITUTIONAL_RELEASE}')) fail('response provenance header is missing institutional release');
 
 const requiredFingerprints = [
