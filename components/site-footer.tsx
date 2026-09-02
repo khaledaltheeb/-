@@ -1,4 +1,5 @@
 import RawafidBrand from '@/components/rawafid-brand';
+import styles from '@/components/site-footer.module.css';
 
 const groups = [
   {
@@ -59,7 +60,7 @@ const groups = [
 export default function SiteFooter() {
   return (
     <footer className="site-footer" style={{ display: 'block', padding: 0 }}>
-      <div className="site-footer-inner" data-nosnippet>
+      <div className={`site-footer-inner ${styles.mobileInner}`} data-nosnippet>
         <div className="footer-brand-block">
           <RawafidBrand className="footer-brand" />
           <p>منصة عربية مؤسسية تربط المعرفة الموثوقة بالأدلة العملية والرعاية الأسرية والخدمات المهنية، مع مسارات واضحة للصحة النفسية وسرطان الأطفال والتعافي والدمج والتمكين.</p>
