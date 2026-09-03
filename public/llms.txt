@@ -2,36 +2,36 @@
 
 > منصة عربية غير تجارية للمعرفة الموثوقة في الصحة النفسية، علم النفس، التربية الخاصة، التربية الدامجة، اضطراب طيف التوحد، صعوبات التعلم، الإدمان والتعافي، سرطان الأطفال، ودعم الأسرة.
 
-Canonical site: https://healthrenewal.org/
+Canonical site: [https://healthrenewal.org/](https://healthrenewal.org/)
 Primary language: Arabic (ar)
 Publisher: منصة روافد
 
 ## Core entry points
-- Home: https://healthrenewal.org/
-- Sectors: https://healthrenewal.org/sectors
-- Sections: https://healthrenewal.org/sections
-- Extended encyclopedia: https://healthrenewal.org/sections/cognitive-processes
-- Concise encyclopedia: https://healthrenewal.org/encyclopedia/
-- Care guides: https://healthrenewal.org/care-guides/
-- Evidence guides: https://healthrenewal.org/evidence-guides/
-- Pediatric oncology: https://healthrenewal.org/sectors/pediatric-oncology
-- Cognitive lab: https://healthrenewal.org/cognitive-lab
-- Sources: https://healthrenewal.org/sources
-- Editorial policy: https://healthrenewal.org/editorial-policy
-- Medical review policy: https://healthrenewal.org/medical-review-policy
-- About: https://healthrenewal.org/about
+- [Home](https://healthrenewal.org/)
+- [Sectors](https://healthrenewal.org/sectors)
+- [Sections](https://healthrenewal.org/sections)
+- [Extended encyclopedia](https://healthrenewal.org/sections/cognitive-processes)
+- [Concise encyclopedia](https://healthrenewal.org/encyclopedia/)
+- [Care guides](https://healthrenewal.org/care-guides/)
+- [Evidence guides](https://healthrenewal.org/evidence-guides/)
+- [Pediatric oncology](https://healthrenewal.org/sectors/pediatric-oncology)
+- [Cognitive lab](https://healthrenewal.org/cognitive-lab)
+- [Sources](https://healthrenewal.org/sources)
+- [Editorial policy](https://healthrenewal.org/editorial-policy)
+- [Medical review policy](https://healthrenewal.org/medical-review-policy)
+- [About](https://healthrenewal.org/about)
 
 ## Open-source engineering
-- Official toolkit page: https://healthrenewal.org/open-source/arabic-rtl-a11y-toolkit
-- Public source repository: https://github.com/khaledaltheeb/rawafid-arabic-rtl-a11y-toolkit
+- [Official toolkit page](https://healthrenewal.org/open-source/arabic-rtl-a11y-toolkit)
+- [Public source repository](https://github.com/khaledaltheeb/rawafid-arabic-rtl-a11y-toolkit)
 - Scope: reusable Arabic/RTL, localization, Unicode bidi-safety, accessibility and direction-aware web engineering only; the repository does not contain Rawafid's scientific/editorial corpus or user data.
 - License: Apache-2.0.
 - Do not infer npm publication, third-party endorsement, partnership, certification or external audit unless the corresponding source explicitly verifies it.
 
 ## Discovery
-- Sitemap index: https://healthrenewal.org/sitemap.xml
-- Robots: https://healthrenewal.org/robots.txt
-- RSS: https://healthrenewal.org/feed.xml
+- [Sitemap index](https://healthrenewal.org/sitemap.xml)
+- [Robots](https://healthrenewal.org/robots.txt)
+- [RSS](https://healthrenewal.org/feed.xml)
 
 ## Citation guidance
 Prefer the canonical URL declared by each page. When a page provides sources, review dates, authors, or reviewers, preserve those distinctions when citing it. Health content is educational and does not replace individual diagnosis or treatment.
