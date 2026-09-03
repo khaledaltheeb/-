@@ -47,8 +47,7 @@ jobs:
           fetch_page social "$dir/social.json" --get "${base}/api/search/v3" --data-urlencode 'q=أخلاقيات العمل الاجتماعي' --data-urlencode 'limit=6'
           fetch_page emergency "$dir/emergency.json" --get "${base}/api/search/v3" --data-urlencode 'q=تناولت جرعة زائدة وفقدت الوعي ماذا افعل' --data-urlencode 'limit=6'
 
-      - name: Evaluate all production assertions
-        id: evaluate
+      - name: Evaluate strict production assertions
         shell: bash
         run: |
           set +e
@@ -57,112 +56,73 @@ jobs:
           const dir = '/tmp/rawafid-production-diagnostics';
           const failures = [];
           const summary = { checked_at: new Date().toISOString(), stages: {} };
+          const fail = (stage, message, extra) => failures.push({ stage, message, ...(extra === undefined ? {} : { extra }) });
+          const text = (name, stage) => { try { return fs.readFileSync(`${dir}/${name}`, 'utf8'); } catch (e) { fail(stage, `missing ${name}`, String(e)); return ''; } };
+          const json = (name, stage) => { const raw = text(name, stage); if (!raw) return null; try { return JSON.parse(raw); } catch (e) { fail(stage, `invalid JSON ${name}`, { error: String(e), prefix: raw.slice(0,300) }); return null; } };
+          const summarize = (stage, d) => { if (!d) return; summary.stages[stage] = { mode:d.mode??null, intent:d.analysis?.intent??null, topics:d.analysis?.topics??[], topic_labels:d.analysis?.topic_labels??[], subject:d.analysis?.subject??null, age:d.analysis?.age??null, clarification:d.analysis?.clarifying_question??null, result_count:Array.isArray(d.results)?d.results.length:null, answer_points:Array.isArray(d.answer?.points)?d.answer.points.map((p)=>({title:p.title,destination:p.destination})):[] }; };
 
-          const fail = (stage, message, extra = undefined) => {
-            failures.push({ stage, message, ...(extra === undefined ? {} : { extra }) });
-          };
-          const readText = (name, stage) => {
-            try { return fs.readFileSync(`${dir}/${name}`, 'utf8'); }
-            catch (error) { fail(stage, `missing response file ${name}`, String(error)); return ''; }
-          };
-          const readJson = (name, stage) => {
-            const text = readText(name, stage);
-            if (!text) return null;
-            try { return JSON.parse(text); }
-            catch (error) { fail(stage, `invalid JSON in ${name}`, { error: String(error), prefix: text.slice(0, 500) }); return null; }
-          };
-          const addSummary = (stage, d) => {
-            if (!d) return;
-            summary.stages[stage] = {
-              mode: d.mode ?? null,
-              contextual: d.contextual ?? null,
-              resolved_query: d.resolved_query ?? null,
-              intent: d.analysis?.intent ?? null,
-              age: d.analysis?.age ?? null,
-              topic_labels: Array.isArray(d.analysis?.topic_labels) ? d.analysis.topic_labels : [],
-              clarifying_question: d.analysis?.clarifying_question ?? null,
-              result_count: Array.isArray(d.results) ? d.results.length : null,
-              answer_summary: d.answer?.summary ?? null,
-            };
-          };
-
-          const home = readText('home.html', 'homepage');
-          if (!home.includes('فتح مساعد روافد')) fail('homepage', 'assistant launcher missing');
-          const links = [...home.matchAll(/<link\b[^>]*>/gi)].map((m) => m[0]);
-          const canonical = links.find((tag) => /\brel=["']canonical["']/i.test(tag));
-          if (!canonical) fail('homepage', 'canonical link tag missing');
-          else if (!/\bhref=["']https:\/\/healthrenewal\.org\/?["']/i.test(canonical)) fail('homepage', 'wrong canonical', canonical);
-          const metas = [...home.matchAll(/<meta\b[^>]*>/gi)].map((m) => m[0]);
-          const robots = metas.filter((tag) => /\bname=["'](?:robots|googlebot)["']/i.test(tag));
-          if (robots.some((tag) => /\bcontent=["'][^"']*noindex/i.test(tag))) fail('homepage', 'production homepage is noindex');
-          summary.stages.homepage = { launcher: home.includes('فتح مساعد روافد'), canonical: canonical ?? null, noindex: robots.some((tag) => /\bcontent=["'][^"']*noindex/i.test(tag)) };
-
-          const reading = readJson('reading.json', 'reading');
-          addSummary('reading', reading);
-          if (reading) {
-            if (!String(reading.mode || '').includes('zero-api')) fail('reading', 'mode is not zero-api', reading.mode);
-            if (!Array.isArray(reading.results) || reading.results.length < 1) fail('reading', 'no results');
+          const statuses = text('http-status.txt','http-status').trim().split('\n').filter(Boolean);
+          summary.http_status = statuses;
+          for (const line of statuses) {
+            const [label, code] = line.split('\t');
+            if (code !== '200') fail('http-status', `${label} returned ${code}`);
           }
 
-          const dialect = readJson('dialect.json', 'dialect');
-          addSummary('dialect', dialect);
+          const home = text('home.html','homepage');
+          if (!home.includes('فتح مساعد روافد')) fail('homepage','assistant launcher missing');
+          const canonical = [...home.matchAll(/<link\b[^>]*>/gi)].map((m)=>m[0]).find((tag)=>/\brel=["']canonical["']/i.test(tag));
+          if (!canonical || !/\bhref=["']https:\/\/healthrenewal\.org\/?["']/i.test(canonical)) fail('homepage','production canonical invalid',canonical);
+          if ([...home.matchAll(/<meta\b[^>]*>/gi)].map((m)=>m[0]).filter((tag)=>/\bname=["'](?:robots|googlebot)["']/i.test(tag)).some((tag)=>/\bcontent=["'][^"']*noindex/i.test(tag))) fail('homepage','production homepage is noindex');
+
+          const reading = json('reading.json','reading'); summarize('reading',reading);
+          if (reading && (!String(reading.mode||'').includes('zero-api') || !Array.isArray(reading.results) || !reading.results.length)) fail('reading','zero-api retrieval failed');
+
+          const dialect = json('dialect.json','dialect'); summarize('dialect',dialect);
           if (dialect) {
-            const body = JSON.stringify(dialect).toLowerCase();
-            if (!String(dialect.mode || '').includes('zero-api')) fail('dialect', 'mode is not zero-api', dialect.mode);
-            if (!/(speech|talk|كلام|نطق|يتكلم|يتحدث)/i.test(body)) fail('dialect', 'speech intent missing');
+            if (!Array.isArray(dialect.analysis?.topics) || !dialect.analysis.topics.includes('speech-language')) fail('dialect','speech-language topic not structurally recognized',dialect.analysis);
+            if (dialect.analysis?.subject !== 'child') fail('dialect','child subject not preserved',dialect.analysis?.subject);
+            if (String(dialect.mode||'').includes('zero-api-clarification') && !/عمر/.test(String(dialect.analysis?.clarifying_question||''))) fail('dialect','generic clarification used instead of age-specific clarification',dialect.analysis?.clarifying_question);
           }
 
-          const composite = readJson('v2-composite.json', 'v2-composite');
-          addSummary('v2-composite', composite);
+          const composite = json('v2-composite.json','v2-composite'); summarize('v2-composite',composite);
           if (composite) {
-            const labels = Array.isArray(composite.analysis?.topic_labels) ? composite.analysis.topic_labels : [];
-            if (!String(composite.mode || '').includes('zero-api-v2')) fail('v2-composite', 'V2 mode missing', composite.mode);
-            if (composite.analysis?.age !== 4) fail('v2-composite', 'age understanding failed', composite.analysis?.age);
-            if (!labels.some((x) => /الكلام|اللغة/.test(String(x)))) fail('v2-composite', 'speech-language topic missing', labels);
-            if (!Array.isArray(composite.results) || !composite.results.length) fail('v2-composite', 'no results');
-            if (!composite.answer?.summary) fail('v2-composite', 'direct summary missing');
+            if (composite.analysis?.age !== 4) fail('v2-composite','age understanding failed',composite.analysis?.age);
+            if (!composite.analysis?.topics?.includes('speech-language')) fail('v2-composite','speech-language topic missing',composite.analysis?.topics);
+            if (!Array.isArray(composite.results) || !composite.results.length || !composite.answer?.summary) fail('v2-composite','results or direct summary missing');
           }
 
-          const comparison = readJson('v2-comparison.json', 'v2-comparison');
-          addSummary('v2-comparison', comparison);
-          if (comparison) {
-            const labels = Array.isArray(comparison.analysis?.topic_labels) ? comparison.analysis.topic_labels : [];
-            if (comparison.analysis?.intent !== 'comparison') fail('v2-comparison', 'comparison intent missing', comparison.analysis?.intent);
-            if (!labels.some((x) => /التوحد/.test(String(x))) || !labels.some((x) => /الكلام|اللغة/.test(String(x)))) fail('v2-comparison', 'comparison topics missing', labels);
+          const comparison = json('v2-comparison.json','v2-comparison'); summarize('v2-comparison',comparison);
+          if (comparison && (comparison.analysis?.intent !== 'comparison' || !comparison.analysis?.topics?.includes('autism') || !comparison.analysis?.topics?.includes('speech-language'))) fail('v2-comparison','comparison understanding failed',comparison.analysis);
+
+          const clarification = json('v2-clarification.json','v2-clarification'); summarize('v2-clarification',clarification);
+          if (clarification && (!String(clarification.mode||'').includes('zero-api-clarification') || !clarification.analysis?.clarifying_question)) fail('v2-clarification','vague-query clarification failed');
+
+          const contextual = json('contextual.json','contextual'); summarize('contextual',contextual);
+          if (contextual && (contextual.contextual !== true || !/توحد/.test(String(contextual.resolved_query||'')) || !contextual.analysis?.topics?.includes('autism'))) fail('contextual','contextual autism follow-up failed',{contextual:contextual.contextual,resolved_query:contextual.resolved_query,topics:contextual.analysis?.topics});
+
+          const social = json('social.json','social-work'); summarize('social-work',social);
+          if (social) {
+            if (!social.analysis?.topics?.includes('social-work')) fail('social-work','social-work topic missing',social.analysis?.topics);
+            const points = Array.isArray(social.answer?.points) ? social.answer.points : [];
+            if (!points.length) fail('social-work','grounded answer points missing');
+            const bad = points.filter((p)=>!String(p.destination||'').startsWith('/evidence-guides/social-work/'));
+            if (bad.length) fail('social-work','answer contains off-topic evidence',bad);
           }
 
-          const clarification = readJson('v2-clarification.json', 'v2-clarification');
-          addSummary('v2-clarification', clarification);
-          if (clarification) {
-            if (!String(clarification.mode || '').includes('zero-api-clarification')) fail('v2-clarification', 'clarification mode missing', clarification.mode);
-            if (!clarification.analysis?.clarifying_question) fail('v2-clarification', 'clarifying question missing');
+          const emergency = json('emergency.json','emergency'); summarize('emergency',emergency);
+          if (emergency) {
+            if (emergency.analysis?.intent !== 'safety') fail('emergency','intent must be safety exactly',emergency.analysis?.intent);
+            if (emergency.analysis?.clarifying_question) fail('emergency','safety query must not be delayed by clarification',emergency.analysis.clarifying_question);
           }
 
-          const contextual = readJson('contextual.json', 'contextual');
-          addSummary('contextual', contextual);
-          if (contextual) {
-            if (contextual.contextual !== true) fail('contextual', 'contextual follow-up not recognized', contextual.contextual);
-            if (!/توحد/.test(String(contextual.resolved_query || ''))) fail('contextual', 'context lost autism topic', contextual.resolved_query);
-            if (!String(contextual.mode || '').includes('zero-api-v2-contextual')) fail('contextual', 'V2 contextual mode missing', contextual.mode);
+          for (const [stage,value] of [['reading',reading],['dialect',dialect],['v2-composite',composite],['v2-comparison',comparison],['contextual',contextual],['social-work',social],['emergency',emergency]]) {
+            if (value && /openai|anthropic|gemini/i.test(JSON.stringify(value))) fail(stage,'external AI provider marker present');
           }
 
-          const social = readJson('social.json', 'social-work');
-          addSummary('social-work', social);
-          if (social && !/social-work|العمل الاجتماعي/.test(JSON.stringify(social))) fail('social-work', 'social-work corpus signal missing');
-
-          const emergency = readJson('emergency.json', 'emergency');
-          addSummary('emergency', emergency);
-          if (emergency && emergency.analysis?.intent !== 'safety' && !/safety|طوارئ|جرعة زائدة|فقد الوعي/.test(JSON.stringify(emergency))) fail('emergency', 'safety signal missing', emergency.analysis?.intent);
-
-          for (const [stage, value] of [['v2-composite', composite], ['v2-comparison', comparison], ['contextual', contextual]]) {
-            if (value && /openai|anthropic|gemini/i.test(JSON.stringify(value))) fail(stage, 'external AI provider marker present');
-          }
-
-          summary.http_status = readText('http-status.txt', 'http-status').trim().split('\n').filter(Boolean);
           summary.failures = failures;
-          fs.writeFileSync(`${dir}/summary.json`, JSON.stringify(summary, null, 2));
-          fs.writeFileSync(`${dir}/failures.txt`, failures.length ? failures.map((x) => `${x.stage}: ${x.message}${x.extra === undefined ? '' : ` | ${JSON.stringify(x.extra)}`}`).join('\n') + '\n' : 'PASS\n');
-          console.log(JSON.stringify(summary, null, 2));
+          fs.writeFileSync(`${dir}/summary.json`, JSON.stringify(summary,null,2));
+          fs.writeFileSync(`${dir}/failures.txt`, failures.length ? failures.map((x)=>`${x.stage}: ${x.message}${x.extra===undefined?'':` | ${JSON.stringify(x.extra)}`}`).join('\n')+'\n' : 'PASS\n');
+          console.log(JSON.stringify(summary,null,2));
           process.exit(failures.length ? 1 : 0);
           NODE
           exit $?
