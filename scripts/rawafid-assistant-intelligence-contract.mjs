@@ -13,6 +13,17 @@ assert.ok(
 );
 assert.equal(dialect.subject, 'child', 'Dialect speech query must preserve child subject.');
 
+const agedDialect = analyzeFreeQuery('طفلي 4 سنوات ما بحكي');
+assert.equal(agedDialect.age, 4, 'Arabic age phrase must be parsed without ASCII word boundaries.');
+assert.equal(agedDialect.subject, 'child', 'Age-bearing dialect query must preserve child subject.');
+assert.ok(
+  agedDialect.topics.includes('speech-language'),
+  `Age-bearing dialect query must preserve speech-language topic; got ${JSON.stringify(agedDialect)}`,
+);
+
+const easternAgedDialect = analyzeFreeQuery('طفلي ٤ سنوات ما بحكي');
+assert.equal(easternAgedDialect.age, 4, 'Eastern Arabic numerals must normalize before age extraction.');
+
 const emergency = analyzeFreeQuery('تناولت جرعة زائدة وفقدت الوعي ماذا افعل');
 assert.equal(
   emergency.intent,
