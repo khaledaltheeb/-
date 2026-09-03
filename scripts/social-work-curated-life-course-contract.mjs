@@ -55,7 +55,7 @@ for (const token of forbidden) {
 const jurisdictionGuards = [
   'لا تقدم حكمًا قانونيًا',
   'لا تستنتج ترتيب حضانة',
-  'لا تشخص اضطرابًا',
+  'لا لتشخيص الشاب من هذه الصفحة',
   'تختلف بشدة بين الدول',
 ];
 for (const token of jurisdictionGuards) {
