@@ -1,0 +1,137 @@
+name: Deploy Rawafid Assistant Production 2026-09-03
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'deploy/rawafid-assistant-production-20260903.trigger'
+
+concurrency:
+  group: rawafid-production-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
+      NEXT_PUBLIC_SITE_URL: https://healthrenewal.org
+      NEXT_PUBLIC_ALLOW_INDEXING: 'true'
+      NEXT_PUBLIC_ENABLE_ANALYTICS: 'true'
+      NEXT_PUBLIC_GTM_ID: GTM-WBLQVBG4
+      NEXT_PUBLIC_GA_MEASUREMENT_ID: G-VLZMV8Y4JP
+      NEXT_PUBLIC_ENABLE_DIRECT_GA: 'true'
+      ENABLE_RAWAFID_ASSISTANT: 'true'
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: 1910e1ad3c793fd568ba1caafe34f964
+    steps:
+      - name: Require Cloudflare credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${CLOUDFLARE_API_TOKEN:-}"
+
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Install deterministic Arabic image build dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends imagemagick fontconfig fonts-noto-core librsvg2-bin
+
+      - name: Verify activation and preservation contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${NEXT_PUBLIC_SITE_URL}" = "https://healthrenewal.org"
+          test "${NEXT_PUBLIC_ALLOW_INDEXING}" = "true"
+          test "${ENABLE_RAWAFID_ASSISTANT}" = "true"
+          grep -q '"ENABLE_RAWAFID_ASSISTANT": "true"' wrangler.jsonc
+          npm run typecheck
+          npm run lint
+          npm run architecture-check
+          npm run live-preservation:validate
+
+      - name: Verify Cloudflare account access
+        run: npx wrangler whoami
+
+      - name: Build exact production Worker
+        run: npx opennextjs-cloudflare build --env production
+
+      - name: Validate production package
+        run: npx wrangler deploy --env production --dry-run
+
+      - name: Deploy exact production Worker
+        run: npx opennextjs-cloudflare deploy --env production
+
+      - name: Verify Rawafid Assistant V2 on production
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://healthrenewal.org'
+          stamp="${GITHUB_SHA}-$(date +%s)"
+
+          echo 'SMOKE_STAGE homepage'
+          : > /tmp/rawafid-production-home.html
+          for attempt in $(seq 1 15); do
+            curl -fsSL --compressed --max-time 30 -H 'Cache-Control: no-cache, no-store' "${base}/?rawafid-assistant-release=${stamp}-${attempt}" -o /tmp/rawafid-production-home.html 2>/dev/null || true
+            if grep -q 'فتح مساعد روافد' /tmp/rawafid-production-home.html; then
+              break
+            fi
+            sleep 4
+          done
+          node -e 'const fs=require("fs");const html=fs.readFileSync("/tmp/rawafid-production-home.html","utf8");if(!html.includes("فتح مساعد روافد"))throw new Error("assistant launcher missing from production homepage");const links=[...html.matchAll(/<link\b[^>]*>/gi)].map(m=>m[0]);const canonical=links.find(tag=>/\brel=["'"']canonical["'"']/i.test(tag));if(!canonical)throw new Error("canonical link tag missing");if(!/\bhref=["'"']https:\/\/healthrenewal\.org\/?["'"']/i.test(canonical))throw new Error("wrong canonical: "+canonical);const metas=[...html.matchAll(/<meta\b[^>]*>/gi)].map(m=>m[0]);const robots=metas.filter(tag=>/\bname=["'"'](?:robots|googlebot)["'"']/i.test(tag));if(robots.some(tag=>/\bcontent=["'"'][^"'"']*noindex/i.test(tag)))throw new Error("production homepage is noindex");console.log("SMOKE_OK homepage assistant canonical indexability")'
+
+          echo 'SMOKE_STAGE reading'
+          curl -fsSL --compressed --max-time 30 --get "${base}/api/search/v3" --data-urlencode 'q=كيف اساعد طفلي على القراءة' --data-urlencode 'limit=6' -o /tmp/reading.json
+          node -e 'const d=require("/tmp/reading.json");if(!String(d.mode||"").includes("zero-api"))throw new Error("reading is not zero-api");if(!Array.isArray(d.results)||d.results.length<1)throw new Error("reading returned no results");console.log("SMOKE_OK reading",d.mode,d.results.length)'
+
+          echo 'SMOKE_STAGE dialect'
+          curl -fsSL --compressed --max-time 30 --get "${base}/api/search/v3" --data-urlencode 'q=طفلي ما بحكي' --data-urlencode 'limit=6' -o /tmp/dialect.json
+          node -e 'const d=require("/tmp/dialect.json"),body=JSON.stringify(d).toLowerCase();if(!String(d.mode||"").includes("zero-api"))throw new Error("dialect is not zero-api");if(!/(speech|talk|كلام|نطق|يتكلم|يتحدث)/i.test(body))throw new Error("speech intent missing");console.log("SMOKE_OK dialect")'
+
+          echo 'SMOKE_STAGE v2-composite'
+          curl -fsSL --compressed --max-time 30 --get "${base}/api/search/v3" --data-urlencode 'q=طفلي عمره 4 سنوات يفهم الكلام لكنه لا يتكلم جيدا ماذا افعل' --data-urlencode 'limit=6' -o /tmp/v2-composite.json
+          node -e 'const d=require("/tmp/v2-composite.json"),labels=Array.isArray(d.analysis?.topic_labels)?d.analysis.topic_labels:[];if(!String(d.mode||"").includes("zero-api-v2"))throw new Error("V2 mode missing");if(d.analysis?.age!==4)throw new Error("age understanding failed");if(!labels.some(x=>/الكلام|اللغة/.test(x)))throw new Error("speech-language topic missing");if(!Array.isArray(d.results)||!d.results.length)throw new Error("V2 composite returned no results");if(!d.answer?.summary)throw new Error("V2 direct summary missing");console.log("SMOKE_OK v2-composite")'
+
+          echo 'SMOKE_STAGE v2-comparison'
+          curl -fsSL --compressed --max-time 30 --get "${base}/api/search/v3" --data-urlencode 'q=الفرق بين التوحد وتأخر الكلام' --data-urlencode 'limit=6' -o /tmp/v2-comparison.json
+          node -e 'const d=require("/tmp/v2-comparison.json"),labels=Array.isArray(d.analysis?.topic_labels)?d.analysis.topic_labels:[];if(d.analysis?.intent!=="comparison")throw new Error("comparison intent missing");if(!labels.some(x=>/التوحد/.test(x))||!labels.some(x=>/الكلام|اللغة/.test(x)))throw new Error("comparison topics missing");console.log("SMOKE_OK v2-comparison")'
+
+          echo 'SMOKE_STAGE v2-clarification'
+          curl -fsSL --compressed --max-time 30 --get "${base}/api/search/v3" --data-urlencode 'q=ماذا افعل' --data-urlencode 'limit=6' -o /tmp/v2-clarification.json
+          node -e 'const d=require("/tmp/v2-clarification.json");if(!String(d.mode||"").includes("zero-api-clarification"))throw new Error("clarification mode missing");if(!d.analysis?.clarifying_question)throw new Error("clarifying question missing");console.log("SMOKE_OK v2-clarification")'
+
+          echo 'SMOKE_STAGE contextual'
+          curl -fsSL --compressed --max-time 30 --get "${base}/api/search/v3" --data-urlencode 'q=وماذا عن العلاج' --data-urlencode 'context=علامات التوحد || كيف اعرف التوحد' --data-urlencode 'limit=6' -o /tmp/contextual.json
+          node -e 'const d=require("/tmp/contextual.json");if(d.contextual!==true)throw new Error("contextual follow-up was not recognized");if(!/توحد/.test(String(d.resolved_query||"")))throw new Error("context lost autism topic");if(!String(d.mode||"").includes("zero-api-v2-contextual"))throw new Error("V2 contextual mode missing");console.log("SMOKE_OK contextual")'
+
+          echo 'SMOKE_STAGE social-work'
+          curl -fsSL --compressed --max-time 30 --get "${base}/api/search/v3" --data-urlencode 'q=أخلاقيات العمل الاجتماعي' --data-urlencode 'limit=6' -o /tmp/social.json
+          node -e 'const d=require("/tmp/social.json");if(!/social-work|العمل الاجتماعي/.test(JSON.stringify(d)))throw new Error("social-work corpus result missing");console.log("SMOKE_OK social-work")'
+
+          echo 'SMOKE_STAGE emergency'
+          curl -fsSL --compressed --max-time 30 --get "${base}/api/search/v3" --data-urlencode 'q=تناولت جرعة زائدة وفقدت الوعي ماذا افعل' --data-urlencode 'limit=6' -o /tmp/emergency.json
+          node -e 'const d=require("/tmp/emergency.json");if(d.analysis?.intent!=="safety"&&!/safety|طوارئ|جرعة زائدة|فقد الوعي/.test(JSON.stringify(d)))throw new Error("emergency safety signal missing");console.log("SMOKE_OK emergency")'
+
+          if grep -Eqi 'openai|anthropic|gemini' /tmp/v2-composite.json /tmp/v2-comparison.json /tmp/contextual.json; then
+            echo 'Unexpected external AI provider marker in zero-API response.' >&2
+            exit 1
+          fi
+          echo 'Rawafid Assistant V2 production smoke passed.'

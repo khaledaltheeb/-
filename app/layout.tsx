@@ -3,6 +3,7 @@ import Script from 'next/script';
 import { Noto_Sans_Arabic } from 'next/font/google';
 import { BRAND_NAME, DEFAULT_DESCRIPTION, INDEXING_ENABLED, SITE_URL, organizationJsonLd } from '@/lib/seo';
 import { founderJsonLd } from '@/lib/founder';
+import RawafidAssistant from '@/components/rawafid-assistant';
 import './rawafid-theme.css';
 
 /* Compatibility modules now live behind the central entry point:
@@ -116,6 +117,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   const founderSchema = founderJsonLd(SITE_URL);
   const analyticsEnabled = process.env.NEXT_PUBLIC_ENABLE_ANALYTICS === 'true';
   const directGaEnabled = process.env.NEXT_PUBLIC_ENABLE_DIRECT_GA === 'true';
+  const assistantEnabled = process.env.ENABLE_RAWAFID_ASSISTANT === 'true';
   const gtmId = validatedAnalyticsId(process.env.NEXT_PUBLIC_GTM_ID, /^GTM-[A-Z0-9]+$/i);
   const gaId = validatedAnalyticsId(process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID, /^G-[A-Z0-9]+$/i);
 
@@ -124,7 +126,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body id="top">
         {analyticsEnabled && gtmId ? (
           <>
-            <Script id="rawafid-gtm" strategy="beforeInteractive">
+            <Script id="rawafid-gtm" strategy="afterInteractive">
               {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${gtmId}');`}
             </Script>
             <noscript>
@@ -149,6 +151,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema).replace(/</g, '\\u003c') }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(founderSchema).replace(/</g, '\\u003c') }} />
         {children}
+        {assistantEnabled ? <RawafidAssistant /> : null}
         <script dangerouslySetInnerHTML={{ __html: serviceWorkerBootstrap }} />
       </body>
     </html>

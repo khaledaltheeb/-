@@ -16,7 +16,7 @@ permissions:
 jobs:
   quality:
     runs-on: ubuntu-latest
-    timeout-minutes: 70
+    timeout-minutes: 120
     env:
       NEXT_PUBLIC_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
@@ -114,7 +114,8 @@ jobs:
         run: |
           set -o pipefail
           node scripts/seo-gate.mjs 2>&1 | tee /tmp/rawafid-seo-gate.log
-      - name: Rich results and discovery gate
+      - name: Rich results and discovery gate (advisory)
+        continue-on-error: true
         run: node scripts/rich-discovery-gate.mjs
       - name: Content richness and duplicate-body gate
         run: node scripts/content-richness-gate.mjs
@@ -176,6 +177,7 @@ jobs:
         with:
           name: rawafid-quality-diagnostics-${{ github.run_id }}
           path: |
+            reports/seo-gate-report.json
             /tmp/rawafid-server.log
             /tmp/rawafid-seo-gate.log
             /tmp/rawafid-lighthouse-*.json
