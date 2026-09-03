@@ -67,33 +67,22 @@ jobs:
           base='https://rawafid-search-assistant-canary.khaledaltheeb.workers.dev'
           for attempt in $(seq 1 18); do
             stamp="${GITHUB_SHA}-${attempt}-$(date +%s)"
-            curl -fsSL --compressed --max-time 25 -H 'Cache-Control: no-cache, no-store' "${base}/?canary=${stamp}" -o /tmp/home.html 2>/dev/null || true
-            curl -fsSL --compressed --max-time 25 "${base}/api/search/v3?q=%D9%83%D9%8A%D9%81%20%D8%A7%D8%B3%D8%A7%D8%B9%D8%AF%20%D8%B7%D9%81%D9%84%D9%8A%20%D8%B9%D9%84%D9%89%20%D8%A7%D9%84%D9%82%D8%B1%D8%A7%D8%A1%D8%A9&limit=6" -o /tmp/reading.json 2>/dev/null || true
-            curl -fsSL --compressed --max-time 25 "${base}/api/search/v3?q=%D8%B7%D9%81%D9%84%D9%8A%20%D9%85%D8%A7%20%D8%A8%D8%AD%D9%83%D9%8A&limit=6" -o /tmp/dialect.json 2>/dev/null || true
-            curl -fsSL --compressed --max-time 25 "${base}/api/search/v3?q=%D8%A7%D8%AE%D9%84%D8%A7%D9%82%D9%8A%D8%A7%D8%AA%20%D8%A7%D9%84%D8%B9%D9%85%D9%84%20%D8%A7%D9%84%D8%A7%D8%AC%D8%AA%D9%85%D8%A7%D8%B9%D9%8A&limit=6" -o /tmp/social.json 2>/dev/null || true
-            curl -fsSL --compressed --max-time 25 "${base}/api/search/v3?q=%D9%88%D9%85%D8%A7%D8%B0%D8%A7%20%D8%B9%D9%86%20%D8%A7%D9%84%D8%B9%D9%84%D8%A7%D8%AC&context=%D8%B9%D9%84%D8%A7%D9%85%D8%A7%D8%AA%20%D8%A7%D9%84%D8%AA%D9%88%D8%AD%D8%AF&limit=6" -o /tmp/followup.json 2>/dev/null || true
-            if node <<'NODE'
-          const fs = require('fs');
-          const home = fs.readFileSync('/tmp/home.html','utf8');
-          const read = (p) => JSON.parse(fs.readFileSync(p,'utf8'));
-          const reading = read('/tmp/reading.json');
-          const dialect = read('/tmp/dialect.json');
-          const social = read('/tmp/social.json');
-          const followup = read('/tmp/followup.json');
-          const text = (value) => JSON.stringify(value);
-          const checks = [
-            /noindex/i.test(home),
-            String(reading.mode).includes('zero-api'),
-            text(reading).includes('reading-difficulties-at-home'),
-            /speech|يتكلم|الكلام/.test(text(dialect)),
-            text(social).includes('social-work'),
-            followup.contextual === true,
-            /التوحد|autism/.test(String(followup.resolved_query || '')),
-            !/openai/i.test(text(reading)) && !/openai/i.test(text(dialect)) && !/openai/i.test(text(social)) && !/openai/i.test(text(followup)),
-          ];
-          if (!checks.every(Boolean)) process.exit(1);
-NODE
-            then
+            home="$(curl -fsSL --compressed --max-time 25 -H 'Cache-Control: no-cache, no-store' "${base}/?canary=${stamp}" 2>/dev/null || true)"
+            reading="$(curl -fsSL --compressed --max-time 25 "${base}/api/search/v3?q=%D9%83%D9%8A%D9%81%20%D8%A7%D8%B3%D8%A7%D8%B9%D8%AF%20%D8%B7%D9%81%D9%84%D9%8A%20%D8%B9%D9%84%D9%89%20%D8%A7%D9%84%D9%82%D8%B1%D8%A7%D8%A1%D8%A9&limit=6" 2>/dev/null || true)"
+            dialect="$(curl -fsSL --compressed --max-time 25 "${base}/api/search/v3?q=%D8%B7%D9%81%D9%84%D9%8A%20%D9%85%D8%A7%20%D8%A8%D8%AD%D9%83%D9%8A&limit=6" 2>/dev/null || true)"
+            social="$(curl -fsSL --compressed --max-time 25 "${base}/api/search/v3?q=%D8%A7%D8%AE%D9%84%D8%A7%D9%82%D9%8A%D8%A7%D8%AA%20%D8%A7%D9%84%D8%B9%D9%85%D9%84%20%D8%A7%D9%84%D8%A7%D8%AC%D8%AA%D9%85%D8%A7%D8%B9%D9%8A&limit=6" 2>/dev/null || true)"
+            followup="$(curl -fsSL --compressed --max-time 25 "${base}/api/search/v3?q=%D9%88%D9%85%D8%A7%D8%B0%D8%A7%20%D8%B9%D9%86%20%D8%A7%D9%84%D8%B9%D9%84%D8%A7%D8%AC&context=%D8%B9%D9%84%D8%A7%D9%85%D8%A7%D8%AA%20%D8%A7%D9%84%D8%AA%D9%88%D8%AD%D8%AF&limit=6" 2>/dev/null || true)"
+            if [[ "$home" == *"noindex"* ]] \
+              && [[ "$reading" == *"zero-api"* ]] \
+              && [[ "$reading" == *"reading-difficulties-at-home"* ]] \
+              && [[ "$dialect" == *"speech"* || "$dialect" == *"يتكلم"* || "$dialect" == *"الكلام"* ]] \
+              && [[ "$social" == *"social-work"* ]] \
+              && [[ "$followup" == *'"contextual":true'* ]] \
+              && [[ "$followup" == *"التوحد"* || "$followup" == *"autism"* ]] \
+              && [[ "$reading" != *"openai"* ]] \
+              && [[ "$dialect" != *"openai"* ]] \
+              && [[ "$social" != *"openai"* ]] \
+              && [[ "$followup" != *"openai"* ]]; then
               echo 'Legacy Zero-API assistant canary passed.'
               exit 0
             fi
@@ -115,39 +104,7 @@ NODE
             curl -fsSL --compressed --max-time 25 "${base}/api/search/v3?q=%D8%A7%D9%84%D9%81%D8%B1%D9%82%20%D8%A8%D9%8A%D9%86%20%D8%A7%D9%84%D8%AA%D9%88%D8%AD%D8%AF%20%D9%88%D8%AA%D8%A3%D8%AE%D8%B1%20%D8%A7%D9%84%D9%83%D9%84%D8%A7%D9%85&limit=6" -o /tmp/comparison.json 2>/dev/null || true
             curl -fsSL --compressed --max-time 25 "${base}/api/search/v3?q=%D9%85%D8%A7%D8%B0%D8%A7%20%D8%A7%D9%81%D8%B9%D9%84&limit=6" -o /tmp/clarification.json 2>/dev/null || true
             curl -fsSL --compressed --max-time 25 "${base}/api/search/v3?q=%D9%88%D9%85%D8%A7%D8%B0%D8%A7%20%D8%B9%D9%86%20%D8%A7%D9%84%D8%B9%D9%84%D8%A7%D8%AC&context=%D8%B9%D9%84%D8%A7%D9%85%D8%A7%D8%AA%20%D8%A7%D9%84%D8%AA%D9%88%D8%AD%D8%AF%20%7C%7C%20%D9%83%D9%8A%D9%81%20%D8%A7%D8%B9%D8%B1%D9%81%20%D8%A7%D9%84%D8%AA%D9%88%D8%AD%D8%AF&limit=6" -o /tmp/followup.json 2>/dev/null || true
-            if node <<'NODE'
-          const fs = require('fs');
-          const home = fs.readFileSync('/tmp/home.html','utf8');
-          const read = (p) => JSON.parse(fs.readFileSync(p,'utf8'));
-          const composite = read('/tmp/composite.json');
-          const comparison = read('/tmp/comparison.json');
-          const clarification = read('/tmp/clarification.json');
-          const followup = read('/tmp/followup.json');
-          const compositeLabels = Array.isArray(composite.analysis?.topic_labels) ? composite.analysis.topic_labels : [];
-          const comparisonLabels = Array.isArray(comparison.analysis?.topic_labels) ? comparison.analysis.topic_labels : [];
-          const checks = [
-            /noindex/i.test(home),
-            home.includes('فتح مساعد روافد'),
-            String(composite.mode).includes('zero-api-v2'),
-            composite.analysis?.age === 4,
-            compositeLabels.some((x) => /الكلام|اللغة/.test(x)),
-            Array.isArray(composite.results) && composite.results.length > 0,
-            Boolean(composite.answer?.summary),
-            comparison.analysis?.intent === 'comparison',
-            comparisonLabels.some((x) => /التوحد/.test(x)) && comparisonLabels.some((x) => /الكلام|اللغة/.test(x)),
-            String(clarification.mode).includes('zero-api-clarification'),
-            Boolean(clarification.analysis?.clarifying_question),
-            followup.contextual === true,
-            /التوحد/.test(String(followup.resolved_query || '')),
-            String(followup.mode).includes('zero-api-v2-contextual'),
-            !/openai/i.test(JSON.stringify(composite)) && !/openai/i.test(JSON.stringify(followup)),
-          ];
-          if (!checks.every(Boolean)) {
-            console.error(checks.map((value,index) => `${index+1}:${value}`).join(' '));
-            process.exit(1);
-          }
-NODE
-            then
+            if node -e 'const fs=require("fs"); const read=(p)=>JSON.parse(fs.readFileSync(p,"utf8")); const home=fs.readFileSync("/tmp/home.html","utf8"); const composite=read("/tmp/composite.json"); const comparison=read("/tmp/comparison.json"); const clarification=read("/tmp/clarification.json"); const followup=read("/tmp/followup.json"); const compositeLabels=Array.isArray(composite.analysis?.topic_labels)?composite.analysis.topic_labels:[]; const comparisonLabels=Array.isArray(comparison.analysis?.topic_labels)?comparison.analysis.topic_labels:[]; const checks=[/noindex/i.test(home),home.includes("فتح مساعد روافد"),String(composite.mode).includes("zero-api-v2"),composite.analysis?.age===4,compositeLabels.some((x)=>/الكلام|اللغة/.test(x)),Array.isArray(composite.results)&&composite.results.length>0,Boolean(composite.answer?.summary),comparison.analysis?.intent==="comparison",comparisonLabels.some((x)=>/التوحد/.test(x))&&comparisonLabels.some((x)=>/الكلام|اللغة/.test(x)),String(clarification.mode).includes("zero-api-clarification"),Boolean(clarification.analysis?.clarifying_question),followup.contextual===true,/التوحد/.test(String(followup.resolved_query||"")),String(followup.mode).includes("zero-api-v2-contextual"),!/openai/i.test(JSON.stringify(composite))&&!/openai/i.test(JSON.stringify(followup))]; if(!checks.every(Boolean)){console.error(checks.map((value,index)=>`${index+1}:${value}`).join(" ")); process.exit(1);}' ; then
               echo 'Rawafid Assistant V2 passed structured understanding, comparison, clarification, contextual follow-up and live retrieval.'
               exit 0
             fi
