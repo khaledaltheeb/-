@@ -1,6 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
     <shortcut
+        android:shortcutId="life_inbox"
+        android:enabled="true"
+        android:icon="@drawable/ic_launcher"
+        android:shortcutShortLabel="@string/life_inbox_shortcut_short"
+        android:shortcutLongLabel="@string/life_inbox_shortcut_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="org.healthrenewal.rawafid"
+            android:targetClass="org.healthrenewal.rawafid.MainActivity">
+            <extra android:name="destination" android:value="life_inbox" />
+        </intent>
+    </shortcut>
+
+    <shortcut
         android:shortcutId="tools_hub"
         android:enabled="true"
         android:icon="@drawable/ic_launcher"
