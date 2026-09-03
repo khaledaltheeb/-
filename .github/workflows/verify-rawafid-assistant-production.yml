@@ -1,0 +1,177 @@
+name: Verify Rawafid Assistant Production
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/verify-rawafid-assistant-production.yml'
+      - 'deploy/rawafid-assistant-verification.trigger'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+
+      - name: Probe production responses
+        shell: bash
+        run: |
+          set -uo pipefail
+          base='https://healthrenewal.org'
+          dir='/tmp/rawafid-production-diagnostics'
+          mkdir -p "$dir"
+          : > "$dir/http-status.txt"
+
+          fetch_page() {
+            local label="$1"
+            local output="$2"
+            shift 2
+            local code
+            code="$(curl -sS --compressed --max-time 30 -w '%{http_code}' -o "$output" "$@")" || code="curl-error:${?}"
+            printf '%s\t%s\n' "$label" "$code" >> "$dir/http-status.txt"
+          }
+
+          fetch_page homepage "$dir/home.html" -H 'Cache-Control: no-cache, no-store' "${base}/?rawafid-assistant-diagnostic=${GITHUB_SHA}-$(date +%s)"
+          fetch_page reading "$dir/reading.json" --get "${base}/api/search/v3" --data-urlencode 'q=كيف اساعد طفلي على القراءة' --data-urlencode 'limit=6'
+          fetch_page dialect "$dir/dialect.json" --get "${base}/api/search/v3" --data-urlencode 'q=طفلي ما بحكي' --data-urlencode 'limit=6'
+          fetch_page composite "$dir/v2-composite.json" --get "${base}/api/search/v3" --data-urlencode 'q=طفلي عمره 4 سنوات يفهم الكلام لكنه لا يتكلم جيدا ماذا افعل' --data-urlencode 'limit=6'
+          fetch_page comparison "$dir/v2-comparison.json" --get "${base}/api/search/v3" --data-urlencode 'q=الفرق بين التوحد وتأخر الكلام' --data-urlencode 'limit=6'
+          fetch_page clarification "$dir/v2-clarification.json" --get "${base}/api/search/v3" --data-urlencode 'q=ماذا افعل' --data-urlencode 'limit=6'
+          fetch_page contextual "$dir/contextual.json" --get "${base}/api/search/v3" --data-urlencode 'q=وماذا عن العلاج' --data-urlencode 'context=علامات التوحد || كيف اعرف التوحد' --data-urlencode 'limit=6'
+          fetch_page social "$dir/social.json" --get "${base}/api/search/v3" --data-urlencode 'q=أخلاقيات العمل الاجتماعي' --data-urlencode 'limit=6'
+          fetch_page emergency "$dir/emergency.json" --get "${base}/api/search/v3" --data-urlencode 'q=تناولت جرعة زائدة وفقدت الوعي ماذا افعل' --data-urlencode 'limit=6'
+
+      - name: Evaluate all production assertions
+        id: evaluate
+        shell: bash
+        run: |
+          set +e
+          node <<'NODE'
+          const fs = require('node:fs');
+          const dir = '/tmp/rawafid-production-diagnostics';
+          const failures = [];
+          const summary = { checked_at: new Date().toISOString(), stages: {} };
+
+          const fail = (stage, message, extra = undefined) => {
+            failures.push({ stage, message, ...(extra === undefined ? {} : { extra }) });
+          };
+          const readText = (name, stage) => {
+            try { return fs.readFileSync(`${dir}/${name}`, 'utf8'); }
+            catch (error) { fail(stage, `missing response file ${name}`, String(error)); return ''; }
+          };
+          const readJson = (name, stage) => {
+            const text = readText(name, stage);
+            if (!text) return null;
+            try { return JSON.parse(text); }
+            catch (error) { fail(stage, `invalid JSON in ${name}`, { error: String(error), prefix: text.slice(0, 500) }); return null; }
+          };
+          const addSummary = (stage, d) => {
+            if (!d) return;
+            summary.stages[stage] = {
+              mode: d.mode ?? null,
+              contextual: d.contextual ?? null,
+              resolved_query: d.resolved_query ?? null,
+              intent: d.analysis?.intent ?? null,
+              age: d.analysis?.age ?? null,
+              topic_labels: Array.isArray(d.analysis?.topic_labels) ? d.analysis.topic_labels : [],
+              clarifying_question: d.analysis?.clarifying_question ?? null,
+              result_count: Array.isArray(d.results) ? d.results.length : null,
+              answer_summary: d.answer?.summary ?? null,
+            };
+          };
+
+          const home = readText('home.html', 'homepage');
+          if (!home.includes('فتح مساعد روافد')) fail('homepage', 'assistant launcher missing');
+          const links = [...home.matchAll(/<link\b[^>]*>/gi)].map((m) => m[0]);
+          const canonical = links.find((tag) => /\brel=["']canonical["']/i.test(tag));
+          if (!canonical) fail('homepage', 'canonical link tag missing');
+          else if (!/\bhref=["']https:\/\/healthrenewal\.org\/?["']/i.test(canonical)) fail('homepage', 'wrong canonical', canonical);
+          const metas = [...home.matchAll(/<meta\b[^>]*>/gi)].map((m) => m[0]);
+          const robots = metas.filter((tag) => /\bname=["'](?:robots|googlebot)["']/i.test(tag));
+          if (robots.some((tag) => /\bcontent=["'][^"']*noindex/i.test(tag))) fail('homepage', 'production homepage is noindex');
+          summary.stages.homepage = { launcher: home.includes('فتح مساعد روافد'), canonical: canonical ?? null, noindex: robots.some((tag) => /\bcontent=["'][^"']*noindex/i.test(tag)) };
+
+          const reading = readJson('reading.json', 'reading');
+          addSummary('reading', reading);
+          if (reading) {
+            if (!String(reading.mode || '').includes('zero-api')) fail('reading', 'mode is not zero-api', reading.mode);
+            if (!Array.isArray(reading.results) || reading.results.length < 1) fail('reading', 'no results');
+          }
+
+          const dialect = readJson('dialect.json', 'dialect');
+          addSummary('dialect', dialect);
+          if (dialect) {
+            const body = JSON.stringify(dialect).toLowerCase();
+            if (!String(dialect.mode || '').includes('zero-api')) fail('dialect', 'mode is not zero-api', dialect.mode);
+            if (!/(speech|talk|كلام|نطق|يتكلم|يتحدث)/i.test(body)) fail('dialect', 'speech intent missing');
+          }
+
+          const composite = readJson('v2-composite.json', 'v2-composite');
+          addSummary('v2-composite', composite);
+          if (composite) {
+            const labels = Array.isArray(composite.analysis?.topic_labels) ? composite.analysis.topic_labels : [];
+            if (!String(composite.mode || '').includes('zero-api-v2')) fail('v2-composite', 'V2 mode missing', composite.mode);
+            if (composite.analysis?.age !== 4) fail('v2-composite', 'age understanding failed', composite.analysis?.age);
+            if (!labels.some((x) => /الكلام|اللغة/.test(String(x)))) fail('v2-composite', 'speech-language topic missing', labels);
+            if (!Array.isArray(composite.results) || !composite.results.length) fail('v2-composite', 'no results');
+            if (!composite.answer?.summary) fail('v2-composite', 'direct summary missing');
+          }
+
+          const comparison = readJson('v2-comparison.json', 'v2-comparison');
+          addSummary('v2-comparison', comparison);
+          if (comparison) {
+            const labels = Array.isArray(comparison.analysis?.topic_labels) ? comparison.analysis.topic_labels : [];
+            if (comparison.analysis?.intent !== 'comparison') fail('v2-comparison', 'comparison intent missing', comparison.analysis?.intent);
+            if (!labels.some((x) => /التوحد/.test(String(x))) || !labels.some((x) => /الكلام|اللغة/.test(String(x)))) fail('v2-comparison', 'comparison topics missing', labels);
+          }
+
+          const clarification = readJson('v2-clarification.json', 'v2-clarification');
+          addSummary('v2-clarification', clarification);
+          if (clarification) {
+            if (!String(clarification.mode || '').includes('zero-api-clarification')) fail('v2-clarification', 'clarification mode missing', clarification.mode);
+            if (!clarification.analysis?.clarifying_question) fail('v2-clarification', 'clarifying question missing');
+          }
+
+          const contextual = readJson('contextual.json', 'contextual');
+          addSummary('contextual', contextual);
+          if (contextual) {
+            if (contextual.contextual !== true) fail('contextual', 'contextual follow-up not recognized', contextual.contextual);
+            if (!/توحد/.test(String(contextual.resolved_query || ''))) fail('contextual', 'context lost autism topic', contextual.resolved_query);
+            if (!String(contextual.mode || '').includes('zero-api-v2-contextual')) fail('contextual', 'V2 contextual mode missing', contextual.mode);
+          }
+
+          const social = readJson('social.json', 'social-work');
+          addSummary('social-work', social);
+          if (social && !/social-work|العمل الاجتماعي/.test(JSON.stringify(social))) fail('social-work', 'social-work corpus signal missing');
+
+          const emergency = readJson('emergency.json', 'emergency');
+          addSummary('emergency', emergency);
+          if (emergency && emergency.analysis?.intent !== 'safety' && !/safety|طوارئ|جرعة زائدة|فقد الوعي/.test(JSON.stringify(emergency))) fail('emergency', 'safety signal missing', emergency.analysis?.intent);
+
+          for (const [stage, value] of [['v2-composite', composite], ['v2-comparison', comparison], ['contextual', contextual]]) {
+            if (value && /openai|anthropic|gemini/i.test(JSON.stringify(value))) fail(stage, 'external AI provider marker present');
+          }
+
+          summary.http_status = readText('http-status.txt', 'http-status').trim().split('\n').filter(Boolean);
+          summary.failures = failures;
+          fs.writeFileSync(`${dir}/summary.json`, JSON.stringify(summary, null, 2));
+          fs.writeFileSync(`${dir}/failures.txt`, failures.length ? failures.map((x) => `${x.stage}: ${x.message}${x.extra === undefined ? '' : ` | ${JSON.stringify(x.extra)}`}`).join('\n') + '\n' : 'PASS\n');
+          console.log(JSON.stringify(summary, null, 2));
+          process.exit(failures.length ? 1 : 0);
+          NODE
+          exit $?
+
+      - name: Upload production diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rawafid-assistant-production-diagnostics-${{ github.sha }}
+          path: /tmp/rawafid-production-diagnostics
+          if-no-files-found: error
+          retention-days: 7
