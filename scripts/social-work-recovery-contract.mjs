@@ -23,11 +23,17 @@ for (const required of [manifestPath, htmlRoot, routePath, generatedModule]) {
 }
 
 const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
-if (manifest.version !== 2) fail(`unexpected manifest version ${manifest.version}`);
+if (manifest.version !== 3) fail(`unexpected manifest version ${manifest.version}`);
 if (manifest.source?.repository !== 'khaledaltheeb/healthrenewal.org') fail('legacy repository identity mismatch');
 if (manifest.source?.commit !== '6911d5ee75bd6fc2dfa12f394d61efe46e87df17') fail('legacy source SHA mismatch');
 if (manifest.actual_page_count !== expectedCount || manifest.pages?.length !== expectedCount) fail(`expected ${expectedCount} pages`);
-if (!manifest.institutional_sources?.some((s) => String(s.url || '').includes('2015081211140160'))) fail('exact emailed Ljubljana source missing from manifest');
+
+const directLjubljana = manifest.institutional_sources?.find((s) => String(s.url || '').includes('2016091213042605'));
+if (!directLjubljana || !String(directLjubljana.provenance || '').startsWith('direct_email')) fail('directly emailed 201609 Ljubljana source missing or misclassified');
+const archiveCompanion = manifest.institutional_sources?.find((s) => String(s.url || '').includes('2015081211140160'));
+if (!archiveCompanion || !String(archiveCompanion.provenance || '').includes('independently_discovered')) fail('201508 archive companion provenance missing');
+const englishCompanion = manifest.institutional_sources?.find((s) => String(s.url || '').includes('2017092010392030'));
+if (!englishCompanion || !String(englishCompanion.provenance || '').includes('independently_discovered')) fail('201709 English companion provenance missing');
 
 const routes = new Set();
 let minimumWords = Infinity;
@@ -40,8 +46,10 @@ for (const page of manifest.pages) {
   const canonical = `https://healthrenewal.org${page.route}`;
   if (!html.includes(`<link rel="canonical" href="${canonical}">`)) fail(`canonical mismatch: ${page.route}`);
   if (!html.includes('id=DRUG4023')) fail(`DRUG4023 missing: ${page.route}`);
-  if (!html.includes('2015081211140160')) fail(`original emailed Ljubljana source missing: ${page.route}`);
-  if (!html.includes('2016091213042605')) fail(`Ljubljana source missing: ${page.route}`);
+  if (!html.includes('2016091213042605')) fail(`directly emailed Ljubljana source missing: ${page.route}`);
+  if (!html.includes('2015081211140160')) fail(`independent Ljubljana archive companion missing: ${page.route}`);
+  if (!html.includes('2017092010392030')) fail(`independent English Ljubljana companion missing: ${page.route}`);
+  if (html.includes('الرابط الأصلي الذي شاركته الجهة المهنية معنا')) fail(`false Ljubljana provenance leaked: ${page.route}`);
   if (!html.includes('Social Chamber of Slovenia')) fail(`source publisher missing: ${page.route}`);
   if (!html.includes('Faculty of Social Work, University of Ljubljana')) fail(`university publisher missing: ${page.route}`);
   if (!html.includes('لا يعني اعتمادًا أو شراكة أو مصادقة')) fail(`endorsement guard missing: ${page.route}`);
@@ -55,6 +63,5 @@ for (const page of manifest.pages) {
 const routeSource = fs.readFileSync(routePath, 'utf8');
 if (!routeSource.includes('SOCIAL_WORK_PAGES')) fail('route is not backed by recovered pages');
 if (!routeSource.includes('x-rawafid-source')) fail('source provenance response header missing');
-if (routeSource.includes('2015081211140160')) fail('exact emailed source must be persisted in artifacts, not injected at request time');
 
-console.log(`Social Work recovery contract passed: ${expectedCount} persisted URLs; minimum ${minimumWords} words; exact emailed source, institutional sources and evidence-boundary notice on every page.`);
+console.log(`Social Work recovery contract prepared: ${expectedCount} persisted URLs; minimum ${minimumWords} words; 201609 classified as direct email and 201508/201709 as independent companions.`);
