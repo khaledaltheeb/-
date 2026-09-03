@@ -18,14 +18,17 @@ jobs:
           set -euo pipefail
           base='https://healthrenewal.org'
           stamp="${GITHUB_SHA}-$(date +%s)"
-          home=''
+          home_file='/tmp/rawafid-production-home.html'
+          : > "$home_file"
           for attempt in $(seq 1 10); do
-            home="$(curl -fsSL --compressed --max-time 30 -H 'Cache-Control: no-cache, no-store' "${base}/?rawafid-live-smoke=${stamp}-${attempt}" 2>/dev/null || true)"
-            if grep -q 'فتح مساعد روافد' <<<"$home"; then break; fi
+            if curl -fsSL --compressed --max-time 30 -H 'Cache-Control: no-cache, no-store' "${base}/?rawafid-live-smoke=${stamp}-${attempt}" -o "$home_file"; then
+              if grep -q 'فتح مساعد روافد' "$home_file"; then break; fi
+            fi
             sleep 3
           done
-          HOME_HTML="$home" node <<'NODE'
-          const html = process.env.HOME_HTML || '';
+          HOME_FILE="$home_file" node <<'NODE'
+          const fs = require('fs');
+          const html = fs.readFileSync(process.env.HOME_FILE, 'utf8');
           if (!html.includes('فتح مساعد روافد')) throw new Error('assistant launcher missing from production homepage');
           const canonical = [...html.matchAll(/<link\b[^>]*>/gi)].map(m=>m[0]).find(tag=>/\brel=["']canonical["']/i.test(tag));
           if (!canonical) throw new Error('canonical link tag missing from production homepage');
