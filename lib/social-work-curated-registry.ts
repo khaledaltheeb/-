@@ -49,6 +49,19 @@ import {
   youthComplexBehaviourFamilyWorkPage,
   schoolFamilyCollaborationPage,
 } from '@/lib/social-work-curated/life-course-wave5-b';
+import {
+  povertyStructuralBarriersPage,
+  financialCrisisFamilyPlanPage,
+  familyRoleRedistributionPage,
+  familyPrioritySettingPage,
+  familyBurdenMonitoringPage,
+} from '@/lib/social-work-curated/structural-wave6-a';
+import {
+  helpPlanQualityAuditPage,
+  communityIndependencePlanPage,
+  serviceExitPlanPage,
+  postClosureFollowUpPage,
+} from '@/lib/social-work-curated/structural-wave6-b';
 
 export { SOCIAL_WORK_CURATED_RELEASE };
 
@@ -89,6 +102,15 @@ export const SOCIAL_WORK_CURATED_PAGES: Record<string, string> = {
   'foster-care-adoption-family-work': fosterCareAdoptionFamilyWorkPage,
   'youth-complex-behaviour-family-work': youthComplexBehaviourFamilyWorkPage,
   'school-family-collaboration': schoolFamilyCollaborationPage,
+  'poverty-structural-barriers': povertyStructuralBarriersPage,
+  'financial-crisis-family-plan': financialCrisisFamilyPlanPage,
+  'family-role-redistribution': familyRoleRedistributionPage,
+  'family-priority-setting': familyPrioritySettingPage,
+  'family-burden-monitoring': familyBurdenMonitoringPage,
+  'help-plan-quality-audit': helpPlanQualityAuditPage,
+  'community-independence-plan': communityIndependencePlanPage,
+  'service-exit-plan': serviceExitPlanPage,
+  'post-closure-follow-up': postClosureFollowUpPage,
 };
 
 export const SOCIAL_WORK_CURATED_FOUNDATION_SLUGS = [
@@ -140,4 +162,16 @@ export const SOCIAL_WORK_CURATED_LIFE_COURSE_SLUGS = [
   'foster-care-adoption-family-work',
   'youth-complex-behaviour-family-work',
   'school-family-collaboration',
+] as const;
+
+export const SOCIAL_WORK_CURATED_STRUCTURAL_SLUGS = [
+  'poverty-structural-barriers',
+  'financial-crisis-family-plan',
+  'family-role-redistribution',
+  'family-priority-setting',
+  'family-burden-monitoring',
+  'help-plan-quality-audit',
+  'community-independence-plan',
+  'service-exit-plan',
+  'post-closure-follow-up',
 ] as const;
