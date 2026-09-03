@@ -75,40 +75,7 @@ jobs:
             curl -fsSL --compressed --max-time 25 "${base}/api/search/v3?q=%D9%85%D8%A7%D8%B0%D8%A7%20%D8%A7%D9%81%D8%B9%D9%84&limit=6" -o /tmp/clarification.json 2>/dev/null || true
             curl -fsSL --compressed --max-time 25 "${base}/api/search/v3?q=%D9%88%D9%85%D8%A7%D8%B0%D8%A7%20%D8%B9%D9%86%20%D8%A7%D9%84%D8%B9%D9%84%D8%A7%D8%AC&context=%D8%B9%D9%84%D8%A7%D9%85%D8%A7%D8%AA%20%D8%A7%D9%84%D8%AA%D9%88%D8%AD%D8%AF%20%7C%7C%20%D9%83%D9%8A%D9%81%20%D8%A7%D8%B9%D8%B1%D9%81%20%D8%A7%D9%84%D8%AA%D9%88%D8%AD%D8%AF&limit=6" -o /tmp/followup.json 2>/dev/null || true
             curl -fsSL --compressed --max-time 25 "${base}/api/search/v3?q=%D8%A7%D8%AE%D9%84%D8%A7%D9%82%D9%8A%D8%A7%D8%AA%20%D8%A7%D9%84%D8%B9%D9%85%D9%84%20%D8%A7%D9%84%D8%A7%D8%AC%D8%AA%D9%85%D8%A7%D8%B9%D9%8A&limit=6" -o /tmp/social.json 2>/dev/null || true
-            if node <<'NODE'
-          const fs = require('fs');
-          const read = (p) => JSON.parse(fs.readFileSync(p, 'utf8'));
-          const home = fs.readFileSync('/tmp/home.html', 'utf8');
-          const composite = read('/tmp/composite.json');
-          const comparison = read('/tmp/comparison.json');
-          const clarification = read('/tmp/clarification.json');
-          const followup = read('/tmp/followup.json');
-          const social = read('/tmp/social.json');
-          const labels = (obj) => Array.isArray(obj.analysis?.topic_labels) ? obj.analysis.topic_labels : [];
-          const checks = {
-            noindex: /noindex/i.test(home),
-            assistant: home.includes('فتح مساعد روافد'),
-            v2: String(composite.mode).includes('zero-api-v2'),
-            age: composite.analysis?.age === 4,
-            speech: labels(composite).some((x) => /الكلام|اللغة/.test(x)),
-            results: Array.isArray(composite.results) && composite.results.length > 0,
-            summary: Boolean(composite.answer?.summary),
-            comparisonIntent: comparison.analysis?.intent === 'comparison',
-            comparisonTopics: labels(comparison).some((x) => /التوحد/.test(x)) && labels(comparison).some((x) => /الكلام|اللغة/.test(x)),
-            clarificationMode: String(clarification.mode).includes('zero-api-clarification'),
-            clarificationQuestion: Boolean(clarification.analysis?.clarifying_question),
-            contextual: followup.contextual === true && String(followup.mode).includes('zero-api-v2-contextual'),
-            retainedTopic: /التوحد/.test(String(followup.resolved_query || '')),
-            socialWork: /social-work|العمل الاجتماعي/.test(JSON.stringify(social)),
-            zeroPaidAI: !/openai/i.test(JSON.stringify(composite)) && !/openai/i.test(JSON.stringify(followup)),
-          };
-          const failed = Object.entries(checks).filter(([,value]) => !value);
-          if (failed.length) {
-            console.error('Failed:', failed.map(([key]) => key).join(', '));
-            process.exit(1);
-          }
-NODE
-            then
+            if node -e "const fs=require('fs');const r=p=>JSON.parse(fs.readFileSync(p,'utf8'));const h=fs.readFileSync('/tmp/home.html','utf8'),c=r('/tmp/composite.json'),x=r('/tmp/comparison.json'),q=r('/tmp/clarification.json'),f=r('/tmp/followup.json'),s=r('/tmp/social.json'),l=o=>Array.isArray(o.analysis?.topic_labels)?o.analysis.topic_labels:[];const checks=[/noindex/i.test(h),h.includes('فتح مساعد روافد'),String(c.mode).includes('zero-api-v2'),c.analysis?.age===4,l(c).some(v=>/الكلام|اللغة/.test(v)),Array.isArray(c.results)&&c.results.length>0,Boolean(c.answer?.summary),x.analysis?.intent==='comparison',l(x).some(v=>/التوحد/.test(v))&&l(x).some(v=>/الكلام|اللغة/.test(v)),String(q.mode).includes('zero-api-clarification'),Boolean(q.analysis?.clarifying_question),f.contextual===true&&String(f.mode).includes('zero-api-v2-contextual'),/التوحد/.test(String(f.resolved_query||'')),/social-work|العمل الاجتماعي/.test(JSON.stringify(s)),!/openai/i.test(JSON.stringify(c))&&!/openai/i.test(JSON.stringify(f))];if(!checks.every(Boolean)){console.error(checks.map((v,i)=>(i+1)+':'+v).join(' '));process.exit(1)}"; then
               passed=1
               break
             fi
