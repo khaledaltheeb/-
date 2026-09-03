@@ -62,19 +62,19 @@ function normalize(value: string) {
 }
 
 const PHRASE_REWRITES: Array<[RegExp, string]> = [
-  [/\bما\s*(?:بحكي|بيحكي|بحكيش)\b/giu, 'لا يتكلم'],
-  [/\bمش\s*(?:بيركز|بركز|مركز)\b/giu, 'لا يركز'],
-  [/\bما\s*(?:بيركز|بركز)\b/giu, 'لا يركز'],
-  [/\bكتير\s+حركه\b/giu, 'فرط حركة'],
-  [/\bشو\s+(?:اعمل|اسوي)\b/giu, 'ماذا افعل'],
-  [/\bوين\s+(?:الاقي|اجد)\b/giu, 'اين اجد'],
-  [/\bليش\b/giu, 'لماذا'],
-  [/\bاشي\b/giu, 'شيء'],
-  [/\bمنيح\b/giu, 'جيد'],
-  [/\bدكتور\b/giu, 'طبيب'],
-  [/\bدكتوره\b/giu, 'طبيبة'],
-  [/\bاخصائيه\b/giu, 'اخصائية'],
-  [/\bروضه\b/giu, 'روضة مدرسة'],
+  [/(^|\s)ما\s*(?:بحكي|بيحكي|بحكيش)(?=\s|$)/giu, '$1لا يتكلم'],
+  [/(^|\s)مش\s*(?:بيركز|بركز|مركز)(?=\s|$)/giu, '$1لا يركز'],
+  [/(^|\s)ما\s*(?:بيركز|بركز)(?=\s|$)/giu, '$1لا يركز'],
+  [/(^|\s)كتير\s+حركه(?=\s|$)/giu, '$1فرط حركة'],
+  [/(^|\s)شو\s+(?:اعمل|اسوي)(?=\s|$)/giu, '$1ماذا افعل'],
+  [/(^|\s)وين\s+(?:الاقي|اجد)(?=\s|$)/giu, '$1اين اجد'],
+  [/(^|\s)ليش(?=\s|$)/giu, '$1لماذا'],
+  [/(^|\s)اشي(?=\s|$)/giu, '$1شيء'],
+  [/(^|\s)منيح(?=\s|$)/giu, '$1جيد'],
+  [/(^|\s)دكتور(?=\s|$)/giu, '$1طبيب'],
+  [/(^|\s)دكتوره(?=\s|$)/giu, '$1طبيبة'],
+  [/(^|\s)اخصائيه(?=\s|$)/giu, '$1اخصائية'],
+  [/(^|\s)روضه(?=\s|$)/giu, '$1روضة مدرسة'],
 ];
 
 const TOKEN_REWRITES = new Map<string, string>([
@@ -129,7 +129,7 @@ const TOPIC_RULES: TopicRule[] = [
 
 function detectIntent(query: string): SearchIntent {
   const q = normalize(query);
-  if (/(خطر|طوارئ|جرعه زائده|نزيف|فقد الوعي|لا يستجيب|صعوبه التنفس|تسمم|تشنج مستمر|انسحاب شديد)/u.test(q)) return 'safety';
+  if (/(خطر|طوارئ|جرعه (?:زايده|كبيره)|overdose|نزيف شديد|فقد(?:ت)? الوعي|فاقد الوعي|اغماء|اغمي|لا يستجيب|غير مستجيب|صعوبه التنفس|لا يتنفس|توقف التنفس|تسمم|اختناق|تشنج مستمر|انسحاب شديد)/u.test(q)) return 'safety';
   if (/(الفرق|مقارنه|مقارنة|ام .* ام |مقابل|\bvs\b)/u.test(q)) return 'comparison';
   if (/(علامات|اعراض|أعراض|كيف اعرف|هل .* مصاب|تشخيص|تقييم|متي اطلب تقييم|متى اطلب تقييم)/u.test(q)) return 'assessment';
   if (/(علاج|دواء|ادويه|أدوية|تدخل|رعايه|رعاية|ماذا افعل|ما المفيد|خطة علاج)/u.test(q)) return 'treatment';
@@ -285,9 +285,20 @@ function queryTokens(query: string) {
   return [...new Set(normalize(rewritten).split(' ').filter((token) => token.length >= 2 && !STOP.has(token)))];
 }
 
+function relevantTopicRules(understanding: QueryUnderstanding) {
+  return TOPIC_RULES.filter((rule) => understanding.topics.includes(rule.key));
+}
+
+function rowMatchesTopic(row: Pick<FreeSearchResult, 'title' | 'subtitle' | 'destination'>, rules: TopicRule[]) {
+  if (!rules.length) return true;
+  const haystack = normalize(`${row.title} ${row.subtitle ?? ''} ${row.destination}`);
+  return rules.some((rule) => rule.test.test(haystack));
+}
+
 export function rerankFreeResults(query: string, results: FreeSearchResult[], understanding = analyzeFreeQuery(query)) {
   const tokens = queryTokens(query);
   const topicTokens = understanding.topic_labels.flatMap((label) => normalize(label).split(' ')).filter((token) => token.length >= 3);
+  const topicRules = relevantTopicRules(understanding);
   const intentSignals: Partial<Record<SearchIntent, RegExp>> = {
     assessment: /(علامات|اعراض|أعراض|تقييم|تشخيص|فحص)/iu,
     treatment: /(علاج|تدخل|رعايه|رعاية|دواء|تأهيل|دعم)/iu,
@@ -295,7 +306,7 @@ export function rerankFreeResults(query: string, results: FreeSearchResult[], un
     comparison: /(فرق|مقارن|تمييز|تفريق|تشابه|اختلاف)/iu,
     school: /(مدرس|صف|تعليم|تكييف|معلم|روضة)/iu,
     professional: /(مختص|اخصائي|أخصائي|مركز|طبيب|معالج)/iu,
-    safety: /(طوارئ|خطر|اسعاف|إسعاف|سلامه|سلامة)/iu,
+    safety: /(طوارئ|خطر|اسعاف|إسعاف|سلامه|سلامة|جرعه|جرعة|تسمم|وعي)/iu,
   };
   const intentSignal = intentSignals[understanding.intent];
 
@@ -310,6 +321,7 @@ export function rerankFreeResults(query: string, results: FreeSearchResult[], un
       const excerptHits = tokens.filter((token) => excerpt.includes(token)).length;
       const topicHits = topicTokens.filter((token) => title.includes(token) || subtitle.includes(token) || destination.includes(token)).length;
       let bonus = titleHits * 34 + subtitleHits * 18 + Math.min(excerptHits, 5) * 7 + topicHits * 15;
+      if (topicRules.length) bonus += rowMatchesTopic(row, topicRules) ? 2600 : -2200;
       if (intentSignal?.test(`${row.title} ${row.subtitle ?? ''} ${row.excerpt ?? ''}`)) bonus += 22;
       if (understanding.setting === 'school' && /(school|education|مدرس|تعليم|صف)/iu.test(`${row.destination} ${row.title}`)) bonus += 20;
       return { ...row, score: Number(row.score) + bonus };
@@ -349,10 +361,14 @@ export function buildExtractiveAnswer(
 ): ExtractiveAnswer | null {
   if (!results.length) return null;
   const tokens = queryTokens(query);
+  const topicRules = relevantTopicRules(understanding);
+  const topicScopedResults = topicRules.length ? results.filter((result) => rowMatchesTopic(result, topicRules)) : results;
+  const answerResults = topicRules.length ? topicScopedResults : results;
+  if (!answerResults.length) return null;
   const points: ExtractiveAnswer['points'] = [];
   const seen = new Set<string>();
 
-  for (const result of results.slice(0, 7)) {
+  for (const result of answerResults.slice(0, 7)) {
     const excerpt = cleanExcerpt(result.excerpt);
     if (!excerpt) continue;
     const sentences = splitSentences(excerpt);
