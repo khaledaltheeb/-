@@ -66,6 +66,40 @@ function contextualizeQuery(query: string, context: string) {
   return `${recentContext} ${query}`.replace(/\s+/g, ' ').trim().slice(0, 320);
 }
 
+function comparisonSubjectsFromTurn(query: string) {
+  const cleaned = query.replace(/[؟?]/g, ' ').replace(/\s+/g, ' ').trim();
+  const between = cleaned.match(/(?:الفرق|مقارن(?:ة|ه))\s+بين\s+(.{2,55}?)\s+و(?:بين\s+)?(.{2,55})/iu);
+  if (!between) return [];
+  return [between[1], between[2]].map((item) => item.trim()).filter(Boolean).slice(0, 2);
+}
+
+function analyzeWithCurrentTurn(query: string, resolvedQuery: string): QueryUnderstanding {
+  const contextualAnalysis = analyzeFreeQuery(resolvedQuery);
+  if (resolvedQuery === query) {
+    const betweenSubjects = comparisonSubjectsFromTurn(query);
+    return betweenSubjects.length === 2
+      ? { ...contextualAnalysis, comparison_subjects: betweenSubjects }
+      : contextualAnalysis;
+  }
+
+  const turnAnalysis = analyzeFreeQuery(query);
+  const currentIntentIsSpecific = turnAnalysis.intent !== 'general';
+  const betweenSubjects = comparisonSubjectsFromTurn(query);
+
+  return {
+    ...contextualAnalysis,
+    intent: currentIntentIsSpecific ? turnAnalysis.intent : contextualAnalysis.intent,
+    question_parts: turnAnalysis.question_parts.length ? turnAnalysis.question_parts : contextualAnalysis.question_parts,
+    comparison_subjects: betweenSubjects.length === 2
+      ? betweenSubjects
+      : turnAnalysis.comparison_subjects.length
+        ? turnAnalysis.comparison_subjects
+        : contextualAnalysis.comparison_subjects,
+    confidence: Math.max(contextualAnalysis.confidence, turnAnalysis.confidence),
+    suggested_questions: currentIntentIsSpecific ? turnAnalysis.suggested_questions : contextualAnalysis.suggested_questions,
+  };
+}
+
 function mergeResults(groups: SearchRow[][], limit: number) {
   const byDestination = new Map<string, SearchRow>();
   for (const row of groups.flat()) {
@@ -174,7 +208,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ query: q, resolved_query: q, mode: 'empty', results: [], answer: null }, { status: 200 });
   }
 
-  const analysis = analyzeFreeQuery(resolvedQuery);
+  const analysis = analyzeWithCurrentTurn(q, resolvedQuery);
   if (analysis.clarifying_question && analysis.topics.length === 0) {
     return NextResponse.json(
       {
