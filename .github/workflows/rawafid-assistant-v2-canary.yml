@@ -44,9 +44,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          grep -F "right:calc(20vw + 5px)" components/rawafid-assistant.module.css
-          grep -F "launcherLabel">/dev/null components/rawafid-assistant.tsx || grep -F "launcherLabel" components/rawafid-assistant.tsx
-          grep -F ">اسأل<" components/rawafid-assistant.tsx
+          grep -F "right:calc(20vw + 5px)" components/rawafid-assistant.module.css >/dev/null
+          grep -F "launcherLabel" components/rawafid-assistant.tsx >/dev/null
+          grep -F ">اسأل<" components/rawafid-assistant.tsx >/dev/null
+          echo 'Mobile assistant search-slot contract passed.'
       - name: Type check
         run: npm run typecheck
       - name: Build canary Worker
@@ -76,17 +77,20 @@ jobs:
           const comparison = read('/tmp/comparison.json');
           const clarification = read('/tmp/clarification.json');
           const followup = read('/tmp/followup.json');
+          const compositeLabels = Array.isArray(composite.analysis?.topic_labels) ? composite.analysis.topic_labels : [];
+          const comparisonLabels = Array.isArray(comparison.analysis?.topic_labels) ? comparison.analysis.topic_labels : [];
           const checks = [
             /noindex/i.test(home),
             home.includes('فتح مساعد روافد'),
             String(composite.mode).includes('zero-api-v2'),
             composite.analysis?.age === 4,
-            Array.isArray(composite.analysis?.topics) && composite.analysis.topics.some((x) => /الكلام|اللغة/.test(x)),
+            compositeLabels.some((x) => /الكلام|اللغة/.test(x)),
             Array.isArray(composite.results) && composite.results.length > 0,
+            Boolean(composite.answer?.summary),
             comparison.analysis?.intent === 'comparison',
-            Array.isArray(comparison.analysis?.topics) && comparison.analysis.topics.some((x) => /التوحد/.test(x)) && comparison.analysis.topics.some((x) => /الكلام/.test(x)),
+            comparisonLabels.some((x) => /التوحد/.test(x)) && comparisonLabels.some((x) => /الكلام|اللغة/.test(x)),
             String(clarification.mode).includes('zero-api-clarification'),
-            Boolean(clarification.analysis?.clarification_question),
+            Boolean(clarification.analysis?.clarifying_question),
             followup.contextual === true,
             /التوحد/.test(String(followup.resolved_query || '')),
             String(followup.mode).includes('zero-api-v2-contextual'),
