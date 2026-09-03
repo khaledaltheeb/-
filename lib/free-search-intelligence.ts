@@ -143,7 +143,7 @@ function detectIntent(query: string): SearchIntent {
 function extractAge(query: string) {
   const q = normalizeNumerals(query);
   const explicit = q.match(/(?:عمر(?:ه|ها|ي)?|بعمر)\s*(\d{1,2})\s*(?:سنه|سنة|سنوات|عام|اعوام|أعوام)/iu);
-  const loose = q.match(/\b(\d{1,2})\s*(?:سنه|سنة|سنوات|عام|اعوام|أعوام)\b/iu);
+  const loose = q.match(/(?:^|[\s،,؛;:!?؟.])(\d{1,2})\s*(?:سنه|سنة|سنوات|عام|اعوام|أعوام)(?=$|[\s،,؛;:!?؟.])/iu);
   const value = Number(explicit?.[1] ?? loose?.[1]);
   return Number.isFinite(value) && value >= 1 && value <= 100 ? value : null;
 }
