@@ -90,14 +90,14 @@ jobs:
           home=''
           for attempt in $(seq 1 15); do
             home="$(curl -fsSL --compressed --max-time 30 -H 'Cache-Control: no-cache, no-store' "${base}/?rawafid-assistant-release=${stamp}-${attempt}" 2>/dev/null || true)"
-            if printf '%s' "$home" | grep -q 'فتح مساعد روافد'; then
+            if grep -q 'فتح مساعد روافد' <<<"$home"; then
               break
             fi
             sleep 4
           done
-          printf '%s' "$home" | grep -q 'فتح مساعد روافد'
-          printf '%s' "$home" | grep -q "rel=\"canonical\" href=\"${base}/\""
-          if printf '%s' "$home" | grep -qi 'noindex'; then
+          grep -q 'فتح مساعد روافد' <<<"$home"
+          grep -q "rel=\"canonical\" href=\"${base}/\"" <<<"$home"
+          if grep -qi 'noindex' <<<"$home"; then
             echo 'Production homepage unexpectedly contains noindex.' >&2
             exit 1
           fi
