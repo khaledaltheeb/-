@@ -49,9 +49,15 @@ for (const fingerprint of requiredFingerprints) {
   }
 }
 
-if (!layer.includes('https://avenirsocial.ch/app/uploads/2025/12/berufskodex_de_2026-07.pdf')) fail('final German AvenirSocial 2026 code is missing');
-if (!layer.includes('https://avenirsocial.ch/app/uploads/2025/12/code_de_deontologie_fr_2026-07.pdf')) fail('final French AvenirSocial 2026 code is missing');
-if (!layer.includes(".split(STALE_AVENIR_DRAFT).join(FINAL_AVENIR_DE)")) fail('legacy AvenirSocial draft URL is not patched out at render time');
+const finalAvenirDe = 'https://avenirsocial.ch/app/uploads/2025/12/berufskodex_de_2026-07.pdf';
+const finalAvenirFr = 'https://avenirsocial.ch/app/uploads/2025/12/code_de_deontologie_fr_2026-07.pdf';
+const staleAvenir2025 = 'https://avenirsocial.ch/wp-content/uploads/2025/04/2025_Berufkodex_Soziale-Arbeit_def.pdf';
+if (!layer.includes(finalAvenirDe)) fail('final German AvenirSocial 2026 code is missing from institutional layer');
+if (!layer.includes(finalAvenirFr)) fail('final French AvenirSocial 2026 code is missing from institutional layer');
+if (!comparative.includes(finalAvenirDe)) fail('comparative generator does not use final German AvenirSocial 2026 code');
+if (!comparative.includes(finalAvenirFr)) fail('comparative generator does not use final French AvenirSocial 2026 code');
+if (comparative.includes(staleAvenir2025)) fail('stale AvenirSocial 2025 draft URL remains in comparative generator');
+if (!layer.includes(".split(STALE_AVENIR_DRAFT).join(FINAL_AVENIR_DE)")) fail('legacy-content migration guard for AvenirSocial draft URL is missing');
 if (!layer.includes("portal/lt/legalAct/f596df101af111eeb233e8b04dc9bb3d")) fail('exact LSDA-supplied e-TAR URL is missing');
 
 if (ledger.implementation.base_recovered_routes !== 56) fail('ledger must record 56 recovered routes including collection root');
