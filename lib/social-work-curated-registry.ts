@@ -37,6 +37,18 @@ import {
   failedReferralRecoveryPage,
   institutionalAdvocacyPage,
 } from '@/lib/social-work-curated/community-wave4-b';
+import {
+  familyLifeCourseTransitionsPage,
+  separationDivorceFamilySupportPage,
+  olderAdultsFamilySupportPage,
+  caregiverRoleBurdenPage,
+} from '@/lib/social-work-curated/life-course-wave5-a';
+import {
+  transitionToAdulthoodPage,
+  fosterCareAdoptionFamilyWorkPage,
+  youthComplexBehaviourFamilyWorkPage,
+  schoolFamilyCollaborationPage,
+} from '@/lib/social-work-curated/life-course-wave5-b';
 
 export { SOCIAL_WORK_CURATED_RELEASE };
 
@@ -69,6 +81,14 @@ export const SOCIAL_WORK_CURATED_PAGES: Record<string, string> = {
   'community-partnership-family-support': communityPartnershipFamilySupportPage,
   'failed-referral-recovery': failedReferralRecoveryPage,
   'institutional-advocacy': institutionalAdvocacyPage,
+  'family-life-course-transitions': familyLifeCourseTransitionsPage,
+  'separation-divorce-family-support': separationDivorceFamilySupportPage,
+  'older-adults-family-support': olderAdultsFamilySupportPage,
+  'caregiver-role-burden': caregiverRoleBurdenPage,
+  'transition-to-adulthood': transitionToAdulthoodPage,
+  'foster-care-adoption-family-work': fosterCareAdoptionFamilyWorkPage,
+  'youth-complex-behaviour-family-work': youthComplexBehaviourFamilyWorkPage,
+  'school-family-collaboration': schoolFamilyCollaborationPage,
 };
 
 export const SOCIAL_WORK_CURATED_FOUNDATION_SLUGS = [
@@ -109,4 +129,15 @@ export const SOCIAL_WORK_CURATED_COMMUNITY_SLUGS = [
   'community-partnership-family-support',
   'failed-referral-recovery',
   'institutional-advocacy',
+] as const;
+
+export const SOCIAL_WORK_CURATED_LIFE_COURSE_SLUGS = [
+  'family-life-course-transitions',
+  'separation-divorce-family-support',
+  'older-adults-family-support',
+  'caregiver-role-burden',
+  'transition-to-adulthood',
+  'foster-care-adoption-family-work',
+  'youth-complex-behaviour-family-work',
+  'school-family-collaboration',
 ] as const;
