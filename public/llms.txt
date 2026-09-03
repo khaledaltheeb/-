@@ -7,7 +7,6 @@ Primary language: Arabic (ar)
 Publisher: منصة روافد
 
 ## Core entry points
-- [Home](https://healthrenewal.org/)
 - [Sectors](https://healthrenewal.org/sectors)
 - [Sections](https://healthrenewal.org/sections)
 - [Extended encyclopedia](https://healthrenewal.org/sections/cognitive-processes)
