@@ -1,5 +1,14 @@
 const SITE_ORIGIN = 'https://healthrenewal.org';
 
+const DESCRIPTION_OVERRIDES: Record<string, string> = {
+  '/evidence-guides/social-work/agreement-on-collaboration/':
+    'دليل مهني عربي لبناء اتفاق تعاون واضح في العمل الاجتماعي مع الأسرة، يحدد الغرض والأدوار والخصوصية وحدود السلطة والخلاف والتوثيق والمراجعة.',
+  '/evidence-guides/social-work/desired-outcomes/':
+    'دليل مهني عربي لصياغة النتائج المرغوبة في العمل الاجتماعي مع الأسرة، يوضح الفرق بين الهدف والنشاط، ومؤشرات التقدم، واختلاف الأولويات، والقياس والمراجعة.',
+  '/evidence-guides/social-work/strengths-perspective/':
+    'دليل مهني عربي لمنظور القوة في العمل الاجتماعي، يوضح اكتشاف الموارد والقدرات والعلاقات مع مراعاة الخطر والعوائق البنيوية، وأدوات التقييم والتفعيل والجودة.',
+};
+
 function escapeHtmlAttribute(value: string) {
   return value
     .replaceAll('&', '&amp;')
@@ -35,6 +44,19 @@ function shortenTitle(title: string) {
   return title.slice(0, 65).trimEnd();
 }
 
+function shortenDescription(description: string) {
+  const normalized = description.replace(/\s+/g, ' ').trim();
+  if (normalized.length <= 170) return normalized;
+
+  const candidate = normalized.slice(0, 169).trimEnd();
+  const boundaries = [candidate.lastIndexOf(' '), candidate.lastIndexOf('،'), candidate.lastIndexOf('؛')];
+  const boundary = Math.max(...boundaries);
+  const clipped = (boundary >= 140 ? candidate.slice(0, boundary) : candidate)
+    .replace(/[\s،؛,:-]+$/u, '')
+    .trimEnd();
+  return `${clipped}…`;
+}
+
 function hasJsonLd(html: string) {
   return /<script\b[^>]*\btype\s*=\s*["']application\/ld\+json["'][^>]*>/i.test(html);
 }
@@ -46,12 +68,25 @@ function injectIntoHead(html: string, additions: string[]) {
   return `${block}${html}`;
 }
 
+function setMetaDescription(html: string, description: string) {
+  const tag = `<meta name="description" content="${escapeHtmlAttribute(description)}">`;
+  const pattern = /<meta\b(?=[^>]*\bname\s*=\s*["']description["'])[^>]*>/i;
+  if (pattern.test(html)) return html.replace(pattern, tag);
+  return injectIntoHead(html, [tag]);
+}
+
 export function hardenRawHtmlSeo(html: string, pathname: string) {
   let output = html;
   const originalTitle = titleContent(output);
   const safeTitle = shortenTitle(originalTitle);
   if (safeTitle && safeTitle !== originalTitle) {
     output = output.replace(/<title([^>]*)>[\s\S]*?<\/title>/i, `<title$1>${escapeHtmlAttribute(safeTitle)}</title>`);
+  }
+
+  const preferredDescription = DESCRIPTION_OVERRIDES[pathname] || descriptionContent(output);
+  const safeDescription = shortenDescription(preferredDescription);
+  if (safeDescription) {
+    output = setMetaDescription(output, safeDescription);
   }
 
   const title = titleContent(output) || 'روافد | دليل معرفي';
