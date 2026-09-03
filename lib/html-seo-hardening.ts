@@ -35,6 +35,16 @@ function shortenTitle(title: string) {
   return title.slice(0, 65).trimEnd();
 }
 
+function shortenDescription(description: string) {
+  const normalized = description.replace(/\s+/g, ' ').trim();
+  if (normalized.length <= 160) return normalized;
+
+  const candidate = normalized.slice(0, 157).trimEnd();
+  const lastSpace = candidate.lastIndexOf(' ');
+  const safeCut = lastSpace >= 120 ? candidate.slice(0, lastSpace).trimEnd() : candidate;
+  return `${safeCut}…`;
+}
+
 function hasJsonLd(html: string) {
   return /<script\b[^>]*\btype\s*=\s*["']application\/ld\+json["'][^>]*>/i.test(html);
 }
@@ -52,6 +62,15 @@ export function hardenRawHtmlSeo(html: string, pathname: string) {
   const safeTitle = shortenTitle(originalTitle);
   if (safeTitle && safeTitle !== originalTitle) {
     output = output.replace(/<title([^>]*)>[\s\S]*?<\/title>/i, `<title$1>${escapeHtmlAttribute(safeTitle)}</title>`);
+  }
+
+  const originalDescription = descriptionContent(output);
+  const safeDescription = shortenDescription(originalDescription);
+  if (safeDescription && safeDescription !== originalDescription) {
+    output = output.replace(
+      /<meta\b([^>]*\bname\s*=\s*["']description["'][^>]*)>/i,
+      (tag) => tag.replace(/\bcontent\s*=\s*["'][^"']*["']/i, `content="${escapeHtmlAttribute(safeDescription)}"`),
+    );
   }
 
   const title = titleContent(output) || 'روافد | دليل معرفي';
