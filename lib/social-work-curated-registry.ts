@@ -25,6 +25,18 @@ import {
   rebuildingTrustAfterHarmPage,
   professionalPersistencePage,
 } from '@/lib/social-work-curated/family-wave3';
+import {
+  communityResourceMapPage,
+  supportNetworkMappingPage,
+  serviceCoordinationPage,
+  referralWithContinuityPage,
+} from '@/lib/social-work-curated/community-wave4-a';
+import {
+  multidisciplinaryFamilyMeetingPage,
+  communityPartnershipFamilySupportPage,
+  failedReferralRecoveryPage,
+  institutionalAdvocacyPage,
+} from '@/lib/social-work-curated/community-wave4-b';
 
 export { SOCIAL_WORK_CURATED_RELEASE };
 
@@ -49,6 +61,14 @@ export const SOCIAL_WORK_CURATED_PAGES: Record<string, string> = {
   'home-based-family-social-work': homeBasedFamilySocialWorkPage,
   'rebuilding-trust-after-harm': rebuildingTrustAfterHarmPage,
   'professional-persistence': professionalPersistencePage,
+  'community-resource-map': communityResourceMapPage,
+  'support-network-mapping': supportNetworkMappingPage,
+  'service-coordination': serviceCoordinationPage,
+  'referral-with-continuity': referralWithContinuityPage,
+  'multidisciplinary-family-meeting': multidisciplinaryFamilyMeetingPage,
+  'community-partnership-family-support': communityPartnershipFamilySupportPage,
+  'failed-referral-recovery': failedReferralRecoveryPage,
+  'institutional-advocacy': institutionalAdvocacyPage,
 };
 
 export const SOCIAL_WORK_CURATED_FOUNDATION_SLUGS = [
@@ -78,4 +98,15 @@ export const SOCIAL_WORK_CURATED_FAMILY_SLUGS = [
   'home-based-family-social-work',
   'rebuilding-trust-after-harm',
   'professional-persistence',
+] as const;
+
+export const SOCIAL_WORK_CURATED_COMMUNITY_SLUGS = [
+  'community-resource-map',
+  'support-network-mapping',
+  'service-coordination',
+  'referral-with-continuity',
+  'multidisciplinary-family-meeting',
+  'community-partnership-family-support',
+  'failed-referral-recovery',
+  'institutional-advocacy',
 ] as const;
