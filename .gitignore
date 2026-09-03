@@ -16,6 +16,10 @@ coverage/
 public/encyclopedia-data/
 bundled/
 
+# Never commit downloaded Firebase Admin / service-account credentials.
+firebase-adminsdk*.json
+*serviceAccountKey*.json
+
 # Deterministically materialized from the validated v3 legacy static-asset bundle
 public/api/v1/iris-learning-pathways.json
 public/api/v1/openapi.json

@@ -1,0 +1,9 @@
+[
+  {"id":"blink","title":"ارمش الآن","description":"راحة قصيرة للعين أثناء استخدام الشاشة","channel":"eye","default_minutes":20,"min_minutes":15,"max_per_day":20,"body":"أغمض عينيك للحظات، ارمش عدة مرات، ثم انظر إلى نقطة أبعد عن الشاشة إن أمكن."},
+  {"id":"move","title":"قف وتحرك","description":"تذكير بالوقوف والحركة والتمدد","channel":"daily","default_minutes":60,"min_minutes":30,"max_per_day":12,"body":"إذا كنت جالسًا منذ مدة، قف وتحرك قليلًا وحرّك كتفيك وخذ عدة أنفاس هادئة."},
+  {"id":"water","title":"وقت الماء","description":"تذكير مرن بشرب الماء","channel":"daily","default_minutes":120,"min_minutes":30,"max_per_day":12,"body":"خذ استراحة قصيرة واشرب ماءً إذا كان ذلك مناسبًا لحالتك الصحية وتعليماتك الطبية."},
+  {"id":"motivation","title":"رسالة لك","description":"رسالة داعمة قصيرة اختيارية","channel":"motivation","default_minutes":180,"min_minutes":60,"max_per_day":8,"body":"اختر الخطوة التالية فقط، واترك ما لا يحتاج قرارًا الآن لوقت لاحق."},
+  {"id":"screen_rest","title":"راحة الشاشة","description":"نظرة بعيدة وحركة بسيطة بعد الاستخدام الطويل","channel":"eye","default_minutes":45,"min_minutes":20,"max_per_day":12,"body":"انظر بعيدًا عن الشاشة، أرخ كتفيك وغيّر وضعية الجلوس للحظات."},
+  {"id":"stretch","title":"تمدد قصير","description":"حركة لطيفة خلال اليوم","channel":"daily","default_minutes":120,"min_minutes":45,"max_per_day":8,"body":"حان وقت حركة قصيرة: مدد كتفيك وذراعيك وتحرك بما يناسب قدرتك."},
+  {"id":"self_check","title":"كيف حالك؟","description":"توقف قصير لتفقد احتياجك الحالي","channel":"daily","default_minutes":240,"min_minutes":120,"max_per_day":4,"body":"كيف حالك الآن؟ هل تحتاج ماءً أو راحة أو حركة أو هدوءًا أو شخصًا تتواصل معه؟"}
+]

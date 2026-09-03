@@ -1,0 +1,1 @@
+create index if not exists circle_messages_reply_to_idx on public.circle_messages(reply_to_id) where reply_to_id is not null;

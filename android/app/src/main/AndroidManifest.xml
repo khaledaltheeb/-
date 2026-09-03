@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+    <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION" />
+    <uses-permission android:name="android.permission.SEND_SMS" />
+    <uses-permission android:name="android.permission.health.READ_STEPS" />
+    <uses-permission android:name="android.permission.health.READ_SLEEP" />
+    <uses-feature android:name="android.hardware.telephony" android:required="false" />
+
+    <application
+        android:name=".RawafidApplication"
+        android:allowBackup="false"
+        android:label="روافد"
+        android:icon="@drawable/ic_launcher"
+        android:theme="@style/Theme.Rawafid"
+        android:supportsRtl="true"
+        android:usesCleartextTraffic="false">
+        <meta-data
+            android:name="com.google.mlkit.vision.DEPENDENCIES"
+            android:value="barcode_ui" />
+        <activity android:name=".MainActivity" android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <meta-data android:name="android.app.shortcuts" android:resource="@xml/shortcuts" />
+        </activity>
+        <activity android:name=".ToolCatalogActivity" android:exported="false" android:label="أدوات روافد" />
+        <activity android:name=".LifeUtilityActivity" android:exported="false" android:label="أدوات روافد" />
+        <activity android:name=".InteractiveUtilityActivity" android:exported="false" android:label="أداة تفاعلية" />
+        <activity android:name=".PresentationActivity" android:exported="false" android:excludeFromRecents="true" android:label="عرض مباشر" />
+        <activity android:name=".CareHubActivity" android:exported="false" android:label="اهتم بي" />
+        <activity android:name=".CareModeActivity" android:exported="false" android:label="Care Mode" />
+        <activity android:name=".AccessibilityProfileActivity" android:exported="false" android:label="الإعدادات والوصولية" />
+        <activity android:name=".HealthTimelineActivity" android:exported="false" android:label="دفتر الصحة الزمني" />
+        <activity android:name=".HealthConnectActivity" android:exported="false" android:label="Health Connect" />
+        <activity android:name=".MedicationCompanionActivity" android:exported="false" android:label="رفيق العلاج" />
+        <activity android:name=".AppointmentCompanionActivity" android:exported="false" android:label="رفيق الموعد" />
+        <activity android:name=".FamilyHubActivity" android:exported="false" android:label="مركز الأسرة" />
+        <activity android:name=".MyCircleActivity" android:exported="false" android:label="دائرتي" />
+        <activity android:name=".CircleAccountActivity" android:exported="false" android:label="حساب روافد" />
+        <activity android:name=".CircleConversationActivity" android:exported="false" android:label="محادثة دائرتي" />
+        <activity android:name=".SafeArrivalActivity" android:exported="false" android:label="وصلت بالسلامة" />
+        <activity android:name=".SafetyMonitorActivity" android:exported="false" android:label="مراقبة الأمان والموقع" />
+        <activity android:name=".SafeDriveActivity" android:exported="false" android:label="قيادة آمنة" />
+        <activity android:name=".SafeDriveAgreementsActivity" android:exported="false" android:label="اتفاق القيادة الآمنة" />
+        <activity android:name=".EmergencyBeaconActivity" android:exported="false" android:label="بطاقة المساعدة" />
+        <activity android:name=".LifeCardActivity" android:exported="false" android:label="بطاقة روافد للحياة" />
+        <activity android:name=".WhatNowActivity" android:exported="false" android:label="ماذا أفعل الآن؟" />
+        <activity android:name=".HelpNowActivity" android:exported="false" android:label="ساعدني الآن" />
+        <activity android:name=".OfflineEmergencyActivity" android:exported="false" android:label="حزمة الطوارئ Offline" />
+        <activity android:name=".RoutinesActivity" android:exported="false" android:label="روتيناتي" />
+        <activity android:name=".FutureNoteActivity" android:exported="false" android:label="رسالة لنفسي لاحقًا" />
+        <activity android:name=".SupportPassportActivity" android:exported="false" android:label="جواز احتياجاتي" />
+        <activity android:name=".LifeVaultActivity" android:exported="false" android:label="خزانة الحياة" />
+        <activity android:name=".TravelSafeActivity" android:exported="false" android:label="Travel Safe" />
+        <activity android:name=".HealthPermissionsRationaleActivity" android:exported="true" android:label="خصوصية Health Connect">
+            <intent-filter><action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" /></intent-filter>
+        </activity>
+        <activity-alias android:name=".ViewHealthPermissionUsageActivity" android:exported="true" android:targetActivity=".HealthPermissionsRationaleActivity" android:permission="android.permission.START_VIEW_PERMISSION_USAGE">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW_PERMISSION_USAGE" />
+                <category android:name="android.intent.category.HEALTH_PERMISSIONS" />
+            </intent-filter>
+        </activity-alias>
+        <activity android:name=".WomenPrivacyGateActivity" android:exported="false" android:excludeFromRecents="true" android:label="حماية قطاع المرأة" />
+        <activity android:name=".WomenPrivacySettingsActivity" android:exported="true" android:label="خصوصية قطاع المرأة" />
+        <activity android:name=".WomenActivity" android:exported="true" android:label="رفيقة روافد">
+            <intent-filter>
+                <action android:name="org.healthrenewal.rawafid.OPEN_WOMEN" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".WomenCalendarActivity" android:exported="false" android:label="تقويم المرأة" />
+        <activity android:name=".WomenCarePlannerActivity" android:exported="false" android:label="خطة العناية النسائية" />
+        <activity android:name=".WomenVisitPrepActivity" android:exported="false" android:label="جهزي زيارتي" />
+        <activity android:name=".WebActivity" android:exported="false" />
+
+        <service android:name=".SafetyLocationService" android:exported="false" android:foregroundServiceType="location" />
+        <service android:name=".SafeDriveService" android:exported="false" android:foregroundServiceType="location" />
+        <service android:name=".RawafidFirebaseMessagingService" android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+        <service android:name=".SafetyHotkeyAccessibilityService" android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE" android:exported="true" android:label="اختصار أمان روافد">
+            <intent-filter><action android:name="android.accessibilityservice.AccessibilityService" /></intent-filter>
+            <meta-data android:name="android.accessibilityservice" android:resource="@xml/safety_hotkey_accessibility_service" />
+        </service>
+
+        <receiver android:name=".RawafidWidgetProvider" android:exported="false">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/rawafid_widget_info" />
+        </receiver>
+        <receiver android:name=".TreatmentReminderReceiver" android:exported="false" />
+        <receiver android:name=".MedicationReminderReceiver" android:exported="false" />
+        <receiver android:name=".FutureNoteReceiver" android:exported="false" />
+        <receiver android:name=".WomenCareReminderReceiver" android:exported="false" />
+        <receiver android:name=".SafeArrivalReceiver" android:exported="false" />
+        <receiver android:name=".SafetyMonitorReceiver" android:exported="false" />
+        <receiver android:name=".EmergencyBeaconReceiver" android:exported="false" />
+        <receiver android:name=".CircleNotificationActionReceiver" android:exported="false" />
+        <receiver android:name=".SafeDriveActivityTransitionReceiver" android:exported="false" />
+        <receiver android:name=".SafeDriveAutoRestoreReceiver" android:enabled="true" android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
+        <receiver android:name=".BootReceiver" android:enabled="true" android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
+    </application>
+</manifest>
