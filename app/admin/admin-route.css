@@ -1,0 +1,10 @@
+/* Admin route preparation layer.
+ *
+ * This file deliberately re-imports the existing admin compatibility styles
+ * from the /admin route boundary before they are removed from the public root
+ * theme in a later, separately reviewed change. Keeping this as a preparation
+ * step makes the eventual root-theme removal reversible and visually safer.
+ */
+@import '../admin-ui.css';
+@import '../admin-operations.css';
+@import '../admin-shell-v3.css';
