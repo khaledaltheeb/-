@@ -1,0 +1,119 @@
+name: Rawafid Assistant V2 Isolated Canary
+
+on:
+  push:
+    branches:
+      - feat/rawafid-assistant-v2-isolated-20260903
+    paths:
+      - '.github/workflows/rawafid-assistant-v2-isolated-canary.yml'
+      - 'app/api/search/v3/route.ts'
+      - 'components/rawafid-assistant.tsx'
+      - 'components/rawafid-assistant.module.css'
+      - 'lib/free-search-intelligence.ts'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rawafid-assistant-v2-isolated-canary
+  cancel-in-progress: true
+
+jobs:
+  canary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
+      NEXT_PUBLIC_SITE_URL: https://rawafid-search-assistant-canary.khaledaltheeb.workers.dev
+      NEXT_PUBLIC_ALLOW_INDEXING: 'false'
+      NEXT_PUBLIC_ENABLE_ANALYTICS: 'false'
+      NEXT_PUBLIC_ENABLE_DIRECT_GA: 'false'
+      ENABLE_RAWAFID_ASSISTANT: 'true'
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: 1910e1ad3c793fd568ba1caafe34f964
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Install deterministic Arabic image build dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends imagemagick fontconfig fonts-noto-core librsvg2-bin
+      - name: Verify mobile search-slot source contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -F ':global(.mobile-bottom-nav a[href="/search"]){visibility:hidden;pointer-events:none}' components/rawafid-assistant.module.css >/dev/null
+          grep -F 'right:calc(20vw + 5px)' components/rawafid-assistant.module.css >/dev/null
+          grep -F '>اسأل<' components/rawafid-assistant.tsx >/dev/null
+      - name: Type check
+        run: npm run typecheck
+      - name: Build canary Worker
+        run: npx opennextjs-cloudflare build
+      - name: Validate isolated package
+        run: npx wrangler deploy --config wrangler.canary.jsonc --dry-run
+      - name: Deploy isolated canary
+        run: npx wrangler deploy --config wrangler.canary.jsonc --keep-vars
+      - name: Verify live V2 behavior
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://rawafid-search-assistant-canary.khaledaltheeb.workers.dev'
+          passed=0
+          for attempt in $(seq 1 18); do
+            stamp="${GITHUB_SHA}-${attempt}-$(date +%s)"
+            curl -fsSL --compressed --max-time 25 -H 'Cache-Control: no-cache, no-store' "${base}/?canary=${stamp}" -o /tmp/home.html 2>/dev/null || true
+            curl -fsSL --compressed --max-time 25 "${base}/api/search/v3?q=%D8%B7%D9%81%D9%84%D9%8A%20%D8%B9%D9%85%D8%B1%D9%87%204%20%D8%B3%D9%86%D9%88%D8%A7%D8%AA%20%D9%8A%D9%81%D9%87%D9%85%20%D8%A7%D9%84%D9%83%D9%84%D8%A7%D9%85%20%D9%84%D9%83%D9%86%D9%87%20%D9%84%D8%A7%20%D9%8A%D8%AA%D9%83%D9%84%D9%85%20%D8%AC%D9%8A%D8%AF%D8%A7%20%D9%85%D8%A7%D8%B0%D8%A7%20%D8%A7%D9%81%D8%B9%D9%84&limit=6" -o /tmp/composite.json 2>/dev/null || true
+            curl -fsSL --compressed --max-time 25 "${base}/api/search/v3?q=%D8%A7%D9%84%D9%81%D8%B1%D9%82%20%D8%A8%D9%8A%D9%86%20%D8%A7%D9%84%D8%AA%D9%88%D8%AD%D8%AF%20%D9%88%D8%AA%D8%A3%D8%AE%D8%B1%20%D8%A7%D9%84%D9%83%D9%84%D8%A7%D9%85&limit=6" -o /tmp/comparison.json 2>/dev/null || true
+            curl -fsSL --compressed --max-time 25 "${base}/api/search/v3?q=%D9%85%D8%A7%D8%B0%D8%A7%20%D8%A7%D9%81%D8%B9%D9%84&limit=6" -o /tmp/clarification.json 2>/dev/null || true
+            curl -fsSL --compressed --max-time 25 "${base}/api/search/v3?q=%D9%88%D9%85%D8%A7%D8%B0%D8%A7%20%D8%B9%D9%86%20%D8%A7%D9%84%D8%B9%D9%84%D8%A7%D8%AC&context=%D8%B9%D9%84%D8%A7%D9%85%D8%A7%D8%AA%20%D8%A7%D9%84%D8%AA%D9%88%D8%AD%D8%AF%20%7C%7C%20%D9%83%D9%8A%D9%81%20%D8%A7%D8%B9%D8%B1%D9%81%20%D8%A7%D9%84%D8%AA%D9%88%D8%AD%D8%AF&limit=6" -o /tmp/followup.json 2>/dev/null || true
+            curl -fsSL --compressed --max-time 25 "${base}/api/search/v3?q=%D8%A7%D8%AE%D9%84%D8%A7%D9%82%D9%8A%D8%A7%D8%AA%20%D8%A7%D9%84%D8%B9%D9%85%D9%84%20%D8%A7%D9%84%D8%A7%D8%AC%D8%AA%D9%85%D8%A7%D8%B9%D9%8A&limit=6" -o /tmp/social.json 2>/dev/null || true
+            if node <<'NODE'
+          const fs = require('fs');
+          const read = (p) => JSON.parse(fs.readFileSync(p, 'utf8'));
+          const home = fs.readFileSync('/tmp/home.html', 'utf8');
+          const composite = read('/tmp/composite.json');
+          const comparison = read('/tmp/comparison.json');
+          const clarification = read('/tmp/clarification.json');
+          const followup = read('/tmp/followup.json');
+          const social = read('/tmp/social.json');
+          const labels = (obj) => Array.isArray(obj.analysis?.topic_labels) ? obj.analysis.topic_labels : [];
+          const checks = {
+            noindex: /noindex/i.test(home),
+            assistant: home.includes('فتح مساعد روافد'),
+            v2: String(composite.mode).includes('zero-api-v2'),
+            age: composite.analysis?.age === 4,
+            speech: labels(composite).some((x) => /الكلام|اللغة/.test(x)),
+            results: Array.isArray(composite.results) && composite.results.length > 0,
+            summary: Boolean(composite.answer?.summary),
+            comparisonIntent: comparison.analysis?.intent === 'comparison',
+            comparisonTopics: labels(comparison).some((x) => /التوحد/.test(x)) && labels(comparison).some((x) => /الكلام|اللغة/.test(x)),
+            clarificationMode: String(clarification.mode).includes('zero-api-clarification'),
+            clarificationQuestion: Boolean(clarification.analysis?.clarifying_question),
+            contextual: followup.contextual === true && String(followup.mode).includes('zero-api-v2-contextual'),
+            retainedTopic: /التوحد/.test(String(followup.resolved_query || '')),
+            socialWork: /social-work|العمل الاجتماعي/.test(JSON.stringify(social)),
+            zeroPaidAI: !/openai/i.test(JSON.stringify(composite)) && !/openai/i.test(JSON.stringify(followup)),
+          };
+          const failed = Object.entries(checks).filter(([,value]) => !value);
+          if (failed.length) {
+            console.error('Failed:', failed.map(([key]) => key).join(', '));
+            process.exit(1);
+          }
+NODE
+            then
+              passed=1
+              break
+            fi
+            echo "Canary verification attempt ${attempt} not ready yet."
+            sleep 5
+          done
+          test "$passed" = '1'
+          echo 'Rawafid Assistant V2 isolated live canary passed.'
