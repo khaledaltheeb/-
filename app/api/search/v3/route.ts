@@ -3,11 +3,12 @@ import { createClient } from '@/lib/supabase/server';
 import { createSearchBackendClient } from '@/lib/supabase/search-backend';
 import { searchSocialWorkStaticPages } from '@/lib/social-work-search-index';
 import {
-  analyzeAssistantQuery,
-  buildAssistantAnswer,
-  buildAssistantQueryVariants,
-  rerankAssistantResults,
-} from '@/lib/assistant-intelligence-v2';
+  analyzeFreeQuery,
+  buildExtractiveAnswer,
+  buildFreeQueryVariants,
+  rerankFreeResults,
+  type QueryUnderstanding,
+} from '@/lib/free-search-intelligence';
 
 export const dynamic = 'force-dynamic';
 
@@ -147,6 +148,19 @@ function evidenceAsResults(evidence: EvidenceRow[]): SearchRow[] {
   }));
 }
 
+function understoodLabel(analysis: QueryUnderstanding) {
+  const parts: string[] = [];
+  if (analysis.topic_labels.length) parts.push(analysis.topic_labels.slice(0, 2).join(' + '));
+  if (analysis.age !== null) parts.push(`العمر ${analysis.age} سنة`);
+  if (analysis.setting === 'school') parts.push('السياق المدرسي');
+  if (analysis.setting === 'home') parts.push('السياق المنزلي');
+  if (analysis.subject === 'child') parts.push('السؤال عن طفل');
+  if (analysis.intent === 'comparison') parts.push('المطلوب مقارنة');
+  if (analysis.intent === 'assessment') parts.push('المطلوب فهم العلامات/التقييم');
+  if (analysis.intent === 'treatment') parts.push('المطلوب علاج أو تدخل');
+  return parts.length ? parts.join(' · ') : null;
+}
+
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const q = normalizeQuery(url.searchParams.get('q'));
@@ -158,8 +172,8 @@ export async function GET(request: Request) {
     return NextResponse.json({ query: q, resolved_query: q, mode: 'empty', results: [], answer: null }, { status: 200 });
   }
 
-  const analysis = analyzeAssistantQuery(resolvedQuery);
-  if (analysis.clarification_question && analysis.topics.length === 0) {
+  const analysis = analyzeFreeQuery(resolvedQuery);
+  if (analysis.clarifying_question && analysis.topics.length === 0) {
     return NextResponse.json(
       {
         query: q,
@@ -176,7 +190,7 @@ export async function GET(request: Request) {
     );
   }
 
-  const variants = buildAssistantQueryVariants(resolvedQuery, analysis).slice(0, 4);
+  const variants = buildFreeQueryVariants(resolvedQuery, analysis).slice(0, 4);
   const searchedVariants = await Promise.all(
     variants.map((variant) => searchDatabaseVariant(variant, Math.min(limit * 3, 60))),
   );
@@ -195,15 +209,22 @@ export async function GET(request: Request) {
   );
 
   const candidates = mergeResults([...dbGroups, ...staticGroups], Math.min(limit * 4, 80));
-  const results = rerankAssistantResults(resolvedQuery, analysis, candidates).slice(0, limit);
+  const results = rerankFreeResults(resolvedQuery, candidates, analysis).slice(0, limit);
   const rankedEvidence = evidenceGroups.flat()
     .sort((a, b) => Number(b.evidence_score) - Number(a.evidence_score))
     .filter((row, index, rows) => rows.findIndex((candidate) => candidate.destination === row.destination) === index)
     .slice(0, 8);
   const answerSource = rankedEvidence.length
-    ? rerankAssistantResults(resolvedQuery, analysis, evidenceAsResults(rankedEvidence))
+    ? rerankFreeResults(resolvedQuery, evidenceAsResults(rankedEvidence), analysis)
     : results;
-  const answer = buildAssistantAnswer(resolvedQuery, analysis, answerSource);
+  const baseAnswer = buildExtractiveAnswer(resolvedQuery, answerSource, analysis);
+  const answer = baseAnswer ? {
+    ...baseAnswer,
+    summary: baseAnswer.points[0]?.text ?? null,
+    understood: understoodLabel(analysis),
+    clarifying_question: analysis.clarifying_question,
+    follow_ups: analysis.suggested_questions,
+  } : null;
   const contextual = resolvedQuery !== q;
   const modePrefix = contextual ? 'zero-api-v2-contextual' : variants.length > 1 ? 'zero-api-v2-expanded' : 'zero-api-v2';
   const mode = `${modePrefix}:${[...modes].join('+') || 'local'}`;
