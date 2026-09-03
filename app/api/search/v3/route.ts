@@ -216,8 +216,14 @@ export async function GET(request: Request) {
     .sort((a, b) => Number(b.evidence_score) - Number(a.evidence_score))
     .filter((row, index, rows) => rows.findIndex((candidate) => candidate.destination === row.destination) === index)
     .slice(0, 8);
-  const answerSource = rankedEvidence.length
-    ? rerankFreeResults(resolvedQuery, evidenceAsResults(rankedEvidence), analysis)
+  const resultDestinations = new Set(results.map((row) => row.destination));
+  const relevantEvidence = rankedEvidence.filter((row) => resultDestinations.has(row.destination));
+  const answerSource = relevantEvidence.length
+    ? rerankFreeResults(
+      resolvedQuery,
+      mergeResults([evidenceAsResults(relevantEvidence), results], Math.max(limit, 12)),
+      analysis,
+    )
     : results;
   const baseAnswer = buildExtractiveAnswer(resolvedQuery, answerSource, analysis);
   const answer = baseAnswer ? {
@@ -240,7 +246,7 @@ export async function GET(request: Request) {
       mode,
       analysis,
       count: results.length,
-      evidence_count: rankedEvidence.length,
+      evidence_count: relevantEvidence.length,
       answer,
       results,
     },
