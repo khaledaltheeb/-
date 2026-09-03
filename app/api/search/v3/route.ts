@@ -40,6 +40,7 @@ type EdgeSearchResponse = {
 
 const EXPLICIT_TOPIC_PATTERN = /(توحد|autism|adhd|فرط\s*الحرك|تشتت|ديسلكس|عسر\s*القراء|تأخر\s*(?:الكلام|النطق)|وسواس|ocd|erp|aac|قلق\s*اجتماعي|رهاب\s*اجتماعي|اكتئاب|ادمان|إدمان|انسحاب|مرض\s*نادر|علاج\s*جيني|سرطان|صرع|عمل\s*اجتماعي|خدمه\s*اجتماعي|خدمة\s*اجتماعي|تربيه\s*دامج|تربية\s*دامج|تعليم\s*دامج|متلازمه\s*داون|متلازمة\s*داون|شلل\s*دماغي|صعوبات\s*التعلم)/iu;
 const FOLLOW_UP_PATTERN = /^(?:و?ماذا(?:\s+عن)?|و?ما(?:\s+عن)?|طيب|تمام|و?كيف|و?هل|و?العلاج|و?التشخيص|و?التقييم|و?الاعراض|و?الأعراض|و?الدعم|و?المدرسه|و?المدرسة|و?الدواء|و?الادويه|و?الأدوية|و?الاسره|و?الأسرة|و?المضاعفات|و?الاسباب|و?الأسباب|و?الفرق)(?:\s|$)/iu;
+const CONTEXT_RESOLVED_BUDGET = 320;
 
 function boundedLimit(value: string | null) {
   const n = Number(value ?? 30);
@@ -57,13 +58,22 @@ function contextualizeQuery(query: string, context: string) {
   const explicitFollowUp = FOLLOW_UP_PATTERN.test(query);
   const looksLikeFollowUp = explicitFollowUp || (!explicitTopic && tokenCount <= 4);
   if (!looksLikeFollowUp) return query;
+
   const recentContext = context
     .split('||')
     .map((item) => item.trim())
     .filter(Boolean)
     .slice(-3)
-    .join(' ');
-  return `${recentContext} ${query}`.replace(/\s+/g, ' ').trim().slice(0, 320);
+    .join(' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  // The current turn is authoritative and must never be truncated by older
+  // context. Spend only the remaining budget on the most recent context tail.
+  const contextBudget = Math.max(0, CONTEXT_RESOLVED_BUDGET - query.length - 1);
+  if (!contextBudget || !recentContext) return query;
+  const boundedContext = recentContext.slice(-contextBudget).trim();
+  return boundedContext ? `${boundedContext} ${query}` : query;
 }
 
 function comparisonSubjectsFromTurn(query: string) {
