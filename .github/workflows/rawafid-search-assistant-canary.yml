@@ -40,15 +40,19 @@ jobs:
           set -euo pipefail
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends imagemagick fontconfig fonts-noto-core librsvg2-bin
-      - name: Verify V2 mobile search-slot source contract
+      - name: Verify V2 mobile search-slot and bounded-history source contract
         if: github.head_ref == 'feat/rawafid-assistant-v2'
         shell: bash
         run: |
           set -euo pipefail
           grep -F "right:calc(20vw + 5px)" components/rawafid-assistant.module.css >/dev/null
+          grep -F 'mobile-bottom-nav a[href="/search"]' components/rawafid-assistant.module.css >/dev/null
+          grep -F 'visibility:hidden;pointer-events:none' components/rawafid-assistant.module.css >/dev/null
           grep -F "launcherLabel" components/rawafid-assistant.tsx >/dev/null
           grep -F ">اسأل<" components/rawafid-assistant.tsx >/dev/null
-          echo 'Mobile assistant search-slot contract passed.'
+          grep -F "const nextHistory = [...history, q]" components/rawafid-assistant.tsx >/dev/null
+          grep -F "clarifying_question" components/rawafid-assistant.tsx >/dev/null
+          echo 'Mobile assistant search-slot, accessibility and bounded-history contract passed.'
       - name: Materialize generated route assets
         run: node scripts/build-daily-tools-route-manifest.mjs
       - name: Type check
@@ -115,6 +119,7 @@ NODE
             curl -fsSL --compressed --max-time 25 "${base}/api/search/v3?q=%D8%A7%D9%84%D9%81%D8%B1%D9%82%20%D8%A8%D9%8A%D9%86%20%D8%A7%D9%84%D8%AA%D9%88%D8%AD%D8%AF%20%D9%88%D8%AA%D8%A3%D8%AE%D8%B1%20%D8%A7%D9%84%D9%83%D9%84%D8%A7%D9%85&limit=6" -o /tmp/comparison.json 2>/dev/null || true
             curl -fsSL --compressed --max-time 25 "${base}/api/search/v3?q=%D9%85%D8%A7%D8%B0%D8%A7%20%D8%A7%D9%81%D8%B9%D9%84&limit=6" -o /tmp/clarification.json 2>/dev/null || true
             curl -fsSL --compressed --max-time 25 "${base}/api/search/v3?q=%D9%88%D9%85%D8%A7%D8%B0%D8%A7%20%D8%B9%D9%86%20%D8%A7%D9%84%D8%B9%D9%84%D8%A7%D8%AC&context=%D8%B9%D9%84%D8%A7%D9%85%D8%A7%D8%AA%20%D8%A7%D9%84%D8%AA%D9%88%D8%AD%D8%AF%20%7C%7C%20%D9%83%D9%8A%D9%81%20%D8%A7%D8%B9%D8%B1%D9%81%20%D8%A7%D9%84%D8%AA%D9%88%D8%AD%D8%AF&limit=6" -o /tmp/followup.json 2>/dev/null || true
+            curl -fsSL --compressed --max-time 25 "${base}/api/search/v3?q=%D9%88%D9%87%D9%84%20%D9%87%D8%B0%D8%A7%20%D9%8A%D8%B9%D9%86%D9%8A%20%D8%AA%D9%88%D8%AD%D8%AF&context=%D8%B7%D9%81%D9%84%D9%8A%20%D8%B9%D9%85%D8%B1%D9%87%204%20%D8%B3%D9%86%D9%88%D8%A7%D8%AA%20%D9%8A%D9%81%D9%87%D9%85%20%D8%A7%D9%84%D9%83%D9%84%D8%A7%D9%85%20%D9%84%D9%83%D9%86%D9%87%20%D9%84%D8%A7%20%D9%8A%D8%AA%D9%83%D9%84%D9%85%20%D8%AC%D9%8A%D8%AF%D8%A7&limit=6" -o /tmp/explicit-followup.json 2>/dev/null || true
             if node <<'NODE'
           const fs = require('fs');
           const home = fs.readFileSync('/tmp/home.html','utf8');
@@ -123,8 +128,10 @@ NODE
           const comparison = read('/tmp/comparison.json');
           const clarification = read('/tmp/clarification.json');
           const followup = read('/tmp/followup.json');
+          const explicitFollowup = read('/tmp/explicit-followup.json');
           const compositeLabels = Array.isArray(composite.analysis?.topic_labels) ? composite.analysis.topic_labels : [];
           const comparisonLabels = Array.isArray(comparison.analysis?.topic_labels) ? comparison.analysis.topic_labels : [];
+          const explicitResolved = String(explicitFollowup.resolved_query || '');
           const checks = [
             /noindex/i.test(home),
             home.includes('فتح مساعد روافد'),
@@ -140,7 +147,10 @@ NODE
             followup.contextual === true,
             /التوحد/.test(String(followup.resolved_query || '')),
             String(followup.mode).includes('zero-api-v2-contextual'),
-            !/openai/i.test(JSON.stringify(composite)) && !/openai/i.test(JSON.stringify(followup)),
+            explicitFollowup.contextual === true,
+            /التوحد/.test(explicitResolved) && /الكلام|يتكلم|اللغة/.test(explicitResolved),
+            String(explicitFollowup.mode).includes('zero-api-v2-contextual'),
+            !/openai/i.test(JSON.stringify(composite)) && !/openai/i.test(JSON.stringify(followup)) && !/openai/i.test(JSON.stringify(explicitFollowup)),
           ];
           if (!checks.every(Boolean)) {
             console.error(checks.map((value,index) => `${index+1}:${value}`).join(' '));
@@ -148,7 +158,7 @@ NODE
           }
 NODE
             then
-              echo 'Rawafid Assistant V2 passed structured understanding, comparison, clarification, contextual follow-up and live retrieval.'
+              echo 'Rawafid Assistant V2 passed structured understanding, comparison, clarification, bounded context, explicit-topic follow-up and live retrieval.'
               exit 0
             fi
             echo "V2 canary attempt ${attempt} not ready yet."
