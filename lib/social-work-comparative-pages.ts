@@ -1,6 +1,8 @@
 const SOURCES = {
-  avenirCode: 'https://avenirsocial.ch/wp-content/uploads/2025/04/2025_Berufkodex_Soziale-Arbeit_def.pdf',
-  avenirKnowledge: 'https://avenirsocial.ch/fachwissen/#broschure',
+  avenirCodeDe: 'https://avenirsocial.ch/app/uploads/2025/12/berufskodex_de_2026-07.pdf',
+  avenirCodeFr: 'https://avenirsocial.ch/app/uploads/2025/12/code_de_deontologie_fr_2026-07.pdf',
+  avenirKnowledgeDe: 'https://avenirsocial.ch/fachwissen/#broschure',
+  avenirKnowledgeFr: 'https://avenirsocial.ch/fr/expertise/#brochures',
   lithuaniaCode: 'https://www.e-tar.lt/portal/en/legalAct/f596df101af111eeb233e8b04dc9bb3d',
   lithuaniaMethods: 'https://pktc.lt/metodine-informacija/metodine-medziaga',
   lsda: 'https://www.lsda.lt/kompetenciju-tobulinimo-centras/',
@@ -26,8 +28,9 @@ const style = `<style>:root{--bg:#f4f8f7;--ink:#14251f;--muted:#536760;--line:#c
 function sourceList(keys: SourceKey[]) {
   const rows: string[] = [];
   if (keys.includes('avenir')) {
-    rows.push(`<li><a href="${SOURCES.avenirCode}" target="_blank" rel="noopener noreferrer"><strong>AvenirSocial — Berufskodex Soziale Arbeit Schweiz / Code de déontologie</strong></a> — مدونة المهنة السويسرية الجديدة، نافذة من 1 يناير 2026 وفق الوثيقة المنشورة.</li>`);
-    rows.push(`<li><a href="${SOURCES.avenirKnowledge}" target="_blank" rel="noopener noreferrer">AvenirSocial — الموارد والمعرفة المهنية</a></li>`);
+    rows.push(`<li><a href="${SOURCES.avenirCodeDe}" target="_blank" rel="noopener noreferrer"><strong>AvenirSocial — Berufskodex Soziale Arbeit Schweiz 2026</strong></a> — النسخة الألمانية النهائية التي أرسلتها AvenirSocial مباشرةً.</li>`);
+    rows.push(`<li><a href="${SOURCES.avenirCodeFr}" target="_blank" rel="noopener noreferrer"><strong>AvenirSocial — Code de déontologie du travail social en Suisse 2026</strong></a> — النسخة الفرنسية النهائية التي أرسلتها AvenirSocial مباشرةً.</li>`);
+    rows.push(`<li><a href="${SOURCES.avenirKnowledgeDe}" target="_blank" rel="noopener noreferrer">AvenirSocial — Fachwissen / Broschüren</a> · <a href="${SOURCES.avenirKnowledgeFr}" target="_blank" rel="noopener noreferrer">Expertise / Brochures</a></li>`);
   }
   if (keys.includes('lithuania')) {
     rows.push(`<li><a href="${SOURCES.lithuaniaCode}" target="_blank" rel="noopener noreferrer"><strong>Lithuania e-TAR — Order A1-448, Code of Ethics for Social Services Sector Workers</strong></a> — سجل رسمي نافذ منذ 6 يوليو 2023.</li>`);
