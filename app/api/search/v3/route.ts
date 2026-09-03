@@ -2,7 +2,12 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createSearchBackendClient } from '@/lib/supabase/search-backend';
 import { searchSocialWorkStaticPages } from '@/lib/social-work-search-index';
-import { buildExtractiveAnswer, buildFreeQueryVariants } from '@/lib/free-search-intelligence';
+import {
+  analyzeAssistantQuery,
+  buildAssistantAnswer,
+  buildAssistantQueryVariants,
+  rerankAssistantResults,
+} from '@/lib/assistant-intelligence-v2';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,15 +38,15 @@ type EdgeSearchResponse = {
 };
 
 const EXPLICIT_TOPIC_PATTERN = /(توحد|autism|adhd|فرط\s*الحرك|تشتت|ديسلكس|عسر\s*القراء|تأخر\s*(?:الكلام|النطق)|وسواس|ocd|erp|aac|قلق\s*اجتماعي|رهاب\s*اجتماعي|اكتئاب|ادمان|إدمان|انسحاب|مرض\s*نادر|علاج\s*جيني|سرطان|صرع|عمل\s*اجتماعي|خدمه\s*اجتماعي|خدمة\s*اجتماعي|تربيه\s*دامج|تربية\s*دامج|تعليم\s*دامج|متلازمه\s*داون|متلازمة\s*داون|شلل\s*دماغي|صعوبات\s*التعلم)/iu;
-const FOLLOW_UP_PATTERN = /^(?:و?ماذا(?:\s+عن)?|و?ما(?:\s+عن)?|طيب|تمام|و?كيف|و?هل|و?العلاج|و?التشخيص|و?التقييم|و?الاعراض|و?الأعراض|و?الدعم|و?المدرسه|و?المدرسة|و?الدواء|و?الادويه|و?الأدوية|و?الاسره|و?الأسرة|و?المضاعفات|و?الاسباب|و?الأسباب)(?:\s|$)/iu;
+const FOLLOW_UP_PATTERN = /^(?:و?ماذا(?:\s+عن)?|و?ما(?:\s+عن)?|طيب|تمام|و?كيف|و?هل|و?العلاج|و?التشخيص|و?التقييم|و?الاعراض|و?الأعراض|و?الدعم|و?المدرسه|و?المدرسة|و?الدواء|و?الادويه|و?الأدوية|و?الاسره|و?الأسرة|و?المضاعفات|و?الاسباب|و?الأسباب|و?الفرق)(?:\s|$)/iu;
 
 function boundedLimit(value: string | null) {
   const n = Number(value ?? 30);
   return Number.isFinite(n) ? Math.max(1, Math.min(Math.trunc(n), 100)) : 30;
 }
 
-function normalizeQuery(value: string | null) {
-  return String(value ?? '').trim().replace(/\s+/g, ' ').slice(0, 160);
+function normalizeQuery(value: string | null, maxLength = 220) {
+  return String(value ?? '').trim().replace(/\s+/g, ' ').slice(0, maxLength);
 }
 
 function contextualizeQuery(query: string, context: string) {
@@ -49,7 +54,13 @@ function contextualizeQuery(query: string, context: string) {
   const tokenCount = query.split(/\s+/u).filter(Boolean).length;
   const looksLikeFollowUp = FOLLOW_UP_PATTERN.test(query) || tokenCount <= 4;
   if (!looksLikeFollowUp) return query;
-  return `${context} ${query}`.replace(/\s+/g, ' ').trim().slice(0, 160);
+  const recentContext = context
+    .split('||')
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .slice(-2)
+    .join(' ');
+  return `${recentContext} ${query}`.replace(/\s+/g, ' ').trim().slice(0, 320);
 }
 
 function mergeResults(groups: SearchRow[][], limit: number) {
@@ -139,7 +150,7 @@ function evidenceAsResults(evidence: EvidenceRow[]): SearchRow[] {
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const q = normalizeQuery(url.searchParams.get('q'));
-  const context = normalizeQuery(url.searchParams.get('context'));
+  const context = normalizeQuery(url.searchParams.get('context'), 660);
   const resolvedQuery = contextualizeQuery(q, context);
   const limit = boundedLimit(url.searchParams.get('limit'));
 
@@ -147,41 +158,69 @@ export async function GET(request: Request) {
     return NextResponse.json({ query: q, resolved_query: q, mode: 'empty', results: [], answer: null }, { status: 200 });
   }
 
-  const variants = buildFreeQueryVariants(resolvedQuery);
-  const dbGroups: SearchRow[][] = [];
-  const evidenceGroups: EvidenceRow[][] = [];
-  const modes = new Set<string>();
-
-  for (const [index, variant] of variants.entries()) {
-    const searched = await searchDatabaseVariant(variant, Math.min(limit * 3, 60));
-    modes.add(searched.mode);
-    dbGroups.push(searched.rows.map((row) => ({
-      ...row,
-      score: Number(row.score) + (index === 0 ? 140 : 0),
-    })));
-    evidenceGroups.push(searched.evidence);
+  const analysis = analyzeAssistantQuery(resolvedQuery);
+  if (analysis.clarification_question && analysis.topics.length === 0) {
+    return NextResponse.json(
+      {
+        query: q,
+        resolved_query: resolvedQuery,
+        contextual: resolvedQuery !== q,
+        mode: 'zero-api-clarification',
+        analysis,
+        count: 0,
+        evidence_count: 0,
+        answer: null,
+        results: [],
+      },
+      { status: 200, headers: { 'cache-control': 'private, max-age=0, no-store', 'x-content-type-options': 'nosniff' } },
+    );
   }
+
+  const variants = buildAssistantQueryVariants(resolvedQuery, analysis).slice(0, 4);
+  const searchedVariants = await Promise.all(
+    variants.map((variant) => searchDatabaseVariant(variant, Math.min(limit * 3, 60))),
+  );
+  const modes = new Set(searchedVariants.map((searched) => searched.mode));
+  const dbGroups = searchedVariants.map((searched, index) => searched.rows.map((row) => ({
+    ...row,
+    score: Number(row.score) + (index === 0 ? 160 : Math.max(0, 90 - index * 20)),
+  })));
+  const evidenceGroups = searchedVariants.map((searched) => searched.evidence);
 
   const staticGroups = variants.map((variant, index) =>
     searchSocialWorkStaticPages(variant, Math.min(limit * 2, 100)).map((row) => ({
       ...row,
-      score: Number(row.score) + (index === 0 ? 140 : 0),
+      score: Number(row.score) + (index === 0 ? 160 : Math.max(0, 90 - index * 20)),
     })) as SearchRow[],
   );
 
-  const results = mergeResults([...dbGroups, ...staticGroups], limit);
+  const candidates = mergeResults([...dbGroups, ...staticGroups], Math.min(limit * 4, 80));
+  const results = rerankAssistantResults(resolvedQuery, analysis, candidates).slice(0, limit);
   const rankedEvidence = evidenceGroups.flat()
     .sort((a, b) => Number(b.evidence_score) - Number(a.evidence_score))
     .filter((row, index, rows) => rows.findIndex((candidate) => candidate.destination === row.destination) === index)
-    .slice(0, 6);
-  const answerSource = rankedEvidence.length ? evidenceAsResults(rankedEvidence) : results;
-  const answer = buildExtractiveAnswer(q, answerSource);
+    .slice(0, 8);
+  const answerSource = rankedEvidence.length
+    ? rerankAssistantResults(resolvedQuery, analysis, evidenceAsResults(rankedEvidence))
+    : results;
+  const answer = buildAssistantAnswer(resolvedQuery, analysis, answerSource);
   const contextual = resolvedQuery !== q;
-  const modePrefix = contextual ? 'zero-api-contextual' : variants.length > 1 ? 'zero-api-expanded' : 'zero-api';
+  const modePrefix = contextual ? 'zero-api-v2-contextual' : variants.length > 1 ? 'zero-api-v2-expanded' : 'zero-api-v2';
   const mode = `${modePrefix}:${[...modes].join('+') || 'local'}`;
 
   return NextResponse.json(
-    { query: q, resolved_query: resolvedQuery, contextual, variants, mode, count: results.length, evidence_count: rankedEvidence.length, answer, results },
+    {
+      query: q,
+      resolved_query: resolvedQuery,
+      contextual,
+      variants,
+      mode,
+      analysis,
+      count: results.length,
+      evidence_count: rankedEvidence.length,
+      answer,
+      results,
+    },
     {
       status: 200,
       headers: {
