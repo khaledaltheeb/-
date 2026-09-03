@@ -25,7 +25,7 @@
       "title_ar": "ما المراجعات المنهجية؟",
       "title_en": "What are systematic reviews?",
       "kind": "methodology-intro",
-      "url": "https://www.cochrane.org/our-evidence/what-are-systematic-reviews",
+      "url": "https://www.cochrane.org/evidence/what-are-systematic-reviews",
       "scope_ar": "مدخل رسمي لفهم لماذا تجمع المراجعة المنهجية الأدلة وفق سؤال ومعايير وخطوات محددة بدلاً من الاعتماد على دراسة منفردة.",
       "audience_ar": ["الجمهور", "الطلاب", "الممارسون"]
     },
@@ -34,7 +34,7 @@
       "title_ar": "أساسيات الدليل",
       "title_en": "Cochrane Evidence Essentials",
       "kind": "free-learning",
-      "url": "https://training.cochrane.org/essentials",
+      "url": "https://www.cochrane.org/learn/courses-and-resources/evidence-essentials",
       "scope_ar": "مورد تدريبي مجاني تفاعلي يقدم مدخلاً إلى الدليل الصحي والطب المبني على الدليل والتجارب السريرية وأدلة كوكرين.",
       "audience_ar": ["المرضى", "مقدمو الرعاية", "صناع القرار", "الفريق الصحي"]
     },
@@ -43,7 +43,7 @@
       "title_ar": "جداول ملخص النتائج ودرجة اليقين GRADE",
       "title_en": "Cochrane Handbook Chapter 14",
       "kind": "methods-handbook",
-      "url": "https://training.cochrane.org/handbook/current/chapter-14",
+      "url": "https://www.cochrane.org/authors/handbooks-and-manuals/handbook/current/chapter-14",
       "scope_ar": "مرجع منهجي رسمي لفهم جداول Summary of Findings ومستويات اليقين الأربعة وعوامل خفض اليقين في GRADE.",
       "audience_ar": ["الباحثون", "الممارسون", "مراجعو الأدلة"]
     },
@@ -132,7 +132,7 @@
       "title_en": "Dietary interventions for multiple sclerosis-related outcomes",
       "published_on": "2020-05-19",
       "evidence_current_to": "2019-05-30",
-      "cochrane_url": "https://www.cochrane.org/CD004192/MS_dietary-interventions-multiple-sclerosis-related-outcomes",
+      "cochrane_url": "https://www.cochrane.org/evidence/CD004192_dietary-interventions-multiple-sclerosis-related-outcomes",
       "library_url": "https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD004192.pub4/full",
       "question_ar": "هل تؤثر الحميات أو المكملات الغذائية، باستثناء فيتامين د الذي تناولته مراجعة أخرى، في الانتكاسات أو تقدم الإعاقة أو مؤشرات الرنين أو السلامة لدى المصابين بالتصلب المتعدد؟",
       "evidence_base_ar": "30 تجربة في 41 تقريراً كاملاً، شملت أحماضاً دهنية متعددة غير مشبعة ومضادات أكسدة وبرامج غذائية ومكملات أخرى، مع تباين كبير بين التدخلات والمقارنات والنتائج.",
