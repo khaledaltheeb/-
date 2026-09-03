@@ -8,7 +8,7 @@
 .launcher{
   width:58px;height:58px;border:0;border-radius:18px;background:#075f61;color:#fff;
   box-shadow:0 12px 32px rgba(4,52,54,.24);display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:1px;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease;
+  gap:1px;cursor:pointer;touch-action:manipulation;transition:transform .18s ease,box-shadow .18s ease;
 }
 .launcher:hover{transform:translateY(-2px);box-shadow:0 16px 38px rgba(4,52,54,.3)}
 .launcherIcon{display:grid;place-items:center;width:25px;height:25px}.launcherIcon svg{width:25px;height:25px}.launcherLabel{display:none;font:800 8.5px/1.1 inherit}
