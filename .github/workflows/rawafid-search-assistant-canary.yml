@@ -13,7 +13,7 @@ concurrency:
 
 jobs:
   canary:
-    if: github.head_ref == 'feat/enterprise-hybrid-search-rag' || github.head_ref == 'feat/rawafid-assistant-v2'
+    if: github.head_ref == 'feat/enterprise-hybrid-search-rag' || startsWith(github.head_ref, 'feat/rawafid-assistant-v2')
     runs-on: ubuntu-latest
     timeout-minutes: 40
     env:
@@ -41,7 +41,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends imagemagick fontconfig fonts-noto-core librsvg2-bin
       - name: Verify V2 mobile search-slot source contract
-        if: github.head_ref == 'feat/rawafid-assistant-v2'
+        if: startsWith(github.head_ref, 'feat/rawafid-assistant-v2')
         shell: bash
         run: |
           set -euo pipefail
@@ -103,7 +103,7 @@ NODE
           echo 'Legacy Rawafid search assistant canary verification failed.' >&2
           exit 1
       - name: Verify V2 understanding, comparison, clarification and context
-        if: github.head_ref == 'feat/rawafid-assistant-v2'
+        if: startsWith(github.head_ref, 'feat/rawafid-assistant-v2')
         shell: bash
         run: |
           set -euo pipefail
