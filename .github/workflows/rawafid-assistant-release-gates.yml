@@ -1,0 +1,98 @@
+name: Rawafid Assistant Release Gates
+
+on:
+  push:
+    branches:
+      - verify/rawafid-assistant-release-gates-20260903
+
+permissions:
+  contents: read
+
+jobs:
+  release-gates:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
+      NEXT_PUBLIC_SITE_URL: https://healthrenewal.org
+      NEXT_PUBLIC_ALLOW_INDEXING: 'true'
+      SEO_GATE_BASE_URL: http://127.0.0.1:3000
+      SEO_TARGET_URLS: '10000'
+      SEO_REQUIRE_TARGET: 'false'
+      EDITORIAL_REQUIRE_READY: 'false'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Build
+        run: npm run build
+      - name: Start production server
+        shell: bash
+        run: |
+          set -euo pipefail
+          nohup npm run start -- --hostname 127.0.0.1 --port 3000 > /tmp/rawafid-release-gates-server.log 2>&1 &
+          echo $! > /tmp/rawafid-release-gates-server.pid
+          ready=0
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:3000/ >/dev/null; then
+              ready=1
+              break
+            fi
+            sleep 1
+          done
+          if [ "$ready" -ne 1 ]; then
+            cat /tmp/rawafid-release-gates-server.log >&2 || true
+            exit 1
+          fi
+      - name: Content richness and duplicate-body gate
+        run: node scripts/content-richness-gate.mjs
+      - name: YMYL editorial SEO readiness report
+        run: node scripts/editorial-seo-readiness.mjs
+      - name: SEO readiness progress toward 10000 canonical URLs
+        run: node scripts/seo-readiness-report.mjs
+      - name: Lighthouse lab audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          for run in 1 2 3; do
+            ok=0
+            for attempt in 1 2 3; do
+              if npx --yes lighthouse@12.8.2 http://127.0.0.1:3000/ \
+                --quiet --chrome-flags="--headless --no-sandbox" \
+                --only-categories=performance,accessibility,best-practices,seo \
+                --output=json --output-path="/tmp/rawafid-release-lighthouse-${run}.json"; then
+                ok=1
+                break
+              fi
+              pkill -f 'chrome|chromium' 2>/dev/null || true
+              sleep 2
+            done
+            test "$ok" -eq 1
+          done
+          node - <<'NODE'
+          const fs=require('fs');
+          const runs=[1,2,3].map((run)=>JSON.parse(fs.readFileSync(`/tmp/rawafid-release-lighthouse-${run}.json`,'utf8')));
+          const performance=[];
+          for (const [index,report] of runs.entries()) {
+            const scores=Object.fromEntries(Object.entries(report.categories).map(([key,value])=>[key,value.score]));
+            console.log(`Lighthouse release run ${index+1}:`,scores);
+            if ((scores.accessibility ?? 0) < 0.90) throw new Error(`Accessibility below 0.90 on run ${index+1}`);
+            if ((scores['best-practices'] ?? 0) < 0.90) throw new Error(`Best Practices below 0.90 on run ${index+1}`);
+            if ((scores.seo ?? 0) < 0.95) throw new Error(`SEO below 0.95 on run ${index+1}`);
+            performance.push(scores.performance ?? 0);
+          }
+          performance.sort((a,b)=>a-b);
+          if (performance[1] < 0.70) throw new Error(`Median performance below 0.70: ${performance[1]}`);
+          NODE
+      - name: Stop production server
+        if: always()
+        shell: bash
+        run: |
+          if [ -f /tmp/rawafid-release-gates-server.pid ]; then
+            kill "$(cat /tmp/rawafid-release-gates-server.pid)" 2>/dev/null || true
+          fi
