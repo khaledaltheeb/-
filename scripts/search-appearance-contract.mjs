@@ -198,7 +198,7 @@ if (/^\s*schedule:/m.test(indexNowWorkflow)) {
 if (/workers\.dev/i.test(llms)) {
   throw new Error('llms discovery file must not advertise staging URLs');
 }
-requireAll(llms, ['Canonical site: https://healthrenewal.org/', 'https://healthrenewal.org/sitemap.xml'], 'AI discovery canonical');
+requireAll(llms, ['Canonical site: [https://healthrenewal.org/](https://healthrenewal.org/)', '[Sitemap index](https://healthrenewal.org/sitemap.xml)'], 'AI discovery canonical');
 if (/rawafid-platform-staging\.khaledaltheeb\.workers\.dev/i.test(citation)) {
   throw new Error('citation page must not publish staging URL');
 }
