@@ -1,6 +1,6 @@
 package org.healthrenewal.rawafid
 
-import androidx.compose.ui.test.assertExists
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -15,10 +15,10 @@ class RawafidLaunchSmokeTest {
 
     @Test
     fun homeShowsPrimaryNavigationAndHelpEntry() {
-        composeRule.onNodeWithText("روافد").assertExists()
-        composeRule.onNodeWithText("ساعدني الآن").assertExists()
-        composeRule.onNodeWithText("اليوم").assertExists()
-        composeRule.onNodeWithText("صحتي").assertExists()
-        composeRule.onNodeWithText("الأمان").assertExists()
+        composeRule.onNodeWithText("روافد").assertIsDisplayed()
+        composeRule.onNodeWithText("ساعدني الآن").assertIsDisplayed()
+        composeRule.onNodeWithText("اليوم").assertIsDisplayed()
+        composeRule.onNodeWithText("صحتي").assertIsDisplayed()
+        composeRule.onNodeWithText("الأمان").assertIsDisplayed()
     }
 }
