@@ -51,15 +51,17 @@ function normalizeQuery(value: string | null, maxLength = 220) {
 }
 
 function contextualizeQuery(query: string, context: string) {
-  if (!context || context === query || EXPLICIT_TOPIC_PATTERN.test(query)) return query;
+  if (!context || context === query) return query;
   const tokenCount = query.split(/\s+/u).filter(Boolean).length;
-  const looksLikeFollowUp = FOLLOW_UP_PATTERN.test(query) || tokenCount <= 4;
+  const explicitTopic = EXPLICIT_TOPIC_PATTERN.test(query);
+  const explicitFollowUp = FOLLOW_UP_PATTERN.test(query);
+  const looksLikeFollowUp = explicitFollowUp || (!explicitTopic && tokenCount <= 4);
   if (!looksLikeFollowUp) return query;
   const recentContext = context
     .split('||')
     .map((item) => item.trim())
     .filter(Boolean)
-    .slice(-2)
+    .slice(-3)
     .join(' ');
   return `${recentContext} ${query}`.replace(/\s+/g, ' ').trim().slice(0, 320);
 }
