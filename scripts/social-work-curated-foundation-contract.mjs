@@ -10,6 +10,7 @@ const route = read('app/evidence-guides/social-work/[[...slug]]/route.ts');
 const registry = read('lib/social-work-curated-registry.ts');
 const base = read('lib/social-work-curated-pages.ts');
 const repair = read('lib/social-work-provenance-repair.ts');
+const seoHardening = read('lib/html-seo-hardening.ts');
 
 const pages = {
   'agreement-on-collaboration': base,
@@ -63,10 +64,22 @@ for (const sourceFingerprint of [
   if (coverage < 2) fail(`source fingerprint ${sourceFingerprint} appears in too few curated pages (${coverage})`);
 }
 
+const seoDescriptionPaths = [
+  '/evidence-guides/social-work/agreement-on-collaboration/',
+  '/evidence-guides/social-work/desired-outcomes/',
+  '/evidence-guides/social-work/strengths-perspective/',
+];
+for (const pathname of seoDescriptionPaths) {
+  if (!seoHardening.includes(`'${pathname}'`)) fail(`${pathname}: durable SEO description override missing`);
+}
+if (!seoHardening.includes('function shortenDescription(description: string)')) fail('global raw HTML description length guard missing');
+if (!seoHardening.includes('normalized.length <= 170')) fail('raw HTML description upper bound is not locked to 170 characters');
+if (!seoHardening.includes('setMetaDescription(output, safeDescription)')) fail('safe description is not written back to rendered HTML');
+
 if (!repair.includes('2015081211140160')) fail('legacy 201508 archive fingerprint is not governed');
 if (!repair.includes('ليس الرابط الذي أرسلته الجمعية السلوفينية مباشرة')) fail('legacy archive provenance is not explicitly corrected');
 if (!repair.includes('2016091213042605')) fail('directly shared Ljubljana source is not preserved');
 
 if (!process.exitCode) {
-  console.log(`SOCIAL WORK CURATED FOUNDATION CONTRACT OK: ${Object.keys(pages).length} pages; scope separation, provenance, source density, and internal linking verified.`);
+  console.log(`SOCIAL WORK CURATED FOUNDATION CONTRACT OK: ${Object.keys(pages).length} pages; scope separation, provenance, source density, internal linking, and durable SEO description bounds verified.`);
 }
