@@ -68,14 +68,22 @@ jobs:
         with:
           gradle-version: '8.13'
 
-      - name: Compile, lint, unit test and verify release shrinker
-        run: gradle -p android :app:assembleDebug :app:assembleRelease :app:lintDebug :app:lintRelease :app:testDebugUnitTest --stacktrace
+      - name: Compile, lint, unit test, instrumentation test APK and release shrinker
+        run: gradle -p android :app:assembleDebug :app:assembleRelease :app:assembleDebugAndroidTest :app:lintDebug :app:lintRelease :app:testDebugUnitTest --stacktrace
 
       - name: Upload debug APK
         uses: actions/upload-artifact@v7
         with:
           name: rawafid-life-os-debug
           path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Upload Android instrumentation test APK
+        uses: actions/upload-artifact@v7
+        with:
+          name: rawafid-life-os-debug-androidTest
+          path: android/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
           if-no-files-found: error
           retention-days: 7
 
