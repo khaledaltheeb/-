@@ -1,0 +1,96 @@
+name: Rawafid Production Live Smoke
+
+on:
+  push:
+    branches: [verify/rawafid-production-live-smoke-20260903]
+
+permissions:
+  contents: read
+
+jobs:
+  live-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Homepage assistant canonical and indexability
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://healthrenewal.org'
+          stamp="${GITHUB_SHA}-$(date +%s)"
+          home=''
+          for attempt in $(seq 1 10); do
+            home="$(curl -fsSL --compressed --max-time 30 -H 'Cache-Control: no-cache, no-store' "${base}/?rawafid-live-smoke=${stamp}-${attempt}" 2>/dev/null || true)"
+            if grep -q 'فتح مساعد روافد' <<<"$home"; then break; fi
+            sleep 3
+          done
+          HOME_HTML="$home" node <<'NODE'
+          const html = process.env.HOME_HTML || '';
+          if (!html.includes('فتح مساعد روافد')) throw new Error('assistant launcher missing from production homepage');
+          const canonical = [...html.matchAll(/<link\b[^>]*>/gi)].map(m=>m[0]).find(tag=>/\brel=["']canonical["']/i.test(tag));
+          if (!canonical) throw new Error('canonical link tag missing from production homepage');
+          if (!/\bhref=["']https:\/\/healthrenewal\.org\/?["']/i.test(canonical)) throw new Error(`canonical target is not production root: ${canonical}`);
+          const robots = [...html.matchAll(/<meta\b[^>]*>/gi)].map(m=>m[0]).filter(tag=>/\bname=["'](?:robots|googlebot)["']/i.test(tag));
+          if (robots.some(tag=>/\bcontent=["'][^"']*noindex/i.test(tag))) throw new Error(`production homepage is noindex: ${robots.join(' ')}`);
+          console.log('Homepage assistant/canonical/indexability passed.');
+          NODE
+
+      - name: Zero API reading search
+        shell: bash
+        run: |
+          set -euo pipefail
+          response="$(curl -fsSL --compressed --max-time 30 --get 'https://healthrenewal.org/api/search/v3' --data-urlencode 'q=كيف اساعد طفلي على القراءة' --data-urlencode 'limit=6')"
+          RESPONSE_JSON="$response" node <<'NODE'
+          const data = JSON.parse(process.env.RESPONSE_JSON || '{}');
+          if (!String(data.mode || '').includes('zero-api')) throw new Error(`reading mode is not zero-api: ${data.mode}`);
+          if (!Array.isArray(data.results) || data.results.length < 1) throw new Error('reading search returned no results');
+          console.log({mode:data.mode,count:data.count,results:data.results.length,resolved_query:data.resolved_query});
+          NODE
+
+      - name: Jordanian dialect search
+        shell: bash
+        run: |
+          set -euo pipefail
+          response="$(curl -fsSL --compressed --max-time 30 --get 'https://healthrenewal.org/api/search/v3' --data-urlencode 'q=طفلي ما بحكي' --data-urlencode 'limit=6')"
+          RESPONSE_JSON="$response" node <<'NODE'
+          const data = JSON.parse(process.env.RESPONSE_JSON || '{}');
+          const body = JSON.stringify(data).toLowerCase();
+          if (!String(data.mode || '').includes('zero-api')) throw new Error(`dialect mode is not zero-api: ${data.mode}`);
+          if (!/(speech|talk|كلام|نطق|يتكلم|يتحدث)/i.test(body)) throw new Error('dialect search did not preserve speech intent');
+          console.log({mode:data.mode,count:data.count,results:Array.isArray(data.results)?data.results.length:null,resolved_query:data.resolved_query});
+          NODE
+
+      - name: Contextual follow up
+        shell: bash
+        run: |
+          set -euo pipefail
+          response="$(curl -fsSL --compressed --max-time 30 --get 'https://healthrenewal.org/api/search/v3' --data-urlencode 'q=وماذا عن العلاج' --data-urlencode 'context=علامات التوحد' --data-urlencode 'limit=6')"
+          RESPONSE_JSON="$response" node <<'NODE'
+          const data = JSON.parse(process.env.RESPONSE_JSON || '{}');
+          if (data.contextual !== true) throw new Error('contextual follow-up was not recognized');
+          if (!/توحد/.test(String(data.resolved_query || ''))) throw new Error(`contextual follow-up lost autism topic: ${data.resolved_query}`);
+          console.log({mode:data.mode,contextual:data.contextual,resolved_query:data.resolved_query,results:Array.isArray(data.results)?data.results.length:null});
+          NODE
+
+      - name: Social Work search
+        shell: bash
+        run: |
+          set -euo pipefail
+          response="$(curl -fsSL --compressed --max-time 30 --get 'https://healthrenewal.org/api/search/v3' --data-urlencode 'q=أخلاقيات العمل الاجتماعي' --data-urlencode 'limit=6')"
+          RESPONSE_JSON="$response" node <<'NODE'
+          const data = JSON.parse(process.env.RESPONSE_JSON || '{}');
+          if (!/social-work/.test(JSON.stringify(data))) throw new Error('social-work corpus result missing');
+          console.log({mode:data.mode,count:data.count,urls:Array.isArray(data.results)?data.results.map(x=>x?.url).filter(Boolean).slice(0,3):[]});
+          NODE
+
+      - name: Emergency safety route
+        shell: bash
+        run: |
+          set -euo pipefail
+          response="$(curl -fsSL --compressed --max-time 30 --get 'https://healthrenewal.org/api/search/v3' --data-urlencode 'q=تناولت جرعة زائدة وفقدت الوعي ماذا افعل' --data-urlencode 'limit=6')"
+          RESPONSE_JSON="$response" node <<'NODE'
+          const data = JSON.parse(process.env.RESPONSE_JSON || '{}');
+          const body = JSON.stringify(data);
+          if (!/(طوارئ|الإسعاف|اسعاف|الطوارئ|emergency|جرعة زائدة|فقدان الوعي)/i.test(body)) throw new Error('emergency safety routing signal missing');
+          console.log({mode:data.mode,answer:data.answer?.slice?.(0,300)});
+          NODE
