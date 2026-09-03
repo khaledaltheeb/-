@@ -17,7 +17,7 @@ type Result = {
 };
 
 type ExtractiveAnswer = {
-  mode: 'extractive';
+  mode: 'guided-extractive' | 'extractive';
   intent: string;
   lead: string;
   points: Array<{ text: string; title: string; destination: string }>;
@@ -31,12 +31,15 @@ type ExtractiveAnswer = {
 type QueryAnalysis = {
   intent: string;
   topics: string[];
+  topic_labels: string[];
   age: number | null;
+  subject: string;
   setting: string | null;
-  audience: string | null;
-  facets: string[];
-  confidence: 'high' | 'medium' | 'low';
-  clarification_question: string | null;
+  question_parts: string[];
+  comparison_subjects: string[];
+  confidence: number;
+  clarifying_question: string | null;
+  suggested_questions: string[];
 };
 
 type ApiResponse = {
@@ -141,13 +144,14 @@ export default function RawafidAssistant() {
       const data = await response.json() as ApiResponse;
       const rows = Array.isArray(data.results) ? data.results : [];
       const nextAnswer = data.answer ?? null;
-      const nextClarification = data.analysis?.clarification_question || nextAnswer?.clarifying_question || '';
+      const nextClarification = data.analysis?.clarifying_question || nextAnswer?.clarifying_question || '';
       setResults(rows);
       setAnswer(nextAnswer);
       setClarification(nextClarification);
 
-      const resolved = String(data.resolved_query || q).slice(0, 320);
-      const nextHistory = [...history, resolved].filter((item, index, values) => values.indexOf(item) === index).slice(-3);
+      const nextHistory = [...history, q]
+        .filter((item, index, values) => values.lastIndexOf(item) === index)
+        .slice(-3);
       conversationContextRef.current = nextHistory;
 
       if (nextClarification && rows.length === 0) {
