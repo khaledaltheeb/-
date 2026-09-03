@@ -22,6 +22,21 @@ type ExtractiveAnswer = {
   lead: string;
   points: Array<{ text: string; title: string; destination: string }>;
   note: string | null;
+  summary?: string | null;
+  understood?: string | null;
+  clarifying_question?: string | null;
+  follow_ups?: string[];
+};
+
+type QueryAnalysis = {
+  intent: string;
+  topics: string[];
+  age: number | null;
+  setting: string | null;
+  audience: string | null;
+  facets: string[];
+  confidence: 'high' | 'medium' | 'low';
+  clarification_question: string | null;
 };
 
 type ApiResponse = {
@@ -30,6 +45,7 @@ type ApiResponse = {
   contextual?: boolean;
   mode: string;
   count?: number;
+  analysis?: QueryAnalysis;
   answer?: ExtractiveAnswer | null;
   results: Result[];
 };
@@ -62,9 +78,10 @@ export default function RawafidAssistant() {
   const [results, setResults] = useState<Result[]>([]);
   const [answer, setAnswer] = useState<ExtractiveAnswer | null>(null);
   const [status, setStatus] = useState('');
+  const [clarification, setClarification] = useState('');
   const [safety, setSafety] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const conversationContextRef = useRef('');
+  const conversationContextRef = useRef<string[]>([]);
 
   const quick = useMemo(() => {
     return CONTEXT_QUICK.find((item) => item.match.test(pathname ?? ''))?.values ?? DEFAULT_QUICK;
@@ -95,25 +112,26 @@ export default function RawafidAssistant() {
   }, [open]);
 
   async function search(nextQuery: string, resetContext = false) {
-    const q = nextQuery.trim().replace(/\s+/g, ' ').slice(0, 160);
-    if (resetContext) conversationContextRef.current = '';
+    const q = nextQuery.trim().replace(/\s+/g, ' ').slice(0, 220);
+    if (resetContext) conversationContextRef.current = [];
     setQuery(q);
     setResults([]);
     setAnswer(null);
+    setClarification('');
     setStatus('');
     const isRisk = RISK_PATTERN.test(q);
     setSafety(isRisk);
     if (isRisk) return;
     if (q.length < 2) {
-      setStatus('اكتب كلمتين على الأقل حتى أبحث داخل روافد.');
+      setStatus('اكتب سؤالًا قصيرًا أو صف المشكلة بكلماتك.');
       return;
     }
 
     setLoading(true);
-    setStatus('أحلل سؤالك وأبحث داخل محتوى روافد…');
+    setStatus('أفهم السؤال وأفككه ثم أبحث في أدلة روافد…');
     try {
-      const context = conversationContextRef.current;
-      const contextParam = context ? `&context=${encodeURIComponent(context)}` : '';
+      const history = conversationContextRef.current.slice(-3);
+      const contextParam = history.length ? `&context=${encodeURIComponent(history.join(' || '))}` : '';
       const response = await fetch(`/api/search/v3?q=${encodeURIComponent(q)}&limit=6${contextParam}`, {
         method: 'GET',
         cache: 'no-store',
@@ -122,16 +140,25 @@ export default function RawafidAssistant() {
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json() as ApiResponse;
       const rows = Array.isArray(data.results) ? data.results : [];
+      const nextAnswer = data.answer ?? null;
+      const nextClarification = data.analysis?.clarification_question || nextAnswer?.clarifying_question || '';
       setResults(rows);
-      setAnswer(data.answer ?? null);
-      conversationContextRef.current = String(data.resolved_query || q).slice(0, 160);
-      setStatus(
-        rows.length
-          ? (data.contextual ? 'فهمت سؤالك كمتابعة للسياق السابق. هذه أقرب المعلومات والصفحات.' : 'هذه أقرب المعلومات والصفحات لسؤالك.')
-          : 'لم أجد نتيجة مطابقة بثقة. جرّب صياغة أقصر أو كلمة أكثر تحديدًا.',
-      );
+      setAnswer(nextAnswer);
+      setClarification(nextClarification);
+
+      const resolved = String(data.resolved_query || q).slice(0, 320);
+      const nextHistory = [...history, resolved].filter((item, index, values) => values.indexOf(item) === index).slice(-3);
+      conversationContextRef.current = nextHistory;
+
+      if (nextClarification && rows.length === 0) {
+        setStatus('أحتاج معلومة واحدة إضافية حتى لا أخمّن.');
+      } else if (rows.length) {
+        setStatus(data.contextual ? 'ربطت السؤال بما سبق في المحادثة وأعدت ترتيب الأدلة وفق السياق.' : 'حللت السؤال وأعدت ترتيب الأدلة وفق الموضوع والنية والسياق.');
+      } else {
+        setStatus('لم أجد نتيجة كافية بثقة. جرّب وصف المشكلة بتفصيل مختلف.');
+      }
     } catch {
-      setStatus('تعذر تنفيذ البحث الآن. يمكنك استخدام صفحة البحث الكاملة.');
+      setStatus('تعذر تنفيذ البحث الآن. يمكنك استخدام صفحة البحث المتقدم.');
     } finally {
       setLoading(false);
     }
@@ -142,6 +169,9 @@ export default function RawafidAssistant() {
     void search(query);
   }
 
+  const answerPoints = answer?.summary ? answer.points.slice(1) : answer?.points ?? [];
+  const primarySource = answer?.summary ? answer.points[0] : null;
+
   return (
     <div className={styles.root} dir="rtl">
       {open ? (
@@ -151,14 +181,14 @@ export default function RawafidAssistant() {
               <span className={styles.mark} aria-hidden="true">ر</span>
               <div>
                 <h2 className={styles.title} id="rawafid-assistant-title">مساعد روافد</h2>
-                <p className={styles.subtitle}>بحث عربي سياقي داخل محتوى روافد دون نموذج خارجي مدفوع.</p>
+                <p className={styles.subtitle}>يفهم السؤال والسياق ثم يبحث داخل محتوى روافد — دون نموذج خارجي مدفوع.</p>
               </div>
             </div>
             <button className={styles.close} type="button" onClick={() => setOpen(false)} aria-label="إغلاق مساعد روافد">×</button>
           </header>
 
           <div className={styles.body}>
-            <p className={styles.intro}>اكتب سؤالك بطريقتك، ثم تابع بسؤال مثل «وماذا عن العلاج؟». أحلل الكلمات والمرادفات والنية والسياق القصير، ثم أستخرج أقرب خلاصة من صفحات روافد مع روابطها.</p>
+            <p className={styles.intro}>صف ما تريد بطريقتك، حتى لو كان السؤال مركبًا. أستخرج الموضوع والعمر والسياق والهدف، ثم أبحث في أكثر من مسار وأربط سؤالك بما سبق.</p>
             <div className={styles.quickGrid} aria-label="اقتراحات سريعة">
               {quick.map((item) => (
                 <button key={item} type="button" className={styles.quick} onClick={() => void search(item, true)}>{item}</button>
@@ -171,12 +201,12 @@ export default function RawafidAssistant() {
                 className={styles.input}
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                maxLength={160}
+                maxLength={220}
                 rows={1}
                 aria-label="سؤالك لمساعد روافد"
-                placeholder="مثال: كيف أساعد طفلي على القراءة؟"
+                placeholder="مثال: طفلي عمره 4 سنوات يفهم الكلام لكنه لا يتكلم جيدًا، ماذا أفعل؟"
               />
-              <button className={styles.submit} type="submit" disabled={loading}>{loading ? 'بحث…' : 'اسأل'}</button>
+              <button className={styles.submit} type="submit" disabled={loading}>{loading ? 'أحلل…' : 'اسأل'}</button>
             </form>
 
             {safety ? (
@@ -187,18 +217,39 @@ export default function RawafidAssistant() {
 
             <div className={styles.status} role="status" aria-live="polite">{status}</div>
 
+            {clarification && !safety ? (
+              <div className={styles.clarification}>
+                <strong>حتى أجيب بدقة:</strong>
+                <span>{clarification}</span>
+              </div>
+            ) : null}
+
             {answer ? (
               <section className={styles.answer} aria-label="خلاصة من محتوى روافد">
+                {answer.understood ? <div className={styles.understood}>فهمت السؤال: {answer.understood}</div> : null}
                 <strong className={styles.answerLead}>{answer.lead}</strong>
-                <div className={styles.answerPoints}>
-                  {answer.points.map((point, index) => (
-                    <div className={styles.answerPoint} key={`${point.destination}:${index}`}>
-                      <p>{point.text}</p>
-                      <Link href={point.destination} onClick={() => setOpen(false)}>{point.title}</Link>
-                    </div>
-                  ))}
-                </div>
+                {answer.summary ? (
+                  <div className={styles.answerSummary}>
+                    <p>{answer.summary}</p>
+                    {primarySource ? <Link href={primarySource.destination} onClick={() => setOpen(false)}>المصدر: {primarySource.title}</Link> : null}
+                  </div>
+                ) : null}
+                {answerPoints.length ? (
+                  <div className={styles.answerPoints}>
+                    {answerPoints.map((point, index) => (
+                      <div className={styles.answerPoint} key={`${point.destination}:${index}`}>
+                        <p>{point.text}</p>
+                        <Link href={point.destination} onClick={() => setOpen(false)}>{point.title}</Link>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
                 {answer.note ? <p className={styles.answerNote}>{answer.note}</p> : null}
+                {answer.follow_ups?.length ? (
+                  <div className={styles.followUps} aria-label="أسئلة متابعة مقترحة">
+                    {answer.follow_ups.map((item) => <button key={item} type="button" onClick={() => void search(item)}>{item}</button>)}
+                  </div>
+                ) : null}
               </section>
             ) : null}
 
@@ -215,11 +266,11 @@ export default function RawafidAssistant() {
             ) : null}
 
             {!safety ? (
-              <div className={styles.notice}>الخلاصة استخراجية من محتوى روافد وليست تشخيصًا أو وصفة علاجية. افتح المصدر لقراءة السياق الكامل.</div>
+              <div className={styles.notice}>الإجابة مبنية على محتوى روافد المنشور وتُظهر مصادرها. ليست تشخيصًا فرديًا أو وصفة علاجية، وعند نقص معلومة أساسية يطلبها المساعد بدل التخمين.</div>
             ) : null}
           </div>
 
-          <footer className={styles.footer}>السياق يبقى داخل جلسة الصفحة فقط. لا يستخدم مساعد روافد نموذج ذكاء اصطناعي خارجيًا مدفوعًا؛ يعتمد على فهرس المنصة ومحتواها المنشور.</footer>
+          <footer className={styles.footer}>يحفظ المساعد سياقًا قصيرًا داخل جلسة الصفحة فقط. لا يرسل سؤالك إلى نموذج ذكاء اصطناعي خارجي مدفوع.</footer>
         </section>
       ) : null}
 
@@ -230,7 +281,14 @@ export default function RawafidAssistant() {
         aria-expanded={open}
         onClick={() => setOpen((value) => !value)}
       >
-        <span aria-hidden="true">؟</span>
+        <span className={styles.launcherIcon} aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="10.5" cy="10.5" r="5.5" />
+            <path d="m15 15 4.5 4.5" />
+            <path d="M18 3v4M16 5h4" />
+          </svg>
+        </span>
+        <span className={styles.launcherLabel}>اسأل</span>
       </button>
     </div>
   );
