@@ -24,13 +24,38 @@ const sitemap = read(sitemapPath);
 
 if (registry.schema_version !== 'rawafid-cochrane-resource-hub-v1') fail('unexpected schema_version');
 if (registry.updated_on !== '2026-09-03') fail('release date must remain explicit');
-if (!Array.isArray(registry.official_resources) || registry.official_resources.length < 8) fail('official resource registry is incomplete');
+if (!Array.isArray(registry.official_resources) || registry.official_resources.length < 18) fail('official resource registry is not comprehensive enough');
 
 const sourceIds = registry.official_resources.map((item) => item.id);
 if (new Set(sourceIds).size !== sourceIds.length) fail('duplicate official resource id');
+const requiredResourceIds = new Set([
+  'cochrane-evidence',
+  'cochrane-library',
+  'systematic-reviews',
+  'learn',
+  'courses-resources',
+  'evidence-essentials',
+  'handbook',
+  'handbooks-manuals',
+  'grade-chapter-14',
+  'mecir',
+  'cochrane-methodology',
+  'methods-in-cochrane',
+  'cochrane-groups',
+  'group-resources',
+  'patient-public-principles',
+  'translate-evidence',
+  'scientific-strategy-2025-2030',
+  'communications-resources',
+  'methods-groups',
+  'ms-group',
+]);
+for (const id of sourceIds) requiredResourceIds.delete(id);
+if (requiredResourceIds.size) fail(`missing core Cochrane resources: ${[...requiredResourceIds].join(', ')}`);
+
 for (const item of registry.official_resources) {
   if (!/^https:\/\//.test(item.url)) fail(`non-HTTPS official source: ${item.id}`);
-  if (!item.title_ar || !item.scope_ar || !Array.isArray(item.audience_ar) || !item.audience_ar.length) fail(`incomplete official source record: ${item.id}`);
+  if (!item.title_ar || !item.title_en || !item.kind || !item.scope_ar || !Array.isArray(item.audience_ar) || !item.audience_ar.length) fail(`incomplete official source record: ${item.id}`);
 }
 
 const requiredReviews = new Set(['CD015005', 'CD012186', 'CD004192']);
