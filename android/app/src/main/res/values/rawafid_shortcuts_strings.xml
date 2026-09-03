@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="life_inbox_shortcut_short">صندوق الحياة</string>
+    <string name="life_inbox_shortcut_long">التقاط ملاحظة أو مهمة أو موعد في صندوق الحياة</string>
     <string name="tools_shortcut_short">كل الأدوات</string>
     <string name="tools_shortcut_long">فتح كل أدوات روافد</string>
     <string name="safe_arrival_shortcut_short">وصلت بالسلامة</string>
