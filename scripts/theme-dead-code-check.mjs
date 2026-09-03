@@ -19,4 +19,26 @@ for (const file of importedCss) {
   }
 }
 
-if (!process.exitCode) console.log(`Rawafid central theme import graph passed: ${importedCss.length} unique compatibility modules.`);
+const adminLayout = read('app/admin/layout.tsx');
+const adminUiStub = read('app/admin-ui.css');
+const adminOperationsStub = read('app/admin-operations.css');
+const adminUiRoute = read('app/admin/admin-ui.css');
+const adminOperationsRoute = read('app/admin/admin-operations.css');
+
+for (const cssImport of ["'./admin-ui.css'", "'./admin-operations.css'"]) {
+  if (!adminLayout.includes(cssImport)) {
+    console.error(`THEME IMPORT CHECK FAILED: admin layout missing route-scoped ${cssImport}`);
+    process.exitCode = 1;
+  }
+}
+
+if (adminUiStub.includes('.advanced-fields') || adminOperationsStub.includes('.admin-list')) {
+  console.error('THEME IMPORT CHECK FAILED: admin-only selectors leaked back into the public compatibility stubs');
+  process.exitCode = 1;
+}
+if (!adminUiRoute.includes('.advanced-fields') || !adminOperationsRoute.includes('.admin-list')) {
+  console.error('THEME IMPORT CHECK FAILED: route-scoped admin CSS is missing required admin selectors');
+  process.exitCode = 1;
+}
+
+if (!process.exitCode) console.log(`Rawafid central theme import graph passed: ${importedCss.length} unique compatibility modules; admin-only CSS remains route-scoped.`);
