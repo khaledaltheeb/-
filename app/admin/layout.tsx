@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import './admin-route.css';
 
 type AdminNavItem = readonly [href: string, label: string];
 type AdminNavGroup = { label: string; items: AdminNavItem[] };
