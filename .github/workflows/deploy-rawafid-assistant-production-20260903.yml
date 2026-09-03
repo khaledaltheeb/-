@@ -87,6 +87,7 @@ jobs:
           base='https://healthrenewal.org'
           stamp="${GITHUB_SHA}-$(date +%s)"
 
+          echo 'SMOKE_STAGE homepage'
           home=''
           for attempt in $(seq 1 15); do
             home="$(curl -fsSL --compressed --max-time 30 -H 'Cache-Control: no-cache, no-store' "${base}/?rawafid-assistant-release=${stamp}-${attempt}" 2>/dev/null || true)"
@@ -95,40 +96,62 @@ jobs:
             fi
             sleep 4
           done
-          grep -q 'فتح مساعد روافد' <<<"$home"
-          grep -q "rel=\"canonical\" href=\"${base}/\"" <<<"$home"
-          if grep -qi 'noindex' <<<"$home"; then
-            echo 'Production homepage unexpectedly contains noindex.' >&2
-            exit 1
-          fi
+          HOME_HTML="$home" node <<'NODE'
+          const html = process.env.HOME_HTML || '';
+          if (!html.includes('فتح مساعد روافد')) throw new Error('assistant launcher missing from production homepage');
+          const linkTags = [...html.matchAll(/<link\b[^>]*>/gi)].map((m) => m[0]);
+          const canonical = linkTags.find((tag) => /\brel=["']canonical["']/i.test(tag));
+          if (!canonical) throw new Error('canonical link tag missing from production homepage');
+          if (!/\bhref=["']https:\/\/healthrenewal\.org\/?["']/i.test(canonical)) {
+            throw new Error(`canonical target is not production root: ${canonical}`);
+          }
+          const metaTags = [...html.matchAll(/<meta\b[^>]*>/gi)].map((m) => m[0]);
+          const robots = metaTags.filter((tag) => /\bname=["'](?:robots|googlebot)["']/i.test(tag));
+          if (robots.some((tag) => /\bcontent=["'][^"']*noindex/i.test(tag))) {
+            throw new Error(`production homepage is noindex: ${robots.join(' ')}`);
+          }
+          console.log('SMOKE_OK homepage assistant canonical indexability');
+          NODE
 
+          echo 'SMOKE_STAGE reading'
           reading="$(curl -fsSL --compressed --max-time 30 --get "${base}/api/search/v3" --data-urlencode 'q=كيف اساعد طفلي على القراءة' --data-urlencode 'limit=6')"
           READING_JSON="$reading" node <<'NODE'
           const data = JSON.parse(process.env.READING_JSON || '{}');
+          console.log('reading summary', {mode:data.mode,count:data.count,results:Array.isArray(data.results)?data.results.length:null,resolved_query:data.resolved_query});
           if (!String(data.mode || '').includes('zero-api')) throw new Error('reading search is not zero-api');
           if (!Array.isArray(data.results) || data.results.length < 1) throw new Error('reading search returned no results');
+          console.log('SMOKE_OK reading');
           NODE
 
+          echo 'SMOKE_STAGE dialect'
           dialect="$(curl -fsSL --compressed --max-time 30 --get "${base}/api/search/v3" --data-urlencode 'q=طفلي ما بحكي' --data-urlencode 'limit=6')"
           DIALECT_JSON="$dialect" node <<'NODE'
           const data = JSON.parse(process.env.DIALECT_JSON || '{}');
           const body = JSON.stringify(data).toLowerCase();
+          console.log('dialect summary', {mode:data.mode,count:data.count,results:Array.isArray(data.results)?data.results.length:null,resolved_query:data.resolved_query});
           if (!String(data.mode || '').includes('zero-api')) throw new Error('dialect search is not zero-api');
           if (!/(speech|talk|كلام|نطق|يتكلم|يتحدث)/i.test(body)) throw new Error('dialect search did not preserve speech intent');
+          console.log('SMOKE_OK dialect');
           NODE
 
+          echo 'SMOKE_STAGE contextual'
           contextual="$(curl -fsSL --compressed --max-time 30 --get "${base}/api/search/v3" --data-urlencode 'q=وماذا عن العلاج' --data-urlencode 'context=علامات التوحد' --data-urlencode 'limit=6')"
           CONTEXTUAL_JSON="$contextual" node <<'NODE'
           const data = JSON.parse(process.env.CONTEXTUAL_JSON || '{}');
+          console.log('contextual summary', {mode:data.mode,contextual:data.contextual,resolved_query:data.resolved_query,results:Array.isArray(data.results)?data.results.length:null});
           if (data.contextual !== true) throw new Error('contextual follow-up was not recognized');
           if (!/توحد/.test(String(data.resolved_query || ''))) throw new Error('contextual follow-up lost autism topic');
+          console.log('SMOKE_OK contextual');
           NODE
 
+          echo 'SMOKE_STAGE social-work'
           social="$(curl -fsSL --compressed --max-time 30 --get "${base}/api/search/v3" --data-urlencode 'q=أخلاقيات العمل الاجتماعي' --data-urlencode 'limit=6')"
           SOCIAL_JSON="$social" node <<'NODE'
           const data = JSON.parse(process.env.SOCIAL_JSON || '{}');
-          const body = JSON.stringify(data);
-          if (!/social-work/.test(body)) throw new Error('social-work corpus result missing');
+          const urls = Array.isArray(data.results) ? data.results.map((item) => item?.url).filter(Boolean) : [];
+          console.log('social-work summary', {mode:data.mode,count:data.count,results:urls.length,urls:urls.slice(0,3)});
+          if (!/social-work/.test(JSON.stringify(data))) throw new Error('social-work corpus result missing');
+          console.log('SMOKE_OK social-work');
           NODE
 
           echo 'Rawafid assistant production smoke passed.'
