@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "updated_at": "2026-09-03",
   "scope": "Health Renewal / Rawafid Social Work evidence guides",
   "provenance_taxonomy": {
@@ -86,7 +86,7 @@
     {
       "organization": "AvenirSocial, Switzerland",
       "received": "2026-09-01",
-      "status": "final 2026 code links and knowledge portals received; runtime implementation uses final 2026 sources; implementation update not yet sent pending merge/live verification",
+      "status": "final 2026 code links and knowledge portals received; comparative generator and runtime implementation now use the final 2026 German and French sources; implementation update not yet sent pending merge/live verification",
       "sources": [
         {
           "title": "Berufskodex Soziale Arbeit Schweiz 2026",
@@ -115,7 +115,7 @@
           "use": ["topic-specific professional source discovery", "French source discovery"]
         }
       ],
-      "technical_debt": "A legacy comparative generator still contains a stale 2025 PDF constant. Active rendering replaces it with the final 2026 source, but the generator constant should be removed before final merge."
+      "source_migration": "Resolved 2026-09-03: the stale 2025 comparative-generator PDF constant was removed. The generator now emits both final 2026 direct-email code URLs. The runtime migration guard remains only to protect legacy persisted content."
     },
     {
       "organization": "Lithuanian Association of Social Workers (LSDA)",
