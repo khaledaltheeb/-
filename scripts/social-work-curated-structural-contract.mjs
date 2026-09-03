@@ -3,6 +3,7 @@ import fs from 'node:fs';
 const registry = fs.readFileSync('lib/social-work-curated-registry.ts', 'utf8');
 const a = fs.readFileSync('lib/social-work-curated/structural-wave6-a.ts', 'utf8');
 const b = fs.readFileSync('lib/social-work-curated/structural-wave6-b.ts', 'utf8');
+const shell = fs.readFileSync('lib/social-work-curated/rights-shell.ts', 'utf8');
 const route = fs.readFileSync('app/evidence-guides/social-work/[[...slug]]/route.ts', 'utf8');
 const combined = `${a}\n${b}`;
 
@@ -72,8 +73,8 @@ if (!combined.includes('سياسات الإنهاء والسجلات وواجب�
 if (!combined.includes('سياسة الخدمة والقانون المحلي')) {
   throw new Error('Post-closure page lacks policy guard');
 }
-if (!combined.includes('data-rawafid-curated-page')) {
-  throw new Error('Curated marker missing through shared shell source');
+if (!shell.includes('data-rawafid-curated-page')) {
+  throw new Error('Curated marker missing from shared curated shell');
 }
 if (!route.includes("const curatedHtml = SOCIAL_WORK_CURATED_PAGES[key]")) {
   throw new Error('Route does not resolve curated pages before legacy content');
