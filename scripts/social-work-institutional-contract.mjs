@@ -49,12 +49,22 @@ for (const fingerprint of requiredFingerprints) {
   }
 }
 
-if (!layer.includes('https://avenirsocial.ch/app/uploads/2025/12/berufskodex_de_2026-07.pdf')) fail('final German AvenirSocial 2026 code is missing');
-if (!layer.includes('https://avenirsocial.ch/app/uploads/2025/12/code_de_deontologie_fr_2026-07.pdf')) fail('final French AvenirSocial 2026 code is missing');
-if (!layer.includes(".split(STALE_AVENIR_DRAFT).join(FINAL_AVENIR_DE)")) fail('legacy AvenirSocial draft URL is not patched out at render time');
+const finalAvenirDe = 'https://avenirsocial.ch/app/uploads/2025/12/berufskodex_de_2026-07.pdf';
+const finalAvenirFr = 'https://avenirsocial.ch/app/uploads/2025/12/code_de_deontologie_fr_2026-07.pdf';
+const staleAvenir2025 = 'https://avenirsocial.ch/wp-content/uploads/2025/04/2025_Berufkodex_Soziale-Arbeit_def.pdf';
+if (!layer.includes(finalAvenirDe)) fail('final German AvenirSocial 2026 code is missing from institutional layer');
+if (!layer.includes(finalAvenirFr)) fail('final French AvenirSocial 2026 code is missing from institutional layer');
+if (!comparative.includes(finalAvenirDe)) fail('comparative generator does not use final German AvenirSocial 2026 code');
+if (!comparative.includes(finalAvenirFr)) fail('comparative generator does not use final French AvenirSocial 2026 code');
+if (comparative.includes(staleAvenir2025)) fail('stale AvenirSocial 2025 draft URL remains in comparative generator');
+if (!layer.includes(".split(STALE_AVENIR_DRAFT).join(FINAL_AVENIR_DE)")) fail('legacy-content migration guard for AvenirSocial draft URL is missing');
 if (!layer.includes("portal/lt/legalAct/f596df101af111eeb233e8b04dc9bb3d")) fail('exact LSDA-supplied e-TAR URL is missing');
 
-if (ledger.implementation.public_content_routes_excluding_collection_root !== 78) fail('ledger must record 78 public content routes excluding collection root');
+if (ledger.implementation.base_recovered_routes !== 56) fail('ledger must record 56 recovered routes including collection root');
+if (ledger.implementation.talentia_additive_pages !== 7) fail('ledger must record seven Talentia additive pages');
+if (ledger.implementation.comparative_additive_pages !== 16) fail('ledger must record sixteen comparative additive pages');
+if (ledger.implementation.curated_priority_pages !== 45) fail('ledger must record 45 curated priority pages');
+if (!ledger.provenance_taxonomy?.direct_email || !ledger.provenance_taxonomy?.independently_discovered) fail('ledger provenance taxonomy is incomplete');
 if (recoveredKeys.filter(Boolean).length !== 55) fail(`expected 55 recovered content routes excluding root; found ${recoveredKeys.filter(Boolean).length}`);
 if (new Set(talentiaKeys).size !== 7) fail(`expected 7 Talentia additive pages; found ${new Set(talentiaKeys).size}`);
 if (new Set(comparativeKeys).size !== 16) fail(`expected 16 comparative additive pages; found ${new Set(comparativeKeys).size}`);
@@ -77,6 +87,13 @@ if (!talentiaRecord?.status.includes('implementation update sent')) fail('Talent
 if (!sloveniaRecord?.status.includes('implementation update sent')) fail('Slovenia implementation-update state is not tracked');
 if (!avenirRecord?.status.includes('not yet sent')) fail('AvenirSocial follow-up state is not tracked conservatively');
 if (!lithuaniaRecord?.status.includes('not yet sent')) fail('LSDA follow-up state is not tracked conservatively');
+
+const sloveniaDirect = sloveniaRecord?.sources?.filter((source) => source.provenance === 'direct_email') ?? [];
+if (!sloveniaDirect.some((source) => source.url.includes('DRUG4023'))) fail('Slovenian ethics code is not classified as direct email');
+if (!sloveniaDirect.some((source) => source.url.includes('2016091213042605'))) fail('201609 Ljubljana source is not classified as direct email');
+const sloveniaIndependent = sloveniaRecord?.sources?.filter((source) => source.provenance === 'independently_discovered') ?? [];
+if (!sloveniaIndependent.some((source) => source.url.includes('2015081211140160'))) fail('201508 archive link is not classified as independently discovered');
+if (!sloveniaIndependent.some((source) => source.url.includes('2017092010392030'))) fail('201709 English companion is not classified as independently discovered');
 
 if (!process.exitCode) {
   console.log(`SOCIAL WORK INSTITUTIONAL CONTRACT OK: ${allContentKeys.size} unique content routes; source provenance, jurisdiction boundaries and institution-wide enrichment verified.`);

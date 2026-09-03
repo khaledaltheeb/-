@@ -1,0 +1,147 @@
+{
+  "version": 1,
+  "date": "2026-09-03",
+  "scope": "Social Work sources received through contact@healthrenewal.org and their implementation coverage",
+  "rules": [
+    "direct_email means the exact URL or document was supplied by the external organization in its email",
+    "discovered_within_direct_email_resource means Rawafid identified a sub-document after following a directly supplied library or portal",
+    "independently_discovered means Rawafid found the source separately and must never describe it as emailed by the organization",
+    "a source is added to a curated page only when it materially informs that page; sources are not repeated mechanically",
+    "national law, codes and service-system rules remain jurisdiction-specific",
+    "implementation updates are sent only after public deployment and URL verification"
+  ],
+  "organizations": [
+    {
+      "organization": "Slovenian Association of Social Workers",
+      "contact": "Anja Tekavcic, President",
+      "email_evidence": ["Hostinger INBOX UID 391", "Hostinger INBOX UID 406"],
+      "sources": [
+        {
+          "id": "slovenia-pisrs-drug4023",
+          "origin": "direct_email",
+          "url": "https://pisrs.si/pregledPredpisa?id=DRUG4023",
+          "coverage": ["participation-and-voice", "ethics-power-autonomy", "privacy-information-sharing", "documenting-disagreement", "other curated ethics pages where directly relevant"],
+          "status": "implemented"
+        },
+        {
+          "id": "slovenia-ljubljana-2016091213042605",
+          "origin": "direct_email",
+          "url": "https://www.fsd.uni-lj.si/mma/-/2016091213042605/",
+          "coverage": ["agreement-on-collaboration", "working-relationship", "desired-outcomes", "strengths-perspective", "co-created-help-plan", "multi-challenged-families", "community-resource-map", "service-coordination", "family and structural practice pages where relevant"],
+          "status": "implemented extensively"
+        },
+        {
+          "id": "slovenia-ljubljana-2017092010392030",
+          "origin": "independently_discovered",
+          "url": "https://www.fsd.uni-lj.si/mma/monografija_ang_elektronska_verzija/2017092010392030/",
+          "coverage": ["working-relationship", "co-created-help-plan", "family and community pages"],
+          "status": "implemented as companion only",
+          "critical_provenance_note": "This URL was not directly supplied by the Slovenian Association and must never be labelled as such."
+        },
+        {
+          "id": "slovenia-ljubljana-2015081211140160",
+          "origin": "independently_discovered",
+          "url": "https://www.fsd.uni-lj.si/mma/Soustvarjanje_podpore_v_skupnosti_-_Angleska_izdaja.pdf/2015081211140160/?m=1439370841",
+          "status": "legacy companion only; render-time provenance repair active",
+          "critical_provenance_note": "Legacy generator incorrectly called this the emailed source. The directly supplied Ljubljana URL is 2016091213042605."
+        }
+      ]
+    },
+    {
+      "organization": "Talentia — Union of Professional Social Workers, Finland",
+      "contact": "Jenny Suominen, Director of Public Affairs",
+      "email_evidence": ["Hostinger INBOX UID 436"],
+      "permission": "Talentia explicitly allowed citation and linking with full attribution and warned that parts refer specifically to Finnish legislation and the Finnish service system.",
+      "sources": [
+        {
+          "id": "talentia-work-values-ethics",
+          "origin": "direct_email",
+          "url": "https://talentia.lukusali.fi/index.html#/reader/c5aa171b-223d-43b7-9778-05a0d8cede8e",
+          "coverage": ["professional-ethics", "human-dignity-social-justice", "self-determination-client-rights", "ethical-decision-making", "professional-boundaries-conflicts", "advocacy-accountability", "digital-ethics-confidentiality", "selected curated rights/quality/structural pages"],
+          "status": "implemented extensively"
+        },
+        {
+          "id": "talentia-english-news",
+          "origin": "direct_email",
+          "url": "https://www.talentia.fi/en/news/talentias-ethical-guidelines-are-now-available-in-english/",
+          "coverage": ["all Talentia-specific ethics pages as institutional provenance"],
+          "status": "implemented"
+        }
+      ]
+    },
+    {
+      "organization": "AvenirSocial, Switzerland",
+      "contact": "Susanna Peters, Administration",
+      "email_evidence": ["Hostinger INBOX UID 505"],
+      "sources": [
+        {
+          "id": "avenirsocial-code-2026-de",
+          "origin": "direct_email",
+          "url": "https://avenirsocial.ch/app/uploads/2025/12/berufskodex_de_2026-07.pdf",
+          "coverage": ["international-comparative-practice", "ethics-code-vs-local-law", "power-awareness-social-work", "selected curated ethics/advocacy/structural pages"],
+          "status": "implemented through institutional replacement layer and curated direct-source layer"
+        },
+        {
+          "id": "avenirsocial-code-2026-fr",
+          "origin": "direct_email",
+          "url": "https://avenirsocial.ch/app/uploads/2025/12/code_de_deontologie_fr_2026-07.pdf",
+          "coverage": ["comparative ethics terminology cross-check", "selected curated ethics pages"],
+          "status": "implemented through institutional replacement layer and curated direct-source layer"
+        },
+        {
+          "id": "avenirsocial-fachwissen",
+          "origin": "direct_email",
+          "url": "https://avenirsocial.ch/fachwissen/#broschure",
+          "coverage": ["comparative source discovery"],
+          "status": "used as discovery portal; not treated as evidence for topic-specific claims without a named sub-document"
+        },
+        {
+          "id": "avenirsocial-expertise-fr",
+          "origin": "direct_email",
+          "url": "https://avenirsocial.ch/fr/expertise/#brochures",
+          "coverage": ["French source discovery"],
+          "status": "used as discovery portal; not treated as evidence for topic-specific claims without a named sub-document"
+        }
+      ],
+      "known_legacy_issue": "lib/social-work-comparative-pages.ts contains the older 2025 PDF URL in source code, but social-work-institutional-enrichment.ts replaces it with the final directly supplied 2026 URL at render time. Future cleanup should remove the stale constant from the generator itself."
+    },
+    {
+      "organization": "Lithuanian Association of Social Workers (LSDA)",
+      "contact": "Jurate Tamasauskiene, President",
+      "email_evidence": ["Hostinger INBOX UID 520", "Hostinger INBOX UID 521"],
+      "sources": [
+        {
+          "id": "lithuania-pktc-method-library",
+          "origin": "direct_email",
+          "url": "https://pktc.lt/metodine-informacija/metodine-medziaga",
+          "coverage": ["international comparative pages", "community-resource-map", "service-coordination", "professional-persistence", "help-plan-quality-audit", "family-burden-monitoring", "service-exit-plan"],
+          "status": "implemented as methodological library plus selective curated-page attribution"
+        },
+        {
+          "id": "lithuania-pktc-competency-model",
+          "origin": "discovered_within_direct_email_resource",
+          "url": "https://api.pktc.lt/methodological-informations/99628ad8-aa62-4dd9-88f9-821a8632fd9f/99628ad8-af52-4176-a764-b1ca189e3567/download",
+          "coverage": ["professional-persistence", "help-plan-quality-audit"],
+          "status": "selectively integrated; provenance explicitly states that the sub-document was found inside the LSDA-supplied PKTC library"
+        },
+        {
+          "id": "lithuania-etar-a1-448",
+          "origin": "direct_email",
+          "url": "https://www.e-tar.lt/portal/lt/legalAct/f596df101af111eeb233e8b04dc9bb3d",
+          "coverage": ["international-comparative-practice", "ethics-code-vs-local-law", "privacy-information-sharing", "documenting-disagreement", "ethics-power-autonomy"],
+          "status": "implemented with Lithuania-only legal boundary"
+        }
+      ]
+    }
+  ],
+  "coverage_summary": {
+    "direct_source_groups_received": 10,
+    "direct_source_groups_in_active_content_or_discovery": 10,
+    "known_provenance_errors_guarded": 2,
+    "known_generator_cleanup_remaining": [
+      "remove the stale 2025 AvenirSocial code constant from lib/social-work-comparative-pages.ts instead of relying only on render-time replacement",
+      "remove/rename FSD_EMAIL_URL and legacy source-label assumptions in scripts/recover-social-work-sector.mjs and older release contracts"
+    ],
+    "deployment_state": "content/audit changes are isolated on social-work-10of10-wave1; do not send new implementation-update emails until merged and public URLs are verified"
+  }
+}

@@ -1,7 +1,12 @@
 {
-  "version": 1,
-  "updated_at": "2026-09-02",
+  "version": 3,
+  "updated_at": "2026-09-03",
   "scope": "Health Renewal / Rawafid Social Work evidence guides",
+  "provenance_taxonomy": {
+    "direct_email": "The exact URL or document was supplied directly by the organization in correspondence.",
+    "discovered_within_direct_email_resource": "Rawafid identified a specific sub-document inside a library or portal supplied directly by the organization.",
+    "independently_discovered": "Rawafid identified the source independently; it must not be described as supplied by the organization."
+  },
   "principles": [
     "Preserve the original institutional source and the route by which it was received.",
     "Separate source ownership from Rawafid's independent Arabic synthesis.",
@@ -14,25 +19,35 @@
       "organization": "Slovenian Association of Social Workers",
       "contact": "Anja Tekavcic, President",
       "received": "2026-08-30 to 2026-08-31",
-      "status": "sources received; implementation update sent; terminology/context feedback offered; network sharing offered; introduction to Slovenian Philanthropy offered and accepted",
+      "status": "direct sources received; earlier implementation update sent; terminology/context feedback and network sharing offered; introduction to Slovenian Philanthropy offered and accepted; new curated implementation still awaiting merge/live verification",
       "sources": [
         {
           "title": "Kodeks eticnih nacel v socialnem varstvu",
           "publisher": "Social Chamber of Slovenia",
           "url": "https://pisrs.si/pregledPredpisa?id=DRUG4023",
+          "provenance": "direct_email",
           "use": ["dignity", "rights", "autonomy", "participation", "confidentiality", "professional responsibility", "professional and institutional authority"]
         },
         {
-          "title": "Families with Multiple Challenges: Co-creating Support in the Community",
+          "title": "Druzine s stevilnimi izzivi: soustvarjanje pomoci v skupnosti / Families with Multiple Challenges: Co-creating Support in the Community",
           "publisher": "Faculty of Social Work, University of Ljubljana",
           "url": "https://www.fsd.uni-lj.si/mma/-/2016091213042605/",
+          "provenance": "direct_email",
           "use": ["co-created help", "individual working project of help", "desired outcomes", "strengths perspective", "family participation", "community resources"]
         },
         {
           "title": "Co-creating Processes of Help: Collaboration with Families in the Community",
           "publisher": "Faculty of Social Work, University of Ljubljana",
           "url": "https://www.fsd.uni-lj.si/mma/monografija_ang_elektronska_verzija/2017092010392030/",
+          "provenance": "independently_discovered",
           "use": ["working relationship", "collaboration agreement", "family expertise", "action planning", "practice verification"]
+        },
+        {
+          "title": "Families with Multiple Challenges — archival/companion URL",
+          "publisher": "Faculty of Social Work, University of Ljubljana",
+          "url": "https://www.fsd.uni-lj.si/mma/Soustvarjanje_podpore_v_skupnosti_-_Angleska_izdaja.pdf/2015081211140160/?m=1439370841",
+          "provenance": "independently_discovered",
+          "use": ["archive verification only; never describe as the exact link supplied by the Association"]
         }
       ],
       "correspondence_notes": [
@@ -46,18 +61,20 @@
       "organization": "Talentia - Union of Professional Social Workers, Finland",
       "contact": "Jenny Suominen, Director of Public Affairs",
       "received": "2026-08-31",
-      "status": "sources received; explicit permission to cite/link with attribution; implementation update sent 2026-08-31",
+      "status": "sources received; explicit permission to cite/link with attribution; earlier implementation update sent; current curated implementation awaiting merge/live verification",
       "sources": [
         {
           "title": "Work, Values and Ethics - Ethical Guidelines for Social Welfare Professionals",
           "publisher": "Talentia",
           "url": "https://talentia.lukusali.fi/index.html#/reader/c5aa171b-223d-43b7-9778-05a0d8cede8e",
+          "provenance": "direct_email",
           "use": ["human dignity", "social justice", "client rights", "self-determination", "professional responsibility", "ethical decision-making"]
         },
         {
           "title": "Talentia's ethical guidelines are now available in English",
           "publisher": "Talentia",
           "url": "https://www.talentia.fi/en/news/talentias-ethical-guidelines-are-now-available-in-english/",
+          "provenance": "direct_email",
           "use": ["institutional provenance", "scope and purpose of the ethics guide"]
         }
       ],
@@ -69,50 +86,63 @@
     {
       "organization": "AvenirSocial, Switzerland",
       "received": "2026-09-01",
-      "status": "final 2026 code links and knowledge portal received; implementation correction prepared; implementation update not yet sent",
+      "status": "final 2026 code links and knowledge portals received; comparative generator and runtime implementation now use the final 2026 German and French sources; implementation update not yet sent pending merge/live verification",
       "sources": [
         {
           "title": "Berufskodex Soziale Arbeit Schweiz 2026",
           "language": "German",
           "url": "https://avenirsocial.ch/app/uploads/2025/12/berufskodex_de_2026-07.pdf",
+          "provenance": "direct_email",
           "use": ["professional ethics", "professional identity", "power and responsibility", "comparative ethics"]
         },
         {
           "title": "Code de deontologie du travail social en Suisse 2026",
           "language": "French",
           "url": "https://avenirsocial.ch/app/uploads/2025/12/code_de_deontologie_fr_2026-07.pdf",
+          "provenance": "direct_email",
           "use": ["terminology cross-check", "professional ethics", "comparative ethics"]
         },
         {
           "title": "AvenirSocial professional knowledge portal",
           "url": "https://avenirsocial.ch/fachwissen/#broschure",
-          "use": ["future topic-specific professional sources"]
+          "provenance": "direct_email",
+          "use": ["topic-specific professional source discovery"]
         },
         {
           "title": "AvenirSocial expertise portal",
           "url": "https://avenirsocial.ch/fr/expertise/#brochures",
-          "use": ["future topic-specific professional sources", "French source discovery"]
+          "provenance": "direct_email",
+          "use": ["topic-specific professional source discovery", "French source discovery"]
         }
       ],
-      "correction_required": "Replace the previously referenced 2025 draft PDF URL in the comparative implementation with the final 2026 code supplied directly by AvenirSocial."
+      "source_migration": "Resolved 2026-09-03: the stale 2025 comparative-generator PDF constant was removed. The generator now emits both final 2026 direct-email code URLs. The runtime migration guard remains only to protect legacy persisted content."
     },
     {
       "organization": "Lithuanian Association of Social Workers (LSDA)",
       "contact": "Jurate Tamasauskiene, President",
       "received": "2026-09-01",
-      "status": "methodological library and official national document received; expanded implementation prepared; implementation update not yet sent",
+      "status": "methodological library and official national document received; curated selective implementation prepared; implementation update not yet sent pending merge/live verification",
       "sources": [
         {
           "title": "PKTC methodological materials",
           "publisher": "Professional Competence Development / methodological resources in Lithuania",
           "url": "https://pktc.lt/metodine-informacija/metodine-medziaga",
+          "provenance": "direct_email",
           "use": ["competence models", "competence assessment and development", "selection of social-work methods", "supervision and organizational learning", "community and macro-level practice"]
         },
         {
           "title": "Lithuanian official social-services ethics document - Order A1-448",
           "publisher": "Lithuanian e-TAR official legal register",
           "url": "https://www.e-tar.lt/portal/lt/legalAct/f596df101af111eeb233e8b04dc9bb3d",
+          "provenance": "direct_email",
           "use": ["national ethics comparison", "professional conduct", "responsibility", "transparency", "confidentiality"]
+        },
+        {
+          "title": "Social-work competencies and methodological recommendations for organisational competency models",
+          "publisher": "PKTC",
+          "url": "https://api.pktc.lt/methodological-informations/99628ad8-aa62-4dd9-88f9-821a8632fd9f/99628ad8-af52-4176-a764-b1ca189e3567/download",
+          "provenance": "discovered_within_direct_email_resource",
+          "use": ["competency model", "competency assessment", "professional development planning", "quality improvement"]
         }
       ],
       "limits": [
@@ -147,16 +177,17 @@
     }
   ],
   "implementation": {
-    "release": "social-work-institutional-20260902",
+    "release": "social-work-curated-20260903",
     "base_recovered_routes": 56,
     "talentia_additive_pages": 7,
     "comparative_additive_pages": 16,
-    "public_content_routes_excluding_collection_root": 78,
+    "curated_priority_pages": 45,
     "architecture": [
       "co-created family and community practice",
       "ethics, rights and professional authority",
       "coordination, referral, competence and quality",
-      "international comparative practice with jurisdiction boundaries"
+      "international comparative practice with jurisdiction boundaries",
+      "selective direct-email source enrichment for curated pages"
     ]
   }
 }

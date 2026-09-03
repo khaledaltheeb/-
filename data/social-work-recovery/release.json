@@ -1,31 +1,49 @@
 {
-  "release": "social-work-comparative-ethics-2026-09-01",
-  "attempt": 7,
+  "release": "social-work-curated-source-governance-2026-09-03",
+  "attempt": 8,
   "previous_merged_pr": 489,
   "legacy_source_repository": "khaledaltheeb/healthrenewal.org",
   "legacy_source_sha": "6911d5ee75bd6fc2dfa12f394d61efe46e87df17",
-  "expected_live_urls": 56,
+  "expected_recovered_urls": 56,
   "talentia_additive_pages": 7,
   "comparative_additive_pages": 16,
+  "curated_priority_pages": 45,
   "comparative_hub": "international-comparative-practice",
   "comparative_sources": [
-    "AvenirSocial — Berufskodex Soziale Arbeit Schweiz / Code de déontologie, effective 2026-01-01",
-    "Lithuania e-TAR — Order A1-448, Code of Ethics for Social Services Sector Workers, effective 2023-07-06",
-    "Lithuanian Association of Social Workers / PKTC methodological materials",
-    "Talentia Finland — Work, Values and Ethics",
+    "AvenirSocial — final German and French 2026 professional codes supplied directly by AvenirSocial",
+    "Lithuania e-TAR — Order A1-448 supplied directly by LSDA",
+    "Lithuanian Association of Social Workers / PKTC methodological library supplied directly by LSDA",
+    "Talentia Finland — Work, Values and Ethics supplied directly by Talentia",
     "IFSW — Global Social Work Statement of Ethical Principles"
   ],
+  "slovenia_source_provenance": {
+    "direct_email": [
+      "https://pisrs.si/pregledPredpisa?id=DRUG4023",
+      "https://www.fsd.uni-lj.si/mma/-/2016091213042605/"
+    ],
+    "independently_discovered_companions": [
+      "https://www.fsd.uni-lj.si/mma/Soustvarjanje_podpore_v_skupnosti_-_Angleska_izdaja.pdf/2015081211140160/?m=1439370841",
+      "https://www.fsd.uni-lj.si/mma/monografija_ang_elektronska_verzija/2017092010392030/"
+    ]
+  },
   "quality_guards": [
     "National legal rules are explicitly separated from transferable professional principles",
-    "No source is described as reviewing, approving, supervising, endorsing, or partnering with Rawafid",
+    "No source is described as reviewing, approving, supervising, endorsing, or partnering with Rawafid without written confirmation",
+    "Direct-email sources are distinguished from independently discovered companions",
     "Comparative pages use original-source links and jurisdiction labels",
-    "Existing 56 recovered Social Work URLs and seven Talentia pages remain preserved",
-    "Comparative pathway is added to the Social Work sitemap and hub"
+    "Curated pages selectively use institutional sources only when relevant",
+    "Implementation updates are sent only after merged public pages are verified live"
   ],
   "required_source_fingerprints": [
     "DRUG4023",
+    "2016091213042605",
     "2015081211140160",
-    "2016091213042605"
+    "2017092010392030",
+    "c5aa171b-223d-43b7-9778-05a0d8cede8e",
+    "berufskodex_de_2026-07.pdf",
+    "code_de_deontologie_fr_2026-07.pdf",
+    "f596df101af111eeb233e8b04dc9bb3d",
+    "pktc.lt/metodine-informacija/metodine-medziaga"
   ],
-  "purpose": "Deploy the 16-page AvenirSocial/Lithuania comparative Social Work ethics and practice pathway while preserving the recovered sector and existing Talentia implementation."
+  "purpose": "Ship the curated Social Work upgrade with auditable institutional-source provenance, current evidence metadata, and jurisdiction-safe comparative practice guidance."
 }

@@ -5,6 +5,7 @@ const siteOrigin = 'https://healthrenewal.org';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 const failures = [];
+const transientStatuses = new Set([408, 425, 429]);
 
 function fail(message) {
   failures.push(message);
@@ -56,6 +57,63 @@ function normalizeCanonical(value) {
   return { key: path.toLowerCase(), canonical: raw };
 }
 
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function retryDelayMs(response, attempt) {
+  const retryAfter = response?.headers?.get('retry-after');
+  if (retryAfter) {
+    const seconds = Number(retryAfter);
+    if (Number.isFinite(seconds) && seconds >= 0) return Math.min(seconds * 1000, 30000);
+    const date = Date.parse(retryAfter);
+    if (Number.isFinite(date)) return Math.min(Math.max(date - Date.now(), 0), 30000);
+  }
+  return Math.min(1500 * 2 ** (attempt - 1), 12000);
+}
+
+function isTransientStatus(status) {
+  return transientStatuses.has(status) || status >= 500;
+}
+
+async function fetchInventoryBatch(endpoint, batchNumber) {
+  const maxAttempts = 5;
+  let lastError = null;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    let response;
+    try {
+      response = await fetch(endpoint, {
+        headers: {
+          apikey: supabaseKey,
+          Authorization: `Bearer ${supabaseKey}`,
+          Accept: 'application/json',
+        },
+        signal: AbortSignal.timeout(25000),
+      });
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+      if (attempt === maxAttempts) break;
+      const delay = Math.min(1500 * 2 ** (attempt - 1), 12000);
+      console.warn(`CANONICAL OWNERSHIP RETRY: batch ${batchNumber} network failure on attempt ${attempt}/${maxAttempts}: ${lastError.message}; retrying in ${delay}ms.`);
+      await sleep(delay);
+      continue;
+    }
+
+    if (response.ok) return response;
+
+    const detail = (await response.text()).slice(0, 500);
+    const error = new Error(`canonical ownership inventory query failed (${response.status}): ${detail}`);
+    if (!isTransientStatus(response.status) || attempt === maxAttempts) throw error;
+
+    const delay = retryDelayMs(response, attempt);
+    console.warn(`CANONICAL OWNERSHIP RETRY: batch ${batchNumber} received ${response.status} on attempt ${attempt}/${maxAttempts}; retrying in ${delay}ms.`);
+    await sleep(delay);
+  }
+
+  throw new Error(`canonical ownership inventory query failed after ${maxAttempts} attempts: ${lastError?.message || 'network failure'}`);
+}
+
 async function fetchPublishedIndexableInventory() {
   const rows = [];
   let lastId = null;
@@ -71,19 +129,7 @@ async function fetchPublishedIndexableInventory() {
     endpoint.searchParams.set('limit', String(batchSize));
     if (lastId) endpoint.searchParams.set('id', `gt.${lastId}`);
 
-    const response = await fetch(endpoint, {
-      headers: {
-        apikey: supabaseKey,
-        Authorization: `Bearer ${supabaseKey}`,
-        Accept: 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      const detail = (await response.text()).slice(0, 500);
-      throw new Error(`canonical ownership inventory query failed (${response.status}): ${detail}`);
-    }
-
+    const response = await fetchInventoryBatch(endpoint, batchNumber);
     const batch = await response.json();
     if (!Array.isArray(batch)) throw new Error('canonical ownership inventory response is not an array');
     if (!batch.length) return rows;
