@@ -9,3 +9,4 @@ Verification rerun: shell-safe heredoc production smoke for Assistant V2.
 Release: Arabic dialect safety and grounded-answer fix after PR #545 quality success.
 Release: current-main Assistant V2 production build with mobile search-slot replacement and structured zero-API intelligence.
 Release: grounded social-work answer fallback after PR #548 quality success.
+Release: permanent Social Work meta-description bounds from PR #554; Full Sitemap completion explicitly bypassed by project owner for this deployment.
