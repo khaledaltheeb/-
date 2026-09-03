@@ -1,0 +1,273 @@
+{
+  "schema_version": "rawafid-cochrane-resource-hub-v1",
+  "updated_on": "2026-09-03",
+  "language": "ar",
+  "scope_ar": "سجل مصادر منظم لقسم كوكرين في منصة روافد. يعيد تنظيم الوصول إلى المصادر الأصلية ويضيف شرحاً عربياً مستقلاً، ولا يمثل ترجمة رسمية أو اعتماداً أو انتساباً من كوكرين ما لم يذكر ذلك صراحة في مادة بعينها.",
+  "principles_ar": [
+    "المصدر الأولي أولاً: كل استنتاج قابل للتتبع إلى صفحة أو مراجعة رسمية من كوكرين.",
+    "لا نحول غياب الدليل إلى دليل على الغياب، ولا نحول اليقين المنخفض إلى توصية قاطعة.",
+    "نفصل بين نتيجة المراجعة، ودرجة اليقين، وحدود القابلية للنقل إلى سياق آخر.",
+    "نلخص المحتوى بصياغة عربية أصلية ونربط بالمصدر؛ لا نعيد نشر نصوص المراجعات أو أشكالها أو جداولها المحمية.",
+    "أي مادة ترجمة تجريبية تبقى غير منشورة بوصفها ترجمة كوكرين إلى أن تكتمل المراجعة المتفق عليها."
+  ],
+  "official_resources": [
+    {
+      "id": "cochrane-evidence",
+      "title_ar": "بوابة أدلة كوكرين والملخصات بلغة مبسطة",
+      "title_en": "Cochrane Evidence",
+      "kind": "evidence-discovery",
+      "url": "https://www.cochrane.org/evidence",
+      "scope_ar": "نقطة دخول للبحث في أدلة كوكرين والملخصات المبسطة والوصول إلى موضوعات صحية مرتبة حول أسئلة قابلة للقرار.",
+      "audience_ar": ["الجمهور", "الأسر", "الممارسون", "صناع القرار"]
+    },
+    {
+      "id": "cochrane-library",
+      "title_ar": "مكتبة كوكرين",
+      "title_en": "Cochrane Library",
+      "kind": "evidence-database",
+      "url": "https://www.cochranelibrary.com/",
+      "scope_ar": "المنصة الأساسية للوصول إلى قاعدة Cochrane Database of Systematic Reviews والبحث في المراجعات والبروتوكولات والسجلات المرتبطة بها.",
+      "audience_ar": ["الباحثون", "الممارسون", "الطلاب", "صناع القرار"]
+    },
+    {
+      "id": "systematic-reviews",
+      "title_ar": "ما المراجعات المنهجية؟",
+      "title_en": "What are systematic reviews?",
+      "kind": "methodology-intro",
+      "url": "https://www.cochrane.org/evidence/what-are-systematic-reviews",
+      "scope_ar": "مدخل رسمي لفهم كيف تُعرَّف أسئلة المراجعة وتُبحث الأدلة وتُنتقى الدراسات وتُستخرج النتائج وتُجمع بصورة منهجية وشفافة.",
+      "audience_ar": ["الجمهور", "الطلاب", "الممارسون"]
+    },
+    {
+      "id": "learn",
+      "title_ar": "بوابة التعلّم عن الدليل الصحي",
+      "title_en": "Cochrane Learn",
+      "kind": "learning-hub",
+      "url": "https://www.cochrane.org/learn",
+      "scope_ar": "بوابة تجمع موارد مجانية للبدء بفهم الدليل ثم التدرج إلى دورات ومنهجيات وأدوات أكثر تقدماً، مع مسارات للجمهور والباحثين.",
+      "audience_ar": ["الجمهور", "الطلاب", "الباحثون", "الممارسون"]
+    },
+    {
+      "id": "courses-resources",
+      "title_ar": "الدورات وموارد التعلّم",
+      "title_en": "Courses and resources",
+      "kind": "learning-catalogue",
+      "url": "https://www.cochrane.org/learn/courses-and-resources",
+      "scope_ar": "فهرس تعلّم منظم يغطي أساسيات الدليل، نطاق/PICO، منهجيات المراجعات، التحيز، إشراك المرضى والعامة، والبرمجيات والتدريب.",
+      "audience_ar": ["الطلاب", "الباحثون", "فرق المراجعات", "المدربون"]
+    },
+    {
+      "id": "evidence-essentials",
+      "title_ar": "أساسيات الدليل",
+      "title_en": "Cochrane Evidence Essentials",
+      "kind": "free-learning",
+      "url": "https://www.cochrane.org/learn/courses-and-resources/evidence-essentials",
+      "scope_ar": "مورد تفاعلي مجاني مع حساب كوكرين، يقدم مدخلاً إلى الطب المبني على الدليل والتجارب العشوائية والمراجعات المنهجية واستخدامها في القرار المشترك.",
+      "audience_ar": ["المرضى", "الجمهور", "صناع القرار", "الفريق الصحي"]
+    },
+    {
+      "id": "handbook",
+      "title_ar": "دليل كوكرين للمراجعات المنهجية للتدخلات",
+      "title_en": "Cochrane Handbook for Systematic Reviews of Interventions",
+      "kind": "core-methods-handbook",
+      "url": "https://www.cochrane.org/authors/handbooks-and-manuals/handbook",
+      "scope_ar": "الدليل الرسمي الشامل لمنهج إعداد وصيانة مراجعات التدخلات: تخطيط السؤال، البحث والاختيار، جمع البيانات، خطر التحيز، التحليل الإحصائي، GRADE، الأضرار، الإنصاف وموضوعات متقدمة أخرى.",
+      "audience_ar": ["مؤلفو المراجعات", "الباحثون", "المحررون", "اختصاصيو المعلومات"]
+    },
+    {
+      "id": "handbooks-manuals",
+      "title_ar": "الأدلة والكتيبات المنهجية",
+      "title_en": "Handbooks and manuals",
+      "kind": "methods-reference-map",
+      "url": "https://www.cochrane.org/authors/handbooks-and-manuals",
+      "scope_ar": "خريطة مرجعية تجمع أدلة مراجعات التدخلات ودقة الاختبارات التشخيصية والتنبؤ والتركيب النوعي وMECIR وأدلة الأسلوب وغيرها.",
+      "audience_ar": ["الباحثون", "مؤلفو المراجعات", "المحررون"]
+    },
+    {
+      "id": "grade-chapter-14",
+      "title_ar": "جداول ملخص النتائج ودرجة اليقين GRADE",
+      "title_en": "Cochrane Handbook Chapter 14",
+      "kind": "methods-handbook",
+      "url": "https://www.cochrane.org/authors/handbooks-and-manuals/handbook/current/chapter-14",
+      "scope_ar": "المرجع المباشر لفهم جداول Summary of Findings ومستويات اليقين الأربعة ومجالات خفض اليقين وكيفية تفسير مجموعة الأدلة.",
+      "audience_ar": ["الباحثون", "الممارسون", "مراجعو الأدلة"]
+    },
+    {
+      "id": "mecir",
+      "title_ar": "معايير MECIR للمراجعات التدخلية",
+      "title_en": "Methodological Expectations of Cochrane Intervention Reviews (MECIR)",
+      "kind": "methods-standards",
+      "url": "https://resources.cochrane.org/mecir-manual",
+      "scope_ar": "معايير منهجية تربط مراحل البروتوكول والمراجعة والتحديث بمتطلبات محددة، وتفرّق بين المعايير الإلزامية والمعايير المرغوبة بشدة.",
+      "audience_ar": ["مؤلفو المراجعات", "مجموعات المراجعة", "المحررون", "فرق الجودة"]
+    },
+    {
+      "id": "cochrane-methodology",
+      "title_ar": "موارد منهجيات كوكرين",
+      "title_en": "Cochrane methodology",
+      "kind": "advanced-methods-learning",
+      "url": "https://www.cochrane.org/learn/courses-and-resources/cochrane-methodology",
+      "scope_ar": "موارد تعلّم متقدمة في تحديد نطاق المراجعة، DTA، التركيب النوعي، دراسات الإنذار، التحليل الشبكي، خطر التحيز، GRADE، الدراسات غير العشوائية وSWiM.",
+      "audience_ar": ["الباحثون", "المنهجيون", "طلاب الدراسات العليا", "فرق المراجعات"]
+    },
+    {
+      "id": "methods-in-cochrane",
+      "title_ar": "المنهجيات داخل كوكرين",
+      "title_en": "Methods in Cochrane",
+      "kind": "methods-ecosystem",
+      "url": "https://www.cochrane.org/authors/methods-cochrane",
+      "scope_ar": "بوابة لفهم بنية تطوير المنهجيات ومجموعات المنهجيات ودعم المؤلفين وأدوات مثل TRANSFER والموارد المتخصصة للتركيب النوعي والتشخيص وغيرها.",
+      "audience_ar": ["المنهجيون", "الباحثون", "محررو الأدلة"]
+    },
+    {
+      "id": "cochrane-groups",
+      "title_ar": "شبكة مجموعات كوكرين",
+      "title_en": "Cochrane Groups",
+      "kind": "network-map",
+      "url": "https://www.cochrane.org/about-us/who-we-are/our-groups",
+      "scope_ar": "خريطة المجموعات الموضوعية ووحدات تجميع الأدلة ومجموعات المراجعة والمجموعات الجغرافية والمنهجية والحقول والشبكات، لفهم أين توجد الخبرة داخل الشبكة.",
+      "audience_ar": ["الباحثون", "المؤسسات", "الشركاء"]
+    },
+    {
+      "id": "group-resources",
+      "title_ar": "موارد مجموعات كوكرين والمساهمين",
+      "title_en": "For Cochrane Groups and contributors",
+      "kind": "group-operations",
+      "url": "https://resources.cochrane.org/cochrane-groups",
+      "scope_ar": "إرشادات تشغيلية للمجموعات تشمل دعم المؤلفين والمتطوعين، المشاركة العامة، التواصل والعلامة والمواقع والموارد المخصصة لأنواع المجموعات المختلفة.",
+      "audience_ar": ["المجموعات", "المساهمون", "فرق التشغيل", "المتطوعون"]
+    },
+    {
+      "id": "patient-public-principles",
+      "title_ar": "مبادئ إشراك المرضى والجمهور",
+      "title_en": "Statement of Principles: Patient and Public Involvement in Cochrane",
+      "kind": "patient-public-involvement",
+      "url": "https://www.cochrane.org/get-involved/patient-and-public-network/statement-principles-patient-and-public-involvement",
+      "scope_ar": "مرجع لفهم لماذا تعد الشفافية والمساءلة والثقة والإنصاف والشمول والشراكة عناصر أساسية في إشراك أصحاب الخبرة المعيشة في عمل الأدلة.",
+      "audience_ar": ["المرضى", "مقدمو الرعاية", "الباحثون", "المؤسسات"]
+    },
+    {
+      "id": "translate-evidence",
+      "title_ar": "ترجمة أدلة كوكرين",
+      "title_en": "Translate our evidence",
+      "kind": "translation-programme",
+      "url": "https://www.cochrane.org/get-involved/translate-our-evidence",
+      "scope_ar": "الصفحة الرسمية لبرنامج كسر الحواجز اللغوية في أدلة كوكرين، وتوضح دور المجموعات والمترجمين في ترجمة الملخصات المبسطة والملخصات وصفحات رئيسية ونشر المعرفة بلغات متعددة.",
+      "audience_ar": ["المترجمون", "فرق الترجمة", "المجموعات", "التواصل العلمي"]
+    },
+    {
+      "id": "scientific-strategy-2025-2030",
+      "title_ar": "الاستراتيجية العلمية 2025–2030",
+      "title_en": "Cochrane scientific strategy 2025–2030",
+      "kind": "strategy",
+      "url": "https://www.cochrane.org/about-us/what-we-do/our-scientific-strategy",
+      "scope_ar": "مرجع لفهم أولويات كوكرين البحثية والتزاماتها بالابتكار المنهجي والإنصاف والتعاون وإشراك أصحاب المصلحة ونزاهة البحث.",
+      "audience_ar": ["المؤسسات", "الباحثون", "صناع القرار"]
+    },
+    {
+      "id": "communications-resources",
+      "title_ar": "موارد التواصل للمجموعات",
+      "title_en": "Cochrane social media and communications resources",
+      "kind": "communications",
+      "url": "https://resources.cochrane.org/cochrane-groups/social-media",
+      "scope_ar": "موارد تواصل رسمية للمجموعات تساعد على إنتاج ونشر المعرفة بصورة متسقة عبر المنصات والقوالب والأدوات الاجتماعية.",
+      "audience_ar": ["فرق الترجمة", "التواصل العلمي", "المجموعات"]
+    },
+    {
+      "id": "methods-groups",
+      "title_ar": "مجموعات المنهجيات",
+      "title_en": "Cochrane Methods Groups",
+      "kind": "methods-network",
+      "url": "https://resources.cochrane.org/cochrane-groups/methods-groups",
+      "scope_ar": "مدخل إلى المجموعات التي تطور الممارسات المنهجية وتعرّف أفضل الممارسات وتدعم تطبيق المنهجيات الجديدة أو المعدلة في مراجعات كوكرين.",
+      "audience_ar": ["المنهجيون", "الباحثون", "المحررون", "فرق التدريب"]
+    },
+    {
+      "id": "ms-group",
+      "title_ar": "كوكرين للتصلب المتعدد والأمراض النادرة في الجهاز العصبي المركزي",
+      "title_en": "Cochrane Multiple Sclerosis and Rare Diseases of the CNS",
+      "kind": "topic-group",
+      "url": "https://ms.cochrane.org/",
+      "scope_ar": "المجموعة الموضوعية ذات الصلة المباشرة بحزمة الترجمة التجريبية الحالية ومراجعات التصلب المتعدد الثلاث المستخدمة كنموذج تطبيقي في هذا القسم.",
+      "audience_ar": ["المصابون بالتصلب المتعدد", "الأسر", "أطباء الأعصاب", "الباحثون"]
+    }
+  ],
+  "ms_reviews": [
+    {
+      "id": "CD015005",
+      "doi": "10.1002/14651858.CD015005.pub2",
+      "title_ar": "الآزاثيوبرين للأشخاص المصابين بالتصلب المتعدد",
+      "title_en": "Azathioprine for people with multiple sclerosis",
+      "published_on": "2024-12-09",
+      "evidence_current_to": "2023-08-09",
+      "cochrane_url": "https://www.cochrane.org/evidence/CD015005_what-are-benefits-and-risks-azathioprine-type-medication-affects-bodys-immune-response-people",
+      "library_url": "https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD015005.pub2/full",
+      "question_ar": "ما فوائد ومضار الآزاثيوبرين مقارنة بعلاجات معدلة للمرض أو الدواء الوهمي/عدم العلاج لدى المصابين بأشكال ناكسة أو مترقية من التصلب المتعدد؟",
+      "evidence_base_ar": "14 دراسة: 8 تجارب عشوائية و6 دراسات غير عشوائية، شملت 2105 مشاركين إجمالاً؛ وكانت المقارنة ذات الأولوية في النتائج الرئيسية بين الآزاثيوبرين والإنترفيرون بيتا في التصلب المتعدد الناكس.",
+      "key_messages_ar": [
+        "قد يقلل الآزاثيوبرين عدد الأشخاص الذين يمرون بانتكاسات مقارنة بالإنترفيرون بيتا خلال سنة إلى سنتين، لكن يقين الدليل منخفض.",
+        "قد ترتفع الأحداث الضارة الخطيرة مقارنة بالإنترفيرون بيتا، مع عدم دقة كبيرة في التقدير؛ لذلك لا ينبغي قراءة الإشارة كرقم خطر ثابت لكل مريض.",
+        "الأثر على تقدم الإعاقة وبعض الآثار الضارة قصيرة الأمد غير مؤكد جداً.",
+        "توجد فجوات مهمة في نتائج تهم الأشخاص مباشرة مثل جودة الحياة والوظيفة المعرفية، وفي الأدلة طويلة الأمد والأشكال المترقية."
+      ],
+      "certainty_ar": "منخفض إلى منخفض جداً في النتائج المحورية المذكورة؛ مزيد من الأدلة قد يغير الاستنتاجات.",
+      "rawafid_use_ar": "يستخدم في روافد كمثال على ضرورة قراءة الفائدة والضرر ودرجة اليقين معاً، لا كصفحة توصية دوائية أو بديل عن قرار اختصاصي الأعصاب."
+    },
+    {
+      "id": "CD012186",
+      "doi": "10.1002/14651858.CD012186.pub2",
+      "title_ar": "الآثار الضارة للعلاجات المناعية للتصلب المتعدد: تحليل شبكي",
+      "title_en": "Adverse effects of immunotherapies for multiple sclerosis: a network meta-analysis",
+      "published_on": "2023-11-30",
+      "evidence_current_to": "2022-03-31",
+      "cochrane_url": "https://www.cochrane.org/evidence/CD012186_what-are-risks-therapies-treating-multiple-sclerosis",
+      "library_url": "https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD012186.pub2/full",
+      "question_ar": "كيف تقارن العلاجات المناعية المختلفة للتصلب المتعدد من حيث الأحداث الضارة الخطيرة والانسحاب بسبب الآثار الضارة؟",
+      "evidence_base_ar": "مراجعة شبكية للعلاجات المناعية؛ تتيح المقارنات المباشرة وغير المباشرة لكنها تواجه تحدياً منهجياً لأن الأحداث الخطيرة نادرة ولأن الإبلاغ عن الضرر في التجارب كان ضعيفاً في كثير من الأحيان.",
+      "key_messages_ar": [
+        "بالنسبة إلى عدة علاجات، لم تُظهر البيانات زيادة واضحة في الأحداث الصحية الخطيرة مقارنة بالدواء الوهمي خلال فترات المتابعة القصيرة نسبياً.",
+        "بعض العلاجات قد تزيد الانسحاب من الدراسة بسبب الآثار الضارة مقارنة بالدواء الوهمي.",
+        "بالنسبة إلى علاجات أخرى، لم تسمح قلة الأحداث أو صغر الدراسات بتقدير موثوق للخطر.",
+        "أغلب اليقين كان منخفضاً أو منخفضاً جداً، والإبلاغ غير الكافي عن الأضرار يحد من المقارنات والترتيب."
+      ],
+      "certainty_ar": "غالباً منخفض أو منخفض جداً؛ ندرة الأحداث والإبلاغ غير المكتمل عن الضرر يقللان الثقة في الاستنتاجات.",
+      "rawafid_use_ar": "يستخدم لتعليم الفرق بين «لم نجد زيادة واضحة» و«ثبت عدم وجود خطر»، ولإظهار لماذا تحتاج السلامة إلى مصادر متابعة أوسع من التجارب العشوائية وحدها."
+    },
+    {
+      "id": "CD004192",
+      "doi": "10.1002/14651858.CD004192.pub4",
+      "title_ar": "التدخلات الغذائية والنتائج المرتبطة بالتصلب المتعدد",
+      "title_en": "Dietary interventions for multiple sclerosis-related outcomes",
+      "published_on": "2020-05-19",
+      "evidence_current_to": "2019-05-30",
+      "cochrane_url": "https://www.cochrane.org/evidence/CD004192_dietary-interventions-multiple-sclerosis-related-outcomes",
+      "library_url": "https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD004192.pub4/full",
+      "question_ar": "هل تؤثر الحميات أو المكملات الغذائية، باستثناء فيتامين د الذي تناولته مراجعة أخرى، في الانتكاسات أو تقدم الإعاقة أو مؤشرات الرنين أو السلامة لدى المصابين بالتصلب المتعدد؟",
+      "evidence_base_ar": "30 تجربة في 41 تقريراً كاملاً، شملت أحماضاً دهنية متعددة غير مشبعة ومضادات أكسدة وبرامج غذائية ومكملات أخرى، مع تباين كبير بين التدخلات والمقارنات والنتائج.",
+      "key_messages_ar": [
+        "قد يكون الفرق محدوداً أو معدوماً في بعض نتائج الانتكاس أو التدهور عند مقارنة تدخلات الدهون غير المشبعة بمقارنات غذائية أخرى، لكن الدليل غير يقيني.",
+        "بالنسبة لمضادات الأكسدة وغيرها من المكملات، لم تكن الأدلة كافية لإثبات أثر موثوق في النتائج المرتبطة بالتصلب المتعدد.",
+        "اختلاف البرامج الغذائية والتدخلات منع تجميع كثير من النتائج في تحليل واحد ذي معنى.",
+        "لا توجد أدلة عالية اليقين كافية، في تاريخ البحث المستخدم بالمراجعة، لإثبات أن التدخلات الغذائية تغير مسار التصلب المتعدد."
+      ],
+      "certainty_ar": "منخفض إلى منخفض جداً في أجزاء مهمة من قاعدة الدليل، مع مشكلات تصميم وتنفيذ وتغاير بين الدراسات.",
+      "rawafid_use_ar": "يستخدم لتصحيح القفزة من «اهتمام بيولوجي أو تجربة صغيرة» إلى «حمية مثبتة لتغيير مسار المرض»، مع ضرورة التحقق من وجود تحديثات أحدث قبل أي قرار سريري."
+    }
+  ],
+  "arabic_pilot": {
+    "status": "materials-received-not-yet-translated",
+    "public_status_ar": "استُلمت ثلاثة ملفات مصدر قابلة للتحرير للمسار التجريبي. لم تُنشر بعد ترجمة عربية معتمدة لأي منها.",
+    "items": ["CD015005", "CD012186", "CD004192"],
+    "workflow_ar": [
+      "تثبيت نسخة المصدر وتسجيل العنوان وDOI وتاريخ آخر بحث للدليل.",
+      "إنشاء سجل مصطلحات عربي/إنجليزي قبل الترجمة البصرية.",
+      "إعداد ترجمة عربية أولية تحافظ على اتجاه الرسالة العلمية وعبارات عدم اليقين.",
+      "مراجعة تحريرية ثنائية اللغة مستقلة عن المترجم الأول.",
+      "ترجمة عكسية للنصوص الحساسة للحكم ومقارنة الفروق مع الأصل.",
+      "سجل فروق وقرارات يوضح سبب كل تعديل مصطلحي أو دلالي جوهري.",
+      "تكييف RTL بصري مع الحفاظ على المصدر والنسب والتسلسل المنطقي للمعلومات.",
+      "مراجعة نهائية للمحتوى والهوية والنسب من الطرف المعني قبل أي نشر بوصفه ترجمة كوكرين."
+    ],
+    "publication_guard_ar": "لا توصف أي مسودة أو صفحة روافد بأنها ترجمة كوكرين معتمدة قبل اكتمال المراجعة المطلوبة وتأكيد صلاحية النسخة النهائية للنشر."
+  }
+}
