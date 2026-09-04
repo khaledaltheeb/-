@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'scripts/seo-gate.mjs'
+      - 'scripts/rich-discovery-gate.mjs'
       - 'scripts/content-richness-gate.mjs'
       - 'scripts/seo-shared-html-cache.mjs'
       - 'scripts/seo-gate-reliability-contract.mjs'
@@ -14,6 +15,7 @@ on:
     branches: [main]
     paths:
       - 'scripts/seo-gate.mjs'
+      - 'scripts/rich-discovery-gate.mjs'
       - 'scripts/content-richness-gate.mjs'
       - 'scripts/seo-shared-html-cache.mjs'
       - 'scripts/seo-gate-reliability-contract.mjs'
@@ -60,9 +62,6 @@ jobs:
           set -euo pipefail
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends imagemagick fontconfig fonts-noto-core librsvg2-bin
-          convert -version
-          rsvg-convert --version
-          fc-match 'Noto Sans Arabic'
       - name: Build production candidate
         run: npm run build
       - name: Start production candidate
@@ -73,16 +72,10 @@ jobs:
           echo $! > /tmp/rawafid-seo-integration-server.pid
           ready=0
           for i in $(seq 1 60); do
-            if curl -fsS http://127.0.0.1:3000/ >/dev/null; then
-              ready=1
-              break
-            fi
+            if curl -fsS http://127.0.0.1:3000/ >/dev/null; then ready=1; break; fi
             sleep 1
           done
-          if [ "$ready" -ne 1 ]; then
-            cat /tmp/rawafid-seo-integration-server.log >&2 || true
-            exit 1
-          fi
+          test "$ready" -eq 1
       - name: Full sitemap SEO crawl
         run: node scripts/seo-gate.mjs
       - name: Verify full crawl report and shared cache population
@@ -92,22 +85,28 @@ jobs:
           node - <<'NODE'
           const fs = require('fs');
           const report = JSON.parse(fs.readFileSync('reports/seo-gate-report.json', 'utf8'));
-          if (report.fatalError) throw new Error(`SEO crawl fatal error: ${report.fatalError}`);
+          if (report.fatalError) throw new Error(report.fatalError);
           if (!Number.isInteger(report.summary?.pages) || report.summary.pages < 1) throw new Error('SEO crawl reported no sitemap pages');
           if (!Number.isInteger(report.summary?.internalLinks) || report.summary.internalLinks < 1) throw new Error('SEO crawl reported no internal links');
-          console.log(`Full crawl report verified: pages=${report.summary.pages}, internalLinks=${report.summary.internalLinks}, failures=${report.summary.failures}`);
           NODE
-          test -d /tmp/rawafid-seo-html-cache
           test -n "$(find /tmp/rawafid-seo-html-cache -type f -name '*.json.gz' -print -quit)"
+      - name: Rich discovery using the same audited HTML
+        shell: bash
+        run: |
+          set -o pipefail
+          node scripts/rich-discovery-gate.mjs 2>&1 | tee /tmp/rawafid-rich-discovery.log
+          grep -Eq 'cacheHits=[1-9][0-9]*' /tmp/rawafid-rich-discovery.log
       - name: Content richness using the same audited HTML
-        run: node scripts/content-richness-gate.mjs
+        shell: bash
+        run: |
+          set -o pipefail
+          node scripts/content-richness-gate.mjs 2>&1 | tee /tmp/rawafid-content-richness.log
+          grep -Eq 'cacheHits=[1-9][0-9]*' /tmp/rawafid-content-richness.log
       - name: Stop candidate
         if: always()
         shell: bash
         run: |
-          if [ -f /tmp/rawafid-seo-integration-server.pid ]; then
-            kill "$(cat /tmp/rawafid-seo-integration-server.pid)" 2>/dev/null || true
-          fi
+          if [ -f /tmp/rawafid-seo-integration-server.pid ]; then kill "$(cat /tmp/rawafid-seo-integration-server.pid)" 2>/dev/null || true; fi
       - name: Upload diagnostics
         if: failure()
         uses: actions/upload-artifact@v4
@@ -116,5 +115,7 @@ jobs:
           path: |
             reports/seo-gate-report.json
             /tmp/rawafid-seo-integration-server.log
+            /tmp/rawafid-rich-discovery.log
+            /tmp/rawafid-content-richness.log
           if-no-files-found: ignore
           retention-days: 7
