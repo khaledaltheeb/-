@@ -21,6 +21,18 @@ object FeatureCatalog {
     private const val ASSET = "rawafid_feature_catalog.json"
     private const val TAG = "RawafidFeatureCatalog"
     private val allowedRouteTypes = setOf("web", "main", "quick", "activity")
+
+    private val lifeInboxFeature = RawafidFeature(
+        id = "life_inbox",
+        title = "صندوق الحياة",
+        subtitle = "اكتب ما تريد تذكره مرة واحدة؛ يصنّفه روافد محليًا ويوجهك إلى الموعد أو العلاج أو المهمة أو الشخص أو الأمان أو الملاحظة المناسبة.",
+        category = "daily",
+        routeType = "main",
+        routeTarget = "life_inbox",
+        status = "beta",
+        priority = 130
+    )
+
     private val accountFeature = RawafidFeature(
         id = "rawafid_account",
         title = "حساب روافد ورقمي",
@@ -31,6 +43,7 @@ object FeatureCatalog {
         status = "stable",
         priority = 121
     )
+
     private val safeDriveAgreementsFeature = RawafidFeature(
         id = "safe_drive_agreements",
         title = "اتفاق القيادة الآمنة",
@@ -41,6 +54,7 @@ object FeatureCatalog {
         status = "beta",
         priority = 103
     )
+
     private val safeDriveCalibrationFeature = RawafidFeature(
         id = "safe_drive_calibration",
         title = "جودة قياس القيادة",
@@ -51,6 +65,7 @@ object FeatureCatalog {
         status = "beta",
         priority = 102
     )
+
     @Volatile private var cache: List<RawafidFeature>? = null
 
     fun all(context: Context): List<RawafidFeature> = cache ?: synchronized(this) {
@@ -77,7 +92,7 @@ object FeatureCatalog {
                     feature
                 }
             }
-        return (listOf(accountFeature, safeDriveAgreementsFeature, safeDriveCalibrationFeature) + published)
+        return (listOf(lifeInboxFeature, accountFeature, safeDriveAgreementsFeature, safeDriveCalibrationFeature) + published)
             .distinctBy { it.id }
             .sortedByDescending { it.priority }
     }
