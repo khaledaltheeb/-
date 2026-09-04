@@ -14,7 +14,7 @@ function escapeXml(value: string) {
 
 function titleText(line: string, y: number, size: number, rtl: boolean) {
   return rtl
-    ? `<text x="${RTL_X}" y="${y}" font-family="Noto Sans Arabic,Tahoma,Arial,sans-serif" font-size="${size}" font-weight="800" fill="#183d40" text-anchor="end" direction="rtl" unicode-bidi="plaintext">${escapeXml(line)}</text>`
+    ? `<text x="${RTL_X}" y="${y}" font-family="Noto Sans Arabic,Tahoma,Arial,sans-serif" font-size="${size}" font-weight="800" fill="#183d40" text-anchor="start" direction="rtl" unicode-bidi="plaintext">${escapeXml(line)}</text>`
     : `<text x="${LTR_X}" y="${y}" font-family="Noto Sans,Arial,sans-serif" font-size="${size}" font-weight="800" fill="#183d40" text-anchor="start" direction="ltr" unicode-bidi="plaintext">${escapeXml(line)}</text>`;
 }
 
@@ -53,12 +53,12 @@ export function addictionOgImage(title: string) {
   <circle cx="65" cy="5" r="250" fill="#df7f45" opacity=".86"/>
   <circle cx="210" cy="660" r="145" fill="none" stroke="#26978b" stroke-width="36" opacity=".22"/>
   <rect x="760" y="72" width="350" height="58" rx="29" fill="#fff0df"/>
-  <text x="1080" y="110" font-family="Noto Sans Arabic,Tahoma,Arial,sans-serif" font-size="24" font-weight="700" fill="#963f2e" text-anchor="end" direction="rtl" unicode-bidi="plaintext">الإدمان والتعافي · روافد</text>
+  <text x="1080" y="110" font-family="Noto Sans Arabic,Tahoma,Arial,sans-serif" font-size="24" font-weight="700" fill="#963f2e" text-anchor="start" direction="rtl" unicode-bidi="plaintext">الإدمان والتعافي · روافد</text>
   <g clip-path="url(#addiction-title-safe)">${titleSvg}</g>
   <rect x="90" y="550" width="58" height="58" rx="18" fill="#0f8f88"/>
   <text x="109" y="591" font-family="Arial,sans-serif" font-size="34" font-weight="800" fill="#fff">R</text>
   <text x="166" y="578" font-family="Arial,sans-serif" font-size="27" font-weight="800" fill="#183d40">RAWAFID</text>
-  <text x="1090" y="604" font-family="Noto Sans Arabic,Tahoma,Arial,sans-serif" font-size="18" fill="#657d82" text-anchor="end" direction="rtl" unicode-bidi="plaintext">سلامة · رعاية مبنية على الدليل · تعافٍ وظيفي</text>
+  <text x="1090" y="604" font-family="Noto Sans Arabic,Tahoma,Arial,sans-serif" font-size="18" fill="#657d82" text-anchor="start" direction="rtl" unicode-bidi="plaintext">سلامة · رعاية مبنية على الدليل · تعافٍ وظيفي</text>
 </svg>`;
   return new Response(svg, {
     headers: {
