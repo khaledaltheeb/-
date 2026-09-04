@@ -112,11 +112,12 @@ class AppointmentCompanionActivity : ComponentActivity() {
 @Composable
 private fun AppointmentCompanionScreen() {
     val context = LocalContext.current
+    val repository = remember(context) { RawafidRepositories.local(context) }
     var version by remember { mutableIntStateOf(0) }
     var title by rememberSaveable { mutableStateOf("موعد طبي") }
     var reminderNote by rememberSaveable { mutableStateOf("") }
     var selectedId by remember { mutableStateOf<Int?>(null) }
-    val appointments = remember(version) { LocalStore.treatments(context).sortedBy { it.timeMillis } }
+    val appointments = remember(version) { repository.treatments().sortedBy { it.timeMillis } }
 
     fun addAppointment() {
         val now = Calendar.getInstance()
@@ -129,7 +130,7 @@ private fun AppointmentCompanionScreen() {
                 if (at > System.currentTimeMillis()) {
                     val id = (((at / 60000L) xor title.hashCode().toLong()).toInt() and Int.MAX_VALUE).coerceAtLeast(1)
                     val reminder = TreatmentReminder(id, at, title.trim().ifBlank { "موعد طبي" }, reminderNote.trim())
-                    LocalStore.saveTreatment(context, reminder)
+                    repository.saveTreatment(reminder)
                     TreatmentReminderScheduler.schedule(context, reminder)
                     selectedId = id
                     version++
@@ -176,7 +177,7 @@ private fun AppointmentCompanionScreen() {
                         onSaved = { AppointmentCompanionStore.save(context, it) },
                         onDelete = {
                             TreatmentReminderScheduler.cancel(context, appointment)
-                            LocalStore.removeTreatment(context, appointment.id)
+                            repository.removeTreatment(appointment.id)
                             AppointmentCompanionStore.remove(context, appointment.id)
                             selectedId = null
                             version++
