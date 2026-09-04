@@ -2,6 +2,7 @@ import http from 'node:http';
 import https from 'node:https';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
+import { readSharedHtml, SHARED_CRAWL_USER_AGENT } from './seo-shared-html-cache.mjs';
 
 const execFileAsync = promisify(execFile);
 const base = (process.env.SEO_GATE_BASE_URL || process.env.SMOKE_BASE_URL || 'http://127.0.0.1:3000').replace(/\/$/, '');
@@ -13,10 +14,12 @@ const pageAttempts = Math.max(1, Math.min(5, Number(process.env.SEO_GATE_PAGE_AT
 const pageRetryDelayMs = Math.max(0, Number(process.env.SEO_GATE_PAGE_RETRY_DELAY_MS || 300));
 // This gate requires critical metadata to be present in <head>. Next.js streams
 // metadata for Googlebot by design because Googlebot inspects the full DOM, so
-// use an HTML-limited crawler for the head contract while keeping the same SEO
-// assertions. Bingbot is part of Next.js' built-in HTML-limited bot list.
-const crawlerUserAgent = process.env.SEO_GATE_USER_AGENT || 'Mozilla/5.0 (compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)';
+// use the same HTML-limited crawler representation that populated the shared
+// cache. Bingbot is part of Next.js' built-in HTML-limited bot list.
+const crawlerUserAgent = SHARED_CRAWL_USER_AGENT;
 const failures = [];
+let cacheHits = 0;
+let cacheMisses = 0;
 
 function decodeXml(value) {
   return value.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&apos;/g, "'");
@@ -227,8 +230,15 @@ function requireTypes(url, pathname, types) {
 }
 async function audit(url) {
   let result;
-  try { result = await fetchText(url); }
-  catch (error) { failures.push(`${url}: request failed (${error?.message || error})`); return; }
+  const cached = await readSharedHtml(url);
+  if (cached) {
+    cacheHits += 1;
+    result = { response: { status: cached.status, ok: cached.status >= 200 && cached.status < 300 }, text: cached.html };
+  } else {
+    cacheMisses += 1;
+    try { result = await fetchText(url); }
+    catch (error) { failures.push(`${url}: request failed (${error?.message || error})`); return; }
+  }
   if (result.response.status !== 200) { failures.push(`${url}: expected 200, got ${result.response.status}`); return; }
   const html = result.text;
   const htmlTag = (html.match(/<html\b[^>]*>/i) || [''])[0];
@@ -324,7 +334,7 @@ async function main() {
   if (!urls.length) throw new Error('No sitemap URLs discovered');
   console.log(`Rich discovery gate: auditing ${urls.length} indexable URLs for ${canonicalOrigin}`);
   await runPool(urls, audit);
-  console.log(`Rich discovery gate summary: pages=${urls.length}, failures=${failures.length}`);
+  console.log(`Rich discovery gate summary: pages=${urls.length}, cacheHits=${cacheHits}, cacheMisses=${cacheMisses}, failures=${failures.length}`);
   if (failures.length) {
     failures.slice(0, 500).forEach((failure) => console.error(`FAIL ${failure}`));
     if (failures.length > 500) console.error(`FAIL ... ${failures.length - 500} additional failures omitted`);
