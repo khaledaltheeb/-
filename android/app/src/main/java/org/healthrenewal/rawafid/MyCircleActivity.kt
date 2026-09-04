@@ -152,7 +152,7 @@ class MyCircleActivity : ComponentActivity() {
         setContent {
             RawafidTheme {
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                    Surface(Modifier.fillMaxSize()) { MyCircleScreen() }
+                    MyCircleScreen(onClose = { finish() })
                 }
             }
         }
@@ -160,7 +160,7 @@ class MyCircleActivity : ComponentActivity() {
 }
 
 @Composable
-private fun MyCircleScreen() {
+private fun MyCircleScreen(onClose: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var refresh by remember { mutableIntStateOf(0) }
@@ -240,318 +240,317 @@ private fun MyCircleScreen() {
             .onFailure { error = it.message ?: "تعذر تحميل الصلاحيات." }
     }
 
-    LazyColumn(
-        contentPadding = PaddingValues(RawafidSpacing.ScreenHorizontal),
-        verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Md)
-    ) {
-        item {
-            Column(verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
-                Text("دائرتي — Rawafid Circle", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-                Text("تواصل خاص للرعاية والأمان. معرفة المعرّف وحدها لا تمنح أي وصول، ولا يبدأ التواصل قبل موافقة الطرفين.")
-            }
-        }
-
-        if (!signedIn) {
-            item {
-                Card {
-                    Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)) {
-                        Text("اربط دائرتك بين الأجهزة", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                        Text("سجّل الدخول أو أنشئ حسابًا للحصول على معرّف روافد ثابت وإضافة أفراد الأسرة أو مقدمي الرعاية بموافقتهم.")
-                        Button(onClick = { context.startActivity(Intent(context, CircleAccountActivity::class.java)) }) { Text("حساب روافد") }
-                        OutlinedButton(onClick = { refresh++ }) { Text("تحديث بعد تسجيل الدخول") }
+    RawafidScreenScaffold(
+        title = "دائرتي — Rawafid Circle",
+        subtitle = "تواصل خاص للرعاية والأمان. معرفة المعرّف وحدها لا تمنح أي وصول، ولا يبدأ التواصل قبل موافقة الطرفين.",
+        onBack = onClose
+    ) { contentPadding ->
+        LazyColumn(
+            contentPadding = contentPadding,
+            verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Md)
+        ) {
+            if (!signedIn) {
+                item {
+                    Card {
+                        Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)) {
+                            Text("اربط دائرتك بين الأجهزة", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                            Text("سجّل الدخول أو أنشئ حسابًا للحصول على معرّف روافد ثابت وإضافة أفراد الأسرة أو مقدمي الرعاية بموافقتهم.")
+                            Button(onClick = { context.startActivity(Intent(context, CircleAccountActivity::class.java)) }) { Text("حساب روافد") }
+                            OutlinedButton(onClick = { refresh++ }) { Text("تحديث بعد تسجيل الدخول") }
+                        }
                     }
                 }
-            }
-        } else {
-            item {
-                Card {
-                    Column(
-                        Modifier.fillMaxWidth().padding(RawafidSpacing.CardContent),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)
-                    ) {
-                        Text("معرّف روافد الخاص بي", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                        Text(if (identity.isBlank()) "جارٍ إنشاء المعرّف..." else identity, style = MaterialTheme.typography.titleMedium)
-                        if (identity.isNotBlank()) {
-                            val qr = remember(identity) { rawafidQr(identity) }
-                            Image(qr.asImageBitmap(), contentDescription = "QR لمعرّف روافد", modifier = Modifier.size(190.dp))
-                            FlowRow(horizontalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
-                                OutlinedButton(onClick = {
-                                    (context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager)
-                                        .setPrimaryClip(ClipData.newPlainText("Rawafid ID", identity))
-                                    status = "تم نسخ المعرّف."
-                                }) { Text("نسخ") }
-                                OutlinedButton(onClick = {
-                                    context.startActivity(
-                                        Intent.createChooser(
-                                            Intent(Intent.ACTION_SEND).apply {
-                                                type = "text/plain"
-                                                putExtra(Intent.EXTRA_TEXT, "أضفني إلى دائرتك في روافد: $identity")
-                                            },
-                                            "مشاركة المعرّف"
+            } else {
+                item {
+                    Card {
+                        Column(
+                            Modifier.fillMaxWidth().padding(RawafidSpacing.CardContent),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)
+                        ) {
+                            Text("معرّف روافد الخاص بي", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                            Text(if (identity.isBlank()) "جارٍ إنشاء المعرّف..." else identity, style = MaterialTheme.typography.titleMedium)
+                            if (identity.isNotBlank()) {
+                                val qr = remember(identity) { rawafidQr(identity) }
+                                Image(qr.asImageBitmap(), contentDescription = "QR لمعرّف روافد", modifier = Modifier.size(190.dp))
+                                FlowRow(horizontalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
+                                    OutlinedButton(onClick = {
+                                        (context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager)
+                                            .setPrimaryClip(ClipData.newPlainText("Rawafid ID", identity))
+                                        status = "تم نسخ المعرّف."
+                                    }) { Text("نسخ") }
+                                    OutlinedButton(onClick = {
+                                        context.startActivity(
+                                            Intent.createChooser(
+                                                Intent(Intent.ACTION_SEND).apply {
+                                                    type = "text/plain"
+                                                    putExtra(Intent.EXTRA_TEXT, "أضفني إلى دائرتك في روافد: $identity")
+                                                },
+                                                "مشاركة المعرّف"
+                                            )
                                         )
-                                    )
-                                }) { Text("مشاركة") }
-                                OutlinedButton(enabled = !loading, onClick = { refresh++ }) { Text("تحديث") }
+                                    }) { Text("مشاركة") }
+                                    OutlinedButton(enabled = !loading, onClick = { refresh++ }) { Text("تحديث") }
+                                }
                             }
                         }
                     }
                 }
-            }
 
-            item {
-                Card {
-                    Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)) {
-                        Text("إضافة شخص", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                        OutlinedTextField(
-                            targetId,
-                            { targetId = CircleRules.normalizeRawafidId(it).take(24) },
-                            label = { Text("معرّف روافد — RFD-....") },
-                            modifier = Modifier.fillMaxWidth(),
-                            singleLine = true
-                        )
-                        OutlinedTextField(
-                            targetLabel,
-                            { targetLabel = it.take(80) },
-                            label = { Text("من هو بالنسبة لي؟ مثال: ابني، أبي، مقدم الرعاية") },
-                            modifier = Modifier.fillMaxWidth(),
-                            singleLine = true
-                        )
-                        FlowRow(horizontalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
-                            Button(
-                                enabled = !loading && CircleRules.isValidRawafidId(targetId) && targetLabel.isNotBlank(),
-                                onClick = {
-                                    val id = targetId
-                                    val label = targetLabel
-                                    runTask(
-                                        success = "تم إرسال طلب الارتباط.",
-                                        operation = { RawafidCircleApi.sendConnectionRequest(context, id, label) },
-                                        afterSuccess = {
-                                            targetId = ""
-                                            targetLabel = ""
-                                            refresh++
-                                        }
-                                    )
-                                }
-                            ) { Text("إرسال الطلب") }
-                            OutlinedButton(onClick = {
-                                val clip = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                                targetId = CircleRules.normalizeRawafidId(
-                                    clip.primaryClip?.getItemAt(0)?.coerceToText(context)?.toString().orEmpty()
-                                ).take(24)
-                            }) { Text("لصق المعرّف") }
-                            OutlinedButton(
-                                enabled = !loading,
-                                onClick = {
-                                    error = ""
-                                    status = ""
-                                    CircleQrScanner.start(
-                                        context = context,
-                                        onSuccess = { scannedId ->
-                                            targetId = scannedId
-                                            status = "تمت قراءة معرّف RFD. راجعه وأدخل صلة الشخص ثم أرسل الطلب بنفسك."
-                                        },
-                                        onCanceled = { status = "تم إلغاء مسح QR." },
-                                        onFailure = { message -> error = message }
-                                    )
-                                }
-                            ) { Text("مسح QR") }
-                        }
-                        Text("المسح يملأ معرّف RFD فقط ولا يرسل طلب ارتباط تلقائيًا. لن يبدأ التواصل قبل قبول الطرف الآخر واختياره الاسم الذي يسجلك به.", style = MaterialTheme.typography.bodySmall)
-                    }
-                }
-            }
-
-            if (pending.isNotEmpty()) {
-                item { Text("طلبات واردة", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold) }
-                items(pending, key = { it.requestId }) { request ->
+                item {
                     Card {
                         Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)) {
-                            Text(request.requesterName, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                            Text(request.requesterRawafidId)
+                            Text("إضافة شخص", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                             OutlinedTextField(
-                                pendingLabels[request.requestId].orEmpty(),
-                                { pendingLabels[request.requestId] = it.take(80) },
-                                label = { Text("كيف تريد تسجيله عندك؟") },
+                                targetId,
+                                { targetId = CircleRules.normalizeRawafidId(it).take(24) },
+                                label = { Text("معرّف روافد — RFD-....") },
+                                modifier = Modifier.fillMaxWidth(),
+                                singleLine = true
+                            )
+                            OutlinedTextField(
+                                targetLabel,
+                                { targetLabel = it.take(80) },
+                                label = { Text("من هو بالنسبة لي؟ مثال: ابني، أبي، مقدم الرعاية") },
                                 modifier = Modifier.fillMaxWidth(),
                                 singleLine = true
                             )
                             FlowRow(horizontalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
                                 Button(
-                                    enabled = !loading && pendingLabels[request.requestId].orEmpty().isNotBlank(),
+                                    enabled = !loading && CircleRules.isValidRawafidId(targetId) && targetLabel.isNotBlank(),
                                     onClick = {
-                                        val label = pendingLabels[request.requestId].orEmpty()
+                                        val id = targetId
+                                        val label = targetLabel
                                         runTask(
-                                            success = "تم قبول الارتباط.",
-                                            operation = { RawafidCircleApi.respondToRequest(context, request.requestId, true, label) },
+                                            success = "تم إرسال طلب الارتباط.",
+                                            operation = { RawafidCircleApi.sendConnectionRequest(context, id, label) },
                                             afterSuccess = {
-                                                pendingLabels.remove(request.requestId)
+                                                targetId = ""
+                                                targetLabel = ""
                                                 refresh++
                                             }
                                         )
                                     }
-                                ) { Text("قبول") }
+                                ) { Text("إرسال الطلب") }
+                                OutlinedButton(onClick = {
+                                    val clip = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                    targetId = CircleRules.normalizeRawafidId(
+                                        clip.primaryClip?.getItemAt(0)?.coerceToText(context)?.toString().orEmpty()
+                                    ).take(24)
+                                }) { Text("لصق المعرّف") }
                                 OutlinedButton(
                                     enabled = !loading,
                                     onClick = {
-                                        runTask(
-                                            success = "تم رفض الطلب.",
-                                            operation = { RawafidCircleApi.respondToRequest(context, request.requestId, false, "") },
-                                            afterSuccess = {
-                                                pendingLabels.remove(request.requestId)
-                                                refresh++
-                                            }
+                                        error = ""
+                                        status = ""
+                                        CircleQrScanner.start(
+                                            context = context,
+                                            onSuccess = { scannedId ->
+                                                targetId = scannedId
+                                                status = "تمت قراءة معرّف RFD. راجعه وأدخل صلة الشخص ثم أرسل الطلب بنفسك."
+                                            },
+                                            onCanceled = { status = "تم إلغاء مسح QR." },
+                                            onFailure = { message -> error = message }
                                         )
                                     }
-                                ) { Text("رفض") }
+                                ) { Text("مسح QR") }
+                            }
+                            Text("المسح يملأ معرّف RFD فقط ولا يرسل طلب ارتباط تلقائيًا. لن يبدأ التواصل قبل قبول الطرف الآخر واختياره الاسم الذي يسجلك به.", style = MaterialTheme.typography.bodySmall)
+                        }
+                    }
+                }
+
+                if (pending.isNotEmpty()) {
+                    item { Text("طلبات واردة", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold) }
+                    items(pending, key = { it.requestId }) { request ->
+                        Card {
+                            Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)) {
+                                Text(request.requesterName, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                                Text(request.requesterRawafidId)
+                                OutlinedTextField(
+                                    pendingLabels[request.requestId].orEmpty(),
+                                    { pendingLabels[request.requestId] = it.take(80) },
+                                    label = { Text("كيف تريد تسجيله عندك؟") },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    singleLine = true
+                                )
+                                FlowRow(horizontalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
+                                    Button(
+                                        enabled = !loading && pendingLabels[request.requestId].orEmpty().isNotBlank(),
+                                        onClick = {
+                                            val label = pendingLabels[request.requestId].orEmpty()
+                                            runTask(
+                                                success = "تم قبول الارتباط.",
+                                                operation = { RawafidCircleApi.respondToRequest(context, request.requestId, true, label) },
+                                                afterSuccess = {
+                                                    pendingLabels.remove(request.requestId)
+                                                    refresh++
+                                                }
+                                            )
+                                        }
+                                    ) { Text("قبول") }
+                                    OutlinedButton(
+                                        enabled = !loading,
+                                        onClick = {
+                                            runTask(
+                                                success = "تم رفض الطلب.",
+                                                operation = { RawafidCircleApi.respondToRequest(context, request.requestId, false, "") },
+                                                afterSuccess = {
+                                                    pendingLabels.remove(request.requestId)
+                                                    refresh++
+                                                }
+                                            )
+                                        }
+                                    ) { Text("رفض") }
+                                }
                             }
                         }
                     }
                 }
-            }
 
-            permissionsTarget?.let { person ->
-                item {
-                    CirclePermissionsCard(
-                        connection = person,
-                        snapshot = permissionSnapshot,
-                        busy = loading,
-                        onToggle = { permission, enabled ->
-                            runTask(
-                                operation = { RawafidCircleApi.setPermission(context, person.connectionId, permission, enabled) },
-                                afterSuccess = { refresh++ }
-                            )
-                        },
-                        onClose = {
-                            permissionsTarget = null
-                            permissionSnapshot = emptyList()
-                        }
-                    )
-                }
-            }
-
-            item { Text("أشخاصي", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold) }
-            if (connections.isEmpty()) item { Text(if (loading) "جارٍ التحميل..." else "لا توجد ارتباطات مقبولة بعد.") }
-            items(connections, key = { it.connectionId }) { connection ->
-                Card {
-                    Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
-                        Text(connection.counterpartName, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                        if (connection.myLabel.isNotBlank()) Text(connection.myLabel)
-                        Text(connection.counterpartRawafidId, style = MaterialTheme.typography.bodySmall)
-                        FlowRow(horizontalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
-                            Button(onClick = {
-                                context.startActivity(
-                                    Intent(context, CircleConversationActivity::class.java).apply {
-                                        putExtra("connection_id", connection.connectionId)
-                                        putExtra("counterpart_name", connection.counterpartName)
-                                        putExtra("my_label", connection.myLabel)
-                                        putExtra("can_message", connection.canMessage)
-                                        putExtra("can_quick_question", connection.canQuickQuestion)
-                                        putExtra("can_request_location", connection.canRequestLocation)
-                                    }
+                permissionsTarget?.let { person ->
+                    item {
+                        CirclePermissionsCard(
+                            connection = person,
+                            snapshot = permissionSnapshot,
+                            busy = loading,
+                            onToggle = { permission, enabled ->
+                                runTask(
+                                    operation = { RawafidCircleApi.setPermission(context, person.connectionId, permission, enabled) },
+                                    afterSuccess = { refresh++ }
                                 )
-                            }) { Text("المحادثة") }
-                            OutlinedButton(onClick = {
+                            },
+                            onClose = {
+                                permissionsTarget = null
                                 permissionSnapshot = emptyList()
-                                permissionsTarget = connection
-                            }) { Text("الصلاحيات") }
-                            TextButton(onClick = { removeTarget = connection }) { Text("إزالة") }
+                            }
+                        )
+                    }
+                }
+
+                item { Text("أشخاصي", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold) }
+                if (connections.isEmpty()) item { Text(if (loading) "جارٍ التحميل..." else "لا توجد ارتباطات مقبولة بعد.") }
+                items(connections, key = { it.connectionId }) { connection ->
+                    Card {
+                        Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
+                            Text(connection.counterpartName, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                            if (connection.myLabel.isNotBlank()) Text(connection.myLabel)
+                            Text(connection.counterpartRawafidId, style = MaterialTheme.typography.bodySmall)
+                            FlowRow(horizontalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
+                                Button(onClick = {
+                                    context.startActivity(
+                                        Intent(context, CircleConversationActivity::class.java).apply {
+                                            putExtra("connection_id", connection.connectionId)
+                                            putExtra("counterpart_name", connection.counterpartName)
+                                            putExtra("my_label", connection.myLabel)
+                                            putExtra("can_message", connection.canMessage)
+                                            putExtra("can_quick_question", connection.canQuickQuestion)
+                                            putExtra("can_request_location", connection.canRequestLocation)
+                                        }
+                                    )
+                                }) { Text("المحادثة") }
+                                OutlinedButton(onClick = {
+                                    permissionSnapshot = emptyList()
+                                    permissionsTarget = connection
+                                }) { Text("الصلاحيات") }
+                                TextButton(onClick = { removeTarget = connection }) { Text("إزالة") }
+                            }
                         }
                     }
                 }
+                item { OutlinedButton(onClick = { context.startActivity(Intent(context, CircleAccountActivity::class.java)) }) { Text("إدارة الحساب") } }
             }
-            item { OutlinedButton(onClick = { context.startActivity(Intent(context, CircleAccountActivity::class.java)) }) { Text("إدارة الحساب") } }
-        }
 
-        if (status.isNotBlank()) item { Text(status, color = MaterialTheme.colorScheme.primary) }
-        if (error.isNotBlank()) item { Text(error, color = MaterialTheme.colorScheme.error) }
-        item { HorizontalDivider() }
+            if (status.isNotBlank()) item { Text(status, color = MaterialTheme.colorScheme.primary) }
+            if (error.isNotBlank()) item { Text(error, color = MaterialTheme.colorScheme.error) }
+            item { HorizontalDivider() }
 
-        item {
-            Card {
-                Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)) {
-                    Text("جهات الأمان المحلية على هذا الهاتف", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                    Text("مسار مستقل يعمل للاتصال وSMS ومراقبة الأمان والقيادة الآمنة عند تعذر الإنترنت. أنت تختار لكل رقم الوظائف المسموح بها، ولا يُرفع دفتر الأرقام إلى دائرة روافد. تُحفظ هذه الجهات مشفرة محليًا باستخدام Android Keystore.")
-                    OutlinedButton(onClick = { showLocal = !showLocal }) { Text(if (showLocal) "إخفاء" else "إدارة جهات الأمان المحلية") }
-                }
-            }
-        }
-
-        if (showLocal) {
             item {
                 Card {
                     Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)) {
-                        OutlinedTextField(localName, { localName = it.take(80) }, label = { Text("الاسم") }, modifier = Modifier.fillMaxWidth())
-                        OutlinedTextField(localRelation, { localRelation = it.take(80) }, label = { Text("العلاقة") }, modifier = Modifier.fillMaxWidth())
-                        OutlinedTextField(localPhone, { localPhone = it.take(40) }, label = { Text("رقم الهاتف") }, modifier = Modifier.fillMaxWidth())
-                        CirclePermission.entries.forEach { permission ->
-                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                                Text(permission.label, Modifier.weight(1f))
-                                Checkbox(
-                                    checked = permission in localPermissions,
-                                    onCheckedChange = { yes ->
-                                        localPermissions = if (yes) localPermissions + permission else localPermissions - permission
-                                    }
-                                )
-                            }
-                        }
-                        Button(
-                            enabled = localName.isNotBlank() && localPhone.isNotBlank(),
-                            onClick = {
-                                val result = runCatching {
-                                    MyCircleStore.save(
-                                        context,
-                                        localPeople + CirclePerson(
-                                            System.currentTimeMillis(),
-                                            localName.trim(),
-                                            localRelation.trim(),
-                                            localPhone.trim(),
-                                            localPermissions
-                                        )
-                                    )
-                                }
-                                result.onSuccess {
-                                    localName = ""
-                                    localRelation = ""
-                                    localPhone = ""
-                                    localPermissions = setOf(CirclePermission.EMERGENCY, CirclePermission.LOCATION_SAFETY)
-                                    localVersion++
-                                    error = ""
-                                    status = "تم حفظ جهة الأمان محليًا بشكل مشفر."
-                                }.onFailure {
-                                    status = ""
-                                    error = "تعذر حفظ جهة الأمان بشكل مشفر."
-                                }
-                            }
-                        ) { Text("حفظ الجهة") }
+                        Text("جهات الأمان المحلية على هذا الهاتف", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                        Text("مسار مستقل يعمل للاتصال وSMS ومراقبة الأمان والقيادة الآمنة عند تعذر الإنترنت. أنت تختار لكل رقم الوظائف المسموح بها، ولا يُرفع دفتر الأرقام إلى دائرة روافد. تُحفظ هذه الجهات مشفرة محليًا باستخدام Android Keystore.")
+                        OutlinedButton(onClick = { showLocal = !showLocal }) { Text(if (showLocal) "إخفاء" else "إدارة جهات الأمان المحلية") }
                     }
                 }
             }
 
-            items(localPeople, key = { it.id }) { person ->
-                Card {
-                    Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
-                        Text(person.name, fontWeight = FontWeight.Bold)
-                        if (person.relation.isNotBlank()) Text(person.relation)
-                        Text(person.phone)
-                        if (person.permissions.isNotEmpty()) {
-                            Text(person.permissions.joinToString(" · ") { it.label }, style = MaterialTheme.typography.bodySmall)
-                        }
-                        FlowRow(horizontalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
-                            Button(onClick = { context.startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:${Uri.encode(person.phone)}"))) }) { Text("اتصال") }
-                            OutlinedButton(onClick = { context.startActivity(Intent(Intent.ACTION_SENDTO, Uri.parse("smsto:${Uri.encode(person.phone)}"))) }) { Text("SMS") }
-                            TextButton(onClick = {
-                                runCatching { MyCircleStore.save(context, localPeople.filterNot { it.id == person.id }) }
-                                    .onSuccess {
+            if (showLocal) {
+                item {
+                    Card {
+                        Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)) {
+                            OutlinedTextField(localName, { localName = it.take(80) }, label = { Text("الاسم") }, modifier = Modifier.fillMaxWidth())
+                            OutlinedTextField(localRelation, { localRelation = it.take(80) }, label = { Text("العلاقة") }, modifier = Modifier.fillMaxWidth())
+                            OutlinedTextField(localPhone, { localPhone = it.take(40) }, label = { Text("رقم الهاتف") }, modifier = Modifier.fillMaxWidth())
+                            CirclePermission.entries.forEach { permission ->
+                                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                                    Text(permission.label, Modifier.weight(1f))
+                                    Checkbox(
+                                        checked = permission in localPermissions,
+                                        onCheckedChange = { yes ->
+                                            localPermissions = if (yes) localPermissions + permission else localPermissions - permission
+                                        }
+                                    )
+                                }
+                            }
+                            Button(
+                                enabled = localName.isNotBlank() && localPhone.isNotBlank(),
+                                onClick = {
+                                    val result = runCatching {
+                                        MyCircleStore.save(
+                                            context,
+                                            localPeople + CirclePerson(
+                                                System.currentTimeMillis(),
+                                                localName.trim(),
+                                                localRelation.trim(),
+                                                localPhone.trim(),
+                                                localPermissions
+                                            )
+                                        )
+                                    }
+                                    result.onSuccess {
+                                        localName = ""
+                                        localRelation = ""
+                                        localPhone = ""
+                                        localPermissions = setOf(CirclePermission.EMERGENCY, CirclePermission.LOCATION_SAFETY)
                                         localVersion++
                                         error = ""
-                                        status = "تمت إزالة جهة الأمان."
-                                    }
-                                    .onFailure {
+                                        status = "تم حفظ جهة الأمان محليًا بشكل مشفر."
+                                    }.onFailure {
                                         status = ""
-                                        error = "تعذر تحديث جهات الأمان المشفرة."
+                                        error = "تعذر حفظ جهة الأمان بشكل مشفر."
                                     }
-                            }) { Text("إزالة") }
+                                }
+                            ) { Text("حفظ الجهة") }
+                        }
+                    }
+                }
+
+                items(localPeople, key = { it.id }) { person ->
+                    Card {
+                        Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
+                            Text(person.name, fontWeight = FontWeight.Bold)
+                            if (person.relation.isNotBlank()) Text(person.relation)
+                            Text(person.phone)
+                            if (person.permissions.isNotEmpty()) {
+                                Text(person.permissions.joinToString(" · ") { it.label }, style = MaterialTheme.typography.bodySmall)
+                            }
+                            FlowRow(horizontalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
+                                Button(onClick = { context.startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:${Uri.encode(person.phone)}"))) }) { Text("اتصال") }
+                                OutlinedButton(onClick = { context.startActivity(Intent(Intent.ACTION_SENDTO, Uri.parse("smsto:${Uri.encode(person.phone)}"))) }) { Text("SMS") }
+                                TextButton(onClick = {
+                                    runCatching { MyCircleStore.save(context, localPeople.filterNot { it.id == person.id }) }
+                                        .onSuccess {
+                                            localVersion++
+                                            error = ""
+                                            status = "تمت إزالة جهة الأمان."
+                                        }
+                                        .onFailure {
+                                            status = ""
+                                            error = "تعذر تحديث جهات الأمان المشفرة."
+                                        }
+                                }) { Text("إزالة") }
+                            }
                         }
                     }
                 }
