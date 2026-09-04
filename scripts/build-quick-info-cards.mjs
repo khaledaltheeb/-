@@ -96,7 +96,7 @@ function cardTitleLayout(title) {
     maxHeight: 190,
     lineHeightRatio: 1.22,
   });
-  const startY = fit.lines.length >= 3 ? 292 : fit.lines.length === 2 ? 314 : 348;
+  const startY = fit.lines.length >= 3 ? 288 : fit.lines.length === 2 ? 314 : 348;
   assertTextBlockBounds('Quick Info card title', {
     ...fit,
     startY,
@@ -186,7 +186,7 @@ function cardSvg(item) {
   const profile = profileFor(item.title);
   const title = cardTitleLayout(item.title);
   const titleBottom = title.startY + (title.lines.length - 1) * title.lineHeight + Math.ceil(title.fontSize * 0.35);
-  const excerpt = cardExcerptLayout(item.excerpt, Math.max(458, titleBottom + 34));
+  const excerpt = cardExcerptLayout(item.excerpt, Math.max(470, titleBottom + 34));
   const titleSpans = title.lines.map((line, index) => `<tspan x="${CARD_RIGHT}" y="${title.startY + index * title.lineHeight}">${esc(line)}</tspan>`).join('');
   const excerptSpans = excerpt.lines.map((line, index) => `<tspan x="${CARD_RIGHT}" y="${excerpt.startY + index * excerpt.lineHeight}">${esc(line)}</tspan>`).join('');
 
