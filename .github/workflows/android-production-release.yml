@@ -65,11 +65,15 @@ jobs:
       - name: Verify signed release artifacts
         run: |
           set -euo pipefail
-          test -f android/app/build/outputs/bundle/release/app-release.aab
-          test -f android/app/build/outputs/apk/release/app-release.apk
-          jarsigner -verify -strict -certs android/app/build/outputs/bundle/release/app-release.aab >/dev/null
-          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose android/app/build/outputs/apk/release/app-release.apk
-          sha256sum android/app/build/outputs/bundle/release/app-release.aab android/app/build/outputs/apk/release/app-release.apk > android/app/build/outputs/release-sha256.txt
+          AAB="android/app/build/outputs/bundle/release/app-release.aab"
+          APK="android/app/build/outputs/apk/release/app-release.apk"
+          test -f "$AAB"
+          test -f "$APK"
+          jarsigner -verify -strict -certs "$AAB" >/dev/null
+          APKSIGNER="$(find "$ANDROID_HOME/build-tools" -type f -name apksigner | sort -V | tail -n 1)"
+          test -n "$APKSIGNER"
+          "$APKSIGNER" verify --verbose "$APK"
+          sha256sum "$AAB" "$APK" > android/app/build/outputs/release-sha256.txt
 
       - name: Upload signed production AAB
         uses: actions/upload-artifact@v7
