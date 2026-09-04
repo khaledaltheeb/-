@@ -40,6 +40,7 @@ export default async function AccountSecurityPage({ searchParams }: { searchPara
       </section>
       <MfaSettings />
       <section className="account-section"><div className="section-mini-heading"><h2>فقدان الوصول</h2><span>مسار مستقل لا يكشف وجود الحساب</span></div><p>إذا نسيت كلمة المرور، استخدم صفحة الاستعادة. ترسل منصة روافد رابطًا محدود الصلاحية إلى البريد المرتبط بالحساب.</p><Link className="button" href="/forgot-password">نسيت كلمة المرور؟</Link></section>
+      <section className="account-section"><div className="section-mini-heading"><h2>حذف الحساب والبيانات</h2><span>عملية نهائية تتطلب إعادة تحقق مستقلة</span></div><p>إذا كنت تريد إنهاء حساب روافد نهائيًا، استخدم مسار الحذف المخصص. سيطلب كلمة المرور الحالية من جديد، ثم التحقق بخطوتين عند تفعيله، ثم تأكيدًا نهائيًا قبل حذف الحساب والبيانات السحابية المرتبطة به.</p><Link className="button" href="/account/delete">فتح مسار حذف الحساب</Link></section>
     </section></main><SiteFooter/></>
   );
 }
