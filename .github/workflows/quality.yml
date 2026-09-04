@@ -111,12 +111,14 @@ jobs:
         run: npm run smoke
       - name: Full sitemap SEO gate
         continue-on-error: true
+        timeout-minutes: 30
         shell: bash
         run: |
           set -o pipefail
           node scripts/seo-gate.mjs 2>&1 | tee /tmp/rawafid-seo-gate.log
       - name: Rich results and discovery gate (advisory)
         continue-on-error: true
+        timeout-minutes: 20
         run: node scripts/rich-discovery-gate.mjs
       - name: Content richness and duplicate-body gate
         run: node scripts/content-richness-gate.mjs
