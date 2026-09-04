@@ -72,6 +72,9 @@ requireMatch('text fit', files.textFit, /fitArabicTextBlock/, 'shared Arabic aut
 requireMatch('text fit', files.textFit, /wrapTextByPixels/, 'pixel-based line wrapping missing.');
 requireMatch('text fit', files.textFit, /splitOversizedTokenByPixels/, 'oversized single-token pixel splitting is required.');
 requireMatch('text fit', files.textFit, /flatMap\(\(word\) => splitOversizedTokenByPixels/, 'pixel wrapper must apply oversized-token splitting.');
+requireMatch('text fit', files.textFit, /Intl\.Segmenter\('ar', \{ granularity: 'grapheme' \}\)/, 'Arabic grapheme segmentation is required so combining marks stay attached to their base glyphs.');
+requireMatch('text fit', files.textFit, /for \(const grapheme of graphemes\(clean\)\)/, 'oversized-token splitting must operate on grapheme clusters, not raw code points.');
+requireMatch('text fit', files.textFit, /graphemes\(text\)\.slice\(0, -1\)/, 'ellipsis trimming must preserve grapheme clusters.');
 requireMatch('text fit', files.textFit, /label:\$\{text\}/, 'ImageMagick text measurement must render the actual text.');
 requireMatch('text fit', files.textFit, /widthCache = new Map\(\)/, 'measurement cache missing; build performance would regress.');
 requireMatch('text fit', files.textFit, /for \(let fontSize = maxFontSize; fontSize >= minFontSize; fontSize -= 1\)/, 'auto-fit must progressively reduce font size.');
@@ -90,4 +93,4 @@ if (errors.length) {
   process.exit(1);
 }
 
-console.log('Quick Info visual contract passed: Arabic titles are pixel-measured, auto-fitted, oversized-token safe, clipped, and hard-validated inside protected 1200x630 and 1280x720 safe areas without changing page routes or content.');
+console.log('Quick Info visual contract passed: Arabic titles are pixel-measured, auto-fitted, grapheme-safe, oversized-token safe, clipped, and hard-validated inside protected 1200x630 and 1280x720 safe areas without changing page routes or content.');
