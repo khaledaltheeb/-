@@ -108,17 +108,17 @@ export default async function CochraneGuidePage({ params }: { params: Params }) 
 
   return <>
     <SiteHeader />
-    <main className="site-shell sector-page-shell">
+    <main className="site-shell sector-page-shell" lang="ar" dir="rtl">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify([breadcrumbs, articleSchema]).replace(/</g, '\\u003c') }} />
       <nav className="breadcrumbs" aria-label="مسار الصفحة">
-        <Link href="/">الرئيسية</Link><span>/</span>
-        <Link href="/cochrane/">موارد كوكرين</Link><span>/</span>
-        <Link href="/cochrane/guides/">الأدلة المنهجية</Link><span>/</span>
+        <Link href="/">الرئيسية</Link><span aria-hidden="true">/</span>
+        <Link href="/cochrane/">موارد كوكرين</Link><span aria-hidden="true">/</span>
+        <Link href="/cochrane/guides/">الأدلة المنهجية</Link><span aria-hidden="true">/</span>
         <span aria-current="page">{guide.title_ar}</span>
       </nav>
 
       <section className="public-index-hero" aria-labelledby="cochrane-guide-title">
-        <span className="eyebrow">Rawafid original methodology guide · pre-release review</span>
+        <span className="eyebrow">دليل منهجي أصلي من روافد · مراجعة ما قبل النشر</span>
         <h1 id="cochrane-guide-title">{guide.title_ar}</h1>
         <p>{guide.description_ar}</p>
         <div className="public-stat-strip">
@@ -138,7 +138,7 @@ export default async function CochraneGuidePage({ params }: { params: Params }) 
         <h2>تنبيه منهجي: ROBINS-I V2 ما يزال مسودة</h2>
         <p>{robinsDraft.note_ar}</p>
         <p><strong>الحالة المتحققة:</strong> {robinsDraft.version_label} · <strong>تاريخ تحقق روافد:</strong> {robinsDraft.verified_on}</p>
-        <a className="sector-open" href={robinsDraft.url} target="_blank" rel="noopener noreferrer">فتح صفحة الحالة الرسمية ↗</a>
+        <a className="sector-open" href={robinsDraft.url} target="_blank" rel="noopener noreferrer" aria-label="فتح صفحة الحالة الرسمية لـ ROBINS-I V2 في نافذة جديدة">فتح صفحة الحالة الرسمية ↗</a>
       </aside> : null}
 
       <section>
@@ -153,7 +153,7 @@ export default async function CochraneGuidePage({ params }: { params: Params }) 
       </section>
 
       {pitfalls.length ? <section>
-        <div className="section-mini-heading"><div><span className="eyebrow">Common failure modes</span><h2>أخطاء شائعة يجب تجنبها</h2></div></div>
+        <div className="section-mini-heading"><div><span className="eyebrow">أنماط الإخفاق الشائعة</span><h2>أخطاء شائعة يجب تجنبها</h2></div></div>
         <div className="institutional-sector-grid">
           {pitfalls.map((item, index) => <article className="institutional-sector-card" key={item}>
             <span className="sector-number">{String(index + 1).padStart(2, '0')}</span><p>{item}</p>
@@ -162,7 +162,7 @@ export default async function CochraneGuidePage({ params }: { params: Params }) 
       </section> : null}
 
       <section>
-        <div className="section-mini-heading"><div><span className="eyebrow">Quality check</span><h2>أسئلة فحص سريعة</h2></div></div>
+        <div className="section-mini-heading"><div><span className="eyebrow">فحص الجودة</span><h2>أسئلة فحص سريعة</h2></div></div>
         <div className="institutional-sector-grid">
           {guide.checklist_ar.map((item, index) => <article className="institutional-sector-card" key={item}>
             <span className="sector-number">{String(index + 1).padStart(2, '0')}</span>
@@ -172,7 +172,7 @@ export default async function CochraneGuidePage({ params }: { params: Params }) 
       </section>
 
       {connections.length ? <section>
-        <div className="section-mini-heading"><div><span className="eyebrow">Connected learning path</span><h2>صفحات مرتبطة تكمل الفكرة</h2></div></div>
+        <div className="section-mini-heading"><div><span className="eyebrow">مسار تعلّم مترابط</span><h2>صفحات مرتبطة تكمل الفكرة</h2></div></div>
         <div className="institutional-sector-grid">
           {connections.map((linkedGuide) => <Link className="institutional-sector-card" href={`/cochrane/guides/${linkedGuide.slug}/`} key={linkedGuide.slug}>
             <h3>{linkedGuide.title_ar}</h3><p>{linkedGuide.description_ar}</p><span className="sector-open">متابعة المسار ←</span>
@@ -181,7 +181,7 @@ export default async function CochraneGuidePage({ params }: { params: Params }) 
       </section> : null}
 
       <section>
-        <div className="section-mini-heading"><div><span className="eyebrow">Primary sources</span><h2>المصادر المستخدمة</h2></div><span>{guide.sources.length} مصادر</span></div>
+        <div className="section-mini-heading"><div><span className="eyebrow">المصادر الأولية</span><h2>المصادر المستخدمة</h2></div><span>{guide.sources.length} مصادر</span></div>
         <div className="institutional-sector-grid">
           {guide.sources.map((source) => {
             const sourceUrl = canonicalSourceUrl(source.url);
@@ -190,7 +190,7 @@ export default async function CochraneGuidePage({ params }: { params: Params }) 
               <span className="eyebrow">{source.kind}</span>
               <h3>{source.label}</h3>
               {freshness ? <><p><strong>حالة المصدر:</strong> {freshness.version_label}</p><p>{freshness.note_ar}</p><p><strong>تحقق روافد:</strong> {freshness.verified_on}</p></> : null}
-              <a className="sector-open" href={sourceUrl} target="_blank" rel="noopener noreferrer">فتح المصدر الأصلي ↗</a>
+              <a className="sector-open" href={sourceUrl} target="_blank" rel="noopener noreferrer" aria-label={`فتح ${source.label} في نافذة جديدة`}>فتح المصدر الأصلي ↗</a>
             </article>;
           })}
         </div>
