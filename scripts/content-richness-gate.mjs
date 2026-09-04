@@ -1,8 +1,9 @@
 import crypto from 'node:crypto';
+import { readSharedHtml, SHARED_CRAWL_USER_AGENT, writeSharedHtml } from './seo-shared-html-cache.mjs';
 
 const base = (process.env.SEO_GATE_BASE_URL || process.env.SMOKE_BASE_URL || 'http://127.0.0.1:3000').replace(/\/$/, '');
 const canonicalOrigin = new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://healthrenewal.org').origin;
-const concurrency = Math.max(1, Math.min(24, Number(process.env.SEO_GATE_CONCURRENCY || 10)));
+const concurrency = Math.max(1, Math.min(24, Number(process.env.SEO_RICH_CONCURRENCY || process.env.SEO_GATE_PAGE_CONCURRENCY || process.env.SEO_GATE_CONCURRENCY || 4)));
 const timeoutMs = Math.max(2000, Number(process.env.SEO_GATE_TIMEOUT_MS || 20000));
 const pageAttempts = Math.max(1, Math.min(5, Number(process.env.SEO_GATE_PAGE_ATTEMPTS || 3)));
 const retryDelayMs = Math.max(0, Number(process.env.SEO_GATE_PAGE_RETRY_DELAY_MS || 300));
@@ -10,6 +11,8 @@ const maxUrls = Math.max(0, Number(process.env.SEO_GATE_MAX_URLS || 0));
 const minimumWords = Math.max(80, Number(process.env.SEO_RICH_MIN_WORDS || 100));
 const failures = [];
 const retryableStatuses = new Set([408, 425, 429, 500, 502, 503, 504]);
+let cacheHits = 0;
+let cacheMisses = 0;
 
 function decode(value = '') {
   return String(value)
@@ -40,7 +43,7 @@ async function fetchTextOnce(url) {
     const response = await fetch(url, {
       redirect: 'follow',
       signal: controller.signal,
-      headers: { 'user-agent': 'Rawafid-Content-Richness-Gate/1.0' },
+      headers: { 'user-agent': SHARED_CRAWL_USER_AGENT },
     });
     return { response, text: await response.text() };
   } finally {
@@ -65,6 +68,26 @@ async function fetchText(url, context = 'request') {
     if (attempt < pageAttempts) await sleep(retryDelayMs * attempt);
   }
   throw new Error(`${context} failed after ${pageAttempts} attempts: ${url} (${requestErrorMessage(lastError)})`, { cause: lastError });
+}
+async function fetchContentPage(url, publicUrl) {
+  const cached = await readSharedHtml(url);
+  if (cached) {
+    cacheHits += 1;
+    return {
+      response: {
+        status: cached.status,
+        ok: cached.status >= 200 && cached.status < 300,
+        url: cached.responseUrl,
+        headers: { get: (name) => name.toLowerCase() === 'content-type' ? cached.contentType : null },
+      },
+      text: cached.html,
+      cached: true,
+    };
+  }
+  cacheMisses += 1;
+  const result = await fetchText(url, `content page ${publicUrl}`);
+  if (result.response.status === 200) await writeSharedHtml(url, result.response, result.text);
+  return { ...result, cached: false };
 }
 function runtimeUrl(publicUrl) {
   const parsed = new URL(publicUrl, canonicalOrigin);
@@ -180,7 +203,7 @@ async function main() {
     const parsed = new URL(publicUrl, canonicalOrigin);
     let result;
     try {
-      result = await fetchText(runtimeUrl(publicUrl), `content page ${publicUrl}`);
+      result = await fetchContentPage(runtimeUrl(publicUrl), publicUrl);
     } catch (error) {
       failures.push(`${publicUrl}: request failed after ${pageAttempts} attempts (${requestErrorMessage(error?.cause || error)})`);
       completed += 1;
@@ -212,7 +235,7 @@ async function main() {
     if (completed % 500 === 0 || completed === urls.length) console.log(`Content richness gate: progress ${completed}/${urls.length}`);
   });
 
-  console.log(`Content richness gate: audited=${urls.length}, detailPages=${details}, minDetailWords=${Number.isFinite(minimumObserved) ? minimumObserved : 0}, exactDuplicateBodies=${failures.filter((x) => x.includes('exact normalized')).length}, failures=${failures.length}`);
+  console.log(`Content richness gate: audited=${urls.length}, detailPages=${details}, minDetailWords=${Number.isFinite(minimumObserved) ? minimumObserved : 0}, exactDuplicateBodies=${failures.filter((x) => x.includes('exact normalized')).length}, cacheHits=${cacheHits}, cacheMisses=${cacheMisses}, failures=${failures.length}`);
   if (failures.length) {
     failures.slice(0, 500).forEach((failure) => console.error(`RICHNESS FAIL: ${failure}`));
     if (failures.length > 500) console.error(`RICHNESS FAIL: ${failures.length - 500} additional failures omitted`);
