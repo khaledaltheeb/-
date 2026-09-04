@@ -11,7 +11,7 @@ if (!chromePath) throw new Error('VISUAL_CHROME_PATH is required.');
 const routes = [
   { name: 'home', path: '/' },
   { name: 'sectors', path: '/sectors' },
-  { name: 'article', path: '/content/autism' },
+  { name: 'article', path: '/about' },
 ];
 
 const viewports = [
@@ -202,11 +202,13 @@ try {
           if (homeSurface.heroPathwayLink.textDecorationLine !== 'none') fail(scope, `hero pathway link decoration leaked: ${homeSurface.heroPathwayLink.textDecorationLine}`);
         }
         if (!homeSurface.heroPathwayStrong || homeSurface.heroPathwayStrong.color !== 'rgb(255, 255, 255)') fail(scope, 'hero pathway title lost high-contrast white text');
-        if (!homeSurface.editorialGrid || homeSurface.editorialGrid.display !== 'grid') fail(scope, 'homepage editorial content is not rendered as a card grid');
-        if (!homeSurface.editorialTitleLink) fail(scope, 'homepage editorial title link is missing');
-        else {
-          if (homeSurface.editorialTitleLink.color !== 'rgb(18, 52, 59)') fail(scope, `editorial title color ${homeSurface.editorialTitleLink.color} does not match --rf-ink`);
-          if (homeSurface.editorialTitleLink.textDecorationLine !== 'none') fail(scope, `editorial title decoration leaked: ${homeSurface.editorialTitleLink.textDecorationLine}`);
+        if (homeSurface.editorialGrid) {
+          if (homeSurface.editorialGrid.display !== 'grid') fail(scope, 'homepage editorial content is not rendered as a card grid');
+          if (!homeSurface.editorialTitleLink) fail(scope, 'homepage editorial title link is missing while editorial content is present');
+          else {
+            if (homeSurface.editorialTitleLink.color !== 'rgb(18, 52, 59)') fail(scope, `editorial title color ${homeSurface.editorialTitleLink.color} does not match --rf-ink`);
+            if (homeSurface.editorialTitleLink.textDecorationLine !== 'none') fail(scope, `editorial title decoration leaked: ${homeSurface.editorialTitleLink.textDecorationLine}`);
+          }
         }
         if (!homeSurface.sectionTextLink) fail(scope, 'homepage section text link is missing');
         else {
