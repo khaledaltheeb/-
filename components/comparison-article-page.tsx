@@ -1,11 +1,12 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import ContentRenderer from '@/components/content-renderer';
+import ArticleFeaturedImage from '@/components/article-featured-image';
 import ComparisonsBrowser from '@/components/comparisons-browser';
 import styles from './comparison-article-page.module.css';
 import { comparisonPageRole, safeComparisonReferences, visibleComparisonFaq, type ComparisonItem, type ComparisonRecord } from '@/lib/comparisons';
+import { resolveVisiblePageImage } from '@/lib/page-image';
 import { contentReviewProvenance } from '@/lib/review-provenance';
 import { breadcrumbJsonLd, SITE_URL } from '@/lib/seo';
 
@@ -31,8 +32,10 @@ export default function ComparisonArticlePage({ record, routeSlug, items = [] }:
   const audiences = Array.isArray(record.audience) ? record.audience.map(String) : [];
   const conceptA = schemaString(record.schema_json, 'concept_a');
   const conceptB = schemaString(record.schema_json, 'concept_b');
+  const pageVisual = resolveVisiblePageImage({ title: record.title, slug: routeSlug, kind: 'comparison', featuredImageUrl: record.featured_image_url, featuredImageAlt: record.featured_image_alt });
+  const pageVisualUrl = pageVisual.src.startsWith('https://') ? pageVisual.src : `${SITE_URL}${pageVisual.src}`;
   const breadcrumbs = breadcrumbJsonLd([{ name: 'الرئيسية', path: '/' }, ...(routeSlug ? [{ name: 'موسوعة المقارنات', path: '/comparisons/' }] : []), { name: record.title, path: canonical }]);
-  const common = { '@context': 'https://schema.org', '@id': `${url}#page`, url, name: record.title, headline: record.title, description: record.seo_description || record.excerpt || undefined, inLanguage: 'ar', datePublished: record.published_at || undefined, dateModified: record.updated_at || undefined, lastReviewed: review.lastReviewedAt || undefined, publisher: { '@id': `${SITE_URL}/#organization` }, isPartOf: { '@id': `${SITE_URL}/#website` }, image: record.featured_image_url ? (record.featured_image_url.startsWith('https://') ? record.featured_image_url : `${SITE_URL}${record.featured_image_url}`) : undefined };
+  const common = { '@context': 'https://schema.org', '@id': `${url}#page`, url, name: record.title, headline: record.title, description: record.seo_description || record.excerpt || undefined, inLanguage: 'ar', datePublished: record.published_at || undefined, dateModified: record.updated_at || undefined, lastReviewed: review.lastReviewedAt || undefined, publisher: { '@id': `${SITE_URL}/#organization` }, isPartOf: { '@id': `${SITE_URL}/#website` }, image: pageVisualUrl };
   const contentSchema: Record<string, unknown> = role === 'hub' ? { ...common, '@type': 'CollectionPage', mainEntity: { '@type': 'ItemList', numberOfItems: items.length, itemListElement: items.map((item) => ({ '@type': 'ListItem', position: item.rank, name: item.title, url: item.href.startsWith('https://') ? item.href : `${SITE_URL}${item.href}` })) } } : { ...common, '@type': 'Article', author: record.author_display_name ? { '@type': 'Organization', name: record.author_display_name } : { '@id': `${SITE_URL}/#organization` }, reviewedBy: review.reviewedBySchema, about: role === 'comparison' && conceptA && conceptB ? [{ '@type': 'Thing', name: conceptA }, { '@type': 'Thing', name: conceptB }] : undefined, citation: references.flatMap((reference) => (reference.url ? [reference.url] : [])) };
   const faqSchema = faqItems.length > 0 ? { '@context': 'https://schema.org', '@type': 'FAQPage', '@id': `${url}#faq`, mainEntity: faqItems.map((item) => ({ '@type': 'Question', name: item.question, acceptedAnswer: { '@type': 'Answer', text: item.answer } })) } : null;
   const schemas = [breadcrumbs, contentSchema, ...(faqSchema ? [faqSchema] : [])];
@@ -44,7 +47,7 @@ export default function ComparisonArticlePage({ record, routeSlug, items = [] }:
       <header className="article-hero"><span className="eyebrow">{role === 'methodology' ? 'المنهجية والأدلة' : 'موسوعة المقارنات المنهجية'}</span><h1>{record.title}</h1>{record.excerpt ? <p>{record.excerpt}</p> : null}<div className="article-meta">{record.author_display_name ? <span>إعداد: {record.author_display_name}</span> : null}{review.reviewerName ? <span>مراجعة: {review.reviewerName}{review.reviewerCredentials ? ` — ${review.reviewerCredentials}` : ''}</span> : null}{record.published_at ? <span>نُشر {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(record.published_at))}</span> : null}{review.lastReviewedAt ? <span>آخر مراجعة {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(review.lastReviewedAt))}</span> : null}</div>{audiences.length > 0 ? <div className="tag-list">{audiences.map((audience) => <span key={audience}>{audience}</span>)}</div> : null}</header>
       <ReferenceNav />
       {role === 'hub' && items.length > 0 ? <ComparisonsBrowser items={items} /> : null}
-      <div className="article-body">{record.featured_image_url ? <figure className="article-featured-image"><Image src={record.featured_image_url} alt={record.featured_image_alt || record.title} width={1200} height={675} sizes="(max-width: 900px) 100vw, 900px" priority={role === 'hub'} unoptimized /></figure> : null}<ContentRenderer bodyJson={record.body_json} bodyText={record.body_text} recordId={record.id} /></div>
+      <div className="article-body"><ArticleFeaturedImage title={record.title} slug={routeSlug} kind="comparison" featuredImageUrl={record.featured_image_url} featuredImageAlt={record.featured_image_alt} priority={role === 'hub'} /><ContentRenderer bodyJson={record.body_json} bodyText={record.body_text} recordId={record.id} /></div>
       {record.medical_disclaimer ? <aside className="medical-disclaimer" aria-label="حدود المحتوى"><strong>تنبيه منهجي وصحي</strong><p>{record.medical_disclaimer}</p><Link href="/disclaimer">إخلاء المسؤولية الكامل</Link></aside> : null}
       <ReferenceNav end />
       {references.length > 0 ? <section className="article-references" aria-labelledby="comparison-references-title"><h2 id="comparison-references-title">المصادر والمراجع</h2><ol>{references.map((reference, index) => <li key={`${reference.url || reference.title}-${index}`}>{reference.url ? <a href={reference.url} target="_blank" rel="noopener noreferrer">{reference.title || reference.url}</a> : <span>{reference.title}</span>}{reference.publisher ? <small>{reference.publisher}</small> : null}{reference.year ? <small>{String(reference.year)}</small> : null}</li>)}</ol></section> : null}
