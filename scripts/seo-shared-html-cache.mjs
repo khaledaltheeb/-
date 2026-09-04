@@ -8,7 +8,7 @@ const gzipAsync = promisify(gzip);
 const gunzipAsync = promisify(gunzip);
 const stats = { hits: 0, misses: 0, writes: 0, corrupt: 0 };
 
-export const SHARED_CRAWL_USER_AGENT = 'Rawafid-Quality-Crawl/1.0';
+export const SHARED_CRAWL_USER_AGENT = 'Mozilla/5.0 (compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)';
 export const SHARED_HTML_CACHE_DIR = process.env.SEO_SHARED_HTML_CACHE_DIR || '/tmp/rawafid-seo-html-cache';
 
 function cacheKey(url) {
