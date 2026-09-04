@@ -1,11 +1,12 @@
 import type { Metadata } from 'next';
-import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import ContentRenderer from '@/components/content-renderer';
+import ArticleFeaturedImage from '@/components/article-featured-image';
 import { createClient } from '@/lib/supabase/server';
+import { resolveVisiblePageImage } from '@/lib/page-image';
 import { buildSeoMetadata, breadcrumbJsonLd, SITE_URL } from '@/lib/seo';
 import { getCognitivePageBySlug, getCognitivePageIndex, getCognitivePageIndexItem } from '@/lib/cognitive-program';
 import { getExpandedEncyclopediaIndex, getExpandedEncyclopediaRecord } from '@/lib/expanded-encyclopedia';
@@ -332,6 +333,8 @@ export default async function PublishedContentPage({ params }: { params: Params 
   const url = canonical.startsWith('https://') ? canonical : `${SITE_URL}${canonical}`;
   const faqItems = visibleFaq(record.body_json);
   const review = contentReviewProvenance(record);
+  const pageVisual = resolveVisiblePageImage({ title: record.title, kind: 'article', featuredImageUrl: record.featured_image_url, featuredImageAlt: record.featured_image_alt });
+  const pageVisualUrl = pageVisual.src.startsWith('https://') ? pageVisual.src : `${SITE_URL}${pageVisual.src}`;
 
   const breadcrumbs = breadcrumbJsonLd([
     { name: 'الرئيسية', path: '/' },
@@ -363,7 +366,7 @@ export default async function PublishedContentPage({ params }: { params: Params 
     author: { '@id': `${SITE_URL}/#organization` },
     reviewedBy: review.reviewedBySchema,
     publisher: { '@id': `${SITE_URL}/#organization` },
-    image: record.featured_image_url || `${SITE_URL}/seo-card`,
+    image: pageVisualUrl,
     keywords: [record.primary_keyword, ...record.secondary_keywords, ...record.semantic_terms.slice(0, 8)]
       .filter((item): item is string => typeof item === 'string' && item.length > 0)
       .join(', '),
@@ -448,9 +451,7 @@ export default async function PublishedContentPage({ params }: { params: Params 
           {audiences.length > 0 && <div className="tag-list">{audiences.map((audience) => <span key={audience}>{audience}</span>)}</div>}
         </header>
         <div className="article-body">
-          {record.featured_image_url && <figure className="article-featured-image">
-            <Image src={record.featured_image_url} alt={record.featured_image_alt || record.title} width={1200} height={675} sizes="(max-width: 900px) 100vw, 900px" priority unoptimized />
-          </figure>}
+          <ArticleFeaturedImage title={record.title} kind="article" featuredImageUrl={record.featured_image_url} featuredImageAlt={record.featured_image_alt} priority />
           <ContentRenderer bodyJson={record.body_json} bodyText={record.body_text} recordId={record.id} />
         </div>
         {record.medical_disclaimer && <aside className="medical-disclaimer" aria-label="إخلاء المسؤولية الطبية">
