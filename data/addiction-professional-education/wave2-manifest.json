@@ -1,0 +1,103 @@
+{
+  "wave": 2,
+  "program": "addiction-professional-education",
+  "depends_on": {
+    "pull_request": 558,
+    "head_sha": "e31c027f615b3a36cf50999572c61b28999511dc"
+  },
+  "category": {
+    "slug": "addiction-education-professional-roles",
+    "activation_policy": "activate-only-after-all-role-pages-pass-v6-and-live-verification",
+    "release_state": "active"
+  },
+  "new_role_pages": [
+    {
+      "slug": "addiction-education-professional-roles-physicians",
+      "route": "/addiction/education/professional-roles/physicians/",
+      "role": "physician",
+      "amersa_pubmed": "https://pubmed.ncbi.nlm.nih.gov/31774388/"
+    },
+    {
+      "slug": "addiction-education-professional-roles-nursing",
+      "route": "/addiction/education/professional-roles/nursing/",
+      "role": "nursing",
+      "amersa_pubmed": "https://pubmed.ncbi.nlm.nih.gov/31638876/"
+    },
+    {
+      "slug": "addiction-education-professional-roles-pharmacy",
+      "route": "/addiction/education/professional-roles/pharmacy/",
+      "role": "pharmacy",
+      "amersa_pubmed": "https://pubmed.ncbi.nlm.nih.gov/31809680/"
+    },
+    {
+      "slug": "addiction-education-professional-roles-social-work",
+      "route": "/addiction/education/professional-roles/social-work/",
+      "role": "social-work",
+      "amersa_pubmed": "https://pubmed.ncbi.nlm.nih.gov/31746677/"
+    }
+  ],
+  "canonical_upgrades": [
+    {
+      "slug": "legacy-addiction-populations-co-occurring-mental-health",
+      "route": "/addiction/populations/co-occurring-mental-health/",
+      "function": "mental-health-and-co-occurring-professional-learning",
+      "source_layer": ["Grayken Co-Occurring Psychiatric Illness and SUD training", "SAMHSA TIP 42", "SAMHSA Co-Occurring Disorders", "WHO mhGAP"],
+      "rollback_snapshot": "content_versions version 2",
+      "live_verification": "http-200-content-canonical-index-follow-passed"
+    },
+    {
+      "slug": "legacy-addiction-audiences-trainer",
+      "route": "/addiction/audiences/trainer/",
+      "function": "peer-recovery-support-professional-learning",
+      "source_layer": ["AMERSA MOUD Toolkit for Peer Recovery Specialists 2022", "SAMHSA Peer Worker Core Competencies", "SAMHSA Peer Support Workers", "SAMHSA TIP 35"],
+      "rollback_snapshot": "content_versions version 2",
+      "rights_note": "AMERSA 2022 toolkit permits clinical-care reproduction/copy/modification for non-financial purposes with source credit; Rawafid uses an original Arabic synthesis rather than a verbatim translation.",
+      "live_verification": "http-200-content-canonical-index-follow-passed"
+    }
+  ],
+  "clinical_update_layer": [
+    "SAMHSA Core Curriculum 2026",
+    "SAMHSA Curricular Elements 2026",
+    "WHO/UNODC Treatment Standards 2020",
+    "WHO mhGAP 2023"
+  ],
+  "release_contract": {
+    "content_contract_version": 6,
+    "minimum_arabic_words_for_new_v6_role_pages": 2500,
+    "minimum_h2": 8,
+    "minimum_h3": 4,
+    "minimum_faq": 6,
+    "minimum_search_intent_questions": 8,
+    "minimum_claim_source_mappings": 5,
+    "minimum_references": 5,
+    "seo_title_max": 47,
+    "seo_description_min": 150,
+    "seo_description_max": 160,
+    "canonical_unique": true,
+    "endorsement_status": "none-claimed",
+    "copyright_policy": "original-arabic-synthesis-no-verbatim-amersa-republication",
+    "localization_policy": "never-generalize-US-licensure-DEA-FDA-or-scope-of-practice-to-Arab-jurisdictions"
+  },
+  "database_validation": {
+    "v6_dry_run_new_role_pages": "passed-4-of-4",
+    "real_publication_new_role_pages": "passed-4-of-4",
+    "canonical_upgrades": "passed-2-of-2"
+  },
+  "live_verification": {
+    "new_role_pages_http_200": "4/4",
+    "new_role_pages_expected_content": "4/4",
+    "new_role_pages_canonical_match": "4/4",
+    "new_role_pages_robots_index_follow": "4/4",
+    "new_role_pages_content_sitemap_present": "4/4",
+    "canonical_upgrades_http_200": "2/2",
+    "canonical_upgrades_expected_content": "2/2",
+    "canonical_upgrades_canonical_match": "2/2",
+    "canonical_upgrades_robots_index_follow": "2/2",
+    "sitemap": "/sitemaps/content.xml?page=0"
+  },
+  "remaining_governance": [
+    "persist-full-content-snapshots-or-equivalent-reproducible-seed",
+    "complete-repository-wave2-review",
+    "send-amersa-implementation-update-and-request-review-translation-republication-promotion-permission"
+  ]
+}
