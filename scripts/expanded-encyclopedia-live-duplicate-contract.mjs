@@ -70,7 +70,7 @@ async function loadLocalTerms() {
     }
     for (const record of payload.records) {
       if (!isRecord(record)) throw new Error(`${file}: invalid record`);
-      const slug = clean(record.slug);
+      const slug = clean(record.slug).toLowerCase();
       if (!slug) throw new Error(`${file}: record missing slug`);
       records.push({ file, slug, record });
     }
@@ -105,6 +105,8 @@ async function loadPublishedCanonicalContent() {
   const params = new URLSearchParams({
     select: 'slug,title,content_type,primary_keyword,schema_json',
     status: 'eq.published',
+    robots_index: 'eq.true',
+    published_at: `lte.${new Date().toISOString()}`,
     content_type: `in.(${TERM_LIKE_TYPES.join(',')})`,
     // Fetch the small schema JSON alongside the identity fields and filter
     // legacy migrations locally. Pushing the JSON-path predicate into the DB
@@ -141,23 +143,33 @@ async function main() {
   const databaseIdentities = new Map();
   for (const row of publishedRows) {
     if (!isRecord(row)) continue;
-    const source = `db:${clean(row.content_type) || 'content'}:${clean(row.slug) || 'unknown'}`;
+    const rowSlug = clean(row.slug).toLowerCase();
+    const source = `db:${clean(row.content_type) || 'content'}:${rowSlug || 'unknown'}`;
     for (const value of databaseIdentityValues(row)) {
       const normalized = normalizeTermIdentity(value);
       if (!normalized) continue;
       const bucket = databaseIdentities.get(normalized) ?? [];
-      bucket.push({ source, value });
+      bucket.push({ source, value, slug: rowSlug });
       databaseIdentities.set(normalized, bucket);
     }
   }
 
   const conflicts = [];
+  let delegatedSameSlugOwners = 0;
   for (const { file, slug, record } of localTerms) {
     for (const value of localIdentityValues(record)) {
       const normalized = normalizeTermIdentity(value);
       if (!normalized) continue;
       const matches = databaseIdentities.get(normalized) ?? [];
       for (const match of matches) {
+        // Runtime canonical reconciliation deliberately delegates a static
+        // fallback record to an indexable published DB owner with the same
+        // slug. That is one entity with an authoritative owner, not two
+        // competing canonicals. Cross-slug identity collisions remain fatal.
+        if (match.slug === slug) {
+          delegatedSameSlugOwners += 1;
+          continue;
+        }
         conflicts.push({ file, slug, local: value, database: match.value, source: match.source });
       }
     }
@@ -168,7 +180,7 @@ async function main() {
       `${item.slug}\u0000${normalizeTermIdentity(item.local)}\u0000${item.source}`,
       item,
     ])).values()];
-    console.error(`EXPANDED_ENCYCLOPEDIA_LIVE_DEDUP: ${unique.length} conflict(s) detected`);
+    console.error(`EXPANDED_ENCYCLOPEDIA_LIVE_DEDUP: ${unique.length} cross-slug conflict(s) detected`);
     for (const item of unique.slice(0, 100)) {
       console.error(`- ${item.slug} (${item.file}): «${item.local}» conflicts with ${item.source} «${item.database}»`);
     }
@@ -176,7 +188,7 @@ async function main() {
     process.exit(1);
   }
 
-  console.log(`EXPANDED_ENCYCLOPEDIA_LIVE_DEDUP: ${localTerms.length} local terms checked against ${publishedRows.length} published canonical-like DB pages; no conflicts`);
+  console.log(`EXPANDED_ENCYCLOPEDIA_LIVE_DEDUP: ${localTerms.length} local terms checked against ${publishedRows.length} published canonical-like DB pages; ${delegatedSameSlugOwners} same-slug owner handoff(s) accepted; no cross-slug conflicts`);
 }
 
 main().catch((error) => {
