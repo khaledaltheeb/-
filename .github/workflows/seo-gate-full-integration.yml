@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'scripts/seo-gate.mjs'
+      - 'scripts/rich-discovery-gate.mjs'
       - 'scripts/content-richness-gate.mjs'
       - 'scripts/seo-shared-html-cache.mjs'
       - 'scripts/seo-gate-reliability-contract.mjs'
@@ -14,6 +15,7 @@ on:
     branches: [main]
     paths:
       - 'scripts/seo-gate.mjs'
+      - 'scripts/rich-discovery-gate.mjs'
       - 'scripts/content-richness-gate.mjs'
       - 'scripts/seo-shared-html-cache.mjs'
       - 'scripts/seo-gate-reliability-contract.mjs'
@@ -99,6 +101,9 @@ jobs:
           NODE
           test -d /tmp/rawafid-seo-html-cache
           test -n "$(find /tmp/rawafid-seo-html-cache -type f -name '*.json.gz' -print -quit)"
+      - name: Rich discovery using the same audited HTML (advisory)
+        continue-on-error: true
+        run: node scripts/rich-discovery-gate.mjs
       - name: Content richness using the same audited HTML
         run: node scripts/content-richness-gate.mjs
       - name: Stop candidate
