@@ -70,6 +70,8 @@ requireMatch('generator', files.generator, /version:\s*11/, 'manifest version mu
 requireMatch('text fit', files.textFit, /measureArabicTextWidth/, 'shared Arabic width measurement missing.');
 requireMatch('text fit', files.textFit, /fitArabicTextBlock/, 'shared Arabic auto-fit routine missing.');
 requireMatch('text fit', files.textFit, /wrapTextByPixels/, 'pixel-based line wrapping missing.');
+requireMatch('text fit', files.textFit, /splitOversizedTokenByPixels/, 'oversized single-token pixel splitting is required.');
+requireMatch('text fit', files.textFit, /flatMap\(\(word\) => splitOversizedTokenByPixels/, 'pixel wrapper must apply oversized-token splitting.');
 requireMatch('text fit', files.textFit, /label:\$\{text\}/, 'ImageMagick text measurement must render the actual text.');
 requireMatch('text fit', files.textFit, /widthCache = new Map\(\)/, 'measurement cache missing; build performance would regress.');
 requireMatch('text fit', files.textFit, /for \(let fontSize = maxFontSize; fontSize >= minFontSize; fontSize -= 1\)/, 'auto-fit must progressively reduce font size.');
@@ -88,4 +90,4 @@ if (errors.length) {
   process.exit(1);
 }
 
-console.log('Quick Info visual contract passed: Arabic titles are pixel-measured, auto-fitted, clipped, and hard-validated inside protected 1200x630 and 1280x720 safe areas without changing page routes or content.');
+console.log('Quick Info visual contract passed: Arabic titles are pixel-measured, auto-fitted, oversized-token safe, clipped, and hard-validated inside protected 1200x630 and 1280x720 safe areas without changing page routes or content.');
