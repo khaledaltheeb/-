@@ -5,6 +5,8 @@ const route = await readFile('app/page-image/route.tsx', 'utf8');
 const resolver = await readFile('lib/page-image.ts', 'utf8');
 const component = await readFile('components/article-featured-image.tsx', 'utf8');
 const middleware = await readFile('middleware.ts', 'utf8');
+const browserRegression = await readFile('scripts/page-image-browser-regression.mjs', 'utf8');
+const qualityWorkflow = await readFile('.github/workflows/quality.yml', 'utf8');
 const templates = {
   capability: await readFile('components/capability-article-page.tsx', 'utf8'),
   comparison: await readFile('components/comparison-article-page.tsx', 'utf8'),
@@ -62,6 +64,17 @@ requireMatch('Featured image component', component, /height=\{visual\.height\}/,
 requireMatch('Featured image component', component, /unoptimized/, 'dynamic/public image routes must remain directly fetchable without Next image rewriting.');
 forbid('Featured image component', component, /featuredImageUrl\s*\?\s*</, 'component must not hide itself when the stored featured image is missing.');
 
+requireMatch('Page-image browser regression', browserRegression, /getBBox\(\)/, 'browser regression must measure actual rendered SVG title bounds.');
+requireMatch('Page-image browser regression', browserRegression, /oversized-token-care/, 'oversized-token fixture missing.');
+requireMatch('Page-image browser regression', browserRegression, /mixed-bidi-encyclopedia/, 'mixed BiDi fixture missing.');
+requireMatch('Page-image browser regression', browserRegression, /diacritized-special-needs/, 'diacritized Arabic fixture missing.');
+requireMatch('Page-image browser regression', browserRegression, /escaping-comparison/, 'escaping fixture missing.');
+requireMatch('Page-image browser regression', browserRegression, /TITLE_SAFE = \{ left: 120, right: 1160, top: 245, bottom: 535 \}/, 'browser title safe-area contract missing.');
+requireMatch('Quality workflow', qualityWorkflow, /Page image 1280x720 safe-area browser regression/, 'page-image browser regression must stay wired into the blocking quality workflow.');
+requireMatch('Quality workflow', qualityWorkflow, /VISUAL_CHROME_PATH="\$CHROME_BIN" node scripts\/page-image-browser-regression\.mjs/, 'quality workflow must execute the page-image browser regression with real Chrome.');
+requireMatch('Quality workflow', qualityWorkflow, /Full sitemap SEO gate[\s\S]*timeout-minutes:\s*30/, 'bounded Full Sitemap SEO advisory timeout must be preserved.');
+requireMatch('Quality workflow', qualityWorkflow, /Rich results and discovery gate \(advisory\)[\s\S]*timeout-minutes:\s*20/, 'bounded Rich Discovery advisory timeout must be preserved.');
+
 const expectedKinds = {
   capability: 'capability',
   comparison: 'comparison',
@@ -90,4 +103,4 @@ if (errors.length) {
   process.exit(1);
 }
 
-console.log('Visible page-image contract passed: all eight article templates always render a curated, route-specific, or generic 16:9 image; generic fallbacks are 1280x720, grapheme-safe, middleware-bypassed, and reflected in structured data.');
+console.log('Visible page-image contract passed: all eight article templates always render a curated, route-specific, or generic 16:9 image; generic fallbacks are 1280x720, grapheme-safe, middleware-bypassed, browser-measured, and reflected in structured data.');
