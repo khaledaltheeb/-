@@ -71,6 +71,7 @@ object RawafidRepositories {
         }
     }
 
+    /** Test seam only; production callers must use [local]. */
     internal fun replaceLocalForTests(repository: RawafidLocalRepository?) {
         localRepository = repository
     }
