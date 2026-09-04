@@ -10,6 +10,19 @@ type StorageObject = {
   path: string
 }
 
+type VerificationDocRow = {
+  object_path: string | null
+}
+
+type MediaAssetRow = {
+  bucket_id: string | null
+  object_path: string | null
+}
+
+type MfaFactorLike = {
+  status?: string | null
+}
+
 const CONFIRMATION = 'DELETE_MY_RAWAFID_ACCOUNT'
 const MAX_SESSION_AGE_SECONDS = 10 * 60
 const MANAGED_ROLES = new Set(['owner', 'admin', 'editor'])
@@ -22,30 +35,12 @@ function normalizeEmail(value: unknown) {
   return String(value ?? '').trim().toLowerCase()
 }
 
-async function removeStorageObjects(admin: any, objects: StorageObject[]) {
-  const grouped = new Map<string, string[]>()
-  for (const object of objects) {
-    if (!object.bucket || !object.path) continue
-    const paths = grouped.get(object.bucket) ?? []
-    if (!paths.includes(object.path)) paths.push(object.path)
-    grouped.set(object.bucket, paths)
-  }
-
-  for (const [bucket, paths] of grouped) {
-    for (let index = 0; index < paths.length; index += 100) {
-      const chunk = paths.slice(index, index + 100)
-      const { error } = await admin.storage.from(bucket).remove(chunk)
-      if (error) throw new Error(`storage_cleanup_failed:${bucket}`)
-    }
-  }
-}
-
 async function requireDelete(query: PromiseLike<{ error: { message?: string } | null }>, label: string) {
   const { error } = await query
   if (error) throw new Error(`${label}:${error.message ?? 'unknown'}`)
 }
 
-export default {
+const handler = {
   fetch: withSupabase({ auth: 'user' }, async (req, ctx) => {
     if (req.method !== 'POST') return fail('POST required.', 405, 'method_not_allowed')
 
@@ -73,10 +68,10 @@ export default {
 
     const { data: factorData, error: factorError } = await ctx.supabase.auth.mfa.listFactors()
     if (factorError) return fail('Unable to verify account protection.', 503, 'mfa_check_failed')
-    const verifiedFactors = [
+    const verifiedFactors: MfaFactorLike[] = [
       ...(factorData?.totp ?? []),
       ...(factorData?.phone ?? []),
-    ].filter((factor: any) => factor?.status === 'verified')
+    ].filter((factor: MfaFactorLike) => factor.status === 'verified')
     const aal = String(ctx.jwtClaims?.aal ?? 'aal1')
     if (verifiedFactors.length > 0 && aal !== 'aal2') {
       return fail('Complete multi-factor authentication before deleting the account.', 403, 'mfa_required')
@@ -106,13 +101,32 @@ export default {
     if (mediaError) return fail('Unable to inventory uploaded media.', 503, 'media_inventory_failed')
 
     const storageObjects: StorageObject[] = [
-      ...(verificationDocs ?? []).map((row: any) => ({ bucket: 'provider-verification', path: String(row.object_path ?? '') })),
-      ...(mediaAssets ?? []).map((row: any) => ({ bucket: String(row.bucket_id ?? ''), path: String(row.object_path ?? '') })),
+      ...((verificationDocs ?? []) as VerificationDocRow[]).map((row) => ({
+        bucket: 'provider-verification',
+        path: String(row.object_path ?? ''),
+      })),
+      ...((mediaAssets ?? []) as MediaAssetRow[]).map((row) => ({
+        bucket: String(row.bucket_id ?? ''),
+        path: String(row.object_path ?? ''),
+      })),
     ]
 
     try {
       // Storage has no database cascade. Remove private/user-owned objects first.
-      await removeStorageObjects(admin, storageObjects)
+      const groupedStorage = new Map<string, string[]>()
+      for (const object of storageObjects) {
+        if (!object.bucket || !object.path) continue
+        const paths = groupedStorage.get(object.bucket) ?? []
+        if (!paths.includes(object.path)) paths.push(object.path)
+        groupedStorage.set(object.bucket, paths)
+      }
+      for (const [bucket, paths] of groupedStorage) {
+        for (let index = 0; index < paths.length; index += 100) {
+          const chunk = paths.slice(index, index + 100)
+          const { error } = await admin.storage.from(bucket).remove(chunk)
+          if (error) throw new Error(`storage_cleanup_failed:${bucket}`)
+        }
+      }
 
       // These tables intentionally have RESTRICT or retain independently published personal profiles.
       // Cleanup is idempotent so a failed final Auth deletion can be safely retried.
@@ -146,3 +160,5 @@ export default {
     )
   }),
 }
+
+export default handler
