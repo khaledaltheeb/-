@@ -4,9 +4,14 @@ const LATIN_UPPER = /[A-Z]/u;
 const LATIN_LOWER = /[a-z]/u;
 const DIGIT = /[0-9٠-٩]/u;
 const PUNCT = /[.,،:؛;!?؟()\[\]{}'"“”«»_\-–—/\\|]/u;
+const GRAPHEME_SEGMENTER = new Intl.Segmenter('ar', { granularity: 'grapheme' });
 
 function cleanText(value: string) {
   return String(value || '').replace(/\s+/gu, ' ').trim();
+}
+
+function graphemes(value: string) {
+  return [...GRAPHEME_SEGMENTER.segment(String(value || ''))].map((part) => part.segment);
 }
 
 function glyphUnits(char: string) {
@@ -28,20 +33,20 @@ export function estimateSeoCardTextWidth(value: string, fontSize: number) {
 
 function ellipsizeLine(value: string, maxWidth: number, fontSize: number) {
   const ellipsis = '…';
-  let chars = Array.from(cleanText(value).replace(/[،,:؛;.!؟?\-–—]+$/u, '').trim());
-  while (chars.length && estimateSeoCardTextWidth(`${chars.join('')}${ellipsis}`, fontSize) > maxWidth) chars = chars.slice(0, -1);
-  return chars.length ? `${chars.join('').trim()}${ellipsis}` : ellipsis;
+  let units = graphemes(cleanText(value).replace(/[،,:؛;.!؟?\-–—]+$/u, '').trim());
+  while (units.length && estimateSeoCardTextWidth(`${units.join('')}${ellipsis}`, fontSize) > maxWidth) units = units.slice(0, -1);
+  return units.length ? `${units.join('').trim()}${ellipsis}` : ellipsis;
 }
 
 function splitOversizedToken(token: string, maxWidth: number, fontSize: number) {
   if (estimateSeoCardTextWidth(token, fontSize) <= maxWidth) return [token];
   const chunks: string[] = [];
   let current = '';
-  for (const char of Array.from(token)) {
-    const candidate = `${current}${char}`;
+  for (const grapheme of graphemes(token)) {
+    const candidate = `${current}${grapheme}`;
     if (current && estimateSeoCardTextWidth(candidate, fontSize) > maxWidth) {
       chunks.push(current);
-      current = char;
+      current = grapheme;
     } else {
       current = candidate;
     }
