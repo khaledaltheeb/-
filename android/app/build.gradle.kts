@@ -22,11 +22,19 @@ android {
 
     buildTypes {
         debug {
-            buildConfigField("String", "RAWAFID_ENV", "\"beta-production-services\"")
+            // Debug remains the same package until a dedicated Firebase Android app/config exists.
+            // Supabase is intentionally fail-closed so local/beta builds cannot touch production by default.
+            buildConfigField("String", "RAWAFID_ENV", "\"debug-isolated\"")
+            buildConfigField("boolean", "RAWAFID_BACKEND_ENABLED", "false")
+            buildConfigField("String", "RAWAFID_SUPABASE_URL", "\"\"")
+            buildConfigField("String", "RAWAFID_SUPABASE_PUBLISHABLE_KEY", "\"\"")
         }
         release {
             isMinifyEnabled = true
             buildConfigField("String", "RAWAFID_ENV", "\"production\"")
+            buildConfigField("boolean", "RAWAFID_BACKEND_ENABLED", "true")
+            buildConfigField("String", "RAWAFID_SUPABASE_URL", "\"https://ghljwfwqsyfnthvlzxjy.supabase.co\"")
+            buildConfigField("String", "RAWAFID_SUPABASE_PUBLISHABLE_KEY", "\"sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs\"")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
