@@ -18,7 +18,7 @@
       "checklist_ar": ["هل السؤال محدد؟","هل معايير الأهلية واضحة؟","هل تاريخ آخر بحث ظاهر؟","هل عملية الاختيار قابلة للتتبع؟","هل خطر التحيز مقيّم على مستوى النتيجة؟","هل الاستنتاج متناسب مع درجة اليقين؟"],
       "sources": [
         {"label":"Cochrane — What are systematic reviews?","url":"https://www.cochrane.org/evidence/what-are-systematic-reviews","kind":"primary-methods"},
-        {"label":"Cochrane Handbook — current edition","url":"https://www.cochrane.org/authors/handbooks-and-manuals/handbook/current","kind":"primary-methods"}
+        {"label":"Cochrane Handbook — Chapter 1: Starting a review","url":"https://www.cochrane.org/authors/handbooks-and-manuals/handbook/current/chapter-01","kind":"primary-methods"}
       ]
     },
     {
@@ -35,8 +35,8 @@
       ],
       "checklist_ar": ["ما تاريخ آخر بحث؟","هل ظهرت تدخلات جديدة؟","هل توجد تجربة كبيرة لاحقة؟","هل كان اليقين الأصلي منخفضاً؟","هل معيار الرعاية تغيّر؟"],
       "sources": [
-        {"label":"Cochrane Handbook — updating reviews","url":"https://www.cochrane.org/authors/handbooks-and-manuals/handbook/current","kind":"primary-methods"},
-        {"label":"Cochrane Evidence","url":"https://www.cochrane.org/evidence","kind":"primary-evidence-navigation"}
+        {"label":"Cochrane Handbook — Chapter 4: Searching for and selecting studies, section 4.4.10","url":"https://www.cochrane.org/authors/handbooks-and-manuals/handbook/current/chapter-04","kind":"primary-methods"},
+        {"label":"MECIR Manual — C37 rerunning searches","url":"https://resources.cochrane.org/mecir-manual","kind":"primary-standards"}
       ]
     },
     {
@@ -53,7 +53,8 @@
       ],
       "checklist_ar": ["هل السكان محددون بما يكفي؟","هل المقارنة واقعية؟","هل النتائج مهمة للمرضى؟","هل توقيت القياس محدد؟","هل يمكن تحويل السؤال إلى معايير أهلية؟"],
       "sources": [
-        {"label":"Cochrane Handbook — determining scope and questions","url":"https://www.cochrane.org/authors/handbooks-and-manuals/handbook/current/chapter-02","kind":"primary-methods"}
+        {"label":"Cochrane Handbook — Chapter 2: Determining scope and review questions","url":"https://www.cochrane.org/authors/handbooks-and-manuals/handbook/current/chapter-02","kind":"primary-methods"},
+        {"label":"Cochrane Handbook — Chapter 3: PICO and eligibility criteria","url":"https://www.cochrane.org/authors/handbooks-and-manuals/handbook/current/chapter-03","kind":"primary-methods"}
       ]
     },
     {
@@ -70,7 +71,8 @@
       ],
       "checklist_ar": ["هل توجد حجة مسبقة للتجميع؟","هل تختلف آلية التدخل؟","هل تختلف خطورة السكان؟","هل المتوسط المشترك قابل للتفسير؟","هل المجموعات الفرعية محددة مسبقاً؟"],
       "sources": [
-        {"label":"Cochrane Handbook — scope and questions","url":"https://www.cochrane.org/authors/handbooks-and-manuals/handbook/current/chapter-02","kind":"primary-methods"}
+        {"label":"Cochrane Handbook — Chapter 2: Determining scope and review questions","url":"https://www.cochrane.org/authors/handbooks-and-manuals/handbook/current/chapter-02","kind":"primary-methods"},
+        {"label":"Cochrane Handbook — Chapter 3: Grouping studies for synthesis","url":"https://www.cochrane.org/authors/handbooks-and-manuals/handbook/current/chapter-03","kind":"primary-methods"}
       ]
     },
     {
@@ -88,7 +90,8 @@
       "checklist_ar": ["هل شارك مستخدمو الدليل مبكراً؟","هل النتائج تهم المرضى؟","هل فئات مهمة ممثلة؟","هل فروق الإنصاف محددة مسبقاً؟","هل الفجوات في التمثيل معلنة؟"],
       "sources": [
         {"label":"Cochrane — Patient and Public Involvement principles","url":"https://www.cochrane.org/get-involved/patient-and-public-network/statement-principles-patient-and-public-involvement","kind":"primary-governance"},
-        {"label":"Cochrane Handbook — current edition","url":"https://www.cochrane.org/authors/handbooks-and-manuals/handbook/current","kind":"primary-methods"}
+        {"label":"Cochrane Handbook — Chapter 2: Stakeholder input in question formulation","url":"https://www.cochrane.org/authors/handbooks-and-manuals/handbook/current/chapter-02","kind":"primary-methods"},
+        {"label":"Cochrane Handbook — Chapter 16: Equity and specific populations","url":"https://www.cochrane.org/authors/handbooks-and-manuals/handbook/current/chapter-16","kind":"primary-methods"}
       ]
     },
     {
@@ -105,7 +108,7 @@
       ],
       "checklist_ar": ["هل يوجد بروتوكول أو تسجيل؟","هل النتائج الأساسية ثابتة؟","هل التعديلات موثقة؟","هل زمن التعديل واضح؟","هل سبب التغيير مستقل عن اتجاه النتائج؟"],
       "sources": [
-        {"label":"Cochrane Handbook — current edition","url":"https://www.cochrane.org/authors/handbooks-and-manuals/handbook/current","kind":"primary-methods"},
+        {"label":"Cochrane Handbook — Chapter 1: Starting a review","url":"https://www.cochrane.org/authors/handbooks-and-manuals/handbook/current/chapter-01","kind":"primary-methods"},
         {"label":"MECIR Manual","url":"https://resources.cochrane.org/mecir-manual","kind":"primary-standards"}
       ]
     },
@@ -123,7 +126,8 @@
       ],
       "checklist_ar": ["هل المعايير تشغيلية؟","هل كل قيد له مبرر؟","هل اللغة مقيدة؟","هل توفر النتائج شرط دخول؟","هل أسباب الاستبعاد موثقة؟"],
       "sources": [
-        {"label":"Cochrane Handbook — selecting studies","url":"https://www.cochrane.org/authors/handbooks-and-manuals/handbook/current","kind":"primary-methods"},
+        {"label":"Cochrane Handbook — Chapter 3: Eligibility criteria and grouping for synthesis","url":"https://www.cochrane.org/authors/handbooks-and-manuals/handbook/current/chapter-03","kind":"primary-methods"},
+        {"label":"Cochrane Handbook — Chapter 4: Selecting studies","url":"https://www.cochrane.org/authors/handbooks-and-manuals/handbook/current/chapter-04","kind":"primary-methods"},
         {"label":"PRISMA 2020","url":"https://www.prisma-statement.org/prisma-2020","kind":"reporting-standard"}
       ]
     },
@@ -141,7 +145,9 @@
       ],
       "checklist_ar": ["ما نوع السؤال؟","هل العشوائية ممكنة وذات صلة؟","هل الضرر نادر أو طويل الأجل؟","هل الالتباس قابل للقياس؟","هل خطة تقييم التحيز مناسبة لكل تصميم؟"],
       "sources": [
-        {"label":"Cochrane Handbook — current edition","url":"https://www.cochrane.org/authors/handbooks-and-manuals/handbook/current","kind":"primary-methods"}
+        {"label":"Cochrane Handbook — Chapter 3: Determining study designs to include","url":"https://www.cochrane.org/authors/handbooks-and-manuals/handbook/current/chapter-03","kind":"primary-methods"},
+        {"label":"Cochrane Handbook — Chapter 19: Adverse effects","url":"https://www.cochrane.org/authors/handbooks-and-manuals/handbook/current/chapter-19","kind":"primary-methods"},
+        {"label":"Cochrane Handbook — Chapter 24: Non-randomized studies of intervention effects","url":"https://www.cochrane.org/authors/handbooks-and-manuals/handbook/current/chapter-24","kind":"primary-methods"}
       ]
     },
     {
@@ -158,7 +164,8 @@
       ],
       "checklist_ar": ["هل النتيجة مهمة للمريض؟","هل هي وسيطة؟","هل التوقيت محدد؟","هل النتائج الحرجة محددة مسبقاً؟","هل توجد Core Outcome Set مناسبة؟"],
       "sources": [
-        {"label":"Cochrane Handbook — outcomes and analysis","url":"https://www.cochrane.org/authors/handbooks-and-manuals/handbook/current","kind":"primary-methods"},
+        {"label":"Cochrane Handbook — Chapter 3: Selecting, prioritizing and grouping outcomes","url":"https://www.cochrane.org/authors/handbooks-and-manuals/handbook/current/chapter-03","kind":"primary-methods"},
+        {"label":"Cochrane Handbook — Chapter 14: Summary of findings and certainty","url":"https://www.cochrane.org/authors/handbooks-and-manuals/handbook/current/chapter-14","kind":"primary-methods"},
         {"label":"COMET Initiative","url":"https://www.comet-initiative.org/","kind":"external-methods"}
       ]
     },
@@ -176,7 +183,7 @@
       ],
       "checklist_ar": ["هل الأضرار محددة مسبقاً؟","هل الأحداث الخطيرة منفصلة؟","هل المتابعة كافية؟","هل المقام واضح؟","هل غياب الدلالة فُسر كغياب للضرر؟"],
       "sources": [
-        {"label":"Cochrane Handbook — adverse effects","url":"https://www.cochrane.org/authors/handbooks-and-manuals/handbook/current","kind":"primary-methods"}
+        {"label":"Cochrane Handbook — Chapter 19: Adverse effects","url":"https://www.cochrane.org/authors/handbooks-and-manuals/handbook/current/chapter-19","kind":"primary-methods"}
       ]
     },
     {
@@ -193,7 +200,7 @@
       ],
       "checklist_ar": ["هل مكونات التدخل محددة؟","هل آلية العمل معلنة؟","هل السياق موصوف؟","هل فرضيات التغاير مسبقة؟","هل الاستنتاج يحدد حدود النقل؟"],
       "sources": [
-        {"label":"Cochrane Handbook — complex interventions and synthesis","url":"https://www.cochrane.org/authors/handbooks-and-manuals/handbook/current","kind":"primary-methods"}
+        {"label":"Cochrane Handbook — Chapter 17: Intervention complexity","url":"https://www.cochrane.org/authors/handbooks-and-manuals/handbook/current/chapter-17","kind":"primary-methods"}
       ]
     },
     {
@@ -210,7 +217,8 @@
       ],
       "checklist_ar": ["هل المقارنة محددة؟","هل usual care موصوفة؟","هل قواعد التجميع مسبقة؟","هل الجرعة/المدة قد تغير الأثر؟","هل التقدير المجمع له معنى سريري؟"],
       "sources": [
-        {"label":"Cochrane Handbook — synthesis planning","url":"https://www.cochrane.org/authors/handbooks-and-manuals/handbook/current","kind":"primary-methods"}
+        {"label":"Cochrane Handbook — Chapter 3: Grouping interventions and comparisons for synthesis","url":"https://www.cochrane.org/authors/handbooks-and-manuals/handbook/current/chapter-03","kind":"primary-methods"},
+        {"label":"Cochrane Handbook — Chapter 10: Analysing data and undertaking meta-analyses","url":"https://www.cochrane.org/authors/handbooks-and-manuals/handbook/current/chapter-10","kind":"primary-methods"}
       ]
     }
   ]
