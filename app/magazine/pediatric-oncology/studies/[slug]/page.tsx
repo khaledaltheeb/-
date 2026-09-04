@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import MagazineArticle from '@/components/magazine-article';
 import { getRelatedMagazine } from '@/lib/magazine';
 import { getPediatricOncologyEvidenceRecordForRequest } from '@/lib/pediatric-oncology-release-preview';
+import { resolveVisiblePageImage } from '@/lib/page-image';
 import { buildSeoMetadata, IS_TEMPORARY_HOST } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
@@ -24,6 +25,12 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
   if (!record) return {};
   const path = record.canonical_url || `/magazine/pediatric-oncology/studies/${slug}/`;
   const verifiedPreview = Boolean(token && record.schema_json?.release_token === token);
+  const visual = resolveVisiblePageImage({
+    title: record.title,
+    kind: 'article',
+    featuredImageUrl: record.featured_image_url,
+    featuredImageAlt: record.featured_image_alt,
+  });
   const metadata = buildSeoMetadata({
     title: record.seo_title || record.title,
     description: record.seo_description || record.excerpt,
@@ -31,6 +38,10 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
     index: record.robots_index,
     follow: record.robots_follow,
     type: 'article',
+    image: visual.src,
+    imageAlt: visual.alt,
+    imageWidth: visual.width,
+    imageHeight: visual.height,
     publishedTime: record.published_at,
     modifiedTime: record.updated_at,
     authors: [{ name: record.author_display_name || 'منصة روافد' }],
