@@ -7,6 +7,17 @@ plugins {
     id("com.google.gms.google-services")
 }
 
+val releaseStoreFile = System.getenv("RAWAFID_RELEASE_STORE_FILE")
+val releaseStorePassword = System.getenv("RAWAFID_RELEASE_STORE_PASSWORD")
+val releaseKeyAlias = System.getenv("RAWAFID_RELEASE_KEY_ALIAS")
+val releaseKeyPassword = System.getenv("RAWAFID_RELEASE_KEY_PASSWORD")
+val hasReleaseSigning = listOf(
+    releaseStoreFile,
+    releaseStorePassword,
+    releaseKeyAlias,
+    releaseKeyPassword
+).all { !it.isNullOrBlank() }
+
 android {
     namespace = "org.healthrenewal.rawafid"
     compileSdk = 36
@@ -15,15 +26,30 @@ android {
         applicationId = "org.healthrenewal.rawafid"
         minSdk = 26
         targetSdk = 36
-        versionCode = 4
-        versionName = "0.4.0-beta01"
+        versionCode = 5
+        versionName = "0.4.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        if (hasReleaseSigning) {
+            create("productionRelease") {
+                storeFile = file(releaseStoreFile!!)
+                storePassword = releaseStorePassword
+                keyAlias = releaseKeyAlias
+                keyPassword = releaseKeyPassword
+                enableV1Signing = true
+                enableV2Signing = true
+                enableV3Signing = true
+                enableV4Signing = true
+            }
+        }
     }
 
     buildTypes {
         debug {
-            // Debug remains the same package until a dedicated Firebase Android app/config exists.
-            // Supabase is intentionally fail-closed so local/beta builds cannot touch production by default.
+            // Internal CI/test build only. It is not a separate user-facing environment.
+            // Supabase stays fail-closed so test builds cannot touch production by default.
             buildConfigField("String", "RAWAFID_ENV", "\"debug-isolated\"")
             buildConfigField("boolean", "RAWAFID_BACKEND_ENABLED", "false")
             buildConfigField("String", "RAWAFID_SUPABASE_URL", "\"\"")
@@ -31,6 +57,9 @@ android {
         }
         release {
             isMinifyEnabled = true
+            if (hasReleaseSigning) {
+                signingConfig = signingConfigs.getByName("productionRelease")
+            }
             buildConfigField("String", "RAWAFID_ENV", "\"production\"")
             buildConfigField("boolean", "RAWAFID_BACKEND_ENABLED", "true")
             buildConfigField("String", "RAWAFID_SUPABASE_URL", "\"https://ghljwfwqsyfnthvlzxjy.supabase.co\"")
