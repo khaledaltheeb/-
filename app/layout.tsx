@@ -3,7 +3,7 @@ import Script from 'next/script';
 import { Noto_Sans_Arabic } from 'next/font/google';
 import { BRAND_NAME, DEFAULT_DESCRIPTION, INDEXING_ENABLED, SITE_URL, organizationJsonLd } from '@/lib/seo';
 import { founderJsonLd } from '@/lib/founder';
-import RawafidAssistant from '@/components/rawafid-assistant';
+import RawafidAssistantLoader from '@/components/rawafid-assistant-loader';
 import './rawafid-theme.css';
 
 /* Compatibility modules now live behind the central entry point:
@@ -151,7 +151,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema).replace(/</g, '\\u003c') }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(founderSchema).replace(/</g, '\\u003c') }} />
         {children}
-        {assistantEnabled ? <RawafidAssistant /> : null}
+        {assistantEnabled ? <RawafidAssistantLoader /> : null}
         <script dangerouslySetInnerHTML={{ __html: serviceWorkerBootstrap }} />
       </body>
     </html>
