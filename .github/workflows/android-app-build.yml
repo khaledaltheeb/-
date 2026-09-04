@@ -4,14 +4,17 @@ on:
   pull_request:
     paths:
       - 'android/**'
+      - 'app/account/delete/**'
       - 'supabase/config.toml'
       - 'supabase/functions/rawafid-circle-push/**'
+      - 'supabase/functions/rawafid-delete-account/**'
       - 'supabase/migrations/*rawafid_circle*.sql'
       - '.gitignore'
       - '.github/scripts/verify_android_catalogs.py'
       - '.github/scripts/verify_android_motion.py'
       - '.github/scripts/verify_android_safety.py'
       - '.github/scripts/verify_android_account_discovery.py'
+      - '.github/scripts/verify_android_account_deletion.py'
       - '.github/scripts/verify_android_safe_drive.py'
       - '.github/scripts/verify_android_safe_drive_weekly.py'
       - '.github/scripts/verify_android_privacy_hardening.py'
@@ -22,14 +25,17 @@ on:
     branches: [main]
     paths:
       - 'android/**'
+      - 'app/account/delete/**'
       - 'supabase/config.toml'
       - 'supabase/functions/rawafid-circle-push/**'
+      - 'supabase/functions/rawafid-delete-account/**'
       - 'supabase/migrations/*rawafid_circle*.sql'
       - '.gitignore'
       - '.github/scripts/verify_android_catalogs.py'
       - '.github/scripts/verify_android_motion.py'
       - '.github/scripts/verify_android_safety.py'
       - '.github/scripts/verify_android_account_discovery.py'
+      - '.github/scripts/verify_android_account_deletion.py'
       - '.github/scripts/verify_android_safe_drive.py'
       - '.github/scripts/verify_android_safe_drive_weekly.py'
       - '.github/scripts/verify_android_privacy_hardening.py'
@@ -54,6 +60,7 @@ jobs:
           python3 .github/scripts/verify_android_motion.py
           python3 .github/scripts/verify_android_safety.py
           python3 .github/scripts/verify_android_account_discovery.py
+          python3 .github/scripts/verify_android_account_deletion.py
           python3 .github/scripts/verify_android_safe_drive.py
           python3 .github/scripts/verify_android_safe_drive_weekly.py
           python3 .github/scripts/verify_android_privacy_hardening.py
