@@ -74,7 +74,7 @@ export default function CochraneGuidesIndex() {
       </nav>
 
       <section className="public-index-hero" aria-labelledby="cochrane-guides-title">
-        <span className="eyebrow">بناء بالمعيار الذهبي · حزمة ما قبل النشر من 50 دليلاً</span>
+        <span className="eyebrow">بناء بالمعيار الذهبي · <span lang="en">50-guide pre-release corpus</span></span>
         <h1 id="cochrane-guides-title">الأدلة المنهجية لقراءة وبناء المراجعات المنهجية</h1>
         <p>خمسون دليلاً عربياً أصلياً في مسار واحد يبدأ من السؤال والبروتوكول، يمر بالبحث والاختيار واستخراج البيانات وخطر التحيز، ثم مقاييس الأثر والتركيب وGRADE، وينتهي بقابلية التطبيق والقرار وتطبيقات واقعية وحوكمة الترجمة العلمية. كل صفحة لها سؤال مستقل ومصادر أولية وروابط إلى الصفحات التي تكمل منطقها.</p>
         <div className="public-stat-strip"><span>{guideCount} صفحة مكتوبة</span><span>5 طبقات مترابطة</span><span>لا فهرسة قبل بوابة الجودة النهائية</span></div>
