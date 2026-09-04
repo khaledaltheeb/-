@@ -22,6 +22,8 @@ requireMatch('SEO card route', route, /clipPath id="safe-text"/, 'final SVG clip
 requireMatch('SEO card route', route, /width="1200" height="630" viewBox="0 0 1200 630"/, 'fallback social image must stay 1200x630.');
 requireMatch('SEO card route', route, /direction="rtl"/, 'Arabic RTL direction is required.');
 requireMatch('SEO card route', route, /unicode-bidi="plaintext"/, 'Arabic bidi isolation is required.');
+requireMatch('SEO card route', route, /function rtlText\([\s\S]*text-anchor="start" direction="rtl" unicode-bidi="plaintext"/, 'dynamic RTL text must anchor from the RTL start edge so x remains the right boundary.');
+forbid('SEO card route', route, /function rtlText\([\s\S]*text-anchor="end" direction="rtl"/, 'dynamic RTL text must never use end anchoring because it can extend beyond the right safe edge.');
 requireMatch('SEO card route', route, /Noto Sans Arabic,Tahoma,Arial,sans-serif/, 'Arabic-first font stack is required.');
 requireMatch('SEO card route', route, /https:\/\/healthrenewal\.org/, 'canonical HTTPS site label must be present.');
 requireMatch('SEO card route', route, /function rtlText\([\s\S]*escapeXml\(text\)/, 'all dynamic rendered text must pass through the shared XML-escaping renderer.');
@@ -50,6 +52,7 @@ requireMatch('SEO card browser regression', browserRegression, /CONTEXT = \{ lef
 requireMatch('SEO card browser regression', browserRegression, /title and context are visually colliding/, 'browser regression must reject title/context collisions.');
 requireMatch('Quality workflow', qualityWorkflow, /SEO card Arabic safe-area browser regression/, 'SEO card browser regression must stay wired into the blocking quality workflow.');
 requireMatch('Quality workflow', qualityWorkflow, /VISUAL_CHROME_PATH="\$CHROME_BIN" node scripts\/seo-card-browser-regression\.mjs/, 'quality workflow must execute the SEO card browser regression with the real Chrome binary.');
+requireMatch('Quality workflow', qualityWorkflow, /Full sitemap SEO gate[\s\S]*timeout-minutes:\s*30/, 'bounded Full Sitemap SEO advisory timeout must be preserved.');
 requireMatch('Quality workflow', qualityWorkflow, /Rich results and discovery gate \(advisory\)[\s\S]*timeout-minutes:\s*20/, 'bounded Rich Discovery advisory timeout must be preserved.');
 
 requireMatch('SEO metadata', seo, /fallbackSocialImagePath/, 'central fallback image resolver must remain present.');
@@ -64,4 +67,4 @@ if (errors.length) {
   process.exit(1);
 }
 
-console.log('SEO card image contract passed: the global 1200x630 fallback uses conservative Arabic auto-fit, oversized-token handling, XML escaping, blocking browser-measured safe-area fixtures, and hard clipping without changing page routes or content.');
+console.log('SEO card image contract passed: the global 1200x630 fallback uses conservative Arabic auto-fit, correct RTL right-edge anchoring, oversized-token handling, XML escaping, blocking browser-measured safe-area fixtures, and hard clipping without changing page routes or content.');
