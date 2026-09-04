@@ -5,6 +5,7 @@ on:
     paths:
       - 'android/**'
       - 'app/account/delete/**'
+      - 'app/account/security/page.tsx'
       - 'supabase/config.toml'
       - 'supabase/functions/rawafid-circle-push/**'
       - 'supabase/functions/rawafid-delete-account/**'
@@ -26,6 +27,7 @@ on:
     paths:
       - 'android/**'
       - 'app/account/delete/**'
+      - 'app/account/security/page.tsx'
       - 'supabase/config.toml'
       - 'supabase/functions/rawafid-circle-push/**'
       - 'supabase/functions/rawafid-delete-account/**'
