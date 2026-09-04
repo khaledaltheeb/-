@@ -13,9 +13,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -25,7 +22,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -41,7 +37,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import org.json.JSONArray
 import org.json.JSONObject
@@ -84,7 +79,17 @@ object MedicationStore {
             buildList {
                 for (i in 0 until a.length()) {
                     val o = a.optJSONObject(i) ?: continue
-                    add(MedicationItem(o.optLong("id"), o.optString("name"), o.optString("instruction"), o.optInt("hour"), o.optInt("minute"), o.optBoolean("reminder"), if (o.has("remaining") && !o.isNull("remaining")) o.optInt("remaining") else null))
+                    add(
+                        MedicationItem(
+                            o.optLong("id"),
+                            o.optString("name"),
+                            o.optString("instruction"),
+                            o.optInt("hour"),
+                            o.optInt("minute"),
+                            o.optBoolean("reminder"),
+                            if (o.has("remaining") && !o.isNull("remaining")) o.optInt("remaining") else null
+                        )
+                    )
                 }
             }.sortedWith(compareBy<MedicationItem> { it.hour }.thenBy { it.minute })
         }.getOrDefault(emptyList())
@@ -93,7 +98,16 @@ object MedicationStore {
     fun saveMedications(context: Context, values: List<MedicationItem>) {
         val a = JSONArray()
         values.take(100).forEach { m ->
-            a.put(JSONObject().put("id", m.id).put("name", m.name).put("instruction", m.instruction).put("hour", m.hour).put("minute", m.minute).put("reminder", m.reminderEnabled).put("remaining", m.remaining ?: JSONObject.NULL))
+            a.put(
+                JSONObject()
+                    .put("id", m.id)
+                    .put("name", m.name)
+                    .put("instruction", m.instruction)
+                    .put("hour", m.hour)
+                    .put("minute", m.minute)
+                    .put("reminder", m.reminderEnabled)
+                    .put("remaining", m.remaining ?: JSONObject.NULL)
+            )
         }
         SensitiveLocalPayload.write(context, ENCRYPTED_MEDICATIONS, a.toString(), PREFS, MEDICATIONS)
     }
@@ -120,13 +134,23 @@ object MedicationStore {
 
     fun logToday(context: Context, medicationId: Long, status: String, note: String = "") {
         val today = LocalDate.now().toString()
-        val next = listOf(MedicationLog(medicationId, today, status, note)) + logs(context).filterNot { it.medicationId == medicationId && it.day == today }
+        val next = listOf(MedicationLog(medicationId, today, status, note)) +
+            logs(context).filterNot { it.medicationId == medicationId && it.day == today }
         val a = JSONArray()
-        next.take(1000).forEach { l -> a.put(JSONObject().put("medication_id", l.medicationId).put("day", l.day).put("status", l.status).put("note", l.note)) }
+        next.take(1000).forEach { l ->
+            a.put(
+                JSONObject()
+                    .put("medication_id", l.medicationId)
+                    .put("day", l.day)
+                    .put("status", l.status)
+                    .put("note", l.note)
+            )
+        }
         SensitiveLocalPayload.write(context, ENCRYPTED_LOGS, a.toString(), PREFS, LOGS)
     }
 
-    fun todayStatus(context: Context, medicationId: Long): String? = logs(context).firstOrNull { it.medicationId == medicationId && it.day == LocalDate.now().toString() }?.status
+    fun todayStatus(context: Context, medicationId: Long): String? =
+        logs(context).firstOrNull { it.medicationId == medicationId && it.day == LocalDate.now().toString() }?.status
 }
 
 object MedicationReminderScheduler {
@@ -171,7 +195,12 @@ class MedicationReminderReceiver : BroadcastReceiver() {
         if (Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) return
 
         NotificationChannels.create(context)
-        val open = PendingIntent.getActivity(context, 9700 + id.toInt().and(0x0fff), Intent(context, MedicationCompanionActivity::class.java), PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        val open = PendingIntent.getActivity(
+            context,
+            9700 + id.toInt().and(0x0fff),
+            Intent(context, MedicationCompanionActivity::class.java),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
         val body = if (medication.instruction.isBlank()) "تذكير بالعلاج الذي سجلته في روافد." else medication.instruction
         val publicVersion = androidx.core.app.NotificationCompat.Builder(context, NotificationChannels.TREATMENT)
@@ -201,7 +230,7 @@ class MedicationCompanionActivity : ComponentActivity() {
         setContent {
             RawafidTheme {
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                    Surface(Modifier.fillMaxSize()) { MedicationCompanionScreen() }
+                    MedicationCompanionScreen(onClose = { finish() })
                 }
             }
         }
@@ -209,7 +238,7 @@ class MedicationCompanionActivity : ComponentActivity() {
 }
 
 @Composable
-private fun MedicationCompanionScreen() {
+private fun MedicationCompanionScreen(onClose: () -> Unit) {
     val context = LocalContext.current
     var version by remember { mutableIntStateOf(0) }
     var name by rememberSaveable { mutableStateOf("") }
@@ -219,54 +248,139 @@ private fun MedicationCompanionScreen() {
     val meds = remember(version) { MedicationStore.medications(context) }
     val requestNotifications = rememberNotificationPermissionRequester()
 
-    LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        item {
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text("رفيق العلاج", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-                Text("يسجل ويذكّر بما أدخلته أنت أو وصفه مختصك. تحفظ السجلات محليًا بشكل مشفر، ولا يغيّر روافد جرعة ولا يقترح علاجًا.")
-            }
-        }
-        item {
-            Card {
-                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(9.dp)) {
-                    Text("إضافة علاج", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                    OutlinedTextField(name, { name = it.take(100) }, label = { Text("اسم الدواء/العلاج") }, modifier = Modifier.fillMaxWidth())
-                    OutlinedTextField(instruction, { instruction = it.take(300) }, label = { Text("تعليماتك المسجلة — مثال: حسب وصف الطبيب") }, modifier = Modifier.fillMaxWidth())
-                    OutlinedTextField(time, { time = it.take(5) }, label = { Text("الوقت HH:mm") }, modifier = Modifier.fillMaxWidth())
-                    OutlinedTextField(remaining, { remaining = it.filter(Char::isDigit).take(5) }, label = { Text("المتبقي — اختياري") }, modifier = Modifier.fillMaxWidth())
-                    Button(onClick = {
-                        val parsed = runCatching { LocalTime.parse(time, DateTimeFormatter.ofPattern("HH:mm")) }.getOrNull()
-                        if (name.isNotBlank() && parsed != null) {
-                            val id = System.currentTimeMillis()
-                            val item = MedicationItem(id, name.trim(), instruction.trim(), parsed.hour, parsed.minute, true, remaining.toIntOrNull())
-                            MedicationStore.saveMedications(context, meds + item)
-                            MedicationReminderScheduler.sync(context, item)
-                            requestNotifications()
-                            name = ""; instruction = ""; remaining = ""; version++
-                        }
-                    }) { Text("حفظ وتفعيل التذكير") }
+    RawafidScreenScaffold(
+        title = "رفيق العلاج",
+        subtitle = "تذكير محلي مشفر بما سجلته أنت أو وصفه مختصك",
+        onBack = onClose
+    ) { contentPadding ->
+        LazyColumn(
+            contentPadding = contentPadding,
+            verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)
+        ) {
+            item {
+                Card {
+                    Text(
+                        "لا يغيّر روافد جرعة، ولا يقترح علاجًا، ولا يستبدل تعليمات الطبيب أو الصيدلي.",
+                        modifier = Modifier.padding(RawafidSpacing.CardContent),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
-        }
-        if (meds.isEmpty()) item { Text("لا توجد علاجات محفوظة.") }
-        items(meds, key = { it.id }) { med ->
-            val status = MedicationStore.todayStatus(context, med.id)
-            Card {
-                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text(med.name, fontWeight = FontWeight.Bold)
-                    Text(String.format("%02d:%02d", med.hour, med.minute))
-                    if (med.instruction.isNotBlank()) Text(med.instruction)
-                    med.remaining?.let { Text("المتبقي المسجل: $it") }
-                    Text("اليوم: ${status ?: "لم يُسجل"}")
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Button(onClick = { MedicationStore.logToday(context, med.id, "أخذته"); version++ }) { Text("أخذته") }
-                        OutlinedButton(onClick = { MedicationStore.logToday(context, med.id, "تخطيته"); version++ }) { Text("تخطيته") }
+
+            item {
+                Card {
+                    Column(
+                        Modifier.padding(RawafidSpacing.CardContent),
+                        verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)
+                    ) {
+                        Text("إضافة علاج", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                        OutlinedTextField(
+                            value = name,
+                            onValueChange = { name = it.take(100) },
+                            label = { Text("اسم الدواء/العلاج") },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true
+                        )
+                        OutlinedTextField(
+                            value = instruction,
+                            onValueChange = { instruction = it.take(300) },
+                            label = { Text("تعليماتك المسجلة — مثال: حسب وصف الطبيب") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        OutlinedTextField(
+                            value = time,
+                            onValueChange = { time = it.take(5) },
+                            label = { Text("الوقت HH:mm") },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true
+                        )
+                        OutlinedTextField(
+                            value = remaining,
+                            onValueChange = { remaining = it.filter(Char::isDigit).take(5) },
+                            label = { Text("المتبقي — اختياري") },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true
+                        )
+                        Button(
+                            modifier = Modifier.fillMaxWidth(),
+                            onClick = {
+                                val parsed = runCatching { LocalTime.parse(time, DateTimeFormatter.ofPattern("HH:mm")) }.getOrNull()
+                                if (name.isNotBlank() && parsed != null) {
+                                    val id = System.currentTimeMillis()
+                                    val item = MedicationItem(
+                                        id,
+                                        name.trim(),
+                                        instruction.trim(),
+                                        parsed.hour,
+                                        parsed.minute,
+                                        true,
+                                        remaining.toIntOrNull()
+                                    )
+                                    MedicationStore.saveMedications(context, meds + item)
+                                    MedicationReminderScheduler.sync(context, item)
+                                    requestNotifications()
+                                    name = ""
+                                    instruction = ""
+                                    remaining = ""
+                                    version++
+                                }
+                            }
+                        ) { Text("حفظ وتفعيل التذكير") }
                     }
-                    TextButton(onClick = {
-                        MedicationReminderScheduler.cancel(context, med.id)
-                        MedicationStore.saveMedications(context, meds.filterNot { it.id == med.id })
-                        version++
-                    }) { Text("حذف") }
+                }
+            }
+
+            if (meds.isEmpty()) {
+                item {
+                    Card {
+                        Text(
+                            "لا توجد علاجات محفوظة بعد.",
+                            modifier = Modifier.padding(RawafidSpacing.CardContent),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
+            items(meds, key = { it.id }) { med ->
+                val status = MedicationStore.todayStatus(context, med.id)
+                Card {
+                    Column(
+                        Modifier.padding(RawafidSpacing.CardContent),
+                        verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)
+                    ) {
+                        Text(med.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                        Text(String.format("%02d:%02d", med.hour, med.minute))
+                        if (med.instruction.isNotBlank()) Text(med.instruction)
+                        med.remaining?.let { Text("المتبقي المسجل: $it") }
+                        Text("اليوم: ${status ?: "لم يُسجل"}")
+
+                        Column(verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
+                            Button(
+                                modifier = Modifier.fillMaxWidth(),
+                                onClick = {
+                                    MedicationStore.logToday(context, med.id, "أخذته")
+                                    version++
+                                }
+                            ) { Text("أخذته") }
+                            OutlinedButton(
+                                modifier = Modifier.fillMaxWidth(),
+                                onClick = {
+                                    MedicationStore.logToday(context, med.id, "تخطيته")
+                                    version++
+                                }
+                            ) { Text("تخطيته") }
+                        }
+
+                        TextButton(
+                            modifier = Modifier.fillMaxWidth(),
+                            onClick = {
+                                MedicationReminderScheduler.cancel(context, med.id)
+                                MedicationStore.saveMedications(context, meds.filterNot { it.id == med.id })
+                                version++
+                            }
+                        ) { Text("حذف") }
+                    }
                 }
             }
         }
