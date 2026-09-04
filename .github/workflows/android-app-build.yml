@@ -22,6 +22,7 @@ on:
       - '.github/scripts/verify_android_circle_migrations.py'
       - '.github/scripts/verify_android_life_inbox.py'
       - '.github/scripts/verify_android_ui_polish.py'
+      - '.github/scripts/verify_android_environment_isolation.py'
       - '.github/workflows/android-app-build.yml'
   push:
     branches: [main]
@@ -45,6 +46,7 @@ on:
       - '.github/scripts/verify_android_circle_migrations.py'
       - '.github/scripts/verify_android_life_inbox.py'
       - '.github/scripts/verify_android_ui_polish.py'
+      - '.github/scripts/verify_android_environment_isolation.py'
       - '.github/workflows/android-app-build.yml'
 
 permissions:
@@ -71,6 +73,7 @@ jobs:
           python3 .github/scripts/verify_android_circle_migrations.py
           python3 .github/scripts/verify_android_life_inbox.py
           python3 .github/scripts/verify_android_ui_polish.py
+          python3 .github/scripts/verify_android_environment_isolation.py
 
       - name: Set up JDK 17
         uses: actions/setup-java@v5
