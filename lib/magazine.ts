@@ -25,6 +25,8 @@ export type MagazineRecord = {
   references_json: MagazineReference[] | null;
   medical_disclaimer: string | null;
   schema_json: Record<string, unknown> | null;
+  featured_image_url: string | null;
+  featured_image_alt: string | null;
 };
 
 export type MagazineListingRecord = Pick<
@@ -87,7 +89,7 @@ export type ResearchCatalogStats = {
   clusters: Array<{ key: string; label: string; count: number }>;
 };
 
-const FIELDS = 'id,slug,title,excerpt,body_json,body_text,seo_title,seo_description,canonical_url,robots_index,robots_follow,published_at,updated_at,primary_keyword,secondary_keywords,semantic_terms,author_display_name,reviewer_display_name,reviewer_credentials,last_reviewed_at,references_json,medical_disclaimer,schema_json';
+const FIELDS = 'id,slug,title,excerpt,body_json,body_text,seo_title,seo_description,canonical_url,robots_index,robots_follow,published_at,updated_at,primary_keyword,secondary_keywords,semantic_terms,author_display_name,reviewer_display_name,reviewer_credentials,last_reviewed_at,references_json,medical_disclaimer,schema_json,featured_image_url,featured_image_alt';
 const LISTING_FIELDS = 'id,slug,title,excerpt,canonical_url,published_at,updated_at,schema_json';
 const RESEARCH_CATALOG_FIELDS = 'id,openalex_id,doi,source_url,title,publication_date,publication_year,work_type,evidence_kind_ar,language,authors,journal_title,publisher,cited_by_count,is_open_access,oa_status,primary_topic,rawafid_cluster,rawafid_cluster_ar,catalog_rank,source_api,last_synced_at';
 
