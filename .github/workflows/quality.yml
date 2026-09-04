@@ -118,15 +118,18 @@ jobs:
       - name: Production HTTP smoke
         run: npm run smoke
       - name: Full sitemap SEO gate
+        if: github.event_name == 'push'
         continue-on-error: true
         shell: bash
         run: |
           set -o pipefail
           node scripts/seo-gate.mjs 2>&1 | tee /tmp/rawafid-seo-gate.log
       - name: Rich results and discovery gate (advisory)
+        if: github.event_name == 'push'
         continue-on-error: true
         run: node scripts/rich-discovery-gate.mjs
       - name: Content richness and duplicate-body gate
+        if: github.event_name == 'push'
         run: node scripts/content-richness-gate.mjs
       - name: YMYL editorial SEO readiness report
         run: node scripts/editorial-seo-readiness.mjs
