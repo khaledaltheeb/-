@@ -44,11 +44,31 @@ function words(value) {
   return String(value || '').trim().split(/\s+/u).filter(Boolean);
 }
 
+export function splitOversizedTokenByPixels(token, { maxWidth, fontSize }) {
+  const clean = String(token || '').trim();
+  if (!clean || measureArabicTextWidth(clean, fontSize) <= maxWidth) return clean ? [clean] : [];
+
+  const chunks = [];
+  let current = '';
+  for (const char of Array.from(clean)) {
+    const candidate = `${current}${char}`;
+    if (current && measureArabicTextWidth(candidate, fontSize) > maxWidth) {
+      chunks.push(current);
+      current = char;
+    } else {
+      current = candidate;
+    }
+  }
+  if (current) chunks.push(current);
+  return chunks;
+}
+
 export function wrapTextByPixels(value, { maxWidth, fontSize }) {
   const lines = [];
   let line = '';
+  const tokens = words(value).flatMap((word) => splitOversizedTokenByPixels(word, { maxWidth, fontSize }));
 
-  for (const word of words(value)) {
+  for (const word of tokens) {
     const candidate = line ? `${line} ${word}` : word;
     if (!line || measureArabicTextWidth(candidate, fontSize) <= maxWidth) {
       line = candidate;
