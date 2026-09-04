@@ -103,9 +103,32 @@ jobs:
           test -n "$(find /tmp/rawafid-seo-html-cache -type f -name '*.json.gz' -print -quit)"
       - name: Rich discovery using the same audited HTML (advisory)
         continue-on-error: true
-        run: node scripts/rich-discovery-gate.mjs
+        shell: bash
+        run: |
+          set -o pipefail
+          node scripts/rich-discovery-gate.mjs 2>&1 | tee /tmp/rawafid-rich-discovery.log
       - name: Content richness using the same audited HTML
-        run: node scripts/content-richness-gate.mjs
+        shell: bash
+        run: |
+          set -o pipefail
+          node scripts/content-richness-gate.mjs 2>&1 | tee /tmp/rawafid-content-richness.log
+      - name: Verify downstream cache reuse
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs = require('fs');
+          function cacheHits(path, label) {
+            const body = fs.readFileSync(path, 'utf8');
+            const matches = [...body.matchAll(/cacheHits=(\d+)/g)];
+            if (!matches.length) throw new Error(`${label} did not report cacheHits`);
+            const value = Number(matches.at(-1)[1]);
+            if (!Number.isInteger(value) || value < 1) throw new Error(`${label} did not consume shared audited HTML`);
+            console.log(`${label} shared cache reuse verified: cacheHits=${value}`);
+          }
+          cacheHits('/tmp/rawafid-rich-discovery.log', 'Rich Discovery');
+          cacheHits('/tmp/rawafid-content-richness.log', 'Content Richness');
+          NODE
       - name: Stop candidate
         if: always()
         shell: bash
@@ -121,5 +144,7 @@ jobs:
           path: |
             reports/seo-gate-report.json
             /tmp/rawafid-seo-integration-server.log
+            /tmp/rawafid-rich-discovery.log
+            /tmp/rawafid-content-richness.log
           if-no-files-found: ignore
           retention-days: 7
