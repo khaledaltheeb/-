@@ -25,8 +25,9 @@ requireMatch('Addiction OG component', component, /minFontSize:\s*34/, 'minimum 
 requireMatch('Addiction OG component', component, /clipPath id="addiction-title-safe"/, 'final SVG clipping guard missing.');
 requireMatch('Addiction OG component', component, /width="1200" height="675" viewBox="0 0 1200 675"/, 'addiction social image must remain native 1200x675 16:9.');
 requireMatch('Addiction OG component', component, /Noto Sans Arabic,Tahoma,Arial,sans-serif/, 'Arabic-first font stack is required.');
-requireMatch('Addiction OG component', component, /direction="rtl" unicode-bidi="plaintext"/, 'RTL/BiDi protection missing.');
-requireMatch('Addiction OG component', component, /direction="ltr" unicode-bidi="plaintext"/, 'LTR/BiDi protection missing for Latin titles.');
+requireMatch('Addiction OG component', component, /text-anchor="start" direction="rtl" unicode-bidi="plaintext"/, 'RTL text must anchor from the RTL start edge so its x coordinate remains the right boundary.');
+forbid('Addiction OG component', component, /text-anchor="end" direction="rtl"/, 'RTL text must never use end anchoring because it can extend beyond the right safe edge.');
+requireMatch('Addiction OG component', component, /text-anchor="start" direction="ltr" unicode-bidi="plaintext"/, 'LTR titles must anchor from their left start edge.');
 requireMatch('Addiction OG component', component, /escapeXml\(line\)/, 'dynamic title lines must remain XML escaped.');
 requireMatch('Addiction OG component', component, /Content-Type': 'image\/svg\+xml; charset=utf-8'/, 'SVG MIME contract missing.');
 requireMatch('Addiction OG component', component, /X-Content-Type-Options': 'nosniff'/, 'MIME hardening header missing.');
@@ -46,4 +47,4 @@ if (errors.length) {
   process.exit(1);
 }
 
-console.log('Addiction OG image contract passed: the 1200x675 image route uses shared Arabic/Latin auto-fit, oversized-token protection, XML escaping, hard safe-area assertions, and clipping without changing published content routes.');
+console.log('Addiction OG image contract passed: the 1200x675 image route uses shared Arabic/Latin auto-fit, correct RTL/LTR anchoring, oversized-token protection, XML escaping, hard safe-area assertions, and clipping without changing published content routes.');
