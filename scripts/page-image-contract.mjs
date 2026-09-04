@@ -4,6 +4,17 @@ import { readFile } from 'node:fs/promises';
 const route = await readFile('app/page-image/route.tsx', 'utf8');
 const resolver = await readFile('lib/page-image.ts', 'utf8');
 const component = await readFile('components/article-featured-image.tsx', 'utf8');
+const middleware = await readFile('middleware.ts', 'utf8');
+const templates = {
+  capability: await readFile('components/capability-article-page.tsx', 'utf8'),
+  comparison: await readFile('components/comparison-article-page.tsx', 'utf8'),
+  family: await readFile('components/family-guide-article-page.tsx', 'utf8'),
+  addiction: await readFile('components/addiction-article-page.tsx', 'utf8'),
+  careGuide: await readFile('components/care-guide-page.tsx', 'utf8'),
+  content: await readFile('app/content/[slug]/page.tsx', 'utf8'),
+  encyclopedia: await readFile('app/encyclopedia/[slug]/page.tsx', 'utf8'),
+  specialNeeds: await readFile('app/special-needs/[[...slug]]/page.tsx', 'utf8'),
+};
 const errors = [];
 
 const requireMatch = (name, text, pattern, message) => {
@@ -31,6 +42,8 @@ requireMatch('Page image route', route, /pageImageKindLabel/, 'kind-specific vis
 requireMatch('Page image route', route, /Content-Type': 'image\/svg\+xml; charset=utf-8'/, 'SVG MIME contract missing.');
 requireMatch('Page image route', route, /X-Content-Type-Options': 'nosniff'/, 'MIME hardening header missing.');
 
+requireMatch('Middleware', middleware, /seo-card\(\?:\/\|\$\)\|page-image\(\?:\/\|\$\)/, 'page-image must bypass auth/redirect middleware just like seo-card.');
+
 requireMatch('Visible resolver', resolver, /if \(curated\)/, 'curated featured images must always win over generated fallback.');
 requireMatch('Visible resolver', resolver, /kind === 'family-guide'[\s\S]*\/family-guide\/images\//, 'family-guide route-specific fallback missing.');
 requireMatch('Visible resolver', resolver, /kind === 'addiction'[\s\S]*\/addiction\/images\//, 'addiction route-specific fallback missing.');
@@ -49,10 +62,32 @@ requireMatch('Featured image component', component, /height=\{visual\.height\}/,
 requireMatch('Featured image component', component, /unoptimized/, 'dynamic/public image routes must remain directly fetchable without Next image rewriting.');
 forbid('Featured image component', component, /featuredImageUrl\s*\?\s*</, 'component must not hide itself when the stored featured image is missing.');
 
+const expectedKinds = {
+  capability: 'capability',
+  comparison: 'comparison',
+  family: 'family-guide',
+  addiction: 'addiction',
+  careGuide: 'care-guide',
+  content: 'article',
+  encyclopedia: 'encyclopedia',
+  specialNeeds: 'special-needs',
+};
+for (const [name, source] of Object.entries(templates)) {
+  requireMatch(`Template ${name}`, source, /ArticleFeaturedImage/, 'template must render the shared visible image component.');
+  requireMatch(`Template ${name}`, source, /resolveVisiblePageImage/, 'template structured data must resolve the same visible image.');
+  requireMatch(`Template ${name}`, source, new RegExp(`kind=["']${expectedKinds[name]}["']|kind:\\s*["']${expectedKinds[name]}["']`), `template must use page-image kind ${expectedKinds[name]}.`);
+  forbid(`Template ${name}`, source, /featured_image_url\s*\?\s*<figure/, 'stored-image conditional must not hide the visible fallback.');
+  forbid(`Template ${name}`, source, /image:\s*record\.featured_image_url\s*\|\|\s*undefined/, 'structured data must not lose its image when stored media is missing.');
+}
+
+for (const name of ['capability', 'comparison', 'family', 'addiction']) {
+  requireMatch(`Route-specific template ${name}`, templates[name], /slug=\{|slug:\s*/, 'route-specific cover templates must pass a slug into the shared resolver/component.');
+}
+
 if (errors.length) {
   console.error('Visible page-image contract failed:');
   for (const error of errors) console.error(`- ${error}`);
   process.exit(1);
 }
 
-console.log('Visible page-image contract passed: curated images win, route-specific covers are reused, and every generic fallback is a semantic 1280x720 grapheme-safe RTL image with explicit alt and dimensions.');
+console.log('Visible page-image contract passed: all eight article templates always render a curated, route-specific, or generic 16:9 image; generic fallbacks are 1280x720, grapheme-safe, middleware-bypassed, and reflected in structured data.');
