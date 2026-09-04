@@ -1,0 +1,112 @@
+{
+  "schema_version": "rawafid-cochrane-guides-plan-v1",
+  "updated_on": "2026-09-04",
+  "target_pages": 50,
+  "release_rule_ar": "لا تدخل أي صفحة في خريطة الموقع ولا تعد جاهزة للنشر قبل اكتمال المصادر والمحتوى والتدقيق العلمي والتحريري والحقوقي والتقني.",
+  "categories": [
+    {
+      "id": "foundations",
+      "title_ar": "أساسيات المراجعة المنهجية",
+      "pages": [
+        ["systematic-review-what-it-is", "المراجعة المنهجية: ما هي ومتى تكون جديرة بالثقة؟"],
+        ["evidence-currency-updating", "حداثة الدليل: متى تصبح المراجعة قديمة ومتى تحتاج إلى تحديث؟"],
+        ["pico-review-question", "صياغة سؤال المراجعة: من الحاجة السريرية إلى PICO قابل للاختبار"],
+        ["review-scope-lumping-splitting", "نطاق المراجعة: متى نوسّع السؤال ومتى نقسمه؟"],
+        ["stakeholders-equity-review-question", "إشراك أصحاب المصلحة والإنصاف عند تحديد سؤال المراجعة"],
+        ["protocol-amendments-transparency", "بروتوكول المراجعة والتعديلات: كيف نقلل القرارات المدفوعة بالنتائج؟"]
+      ]
+    },
+    {
+      "id": "design",
+      "title_ar": "تصميم المراجعة قبل البحث",
+      "pages": [
+        ["eligibility-criteria", "معايير الاشتمال والاستبعاد: بناء حدود قابلة للتطبيق والمراجعة"],
+        ["study-designs-for-review", "اختيار تصاميم الدراسات المناسبة لسؤال المراجعة"],
+        ["outcome-selection", "اختيار النتائج: ما الذي يهم المرضى وصناع القرار فعلاً؟"],
+        ["harms-outcomes", "نتائج الضرر والآثار السلبية: كيف نمنع صورة فائدة منحازة؟"],
+        ["logic-models-complex-interventions", "النماذج المنطقية والتدخلات المعقدة في المراجعات المنهجية"],
+        ["comparisons-grouping-synthesis-plan", "تحديد المقارنات وتجميع التدخلات قبل بدء التركيب"]
+      ]
+    },
+    {
+      "id": "search-selection",
+      "title_ar": "البحث واختيار الدراسات",
+      "pages": [
+        ["systematic-search-strategy", "بناء استراتيجية بحث منهجية عالية الحساسية"],
+        ["databases-registers-regulatory", "قواعد البيانات وسجلات التجارب والمصادر التنظيمية: أين نبحث؟"],
+        ["grey-literature-language-bias", "الأدبيات الرمادية واللغة والنشر: تقليل الأدلة المفقودة"],
+        ["search-peer-review-and-update", "مراجعة استراتيجية البحث وتحديثها قبل النشر"],
+        ["screening-study-selection", "فرز السجلات واختيار الدراسات بصورة قابلة للتدقيق"],
+        ["multiple-reports-study-identity", "دراسة واحدة وتقارير متعددة: منع العد المزدوج وتضارب البيانات"]
+      ]
+    },
+    {
+      "id": "data-bias",
+      "title_ar": "استخراج البيانات وخطر التحيز",
+      "pages": [
+        ["data-extraction-forms", "استخراج البيانات: تصميم نموذج يقلل الأخطاء ويخدم التحليل"],
+        ["missing-inconsistent-data", "البيانات المفقودة والمتعارضة بين المصادر: كيف نتعامل معها؟"],
+        ["risk-of-bias-2-randomized-trials", "RoB 2: تقييم خطر التحيز في نتائج التجارب العشوائية"],
+        ["robins-i-v2-nonrandomized", "ROBINS-I V2: تقييم الدراسات غير العشوائية للتدخلات"],
+        ["rob-me-missing-evidence", "ROB-ME: خطر التحيز الناتج عن الأدلة المفقودة من التحليل"],
+        ["selective-reporting", "الانتقائية في الإبلاغ عن النتائج والتحليلات"],
+        ["funding-conflicts-source-credibility", "التمويل وتعارض المصالح ومصداقية مصادر الدراسة"]
+      ]
+    },
+    {
+      "id": "statistics",
+      "title_ar": "فهم مقاييس الأثر والتركيب الإحصائي",
+      "pages": [
+        ["data-types-effect-measures", "أنواع البيانات واختيار مقياس الأثر الصحيح"],
+        ["risk-ratio-risk-difference-nnt", "نسبة الخطر وفارق الخطر والعدد اللازم للعلاج: قراءة الأثر النسبي والمطلق"],
+        ["odds-ratio-interpretation", "نسبة الأرجحية OR: متى تضلل القراءة المباشرة؟"],
+        ["mean-difference-standardized-mean-difference", "فرق المتوسط وفرق المتوسط المعياري: كيف نفسر النتائج المستمرة؟"],
+        ["confidence-intervals-precision", "فواصل الثقة وعدم الدقة: ما الذي نعرفه عن نطاق الأثر؟"],
+        ["when-to-meta-analyse", "متى يجوز إجراء التحليل التلوي ومتى يكون الجمع مضللاً؟"],
+        ["fixed-random-effects-prediction-interval", "النموذج ثابت الأثر والعشوائي وفاصل التنبؤ"],
+        ["heterogeneity-i2-tau2", "التغاير بين الدراسات: I² وTau² وما لا تقوله الأرقام وحدها"],
+        ["subgroups-sensitivity-meta-regression", "تحليلات المجموعات الفرعية والحساسية والانحدار التلوي"]
+      ]
+    },
+    {
+      "id": "grade",
+      "title_ar": "GRADE وملخص النتائج",
+      "pages": [
+        ["grade-certainty-overview", "GRADE: مستويات اليقين الأربعة وكيف تُبنى الأحكام"],
+        ["grade-risk-of-bias", "GRADE وخطر التحيز: متى نخفض اليقين؟"],
+        ["grade-inconsistency", "GRADE وعدم الاتساق بين الدراسات"],
+        ["grade-indirectness", "GRADE وعدم المباشرة: هل يجيب الدليل سؤالنا فعلاً؟"],
+        ["grade-imprecision", "GRADE وعدم الدقة: العينات القليلة وفواصل الثقة وحدود القرار"],
+        ["grade-publication-bias-summary-findings", "تحيز النشر وجداول Summary of Findings: عرض النتيجة دون تضخيم"]
+      ]
+    },
+    {
+      "id": "decision-use",
+      "title_ar": "من الدليل إلى القرار",
+      "pages": [
+        ["applicability-transferability", "قابلية تطبيق ونقل الدليل إلى سياق مختلف"],
+        ["equity-progress-plus", "الإنصاف الصحي: من المتوسط العام إلى الفئات التي قد تختلف نتائجها"],
+        ["plain-language-shared-decision", "لغة مبسطة وقرار مشترك: كيف نشرح الدليل دون فقدان عدم اليقين؟"],
+        ["benefits-harms-absolute-effects", "موازنة الفوائد والأضرار باستخدام الآثار المطلقة"]
+      ]
+    },
+    {
+      "id": "ms-worked-examples",
+      "title_ar": "تطبيقات عملية: التصلب المتعدد",
+      "pages": [
+        ["ms-azathioprine-cd015005", "الآزاثيوبرين للتصلب المتعدد: كيف نقرأ مراجعة CD015005؟"],
+        ["ms-immunotherapy-adverse-effects-cd012186", "الآثار السلبية للعلاجات المناعية للتصلب المتعدد: قراءة شبكة الأدلة CD012186"],
+        ["ms-dietary-interventions-cd004192", "التدخلات الغذائية ونتائج التصلب المتعدد: قراءة مراجعة CD004192"]
+      ]
+    },
+    {
+      "id": "arabic-governance",
+      "title_ar": "الترجمة العربية والحوكمة",
+      "pages": [
+        ["arabic-translation-back-translation", "ترجمة المواد العلمية إلى العربية: الترجمة العكسية وسجل القرارات"],
+        ["arabic-rtl-terminology-visual-qa", "المصطلحات وRTL وضبط الجودة البصرية للمواد العلمية العربية"],
+        ["attribution-rights-pilot-governance", "النسب والحقوق وحوكمة المسار التجريبي مع Cochrane"]
+      ]
+    }
+  ]
+}
