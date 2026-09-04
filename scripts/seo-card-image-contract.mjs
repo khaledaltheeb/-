@@ -35,6 +35,9 @@ requireMatch('SEO card route', route, /X-Content-Type-Options/, 'MIME hardening 
 requireMatch('SEO card layout', layout, /estimateSeoCardTextWidth/, 'width estimation helper missing.');
 requireMatch('SEO card layout', layout, /splitOversizedToken/, 'oversized single-token protection missing.');
 requireMatch('SEO card layout', layout, /ellipsizeLine/, 'last-resort visual truncation missing.');
+requireMatch('SEO card layout', layout, /Intl\.Segmenter\('ar', \{ granularity: 'grapheme' \}\)/, 'runtime fitting must segment Arabic text by grapheme clusters.');
+requireMatch('SEO card layout', layout, /for \(const grapheme of graphemes\(token\)\)/, 'oversized-token splitting must preserve grapheme clusters.');
+requireMatch('SEO card layout', layout, /let units = graphemes\(/, 'ellipsis trimming must preserve grapheme clusters.');
 requireMatch('SEO card layout', layout, /for \(let fontSize = maxFontSize; fontSize >= minFontSize; fontSize -= 1\)/, 'font size must auto-fit progressively.');
 requireMatch('SEO card layout', layout, /widest > maxWidth/, 'horizontal safe-bound assertion missing.');
 requireMatch('SEO card layout', layout, /top < safeTop/, 'upper safe-bound assertion missing.');
@@ -67,4 +70,4 @@ if (errors.length) {
   process.exit(1);
 }
 
-console.log('SEO card image contract passed: the global 1200x630 fallback uses conservative Arabic auto-fit, correct RTL right-edge anchoring, oversized-token handling, XML escaping, blocking browser-measured safe-area fixtures, and hard clipping without changing page routes or content.');
+console.log('SEO card image contract passed: the global 1200x630 fallback uses grapheme-safe Arabic auto-fit, correct RTL right-edge anchoring, oversized-token handling, XML escaping, blocking browser-measured safe-area fixtures, and hard clipping without changing page routes or content.');
