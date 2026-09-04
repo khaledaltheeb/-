@@ -44,12 +44,10 @@ object CircleRules {
 }
 
 object RawafidCircleApi {
-    private const val BASE_URL = "https://ghljwfwqsyfnthvlzxjy.supabase.co"
-    private const val PUBLISHABLE_KEY = "sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs"
     private const val SESSION_KEY = "rawafid_circle_session_v1"
 
-    fun hasSession(context: Context): Boolean = loadSession(context) != null
-    fun sessionEmail(context: Context): String = loadSession(context)?.email.orEmpty()
+    fun hasSession(context: Context): Boolean = RawafidBackendConfig.isEnabled && loadSession(context) != null
+    fun sessionEmail(context: Context): String = if (RawafidBackendConfig.isEnabled) loadSession(context)?.email.orEmpty() else ""
     fun clearSession(context: Context) = EncryptedLocalStore.remove(context, SESSION_KEY)
 
     @Synchronized
@@ -366,6 +364,7 @@ object RawafidCircleApi {
 
     @Synchronized
     private fun validAccessToken(context: Context): String {
+        RawafidBackendConfig.requireConfigured()
         val session = loadSession(context) ?: throw CircleApiException("سجّل الدخول لاستخدام دائرتي.")
         if (session.expiresAtSeconds > System.currentTimeMillis() / 1000L + 60L) return session.accessToken
         val response = JSONObject(request("POST", "/auth/v1/token?grant_type=refresh_token", JSONObject().put("refresh_token", session.refreshToken), null))
@@ -375,13 +374,14 @@ object RawafidCircleApi {
     private fun rpc(context: Context, name: String, args: JSONObject): String = request("POST", "/rest/v1/rpc/$name", args, validAccessToken(context))
 
     private fun request(method: String, path: String, body: JSONObject?, accessToken: String?): String {
-        val connection = URL(BASE_URL + path).openConnection() as HttpURLConnection
+        RawafidBackendConfig.requireConfigured()
+        val connection = URL(RawafidBackendConfig.baseUrl + path).openConnection() as HttpURLConnection
         try {
             connection.requestMethod = method
             connection.connectTimeout = 15_000
             connection.readTimeout = 20_000
             connection.useCaches = false
-            connection.setRequestProperty("apikey", PUBLISHABLE_KEY)
+            connection.setRequestProperty("apikey", RawafidBackendConfig.publishableKey)
             connection.setRequestProperty("Accept", "application/json")
             connection.setRequestProperty("Content-Type", "application/json")
             connection.setRequestProperty("Cache-Control", "no-store")
