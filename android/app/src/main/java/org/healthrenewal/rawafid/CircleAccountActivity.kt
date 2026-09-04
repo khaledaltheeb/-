@@ -1,5 +1,6 @@
 package org.healthrenewal.rawafid
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
@@ -172,6 +173,12 @@ private fun CircleAccountScreen(onDone: () -> Unit) {
                             enabled = !busy,
                             onClick = { runTask { RawafidCircleApi.signOut(context); sessionVersion++ } }
                         ) { Text("تسجيل الخروج") }
+                        TextButton(
+                            enabled = !busy,
+                            onClick = { context.startActivity(Intent(context, AccountDeletionActivity::class.java)) }
+                        ) {
+                            Text("حذف الحساب والبيانات", color = MaterialTheme.colorScheme.error)
+                        }
                     }
                 }
             }

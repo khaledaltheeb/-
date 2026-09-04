@@ -47,6 +47,7 @@
         <activity android:name=".FamilyHubActivity" android:exported="false" android:label="مركز الأسرة" />
         <activity android:name=".MyCircleActivity" android:exported="false" android:label="دائرتي" />
         <activity android:name=".CircleAccountActivity" android:exported="false" android:label="حساب روافد" />
+        <activity android:name=".AccountDeletionActivity" android:exported="false" android:excludeFromRecents="true" android:label="حذف حساب روافد" />
         <activity android:name=".CircleConversationActivity" android:exported="false" android:label="محادثة دائرتي" />
         <activity android:name=".SafeArrivalActivity" android:exported="false" android:label="وصلت بالسلامة" />
         <activity android:name=".SafetyMonitorActivity" android:exported="false" android:label="مراقبة الأمان والموقع" />

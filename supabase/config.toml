@@ -1,2 +1,5 @@
 [functions.rawafid-circle-push]
 verify_jwt = false
+
+[functions.rawafid-delete-account]
+verify_jwt = true
