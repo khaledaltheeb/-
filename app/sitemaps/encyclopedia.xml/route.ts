@@ -9,7 +9,7 @@ const REDIRECTED_LEGACY_SLUGS = ['fragile-x-syndrome-education'] as const;
 
 type RawItem = Record<string, unknown>;
 type SitemapItem = { slug: string; canonicalUrl: string; updatedAt: string | null };
-type IndexabilityRow = { slug: string; robots_index: boolean | null; status: string | null; published_at: string | null };
+type IndexabilityRow = { slug: string; canonical_url: string | null };
 
 function normalizeItem(row: RawItem): SitemapItem | null {
   const slug = typeof row.slug === 'string' ? row.slug.trim().toLowerCase() : '';
@@ -42,15 +42,21 @@ export async function GET(request: Request) {
   });
   const normalizedReleaseSlugs = normalizedReleaseItems.map((item) => item.slug);
 
+  // The release index is an editorial allow-list, not an indexability authority.
+  // Reconfirm every release entry against the live published/indexable inventory and
+  // the encyclopedia canonical namespace before advertising it in a public sitemap.
   const indexableReleaseSlugs = new Set<string>();
   for (let start = 0; start < normalizedReleaseSlugs.length; start += DB_BATCH_SIZE) {
     const slugBatch = normalizedReleaseSlugs.slice(start, start + DB_BATCH_SIZE);
     if (slugBatch.length === 0) continue;
     const { data, error } = await supabase
       .from('content')
-      .select('slug,robots_index,status,published_at')
-      .eq('content_type', 'condition')
-      .in('slug', slugBatch);
+      .select('slug,canonical_url')
+      .in('slug', slugBatch)
+      .eq('status', 'published')
+      .eq('robots_index', true)
+      .like('canonical_url', '/encyclopedia/%')
+      .lte('published_at', now);
 
     if (error) {
       throw new Error(`encyclopedia release indexability query failed at rows ${start}-${start + slugBatch.length - 1}: ${error.message}`);
@@ -58,9 +64,8 @@ export async function GET(request: Request) {
 
     for (const row of (data ?? []) as IndexabilityRow[]) {
       const slug = typeof row.slug === 'string' ? row.slug.trim().toLowerCase() : '';
-      const publishedAt = typeof row.published_at === 'string' ? row.published_at : null;
-      const isPublishedNow = row.status === 'published' && (!publishedAt || publishedAt <= now);
-      if (slug && row.robots_index === true && isPublishedNow) indexableReleaseSlugs.add(slug);
+      const canonicalUrl = typeof row.canonical_url === 'string' ? row.canonical_url.trim() : '';
+      if (slug && canonicalUrl === `/encyclopedia/${slug}/`) indexableReleaseSlugs.add(slug);
     }
   }
 
