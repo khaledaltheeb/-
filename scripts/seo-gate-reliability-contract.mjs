@@ -28,7 +28,7 @@ if (!seo.includes('status < 200 || status >= 400')) fail('persistent non-success
 
 if (!discovery.includes("readSharedHtml(url)")) fail('rich discovery must reuse the exact audited HTML representation before issuing a new page request');
 if (!discovery.includes('const crawlerUserAgent = SHARED_CRAWL_USER_AGENT')) fail('rich discovery and the shared cache must use one HTML-limited crawler representation');
-for (const token of ['missing canonical', 'missing og:image', 'html lang is not ar', 'html dir is not rtl', 'requires MedicalCondition', 'rendered image missing alt text']) {
+for (const token of ['missing canonical', 'missing og:image', 'html lang is not ar', 'html dir is not rtl', "require('MedicalCondition', 'MedicalWebPage')", 'rendered image missing alt text']) {
   if (!discovery.includes(token)) fail(`rich discovery coverage weakened: missing ${token}`);
 }
 
