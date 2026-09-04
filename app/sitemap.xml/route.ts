@@ -19,6 +19,15 @@ const ATLAS_OWNED_CANONICALS = [
   '/addiction/methodology/',
 ] as const;
 
+const COCHRANE_OWNED_CANONICALS = [
+  '/cochrane/',
+  '/cochrane/resources/',
+  '/cochrane/read-review/',
+  '/cochrane/certainty/',
+  '/cochrane/ms/',
+  '/cochrane/arabic-pilot/',
+] as const;
+
 function inFilter(values: string[]) {
   return `(${values.join(',')})`;
 }
@@ -52,6 +61,9 @@ function applyDedicatedSitemapExclusions<T extends {
     .not('canonical_url', 'like', '/addiction/substances/%')
     .not('canonical_url', 'like', '/addiction/compare/%');
   for (const canonical of ATLAS_OWNED_CANONICALS) {
+    owned = owned.neq('canonical_url', canonical);
+  }
+  for (const canonical of COCHRANE_OWNED_CANONICALS) {
     owned = owned.neq('canonical_url', canonical);
   }
   return owned;
