@@ -3,6 +3,11 @@ import { spawnSync } from 'node:child_process';
 import { mkdir, rm, stat, writeFile, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import {
+  assertTextBlockBounds,
+  fitArabicTextBlock,
+  resolveArabicFontFile,
+} from './lib/arabic-image-text-fit.mjs';
 
 const SUPABASE_URL = (process.env.NEXT_PUBLIC_SUPABASE_URL || '').replace(/\/$/, '');
 const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || '';
@@ -19,18 +24,20 @@ const DEFAULT = PROFILES.find((p) => p.id === 'general') || PROFILES[0];
 const CARD_RIGHT = 1082;
 const BRAND_TEXT_RIGHT = 966;
 const SAFE_LEFT = 92;
-const TITLE_LINE_HEIGHT = 64;
-const EXCERPT_LINE_HEIGHT = 38;
+const CARD_TEXT_LEFT = 128;
+const CARD_TEXT_WIDTH = CARD_RIGHT - CARD_TEXT_LEFT;
 const EXCERPT_FONT_SIZE = 24;
 const SITE_URL_FONT_SIZE = 21;
 const SITE_URL_LABEL = 'https://healthrenewal.org';
 const CARD_PILL_BOTTOM = 222;
 const DISCOVER_RIGHT = 1140;
 const DISCOVER_LEFT = 92;
-const DISCOVER_TITLE_LINE_HEIGHT = 78;
+const DISCOVER_TEXT_LEFT = 130;
+const DISCOVER_TEXT_WIDTH = DISCOVER_RIGHT - DISCOVER_TEXT_LEFT;
 const DISCOVER_PILL_BOTTOM = 248;
 const TITLE_CLEARANCE = 10;
-const CARD_TITLE_BALANCE_SHIFT = 12;
+const CARD_TITLE_SAFE_BOTTOM = 438;
+const DISCOVER_TITLE_SAFE_BOTTOM = 535;
 
 const run = (cmd, args) => {
   const r = spawnSync(cmd, args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
@@ -80,28 +87,64 @@ const routeSlug = (slug) => (
 const imageAlt = (item) => `بطاقة معلومات سريعة من منصة روافد بعنوان «${item.title}»`;
 const discoverAlt = (item) => `صورة معلومات سريعة مهيأة للاكتشاف من منصة روافد بعنوان «${item.title}»`;
 
-function assertTitleClearance(surface, titleStart, titleFontSize, pillBottom) {
-  if (titleStart - titleFontSize < pillBottom + TITLE_CLEARANCE) {
-    throw new Error(`${surface} title violates the protected ${TITLE_CLEARANCE}px gap below the badge row.`);
-  }
+function cardTitleLayout(title) {
+  const fit = fitArabicTextBlock(title, {
+    maxWidth: CARD_TEXT_WIDTH,
+    maxLines: 3,
+    maxFontSize: 53,
+    minFontSize: 34,
+    maxHeight: 190,
+    lineHeightRatio: 1.22,
+  });
+  const startY = fit.lines.length >= 3 ? 292 : fit.lines.length === 2 ? 314 : 348;
+  assertTextBlockBounds('Quick Info card title', {
+    ...fit,
+    startY,
+    safeTop: CARD_PILL_BOTTOM + TITLE_CLEARANCE,
+    safeBottom: CARD_TITLE_SAFE_BOTTOM,
+    maxWidth: CARD_TEXT_WIDTH,
+  });
+  return { ...fit, startY };
 }
 
-function wrap(value, maxChars, maxLines) {
-  const out = [];
-  let row = '';
-  for (const word of String(value || '').trim().split(/\s+/u).filter(Boolean)) {
-    const next = row ? `${row} ${word}` : word;
-    if (!row || next.length <= maxChars) row = next;
-    else {
-      out.push(row);
-      row = word;
-    }
-  }
-  if (row) out.push(row);
-  if (out.length <= maxLines) return out;
-  const cut = out.slice(0, maxLines);
-  cut[maxLines - 1] = `${cut[maxLines - 1].replace(/[.…]+$/u, '')}…`;
-  return cut;
+function cardExcerptLayout(excerpt, startY) {
+  if (!excerpt) return { lines: [], fontSize: EXCERPT_FONT_SIZE, lineHeight: 32, truncated: false, startY };
+  const fit = fitArabicTextBlock(excerpt, {
+    maxWidth: CARD_TEXT_WIDTH,
+    maxLines: 2,
+    maxFontSize: EXCERPT_FONT_SIZE,
+    minFontSize: 20,
+    maxHeight: 72,
+    lineHeightRatio: 1.3,
+  });
+  assertTextBlockBounds('Quick Info card excerpt', {
+    ...fit,
+    startY,
+    safeTop: CARD_TITLE_SAFE_BOTTOM + 8,
+    safeBottom: 518,
+    maxWidth: CARD_TEXT_WIDTH,
+  });
+  return { ...fit, startY };
+}
+
+function discoverTitleLayout(title) {
+  const fit = fitArabicTextBlock(title, {
+    maxWidth: DISCOVER_TEXT_WIDTH,
+    maxLines: 3,
+    maxFontSize: 64,
+    minFontSize: 40,
+    maxHeight: 225,
+    lineHeightRatio: 1.22,
+  });
+  const startY = fit.lines.length >= 3 ? 330 : fit.lines.length === 2 ? 350 : 388;
+  assertTextBlockBounds('Quick Info Discover title', {
+    ...fit,
+    startY,
+    safeTop: DISCOVER_PILL_BOTTOM + TITLE_CLEARANCE,
+    safeBottom: DISCOVER_TITLE_SAFE_BOTTOM,
+    maxWidth: DISCOVER_TEXT_WIDTH,
+  });
+  return { ...fit, startY };
 }
 
 async function load() {
@@ -117,7 +160,7 @@ async function load() {
   url.searchParams.set('robots_index', 'eq.true');
   url.searchParams.set('published_at', `lte.${new Date().toISOString()}`);
   url.searchParams.set('order', 'title.asc');
-  url.searchParams.set('limit', '500');
+  url.searchParams.set('limit', '1000');
 
   const response = await fetch(url, {
     headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}`, Accept: 'application/json' },
@@ -141,19 +184,11 @@ async function load() {
 
 function cardSvg(item) {
   const profile = profileFor(item.title);
-  const titleLines = wrap(item.title, 28, 3);
-  const excerptLines = wrap(item.excerpt, 54, 2);
-  const baseTitleSize = item.title.length > 88 ? 38 : item.title.length > 72 ? 42 : item.title.length > 56 ? 47 : 53;
-  const cardHasThreeLines = titleLines.length >= 3;
-  const cardTitleFontSize = cardHasThreeLines ? Math.min(baseTitleSize, 40) : baseTitleSize;
-  const cardTitleLineHeight = cardHasThreeLines ? 56 : TITLE_LINE_HEIGHT;
-  const titleBaseStart = cardHasThreeLines ? 274 : titleLines.length === 2 ? 286 : 320;
-  const titleShift = titleLines.length >= 2 ? CARD_TITLE_BALANCE_SHIFT : 0;
-  const titleStart = titleBaseStart + titleShift;
-  const excerptStart = titleBaseStart + titleLines.length * cardTitleLineHeight + (cardHasThreeLines ? 24 : 32);
-  assertTitleClearance('Quick Info card', titleStart, cardTitleFontSize, CARD_PILL_BOTTOM);
-  const titleSpans = titleLines.map((line, index) => `<tspan x="${CARD_RIGHT}" y="${titleStart + index * cardTitleLineHeight}">${esc(line)}</tspan>`).join('');
-  const excerptSpans = excerptLines.map((line, index) => `<tspan x="${CARD_RIGHT}" y="${excerptStart + index * EXCERPT_LINE_HEIGHT}">${esc(line)}</tspan>`).join('');
+  const title = cardTitleLayout(item.title);
+  const titleBottom = title.startY + (title.lines.length - 1) * title.lineHeight + Math.ceil(title.fontSize * 0.35);
+  const excerpt = cardExcerptLayout(item.excerpt, Math.max(458, titleBottom + 34));
+  const titleSpans = title.lines.map((line, index) => `<tspan x="${CARD_RIGHT}" y="${title.startY + index * title.lineHeight}">${esc(line)}</tspan>`).join('');
+  const excerptSpans = excerpt.lines.map((line, index) => `<tspan x="${CARD_RIGHT}" y="${excerpt.startY + index * excerpt.lineHeight}">${esc(line)}</tspan>`).join('');
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" xml:lang="ar">
@@ -172,8 +207,8 @@ function cardSvg(item) {
       <text x="1054" y="207" font-size="19" font-weight="700" fill="#315d61">معلومات سريعة</text>
       <rect x="600" y="174" width="260" height="48" rx="24" fill="${profile.soft}"/>
       <text x="832" y="207" font-size="19" font-weight="700" fill="${profile.accentDark}">${esc(profile.label)}</text>
-      <text font-size="${cardTitleFontSize}" font-weight="780" fill="#102f36">${titleSpans}</text>
-      ${excerptSpans ? `<text font-size="${EXCERPT_FONT_SIZE}" fill="#506a70">${excerptSpans}</text>` : ''}
+      <text font-size="${title.fontSize}" font-weight="780" fill="#102f36">${titleSpans}</text>
+      ${excerptSpans ? `<text font-size="${excerpt.fontSize}" fill="#506a70">${excerptSpans}</text>` : ''}
     </g>
     <text x="${CARD_RIGHT}" y="548" direction="ltr" unicode-bidi="plaintext" text-anchor="end" font-size="${SITE_URL_FONT_SIZE}" font-weight="700" fill="${profile.accentDark}">${SITE_URL_LABEL}</text>
   </g>
@@ -182,14 +217,8 @@ function cardSvg(item) {
 
 function discoverSvg(item) {
   const profile = profileFor(item.title);
-  const titleLines = wrap(item.title, 30, 3);
-  const baseTitleSize = item.title.length > 88 ? 45 : item.title.length > 70 ? 50 : item.title.length > 54 ? 57 : 64;
-  const discoverHasThreeLines = titleLines.length >= 3;
-  const imageTitleFontSize = discoverHasThreeLines ? Math.min(baseTitleSize, 48) : baseTitleSize;
-  const discoverTitleLineHeight = discoverHasThreeLines ? 72 : DISCOVER_TITLE_LINE_HEIGHT;
-  const titleStart = discoverHasThreeLines ? 306 : titleLines.length === 2 ? 322 : 352;
-  assertTitleClearance('Quick Info Discover', titleStart, imageTitleFontSize, DISCOVER_PILL_BOTTOM);
-  const titleSpans = titleLines.map((line, index) => `<tspan x="${DISCOVER_RIGHT}" y="${titleStart + index * discoverTitleLineHeight}">${esc(line)}</tspan>`).join('');
+  const title = discoverTitleLayout(item.title);
+  const titleSpans = title.lines.map((line, index) => `<tspan x="${DISCOVER_RIGHT}" y="${title.startY + index * title.lineHeight}">${esc(line)}</tspan>`).join('');
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" xml:lang="ar">
@@ -211,7 +240,7 @@ function discoverSvg(item) {
       <text x="1112" y="231" font-size="20" font-weight="700" fill="#315d61">معلومات سريعة</text>
       <rect x="632" y="196" width="270" height="52" rx="26" fill="${profile.soft}"/>
       <text x="874" y="231" font-size="20" font-weight="700" fill="${profile.accentDark}">${esc(profile.label)}</text>
-      <text font-size="${imageTitleFontSize}" font-weight="790" fill="#102f36">${titleSpans}</text>
+      <text font-size="${title.fontSize}" font-weight="790" fill="#102f36">${titleSpans}</text>
       <text x="${DISCOVER_RIGHT}" y="592" font-size="22" font-weight="650" fill="#5f7377">معلومة واضحة، مختصرة، وقابلة للتتبع إلى مصادرها</text>
     </g>
     <text x="${DISCOVER_RIGHT}" y="630" direction="ltr" unicode-bidi="plaintext" text-anchor="end" font-size="22" font-weight="750" fill="${profile.accentDark}">${SITE_URL_LABEL}</text>
@@ -221,7 +250,8 @@ function discoverSvg(item) {
 
 async function main() {
   run('rsvg-convert', ['--version']);
-  run('fc-match', ['Noto Sans Arabic']);
+  run('convert', ['-version']);
+  resolveArabicFontFile();
 
   const items = await load();
   if (!items.length) return;
@@ -263,9 +293,9 @@ async function main() {
     });
   }
 
-  await writeFile(MANIFEST, `${JSON.stringify({ version: 10, generatedAt: new Date().toISOString(), count: manifest.length, items: manifest }, null, 2)}\n`);
+  await writeFile(MANIFEST, `${JSON.stringify({ version: 11, generatedAt: new Date().toISOString(), count: manifest.length, items: manifest }, null, 2)}\n`);
   await rm(TMP, { recursive: true, force: true });
-  console.log(`[quick-info-social] ready: ${manifest.length} card images plus ${manifest.length} dedicated 1280x720 Discover images with protected Arabic title spacing.`);
+  console.log(`[quick-info-social] ready: ${manifest.length} OG plus ${manifest.length} Discover images with pixel-measured Arabic auto-fit and hard safe-area validation.`);
 }
 
 main().catch((error) => {
