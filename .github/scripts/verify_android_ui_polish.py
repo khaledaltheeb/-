@@ -17,6 +17,7 @@ def require(text: str, marker: str, message: str) -> None:
 scaffold = read("RawafidScreenScaffold.kt")
 what_now = read("WhatNowActivity.kt")
 account = read("CircleAccountActivity.kt")
+circle = read("MyCircleActivity.kt")
 
 require(scaffold, "fun RawafidScreenScaffold(", "shared standalone-screen scaffold is missing")
 require(scaffold, "Icons.AutoMirrored.Filled.ArrowBack", "RTL-aware back affordance is missing")
@@ -49,5 +50,22 @@ for banned in (
 ):
     if banned in account:
         raise SystemExit(f"UI polish contract failed: unsafe or legacy Circle account pattern remains: {banned}")
+
+require(circle, "RawafidScreenScaffold(", "My Circle must use the shared standalone-screen shell")
+require(circle, 'title = "دائرتي — Rawafid Circle"', "My Circle shell title is missing")
+require(circle, "ClipData.newPlainText(\"Rawafid ID\", identity)", "RFD copy action must remain available")
+require(circle, 'putExtra(Intent.EXTRA_TEXT, "أضفني إلى دائرتك في روافد: $identity")', "RFD explicit share action must remain available")
+require(circle, "CircleQrScanner.start(", "My Circle QR scan entry point is missing")
+require(circle, "المسح يملأ معرّف RFD فقط ولا يرسل طلب ارتباط تلقائيًا", "QR scan must remain fill-only with explicit submit")
+require(circle, "RawafidCircleApi.sendConnectionRequest(context, id, label)", "connection requests must remain explicit")
+require(circle, "EncryptedLocalStore.put(context, ENCRYPTED_PEOPLE_KEY", "local safety contacts must remain encrypted")
+require(circle, "Android Keystore", "local safety contact encryption disclosure is missing")
+
+for banned in (
+    "Surface(Modifier.fillMaxSize()) { MyCircleScreen() }",
+    "Surface(Modifier.fillMaxSize()) { MyCircleScreen(",
+):
+    if banned in circle:
+        raise SystemExit(f"UI polish contract failed: legacy My Circle screen shell remains: {banned}")
 
 print("Android UI polish contract: PASS")
