@@ -7,7 +7,6 @@ const groups = [
     links: [
       { href: '/sectors', label: 'القطاعات' },
       { href: '/sections', label: 'جميع الأقسام' },
-      { href: '/all-pages', label: 'فهرس المحتوى المنشور' },
       { href: '/sections/autism', label: 'التوحد' },
       { href: '/sections/special-ed-learning-disabilities', label: 'صعوبات واضطرابات التعلم' },
       { href: '/sections/parenting-family', label: 'التربية والوالدية والأسرة' },
