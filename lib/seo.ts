@@ -96,6 +96,7 @@ export function buildSeoMetadata(input: SeoMetadataInput): Metadata {
 
   const semanticProfile = buildSemanticSeoProfile(input);
   const keywords = semanticProfile.topicKeywords.slice(0, 12);
+  void keywords;
   const openGraphImages = [{
     url: image,
     ...(imageWidth ? { width: imageWidth } : {}),
@@ -106,7 +107,6 @@ export function buildSeoMetadata(input: SeoMetadataInput): Metadata {
   return {
     title: { absolute: title },
     description,
-    keywords,
     creator: BRAND_NAME,
     publisher: BRAND_NAME,
     alternates: { canonical, languages },

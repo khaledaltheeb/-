@@ -1,0 +1,34 @@
+name: No Public Meta Keywords
+
+on:
+  pull_request:
+    paths:
+      - 'lib/seo.ts'
+      - 'lib/semantic-seo.ts'
+      - 'lib/semantic-seo-safe.ts'
+      - 'scripts/no-public-meta-keywords-contract.mjs'
+      - '.github/workflows/no-public-meta-keywords.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'lib/seo.ts'
+      - 'lib/semantic-seo.ts'
+      - 'lib/semantic-seo-safe.ts'
+      - 'scripts/no-public-meta-keywords-contract.mjs'
+      - '.github/workflows/no-public-meta-keywords.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Verify semantic signals remain internal
+        run: node scripts/no-public-meta-keywords-contract.mjs
