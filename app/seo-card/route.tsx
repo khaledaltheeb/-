@@ -19,7 +19,7 @@ function escapeXml(value: string) {
 }
 
 function rtlText(text: string, y: number, size: number, weight = 800) {
-  return `<text x="${CARD_RIGHT}" y="${y}" font-family="Noto Sans Arabic,Tahoma,Arial,sans-serif" font-size="${size}" font-weight="${weight}" fill="#123b3c" text-anchor="end" direction="rtl" unicode-bidi="plaintext">${escapeXml(text)}</text>`;
+  return `<text x="${CARD_RIGHT}" y="${y}" font-family="Noto Sans Arabic,Tahoma,Arial,sans-serif" font-size="${size}" font-weight="${weight}" fill="#123b3c" text-anchor="start" direction="rtl" unicode-bidi="plaintext">${escapeXml(text)}</text>`;
 }
 
 function titleLayout(value: string) {
@@ -82,8 +82,8 @@ export function GET(request: Request) {
   <rect x="64" y="54" width="1072" height="522" rx="34" fill="#fff" opacity=".76"/>
   <rect x="1010" y="78" width="82" height="82" rx="24" fill="#075f61"/>
   <text x="1051" y="132" font-family="Noto Sans Arabic,Tahoma,Arial,sans-serif" font-size="40" font-weight="800" fill="#fff" text-anchor="middle">ر</text>
-  <text x="980" y="111" font-family="Noto Sans Arabic,Tahoma,Arial,sans-serif" font-size="38" font-weight="800" fill="#123b3c" text-anchor="end" direction="rtl" unicode-bidi="plaintext">روافد</text>
-  <text x="980" y="143" font-family="Noto Sans Arabic,Tahoma,Arial,sans-serif" font-size="18" fill="#416a6a" text-anchor="end" direction="rtl" unicode-bidi="plaintext">منصة المعرفة العربية الموثوقة</text>
+  <text x="980" y="111" font-family="Noto Sans Arabic,Tahoma,Arial,sans-serif" font-size="38" font-weight="800" fill="#123b3c" text-anchor="start" direction="rtl" unicode-bidi="plaintext">روافد</text>
+  <text x="980" y="143" font-family="Noto Sans Arabic,Tahoma,Arial,sans-serif" font-size="18" fill="#416a6a" text-anchor="start" direction="rtl" unicode-bidi="plaintext">منصة المعرفة العربية الموثوقة</text>
   <g clip-path="url(#safe-text)">${titleSvg}${contextSvg}</g>
   <text x="1080" y="548" font-family="Arial,sans-serif" font-size="19" fill="#4f7172" text-anchor="end">https://healthrenewal.org</text>
 </svg>`;
