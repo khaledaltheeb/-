@@ -1,9 +1,12 @@
 import Link from 'next/link';
+import ArticleFeaturedImage from '@/components/article-featured-image';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import ContentRenderer from '@/components/content-renderer';
+import { resolveVisiblePageImage } from '@/lib/page-image';
 import { breadcrumbJsonLd, SITE_URL } from '@/lib/seo';
 import { evidenceKind, sourceUrl, type MagazineListingRecord, type MagazineRecord } from '@/lib/magazine';
+import { createClient } from '@/lib/supabase/server';
 import styles from './magazine.module.css';
 
 type Block = { type?: string; items?: Array<{ question?: string; answer?: string }> };
@@ -20,12 +23,21 @@ function faqItems(record: MagazineRecord) {
   return blocks.flatMap((block) => block.type === 'faq' && Array.isArray(block.items) ? block.items : []).filter((item) => item.question && item.answer);
 }
 
-export default function MagazineArticle({ record, related }: { record: MagazineRecord; related: MagazineListingRecord[] }) {
+export default async function MagazineArticle({ record, related }: { record: MagazineRecord; related: MagazineListingRecord[] }) {
   const canonical = record.canonical_url || `/content/${record.slug}`;
   const references = (record.references_json ?? []).filter((ref) => ref && (ref.title || ref.url));
   const primarySource = sourceUrl(record);
   const faqs = faqItems(record);
-  const articleUrl = `${SITE_URL}${canonical}`;
+  const articleUrl = canonical.startsWith('https://') ? canonical : `${SITE_URL}${canonical}`;
+  const supabase = await createClient();
+  const { data: media } = await supabase.from('content').select('featured_image_url,featured_image_alt').eq('id', record.id).maybeSingle();
+  const pageVisual = resolveVisiblePageImage({
+    title: record.title,
+    kind: 'article',
+    featuredImageUrl: media?.featured_image_url ?? null,
+    featuredImageAlt: media?.featured_image_alt ?? null,
+  });
+  const pageVisualUrl = pageVisual.src.startsWith('https://') ? pageVisual.src : `${SITE_URL}${pageVisual.src}`;
   const breadcrumb = breadcrumbJsonLd([
     { name: 'الرئيسية', path: '/' },
     { name: 'المجلة والأبحاث', path: '/magazine/' },
@@ -52,7 +64,7 @@ export default function MagazineArticle({ record, related }: { record: MagazineR
     isBasedOn: primarySource || undefined,
     citation: references.flatMap((reference) => reference.url ? [reference.url] : []),
     about: [record.primary_keyword, ...(record.semantic_terms ?? [])].filter(Boolean),
-    image: `${SITE_URL}/seo-card`,
+    image: pageVisualUrl,
   };
   const faqSchema = faqs.length ? {
     '@context': 'https://schema.org',
@@ -81,6 +93,7 @@ export default function MagazineArticle({ record, related }: { record: MagazineR
               </div>
             </header>
 
+            <ArticleFeaturedImage title={record.title} kind="article" featuredImageUrl={media?.featured_image_url ?? null} featuredImageAlt={media?.featured_image_alt ?? null} />
             <div className={styles.methodNote}><strong>طريقة القراءة:</strong> افصل بين نتيجة الدراسة ودلالتها العملية، واقرأ حدود الدليل قبل تعميم النتيجة. هذه الصفحة تحليل تثقيفي وليست توصية علاجية فردية.</div>
             <div className={styles.articleBody}><ContentRenderer bodyJson={record.body_json} bodyText={record.body_text} recordId={record.id} /></div>
 
