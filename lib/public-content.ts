@@ -8,16 +8,23 @@ export type HomepageContent = {
   updated_at: string;
 };
 
+const HOMEPAGE_CACHE_WINDOW_MS = 5 * 60 * 1000;
+
 export async function getHomepageContent(limit = 6): Promise<HomepageContent[]> {
   const projectUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
   if (!projectUrl || !publishableKey) return [];
 
+  // Keep the publication cutoff stable for the 300s fetch-cache window so repeated homepage renders reuse the same Supabase response.
+  const publicationCutoff = new Date(
+    Math.floor(Date.now() / HOMEPAGE_CACHE_WINDOW_MS) * HOMEPAGE_CACHE_WINDOW_MS,
+  ).toISOString();
+
   const params = new URLSearchParams({
     select: 'slug,title,excerpt,content_type,canonical_url,published_at,updated_at',
     status: 'eq.published',
     robots_index: 'eq.true',
-    published_at: `lte.${new Date().toISOString()}`,
+    published_at: `lte.${publicationCutoff}`,
     order: 'published_at.desc.nullslast,updated_at.desc',
     limit: String(Math.max(1, Math.min(limit, 12))),
   });
