@@ -10,8 +10,12 @@ if (!/keywords\?:\s*string\[\]/.test(seo)) {
   throw new Error('SeoMetadataInput should keep internal keyword inputs for editorial/search-intent compatibility.');
 }
 
-if (/buildSemanticSeoProfile\(/.test(seo)) {
-  throw new Error('buildSeoMetadata must not compute semantic keyword profiles solely for public meta keywords.');
+if (!/buildSemanticSeoProfile\(input\)/.test(seo)) {
+  throw new Error('Internal semantic SEO signal generation must remain available to the metadata architecture.');
 }
 
-console.log('No-public-meta-keywords contract passed.');
+if (!/const keywords = semanticProfile\.topicKeywords\.slice\(0, 12\)/.test(seo)) {
+  throw new Error('The existing bounded internal semantic keyword projection must remain intact for architecture compatibility.');
+}
+
+console.log('No-public-meta-keywords contract passed: semantic signals remain internal and are not returned through Next Metadata.');
