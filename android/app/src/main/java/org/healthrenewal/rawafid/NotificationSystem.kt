@@ -53,12 +53,13 @@ object ReminderScheduler {
 
     fun sync(context: Context, type: ReminderType) {
         val manager = WorkManager.getInstance(context)
+        val repository = RawafidRepositories.local(context)
         val name = "rawafid_${type.key}_periodic"
-        if (!LocalStore.reminderEnabled(context, type)) {
+        if (!repository.reminderEnabled(type)) {
             manager.cancelUniqueWork(name)
             return
         }
-        val minutes = LocalStore.reminderMinutes(context, type).coerceAtLeast(15)
+        val minutes = repository.reminderMinutes(type).coerceAtLeast(15)
         val request = PeriodicWorkRequestBuilder<ReminderWorker>(minutes, TimeUnit.MINUTES)
             .setInitialDelay(minutes, TimeUnit.MINUTES)
             .setInputData(Data.Builder().putString("type", type.name).build())
@@ -70,9 +71,10 @@ object ReminderScheduler {
 class ReminderWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
     override suspend fun doWork(): Result {
         val type = runCatching { ReminderType.valueOf(inputData.getString("type") ?: "") }.getOrNull() ?: return Result.success()
-        if (!LocalStore.reminderEnabled(applicationContext, type)) return Result.success()
-        if (LocalStore.isQuietHour(applicationContext, LocalDateTime.now().hour)) return Result.success()
-        if (type == ReminderType.MOTIVATION && !LocalStore.claimMotivationSlot(applicationContext)) return Result.success()
+        val repository = RawafidRepositories.local(applicationContext)
+        if (!repository.reminderEnabled(type)) return Result.success()
+        if (repository.isQuietHour(LocalDateTime.now().hour)) return Result.success()
+        if (type == ReminderType.MOTIVATION && !repository.claimMotivationSlot()) return Result.success()
         if (!canNotify(applicationContext)) return Result.success()
 
         NotificationChannels.create(applicationContext)
