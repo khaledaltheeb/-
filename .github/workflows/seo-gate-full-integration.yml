@@ -1,0 +1,120 @@
+name: SEO Gate Full Integration
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/seo-gate.mjs'
+      - 'scripts/content-richness-gate.mjs'
+      - 'scripts/seo-shared-html-cache.mjs'
+      - 'scripts/seo-gate-reliability-contract.mjs'
+      - '.github/workflows/quality.yml'
+      - '.github/workflows/seo-gate-reliability.yml'
+      - '.github/workflows/seo-gate-full-integration.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/seo-gate.mjs'
+      - 'scripts/content-richness-gate.mjs'
+      - 'scripts/seo-shared-html-cache.mjs'
+      - 'scripts/seo-gate-reliability-contract.mjs'
+      - '.github/workflows/quality.yml'
+      - '.github/workflows/seo-gate-reliability.yml'
+      - '.github/workflows/seo-gate-full-integration.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  full-crawl:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
+      NEXT_PUBLIC_SITE_URL: https://healthrenewal.org
+      NEXT_PUBLIC_ALLOW_INDEXING: 'true'
+      SEO_GATE_BASE_URL: http://127.0.0.1:3000
+      SEO_GATE_PAGE_CONCURRENCY: '4'
+      SEO_GATE_LINK_CONCURRENCY: '2'
+      SEO_GATE_VERIFICATION_CONCURRENCY: '1'
+      SEO_GATE_VERIFICATION_DELAY_MS: '1000'
+      SEO_GATE_LINK_ATTEMPTS: '3'
+      SEO_GATE_LINK_RETRY_DELAY_MS: '150'
+      SEO_RICH_CONCURRENCY: '4'
+      SEO_SHARED_HTML_CACHE_DIR: /tmp/rawafid-seo-html-cache
+      SEO_GATE_TIMEOUT_MS: '20000'
+      SEO_GATE_PAGE_ATTEMPTS: '3'
+      SEO_GATE_PAGE_RETRY_DELAY_MS: '300'
+      SEO_RICH_MIN_WORDS: '100'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Install deterministic Arabic image build dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends imagemagick fontconfig fonts-noto-core librsvg2-bin
+          convert -version
+          rsvg-convert --version
+          fc-match 'Noto Sans Arabic'
+      - name: Build production candidate
+        run: npm run build
+      - name: Start production candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          nohup npm run start -- --hostname 127.0.0.1 --port 3000 > /tmp/rawafid-seo-integration-server.log 2>&1 &
+          echo $! > /tmp/rawafid-seo-integration-server.pid
+          ready=0
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:3000/ >/dev/null; then
+              ready=1
+              break
+            fi
+            sleep 1
+          done
+          if [ "$ready" -ne 1 ]; then
+            cat /tmp/rawafid-seo-integration-server.log >&2 || true
+            exit 1
+          fi
+      - name: Full sitemap SEO crawl
+        run: node scripts/seo-gate.mjs
+      - name: Verify full crawl report and shared cache population
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs = require('fs');
+          const report = JSON.parse(fs.readFileSync('reports/seo-gate-report.json', 'utf8'));
+          if (report.fatalError) throw new Error(`SEO crawl fatal error: ${report.fatalError}`);
+          if (!Number.isInteger(report.summary?.pages) || report.summary.pages < 1) throw new Error('SEO crawl reported no sitemap pages');
+          if (!Number.isInteger(report.summary?.internalLinks) || report.summary.internalLinks < 1) throw new Error('SEO crawl reported no internal links');
+          console.log(`Full crawl report verified: pages=${report.summary.pages}, internalLinks=${report.summary.internalLinks}, failures=${report.summary.failures}`);
+          NODE
+          test -d /tmp/rawafid-seo-html-cache
+          test -n "$(find /tmp/rawafid-seo-html-cache -type f -name '*.json.gz' -print -quit)"
+      - name: Content richness using the same audited HTML
+        run: node scripts/content-richness-gate.mjs
+      - name: Stop candidate
+        if: always()
+        shell: bash
+        run: |
+          if [ -f /tmp/rawafid-seo-integration-server.pid ]; then
+            kill "$(cat /tmp/rawafid-seo-integration-server.pid)" 2>/dev/null || true
+          fi
+      - name: Upload diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rawafid-seo-full-integration-${{ github.run_id }}
+          path: |
+            reports/seo-gate-report.json
+            /tmp/rawafid-seo-integration-server.log
+          if-no-files-found: ignore
+          retention-days: 7
