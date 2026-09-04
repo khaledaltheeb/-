@@ -38,11 +38,11 @@ export default function RawafidAssistantLoader() {
   const activate = useCallback(async () => {
     if (activatedRef.current) return;
     activatedRef.current = true;
-    markAssistantSeen();
     setLoading(true);
 
     try {
       const module = await preloadAssistant();
+      markAssistantSeen();
       setAssistant(() => module.default);
     } catch {
       activatedRef.current = false;
