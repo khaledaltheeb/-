@@ -5,14 +5,14 @@ const routes=[
     path:'/open-source',
     title:'المصدر المفتوح',
     canonical:'https://healthrenewal.org/open-source',
-    markers:['Health Renewal · Open Source','Arabic/RTL Accessibility & Localization Toolkit',repoUrl],
-    schemaTypes:['CollectionPage','SoftwareSourceCode'],
+    markers:['Health Renewal / Rawafid','Rawafid Arabic/RTL Accessibility & Localization Toolkit',repoUrl],
+    schemaTypes:['CollectionPage','BreadcrumbList','ItemList'],
   },
   {
     path:'/open-source/arabic-rtl-a11y-toolkit',
-    title:'Arabic/RTL Accessibility & Localization Toolkit',
+    title:'أداة روافد المفتوحة للعربية وRTL والوصولية والتوطين',
     canonical:'https://healthrenewal.org/open-source/arabic-rtl-a11y-toolkit',
-    markers:['Health Renewal Open Source','@rawafid/arabic-rtl-a11y-toolkit',repoUrl,'Apache-2.0'],
+    markers:['Rawafid Arabic/RTL Accessibility & Localization Toolkit','@rawafid/arabic-rtl-a11y-toolkit',repoUrl,'Apache-2.0'],
     schemaTypes:['SoftwareSourceCode','BreadcrumbList'],
   },
 ];
@@ -36,4 +36,4 @@ for(const spec of routes){
   }catch(error){console.error(`OPEN_SOURCE ${spec.path}:`,error);failed=true;}
 }
 if(failed)process.exit(1);
-console.log('Health Renewal open-source identity runtime contract passed.');
+console.log('Health Renewal / Rawafid open-source identity runtime contract passed.');
