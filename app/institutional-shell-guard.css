@@ -1,0 +1,15 @@
+/*
+ * Narrow shell guard for the current institutional footer.
+ *
+ * app/globals.css still contains a legacy element-level `footer { display:flex; ... }`
+ * rule from the pre-institutional shell. The current footer is structured by
+ * `.site-footer` + `.site-footer-inner` in rawafid-theme.css and must not inherit
+ * that legacy flex container behavior.
+ *
+ * Keep this file intentionally tiny: no colors, tokens, typography, sizing,
+ * route/indexing behavior, or content changes belong here.
+ */
+.site-footer{
+  display:block;
+  justify-content:normal;
+}
