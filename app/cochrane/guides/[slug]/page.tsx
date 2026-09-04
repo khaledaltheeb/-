@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
-import { breadcrumbJsonLd, buildSeoMetadata } from '@/lib/seo';
+import { breadcrumbJsonLd, buildSeoMetadata, SITE_URL } from '@/lib/seo';
 import foundations from '@/data/cochrane/guides-foundations-v1.json';
 import searchBias from '@/data/cochrane/guides-search-bias-v1.json';
 import statistics from '@/data/cochrane/guides-statistics-v1.json';
@@ -38,9 +38,12 @@ function getGuide(slug: string): Guide | undefined {
   return guides.find((guide) => guide.slug === slug);
 }
 
+function guideBatch(guide: Guide) {
+  return batches.find((candidate) => candidate.guides.some((item) => item.slug === guide.slug));
+}
+
 function guideEditorialNote(guide: Guide) {
-  const batch = batches.find((candidate) => candidate.guides.some((item) => item.slug === guide.slug));
-  return batch?.editorial_note_ar ?? foundations.editorial_note_ar;
+  return guideBatch(guide)?.editorial_note_ar ?? foundations.editorial_note_ar;
 }
 
 function sourceFreshness(sourceUrl: string): ProvenanceRecord | undefined {
@@ -59,6 +62,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     index: false,
     follow: true,
     type: 'article',
+    modifiedTime: guideBatch(guide)?.updated_on,
     keywords: ['كوكرين', 'المراجعات المنهجية', 'الطب المبني على الدليل', guide.intent_ar],
     relatedTerms: ['Cochrane Handbook', 'systematic review', 'evidence synthesis', 'GRADE', 'منصة روافد'],
   });
@@ -70,12 +74,31 @@ export default async function CochraneGuidePage({ params }: { params: Params }) 
   if (!guide) notFound();
 
   const path = `/cochrane/guides/${guide.slug}/`;
+  const url = `${SITE_URL}${path}`;
   const crumbs = [
     { name: 'الرئيسية', path: '/' },
     { name: 'موارد كوكرين', path: '/cochrane/' },
     { name: 'الأدلة المنهجية', path: '/cochrane/guides/' },
     { name: guide.title_ar, path },
   ];
+  const breadcrumbs = breadcrumbJsonLd(crumbs);
+  const batch = guideBatch(guide);
+  const articleSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    '@id': `${url}#article`,
+    url,
+    headline: guide.title_ar,
+    description: guide.description_ar,
+    inLanguage: 'ar',
+    articleSection: 'المراجعات المنهجية وعلوم الدليل',
+    dateModified: batch?.updated_on,
+    author: { '@id': `${SITE_URL}/#organization` },
+    publisher: { '@id': `${SITE_URL}/#organization` },
+    citation: guide.sources.map((source) => canonicalSourceUrl(source.url)),
+    isPartOf: { '@id': `${SITE_URL}/#website` },
+    mainEntityOfPage: { '@type': 'WebPage', '@id': url },
+  };
   const pitfalls = 'pitfalls_ar' in guide ? guide.pitfalls_ar : [];
   const connections = 'connections' in guide ? guide.connections.map((linkedSlug) => getGuide(linkedSlug)).filter(Boolean) as Guide[] : [];
   const provenanceRecords = guide.sources.map((source) => sourceFreshness(source.url)).filter(Boolean) as ProvenanceRecord[];
@@ -86,7 +109,7 @@ export default async function CochraneGuidePage({ params }: { params: Params }) 
   return <>
     <SiteHeader />
     <main className="site-shell sector-page-shell">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd(crumbs)).replace(/</g, '\\u003c') }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify([breadcrumbs, articleSchema]).replace(/</g, '\\u003c') }} />
       <nav className="breadcrumbs" aria-label="مسار الصفحة">
         <Link href="/">الرئيسية</Link><span>/</span>
         <Link href="/cochrane/">موارد كوكرين</Link><span>/</span>
