@@ -1,6 +1,7 @@
 import { spawnSync } from 'node:child_process';
 
 const widthCache = new Map();
+const graphemeSegmenter = new Intl.Segmenter('ar', { granularity: 'grapheme' });
 let resolvedFontFile = '';
 
 function run(cmd, args) {
@@ -9,6 +10,10 @@ function run(cmd, args) {
     throw new Error(`${cmd} failed: ${result.stderr || result.error?.message || 'unknown error'}`);
   }
   return result.stdout.trim();
+}
+
+function graphemes(value) {
+  return [...graphemeSegmenter.segment(String(value || ''))].map((part) => part.segment);
 }
 
 export function resolveArabicFontFile() {
@@ -50,11 +55,11 @@ export function splitOversizedTokenByPixels(token, { maxWidth, fontSize }) {
 
   const chunks = [];
   let current = '';
-  for (const char of Array.from(clean)) {
-    const candidate = `${current}${char}`;
+  for (const grapheme of graphemes(clean)) {
+    const candidate = `${current}${grapheme}`;
     if (current && measureArabicTextWidth(candidate, fontSize) > maxWidth) {
       chunks.push(current);
-      current = char;
+      current = grapheme;
     } else {
       current = candidate;
     }
@@ -91,7 +96,7 @@ function ellipsizeToWidth(value, maxWidth, fontSize) {
       parts.pop();
       text = parts.join(' ');
     } else {
-      text = Array.from(text).slice(0, -1).join('').trim();
+      text = graphemes(text).slice(0, -1).join('').trim();
     }
   }
   return `${text}${ellipsis}`;
