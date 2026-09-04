@@ -5,6 +5,7 @@ import LegacyPreservedPageView from '@/components/legacy-preserved-page';
 import { getRelatedMagazine } from '@/lib/magazine';
 import { getMagazineRouteRecord } from '@/lib/magazine-route';
 import { getLegacyPreservedPage, legacyPreservedMetadata } from '@/lib/legacy-preserved-page';
+import { resolveVisiblePageImage } from '@/lib/page-image';
 import { buildSeoMetadata } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
@@ -19,6 +20,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return legacyPreservedMetadata(await getLegacyPreservedPage(route), route);
   }
   const path = record.canonical_url || `/magazine/${slug}`;
+  const visual = resolveVisiblePageImage({
+    title: record.title,
+    kind: 'article',
+    featuredImageUrl: record.featured_image_url,
+    featuredImageAlt: record.featured_image_alt,
+  });
   return buildSeoMetadata({
     title: record.seo_title || record.title,
     description: record.seo_description || record.excerpt,
@@ -26,6 +33,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     index: record.robots_index,
     follow: record.robots_follow,
     type: 'article',
+    image: visual.src,
+    imageAlt: visual.alt,
+    imageWidth: visual.width,
+    imageHeight: visual.height,
     publishedTime: record.published_at,
     modifiedTime: record.updated_at,
     authors: [{ name: record.author_display_name || 'منصة روافد' }],

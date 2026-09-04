@@ -4,7 +4,7 @@ import {
   type MagazineRecord,
 } from '@/lib/magazine';
 
-const FIELDS = 'id,slug,title,excerpt,body_json,body_text,seo_title,seo_description,canonical_url,robots_index,robots_follow,published_at,updated_at,primary_keyword,secondary_keywords,semantic_terms,author_display_name,reviewer_display_name,reviewer_credentials,last_reviewed_at,references_json,medical_disclaimer,schema_json';
+const FIELDS = 'id,slug,title,excerpt,body_json,body_text,seo_title,seo_description,canonical_url,robots_index,robots_follow,published_at,updated_at,primary_keyword,secondary_keywords,semantic_terms,author_display_name,reviewer_display_name,reviewer_credentials,last_reviewed_at,references_json,medical_disclaimer,schema_json,featured_image_url,featured_image_alt';
 const RELEASE_TOKEN_RE = /^[a-f0-9]{32}$/;
 const RELEASE_VISIBLE_STATUSES = ['approved', 'scheduled', 'published'] as const;
 
