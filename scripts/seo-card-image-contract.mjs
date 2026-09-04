@@ -22,8 +22,9 @@ requireMatch('SEO card route', route, /direction="rtl"/, 'Arabic RTL direction i
 requireMatch('SEO card route', route, /unicode-bidi="plaintext"/, 'Arabic bidi isolation is required.');
 requireMatch('SEO card route', route, /Noto Sans Arabic,Tahoma,Arial,sans-serif/, 'Arabic-first font stack is required.');
 requireMatch('SEO card route', route, /https:\/\/healthrenewal\.org/, 'canonical HTTPS site label must be present.');
-requireMatch('SEO card route', route, /escapeXml\(text\)/, 'dynamic title text must be XML escaped.');
-requireMatch('SEO card route', route, /escapeXml\(context/, 'dynamic context must be XML escaped through the shared renderer.');
+requireMatch('SEO card route', route, /function rtlText\([\s\S]*escapeXml\(text\)/, 'all dynamic rendered text must pass through the shared XML-escaping renderer.');
+requireMatch('SEO card route', route, /const titleSvg = titleFit\.lines[\s\S]*rtlText\(/, 'title lines must use the shared escaped renderer.');
+requireMatch('SEO card route', route, /const contextSvg = contextFit\.lines[\s\S]*rtlText\(/, 'context lines must use the shared escaped renderer.');
 requireMatch('SEO card route', route, /Cache-Control/, 'cache contract is required.');
 requireMatch('SEO card route', route, /X-Content-Type-Options/, 'MIME hardening header is required.');
 
