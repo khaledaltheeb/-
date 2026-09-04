@@ -53,6 +53,11 @@ type ApiResponse = {
   results: Result[];
 };
 
+type RawafidAssistantProps = {
+  initialOpen?: boolean;
+  autoOpen?: boolean;
+};
+
 const DEFAULT_QUICK = ['علامات التوحد', 'طفلي لا يتكلم', 'القلق الاجتماعي', 'صعوبات القراءة'];
 const CONTEXT_QUICK: Array<{ match: RegExp; values: string[] }> = [
   { match: /social-work/, values: ['أخلاقيات العمل الاجتماعي', 'تقرير المصير', 'السرية المهنية', 'اتخاذ القرار الأخلاقي'] },
@@ -73,9 +78,9 @@ function safeExcerpt(value: string | null) {
   return text.length > 170 ? `${text.slice(0, 167)}…` : text;
 }
 
-export default function RawafidAssistant() {
+export default function RawafidAssistant({ initialOpen = false, autoOpen = true }: RawafidAssistantProps) {
   const pathname = usePathname();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(initialOpen);
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<Result[]>([]);
@@ -91,6 +96,7 @@ export default function RawafidAssistant() {
   }, [pathname]);
 
   useEffect(() => {
+    if (!autoOpen) return;
     let last = 0;
     try { last = Number(window.localStorage.getItem(STORAGE_KEY) || 0); } catch {}
     if (Date.now() - last < AUTO_OPEN_TTL_MS) return;
@@ -99,7 +105,7 @@ export default function RawafidAssistant() {
       try { window.localStorage.setItem(STORAGE_KEY, String(Date.now())); } catch {}
     }, AUTO_OPEN_AFTER_MS);
     return () => window.clearTimeout(timer);
-  }, []);
+  }, [autoOpen]);
 
   useEffect(() => {
     if (!open) return;
