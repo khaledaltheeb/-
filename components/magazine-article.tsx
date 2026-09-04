@@ -6,7 +6,6 @@ import ContentRenderer from '@/components/content-renderer';
 import { resolveVisiblePageImage } from '@/lib/page-image';
 import { breadcrumbJsonLd, SITE_URL } from '@/lib/seo';
 import { evidenceKind, sourceUrl, type MagazineListingRecord, type MagazineRecord } from '@/lib/magazine';
-import { createClient } from '@/lib/supabase/server';
 import styles from './magazine.module.css';
 
 type Block = { type?: string; items?: Array<{ question?: string; answer?: string }> };
@@ -23,19 +22,17 @@ function faqItems(record: MagazineRecord) {
   return blocks.flatMap((block) => block.type === 'faq' && Array.isArray(block.items) ? block.items : []).filter((item) => item.question && item.answer);
 }
 
-export default async function MagazineArticle({ record, related }: { record: MagazineRecord; related: MagazineListingRecord[] }) {
+export default function MagazineArticle({ record, related }: { record: MagazineRecord; related: MagazineListingRecord[] }) {
   const canonical = record.canonical_url || `/content/${record.slug}`;
   const references = (record.references_json ?? []).filter((ref) => ref && (ref.title || ref.url));
   const primarySource = sourceUrl(record);
   const faqs = faqItems(record);
   const articleUrl = canonical.startsWith('https://') ? canonical : `${SITE_URL}${canonical}`;
-  const supabase = await createClient();
-  const { data: media } = await supabase.from('content').select('featured_image_url,featured_image_alt').eq('id', record.id).maybeSingle();
   const pageVisual = resolveVisiblePageImage({
     title: record.title,
     kind: 'article',
-    featuredImageUrl: media?.featured_image_url ?? null,
-    featuredImageAlt: media?.featured_image_alt ?? null,
+    featuredImageUrl: record.featured_image_url,
+    featuredImageAlt: record.featured_image_alt,
   });
   const pageVisualUrl = pageVisual.src.startsWith('https://') ? pageVisual.src : `${SITE_URL}${pageVisual.src}`;
   const breadcrumb = breadcrumbJsonLd([
@@ -93,7 +90,7 @@ export default async function MagazineArticle({ record, related }: { record: Mag
               </div>
             </header>
 
-            <ArticleFeaturedImage title={record.title} kind="article" featuredImageUrl={media?.featured_image_url ?? null} featuredImageAlt={media?.featured_image_alt ?? null} />
+            <ArticleFeaturedImage title={record.title} kind="article" featuredImageUrl={record.featured_image_url} featuredImageAlt={record.featured_image_alt} />
             <div className={styles.methodNote}><strong>طريقة القراءة:</strong> افصل بين نتيجة الدراسة ودلالتها العملية، واقرأ حدود الدليل قبل تعميم النتيجة. هذه الصفحة تحليل تثقيفي وليست توصية علاجية فردية.</div>
             <div className={styles.articleBody}><ContentRenderer bodyJson={record.body_json} bodyText={record.body_text} recordId={record.id} /></div>
 
