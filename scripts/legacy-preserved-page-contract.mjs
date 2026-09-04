@@ -51,6 +51,8 @@ for(const fn of ['get_legacy_preserved_page','legacy_preserved_route_exists']){
 
 for(const forbidden of ['service_role','secret_key']) if(helper.toLowerCase().includes(forbidden)||view.toLowerCase().includes(forbidden)||proxy.toLowerCase().includes(forbidden)) fail(`forbidden preservation secret pattern: ${forbidden}`);
 for(const marker of ['get_legacy_preserved_page','legacyPreservedMetadata','buildSeoMetadata','index: false','follow: true','healthrenewal.org','decodeURIComponent',"normalize('NFC')"]) if(!helper.includes(marker)) fail(`helper marker missing: ${marker}`);
+for(const marker of ['canonicalMatchesRoute',".eq('canonical_url', canonicalUrl)",'for (const canonicalUrl of canonicalVariants(route))','if (current && canonicalMatchesRoute(current.canonical_url, route)) return current','const canonicalPath = legacyCanonicalPath(route)','path: canonicalPath']) if(!helper.includes(marker)) fail(`exact canonical takeover marker missing: ${marker}`);
+if(helper.includes(".in('canonical_url', canonicalVariants(route))")) fail('legacy current-content takeover must not accept an unordered canonical variant set');
 // The preserved helper now delegates robots directives to the centralized SEO generator.
 // Keep the historical noarchive behavior without duplicating a second metadata implementation.
 for(const marker of ['const canIndex = INDEXING_ENABLED && input.index !== false','noarchive: !canIndex','nosnippet: !canIndex']) if(!seo.includes(marker)) fail(`central SEO noindex preservation marker missing: ${marker}`);
@@ -86,4 +88,4 @@ for(const path of [
 ]) if(!fs.existsSync(path)) fail(`deployed migration history not mirrored: ${path}`);
 
 if(failed)process.exit(1);
-console.log('Legacy preservation contract passed: production HTML remains available through a Unicode-safe public read-only noindex boundary, reviewed modern takeovers keep priority over fallback rendering, and centralized SEO preserves the historical noarchive/nosnippet behavior without duplicating metadata logic.');
+console.log('Legacy preservation contract passed: production HTML remains available through a Unicode-safe public read-only noindex boundary, reviewed current-content takeover requires an exact self-canonical route match, and centralized SEO preserves historical noarchive/nosnippet behavior.');
