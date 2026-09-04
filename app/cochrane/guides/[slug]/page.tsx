@@ -6,24 +6,30 @@ import SiteFooter from '@/components/site-footer';
 import { breadcrumbJsonLd, buildSeoMetadata } from '@/lib/seo';
 import foundations from '@/data/cochrane/guides-foundations-v1.json';
 import searchBias from '@/data/cochrane/guides-search-bias-v1.json';
+import statistics from '@/data/cochrane/guides-statistics-v1.json';
+import gradeDecision from '@/data/cochrane/guides-grade-decision-v1.json';
+import msGovernance from '@/data/cochrane/guides-ms-arabic-governance-v1.json';
 
 export const dynamic = 'force-dynamic';
 
 type Params = Promise<{ slug: string }>;
 type FoundationGuide = (typeof foundations.guides)[number];
 type SearchBiasGuide = (typeof searchBias.guides)[number];
-type Guide = FoundationGuide | SearchBiasGuide;
+type StatisticsGuide = (typeof statistics.guides)[number];
+type GradeDecisionGuide = (typeof gradeDecision.guides)[number];
+type MsGovernanceGuide = (typeof msGovernance.guides)[number];
+type Guide = FoundationGuide | SearchBiasGuide | StatisticsGuide | GradeDecisionGuide | MsGovernanceGuide;
 
-const guides: Guide[] = [...foundations.guides, ...searchBias.guides];
+const batches = [foundations, searchBias, statistics, gradeDecision, msGovernance] as const;
+const guides: Guide[] = batches.flatMap((batch) => batch.guides) as Guide[];
 
 function getGuide(slug: string): Guide | undefined {
   return guides.find((guide) => guide.slug === slug);
 }
 
 function guideEditorialNote(guide: Guide) {
-  return searchBias.guides.some((item) => item.slug === guide.slug)
-    ? searchBias.editorial_note_ar
-    : foundations.editorial_note_ar;
+  const batch = batches.find((candidate) => candidate.guides.some((item) => item.slug === guide.slug));
+  return batch?.editorial_note_ar ?? foundations.editorial_note_ar;
 }
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
@@ -38,7 +44,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     follow: true,
     type: 'article',
     keywords: ['كوكرين', 'المراجعات المنهجية', 'الطب المبني على الدليل', guide.intent_ar],
-    relatedTerms: ['Cochrane Handbook', 'systematic review', 'evidence synthesis', 'منصة روافد'],
+    relatedTerms: ['Cochrane Handbook', 'systematic review', 'evidence synthesis', 'GRADE', 'منصة روافد'],
   });
 }
 
