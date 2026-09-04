@@ -1,8 +1,12 @@
 package org.healthrenewal.rawafid
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasScrollAction
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNode
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performScrollToNode
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Rule
 import org.junit.Test
@@ -29,6 +33,8 @@ class TravelSafeScreenSmokeTest {
     fun travelSafeLoadsEncryptedProfileAndOfflinePhraseShell() {
         composeRule.onNodeWithText("Travel Safe").assertIsDisplayed()
         composeRule.onNodeWithText("ملف الرحلة").assertIsDisplayed()
+
+        composeRule.onNode(hasScrollAction()).performScrollToNode(hasText("عبارات جاهزة"))
         composeRule.onNodeWithText("عبارات جاهزة").assertIsDisplayed()
     }
 }
@@ -42,6 +48,8 @@ class AccessibilityProfileScreenSmokeTest {
     fun accessibilitySettingsLoadWithPrivacyDisclosure() {
         composeRule.onNodeWithText("الإعدادات والوصولية").assertIsDisplayed()
         composeRule.onNodeWithText("معاينة مباشرة — غير محفوظة").assertIsDisplayed()
+
+        composeRule.onNode(hasScrollAction()).performScrollToNode(hasText("الخصوصية"))
         composeRule.onNodeWithText("الخصوصية").assertIsDisplayed()
     }
 }
