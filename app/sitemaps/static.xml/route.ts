@@ -7,6 +7,7 @@ export async function GET() {
     { path:'/', changeFrequency:'weekly', priority:1 },
     { path:'/sectors', changeFrequency:'weekly', priority:.92 },
     { path:'/sections', changeFrequency:'weekly', priority:.9 },
+    { path:'/all-pages', changeFrequency:'daily', priority:.86 },
     { path:'/magazine/', changeFrequency:'daily', priority:.84 },
     { path:'/addiction', changeFrequency:'weekly', priority:.82 },
     { path:'/about', changeFrequency:'monthly', priority:.7 },
