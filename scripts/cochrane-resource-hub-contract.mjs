@@ -7,6 +7,7 @@ const fail = (message) => {
 
 const read = (path) => fs.readFileSync(path, 'utf8');
 const registryPath = 'data/cochrane/resources-v1.json';
+const provenancePath = 'data/cochrane/methods-provenance-v1.json';
 const pagePath = 'app/cochrane/[[...slug]]/page.tsx';
 const apiPath = 'app/api/v1/cochrane-resource-hub/route.ts';
 const sitemapPath = 'app/sitemaps/static.xml/route.ts';
@@ -20,13 +21,14 @@ const guideFiles = [
   'data/cochrane/guides-ms-arabic-governance-v1.json',
 ];
 
-for (const path of [registryPath, pagePath, apiPath, sitemapPath, guideIndexPath, guidePagePath, ...guideFiles]) {
+for (const path of [registryPath, provenancePath, pagePath, apiPath, sitemapPath, guideIndexPath, guidePagePath, ...guideFiles]) {
   if (!fs.existsSync(path)) fail(`missing required file: ${path}`);
 }
 
 if (process.exitCode) process.exit(process.exitCode);
 
 const registry = JSON.parse(read(registryPath));
+const provenance = JSON.parse(read(provenancePath));
 const page = read(pagePath);
 const api = read(apiPath);
 const sitemap = read(sitemapPath);
@@ -72,6 +74,26 @@ if (registry.arabic_pilot?.status !== 'materials-received-not-yet-translated') f
 if (!/لم تُنشر بعد ترجمة عربية معتمدة/.test(registry.arabic_pilot?.public_status_ar || '')) fail('pilot public status must explicitly state that no approved Arabic translation is published');
 if (!Array.isArray(registry.arabic_pilot?.workflow_ar) || registry.arabic_pilot.workflow_ar.length < 7) fail('pilot QA workflow is incomplete');
 if (!/لا توصف أي مسودة/.test(registry.arabic_pilot?.publication_guard_ar || '')) fail('publication guard is missing');
+
+// Current-method provenance and freshness guardrails.
+if (provenance.schema_version !== 'rawafid-cochrane-methods-provenance-v1') fail('unexpected methods provenance schema');
+if (provenance.reviewed_on !== '2026-09-04') fail('methods provenance review date must be explicit');
+if (!Array.isArray(provenance.records) || provenance.records.length < 5) fail('methods provenance registry is incomplete');
+const provenanceById = new Map(provenance.records.map((record) => [record.id, record]));
+for (const id of ['cochrane-handbook-current', 'rob-2-current', 'robins-i-v2', 'rob-me-current', 'grade-chapter-14']) {
+  if (!provenanceById.has(id)) fail(`missing methods provenance record: ${id}`);
+}
+for (const record of provenance.records) {
+  if (!/^https:\/\//.test(record.url) || !/^https:\/\//.test(record.source_of_status)) fail(`methods provenance URLs must be HTTPS: ${record.id}`);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(record.verified_on)) fail(`methods provenance verification date invalid: ${record.id}`);
+  if (!record.status || !record.version_label || !record.note_ar || record.note_ar.length < 80) fail(`methods provenance record too thin: ${record.id}`);
+}
+const robinsV2 = provenanceById.get('robins-i-v2');
+if (robinsV2?.status !== 'draft-subject-to-change') fail('ROBINS-I V2 must remain explicitly marked draft-subject-to-change');
+if (!/draft/i.test(robinsV2?.version_label || '') || !/مسودة|draft/i.test(robinsV2?.note_ar || '')) fail('ROBINS-I V2 draft status is not visible enough');
+const handbookCurrent = provenanceById.get('cochrane-handbook-current');
+if (!/6\.5\.1/.test(handbookCurrent?.version_label || '') || !/6\.5/.test(handbookCurrent?.note_ar || '')) fail('Handbook base version and subsequent 6.5.1 updates must both be distinguished');
+if (!/لا يعيد سجل روافد نشر/.test(provenance.rights_note_ar || '')) fail('methods provenance rights guard is missing');
 
 const nativeRoutes = ['', 'resources', 'read-review', 'certainty', 'ms', 'arabic-pilot'];
 for (const key of nativeRoutes) {
@@ -131,6 +153,9 @@ if (!guideIndex.includes('50-guide pre-release corpus')) fail('guide index must 
 if (sitemap.includes('/cochrane/guides/')) fail('pre-release guide corpus must not enter static sitemap before final QA');
 if (!guidePage.includes('أخطاء شائعة يجب تجنبها')) fail('guide renderer must expose failure-mode learning layer');
 if (!guidePage.includes('صفحات مرتبطة تكمل الفكرة')) fail('guide renderer must expose connected learning path');
+if (!guidePage.includes("methods-provenance-v1.json")) fail('guide renderer must consume methods provenance registry');
+if (!guidePage.includes('ROBINS-I V2 ما يزال مسودة')) fail('ROBINS-I V2 draft warning must be visible to readers');
+if (!guidePage.includes('سجل حداثة المصادر')) fail('guide renderer must expose source freshness review layer');
 
 const msGuideIds = ['ms-azathioprine-cd015005', 'ms-immunotherapy-adverse-effects-cd012186', 'ms-dietary-interventions-cd004192'];
 for (const id of msGuideIds) if (!allSlugs.has(id)) fail(`missing MS worked example: ${id}`);
@@ -142,5 +167,6 @@ if (!process.exitCode) {
   console.log(`official_resources=${registry.official_resources.length}`);
   console.log(`ms_reviews=${registry.ms_reviews.length}`);
   console.log(`guides=${guides.length}`);
+  console.log(`methods_provenance=${provenance.records.length}`);
   console.log(`pilot_status=${registry.arabic_pilot.status}`);
 }
