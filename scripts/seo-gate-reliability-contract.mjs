@@ -51,6 +51,8 @@ if (!richness.includes('node scripts/content-richness-gate.mjs')) fail('Content 
 for (const token of ['types: [ready_for_review, synchronize, reopened]', "if: github.event_name == 'push' || github.event.pull_request.draft == false", 'node scripts/seo-gate.mjs','node scripts/rich-discovery-gate.mjs','node scripts/content-richness-gate.mjs',"grep -Eq 'cacheHits=[1-9][0-9]*' /tmp/rawafid-rich-discovery.log","grep -Eq 'cacheHits=[1-9][0-9]*' /tmp/rawafid-content-richness.log"]) {
   if (!integration.includes(token)) fail(`full integration promotion/cache contract missing ${token}`);
 }
-if (/types:\s*\[[^\]]*opened/.test(integration)) fail('Full Integration must not launch its heavy crawl when a draft PR is first opened');
+const activityMatch = integration.match(/types:\s*\[([^\]]+)\]/);
+const activities = activityMatch ? activityMatch[1].split(',').map((value) => value.trim()).filter(Boolean) : [];
+if (activities.includes('opened')) fail('Full Integration must not launch its heavy crawl when a draft PR is first opened');
 
 if (!process.exitCode) console.log('SEO gate reliability contract passed: one audited HTML representation is reused without reducing coverage or blocking semantics, and full integration runs only after promotion.');
