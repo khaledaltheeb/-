@@ -59,7 +59,7 @@ require(circle, "CircleQrScanner.start(", "My Circle QR scan entry point is miss
 require(circle, "المسح يملأ معرّف RFD فقط ولا يرسل طلب ارتباط تلقائيًا", "QR scan must remain fill-only with explicit submit")
 require(circle, "RawafidCircleApi.sendConnectionRequest(context, id, label)", "connection requests must remain explicit")
 require(circle, "EncryptedLocalStore.put(context, ENCRYPTED_PEOPLE_KEY", "local safety contacts must remain encrypted")
-require(circle, "android Keystore" if False else "Android Keystore", "local safety contact encryption disclosure is missing")
+require(circle, "Android Keystore", "local safety contact encryption disclosure is missing")
 
 for banned in (
     "Surface(Modifier.fillMaxSize()) { MyCircleScreen() }",
