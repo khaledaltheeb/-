@@ -11,6 +11,7 @@ const provenancePath = 'data/cochrane/methods-provenance-v1.json';
 const pagePath = 'app/cochrane/[[...slug]]/page.tsx';
 const apiPath = 'app/api/v1/cochrane-resource-hub/route.ts';
 const sitemapPath = 'app/sitemaps/static.xml/route.ts';
+const rootSitemapPath = 'app/sitemap.xml/route.ts';
 const guideIndexPath = 'app/cochrane/guides/page.tsx';
 const guidePagePath = 'app/cochrane/guides/[slug]/page.tsx';
 const guideFiles = [
@@ -21,7 +22,7 @@ const guideFiles = [
   'data/cochrane/guides-ms-arabic-governance-v1.json',
 ];
 
-for (const path of [registryPath, provenancePath, pagePath, apiPath, sitemapPath, guideIndexPath, guidePagePath, ...guideFiles]) {
+for (const path of [registryPath, provenancePath, pagePath, apiPath, sitemapPath, rootSitemapPath, guideIndexPath, guidePagePath, ...guideFiles]) {
   if (!fs.existsSync(path)) fail(`missing required file: ${path}`);
 }
 
@@ -32,6 +33,7 @@ const provenance = JSON.parse(read(provenancePath));
 const page = read(pagePath);
 const api = read(apiPath);
 const sitemap = read(sitemapPath);
+const rootSitemap = read(rootSitemapPath);
 const guideIndex = read(guideIndexPath);
 const guidePage = read(guidePagePath);
 const guideBatches = guideFiles.map((path) => JSON.parse(read(path)));
@@ -104,9 +106,20 @@ if (!page.includes('LegacyPreservedRoute')) fail('legacy Cochrane fallback must 
 if (!page.includes('لم يُنجز بعد') && !page.includes('غير مكتمل')) fail('pilot page must visibly distinguish incomplete work');
 if (!page.includes('ليست ترجمة')) fail('MS page must state that it is not the received Blogshot translation');
 
-for (const path of ['/cochrane/', '/cochrane/resources/', '/cochrane/read-review/', '/cochrane/certainty/', '/cochrane/ms/', '/cochrane/arabic-pilot/']) {
+const nativeCochraneCanonicalRoutes = ['/cochrane/', '/cochrane/resources/', '/cochrane/read-review/', '/cochrane/certainty/', '/cochrane/ms/', '/cochrane/arabic-pilot/'];
+for (const path of nativeCochraneCanonicalRoutes) {
   if (!sitemap.includes(`path:'${path}'`)) fail(`static sitemap missing ${path}`);
 }
+
+// Native Cochrane pages must have exactly one sitemap owner. The static sitemap owns these six routes;
+// the DB-backed content sitemap must exclude exactly these canonicals while preserving legacy /cochrane/* content.
+if (!rootSitemap.includes('const COCHRANE_OWNED_CANONICALS')) fail('root sitemap must declare native Cochrane canonical ownership');
+for (const path of nativeCochraneCanonicalRoutes) {
+  if (!rootSitemap.includes(`'${path}'`)) fail(`root sitemap ownership list missing ${path}`);
+}
+if (!rootSitemap.includes('for (const canonical of COCHRANE_OWNED_CANONICALS)')) fail('root sitemap must apply Cochrane ownership exclusions');
+if (!rootSitemap.includes("owned = owned.neq('canonical_url', canonical)")) fail('root sitemap must exclude owned Cochrane canonicals from DB content sitemap');
+if (rootSitemap.includes(".not('canonical_url', 'like', '/cochrane/%')")) fail('root sitemap must not broadly exclude legacy /cochrane/* content');
 
 if (!api.includes("@/data/cochrane/resources-v1.json")) fail('API must expose the versioned registry as its source of truth');
 if (!api.includes('X-Rawafid-Schema')) fail('API schema-version response header is missing');
@@ -156,6 +169,9 @@ if (!guidePage.includes('صفحات مرتبطة تكمل الفكرة')) fail('
 if (!guidePage.includes("methods-provenance-v1.json")) fail('guide renderer must consume methods provenance registry');
 if (!guidePage.includes('ROBINS-I V2 ما يزال مسودة')) fail('ROBINS-I V2 draft warning must be visible to readers');
 if (!guidePage.includes('سجل حداثة المصادر')) fail('guide renderer must expose source freshness review layer');
+if (!guidePage.includes("'https://www.riskofbias.info/welcome/home/current-version-of-robins-i': 'https://www.riskofbias.info/welcome/robins-i-v2'")) fail('ROBINS-I V2 legacy source URL must canonicalize to the current official route');
+if (!guidePage.includes("'https://www.cochrane.org/join-cochrane/translate': 'https://www.cochrane.org/get-involved/translate-our-evidence'")) fail('legacy Cochrane Translate URL must canonicalize to the current official route');
+if (!guidePage.includes('canonicalSourceUrl(source.url)')) fail('guide renderer must render canonicalized primary source URLs');
 
 const msGuideIds = ['ms-azathioprine-cd015005', 'ms-immunotherapy-adverse-effects-cd012186', 'ms-dietary-interventions-cd004192'];
 for (const id of msGuideIds) if (!allSlugs.has(id)) fail(`missing MS worked example: ${id}`);
