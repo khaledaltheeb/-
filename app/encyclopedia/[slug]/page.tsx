@@ -1,12 +1,13 @@
 import type { Metadata } from 'next';
-import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import ContentRenderer from '@/components/content-renderer';
+import ArticleFeaturedImage from '@/components/article-featured-image';
 import LegacyPreservedPageView from '@/components/legacy-preserved-page';
 import { buildSeoMetadata, breadcrumbJsonLd, SITE_URL } from '@/lib/seo';
+import { resolveVisiblePageImage } from '@/lib/page-image';
 import { getLegacyPreservedPage, legacyPreservedMetadata } from '@/lib/legacy-preserved-page';
 import {
   encyclopediaCanonical,
@@ -61,6 +62,13 @@ export default async function EncyclopediaConditionPage({ params }: { params: Pa
   const wordCount = String(record.body_text ?? '').trim().split(/\s+/u).filter(Boolean).length;
   const topicKeywords = [record.primary_keyword, ...(record.secondary_keywords ?? []), ...(record.semantic_terms ?? []).slice(0, 12)]
     .filter((item): item is string => typeof item === 'string' && item.trim().length > 0);
+  const pageVisual = resolveVisiblePageImage({
+    title: record.title,
+    kind: 'encyclopedia',
+    featuredImageUrl: record.featured_image_url,
+    featuredImageAlt: record.featured_image_alt,
+  });
+  const pageVisualUrl = pageVisual.src.startsWith('https://') ? pageVisual.src : `${SITE_URL}${pageVisual.src}`;
   const breadcrumbs = breadcrumbJsonLd([
     { name: 'الرئيسية', path: '/' },
     { name: 'الموسوعة المختصرة', path: '/encyclopedia/' },
@@ -113,7 +121,7 @@ export default async function EncyclopediaConditionPage({ params }: { params: Pa
     isPartOf: { '@id': `${SITE_URL}/encyclopedia/#page` },
     keywords: topicKeywords.join(', '),
     wordCount,
-    image: record.featured_image_url || `${SITE_URL}/seo-card`,
+    image: pageVisualUrl,
     citation: references.flatMap((reference) => reference.url ? [reference.url] : []),
   };
   const faqSchema = faqItems.length ? {
@@ -140,7 +148,7 @@ export default async function EncyclopediaConditionPage({ params }: { params: Pa
         {review.lastReviewedAt ? <span>آخر مراجعة {new Intl.DateTimeFormat('ar', { dateStyle: 'long' }).format(new Date(review.lastReviewedAt))}</span> : null}
       </div><div className="tag-list">{audiences.map((audience) => <span key={audience}>{audience}</span>)}<span>{references.length} مراجع</span>{faqItems.length > 0 ? <span>{faqItems.length} أسئلة شائعة</span> : null}</div></header>
       <nav className="encyclopedia-nav encyclopedia-detail-nav" aria-label="التنقل في الموسوعة"><Link href="/sectors/short-encyclopedia">قطاع الموسوعة المختصرة</Link><Link href="/encyclopedia/">كل مصطلحات وحالات الموسوعة</Link><Link href="/encyclopedia/index/1/">الفهرس الكامل</Link><Link href={`/search/?type=${encyclopediaSearchType}`}>{isCondition ? 'البحث في الحالات' : 'البحث في المصطلحات'}</Link><Link href="/sections/cognitive-processes">الموسوعة الموسعة</Link><Link href="/care-guides/">أدلة الرعاية</Link><Link href="/evidence-guides/">الأدلة العلمية</Link><Link href="/specialists/">دليل المختصين</Link></nav>
-      <div className="article-body">{record.featured_image_url ? <figure className="article-featured-image"><Image src={record.featured_image_url} alt={record.featured_image_alt || record.title} width={1200} height={675} sizes="(max-width: 900px) 100vw, 900px" priority unoptimized /></figure> : null}<ContentRenderer bodyJson={record.body_json} bodyText={record.body_text} recordId={record.id} /></div>
+      <div className="article-body"><ArticleFeaturedImage title={record.title} kind="encyclopedia" featuredImageUrl={record.featured_image_url} featuredImageAlt={record.featured_image_alt} priority /><ContentRenderer bodyJson={record.body_json} bodyText={record.body_text} recordId={record.id} /></div>
       <aside className="medical-disclaimer" aria-label="حدود المحتوى الطبي"><strong>تنبيه طبي</strong><p>{record.medical_disclaimer || 'هذا المحتوى للتثقيف العام ولا يقدم تشخيصًا فرديًا أو وصفة علاجية، ولا يغني عن تقييم مختص مؤهل عند الحاجة.'}</p><Link href="/disclaimer">إخلاء المسؤولية الكامل</Link></aside>
       {references.length ? <section className="article-references" aria-labelledby="encyclopedia-references-title"><h2 id="encyclopedia-references-title">المصادر والمراجع</h2><ol>{references.map((reference, index) => <li key={`${reference.url || reference.title}-${index}`}>{reference.url ? <a href={reference.url} target="_blank" rel="noopener noreferrer">{reference.title || reference.url}</a> : <span>{reference.title}</span>}{reference.publisher ? <small>{reference.publisher}</small> : null}{reference.year ? <small>{String(reference.year)}</small> : null}</li>)}</ol></section> : null}
     </article>
