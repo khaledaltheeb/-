@@ -68,6 +68,7 @@ class CareHubActivity : ComponentActivity() {
 @Composable
 private fun CareHubScreen(requestNotifications: ((Boolean) -> Unit) -> Unit) {
     val context = LocalContext.current
+    val repository = remember(context) { RawafidRepositories.local(context) }
     var version by remember { mutableIntStateOf(0) }
     val definitions = remember { FlexibleReminderCatalog.all(context) }
 
@@ -130,7 +131,7 @@ private fun CareHubScreen(requestNotifications: ((Boolean) -> Unit) -> Unit) {
             Card {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Text("ساعات الصمت", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                    Text("يستخدم المحرك ساعات الصمت العامة الحالية: ${LocalStore.quietStart(context)}:00 — ${LocalStore.quietEnd(context)}:00")
+                    Text("يستخدم المحرك ساعات الصمت العامة الحالية: ${repository.quietStart()}:00 — ${repository.quietEnd()}:00")
                     Text("الهدف أن يساعدك روافد دون أن يتحول إلى عبء إشعارات.")
                 }
             }
