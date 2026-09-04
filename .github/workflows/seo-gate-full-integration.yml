@@ -2,6 +2,7 @@ name: SEO Gate Full Integration
 
 on:
   pull_request:
+    types: [ready_for_review, synchronize, reopened]
     paths:
       - 'scripts/seo-gate.mjs'
       - 'scripts/rich-discovery-gate.mjs'
@@ -28,6 +29,7 @@ permissions:
 
 jobs:
   full-crawl:
+    if: github.event_name == 'push' || github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     timeout-minutes: 90
     env:
