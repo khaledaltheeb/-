@@ -1,11 +1,18 @@
+@import './institutional-shell-guard.css';
+
 /*
  * Retired visual-stability hotfix.
  *
- * This file intentionally contains no visual overrides. The previous version
- * used high-specificity global selectors (:root:root and body .*) to override
- * the institutional V5/V5.1 design system. That changed the palette, container
- * widths, header proportions, hero sizing, cards and footer layout across the
- * entire public site and caused a site-wide visual regression.
+ * This file intentionally contains no broad visual overrides. The previous
+ * version used high-specificity global selectors (:root:root and body .*) to
+ * override the institutional V5/V5.1 design system. That changed the palette,
+ * container widths, header proportions, hero sizing, cards and footer layout
+ * across the entire public site and caused a site-wide visual regression.
+ *
+ * The only remaining compatibility import is the narrow institutional shell
+ * guard above, which neutralizes the legacy element-level `footer` flex rule
+ * for `.site-footer` without changing colors, typography, spacing tokens,
+ * content, routes, indexing, or canonical behavior.
  *
  * Keep global presentation authoritative in app/rawafid-theme.css. Feature
  * styles must remain scoped to their own surfaces instead of overriding global
