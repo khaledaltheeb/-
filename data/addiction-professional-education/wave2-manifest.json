@@ -1,0 +1,73 @@
+{
+  "wave": 2,
+  "program": "addiction-professional-education",
+  "depends_on": {
+    "pull_request": 558,
+    "head_sha": "e31c027f615b3a36cf50999572c61b28999511dc"
+  },
+  "category": {
+    "slug": "addiction-education-professional-roles",
+    "activation_policy": "activate-only-after-all-role-pages-pass-v6-and-live-verification",
+    "pre_release_state": "inactive"
+  },
+  "pages": [
+    {
+      "slug": "addiction-education-professional-roles-physicians",
+      "route": "/addiction/education/professional-roles/physicians/",
+      "role": "physician",
+      "amersa_pubmed": "https://pubmed.ncbi.nlm.nih.gov/31774388/",
+      "clinical_update_layer": ["SAMHSA Core Curriculum 2026", "SAMHSA Curricular Elements 2026", "WHO/UNODC Treatment Standards 2020", "WHO mhGAP 2023"]
+    },
+    {
+      "slug": "addiction-education-professional-roles-nursing",
+      "route": "/addiction/education/professional-roles/nursing/",
+      "role": "nursing",
+      "amersa_pubmed": "https://pubmed.ncbi.nlm.nih.gov/31638876/",
+      "clinical_update_layer": ["SAMHSA Core Curriculum 2026", "SAMHSA Curricular Elements 2026", "WHO/UNODC Treatment Standards 2020"]
+    },
+    {
+      "slug": "addiction-education-professional-roles-pharmacy",
+      "route": "/addiction/education/professional-roles/pharmacy/",
+      "role": "pharmacy",
+      "amersa_pubmed": "https://pubmed.ncbi.nlm.nih.gov/31809680/",
+      "clinical_update_layer": ["SAMHSA Core Curriculum 2026", "SAMHSA Curricular Elements 2026", "WHO/UNODC Treatment Standards 2020"]
+    },
+    {
+      "slug": "addiction-education-professional-roles-social-work",
+      "route": "/addiction/education/professional-roles/social-work/",
+      "role": "social-work",
+      "amersa_pubmed": "https://pubmed.ncbi.nlm.nih.gov/31746677/",
+      "clinical_update_layer": ["SAMHSA Core Curriculum 2026", "SAMHSA Curricular Elements 2026", "WHO/UNODC Treatment Standards 2020"]
+    }
+  ],
+  "release_contract": {
+    "content_contract_version": 6,
+    "minimum_arabic_words": 2500,
+    "minimum_h2": 8,
+    "minimum_h3": 4,
+    "minimum_faq": 6,
+    "minimum_search_intent_questions": 8,
+    "minimum_claim_source_mappings": 5,
+    "minimum_references": 5,
+    "seo_title_max": 47,
+    "seo_description_min": 150,
+    "seo_description_max": 160,
+    "canonical_unique": true,
+    "robots_before_release": "noindex",
+    "endorsement_status": "none-claimed",
+    "copyright_policy": "original-arabic-synthesis-no-verbatim-amersa-republication",
+    "localization_policy": "never-generalize-US-licensure-DEA-FDA-or-scope-of-practice-to-Arab-jurisdictions"
+  },
+  "database_validation": {
+    "v6_dry_run": "passed",
+    "method": "transactional-category-activation-and-four-page-publication-followed-by-rollback",
+    "production_state_after_dry_run": "draft-noindex-category-inactive"
+  },
+  "next_release_steps": [
+    "persist-source-snapshots-or-equivalent-reproducible-seed",
+    "run-repository-validator",
+    "publish-four-pages-in-one-transaction",
+    "verify-http-200-canonical-index-follow-sitemap",
+    "only-then-send-amersa-implementation-update"
+  ]
+}
