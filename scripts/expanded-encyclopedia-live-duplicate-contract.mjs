@@ -8,11 +8,15 @@ import { fileURLToPath } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const BATCH_DIR = path.join(ROOT, 'data', 'expanded-encyclopedia', 'batches');
 const TERM_LIKE_TYPES = ['condition', 'glossary_term', 'assessment', 'intervention'];
-const PAGE_SIZE = 1000;
+const PAGE_SIZE = 250;
+const QUERY_ATTEMPTS = 3;
+const RETRY_DELAY_MS = 350;
+const RETRYABLE_STATUS = new Set([408, 425, 429, 500, 502, 503, 504]);
 
 const clean = (value) => typeof value === 'string' ? value.trim().replace(/\s+/gu, ' ') : '';
 const cleanList = (value) => Array.isArray(value) ? value.map(clean).filter(Boolean) : [];
 const isRecord = (value) => value !== null && typeof value === 'object' && !Array.isArray(value);
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function preserveMeaningfulNotation(value) {
   return value
@@ -51,6 +55,11 @@ function databaseIdentityValues(record) {
     .filter(Boolean);
 }
 
+function hasLegacyMigration(record) {
+  if (!isRecord(record?.schema_json)) return false;
+  return record.schema_json.legacy_migration !== undefined && record.schema_json.legacy_migration !== null;
+}
+
 async function loadLocalTerms() {
   const files = (await fs.readdir(BATCH_DIR)).filter((name) => name.endsWith('.json')).sort();
   const records = [];
@@ -69,6 +78,23 @@ async function loadLocalTerms() {
   return records;
 }
 
+async function fetchCanonicalPage(endpoint, headers, offset) {
+  let lastError = '';
+  for (let attempt = 1; attempt <= QUERY_ATTEMPTS; attempt += 1) {
+    const response = await fetch(endpoint, { headers });
+    if (response.ok) return response;
+
+    const detail = await response.text().catch(() => '');
+    lastError = `Supabase canonical-content query failed (${response.status}) at offset ${offset}: ${detail.slice(0, 500)}`;
+    const retryable = RETRYABLE_STATUS.has(response.status) || detail.includes('"code":"57014"');
+    if (!retryable || attempt === QUERY_ATTEMPTS) throw new Error(lastError);
+
+    console.warn(`EXPANDED_ENCYCLOPEDIA_LIVE_DEDUP: transient canonical query failure; retry ${attempt}/${QUERY_ATTEMPTS - 1} after offset ${offset}`);
+    await sleep(RETRY_DELAY_MS * attempt);
+  }
+  throw new Error(lastError || `Supabase canonical-content query failed at offset ${offset}`);
+}
+
 async function loadPublishedCanonicalContent() {
   const baseUrl = clean(process.env.NEXT_PUBLIC_SUPABASE_URL).replace(/\/$/u, '');
   const key = clean(process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY);
@@ -77,35 +103,29 @@ async function loadPublishedCanonicalContent() {
   }
 
   const params = new URLSearchParams({
-    select: 'slug,title,content_type,primary_keyword',
+    select: 'slug,title,content_type,primary_keyword,schema_json',
     status: 'eq.published',
     content_type: `in.(${TERM_LIKE_TYPES.join(',')})`,
-    // Legacy migration routes are intentionally preserved as noindex history.
-    // They must not block the single indexable canonical term rebuilt under
-    // the expanded encyclopedia; true published non-legacy peers still do.
-    'schema_json->legacy_migration': 'is.null',
+    // Fetch the small schema JSON alongside the identity fields and filter
+    // legacy migrations locally. Pushing the JSON-path predicate into the DB
+    // caused statement timeouts on the growing canonical corpus.
     order: 'slug.asc',
   });
   const endpoint = `${baseUrl}/rest/v1/content?${params.toString()}`;
   const rows = [];
 
   for (let offset = 0; ; offset += PAGE_SIZE) {
-    const response = await fetch(endpoint, {
-      headers: {
-        apikey: key,
-        Authorization: `Bearer ${key}`,
-        Accept: 'application/json',
-        'Range-Unit': 'items',
-        Range: `${offset}-${offset + PAGE_SIZE - 1}`,
-      },
-    });
-    if (!response.ok) {
-      const detail = await response.text().catch(() => '');
-      throw new Error(`Supabase canonical-content query failed (${response.status}): ${detail.slice(0, 500)}`);
-    }
+    const response = await fetchCanonicalPage(endpoint, {
+      apikey: key,
+      Authorization: `Bearer ${key}`,
+      Accept: 'application/json',
+      'Range-Unit': 'items',
+      Range: `${offset}-${offset + PAGE_SIZE - 1}`,
+    }, offset);
+
     const batch = await response.json();
     if (!Array.isArray(batch)) throw new Error('Supabase canonical-content query returned a non-array payload');
-    rows.push(...batch);
+    rows.push(...batch.filter((row) => isRecord(row) && !hasLegacyMigration(row)));
     if (batch.length < PAGE_SIZE) break;
   }
 
