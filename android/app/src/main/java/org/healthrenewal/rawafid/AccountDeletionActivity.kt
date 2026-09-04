@@ -9,8 +9,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -143,14 +143,15 @@ private fun AccountDeletionScreen(onClose: () -> Unit, onDeleted: () -> Unit) {
                             enabled = !busy && accountEmail.isNotBlank() && password.isNotBlank(),
                             onClick = {
                                 runTask {
-                                    val nextStage = withContext(Dispatchers.IO) {
+                                    val (factors, nextStage) = withContext(Dispatchers.IO) {
                                         RawafidCircleApi.signIn(context, accountEmail, password)
-                                        val factors = RawafidCircleApi.currentUserFactors(context)
-                                            .filter { it.status == "verified" && it.factorType in setOf("totp", "phone") }
-                                        mfaFactors = factors
-                                        if (RawafidCircleApi.needsMfa(context)) AccountDeletionStage.MFA else AccountDeletionStage.CONFIRM
+                                        val verifiedTotp = RawafidCircleApi.currentUserFactors(context)
+                                            .filter { it.status == "verified" && it.factorType == "totp" }
+                                        val required = RawafidCircleApi.needsMfa(context)
+                                        verifiedTotp to if (required) AccountDeletionStage.MFA else AccountDeletionStage.CONFIRM
                                     }
                                     password = ""
+                                    mfaFactors = factors
                                     stage = nextStage
                                 }
                             }
@@ -168,9 +169,14 @@ private fun AccountDeletionScreen(onClose: () -> Unit, onDeleted: () -> Unit) {
                         Icon(Icons.Default.Security, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                         Text("التحقق بخطوتين مطلوب", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                         Text("حسابك محمي بعامل إضافي. أكمله قبل الوصول إلى التأكيد النهائي للحذف.")
-                        if (challengeId == null) {
+                        if (mfaFactors.isEmpty()) {
+                            Text(
+                                "عامل التحقق الموثّق غير متاح داخل التطبيق حاليًا. أدر حسابك من الويب أو أعد تسجيل الدخول ثم حاول مرة أخرى.",
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        } else if (challengeId == null) {
                             Button(
-                                enabled = !busy && mfaFactors.isNotEmpty(),
+                                enabled = !busy,
                                 onClick = {
                                     val factor = mfaFactors.firstOrNull() ?: return@Button
                                     runTask {
@@ -246,13 +252,13 @@ private fun AccountDeletionScreen(onClose: () -> Unit, onDeleted: () -> Unit) {
                             label = { Text("اكتب: حذف حسابي نهائيًا") },
                             singleLine = true
                         )
-                        FlowRow(
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs),
-                            verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Checkbox(checked = acknowledged, onCheckedChange = { acknowledged = it })
-                            Text("أفهم أن الحذف نهائي ولا يمكن التراجع عنه.")
+                            Text("أفهم أن الحذف نهائي ولا يمكن التراجع عنه.", modifier = Modifier.weight(1f))
                         }
                         Button(
                             enabled = !busy &&
