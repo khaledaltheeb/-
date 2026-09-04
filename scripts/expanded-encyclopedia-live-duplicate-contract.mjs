@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const BATCH_DIR = path.join(ROOT, 'data', 'expanded-encyclopedia', 'batches');
+const ALIAS_FILE = path.join(ROOT, 'data', 'expanded-encyclopedia', 'canonical-slug-aliases.json');
 const TERM_LIKE_TYPES = ['condition', 'glossary_term', 'assessment', 'intervention'];
 const PAGE_SIZE = 250;
 const QUERY_ATTEMPTS = 3;
@@ -45,11 +46,6 @@ function localIdentityValues(record) {
 }
 
 function databaseIdentityValues(record) {
-  // A legacy/contextual page such as «الاجترار الفكري: في العلاقات» is not
-  // the same canonical identity as the general term «الاجترار الفكري».
-  // Compare the complete title and its explicit primary keyword; never strip
-  // a subtitle because doing so manufactures a duplicate that the source row
-  // itself does not claim.
   return [record.primary_keyword, record.title]
     .map(clean)
     .filter(Boolean);
@@ -58,6 +54,31 @@ function databaseIdentityValues(record) {
 function hasLegacyMigration(record) {
   if (!isRecord(record?.schema_json)) return false;
   return record.schema_json.legacy_migration !== undefined && record.schema_json.legacy_migration !== null;
+}
+
+async function loadCanonicalAliases() {
+  const payload = JSON.parse(await fs.readFile(ALIAS_FILE, 'utf8'));
+  if (!isRecord(payload)) throw new Error('canonical-slug-aliases.json must be an object');
+  const aliases = new Map();
+  for (const [aliasSlugRaw, raw] of Object.entries(payload)) {
+    if (!isRecord(raw)) throw new Error(`invalid canonical alias entry: ${aliasSlugRaw}`);
+    const aliasSlug = clean(aliasSlugRaw).toLowerCase();
+    const canonicalSlug = clean(raw.canonical_slug).toLowerCase();
+    const destination = clean(raw.destination);
+    if (!aliasSlug || !canonicalSlug || !/^\/encyclopedia\/[a-z0-9-]+\/$/.test(destination)) {
+      throw new Error(`invalid canonical alias mapping: ${aliasSlugRaw}`);
+    }
+    if (!destination.endsWith(`/${canonicalSlug}/`)) {
+      throw new Error(`alias destination does not match canonical slug: ${aliasSlug}`);
+    }
+    const routeFile = path.join(ROOT, 'app', 'content', aliasSlug, 'page.tsx');
+    const route = await fs.readFile(routeFile, 'utf8').catch(() => '');
+    if (!route.includes('permanentRedirect') || !route.includes(`'${destination}'`)) {
+      throw new Error(`canonical alias ${aliasSlug} must have an explicit permanentRedirect route to ${destination}`);
+    }
+    aliases.set(aliasSlug, { canonicalSlug, destination });
+  }
+  return aliases;
 }
 
 async function loadLocalTerms() {
@@ -108,9 +129,6 @@ async function loadPublishedCanonicalContent() {
     robots_index: 'eq.true',
     published_at: `lte.${new Date().toISOString()}`,
     content_type: `in.(${TERM_LIKE_TYPES.join(',')})`,
-    // Fetch the small schema JSON alongside the identity fields and filter
-    // legacy migrations locally. Pushing the JSON-path predicate into the DB
-    // caused statement timeouts on the growing canonical corpus.
     order: 'slug.asc',
   });
   const endpoint = `${baseUrl}/rest/v1/content?${params.toString()}`;
@@ -135,9 +153,10 @@ async function loadPublishedCanonicalContent() {
 }
 
 async function main() {
-  const [localTerms, publishedRows] = await Promise.all([
+  const [localTerms, publishedRows, canonicalAliases] = await Promise.all([
     loadLocalTerms(),
     loadPublishedCanonicalContent(),
+    loadCanonicalAliases(),
   ]);
 
   const databaseIdentities = new Map();
@@ -156,18 +175,20 @@ async function main() {
 
   const conflicts = [];
   let delegatedSameSlugOwners = 0;
+  let redirectedAliasOwners = 0;
   for (const { file, slug, record } of localTerms) {
     for (const value of localIdentityValues(record)) {
       const normalized = normalizeTermIdentity(value);
       if (!normalized) continue;
       const matches = databaseIdentities.get(normalized) ?? [];
       for (const match of matches) {
-        // Runtime canonical reconciliation deliberately delegates a static
-        // fallback record to an indexable published DB owner with the same
-        // slug. That is one entity with an authoritative owner, not two
-        // competing canonicals. Cross-slug identity collisions remain fatal.
         if (match.slug === slug) {
           delegatedSameSlugOwners += 1;
+          continue;
+        }
+        const alias = canonicalAliases.get(slug);
+        if (alias?.canonicalSlug === match.slug) {
+          redirectedAliasOwners += 1;
           continue;
         }
         conflicts.push({ file, slug, local: value, database: match.value, source: match.source });
@@ -180,7 +201,7 @@ async function main() {
       `${item.slug}\u0000${normalizeTermIdentity(item.local)}\u0000${item.source}`,
       item,
     ])).values()];
-    console.error(`EXPANDED_ENCYCLOPEDIA_LIVE_DEDUP: ${unique.length} cross-slug conflict(s) detected`);
+    console.error(`EXPANDED_ENCYCLOPEDIA_LIVE_DEDUP: ${unique.length} unresolved cross-slug conflict(s) detected`);
     for (const item of unique.slice(0, 100)) {
       console.error(`- ${item.slug} (${item.file}): «${item.local}» conflicts with ${item.source} «${item.database}»`);
     }
@@ -188,7 +209,7 @@ async function main() {
     process.exit(1);
   }
 
-  console.log(`EXPANDED_ENCYCLOPEDIA_LIVE_DEDUP: ${localTerms.length} local terms checked against ${publishedRows.length} published canonical-like DB pages; ${delegatedSameSlugOwners} same-slug owner handoff(s) accepted; no cross-slug conflicts`);
+  console.log(`EXPANDED_ENCYCLOPEDIA_LIVE_DEDUP: ${localTerms.length} local terms checked against ${publishedRows.length} published canonical-like DB pages; ${delegatedSameSlugOwners} same-slug owner handoff(s), ${redirectedAliasOwners} permanent alias handoff(s); no unresolved cross-slug conflicts`);
 }
 
 main().catch((error) => {
