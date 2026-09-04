@@ -4,20 +4,24 @@ on:
   pull_request:
     paths:
       - 'scripts/seo-gate.mjs'
+      - 'scripts/rich-discovery-gate.mjs'
       - 'scripts/content-richness-gate.mjs'
       - 'scripts/seo-shared-html-cache.mjs'
       - 'scripts/seo-gate-reliability-contract.mjs'
       - '.github/workflows/quality.yml'
       - '.github/workflows/seo-gate-reliability.yml'
+      - '.github/workflows/seo-gate-full-integration.yml'
   push:
     branches: [main]
     paths:
       - 'scripts/seo-gate.mjs'
+      - 'scripts/rich-discovery-gate.mjs'
       - 'scripts/content-richness-gate.mjs'
       - 'scripts/seo-shared-html-cache.mjs'
       - 'scripts/seo-gate-reliability-contract.mjs'
       - '.github/workflows/quality.yml'
       - '.github/workflows/seo-gate-reliability.yml'
+      - '.github/workflows/seo-gate-full-integration.yml'
 
 permissions:
   contents: read
