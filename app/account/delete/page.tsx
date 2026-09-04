@@ -51,6 +51,10 @@ export default async function AccountDeletePage({ searchParams }: { searchParams
             </div>
           </div>
 
+          <div className="system-message" role="note">
+            فتح هذه الصفحة أو تسجيل الدخول إليها لا يحذف شيئًا. لا تبدأ عملية الحذف إلا بعد إعادة التحقق من الهوية ثم تنفيذ التأكيد النهائي الصريح.
+          </div>
+
           {params.deleted === '1' && (
             <div className="system-message success" role="status">
               تم حذف حساب روافد والبيانات المرتبطة به. إذا كانت لديك بيانات محلية فقط داخل تطبيق Android، يمكنك مسح بيانات التطبيق من إعدادات الجهاز أيضًا.
