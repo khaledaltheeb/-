@@ -29,7 +29,7 @@ object TreatmentReminderScheduler {
     }
 
     fun rescheduleFuture(context: Context) {
-        LocalStore.treatments(context)
+        RawafidRepositories.local(context).treatments()
             .filter { it.timeMillis > System.currentTimeMillis() }
             .forEach { schedule(context, it) }
     }
@@ -53,7 +53,7 @@ class TreatmentReminderReceiver : BroadcastReceiver() {
         val id = intent.getIntExtra("id", 0)
         val title = intent.getStringExtra("title").orEmpty().ifBlank { "موعد علاج" }
         val note = intent.getStringExtra("note").orEmpty()
-        LocalStore.removeTreatment(context, id)
+        RawafidRepositories.local(context).removeTreatment(id)
 
         if (Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) return
 
