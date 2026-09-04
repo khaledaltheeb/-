@@ -33,6 +33,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.FilterChip
@@ -41,6 +42,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -538,14 +540,23 @@ class SafetyLocationService : Service(), LocationListener {
 
 class SafetyMonitorActivity : ComponentActivity() {
     private var onPermissionsReady: ((Boolean) -> Unit)? = null
+    private var showBackgroundLocationDisclosure by mutableStateOf(false)
+    private var backgroundDisclosureAcknowledged = false
 
     private val basePermissions = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { grants ->
         val locationGranted = grants[Manifest.permission.ACCESS_FINE_LOCATION] == true || grants[Manifest.permission.ACCESS_COARSE_LOCATION] == true || hasForegroundLocation()
         val smsRequired = localSmsRecipients().isNotEmpty()
         val smsGranted = !smsRequired || grants[Manifest.permission.SEND_SMS] == true || ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED
         val notificationsGranted = Build.VERSION.SDK_INT < 33 || grants[Manifest.permission.POST_NOTIFICATIONS] == true || ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
-        if (!locationGranted || !smsGranted || !notificationsGranted) finishPermissionRequest(false)
-        else requestBackgroundLocationIfNeeded()
+        if (!locationGranted || !smsGranted || !notificationsGranted) {
+            finishPermissionRequest(false)
+        } else if (hasBackgroundLocation()) {
+            finishPermissionRequest(true)
+        } else if (backgroundDisclosureAcknowledged) {
+            requestBackgroundLocationAfterDisclosure()
+        } else {
+            showBackgroundLocationDisclosure = true
+        }
     }
 
     private val backgroundPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
@@ -562,7 +573,15 @@ class SafetyMonitorActivity : ComponentActivity() {
         setContent {
             RawafidTheme {
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                    Surface(Modifier.fillMaxSize()) { SafetyMonitorScreen(::ensurePermissions) }
+                    Surface(Modifier.fillMaxSize()) {
+                        SafetyMonitorScreen(::ensurePermissions)
+                        if (showBackgroundLocationDisclosure) {
+                            BackgroundLocationDisclosureDialog(
+                                onContinue = ::acceptBackgroundLocationDisclosure,
+                                onCancel = ::cancelBackgroundLocationDisclosure
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -574,6 +593,29 @@ class SafetyMonitorActivity : ComponentActivity() {
             return
         }
         onPermissionsReady = result
+        backgroundDisclosureAcknowledged = false
+
+        if (!hasBackgroundLocation()) {
+            // عرض إفصاح الموقع في الخلفية قبل أي طلب موقع جديد لهذه الجلسة.
+            showBackgroundLocationDisclosure = true
+        } else {
+            requestBasePermissions()
+        }
+    }
+
+    private fun acceptBackgroundLocationDisclosure() {
+        backgroundDisclosureAcknowledged = true
+        showBackgroundLocationDisclosure = false
+        requestBasePermissions()
+    }
+
+    private fun cancelBackgroundLocationDisclosure() {
+        showBackgroundLocationDisclosure = false
+        backgroundDisclosureAcknowledged = false
+        finishPermissionRequest(false)
+    }
+
+    private fun requestBasePermissions() {
         val permissions = buildList {
             if (!hasForegroundLocation()) {
                 add(Manifest.permission.ACCESS_FINE_LOCATION)
@@ -586,10 +628,23 @@ class SafetyMonitorActivity : ComponentActivity() {
                 add(Manifest.permission.POST_NOTIFICATIONS)
             }
         }
-        if (permissions.isEmpty()) requestBackgroundLocationIfNeeded() else basePermissions.launch(permissions.toTypedArray())
+
+        if (permissions.isNotEmpty()) {
+            basePermissions.launch(permissions.toTypedArray())
+        } else if (hasBackgroundLocation()) {
+            finishPermissionRequest(true)
+        } else if (backgroundDisclosureAcknowledged) {
+            requestBackgroundLocationAfterDisclosure()
+        } else {
+            showBackgroundLocationDisclosure = true
+        }
     }
 
-    private fun requestBackgroundLocationIfNeeded() {
+    private fun requestBackgroundLocationAfterDisclosure() {
+        if (!backgroundDisclosureAcknowledged) {
+            showBackgroundLocationDisclosure = true
+            return
+        }
         when {
             hasBackgroundLocation() -> finishPermissionRequest(true)
             Build.VERSION.SDK_INT == 29 -> backgroundPermission.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
@@ -614,9 +669,37 @@ class SafetyMonitorActivity : ComponentActivity() {
     }
 
     private fun finishPermissionRequest(granted: Boolean) {
+        showBackgroundLocationDisclosure = false
+        backgroundDisclosureAcknowledged = false
         onPermissionsReady?.invoke(granted)
         onPermissionsReady = null
     }
+}
+
+@Composable
+private fun BackgroundLocationDisclosureDialog(
+    onContinue: () -> Unit,
+    onCancel: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onCancel,
+        title = { Text("الموقع أثناء مراقبة الأمان") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)) {
+                Text("عرض إفصاح الموقع في الخلفية", fontWeight = FontWeight.Bold)
+                Text("تستخدم «مراقبة الأمان» موقع هذا الهاتف في الخلفية، بما في ذلك عندما لا يكون التطبيق قيد الاستخدام، فقط لتنفيذ محاولات الإرسال التي يحددها صاحب الهاتف ضمن جدول المراقبة.")
+                Text("عند موعد الإرسال، يلتقط روافد موقعًا حديثًا ويحاول مشاركته فقط مع المستلمين الذين اخترتهم مسبقًا في دائرة روافد و/أو جهات SMS المحلية. يظهر تنبيه قبل الإرسال التلقائي كي تتمكن من إلغائه.")
+                Text("لا يستخدم روافد الموقع للإعلانات، ولا يمنح شخصًا آخر القدرة على تشغيل المراقبة سرًا بمجرد معرفة معرّف RFD.")
+                Text("يمكنك الإلغاء الآن وعدم بدء المراقبة. ويمكنك لاحقًا إيقاف الميزة أو سحب إذن الموقع من إعدادات Android.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        },
+        confirmButton = {
+            Button(onClick = onContinue) { Text("أفهم — متابعة إلى الأذونات") }
+        },
+        dismissButton = {
+            TextButton(onClick = onCancel) { Text("إلغاء وعدم بدء المراقبة") }
+        }
+    )
 }
 
 @Composable
