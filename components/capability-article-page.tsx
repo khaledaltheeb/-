@@ -1,8 +1,8 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import ContentRenderer from '@/components/content-renderer';
+import ArticleFeaturedImage from '@/components/article-featured-image';
 import CapabilitiesRegistryBrowser from '@/components/capabilities-registry-browser';
 import styles from './capability-article-page.module.css';
 import {
@@ -14,6 +14,7 @@ import {
   type CapabilityRecord,
   type CapabilityRegistryItem,
 } from '@/lib/capabilities';
+import { resolveVisiblePageImage } from '@/lib/page-image';
 import { contentReviewProvenance } from '@/lib/review-provenance';
 import { breadcrumbJsonLd, SITE_URL } from '@/lib/seo';
 
@@ -87,6 +88,14 @@ export default function CapabilityArticlePage({ record, routeSlug, registryItems
   const audiences = Array.isArray(record.audience) ? record.audience.map(String) : [];
   const registry = role === 'registry' ? registryItems : [];
   const disclaimer = sanitizeCapabilityText(record.medical_disclaimer || DEFAULT_DISCLAIMER);
+  const pageVisual = resolveVisiblePageImage({
+    title: record.title,
+    slug: routeSlug,
+    kind: 'capability',
+    featuredImageUrl: record.featured_image_url,
+    featuredImageAlt: record.featured_image_alt,
+  });
+  const pageVisualUrl = pageVisual.src.startsWith('https://') ? pageVisual.src : `${SITE_URL}${pageVisual.src}`;
 
   const breadcrumbs = breadcrumbJsonLd([
     { name: 'الرئيسية', path: '/' },
@@ -109,9 +118,7 @@ export default function CapabilityArticlePage({ record, routeSlug, registryItems
     lastReviewed: review.lastReviewedAt || undefined,
     publisher: { '@id': `${SITE_URL}/#organization` },
     isPartOf: { '@id': `${SITE_URL}/#website` },
-    image: record.featured_image_url
-      ? (record.featured_image_url.startsWith('https://') ? record.featured_image_url : `${SITE_URL}${record.featured_image_url}`)
-      : undefined,
+    image: pageVisualUrl,
   };
 
   const steps = role === 'protocol' ? protocolSteps(bodyJson) : [];
@@ -225,19 +232,14 @@ export default function CapabilityArticlePage({ record, routeSlug, registryItems
           {role === 'registry' && registry.length > 0 ? <CapabilitiesRegistryBrowser items={registry} /> : null}
 
           <div className="article-body">
-            {record.featured_image_url ? (
-              <figure className="article-featured-image">
-                <Image
-                  src={record.featured_image_url}
-                  alt={record.featured_image_alt || record.title}
-                  width={1200}
-                  height={675}
-                  sizes="(max-width: 900px) 100vw, 900px"
-                  priority={role === 'hub'}
-                  unoptimized
-                />
-              </figure>
-            ) : null}
+            <ArticleFeaturedImage
+              title={record.title}
+              slug={routeSlug}
+              kind="capability"
+              featuredImageUrl={record.featured_image_url}
+              featuredImageAlt={record.featured_image_alt}
+              priority={role === 'hub'}
+            />
             <ContentRenderer bodyJson={bodyJson} bodyText={sanitizeCapabilityText(record.body_text || '')} recordId={record.id} />
           </div>
 

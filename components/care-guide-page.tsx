@@ -1,8 +1,8 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import ContentRenderer from '@/components/content-renderer';
+import ArticleFeaturedImage from '@/components/article-featured-image';
 import styles from './care-guide-page.module.css';
 import {
   careGuideCategory,
@@ -14,6 +14,7 @@ import {
   type CareGuideRecord,
   type CareGuideRelatedItem,
 } from '@/lib/care-guides';
+import { resolveVisiblePageImage } from '@/lib/page-image';
 import { contentReviewProvenance } from '@/lib/review-provenance';
 import { breadcrumbJsonLd, SITE_URL } from '@/lib/seo';
 
@@ -94,6 +95,13 @@ export default function CareGuidePage({ record, items = [], related = [], routeS
   const category = careGuideCategory(record.schema_json);
   const outline = getGuideOutline(record.body_json);
   const readingMinutes = estimateReadingMinutes(record.body_text);
+  const pageVisual = resolveVisiblePageImage({
+    title: record.title,
+    kind: 'care-guide',
+    featuredImageUrl: record.featured_image_url,
+    featuredImageAlt: record.featured_image_alt,
+  });
+  const pageVisualUrl = pageVisual.src.startsWith('https://') ? pageVisual.src : `${SITE_URL}${pageVisual.src}`;
   const breadcrumbs = breadcrumbJsonLd([
     { name: 'الرئيسية', path: '/' },
     ...(routeSegments.length ? [{ name: 'أدلة التعامل والرعاية', path: '/care-guides/' }] : []),
@@ -113,7 +121,7 @@ export default function CareGuidePage({ record, items = [], related = [], routeS
     lastReviewed: review.lastReviewedAt || undefined,
     publisher: { '@id': `${SITE_URL}/#organization` },
     isPartOf: { '@id': `${SITE_URL}/#website` },
-    image: record.featured_image_url ? (record.featured_image_url.startsWith('https://') ? record.featured_image_url : `${SITE_URL}${record.featured_image_url}`) : undefined,
+    image: pageVisualUrl,
   };
 
   const pageSchema: Record<string, unknown> = role === 'hub'
@@ -185,7 +193,7 @@ export default function CareGuidePage({ record, items = [], related = [], routeS
         </aside> : null}
         <div className={styles.readingColumn}>
           <div className="article-body">
-            {record.featured_image_url ? <figure className="article-featured-image"><Image src={record.featured_image_url} alt={record.featured_image_alt || record.title} width={1200} height={675} sizes="(max-width: 900px) 100vw, 900px" priority={role === 'hub'} unoptimized /></figure> : null}
+            <ArticleFeaturedImage title={record.title} kind="care-guide" featuredImageUrl={record.featured_image_url} featuredImageAlt={record.featured_image_alt} priority={role === 'hub'} />
             <ContentRenderer bodyJson={record.body_json} bodyText={record.body_text} recordId={record.id} />
           </div>
           {(record.medical_disclaimer || centralDisclaimer) ? <aside className="medical-disclaimer" aria-label="حدود المحتوى"><strong>حدود المحتوى الصحي</strong>{record.medical_disclaimer ? <p>{record.medical_disclaimer}</p> : <p>هذا الدليل للتثقيف والدعم العملي العام، ولا يحل محل التقييم أو التشخيص أو العلاج المهني الفردي.</p>}<Link href={centralDisclaimer?.url || '/disclaimer'}>{centralDisclaimer?.label || 'إخلاء المسؤولية الكامل'}</Link></aside> : null}
