@@ -20,8 +20,9 @@ class RawafidWidgetProvider : AppWidgetProvider() {
         }
 
         private fun updateWidget(context: Context, manager: AppWidgetManager, id: Int) {
+            val repository = RawafidRepositories.local(context)
             val views = RemoteViews(context.packageName, R.layout.rawafid_widget)
-            views.setTextViewText(R.id.widget_status, "ماء اليوم: ${LocalStore.waterCountToday(context)}")
+            views.setTextViewText(R.id.widget_status, "ماء اليوم: ${repository.waterCountToday()}")
 
             val tools = PendingIntent.getActivity(
                 context,
@@ -55,7 +56,7 @@ class RawafidWidgetProvider : AppWidgetProvider() {
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
         if (intent.action == ACTION_WATER) {
-            LocalStore.recordWater(context)
+            RawafidRepositories.local(context).recordWater()
             updateAll(context)
         }
     }
