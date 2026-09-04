@@ -1,0 +1,171 @@
+{
+  "schema_version": 1,
+  "wave": "assessment-tools-37-48",
+  "validation_boundary": "هذه الخريطة توثق سبب إدراج البناء والمحاور ومقدار قرب الدليل منها. لا تثبت صدق أو ثبات أو حساسية أداة روافد نفسها، ولا تعوض مراجعة صلاحية المحتوى أو المقابلات المعرفية أو الدراسات السيكومترية.",
+  "tools": [
+    {
+      "slug": "decision-fatigue",
+      "domains": [
+        {"domain":"كثرة الخيارات","claim":"كثرة القرارات والبدائل تدخل ضمن التصورات المنشورة لإرهاق القرار، لكن مقدار أثر عدد الخيارات وحده غير محسوم.","evidence_relation":"conceptual","reference_ids":["df1","df2"],"limitations":"المفهوم غير موحد القياس ولا يجوز استنتاج متلازمة أو سببية من كثرة الخيارات."},
+        {"domain":"تأجيل القرار","claim":"التأخير وصعوبة الحسم يظهران كعواقب/مظاهر محتملة في النماذج المفاهيمية متعددة المجالات لإرهاق القرار.","evidence_relation":"supportive","reference_ids":["df1","df2"],"limitations":"التأجيل متعدد الأسباب وليس خاصًا بإرهاق القرار."},
+        {"domain":"الاستنزاف الذهني","claim":"الشعور بالاستنزاف المعرفي بعد عبء قراري متكرر عنصر مركزي في تعريفات ومراجعات إرهاق القرار.","evidence_relation":"direct","reference_ids":["df1","df2"],"limitations":"الاستنزاف الذاتي لا يحدد آلية سببية ولا يميز الأسباب الطبية أو النفسية الأخرى."},
+        {"domain":"وضوح الأولويات","claim":"تنظيم القرار والأولويات يدخل ضمن الإطار متعدد المجالات بوصفه عاملًا في إدارة العبء القراري.","evidence_relation":"conceptual","reference_ids":["df2"],"limitations":"الدليل هنا داعم للإطار أكثر من كونه تحققًا مباشرًا لمحور مستقل."}
+      ],
+      "references": [
+        {"id":"df1","title":"Pignatiello et al. Decision fatigue: A conceptual analysis. PMID 29569950","url":"https://pubmed.ncbi.nlm.nih.gov/29569950/","evidence_type":"conceptual-analysis","supports":"تعريف إرهاق القرار ومكوناته وعواقبه المفاهيمية.","limitations":"تحليل مفاهيمي وليس دراسة تحقق لأداة روافد."},
+        {"id":"df2","title":"Choudhury & Saravanan. Integrative review and multi-domain framework of decision fatigue. PMID 42339225","url":"https://pubmed.ncbi.nlm.nih.gov/42339225/","evidence_type":"integrative-review","supports":"إطار متعدد المجالات يوضح تعقيد البناء وتعدد عوامله.","limitations":"مراجعة تكاملية ولا توفر عتبات أو خصائص قياس للأداة الحالية."}
+      ]
+    },
+    {
+      "slug": "procrastination-cycle",
+      "domains": [
+        {"domain":"تأجيل البدء","claim":"التأجيل الطوعي رغم توقع نتائج سلبية هو قلب تعريف التسويف في الأدبيات النظرية والتحليلية.","evidence_relation":"direct","reference_ids":["pr1"],"limitations":"التأجيل قد ينتج أيضًا عن عبء غير واقعي أو أعراض أخرى؛ لا يثبت اضطرابًا."},
+        {"domain":"تجنب عدم الراحة","claim":"تنظيم الانفعال وتجنب الخبرة غير المريحة من العمليات التي يمكن أن تحافظ على التسويف وتُستهدف علاجيًا.","evidence_relation":"supportive","reference_ids":["pr2","pr3"],"limitations":"لا يثبت أن التجنب هو الآلية الوحيدة لدى كل مستخدم."},
+        {"domain":"ضغط الموعد","claim":"العواقب الزمنية والتراكمية للتأجيل جزء من الضرر الوظيفي المرتبط بالتسويف.","evidence_relation":"supportive","reference_ids":["pr1"],"limitations":"ضغط الموعد يتأثر بطبيعة المهمة والبيئة وليس بالتسويف وحده."},
+        {"domain":"العودة للمهمة","claim":"المداخلات النفسية للتسويف تستهدف عمليات سلوكية وتنظيمية تساعد على إعادة الانخراط بالمهمة.","evidence_relation":"supportive","reference_ids":["pr2","pr3"],"limitations":"الدليل على العلاج لا يتحول تلقائيًا إلى صلاحية قياس لهذا المحور."}
+      ],
+      "references": [
+        {"id":"pr1","title":"Steel. The nature of procrastination: meta-analytic and theoretical review. PMID 17201571","url":"https://pubmed.ncbi.nlm.nih.gov/17201571/","evidence_type":"meta-analysis","supports":"تعريف التسويف وعلاقاته بالتنظيم الذاتي والنتائج السلبية.","limitations":"لا يختبر بنك أسئلة روافد."},
+        {"id":"pr2","title":"Rozental et al. Psychological treatments for procrastination: systematic review and meta-analysis. PMID 30214421","url":"https://pubmed.ncbi.nlm.nih.gov/30214421/","evidence_type":"systematic-review-and-meta-analysis","supports":"قابلية عمليات التسويف للتعديل بمداخلات نفسية منظمة.","limitations":"فعالية العلاج لا تثبت بنية الأداة الحالية."},
+        {"id":"pr3","title":"Processes of change in CBT for procrastination. PMID 42424684","url":"https://pubmed.ncbi.nlm.nih.gov/42424684/","evidence_type":"primary-study","supports":"عمليات تغير محتملة في العلاج المعرفي السلوكي للتسويف.","limitations":"دراسة عملية تغيير وليست تحققًا سيكومتريًا للأداة."}
+      ]
+    },
+    {
+      "slug": "perfectionism-pressure",
+      "domains": [
+        {"domain":"معايير قاسية","claim":"الكمالية تتضمن أبعادًا للمعايير المرتفعة، لكن السعي العالي للجودة لا يعد مرضيًا بحد ذاته.","evidence_relation":"direct","reference_ids":["pf1"],"limitations":"يجب فصل standards عن perfectionistic concerns والضيق الوظيفي."},
+        {"domain":"الخوف من الخطأ","claim":"المخاوف الكمالية والخوف من الأخطاء ترتبط بصورة أوضح بالضيق النفسي من مجرد السعي للجودة.","evidence_relation":"direct","reference_ids":["pf1"],"limitations":"الارتباط لا يثبت سببًا ولا تشخيصًا."},
+        {"domain":"إعادة العمل","claim":"السلوكيات الجامدة المرتبطة بالكمالية هدف للمداخلات المعرفية السلوكية الموجهة للكمالية.","evidence_relation":"supportive","reference_ids":["pf2","pf3"],"limitations":"المراجعات العلاجية لا تحدد وحدها أفضل صياغة أو عدد بنود القياس."},
+        {"domain":"الاكتفاء بالجيد","claim":"خفض الصرامة والسلوكيات الكمالية المعطلة دون إلغاء السعي الصحي للجودة يتفق مع منطق التدخلات الموجهة للكمالية.","evidence_relation":"supportive","reference_ids":["pf2","pf3"],"limitations":"المحور يحتاج لاحقًا اختبار فهم وصلاحية محتوى مع المستخدمين."}
+      ],
+      "references": [
+        {"id":"pf1","title":"Limburg et al. Perfectionism and psychopathology meta-analysis. PMID 28026869","url":"https://pubmed.ncbi.nlm.nih.gov/28026869/","evidence_type":"meta-analysis","supports":"تعدد أبعاد الكمالية وعلاقاتها بالاضطرابات النفسية.","limitations":"الارتباطات لا تساوي تشخيصًا ولا تحقق أداة روافد."},
+        {"id":"pf2","title":"Galloway et al. CBT for perfectionism systematic review and meta-analysis. PMID 34346282","url":"https://pubmed.ncbi.nlm.nih.gov/34346282/","evidence_type":"systematic-review-and-meta-analysis","supports":"قابلية الجوانب المعطلة من الكمالية للتدخل النفسي.","limitations":"لا يثبت الخصائص السيكومترية للمحاور المحلية."},
+        {"id":"pf3","title":"Fuster et al. Perfectionism interventions in childhood and adolescence meta-analysis. PMID 41805454","url":"https://pubmed.ncbi.nlm.nih.gov/41805454/","evidence_type":"meta-analysis","supports":"أدلة تدخلية على الكمالية لدى الأصغر سنًا.","limitations":"قابلية التعميم على جميع الأعمار والسياقات العربية تحتاج دراسة."}
+      ]
+    },
+    {
+      "slug": "study-overload",
+      "domains": [
+        {"domain":"تراكم المتطلبات","claim":"الضغط الأكاديمي يرتبط بعوامل حمل ومتطلبات متعددة وبنتائج في الصحة والأداء.","evidence_relation":"direct","reference_ids":["so1"],"limitations":"عدد الواجبات وحده لا يحدد الضغط أو الاحتراق."},
+        {"domain":"وضوح الخطة","claim":"مداخلات خفض الضغط لدى الطلبة تتضمن استراتيجيات تنظيمية ونفسية، ما يدعم إدراج قابلية التنظيم ضمن المتابعة.","evidence_relation":"supportive","reference_ids":["so2"],"limitations":"الدليل تدخلي عام ولا يثبت محور التخطيط كعامل مستقل."},
+        {"domain":"الاستراحة","claim":"الاستعادة وتنظيم الضغط جزء من التدخلات التي تستهدف ضغوط الطلبة.","evidence_relation":"supportive","reference_ids":["so2"],"limitations":"نوع ومدة الاستراحة المثلى تختلف حسب السياق ولا تنتج من الأداة."},
+        {"domain":"الأثر على النوم","claim":"الضغط الأكاديمي يرتبط بالصحة والرفاه، ويستحق النوم التتبع كأثر وظيفي مهم.","evidence_relation":"supportive","reference_ids":["so1"],"limitations":"لا تثبت هذه المراجعة أن الدراسة هي سبب أي اضطراب نوم لدى فرد بعينه."}
+      ],
+      "references": [
+        {"id":"so1","title":"Pascoe et al. Factors associated with stress impacting academic success. PMID 34242132","url":"https://pubmed.ncbi.nlm.nih.gov/34242132/","evidence_type":"systematic-review","supports":"عوامل الضغط الأكاديمي وعلاقته بالصحة والنجاح الدراسي.","limitations":"تغاير الدراسات والسياقات يمنع عتبة عامة للحمل الدراسي."},
+        {"id":"so2","title":"Regehr et al. Interventions to reduce stress in university students: review and meta-analysis. PMID 23246209","url":"https://pubmed.ncbi.nlm.nih.gov/23246209/","evidence_type":"systematic-review-and-meta-analysis","supports":"إمكان خفض ضغط الطلبة بمداخلات منظمة.","limitations":"لا يحدد بنية أو scoring لأداة روافد."}
+      ]
+    },
+    {
+      "slug": "work-boundaries",
+      "domains": [
+        {"domain":"وقت التوقف","claim":"الانفصال النفسي عن العمل خلال وقت غير العمل عنصر مركزي في التعافي من متطلبات العمل.","evidence_relation":"direct","reference_ids":["wb1"],"limitations":"التفضيلات والوظائف تختلف ولا توجد قاعدة حدود واحدة للجميع."},
+        {"domain":"التوفر خارج الدوام","claim":"استمرار الاتصال بالعمل خارج الدوام قد يعيق الانفصال والاستعادة، ما يبرر تتبع التوفر الفعلي.","evidence_relation":"supportive","reference_ids":["wb1"],"limitations":"بعض الوظائف تتطلب on-call؛ السياق التنظيمي ضروري للتفسير."},
+        {"domain":"الاستعادة","claim":"الانفصال والتعافي من العمل مرتبطان بنتائج رفاه ووظيفة، ويمكن تحسين الانفصال بتدخلات.","evidence_relation":"direct","reference_ids":["wb1","wb2"],"limitations":"التحسن التدخلي لا يثبت أن نقص الاستعادة سببه الحدود وحدها."},
+        {"domain":"حماية الوقت الشخصي","claim":"استراتيجيات تحسين الانفصال عن العمل تدعم إدراج حماية الوقت كهدف سلوكي قابل للتعديل.","evidence_relation":"supportive","reference_ids":["wb2"],"limitations":"قد تكون القدرة على حماية الوقت محدودة بعوامل تنظيمية لا يسيطر عليها الفرد."}
+      ],
+      "references": [
+        {"id":"wb1","title":"Wendsche & Lohmann-Haislah. Detachment from work meta-analysis. PMID 28133454","url":"https://pubmed.ncbi.nlm.nih.gov/28133454/","evidence_type":"meta-analysis","supports":"الانفصال النفسي عن العمل وعلاقته بالتعافي والرفاه.","limitations":"لا يحدد حدودًا معيارية أو عتبات سريرية."},
+        {"id":"wb2","title":"Karabinski et al. Interventions improving psychological detachment: meta-analysis. PMID 34096763","url":"https://pubmed.ncbi.nlm.nih.gov/34096763/","evidence_type":"meta-analysis","supports":"إمكان تحسين الانفصال النفسي عن العمل بتدخلات.","limitations":"ليست دراسة تحقق لأداة قياس روافد."}
+      ]
+    },
+    {
+      "slug": "return-to-work-readiness",
+      "domains": [
+        {"domain":"الطاقة الوظيفية","claim":"القدرات والحالة الصحية والموارد الشخصية تؤثر في مسار العودة المستدامة للعمل.","evidence_relation":"supportive","reference_ids":["rtw2"],"limitations":"الطاقة المدركة لا تساوي اللياقة الطبية للعمل."},
+        {"domain":"تحمل المهام","claim":"التوافق بين القدرة الحالية ومتطلبات الوظيفة عنصر مهم في استدامة العودة.","evidence_relation":"direct","reference_ids":["rtw2"],"limitations":"متطلبات كل وظيفة مختلفة ولا يمكن تحويل المحور إلى تصريح لياقة."},
+        {"domain":"الدعم المتوقع","claim":"العوامل الاجتماعية ودعم بيئة العمل جزء من العوامل المرتبطة بالعودة المستدامة.","evidence_relation":"direct","reference_ids":["rtw2"],"limitations":"وجود الدعم لا يضمن العودة ولا يعوض التقييم الطبي/المهني."},
+        {"domain":"التدرج في العودة","claim":"الكفاءة الذاتية والتخطيط للعودة والتكيف مع المتطلبات يدعمان إدراج التدرج بوصفه موضوعًا للنقاش.","evidence_relation":"supportive","reference_ids":["rtw1","rtw2"],"limitations":"لا تحدد المراجع جدول تدرج فرديًا أو قرارًا علاجيًا."}
+      ],
+      "references": [
+        {"id":"rtw1","title":"Brouwer et al. Self-efficacy and return-to-work outcomes review. PMID 28271400","url":"https://pubmed.ncbi.nlm.nih.gov/28271400/","evidence_type":"systematic-review","supports":"دور الكفاءة الذاتية في نتائج العودة للعمل.","limitations":"العلاقة لا تعادل قرار لياقة أو تنبؤ فردي مؤكد."},
+        {"id":"rtw2","title":"Sustainable return to work: systematic review of personal and social factors. PMID 30767151","url":"https://pubmed.ncbi.nlm.nih.gov/30767151/","evidence_type":"systematic-review","supports":"العوامل الشخصية والاجتماعية والوظيفية في العودة المستدامة.","limitations":"تغاير الحالات والوظائف يمنع درجة جاهزية عامة."}
+      ]
+    },
+    {
+      "slug": "digital-overload",
+      "domains": [
+        {"domain":"تعدد المنصات","claim":"technostress وdigital stress يتضمنان مطالب رقمية متعددة ومستمرة تتجاوز مجرد زمن الشاشة.","evidence_relation":"direct","reference_ids":["do1","do2"],"limitations":"المفاهيم والتعاريف تختلف بين الدراسات والمنصات."},
+        {"domain":"تشتت الانتباه","claim":"البيئة الرقمية والمقاطعات وتعدد المهام قد ترتبط بتجزؤ الانتباه والحمل المعرفي.","evidence_relation":"supportive","reference_ids":["do1","do3"],"limitations":"لا تثبت المراجعات أن التقنية وحدها سبب أي صعوبة انتباه لدى الفرد."},
+        {"domain":"الإرهاق البصري","claim":"الإجهاد المرتبط بالاستخدام الرقمي يمكن أن يتضمن شكاوى جسدية/حسية، لكن الأعراض تحتاج تفسيرًا طبيًا مستقلًا عند اللزوم.","evidence_relation":"supportive","reference_ids":["do1"],"limitations":"هذا أضعف محاور الموجة من حيث التخصيص؛ لا يجوز استبعاد أسباب عينية أو عصبية."},
+        {"domain":"وقت الانفصال","claim":"القدرة على الانفصال عن المطالب الرقمية عنصر منطقي في إدارة technostress والضغط الرقمي.","evidence_relation":"supportive","reference_ids":["do1","do2"],"limitations":"الدليل لا يحدد مدة انفصال مثالية لجميع المستخدمين."}
+      ],
+      "references": [
+        {"id":"do1","title":"Berg-Beckhoff et al. Technostress and mental health/work outcomes systematic review. PMID 34444422","url":"https://pubmed.ncbi.nlm.nih.gov/34444422/","evidence_type":"systematic-review","supports":"technostress وعلاقته بالصحة والعمل ومكوناته المتعددة.","limitations":"تغاير التعريفات والتصاميم يحد من الاستدلال السببي."},
+        {"id":"do2","title":"Steele et al. Digital stress components and psychological wellbeing meta-analysis. PMID 37432506","url":"https://pubmed.ncbi.nlm.nih.gov/37432506/","evidence_type":"meta-analysis","supports":"مكونات الضغط الرقمي وعلاقتها بالرفاه النفسي.","limitations":"العلاقات التجميعية لا تساوي عتبات فردية."},
+        {"id":"do3","title":"Psychology at digital speed systematic review. PMID 42508353","url":"https://pubmed.ncbi.nlm.nih.gov/42508353/","evidence_type":"systematic-review","supports":"أثر السياقات الرقمية السريعة على العمليات النفسية والانتباه.","limitations":"مجال واسع ولا يختبر أداة روافد مباشرة."}
+      ]
+    },
+    {
+      "slug": "social-media-impact",
+      "domains": [
+        {"domain":"المقارنة الاجتماعية","claim":"نوع الخبرة على وسائل التواصل والسياق النفسي أهم من زمن الاستخدام الخام، وتدخل المقارنة ضمن الآليات المدروسة للأثر.","evidence_relation":"supportive","reference_ids":["sm1","sm3"],"limitations":"التأثيرات متفاوتة ولا تثبت السببية لدى مستخدم بعينه."},
+        {"domain":"المزاج بعد الاستخدام","claim":"الاستخدام الإشكالي يرتبط بصورة أكثر اتساقًا بالضيق النفسي من الاستخدام العام وحده.","evidence_relation":"direct","reference_ids":["sm1","sm3"],"limitations":"الارتباط ثنائي الاتجاه محتمل ولا يسمح بتشخيص إدمان أو اضطراب مزاج."},
+        {"domain":"الوقت المستهلك","claim":"الوقت وحده مؤشر ناقص؛ المراجعات الحديثة تشير إلى أهمية نمط الاستخدام والأثر الوظيفي.","evidence_relation":"direct","reference_ids":["sm1","sm2"],"limitations":"لا توجد عتبة ساعات عامة يمكن تطبيقها على جميع الأعمار والسياقات."},
+        {"domain":"التحكم بالاختيار","claim":"صعوبة التحكم عنصر أكثر صلة بالاستخدام الإشكالي من مجرد التعرض للمنصة.","evidence_relation":"direct","reference_ids":["sm3"],"limitations":"لا يساوي فقد السيطرة تشخيصًا مستقلًا دون تقييم أوسع."}
+      ],
+      "references": [
+        {"id":"sm1","title":"Tølbøll. Social media use and adolescent mental health umbrella review. PMID 41589024","url":"https://pubmed.ncbi.nlm.nih.gov/41589024/","evidence_type":"umbrella-review","supports":"الصورة التجميعية للعلاقات بين استخدام التواصل والصحة النفسية لدى المراهقين.","limitations":"تغاير القياس والتصاميم يجعل العلاقات العامة محدودة السببية."},
+        {"id":"sm2","title":"Social media use, mental health and sleep: systematic review with meta-analyses. PMID 39242043","url":"https://pubmed.ncbi.nlm.nih.gov/39242043/","evidence_type":"systematic-review-and-meta-analysis","supports":"العلاقات بين أنماط الاستخدام والصحة النفسية والنوم.","limitations":"لا يحدد عتبة زمن استخدام أو تشخيصًا فرديًا."},
+        {"id":"sm3","title":"Problematic social media use in adolescents and young adults meta-analysis. PMID 35436240","url":"https://pubmed.ncbi.nlm.nih.gov/35436240/","evidence_type":"meta-analysis","supports":"الاستخدام الإشكالي وعلاقته بنتائج الصحة النفسية.","limitations":"مفهوم الاستخدام الإشكالي لا يساوي اضطرابًا تشخيصيًا مثبتًا للأداة الحالية."}
+      ]
+    },
+    {
+      "slug": "doomscrolling-pattern",
+      "domains": [
+        {"domain":"الاندفاع للمتابعة","claim":"doomscrolling يوصف في الأدبيات الناشئة كنمط متكرر من استهلاك المحتوى السلبي مدفوع بصعوبة الانفصال وعدم اليقين.","evidence_relation":"direct","reference_ids":["ds1","ds2"],"limitations":"البناء حديث وتعريفاته ومقاييسه ما تزال في طور التطور."},
+        {"domain":"صعوبة التوقف","claim":"صعوبة قطع سلسلة التصفح عنصر متكرر في تعريف وتشغيل doomscrolling.","evidence_relation":"direct","reference_ids":["ds1","ds2"],"limitations":"لا يعني ذلك وجود اضطراب قهري أو إدمان."},
+        {"domain":"القلق بعد التصفح","claim":"دراسات حديثة تربط doomscrolling بضيق وقلق ونتائج رفاه سلبية.","evidence_relation":"direct","reference_ids":["ds1","ds2","ds3"],"limitations":"غالبية الدليل ارتباطي؛ اتجاه السببية غير محسوم."},
+        {"domain":"العودة للنشاط","claim":"الأثر الوظيفي بعد التصفح مبرر كجزء من متابعة النمط، وإن كان الدليل المباشر على هذا المحور أضعف من دليل الضيق.","evidence_relation":"supportive","reference_ids":["ds1"],"limitations":"يجب اعتباره محورًا وظيفيًا قيد التطوير لا نتيجة سيكومترية مثبتة."}
+      ],
+      "references": [
+        {"id":"ds1","title":"Sharpe et al. The influence of doomscrolling on mental health: a scoping review (2026)","url":"https://doi.org/10.1108/MHDT-10-2025-0068","evidence_type":"scoping-review","supports":"تعريفات doomscrolling ومجالات البحث وعلاقاته بالصحة النفسية.","limitations":"مراجعة نطاقية لمجال ناشئ ولا توفر تحققًا معياريا للأداة."},
+        {"id":"ds2","title":"Taskin et al. Doomscrolling and mental well-being (2024)","url":"https://doi.org/10.1002/jcop.23111","evidence_type":"primary-study","supports":"العلاقة بين doomscrolling والرفاه النفسي.","limitations":"لا تثبت السببية ولا صلاحية أداة روافد."},
+        {"id":"ds3","title":"Doomscrolling and existential anxiety across Iran and the United States (2024)","url":"https://doi.org/10.1016/j.chbr.2024.100438","evidence_type":"primary-study","supports":"العلاقة بين doomscrolling والقلق الوجودي عبر سياقين ثقافيين.","limitations":"لا تمثل دراسة عربية ولا تحققًا للبنود الحالية."}
+      ]
+    },
+    {
+      "slug": "gaming-balance",
+      "domains": [
+        {"domain":"مدة اللعب","claim":"مدة اللعب توفر سياقًا لكنها لا تكفي لتشخيص اضطراب الألعاب؛ WHO يركز على التحكم والأولوية والاستمرار رغم العواقب والتعطيل.","evidence_relation":"supportive","reference_ids":["gm1","gm2"],"limitations":"لا تستخدم ساعات اللعب كعتبة مرضية."},
+        {"domain":"التحكم بالتوقف","claim":"ضعف السيطرة على اللعب معيار مركزي في تعريف WHO لاضطراب الألعاب.","evidence_relation":"direct","reference_ids":["gm1"],"limitations":"الأداة قصيرة المدى ولا تطبق تشخيص ICD-11 أو شرط المدة."},
+        {"domain":"تأثير اللعب على الالتزامات","claim":"الأولوية المتزايدة والاستمرار رغم العواقب والتعطيل الوظيفي مركزية في تعريف اضطراب الألعاب.","evidence_relation":"direct","reference_ids":["gm1","gm2"],"limitations":"التعطيل يحتاج سياقًا أوسع ولا يُستنتج من بند واحد."},
+        {"domain":"التعافي بعد اللعب","claim":"استعادة الروتين والنوم والوظيفة بعد اللعب محور وظيفي داعم للتوازن، لكنه أقل مباشرة من معايير التحكم والتعطيل.","evidence_relation":"supportive","reference_ids":["gm2","gm3"],"limitations":"لا يوجد معيار WHO مستقل باسم التعافي بعد اللعب؛ المحور وظيفي قيد التحقق."}
+      ],
+      "references": [
+        {"id":"gm1","title":"World Health Organization — Gaming disorder in ICD-11","url":"https://www.who.int/standards/classifications/frequently-asked-questions/gaming-disorder","evidence_type":"guideline-or-authority","supports":"التعريف الرسمي: ضعف السيطرة، زيادة الأولوية، الاستمرار رغم العواقب والتعطيل الملحوظ.","limitations":"صفحة تعريف تشخيصي وليست تحققًا لأداة المتابعة المحلية."},
+        {"id":"gm2","title":"Temporal stability of problematic gaming and gaming disorder meta-analysis. PMID 40125549","url":"https://pubmed.ncbi.nlm.nih.gov/40125549/","evidence_type":"meta-analysis","supports":"استقرار وتغير مشكلات اللعب/اضطراب الألعاب عبر الزمن.","limitations":"تغاير المقاييس والتعاريف يحد من تحويل النتائج إلى cutoff محلي."},
+        {"id":"gm3","title":"Treatment of gaming disorder systematic review and meta-analysis. PMID 41187384","url":"https://pubmed.ncbi.nlm.nih.gov/41187384/","evidence_type":"systematic-review-and-meta-analysis","supports":"نتائج تدخلات اضطراب الألعاب ومجالات التحسن الوظيفي.","limitations":"دليل علاجي لا يثبت صلاحية محور أو بند بعينه."}
+      ]
+    },
+    {
+      "slug": "screen-sleep-interference",
+      "domains": [
+        {"domain":"الشاشة قبل النوم","claim":"استخدام الشاشات قرب وقت النوم يرتبط بمؤشرات نوم لدى الأطفال والمراهقين والبالغين، مع اختلاف الأثر حسب التوقيت والسياق.","evidence_relation":"direct","reference_ids":["ss1","ss3"],"limitations":"الارتباط لا يعني أن كل استخدام قبل النوم ضار أو سببي."},
+        {"domain":"تأخير موعد النوم","claim":"التعرض للشاشات واستخدامها قد يرتبط بتأخر وقت النوم وقصر المدة في الأدبيات التجميعية.","evidence_relation":"direct","reference_ids":["ss1","ss3"],"limitations":"توجد عوامل مربكة مثل الروتين والمحتوى والالتزامات الاجتماعية."},
+        {"domain":"الاستيقاظ للشاشة","claim":"الاستخدام الليلي والتفاعل مع المنصات قد يتداخلان مع استمرارية النوم.","evidence_relation":"supportive","reference_ids":["ss2"],"limitations":"الدليل أقل مباشرة من دليل توقيت النوم ولا يثبت سبب الاستيقاظ لدى الفرد."},
+        {"domain":"النشاط الصباحي","claim":"الأثر النهاري جزء مهم من تفسير جودة النوم، ويمكن أن يتأثر بنمط استخدام الشاشة عبر النوم.","evidence_relation":"supportive","reference_ids":["ss1","ss2"],"limitations":"الخمول أو النعاس له أسباب كثيرة ويحتاج تقييمًا مستقلًا عند الشدة."}
+      ],
+      "references": [
+        {"id":"ss1","title":"Within-person daily screen use and sleep in youth: systematic review and meta-analysis. PMID 41770550","url":"https://pubmed.ncbi.nlm.nih.gov/41770550/","evidence_type":"systematic-review-and-meta-analysis","supports":"العلاقات داخل الشخص بين استخدام الشاشة اليومي والنوم لدى الشباب.","limitations":"الفئات والسياقات الرقمية متفاوتة ولا تسمح بعتبة موحدة."},
+        {"id":"ss2","title":"Social media use, mental health and sleep: systematic review with meta-analyses. PMID 39242043","url":"https://pubmed.ncbi.nlm.nih.gov/39242043/","evidence_type":"systematic-review-and-meta-analysis","supports":"العلاقة بين استخدام التواصل والنوم والصحة النفسية.","limitations":"لا تعزل كل آليات الشاشة عن العوامل المصاحبة."},
+        {"id":"ss3","title":"Hale & Guan. Screen time and sleep systematic review. PMID 25193149","url":"https://pubmed.ncbi.nlm.nih.gov/25193149/","evidence_type":"systematic-review","supports":"العلاقة بين screen time ومؤشرات النوم لدى الأطفال والمراهقين.","limitations":"أدلة أقدم وتسبق كثيرًا من أنماط الاستخدام الحديثة."}
+      ]
+    },
+    {
+      "slug": "notification-stress",
+      "domains": [
+        {"domain":"تواتر المقاطعة","claim":"تلقي إشعار هاتف يمكن أن يفرض كلفة انتباه حتى دون تفاعل كامل مع الجهاز.","evidence_relation":"direct","reference_ids":["nt1"],"limitations":"دراسة تجريبية محددة ولا تعطي عتبة عدد إشعارات يومية."},
+        {"domain":"الاستجابة التلقائية","claim":"عمليات التقاط الجهاز المحفزة بالمطالبة/الإشعار ترتبط بالضغط اليومي وتدعم تتبع السلوك التالي للتنبيه.","evidence_relation":"direct","reference_ids":["nt2"],"limitations":"العلاقة لا تثبت أن كل pickup غير تكيفي."},
+        {"domain":"التوتر عند التنبيه","claim":"الدراسات الميدانية والتجريبية تدعم أن الإشعارات قد ترتبط باستجابة ضغط أو تعطيل معرفي لدى بعض المستخدمين.","evidence_relation":"direct","reference_ids":["nt1","nt2","nt3"],"limitations":"التأثير يعتمد على السياق والأهمية والعادات ونوع الإشعار."},
+        {"domain":"إدارة الإشعارات","claim":"لأن كلفة الإشعار مرتبطة بالمقاطعة والاستجابة، فإن إدارة الإعدادات غير الضرورية هدف سلوكي معقول، دون افتراض أن جميع الإشعارات يجب تعطيلها.","evidence_relation":"supportive","reference_ids":["nt1","nt2","nt3"],"limitations":"الدليل على الإدارة كعلاج مستقل محدود؛ يجب الحفاظ على تنبيهات السلامة والعمل الضرورية."}
+      ],
+      "references": [
+        {"id":"nt1","title":"Stothart et al. The attentional cost of receiving a cell phone notification. PMID 26121498","url":"https://pubmed.ncbi.nlm.nih.gov/26121498/","evidence_type":"primary-study","supports":"الكلفة الانتباهية لاستقبال إشعار الهاتف.","limitations":"نتائج مهمة محددة لا تقيس الضغط المزمن أو الحياة اليومية كاملة."},
+        {"id":"nt2","title":"Munzer et al. Mobile device-prompted pickups and daily stress. PMID 38698532","url":"https://pubmed.ncbi.nlm.nih.gov/38698532/","evidence_type":"primary-study","supports":"العلاقة بين pickups المحفزة بالمطالبات والضغط اليومي.","limitations":"الارتباطات اليومية لا تنشئ عتبة مرضية."},
+        {"id":"nt3","title":"Fournier et al. Attention hijacked: social media notifications disrupt cognitive processing (2026)","url":"https://doi.org/10.1016/j.chb.2026.108926","evidence_type":"primary-study","supports":"تعطل المعالجة المعرفية المرتبط بإشعارات التواصل الاجتماعي.","limitations":"دراسة حديثة ضمن سياق محدد ولا تكفي لتعميم سببية سريرية."}
+      ]
+    }
+  ]
+}

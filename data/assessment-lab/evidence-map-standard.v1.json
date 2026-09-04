@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "name": "Rawafid Assessment Lab Claim-to-Evidence Mapping Standard",
+  "status": "mandatory",
+  "purpose": "ربط كل مجال منشور في أداة روافد بالدليل الذي يبرر إدراجه، مع بيان نوع الدليل وقوة الصلة وحدود الاستدلال، دون الخلط بين دعم البناء والتحقق السيكومتري من الأداة المحلية.",
+  "required_domain_fields": ["domain","claim","evidence_relation","reference_ids","limitations"],
+  "allowed_evidence_relations": ["direct","supportive","conceptual"],
+  "required_reference_fields": ["id","title","url","evidence_type","supports","limitations"],
+  "allowed_evidence_types": ["guideline-or-authority","umbrella-review","scoping-review","systematic-review","systematic-review-and-meta-analysis","meta-analysis","integrative-review","conceptual-analysis","primary-study"],
+  "publication_rules": {
+    "every_published_domain_requires_evidence": true,
+    "generic_search_url_forbidden": true,
+    "orphan_reference_forbidden": true,
+    "construct_support_is_not_instrument_validation": true,
+    "content_validity_claim_requires_empirical_content_validity_work": true,
+    "psychometric_validity_claim_requires_empirical_measurement_studies": true,
+    "causal_language_requires_causal_evidence": true,
+    "limitations_required_per_domain": true
+  },
+  "methodology_sources": [
+    {
+      "name": "COSMIN methodology for content validity",
+      "url": "https://www.cosmin.nl/wp-content/uploads/COSMIN-methodology-for-content-validity-user-manual-v1.pdf",
+      "supports": "relevance, comprehensiveness and comprehensibility must be evaluated as distinct content-validity dimensions"
+    },
+    {
+      "name": "FDA Clinical Outcome Assessment roadmap",
+      "url": "https://www.fda.gov/drugs/drug-development-tool-ddt-qualification-programs/wheel-and-spokes-diagram-clinical-outcome-assessments-text-version",
+      "supports": "define context/concept, literature and expert review, recall period/response options, cognitive interviewing, pilot testing and later measurement-property evaluation"
+    },
+    {
+      "name": "PROMIS Instrument Development and Validation Scientific Standards v2.0",
+      "url": "https://www.healthmeasures.net/images/PROMIS/PROMISStandards_Vers2.0_Final.pdf",
+      "supports": "conceptual framework from literature/stakeholder input, expert review, cognitive interviews, translatability/cultural harmonization and item-pool coverage"
+    }
+  ],
+  "scope": {
+    "wave": "tools-37-48",
+    "tool_count": 12,
+    "domain_count": 48,
+    "expansion_target": "all-published-Rawafid-tools"
+  },
+  "reviewed": "2026-08-27"
+}
