@@ -27,6 +27,14 @@ jobs:
       SMOKE_BASE_URL: http://127.0.0.1:3000
       SEO_GATE_BASE_URL: http://127.0.0.1:3000
       SEO_GATE_CONCURRENCY: '8'
+      SEO_GATE_PAGE_CONCURRENCY: '4'
+      SEO_GATE_LINK_CONCURRENCY: '2'
+      SEO_GATE_VERIFICATION_CONCURRENCY: '1'
+      SEO_GATE_VERIFICATION_DELAY_MS: '1000'
+      SEO_GATE_LINK_ATTEMPTS: '3'
+      SEO_GATE_LINK_RETRY_DELAY_MS: '150'
+      SEO_RICH_CONCURRENCY: '4'
+      SEO_SHARED_HTML_CACHE_DIR: /tmp/rawafid-seo-html-cache
       SEO_GATE_TIMEOUT_MS: '20000'
       SEO_GATE_PAGE_ATTEMPTS: '3'
       SEO_GATE_PAGE_RETRY_DELAY_MS: '300'
@@ -110,15 +118,18 @@ jobs:
       - name: Production HTTP smoke
         run: npm run smoke
       - name: Full sitemap SEO gate
+        if: github.event_name == 'push'
         continue-on-error: true
         shell: bash
         run: |
           set -o pipefail
           node scripts/seo-gate.mjs 2>&1 | tee /tmp/rawafid-seo-gate.log
       - name: Rich results and discovery gate (advisory)
+        if: github.event_name == 'push'
         continue-on-error: true
         run: node scripts/rich-discovery-gate.mjs
       - name: Content richness and duplicate-body gate
+        if: github.event_name == 'push'
         run: node scripts/content-richness-gate.mjs
       - name: YMYL editorial SEO readiness report
         run: node scripts/editorial-seo-readiness.mjs
