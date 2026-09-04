@@ -1,0 +1,36 @@
+name: SEO Gate Reliability
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/seo-gate.mjs'
+      - 'scripts/content-richness-gate.mjs'
+      - 'scripts/seo-shared-html-cache.mjs'
+      - 'scripts/seo-gate-reliability-contract.mjs'
+      - '.github/workflows/quality.yml'
+      - '.github/workflows/seo-gate-reliability.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/seo-gate.mjs'
+      - 'scripts/content-richness-gate.mjs'
+      - 'scripts/seo-shared-html-cache.mjs'
+      - 'scripts/seo-gate-reliability-contract.mjs'
+      - '.github/workflows/quality.yml'
+      - '.github/workflows/seo-gate-reliability.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Verify crawl reliability and gate semantics
+        run: node scripts/seo-gate-reliability-contract.mjs

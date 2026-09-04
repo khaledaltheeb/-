@@ -1,4 +1,6 @@
 const SITE_ORIGIN = 'https://healthrenewal.org';
+const SITE_NAME = 'Health Renewal | روافد';
+const DEFAULT_SOCIAL_IMAGE = `${SITE_ORIGIN}/seo-card`;
 
 const DESCRIPTION_OVERRIDES: Record<string, string> = {
   '/evidence-guides/social-work/agreement-on-collaboration/':
@@ -106,8 +108,23 @@ export function hardenRawHtmlSeo(html: string, pathname: string) {
   if (!metaContent(output, 'property', 'og:type')) {
     additions.push('<meta property="og:type" content="article">');
   }
+  if (!metaContent(output, 'property', 'og:site_name')) {
+    additions.push(`<meta property="og:site_name" content="${escapeHtmlAttribute(SITE_NAME)}">`);
+  }
+  if (!metaContent(output, 'property', 'og:image')) {
+    additions.push(`<meta property="og:image" content="${escapeHtmlAttribute(DEFAULT_SOCIAL_IMAGE)}">`);
+  }
   if (!metaContent(output, 'name', 'twitter:card')) {
     additions.push('<meta name="twitter:card" content="summary_large_image">');
+  }
+  if (!metaContent(output, 'name', 'twitter:title')) {
+    additions.push(`<meta name="twitter:title" content="${escapeHtmlAttribute(title)}">`);
+  }
+  if (!metaContent(output, 'name', 'twitter:description')) {
+    additions.push(`<meta name="twitter:description" content="${escapeHtmlAttribute(description)}">`);
+  }
+  if (!metaContent(output, 'name', 'twitter:image')) {
+    additions.push(`<meta name="twitter:image" content="${escapeHtmlAttribute(DEFAULT_SOCIAL_IMAGE)}">`);
   }
   if (!hasJsonLd(output)) {
     additions.push(`<script type="application/ld+json">${JSON.stringify({
