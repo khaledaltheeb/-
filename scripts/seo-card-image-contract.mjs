@@ -4,6 +4,8 @@ import { readFile } from 'node:fs/promises';
 const route = await readFile('app/seo-card/route.tsx', 'utf8');
 const layout = await readFile('lib/seo-card-layout.ts', 'utf8');
 const seo = await readFile('lib/seo.ts', 'utf8');
+const browserRegression = await readFile('scripts/seo-card-browser-regression.mjs', 'utf8');
+const qualityWorkflow = await readFile('.github/workflows/quality.yml', 'utf8');
 const errors = [];
 
 const requireMatch = (name, text, pattern, message) => {
@@ -38,6 +40,18 @@ requireMatch('SEO card layout', layout, /bottom > safeBottom/, 'lower safe-bound
 requireMatch('SEO card layout', layout, /ARABIC_MARKS/, 'Arabic combining marks must not inflate width estimates.');
 requireMatch('SEO card layout', layout, /ARABIC_LETTER/, 'Arabic glyph weighting is required.');
 
+requireMatch('SEO card browser regression', browserRegression, /getBBox\(\)/, 'browser regression must measure actual rendered SVG glyph bounds.');
+requireMatch('SEO card browser regression', browserRegression, /mixed-bidi/, 'mixed Arabic/Latin BiDi fixture missing.');
+requireMatch('SEO card browser regression', browserRegression, /oversized-token/, 'oversized-token fixture missing.');
+requireMatch('SEO card browser regression', browserRegression, /punctuation-and-escaping/, 'escaping fixture missing.');
+requireMatch('SEO card browser regression', browserRegression, /dense-arabic/, 'dense/diacritized Arabic fixture missing.');
+requireMatch('SEO card browser regression', browserRegression, /TITLE = \{ left: 180, right: 1080, top: 205, bottom: 430 \}/, 'browser title safe area must remain explicit.');
+requireMatch('SEO card browser regression', browserRegression, /CONTEXT = \{ left: 180, right: 1080, top: 452, bottom: 520 \}/, 'browser context safe area must remain explicit.');
+requireMatch('SEO card browser regression', browserRegression, /title and context are visually colliding/, 'browser regression must reject title/context collisions.');
+requireMatch('Quality workflow', qualityWorkflow, /SEO card Arabic safe-area browser regression/, 'SEO card browser regression must stay wired into the blocking quality workflow.');
+requireMatch('Quality workflow', qualityWorkflow, /VISUAL_CHROME_PATH="\$CHROME_BIN" node scripts\/seo-card-browser-regression\.mjs/, 'quality workflow must execute the SEO card browser regression with the real Chrome binary.');
+requireMatch('Quality workflow', qualityWorkflow, /Rich results and discovery gate \(advisory\)[\s\S]*timeout-minutes:\s*20/, 'bounded Rich Discovery advisory timeout must be preserved.');
+
 requireMatch('SEO metadata', seo, /fallbackSocialImagePath/, 'central fallback image resolver must remain present.');
 requireMatch('SEO metadata', seo, /\/seo-card\?title=/, 'pages without curated images must retain the safe central fallback.');
 requireMatch('SEO metadata', seo, /usesDefaultImage \? 1200/, 'fallback metadata width must remain explicit.');
@@ -50,4 +64,4 @@ if (errors.length) {
   process.exit(1);
 }
 
-console.log('SEO card image contract passed: the global 1200x630 fallback uses conservative Arabic auto-fit, oversized-token handling, XML escaping, and hard safe-area clipping without changing page routes or content.');
+console.log('SEO card image contract passed: the global 1200x630 fallback uses conservative Arabic auto-fit, oversized-token handling, XML escaping, blocking browser-measured safe-area fixtures, and hard clipping without changing page routes or content.');
