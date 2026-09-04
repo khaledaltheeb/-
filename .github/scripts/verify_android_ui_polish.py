@@ -16,6 +16,7 @@ def require(text: str, marker: str, message: str) -> None:
 
 scaffold = read("RawafidScreenScaffold.kt")
 what_now = read("WhatNowActivity.kt")
+account = read("CircleAccountActivity.kt")
 
 require(scaffold, "fun RawafidScreenScaffold(", "shared standalone-screen scaffold is missing")
 require(scaffold, "Icons.AutoMirrored.Filled.ArrowBack", "RTL-aware back affordance is missing")
@@ -31,5 +32,22 @@ require(what_now, "RawafidSpacing.CardContent", "What Now cards must use shared 
 for banned in ("PaddingValues(20.dp)", "Modifier.padding(16.dp)", "Arrangement.spacedBy(14.dp)"):
     if banned in what_now:
         raise SystemExit(f"UI polish contract failed: legacy local spacing remains in WhatNowActivity: {banned}")
+
+require(account, "RawafidScreenScaffold(", "Circle account must use the shared standalone-screen shell")
+require(account, "WindowManager.LayoutParams.FLAG_SECURE", "Circle account must remain protected from screenshots")
+require(account, 'var password by remember { mutableStateOf("") }', "account password must stay out of saved state")
+require(account, 'var passwordConfirmation by remember { mutableStateOf("") }', "password confirmation must stay out of saved state")
+require(account, 'var mfaCode by remember { mutableStateOf("") }', "MFA code must stay out of saved state")
+require(account, 'title = "حساب روافد"', "Circle account shell title is missing")
+require(account, "modifier = Modifier.fillMaxWidth()", "Circle account actions must provide large-text-safe full-width controls")
+
+for banned in (
+    'var password by rememberSaveable',
+    'var passwordConfirmation by rememberSaveable',
+    'var mfaCode by rememberSaveable',
+    'Surface(Modifier.fillMaxSize()) { CircleAccountScreen',
+):
+    if banned in account:
+        raise SystemExit(f"UI polish contract failed: unsafe or legacy Circle account pattern remains: {banned}")
 
 print("Android UI polish contract: PASS")

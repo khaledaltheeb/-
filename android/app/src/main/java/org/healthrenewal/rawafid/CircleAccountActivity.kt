@@ -8,8 +8,6 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -19,7 +17,6 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -50,7 +47,10 @@ class CircleAccountActivity : ComponentActivity() {
         setContent {
             RawafidTheme {
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                    Surface(Modifier.fillMaxSize()) { CircleAccountScreen(onDone = { finish() }) }
+                    CircleAccountScreen(
+                        onDone = { finish() },
+                        onClose = { finish() }
+                    )
                 }
             }
         }
@@ -58,7 +58,10 @@ class CircleAccountActivity : ComponentActivity() {
 }
 
 @Composable
-private fun CircleAccountScreen(onDone: () -> Unit) {
+private fun CircleAccountScreen(
+    onDone: () -> Unit,
+    onClose: () -> Unit
+) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var sessionVersion by remember { mutableIntStateOf(0) }
@@ -114,222 +117,250 @@ private fun CircleAccountScreen(onDone: () -> Unit) {
         }
     }
 
-    LazyColumn(
-        contentPadding = PaddingValues(RawafidSpacing.ScreenHorizontal),
-        verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Md)
-    ) {
-        item {
-            Column(verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
-                Text("حساب روافد ورقمي", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-                Text("هذا هو الحساب الذي يمنحك معرّف RFD الثابت ويتيح ربط «دائرتي» بين الأجهزة. معرفة المعرّف وحدها لا تكشف رقم هاتفك أو بياناتك الصحية.")
-            }
-        }
-
-        if (signedIn) {
+    RawafidScreenScaffold(
+        title = "حساب روافد",
+        subtitle = "تسجيل آمن لمعرّف RFD وربط دائرة روافد بين أجهزتك",
+        onBack = onClose
+    ) { contentPadding ->
+        LazyColumn(
+            contentPadding = contentPadding,
+            verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Md)
+        ) {
             item {
                 Card {
-                    Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)) {
-                        Text("تم تسجيل الدخول", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                        val accountEmail = RawafidCircleApi.sessionEmail(context)
-                        if (accountEmail.isNotBlank()) Text(accountEmail)
-                        if (mfaRequired) {
-                            Text("هذا الحساب محمي بتحقق بخطوتين. أكمل الرمز قبل استخدام بيانات الدائرة.", fontWeight = FontWeight.SemiBold)
-                            if (challengeId == null) {
-                                Button(
-                                    enabled = !busy && mfaFactors.isNotEmpty(),
-                                    onClick = {
-                                        val factor = mfaFactors.firstOrNull() ?: return@Button
-                                        runTask { challengeId = RawafidCircleApi.startMfaChallenge(context, factor.id) }
-                                    }
-                                ) { Text("إرسال طلب التحقق") }
+                    Column(
+                        Modifier.padding(RawafidSpacing.CardContent),
+                        verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)
+                    ) {
+                        Text("الخصوصية أولًا", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                        Text("معرّف RFD يتيح الربط والموافقة بين الأجهزة، لكنه لا يكشف وحده رقم هاتفك أو بياناتك الصحية. هذه الشاشة محمية من لقطات الشاشة أثناء إدخال بيانات الحساب.")
+                    }
+                }
+            }
+
+            if (signedIn) {
+                item {
+                    Card {
+                        Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)) {
+                            Text("تم تسجيل الدخول", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                            val accountEmail = RawafidCircleApi.sessionEmail(context)
+                            if (accountEmail.isNotBlank()) Text(accountEmail)
+                            if (mfaRequired) {
+                                Text("هذا الحساب محمي بتحقق بخطوتين. أكمل الرمز قبل استخدام بيانات الدائرة.", fontWeight = FontWeight.SemiBold)
+                                if (challengeId == null) {
+                                    Button(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        enabled = !busy && mfaFactors.isNotEmpty(),
+                                        onClick = {
+                                            val factor = mfaFactors.firstOrNull() ?: return@Button
+                                            runTask { challengeId = RawafidCircleApi.startMfaChallenge(context, factor.id) }
+                                        }
+                                    ) { Text("إرسال طلب التحقق") }
+                                } else {
+                                    OutlinedTextField(
+                                        value = mfaCode,
+                                        onValueChange = { mfaCode = it.filter(Char::isDigit).take(8) },
+                                        modifier = Modifier.fillMaxWidth(),
+                                        label = { Text("رمز التحقق") },
+                                        singleLine = true
+                                    )
+                                    Button(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        enabled = !busy && mfaCode.length >= 6,
+                                        onClick = {
+                                            val factor = mfaFactors.firstOrNull() ?: return@Button
+                                            val challenge = challengeId ?: return@Button
+                                            runTask {
+                                                RawafidCircleApi.verifyMfa(context, factor.id, challenge, mfaCode)
+                                                CircleNotificationScheduler.checkNow(context)
+                                                mfaCode = ""
+                                                challengeId = null
+                                                sessionVersion++
+                                            }
+                                        }
+                                    ) { Text("تحقق") }
+                                }
                             } else {
-                                OutlinedTextField(
-                                    value = mfaCode,
-                                    onValueChange = { mfaCode = it.filter(Char::isDigit).take(8) },
+                                Text("الحساب جاهز. ارجع إلى «دائرتي» لعرض رقم RFD والـQR وإرسال أو قبول طلبات الربط.")
+                                Button(
                                     modifier = Modifier.fillMaxWidth(),
-                                    label = { Text("رمز التحقق") },
+                                    onClick = onDone
+                                ) { Text("العودة إلى دائرتي وعرض رقمي") }
+                            }
+                            OutlinedButton(
+                                modifier = Modifier.fillMaxWidth(),
+                                enabled = !busy,
+                                onClick = { runTask { RawafidCircleApi.signOut(context); sessionVersion++ } }
+                            ) { Text("تسجيل الخروج") }
+                            TextButton(
+                                modifier = Modifier.fillMaxWidth(),
+                                enabled = !busy,
+                                onClick = { context.startActivity(Intent(context, AccountDeletionActivity::class.java)) }
+                            ) {
+                                Text("حذف الحساب والبيانات", color = MaterialTheme.colorScheme.error)
+                            }
+                        }
+                    }
+                }
+            } else {
+                item {
+                    Card {
+                        Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
+                            Text("لأول مرة؟", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                            Text("1) أنشئ حسابًا.  2) راجع بريدك لتأكيد الحساب إذا طُلب.  3) إذا لم تجد رسالة التأكيد في الوارد، افحص «الرسائل غير المرغوب فيها / Spam / Junk».  4) افتح رابط التأكيد ثم سجّل الدخول.  5) ارجع إلى «دائرتي» وسيظهر رقم RFD الخاص بك.")
+                        }
+                    }
+                }
+                item {
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
+                        FilterChip(
+                            selected = mode == "signup",
+                            onClick = {
+                                mode = "signup"
+                                error = ""
+                                status = ""
+                            },
+                            label = { Text("إنشاء حساب جديد") }
+                        )
+                        FilterChip(
+                            selected = mode == "login",
+                            onClick = {
+                                mode = "login"
+                                error = ""
+                                status = ""
+                            },
+                            label = { Text("لدي حساب — تسجيل الدخول") }
+                        )
+                    }
+                }
+                item {
+                    Card {
+                        Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)) {
+                            if (mode == "signup") {
+                                Text("إنشاء حساب روافد", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                                Text("استخدم بريدًا يمكنك الوصول إليه. قد تحتاج إلى تأكيد الحساب من رسالة بريد؛ إذا لم تصل إلى الوارد فتحقق من Spam / Junk / الرسائل غير المرغوب فيها.")
+                                Text("كلمة المرور المطلوبة: 10 أحرف على الأقل، وحرف إنجليزي كبير، وحرف صغير، ورقم، ورمز خاص. ستظهر علامة ✓ أمام كل شرط عند تحققه.", fontWeight = FontWeight.SemiBold)
+                                OutlinedTextField(
+                                    value = name,
+                                    onValueChange = { name = it.take(120) },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    label = { Text("الاسم الظاهر") },
                                     singleLine = true
                                 )
-                                Button(
-                                    enabled = !busy && mfaCode.length >= 6,
-                                    onClick = {
-                                        val factor = mfaFactors.firstOrNull() ?: return@Button
-                                        val challenge = challengeId ?: return@Button
-                                        runTask {
-                                            RawafidCircleApi.verifyMfa(context, factor.id, challenge, mfaCode)
-                                            CircleNotificationScheduler.checkNow(context)
-                                            mfaCode = ""
-                                            challengeId = null
-                                            sessionVersion++
-                                        }
-                                    }
-                                ) { Text("تحقق") }
+                            } else {
+                                Text("تسجيل الدخول", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                             }
-                        } else {
-                            Text("الحساب جاهز. ارجع إلى «دائرتي» لعرض رقم RFD والـQR وإرسال أو قبول طلبات الربط.")
-                            Button(onClick = onDone) { Text("العودة إلى دائرتي وعرض رقمي") }
-                        }
-                        OutlinedButton(
-                            enabled = !busy,
-                            onClick = { runTask { RawafidCircleApi.signOut(context); sessionVersion++ } }
-                        ) { Text("تسجيل الخروج") }
-                        TextButton(
-                            enabled = !busy,
-                            onClick = { context.startActivity(Intent(context, AccountDeletionActivity::class.java)) }
-                        ) {
-                            Text("حذف الحساب والبيانات", color = MaterialTheme.colorScheme.error)
-                        }
-                    }
-                }
-            }
-        } else {
-            item {
-                Card {
-                    Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
-                        Text("لأول مرة؟", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                        Text("1) أنشئ حسابًا.  2) راجع بريدك لتأكيد الحساب إذا طُلب.  3) إذا لم تجد رسالة التأكيد في الوارد، افحص «الرسائل غير المرغوب فيها / Spam / Junk».  4) افتح رابط التأكيد ثم سجّل الدخول.  5) ارجع إلى «دائرتي» وسيظهر رقم RFD الخاص بك.")
-                    }
-                }
-            }
-            item {
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
-                    FilterChip(
-                        selected = mode == "signup",
-                        onClick = {
-                            mode = "signup"
-                            error = ""
-                            status = ""
-                        },
-                        label = { Text("إنشاء حساب جديد") }
-                    )
-                    FilterChip(
-                        selected = mode == "login",
-                        onClick = {
-                            mode = "login"
-                            error = ""
-                            status = ""
-                        },
-                        label = { Text("لدي حساب — تسجيل الدخول") }
-                    )
-                }
-            }
-            item {
-                Card {
-                    Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)) {
-                        if (mode == "signup") {
-                            Text("إنشاء حساب روافد", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                            Text("استخدم بريدًا يمكنك الوصول إليه. قد تحتاج إلى تأكيد الحساب من رسالة بريد؛ إذا لم تصل إلى الوارد فتحقق من Spam / Junk / الرسائل غير المرغوب فيها.")
-                            Text("كلمة المرور المطلوبة: 10 أحرف على الأقل، وحرف إنجليزي كبير، وحرف صغير، ورقم، ورمز خاص. ستظهر علامة ✓ أمام كل شرط عند تحققه.", fontWeight = FontWeight.SemiBold)
+
                             OutlinedTextField(
-                                value = name,
-                                onValueChange = { name = it.take(120) },
+                                value = email,
+                                onValueChange = { email = it.take(254) },
                                 modifier = Modifier.fillMaxWidth(),
-                                label = { Text("الاسم الظاهر") },
+                                label = { Text("البريد الإلكتروني") },
                                 singleLine = true
                             )
-                        } else {
-                            Text("تسجيل الدخول", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                        }
-
-                        OutlinedTextField(
-                            value = email,
-                            onValueChange = { email = it.take(254) },
-                            modifier = Modifier.fillMaxWidth(),
-                            label = { Text("البريد الإلكتروني") },
-                            singleLine = true
-                        )
-                        OutlinedTextField(
-                            value = password,
-                            onValueChange = { password = it.take(128) },
-                            modifier = Modifier.fillMaxWidth(),
-                            label = { Text("كلمة المرور") },
-                            singleLine = true,
-                            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation()
-                        )
-                        TextButton(onClick = { passwordVisible = !passwordVisible }) {
-                            Text(if (passwordVisible) "إخفاء كلمة المرور" else "إظهار كلمة المرور")
-                        }
-
-                        if (mode == "signup") {
-                            Card {
-                                Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
-                                    Text("شروط كلمة المرور", fontWeight = FontWeight.Bold)
-                                    passwordRequirements.forEach { requirement ->
-                                        Text(
-                                            text = (if (requirement.met) "✓ " else "○ ") + requirement.label,
-                                            color = if (requirement.met) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    }
-                                    Text("لا تستخدم كلمة المرور نفسها في خدمات أخرى، ولا ترسلها لأي شخص.", style = MaterialTheme.typography.bodySmall)
-                                }
-                            }
                             OutlinedTextField(
-                                value = passwordConfirmation,
-                                onValueChange = { passwordConfirmation = it.take(128) },
+                                value = password,
+                                onValueChange = { password = it.take(128) },
                                 modifier = Modifier.fillMaxWidth(),
-                                label = { Text("تأكيد كلمة المرور") },
+                                label = { Text("كلمة المرور") },
                                 singleLine = true,
                                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation()
                             )
-                            if (passwordConfirmation.isNotBlank()) {
-                                Text(
-                                    if (passwordMatches) "✓ كلمتا المرور متطابقتان" else "كلمتا المرور غير متطابقتين",
-                                    color = if (passwordMatches) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
-                                    style = MaterialTheme.typography.bodySmall
-                                )
+                            TextButton(
+                                modifier = Modifier.fillMaxWidth(),
+                                onClick = { passwordVisible = !passwordVisible }
+                            ) {
+                                Text(if (passwordVisible) "إخفاء كلمة المرور" else "إظهار كلمة المرور")
                             }
-                        }
 
-                        val canSubmit = if (mode == "login") {
-                            !busy && email.contains('@') && password.isNotBlank()
-                        } else {
-                            !busy &&
-                                name.isNotBlank() &&
-                                email.contains('@') &&
-                                CirclePasswordPolicy.isValid(password) &&
-                                passwordMatches
-                        }
-                        Button(
-                            enabled = canSubmit,
-                            onClick = {
-                                runTask {
-                                    if (mode == "login") {
-                                        RawafidCircleApi.signIn(context, email, password)
-                                        CircleNotificationScheduler.checkNow(context)
-                                        sessionVersion++
-                                    } else {
-                                        val created = RawafidCircleApi.signUp(context, name, email, password)
-                                        if (RawafidCircleApi.hasSession(context)) {
+                            if (mode == "signup") {
+                                Card {
+                                    Column(Modifier.padding(RawafidSpacing.CardContent), verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)) {
+                                        Text("شروط كلمة المرور", fontWeight = FontWeight.Bold)
+                                        passwordRequirements.forEach { requirement ->
+                                            Text(
+                                                text = (if (requirement.met) "✓ " else "○ ") + requirement.label,
+                                                color = if (requirement.met) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                        Text("لا تستخدم كلمة المرور نفسها في خدمات أخرى، ولا ترسلها لأي شخص.", style = MaterialTheme.typography.bodySmall)
+                                    }
+                                }
+                                OutlinedTextField(
+                                    value = passwordConfirmation,
+                                    onValueChange = { passwordConfirmation = it.take(128) },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    label = { Text("تأكيد كلمة المرور") },
+                                    singleLine = true,
+                                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation()
+                                )
+                                if (passwordConfirmation.isNotBlank()) {
+                                    Text(
+                                        if (passwordMatches) "✓ كلمتا المرور متطابقتان" else "كلمتا المرور غير متطابقتين",
+                                        color = if (passwordMatches) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
+                                }
+                            }
+
+                            val canSubmit = if (mode == "login") {
+                                !busy && email.contains('@') && password.isNotBlank()
+                            } else {
+                                !busy &&
+                                    name.isNotBlank() &&
+                                    email.contains('@') &&
+                                    CirclePasswordPolicy.isValid(password) &&
+                                    passwordMatches
+                            }
+                            Button(
+                                modifier = Modifier.fillMaxWidth(),
+                                enabled = canSubmit,
+                                onClick = {
+                                    runTask {
+                                        if (mode == "login") {
+                                            RawafidCircleApi.signIn(context, email, password)
                                             CircleNotificationScheduler.checkNow(context)
                                             sessionVersion++
-                                        } else if (created) {
-                                            status = "تم إنشاء الحساب. راجع بريدك لتأكيد الحساب إذا طُلب. إذا لم تجد رسالة التأكيد في الوارد، افحص الرسائل غير المرغوب فيها / Spam / Junk، ثم افتح رابط التأكيد وسجّل الدخول. بعد ذلك سيظهر رقم RFD في «دائرتي»."
-                                            mode = "login"
-                                            passwordConfirmation = ""
+                                        } else {
+                                            val created = RawafidCircleApi.signUp(context, name, email, password)
+                                            if (RawafidCircleApi.hasSession(context)) {
+                                                CircleNotificationScheduler.checkNow(context)
+                                                sessionVersion++
+                                            } else if (created) {
+                                                status = "تم إنشاء الحساب. راجع بريدك لتأكيد الحساب إذا طُلب. إذا لم تجد رسالة التأكيد في الوارد، افحص الرسائل غير المرغوب فيها / Spam / Junk، ثم افتح رابط التأكيد وسجّل الدخول. بعد ذلك سيظهر رقم RFD في «دائرتي»."
+                                                mode = "login"
+                                                passwordConfirmation = ""
+                                            }
                                         }
                                     }
                                 }
+                            ) {
+                                Text(
+                                    if (busy) "جارٍ التحقق..."
+                                    else if (mode == "login") "دخول"
+                                    else "إنشاء الحساب والحصول على رقم RFD"
+                                )
                             }
-                        ) {
-                            Text(
-                                if (busy) "جارٍ التحقق..."
-                                else if (mode == "login") "دخول"
-                                else "إنشاء الحساب والحصول على رقم RFD"
-                            )
-                        }
 
-                        if (mode == "login") {
-                            OutlinedButton(
-                                enabled = !busy && email.contains('@'),
-                                onClick = { runTask { RawafidCircleApi.sendPasswordRecovery(email); status = "تم طلب رسالة استعادة كلمة المرور لهذا البريد." } }
-                            ) { Text("نسيت كلمة المرور") }
+                            if (mode == "login") {
+                                OutlinedButton(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    enabled = !busy && email.contains('@'),
+                                    onClick = {
+                                        runTask {
+                                            RawafidCircleApi.sendPasswordRecovery(email)
+                                            status = "تم طلب رسالة استعادة كلمة المرور لهذا البريد."
+                                        }
+                                    }
+                                ) { Text("نسيت كلمة المرور") }
+                            }
                         }
                     }
                 }
             }
-        }
 
-        if (status.isNotBlank()) item { Text(status, color = MaterialTheme.colorScheme.primary) }
-        if (error.isNotBlank()) item { Text(error, color = MaterialTheme.colorScheme.error) }
+            if (status.isNotBlank()) item { Text(status, color = MaterialTheme.colorScheme.primary) }
+            if (error.isNotBlank()) item { Text(error, color = MaterialTheme.colorScheme.error) }
+        }
     }
 }
