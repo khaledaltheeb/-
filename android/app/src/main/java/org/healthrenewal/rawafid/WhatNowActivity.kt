@@ -2,19 +2,16 @@ package org.healthrenewal.rawafid
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -27,7 +24,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.ui.unit.dp
 import org.json.JSONArray
 
 data class WhatNowScenario(
@@ -69,7 +65,7 @@ class WhatNowActivity : ComponentActivity() {
         setContent {
             RawafidTheme {
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                    Surface(Modifier.fillMaxSize()) { WhatNowScreen() }
+                    WhatNowScreen(onClose = { finish() })
                 }
             }
         }
@@ -77,61 +73,94 @@ class WhatNowActivity : ComponentActivity() {
 }
 
 @Composable
-private fun WhatNowScreen() {
+private fun WhatNowScreen(onClose: () -> Unit) {
     val context = LocalContext.current
     val scenarios = remember { WhatNowCatalog.all(context) }
     var selected by remember { mutableStateOf<WhatNowScenario?>(null) }
 
-    if (selected == null) {
-        LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            item {
-                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text("ماذا أفعل الآن؟", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-                    Text("اختر الموقف الأقرب. المسارات قصيرة وتعمل Offline ولا تحاول تشخيص السبب.")
-                }
-            }
-            scenarios.forEach { scenario ->
-                item(key = scenario.id) {
-                    Card(modifier = Modifier.fillMaxWidth(), onClick = { selected = scenario }) {
-                        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                            Text(scenario.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                            Text(scenario.summary, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    BackHandler(enabled = selected != null) { selected = null }
+
+    RawafidScreenScaffold(
+        title = selected?.title ?: "ماذا أفعل الآن؟",
+        subtitle = if (selected == null) {
+            "مسارات قصيرة تعمل دون اتصال ولا تحاول تشخيص السبب"
+        } else {
+            "خطوات عملية للموقف الذي اخترته"
+        },
+        onBack = {
+            if (selected != null) selected = null else onClose()
+        }
+    ) { contentPadding ->
+        if (selected == null) {
+            LazyColumn(
+                contentPadding = contentPadding,
+                verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)
+            ) {
+                scenarios.forEach { scenario ->
+                    item(key = scenario.id) {
+                        Card(modifier = Modifier.fillMaxWidth(), onClick = { selected = scenario }) {
+                            Column(
+                                Modifier.padding(RawafidSpacing.CardContent),
+                                verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Xxs)
+                            ) {
+                                Text(scenario.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                                Text(scenario.summary, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
                         }
                     }
                 }
-            }
-            item {
-                Card {
-                    Text("إذا كان الموقف يهدد الحياة أو يتدهور بسرعة، استخدم خدمات الطوارئ المحلية بدل انتظار مسار داخل التطبيق.", Modifier.padding(16.dp), color = MaterialTheme.colorScheme.error)
-                }
-            }
-        }
-    } else {
-        val scenario = selected!!
-        LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-            item { OutlinedButton(onClick = { selected = null }) { Text("العودة للمواقف") } }
-            item {
-                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text(scenario.title, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-                    Text(scenario.summary)
-                }
-            }
-            item { StepsCard("الآن", scenario.now) }
-            item { StepsCard("ما الذي أراقبه؟", scenario.watch) }
-            item { StepsCard("متى لا أنتظر؟", scenario.urgent, urgent = true) }
-            item { StepsCard("ماذا لا أفعل؟", scenario.dont) }
-            item {
-                Card {
-                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                        Text("المصدر المرجعي", fontWeight = FontWeight.Bold)
-                        Text(scenario.source)
-                        Text("النص مختصر للعمل Offline؛ لا يحل محل الإسعافات الأولية المعتمدة أو المختص أو خدمات الطوارئ.", style = MaterialTheme.typography.bodySmall)
+                item {
+                    Card {
+                        Text(
+                            "إذا كان الموقف يهدد الحياة أو يتدهور بسرعة، استخدم خدمات الطوارئ المحلية بدل انتظار مسار داخل التطبيق.",
+                            Modifier.padding(RawafidSpacing.CardContent),
+                            color = MaterialTheme.colorScheme.error
+                        )
                     }
                 }
             }
-            item {
-                val help = FeatureCatalog.visible(context).firstOrNull { it.id == "help_now" }
-                if (help != null) Button(modifier = Modifier.fillMaxWidth(), onClick = { FeatureRouter.open(context, help) }) { Text("افتح ساعدني الآن") }
+        } else {
+            val scenario = selected!!
+            LazyColumn(
+                contentPadding = contentPadding,
+                verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)
+            ) {
+                item {
+                    Text(
+                        scenario.summary,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                item { StepsCard("الآن", scenario.now) }
+                item { StepsCard("ما الذي أراقبه؟", scenario.watch) }
+                item { StepsCard("متى لا أنتظر؟", scenario.urgent, urgent = true) }
+                item { StepsCard("ماذا لا أفعل؟", scenario.dont) }
+                item {
+                    Card {
+                        Column(
+                            Modifier.padding(RawafidSpacing.CardContent),
+                            verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Xxs)
+                        ) {
+                            Text("المصدر المرجعي", fontWeight = FontWeight.Bold)
+                            Text(scenario.source)
+                            Text(
+                                "النص مختصر للعمل دون اتصال؛ لا يحل محل الإسعافات الأولية المعتمدة أو المختص أو خدمات الطوارئ.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+                item {
+                    val help = FeatureCatalog.visible(context).firstOrNull { it.id == "help_now" }
+                    if (help != null) {
+                        Button(
+                            modifier = Modifier.fillMaxWidth(),
+                            onClick = { FeatureRouter.open(context, help) }
+                        ) { Text("افتح ساعدني الآن") }
+                    }
+                }
             }
         }
     }
@@ -141,8 +170,16 @@ private fun WhatNowScreen() {
 private fun StepsCard(title: String, steps: List<String>, urgent: Boolean = false) {
     if (steps.isEmpty()) return
     Card {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(7.dp)) {
-            Text(title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = if (urgent) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface)
+        Column(
+            Modifier.padding(RawafidSpacing.CardContent),
+            verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Xs)
+        ) {
+            Text(
+                title,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = if (urgent) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
+            )
             steps.forEach { Text("• $it") }
         }
     }
