@@ -62,7 +62,8 @@
 .institutional-sector-card:hover { transform: translateY(-4px); border-color: color-mix(in srgb,var(--sector-color,#0b8f92) 35%,#dfe9ea); box-shadow: 0 24px 54px rgba(19,52,62,.1); }
 .institutional-sector-card:focus-visible { outline: 3px solid color-mix(in srgb,var(--sector-color,#0b8f92) 70%,#1769aa); outline-offset: 4px; }
 .institutional-sector-card .sector-number { color: var(--sector-color,#0b8f92); font-size: .82rem; font-weight: 900; letter-spacing: .12em; }
-.institutional-sector-card h2 { margin: 28px 0 10px; font-size: clamp(1.28rem,2vw,1.48rem); line-height: 1.55; text-wrap: balance; }
+.institutional-sector-card h2,
+.institutional-sector-card h3 { margin: 28px 0 10px; font-size: clamp(1.28rem,2vw,1.48rem); line-height: 1.55; text-wrap: balance; }
 .institutional-sector-card p { margin: 0 0 20px; color: #61757a; line-height: 1.88; }
 .institutional-sector-card .sector-metrics { display: flex; flex-wrap: wrap; gap: 8px; margin-top: auto; }
 .institutional-sector-card .sector-metrics span { padding: 7px 10px; border: 1px solid #e7eeee; border-radius: 11px; background: #f5f8f8; color: #52666c; font-size: .84rem; font-weight: 750; }
@@ -149,7 +150,8 @@
   .taxonomy-root-grid, .institutional-sector-grid { grid-template-columns: 1fr; }
   .taxonomy-sector-group { padding: 18px 15px; border-radius: 21px; }
   .institutional-sector-card { min-height: 0; padding: 22px; border-radius: 20px; }
-  .institutional-sector-card h2 { margin-top: 20px; }
+  .institutional-sector-card h2,
+  .institutional-sector-card h3 { margin-top: 20px; }
   .public-pagination { padding: 15px 12px; border-radius: 17px; }
   .public-pagination__controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; }
   .public-pagination__numbers { grid-column: 1 / -1; order: -1; }
