@@ -9,6 +9,7 @@ import searchBias from '@/data/cochrane/guides-search-bias-v1.json';
 import statistics from '@/data/cochrane/guides-statistics-v1.json';
 import gradeDecision from '@/data/cochrane/guides-grade-decision-v1.json';
 import msGovernance from '@/data/cochrane/guides-ms-arabic-governance-v1.json';
+import methodsProvenance from '@/data/cochrane/methods-provenance-v1.json';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,6 +20,7 @@ type StatisticsGuide = (typeof statistics.guides)[number];
 type GradeDecisionGuide = (typeof gradeDecision.guides)[number];
 type MsGovernanceGuide = (typeof msGovernance.guides)[number];
 type Guide = FoundationGuide | SearchBiasGuide | StatisticsGuide | GradeDecisionGuide | MsGovernanceGuide;
+type ProvenanceRecord = (typeof methodsProvenance.records)[number];
 
 const batches = [foundations, searchBias, statistics, gradeDecision, msGovernance] as const;
 const guides: Guide[] = batches.flatMap((batch) => batch.guides) as Guide[];
@@ -30,6 +32,10 @@ function getGuide(slug: string): Guide | undefined {
 function guideEditorialNote(guide: Guide) {
   const batch = batches.find((candidate) => candidate.guides.some((item) => item.slug === guide.slug));
   return batch?.editorial_note_ar ?? foundations.editorial_note_ar;
+}
+
+function sourceFreshness(sourceUrl: string): ProvenanceRecord | undefined {
+  return methodsProvenance.records.find((record) => record.url === sourceUrl || record.source_of_status === sourceUrl);
 }
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
@@ -62,6 +68,10 @@ export default async function CochraneGuidePage({ params }: { params: Params }) 
   ];
   const pitfalls = 'pitfalls_ar' in guide ? guide.pitfalls_ar : [];
   const connections = 'connections' in guide ? guide.connections.map((linkedSlug) => getGuide(linkedSlug)).filter(Boolean) as Guide[] : [];
+  const provenanceRecords = guide.sources.map((source) => sourceFreshness(source.url)).filter(Boolean) as ProvenanceRecord[];
+  const robinsDraft = guide.slug === 'robins-i-v2-nonrandomized'
+    ? methodsProvenance.records.find((record) => record.id === 'robins-i-v2')
+    : undefined;
 
   return <>
     <SiteHeader />
@@ -90,6 +100,13 @@ export default async function CochraneGuidePage({ params }: { params: Params }) 
         <p>{guideEditorialNote(guide)}</p>
         <p><strong>نية الصفحة:</strong> {guide.intent_ar}</p>
       </aside>
+
+      {robinsDraft ? <aside className="rawafid-empty" aria-label="تنبيه حالة الأداة">
+        <h2>تنبيه منهجي: ROBINS-I V2 ما يزال مسودة</h2>
+        <p>{robinsDraft.note_ar}</p>
+        <p><strong>الحالة المتحققة:</strong> {robinsDraft.version_label} · <strong>تاريخ تحقق روافد:</strong> {robinsDraft.verified_on}</p>
+        <a className="sector-open" href={robinsDraft.url} target="_blank" rel="noopener noreferrer">فتح صفحة الحالة الرسمية ↗</a>
+      </aside> : null}
 
       <section>
         <div className="section-mini-heading"><div><span className="eyebrow">منهج القراءة</span><h2>الشرح العملي</h2></div></div>
@@ -133,13 +150,22 @@ export default async function CochraneGuidePage({ params }: { params: Params }) 
       <section>
         <div className="section-mini-heading"><div><span className="eyebrow">Primary sources</span><h2>المصادر المستخدمة</h2></div><span>{guide.sources.length} مصادر</span></div>
         <div className="institutional-sector-grid">
-          {guide.sources.map((source) => <article className="institutional-sector-card" key={source.url}>
-            <span className="eyebrow">{source.kind}</span>
-            <h3>{source.label}</h3>
-            <a className="sector-open" href={source.url} target="_blank" rel="noopener noreferrer">فتح المصدر الأصلي ↗</a>
-          </article>)}
+          {guide.sources.map((source) => {
+            const freshness = sourceFreshness(source.url);
+            return <article className="institutional-sector-card" key={source.url}>
+              <span className="eyebrow">{source.kind}</span>
+              <h3>{source.label}</h3>
+              {freshness ? <><p><strong>حالة المصدر:</strong> {freshness.version_label}</p><p>{freshness.note_ar}</p><p><strong>تحقق روافد:</strong> {freshness.verified_on}</p></> : null}
+              <a className="sector-open" href={source.url} target="_blank" rel="noopener noreferrer">فتح المصدر الأصلي ↗</a>
+            </article>;
+          })}
         </div>
       </section>
+
+      {provenanceRecords.length ? <aside className="rawafid-empty" aria-label="سجل حداثة المصادر">
+        <h2>سجل حداثة المصادر</h2>
+        <p>تاريخ مراجعة سجل المصادر المنهجية: {methodsProvenance.reviewed_on}. التحقق من حداثة المرجع منفصل عن تاريخ نشر صفحة روافد، ولا يعني أن كل فصل أو أداة تغيرت في التاريخ نفسه.</p>
+      </aside> : null}
     </main>
     <SiteFooter />
   </>;
