@@ -25,6 +25,15 @@ type ProvenanceRecord = (typeof methodsProvenance.records)[number];
 const batches = [foundations, searchBias, statistics, gradeDecision, msGovernance] as const;
 const guides: Guide[] = batches.flatMap((batch) => batch.guides) as Guide[];
 
+const SOURCE_URL_CANONICAL_OVERRIDES: Record<string, string> = {
+  'https://www.riskofbias.info/welcome/home/current-version-of-robins-i': 'https://www.riskofbias.info/welcome/robins-i-v2',
+  'https://www.cochrane.org/join-cochrane/translate': 'https://www.cochrane.org/get-involved/translate-our-evidence',
+};
+
+function canonicalSourceUrl(sourceUrl: string) {
+  return SOURCE_URL_CANONICAL_OVERRIDES[sourceUrl] ?? sourceUrl;
+}
+
 function getGuide(slug: string): Guide | undefined {
   return guides.find((guide) => guide.slug === slug);
 }
@@ -35,7 +44,8 @@ function guideEditorialNote(guide: Guide) {
 }
 
 function sourceFreshness(sourceUrl: string): ProvenanceRecord | undefined {
-  return methodsProvenance.records.find((record) => record.url === sourceUrl || record.source_of_status === sourceUrl);
+  const canonicalUrl = canonicalSourceUrl(sourceUrl);
+  return methodsProvenance.records.find((record) => record.url === canonicalUrl || record.source_of_status === canonicalUrl);
 }
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
@@ -151,12 +161,13 @@ export default async function CochraneGuidePage({ params }: { params: Params }) 
         <div className="section-mini-heading"><div><span className="eyebrow">Primary sources</span><h2>المصادر المستخدمة</h2></div><span>{guide.sources.length} مصادر</span></div>
         <div className="institutional-sector-grid">
           {guide.sources.map((source) => {
-            const freshness = sourceFreshness(source.url);
-            return <article className="institutional-sector-card" key={source.url}>
+            const sourceUrl = canonicalSourceUrl(source.url);
+            const freshness = sourceFreshness(sourceUrl);
+            return <article className="institutional-sector-card" key={sourceUrl}>
               <span className="eyebrow">{source.kind}</span>
               <h3>{source.label}</h3>
               {freshness ? <><p><strong>حالة المصدر:</strong> {freshness.version_label}</p><p>{freshness.note_ar}</p><p><strong>تحقق روافد:</strong> {freshness.verified_on}</p></> : null}
-              <a className="sector-open" href={source.url} target="_blank" rel="noopener noreferrer">فتح المصدر الأصلي ↗</a>
+              <a className="sector-open" href={sourceUrl} target="_blank" rel="noopener noreferrer">فتح المصدر الأصلي ↗</a>
             </article>;
           })}
         </div>
