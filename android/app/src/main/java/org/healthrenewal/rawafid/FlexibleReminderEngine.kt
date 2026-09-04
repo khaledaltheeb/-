@@ -109,7 +109,8 @@ class FlexibleReminderWorker(context: Context, params: WorkerParameters) : Corou
         val id = inputData.getString("reminder_id") ?: return Result.success()
         val definition = FlexibleReminderCatalog.byId(applicationContext, id) ?: return Result.success()
         if (!FlexibleReminderStore.enabled(applicationContext, definition)) return Result.success()
-        if (LocalStore.isQuietHour(applicationContext, LocalDateTime.now().hour)) return Result.success()
+        val repository = RawafidRepositories.local(applicationContext)
+        if (repository.isQuietHour(LocalDateTime.now().hour)) return Result.success()
         if (!FlexibleReminderStore.claim(applicationContext, definition)) return Result.success()
         if (Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) return Result.success()
 
