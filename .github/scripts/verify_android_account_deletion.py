@@ -25,6 +25,7 @@ edge = read("supabase/functions/rawafid-delete-account/index.ts")
 config = read("supabase/config.toml")
 web_page = read("app/account/delete/page.tsx")
 web_actions = read("app/account/delete/actions.ts")
+security_page = read("app/account/security/page.tsx")
 
 require(
     manifest,
@@ -114,6 +115,11 @@ require(
         "DELETE_MY_RAWAFID_ACCOUNT",
     ],
     "web deletion reauthentication contract",
+)
+require(
+    security_page,
+    ["حذف الحساب والبيانات", 'href="/account/delete"', "إعادة تحقق مستقلة"],
+    "web account-security deletion discovery",
 )
 
 print("Rawafid account deletion contract OK: discoverable, reauthenticated, MFA-aware, JWT-verified, storage-cleaning and server-authoritative")
