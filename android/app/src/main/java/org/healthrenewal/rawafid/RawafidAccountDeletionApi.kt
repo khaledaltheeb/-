@@ -8,26 +8,25 @@ import java.net.SocketTimeoutException
 import java.net.URL
 
 object RawafidAccountDeletionApi {
-    private const val BASE_URL = "https://ghljwfwqsyfnthvlzxjy.supabase.co"
-    private const val PUBLISHABLE_KEY = "sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs"
     private const val SESSION_KEY = "rawafid_circle_session_v1"
     private const val CONFIRMATION = "DELETE_MY_RAWAFID_ACCOUNT"
 
     fun deleteCurrentAccount(context: Context, expectedEmail: String) {
+        RawafidBackendConfig.requireConfigured()
         val session = freshSession(context)
         val email = session.optString("email").trim()
         if (email.isBlank() || !email.equals(expectedEmail.trim(), ignoreCase = true)) {
             throw CircleApiException("تعذر تأكيد بريد الحساب قبل الحذف.")
         }
 
-        val connection = URL("$BASE_URL/functions/v1/rawafid-delete-account").openConnection() as HttpURLConnection
+        val connection = URL("${RawafidBackendConfig.baseUrl}/functions/v1/rawafid-delete-account").openConnection() as HttpURLConnection
         try {
             connection.requestMethod = "POST"
             connection.connectTimeout = 15_000
             connection.readTimeout = 30_000
             connection.useCaches = false
             connection.doOutput = true
-            connection.setRequestProperty("apikey", PUBLISHABLE_KEY)
+            connection.setRequestProperty("apikey", RawafidBackendConfig.publishableKey)
             connection.setRequestProperty("Authorization", "Bearer ${session.getString("access_token")}")
             connection.setRequestProperty("Accept", "application/json")
             connection.setRequestProperty("Content-Type", "application/json")
