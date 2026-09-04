@@ -5,14 +5,25 @@ import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import { breadcrumbJsonLd, buildSeoMetadata } from '@/lib/seo';
 import foundations from '@/data/cochrane/guides-foundations-v1.json';
+import searchBias from '@/data/cochrane/guides-search-bias-v1.json';
 
 export const dynamic = 'force-dynamic';
 
 type Params = Promise<{ slug: string }>;
-type Guide = (typeof foundations.guides)[number];
+type FoundationGuide = (typeof foundations.guides)[number];
+type SearchBiasGuide = (typeof searchBias.guides)[number];
+type Guide = FoundationGuide | SearchBiasGuide;
+
+const guides: Guide[] = [...foundations.guides, ...searchBias.guides];
 
 function getGuide(slug: string): Guide | undefined {
-  return foundations.guides.find((guide) => guide.slug === slug);
+  return guides.find((guide) => guide.slug === slug);
+}
+
+function guideEditorialNote(guide: Guide) {
+  return searchBias.guides.some((item) => item.slug === guide.slug)
+    ? searchBias.editorial_note_ar
+    : foundations.editorial_note_ar;
 }
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
@@ -43,6 +54,8 @@ export default async function CochraneGuidePage({ params }: { params: Params }) 
     { name: 'الأدلة المنهجية', path: '/cochrane/guides/' },
     { name: guide.title_ar, path },
   ];
+  const pitfalls = 'pitfalls_ar' in guide ? guide.pitfalls_ar : [];
+  const connections = 'connections' in guide ? guide.connections.map((linkedSlug) => getGuide(linkedSlug)).filter(Boolean) as Guide[] : [];
 
   return <>
     <SiteHeader />
@@ -68,7 +81,7 @@ export default async function CochraneGuidePage({ params }: { params: Params }) 
 
       <aside className="rawafid-empty" aria-label="حدود النسب">
         <h2>حدود النسب والمنهج</h2>
-        <p>{foundations.editorial_note_ar}</p>
+        <p>{guideEditorialNote(guide)}</p>
         <p><strong>نية الصفحة:</strong> {guide.intent_ar}</p>
       </aside>
 
@@ -83,6 +96,15 @@ export default async function CochraneGuidePage({ params }: { params: Params }) 
         </div>
       </section>
 
+      {pitfalls.length ? <section>
+        <div className="section-mini-heading"><div><span className="eyebrow">Common failure modes</span><h2>أخطاء شائعة يجب تجنبها</h2></div></div>
+        <div className="institutional-sector-grid">
+          {pitfalls.map((item, index) => <article className="institutional-sector-card" key={item}>
+            <span className="sector-number">{String(index + 1).padStart(2, '0')}</span><p>{item}</p>
+          </article>)}
+        </div>
+      </section> : null}
+
       <section>
         <div className="section-mini-heading"><div><span className="eyebrow">Quality check</span><h2>أسئلة فحص سريعة</h2></div></div>
         <div className="institutional-sector-grid">
@@ -92,6 +114,15 @@ export default async function CochraneGuidePage({ params }: { params: Params }) 
           </article>)}
         </div>
       </section>
+
+      {connections.length ? <section>
+        <div className="section-mini-heading"><div><span className="eyebrow">Connected learning path</span><h2>صفحات مرتبطة تكمل الفكرة</h2></div></div>
+        <div className="institutional-sector-grid">
+          {connections.map((linkedGuide) => <Link className="institutional-sector-card" href={`/cochrane/guides/${linkedGuide.slug}/`} key={linkedGuide.slug}>
+            <h3>{linkedGuide.title_ar}</h3><p>{linkedGuide.description_ar}</p><span className="sector-open">متابعة المسار ←</span>
+          </Link>)}
+        </div>
+      </section> : null}
 
       <section>
         <div className="section-mini-heading"><div><span className="eyebrow">Primary sources</span><h2>المصادر المستخدمة</h2></div><span>{guide.sources.length} مصادر</span></div>
