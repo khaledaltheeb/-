@@ -403,6 +403,7 @@ private fun EmergencyBeaconScreen() {
     var indefinite by remember(version) { mutableStateOf(false) }
     var showSaveConfirm by remember { mutableStateOf(false) }
     var showActivateConfirm by remember { mutableStateOf(false) }
+    var showAccessibilityDisclosure by remember { mutableStateOf(false) }
     var permissionMessage by remember { mutableStateOf("") }
     val dirty = draft.copy(active = stored.active, expiresAt = stored.expiresAt, updatedAt = stored.updatedAt) != stored
     val publicPreview = EmergencyBeaconManager.buildPublicText(draft)
@@ -538,8 +539,8 @@ private fun EmergencyBeaconScreen() {
                     }
                     OutlinedButton(
                         modifier = Modifier.fillMaxWidth(),
-                        onClick = { context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) }
-                    ) { Text("فتح إعدادات الوصولية لتفعيل الاختصار") }
+                        onClick = { showAccessibilityDisclosure = true }
+                    ) { Text("مراجعة خدمة الوصولية وتفعيل الاختصار") }
                     Text("تفعيل خدمة الاختصار اختياري. إذا لم ترغب في منح هذه الصلاحية، استخدم بطاقة شاشة القفل من التطبيق أو مركز الأمان.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
@@ -571,6 +572,30 @@ private fun EmergencyBeaconScreen() {
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
+    }
+
+    if (showAccessibilityDisclosure) {
+        AlertDialog(
+            onDismissRequest = { showAccessibilityDisclosure = false },
+            title = { Text("خدمة الوصولية لاختصار أزرار الصوت") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(RawafidSpacing.Sm)) {
+                    Text("إفصاح خدمة الوصولية", fontWeight = FontWeight.Bold)
+                    Text("يستخدم روافد خدمة Android Accessibility فقط لكي يستطيع التقاط تسلسل أزرار الصوت: رفع ← خفض ← رفع، حتى عندما لا يكون التطبيق مفتوحًا، ثم تفعيل بطاقة المساعدة التي أعددتها أنت.")
+                    Text("الخدمة لا تقرأ محتوى الشاشة أو النصوص، ولا تستخرج كلمات المرور أو الرسائل، ولا تنفذ نقرات أو تتحكم بالتطبيقات الأخرى. إعداد الخدمة يطلب أحداث أزرار المفاتيح فقط، مع تعطيل استرجاع محتوى النوافذ.")
+                    Text("هذا الاختصار اختياري بالكامل. يمكنك إلغاء العملية الآن واستخدام بطاقة المساعدة من داخل روافد بدلًا منه، ويمكنك إيقاف خدمة الوصولية لاحقًا من إعدادات Android.")
+                }
+            },
+            confirmButton = {
+                Button(onClick = {
+                    showAccessibilityDisclosure = false
+                    context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+                }) { Text("أفهم — فتح إعدادات الوصولية") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showAccessibilityDisclosure = false }) { Text("إلغاء") }
+            }
+        )
     }
 
     if (showSaveConfirm) {

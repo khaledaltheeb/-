@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import json
+import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -33,14 +34,64 @@ android_text = "\n".join(
 circle_notifications = (SRC / "CircleNotificationSystem.kt").read_text(encoding="utf-8")
 treatment_notifications = (SRC / "TreatmentReminderReceiver.kt").read_text(encoding="utf-8")
 vault_files = (SRC / "LifeVaultFileStore.kt").read_text(encoding="utf-8")
+safety_monitor = (SRC / "SafetyMonitorActivity.kt").read_text(encoding="utf-8")
+emergency_beacon = (SRC / "EmergencyBeaconActivity.kt").read_text(encoding="utf-8")
+
+service_match = re.search(
+    r'<service\b(?:(?!</service>).)*android:name="\.SafetyHotkeyAccessibilityService"(?:(?!</service>).)*?'
+    r'<meta-data\b(?:(?!/>).)*android:name="android\.accessibilityservice"(?:(?!/>).)*?'
+    r'android:resource="@xml/([A-Za-z0-9_]+)"(?:(?!/>).)*/>',
+    MANIFEST,
+    flags=re.DOTALL,
+)
+accessibility_resource = service_match.group(1) if service_match else ""
+accessibility_config_path = ROOT / f"android/app/src/main/res/xml/{accessibility_resource}.xml" if accessibility_resource else None
+accessibility_config = (
+    accessibility_config_path.read_text(encoding="utf-8")
+    if accessibility_config_path is not None and accessibility_config_path.exists()
+    else ""
+)
 
 checks = {
     "manifest background location": "android.permission.ACCESS_BACKGROUND_LOCATION" in MANIFEST,
     "manifest foreground location service": 'android:foregroundServiceType="location"' in MANIFEST,
     "boot receiver registered": '.BootReceiver' in MANIFEST,
-    "safety monitor cloud RPC": "broadcastSafetyLocation" in (SRC / "SafetyMonitorActivity.kt").read_text(encoding="utf-8"),
-    "safety monitor pre-alert cancel": "أنا بخير — لا ترسل" in (SRC / "SafetyMonitorActivity.kt").read_text(encoding="utf-8"),
+    "safety monitor cloud RPC": "broadcastSafetyLocation" in safety_monitor,
+    "safety monitor pre-alert cancel": "أنا بخير — لا ترسل" in safety_monitor,
     "safety monitor SMS optional policy": "requiresSmsPermission" in (SRC / "SafetyDeliveryPolicy.kt").read_text(encoding="utf-8"),
+    "safety monitor background location disclosure": (
+        "عرض إفصاح الموقع في الخلفية" in safety_monitor
+        and "لا يستخدم روافد الموقع للإعلانات" in safety_monitor
+        and "عندما لا يكون التطبيق قيد الاستخدام" in safety_monitor
+        and "requestBackgroundLocationAfterDisclosure" in safety_monitor
+    ),
+    "background location never requested before disclosure": (
+        "requestBackgroundLocationIfNeeded()" not in safety_monitor
+        and "backgroundDisclosureAcknowledged" in safety_monitor
+        and "requestBackgroundLocationAfterDisclosure()" in safety_monitor
+    ),
+    "accessibility service config referenced by manifest": (
+        bool(accessibility_resource)
+        and accessibility_config_path is not None
+        and accessibility_config_path.exists()
+    ),
+    "accessibility shortcut prominent disclosure": (
+        "إفصاح خدمة الوصولية" in emergency_beacon
+        and "لا تقرأ محتوى الشاشة أو النصوص" in emergency_beacon
+        and "اختياري بالكامل" in emergency_beacon
+        and "showAccessibilityDisclosure = true" in emergency_beacon
+    ),
+    "accessibility settings only after disclosure confirmation": (
+        "مراجعة خدمة الوصولية وتفعيل الاختصار" in emergency_beacon
+        and "أفهم — فتح إعدادات الوصولية" in emergency_beacon
+        and "context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))" in emergency_beacon
+        and "onClick = { context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) }" not in emergency_beacon
+    ),
+    "accessibility service cannot retrieve window content": (
+        'android:canRetrieveWindowContent="false"' in accessibility_config
+        and 'android:canRequestFilterKeyEvents="true"' in accessibility_config
+        and "override fun onAccessibilityEvent(event: AccessibilityEvent?) = Unit" in emergency_beacon
+    ),
     "circle boot restore": "CircleNotificationScheduler.ensureScheduled(context)" in treatment_notifications,
     "circle lockscreen privacy": "VISIBILITY_PRIVATE" in circle_notifications and "setPublicVersion" in circle_notifications,
     "circle notification actions require unlock": "setAuthenticationRequired(true)" in circle_notifications,
@@ -70,5 +121,7 @@ checks = {
 failed = [name for name, ok in checks.items() if not ok]
 for name, ok in checks.items():
     print(f"[{'OK' if ok else 'FAIL'}] {name}")
+if accessibility_resource:
+    print(f"[INFO] Accessibility service config: @xml/{accessibility_resource}")
 if failed:
     raise SystemExit("Android safety contract failure: " + ", ".join(failed))
