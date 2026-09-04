@@ -1,9 +1,13 @@
-import { cookies } from 'next/headers';
 import PlatformIcon from '@/components/platform-icon';
 import RawafidBrand from '@/components/rawafid-brand';
+import SiteNavIcon from '@/components/site-nav-icon';
+import {
+  HeaderAccountAction,
+  HeaderMegaMemberLinks,
+  HeaderMemberMenuLinks,
+  HeaderMobileBottomNav,
+} from '@/components/site-header-member-state';
 import { getPublicSectors } from '@/lib/public-taxonomy';
-import { createClient } from '@/lib/supabase/server';
-import { hasSupabaseAuthCookie } from '@/lib/supabase/auth-cookie';
 
 const primaryLinks = [
   { href: '/sectors', label: 'القطاعات', secondary: false },
@@ -32,44 +36,8 @@ const serviceLinks = [
   { href: '/search', label: 'البحث المتقدم', icon: 'search' as const },
 ];
 
-type IconName = 'home' | 'search' | 'discover' | 'messages' | 'account' | 'specialists' | 'more';
-
-function NavIcon({ name }: { name: IconName }) {
-  const common = { width: 20, height: 20, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.9, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const, 'aria-hidden': true };
-  if (name === 'home') return <svg {...common}><path d="M3 10.5 12 3l9 7.5" /><path d="M5 9.5V21h14V9.5" /><path d="M9.5 21v-6h5v6" /></svg>;
-  if (name === 'search') return <svg {...common}><circle cx="11" cy="11" r="7" /><path d="m20 20-4-4" /></svg>;
-  if (name === 'discover') return <svg {...common}><circle cx="12" cy="12" r="9" /><path d="m15.5 8.5-2.2 4.8-4.8 2.2 2.2-4.8 4.8-2.2Z" /></svg>;
-  if (name === 'messages') return <svg {...common}><path d="M4 5h16v11H9l-5 4V5Z" /><path d="M8 9h8M8 12h5" /></svg>;
-  if (name === 'account') return <svg {...common}><circle cx="12" cy="8" r="4" /><path d="M4.5 21a7.5 7.5 0 0 1 15 0" /></svg>;
-  if (name === 'specialists') return <svg {...common}><circle cx="12" cy="7.5" r="3.5" /><path d="M5.5 20a6.5 6.5 0 0 1 13 0" /><path d="M18.5 7.5h3M20 6v3" /></svg>;
-  return <svg {...common}><circle cx="5" cy="12" r="1" fill="currentColor" stroke="none" /><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none" /><circle cx="19" cy="12" r="1" fill="currentColor" stroke="none" /></svg>;
-}
-
 export default async function SiteHeader() {
-  const sectorsPromise = getPublicSectors(50);
-  const cookieStore = await cookies();
-  let signedIn = false;
-
-  if (hasSupabaseAuthCookie(cookieStore.getAll())) {
-    const supabase = await createClient();
-    const { data: claims } = await supabase.auth.getClaims();
-    signedIn = Boolean(claims?.claims?.sub);
-  }
-
-  const sectors = await sectorsPromise;
-  const mobileItems: Array<{ href: string; label: string; icon: IconName }> = signedIn ? [
-    { href: '/', label: 'الرئيسية', icon: 'home' },
-    { href: '/search', label: 'بحث', icon: 'search' },
-    { href: '/care-guides/', label: 'الأدلة', icon: 'discover' },
-    { href: '/messages', label: 'الرسائل', icon: 'messages' },
-    { href: '/account', label: 'حسابي', icon: 'account' },
-  ] : [
-    { href: '/', label: 'الرئيسية', icon: 'home' },
-    { href: '/search', label: 'بحث', icon: 'search' },
-    { href: '/care-guides/', label: 'الأدلة', icon: 'discover' },
-    { href: '/specialists', label: 'مختصون', icon: 'specialists' },
-    { href: '/about', label: 'من نحن', icon: 'more' },
-  ];
+  const sectors = await getPublicSectors(50);
 
   return (
     <>
@@ -117,7 +85,7 @@ export default async function SiteHeader() {
                   <section className="mega-nav-column mega-services">
                     <h2>الدليل والخدمات</h2>
                     <div>{serviceLinks.map((link) => <a href={link.href} key={link.href}><PlatformIcon name={link.icon} size={19} /><span>{link.label}</span></a>)}</div>
-                    {signedIn && <div className="mega-member-links"><a href="/messages">الرسائل</a><a href="/appointments">المواعيد</a><a href="/notifications">الإشعارات</a></div>}
+                    <HeaderMegaMemberLinks />
                   </section>
                 </div>
               </div>
@@ -128,9 +96,9 @@ export default async function SiteHeader() {
             <input id="header-search-input" name="q" type="search" placeholder="حالة، دليل أو خدمة" maxLength={120} enterKeyHint="search" />
             <button type="submit">بحث</button>
           </form>
-          <div className="header-actions">{signedIn ? <a className="button header-login" href="/account">حسابي</a> : <a className="button header-login" href="/login">دخول</a>}</div>
+          <div className="header-actions"><HeaderAccountAction /></div>
           <details className="mobile-menu">
-            <summary aria-label="فتح قائمة التنقل"><NavIcon name="more" /><span>القائمة</span></summary>
+            <summary aria-label="فتح قائمة التنقل"><SiteNavIcon name="more" /><span>القائمة</span></summary>
             <div className="mobile-menu-panel">
               <form className="mobile-search" action="/search" method="get" role="search"><label className="sr-only" htmlFor="mobile-search-input">البحث في منصة روافد</label><input id="mobile-search-input" name="q" type="search" placeholder="حالة، دليل أو خدمة" maxLength={120} enterKeyHint="search" /><button type="submit">بحث</button></form>
               <a href="/">الرئيسية</a>
@@ -145,14 +113,12 @@ export default async function SiteHeader() {
               {sectors.map((sector) => <a key={sector.slug} href={'/sectors/' + sector.slug}>{sector.name_ar}</a>)}
               <span className="mobile-menu-label">الدليل والخدمات</span>
               {serviceLinks.map((link) => <a key={link.href} href={link.href}>{link.label}</a>)}
-              {signedIn ? <><a href="/messages">الرسائل</a><a href="/appointments">المواعيد</a><a href="/notifications">الإشعارات</a><a href="/account">حسابي</a></> : <a href="/login">تسجيل الدخول</a>}
+              <HeaderMemberMenuLinks />
             </div>
           </details>
         </div>
       </header>
-      <nav className="mobile-bottom-nav" aria-label="التنقل السريع للهاتف">
-        {mobileItems.map((item) => <a href={item.href} key={item.href + item.label}><NavIcon name={item.icon} /><span>{item.label}</span></a>)}
-      </nav>
+      <HeaderMobileBottomNav />
     </>
   );
 }
