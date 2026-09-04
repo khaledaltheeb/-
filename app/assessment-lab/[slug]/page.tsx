@@ -5,6 +5,7 @@ import AssessmentMonitorRunner from '@/components/assessment-monitor-runner';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import { assessmentSlugs, buildMonitorQuestions, getAssessmentMonitor, getMonitorReadingTime, getRelatedMonitors, getSourceInstrument, getSourceInstrumentStatusLabel } from '@/lib/assessment-lab/catalog';
+import { assessmentEvidenceValidationBoundary, getAssessmentEvidenceMap, getAssessmentEvidenceReference, getAssessmentEvidenceRelationLabel, getAssessmentEvidenceTypeLabel } from '@/lib/assessment-lab/evidence-map';
 import { getAssessmentScientificProfile } from '@/lib/assessment-lab/scientific-profiles';
 import { breadcrumbJsonLd, buildSeoMetadata } from '@/lib/seo';
 import styles from '../assessment-lab.module.css';
@@ -40,6 +41,7 @@ export default async function AssessmentLabDetail({ params }: { params: Params }
   if (!monitor && !instrument) notFound();
   const profile = monitor ? getAssessmentScientificProfile(slug) : null;
   if (monitor && !profile) throw new Error(`Missing scientific profile for published assessment monitor: ${slug}`);
+  const evidenceMap = monitor ? getAssessmentEvidenceMap(slug) : null;
   const title = monitor?.title ?? instrument!.title;
   const breadcrumbs = breadcrumbJsonLd([{ name: 'الرئيسية', path: '/' }, { name: 'اختبر نفسك', path: '/assessment-lab' }, { name: title, path: `/assessment-lab/${slug}` }]);
   const related = monitor ? getRelatedMonitors(monitor) : [];
@@ -87,6 +89,24 @@ export default async function AssessmentLabDetail({ params }: { params: Params }
         <div className={styles.sourceLinks}>{profile!.scientificReferences.map((reference) => <a href={reference.url} target="_blank" rel="noreferrer" key={`${reference.title}-${reference.url}`}>{reference.title}</a>)}</div>
         <p className={styles.boundary}>إصدار الأداة: {profile!.versioning.instrumentVersion} · مخطط الملف العلمي: v{profile!.versioning.schemaVersion}. عرض هذه المرحلة مقصود للشفافية: وجود مراجع وبنود مدروسة لا يساوي تحققًا سيكومتريًا.</p>
       </section>
+
+      {evidenceMap ? <section className={`${styles.shell} ${styles.evidence}`} aria-labelledby="evidence-map-title">
+        <span className={styles.eyebrow}>خريطة الأدلة · Claim-to-evidence</span>
+        <h2 id="evidence-map-title">ما الدليل الذي يبرر كل محور؟</h2>
+        <p>{assessmentEvidenceValidationBoundary}</p>
+        <div className={styles.methodGrid}>
+          {evidenceMap.domains.map((domain) => <article key={domain.domain}>
+            <h3>{domain.domain}</h3>
+            <p><strong>{getAssessmentEvidenceRelationLabel(domain.evidence_relation)}:</strong> {domain.claim}</p>
+            <p><strong>حدود الاستدلال:</strong> {domain.limitations}</p>
+            <div className={styles.sourceLinks}>{domain.reference_ids.map((referenceId) => {
+              const reference = getAssessmentEvidenceReference(evidenceMap, referenceId);
+              return reference ? <a href={reference.url} target="_blank" rel="noreferrer" key={`${domain.domain}-${reference.id}`} title={`${reference.supports} حدود الدليل: ${reference.limitations}`}>{getAssessmentEvidenceTypeLabel(reference.evidence_type)} · {reference.title}</a> : null;
+            })}</div>
+          </article>)}
+        </div>
+        <p className={styles.boundary}>هذه الخريطة تراجع <strong>صلة الدليل بالمحور</strong>، لا خصائص القياس لأداة روافد. الانتقال من item-development إلى validated يحتاج دراسات صلاحية محتوى وفهم المستخدمين ثم دراسات قياس مستقلة.</p>
+      </section> : null}
 
       <div className={styles.shell}><AssessmentMonitorRunner title={monitor.title} referencePeriod={profile!.referencePeriod} questions={questions}/></div>
       <section className={`${styles.shell} ${styles.afterAssessment}`} aria-labelledby="after-title">
