@@ -30,7 +30,6 @@ jobs:
           raw=text.encode('utf-8')
           print(f'HTML_RAW_BYTES={len(raw)}')
           print(f'HTML_CHARS={len(text)}')
-          print(f'SCRIPT_TAGS={len(re.findall(r"<script\\b", text, re.I))}')
           print(f'STYLE_LINKS={len(re.findall(r"<link[^>]+rel=[\"\']stylesheet[\"\']", text, re.I))}')
 
           sector_links=re.findall(r'href=[\"\'](/sectors/[^\"\']+)', text)
@@ -42,9 +41,6 @@ jobs:
           payloads=[s for s in next_scripts if '__next_f.push' in s]
           print(f'RSC_SCRIPT_COUNT={len(payloads)}')
           print(f'RSC_SCRIPT_BYTES={sum(len(s.encode("utf-8")) for s in payloads)}')
-
-          jsonld=[s for s in next_scripts if 'schema.org' in s]
-          print(f'JSONLD_APPROX_BYTES={sum(len(s.encode("utf-8")) for s in jsonld)}')
 
           matches=[m.start() for m in re.finditer(r'<script[^>]*>[^<]*(?:self\.)?__next_f\.push', text, re.I|re.S)]
           first_rsc=min(matches) if matches else len(text)
@@ -63,3 +59,9 @@ jobs:
           for size,i,kind in sizes[:15]:
               print(f'{size}\t{kind}\tindex={i}')
           PY
+      - name: Upload captured HTML
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-home-html
+          path: /tmp/home.html
+          retention-days: 1
