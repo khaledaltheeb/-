@@ -6,7 +6,7 @@ type RawafidBrandProps = {
 
 export default function RawafidBrand({ className = '' }: RawafidBrandProps) {
   return (
-    <Link className={['brand', className].filter(Boolean).join(' ')} href="/" aria-label="منصة روافد - الرئيسية">
+    <Link className={['brand', className].filter(Boolean).join(' ')} href="/" prefetch={false} aria-label="منصة روافد - الرئيسية">
       <span className="brand-mark" aria-hidden="true">
         <svg viewBox="0 0 48 48" focusable="false">
           <circle className="logo-source" cx="13" cy="12" r="3.2" />

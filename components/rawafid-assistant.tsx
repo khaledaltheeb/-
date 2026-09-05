@@ -64,18 +64,14 @@ const CONTEXT_QUICK: Array<{ match: RegExp; values: string[] }> = [
 ];
 
 const RISK_PATTERN = /(انتحار|اقتل نفسي|قتل نفسي|أقتل نفسي|اذي نفسي|أؤذي نفسي|ايذاء النفس|إيذاء النفس|خطر مباشر|لا استطيع التنفس|لا أستطيع التنفس|فقد الوعي|نزيف شديد|جرعة زائدة)/i;
-const STORAGE_KEY = 'rawafid-assistant-auto-open-v1';
-const AUTO_OPEN_AFTER_MS = 12000;
-const AUTO_OPEN_TTL_MS = 7 * 24 * 60 * 60 * 1000;
-
 function safeExcerpt(value: string | null) {
   const text = String(value ?? '').replace(/\s+/g, ' ').trim();
   return text.length > 170 ? `${text.slice(0, 167)}…` : text;
 }
 
-export default function RawafidAssistant() {
+export default function RawafidAssistant({ initialOpen = false }: { initialOpen?: boolean }) {
   const pathname = usePathname();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(initialOpen);
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<Result[]>([]);
@@ -89,17 +85,6 @@ export default function RawafidAssistant() {
   const quick = useMemo(() => {
     return CONTEXT_QUICK.find((item) => item.match.test(pathname ?? ''))?.values ?? DEFAULT_QUICK;
   }, [pathname]);
-
-  useEffect(() => {
-    let last = 0;
-    try { last = Number(window.localStorage.getItem(STORAGE_KEY) || 0); } catch {}
-    if (Date.now() - last < AUTO_OPEN_TTL_MS) return;
-    const timer = window.setTimeout(() => {
-      setOpen(true);
-      try { window.localStorage.setItem(STORAGE_KEY, String(Date.now())); } catch {}
-    }, AUTO_OPEN_AFTER_MS);
-    return () => window.clearTimeout(timer);
-  }, []);
 
   useEffect(() => {
     if (!open) return;
