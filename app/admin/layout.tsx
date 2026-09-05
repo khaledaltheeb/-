@@ -3,10 +3,12 @@ import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import '../dashboard-v3-scoped.css';
+import '../system-portals-v1.css';
 import './admin-ui.css';
 import './admin-operations.css';
 import './admin-shell-v3.css';
 import './block-editor-v3.css';
+import '../theme-admin-v4-scoped.css';
 
 type AdminNavItem = readonly [href: string, label: string];
 type AdminNavGroup = { label: string; items: AdminNavItem[] };
