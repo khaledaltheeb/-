@@ -24,7 +24,7 @@ url.searchParams.set('status', 'eq.published');
 url.searchParams.set('robots_index', 'eq.true');
 url.searchParams.set('published_at', `lte.${new Date().toISOString()}`);
 url.searchParams.set('order', 'title.asc');
-url.searchParams.set('limit', '500');
+url.searchParams.set('limit', '1000');
 
 const response = await fetch(url, {
   headers: {
