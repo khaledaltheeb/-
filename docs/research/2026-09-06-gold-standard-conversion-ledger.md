@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Persistent execution ledger for converting Rawafid / Health Renewal condition pages from legacy/template-heavy bodies into condition-specific, evidence-led decision pathways.
+Persistent execution ledger for converting Rawafid / Health Renewal Outside-the-Box condition pages from legacy/template-heavy bodies into condition-specific, evidence-led decision pathways.
 
 This ledger complements:
 
@@ -11,7 +11,7 @@ This ledger complements:
 
 ## Gold definition
 
-A page is counted here only when the public `content` record has been fully rewritten under the gold contract and carries:
+A page is counted as GOLD only when the public `content` record has been fully rewritten and carries:
 
 - `rewrite_method = evidence-led-gold-rewrite`
 - `gold_standard_upgrade = true`
@@ -19,14 +19,24 @@ A page is counted here only when the public `content` record has been fully rewr
 - `source_verified_through = 2026-09-06`
 - `publication_ready = true`
 - `external_endorsement = false`
+- direct condition evidence rather than PubMed search-result URLs
 
-The retained legacy source remains preserved in `private.legacy_migration_items`.
+The retained legacy source remains preserved in `private.legacy_migration_items` for provenance and recovery.
 
 ## Current Outside-the-Box GOLD count
 
-**25 condition pages** as of this ledger update.
+**45 condition pages**.
 
-### Completed
+Current verification state:
+
+- minimum direct references per GOLD page: **5**
+- average direct references per GOLD page: **7.2**
+- GOLD pages containing PubMed search URLs: **0**
+- exact repeated scientific paragraph/list/table blocks across GOLD pages: **0**
+
+Shared structural headings are allowed; copied condition science is not.
+
+## Completed GOLD pages
 
 1. `legacy-outside-box-cri-du-chat-syndrome`
 2. `legacy-outside-box-kleefstra-syndrome`
@@ -53,86 +63,70 @@ The retained legacy source remains preserved in `private.legacy_migration_items`
 23. `legacy-outside-box-foxp1-syndrome`
 24. `legacy-outside-box-potocki-lupski-syndrome`
 25. `legacy-outside-box-dyrk1a-syndrome`
+26. `legacy-outside-box-neurofibromatosis-type-1`
+27. `legacy-outside-box-22q11-2-deletion-syndrome`
+28. `legacy-outside-box-phelan-mcdermid-syndrome`
+29. `legacy-outside-box-down-syndrome`
+30. `legacy-outside-box-kernicterus`
+31. `legacy-outside-box-rett-syndrome`
+32. `legacy-outside-box-williams-syndrome`
+33. `legacy-outside-box-hydrocephalus`
+34. `legacy-outside-box-hypoxic-ischemic-encephalopathy`
+35. `legacy-outside-box-charcot-marie-tooth`
+36. `legacy-outside-box-juvenile-idiopathic-arthritis`
+37. `legacy-outside-box-spinal-cord-injury`
+38. `legacy-outside-box-congenital-hypothyroidism-developmental-support`
+39. `legacy-outside-box-epilepsy-aphasia-spectrum`
+40. `legacy-outside-box-smith-mc-cort-dysplasia`
+41. `legacy-outside-box-fragile-x-syndrome`
+42. `legacy-outside-box-global-developmental-delay`
+43. `legacy-outside-box-osteogenesis-imperfecta`
+44. `legacy-outside-box-spinal-muscular-atrophy`
+45. `legacy-outside-box-congenital-cmv`
 
-## Anti-filler verification
+## Scientific design invariant
 
-An exact structured-block comparison was run across the gold corpus.
+Every condition page must answer a condition-specific decision problem rather than simply describe a diagnosis. The required logic is:
 
-**Result after the first 20 rewrites: no repeated condition-science paragraph, list, or table was found across two or more gold pages.**
-
-The only exact repeated blocks were structural headings such as:
-
-- `قوة الدليل وحدوده`
-- `ما لا نفعله`
-- `قواعد القرار`
-- `لوحة الخط الأساسي`
-- `ما الذي قد يخفي أفضل أداء؟`
-- `علامات التصعيد`
-- `المراهقة والرشد`
-
-This is acceptable editorial structure, not content padding. Shared headings create predictable navigation while the science beneath them remains condition-specific. The same invariant remains mandatory as the corpus grows.
-
-## Design principles observed in completed pages
-
-The conversions intentionally use different scientific strategies rather than replacing disease names in a common template. Examples:
-
-- Cri-du-chat: expressive/motor limitations can mask cognition; swallowing and AAC are central.
-- Kleefstra: longitudinal baseline before possible adolescent/adult regression; sleep and neuropsychiatric change.
-- Christianson: ataxia/motor access, epilepsy, growth, pain expression and adult adaptive/motor loss.
-- Coffin-Siris: gene-specific BAFopathy management, hand/motor access, ARID1B adult natural history, ARID1A-specific surveillance considerations.
-- Dup15q: duplication class, epilepsy/postictal state, EEG beta as research biomarker rather than capability score, social learning channel.
-- Smith-Kingsmore: MTOR/mosaicism, sleep/circadian function, seizures, hyperphagia and regression monitoring.
-- Pitt-Hopkins: receptive-expression gap, autonomic breathing, constipation/dysmotility and visceral pain.
-- Mowat-Wilson: receptive communication and cognitive play, epilepsy, Hirschsprung/constipation and social learning.
-- Rubinstein-Taybi: 2024 international consensus, sleep/GI/mental-health interaction, fine-motor access and adult natural history.
-- Sotos: anxiety/attention/sensory access, adult independence, and avoiding unsupported syndrome-specific cancer screening.
-- KBG: verbal-performance discrepancy, hearing, movement disorders, adult work/independence.
-- MED13L: motor-speech apraxia/dysarthria versus language/cognition, AAC, energy and social safety.
-- Dravet: seizure-state-aware measurement, executive trajectory, gait, sleep and lifespan communication.
-- Jacobsen: platelet/bleeding safety, immunology, cardiac safety, receptive-expression gap and mental health.
-- Wolf-Hirschhorn: seizure/growth/hearing safety, slow but continuing development, communication and adult partial independence.
-- Noonan: current molecular natural history, cardiac/bleeding/sensory safety, executive and psychosocial access.
-- Klinefelter: language/reading, executive function and social cognition without equating XXY with intellectual disability.
-- 1p36 deletion: cardiac/epilepsy/hearing/vision safety plus evidence that adolescent/adult function can exceed older expectations.
-- Angelman: multimodal receptive/expressive/pragmatic communication, 2026 ORCA evidence, sleep/GI/mobility/adult priorities.
-- Wiedemann-Steiner: feeding/growth/constipation/sleep/motor access with broad adaptive heterogeneity and adult education/work potential.
-- Kabuki: hearing/immune/feeding safety, testing relative verbal/working-memory strengths, and translating communication into daily-living independence.
-- Turner: 2024 international guideline plus individualized verbal/visuospatial/mathematics/executive/social profile; cardiac and hearing access are safety gates.
-- FOXP1: motor-speech versus language separation, receptive/expressive asymmetry, visual-motor access and independent message repair.
-- Potocki-Lupski: feeding/sleep safety, motor-speech and executive access, and testing the individual social profile rather than assuming a generic ASD phenotype.
-- DYRK1A: early AAC, severe motor-speech/language separation, social motivation as a relative strength to test, and feeding/motor/vision safety.
+1. identify the best plausible ability that may be hidden by access, motor, speech, sensory, fatigue, pain, sleep, anxiety or medical-state effects;
+2. establish safety/red-flag gates before functional experimentation;
+3. define a condition-specific baseline using meaningful function rather than a single global score;
+4. use recent direct literature to generate low-risk reversible hypotheses/experiments;
+5. distinguish treatment effect from environmental access, implementation fidelity and measurement artifact;
+6. define what result changes the decision;
+7. include lifespan/transition issues when the natural history makes them relevant;
+8. state what the page must not recommend or overclaim.
 
 ## Evidence backfill rule
 
-Gold is not permanent. Pages with a small direct-reference set are re-opened for evidence enrichment even if their current body is condition-specific. Turner was immediately backfilled beyond the 2024 guideline with executive-function, mathematics/visuospatial, neurodevelopmental and 2025 psychosocial/school evidence. The same process applies to any gold page whose direct condition evidence is thinner than the current literature permits.
+GOLD is not permanent. A page is reopened whenever newer direct evidence materially changes natural history, safety, assessment, treatment-response interpretation, lifespan planning or functional outcomes. A small reference list is also re-opened when the current literature clearly supports stronger direct sourcing.
 
-## Next conversion wave
+## Anti-filler rule
 
-Continue remaining Outside-the-Box pages rated `DEEP`, beginning with:
+Exact structured-block comparison is rerun as the corpus grows. At 45 GOLD pages, **no scientific paragraph, list or table of 100+ characters was duplicated exactly across two or more pages**. Repeated editorial headings such as `قواعد القرار` or `قوة الدليل وحدوده` are permitted because they provide predictable navigation; the science beneath them must remain condition-specific.
 
-- neurofibromatosis type 1
-- 22q11.2 deletion syndrome
-- kernicterus
-- Phelan-McDermid syndrome
-- Down syndrome
-- Rett syndrome
-- Williams syndrome
-- hydrocephalus
-- hypoxic-ischemic encephalopathy
-- Charcot-Marie-Tooth disease
-- Smith-McCort dysplasia
-- congenital hypothyroidism developmental support
-- juvenile idiopathic arthritis
-- epilepsy-aphasia spectrum
-- spinal cord injury
+## Next DEEP conversion wave
+
+Continue the original audit order with:
+
+- `legacy-outside-box-ehlers-danlos-syndromes`
+- `legacy-outside-box-epilepsy-functional-support`
+- `legacy-outside-box-lennox-gastaut-syndrome`
+- `legacy-outside-box-achondroplasia`
+- `legacy-outside-box-duchenne-muscular-dystrophy`
+- `legacy-outside-box-phenylketonuria`
+- `legacy-outside-box-infantile-epileptic-spasms-syndrome`
+- `legacy-outside-box-sleep-difficulties-neurodevelopmental`
+- `legacy-outside-box-spina-bifida`
+- `legacy-outside-box-acquired-brain-injury`
 
 After all Outside-the-Box DEEP pages:
 
 1. Outside-the-Box ENRICH pages.
 2. Capabilities DEEP pages.
 3. Capabilities ENRICH pages.
-4. Re-audit STRONG pages for evidence freshness and lifespan gaps.
+4. Re-audit STRONG pages for evidence freshness, lifespan gaps and new 2025–2026 literature.
 
 ## Quality invariant
 
-No page advances because of character count. A shorter page with direct condition evidence, fair access testing, explicit safety boundaries and defensible decision rules outranks a longer page padded by shared methodology.
+No page advances because of word count. A shorter page with direct condition evidence, fair access testing, explicit safety boundaries, measurable outcomes and defensible decision rules outranks a long page padded by shared methodology.
