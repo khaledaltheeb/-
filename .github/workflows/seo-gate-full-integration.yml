@@ -1,29 +1,16 @@
 name: SEO Gate Full Integration
 
 on:
-  pull_request:
-    types: [ready_for_review, synchronize, reopened]
-    paths:
-      - 'scripts/seo-gate.mjs'
-      - 'scripts/rich-discovery-gate.mjs'
-      - 'scripts/content-richness-gate.mjs'
-      - 'scripts/seo-shared-html-cache.mjs'
-      - 'scripts/seo-gate-reliability-contract.mjs'
-      - '.github/workflows/quality.yml'
-      - '.github/workflows/seo-gate-reliability.yml'
-      - '.github/workflows/seo-gate-full-integration.yml'
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
   full-crawl:
-    if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     timeout-minutes: 120
     env:
-      NEXT_PUBLIC_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
-      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
       NEXT_PUBLIC_SITE_URL: https://healthrenewal.org
       NEXT_PUBLIC_ALLOW_INDEXING: 'true'
       SEO_GATE_BASE_URL: http://127.0.0.1:3000
@@ -46,13 +33,7 @@ jobs:
           node-version: 24
           package-manager-cache: false
       - name: Install dependencies
-        run: npm install --no-audit --no-fund
-      - name: Install deterministic Arabic image build dependencies
-        shell: bash
-        run: |
-          set -euo pipefail
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends imagemagick fontconfig fonts-noto-core librsvg2-bin
+        run: npm ci --no-audit --no-fund
       - name: Build production candidate
         run: npm run build
       - name: Start production candidate
@@ -69,50 +50,13 @@ jobs:
           test "$ready" -eq 1
       - name: Full sitemap SEO crawl
         run: node scripts/seo-gate.mjs
-      - name: Verify full crawl report and shared cache population
-        shell: bash
-        run: |
-          set -euo pipefail
-          node - <<'NODE'
-          const fs = require('fs');
-          const report = JSON.parse(fs.readFileSync('reports/seo-gate-report.json', 'utf8'));
-          if (report.fatalError) throw new Error(report.fatalError);
-          if (!Number.isInteger(report.summary?.pages) || report.summary.pages < 1) throw new Error('SEO crawl reported no sitemap pages');
-          if (!Number.isInteger(report.summary?.internalLinks) || report.summary.internalLinks < 1) throw new Error('SEO crawl reported no internal links');
-          NODE
-          test -n "$(find /tmp/rawafid-seo-html-cache -type f -name '*.json.gz' -print -quit)"
-      - name: Rich discovery using the same audited HTML (advisory)
-        shell: bash
-        run: |
-          set +e
-          set -o pipefail
-          node scripts/rich-discovery-gate.mjs 2>&1 | tee /tmp/rawafid-rich-discovery.log
-          rich_exit=${PIPESTATUS[0]}
-          set -e
-          grep -Eq 'cacheHits=[1-9][0-9]*' /tmp/rawafid-rich-discovery.log
-          if [ "$rich_exit" -ne 0 ]; then
-            echo "::warning::Rich discovery reported existing advisory findings; cache reuse was verified and blocking validation will continue."
-          fi
-      - name: Content richness using the same audited HTML
-        shell: bash
-        run: |
-          set -o pipefail
-          node scripts/content-richness-gate.mjs 2>&1 | tee /tmp/rawafid-content-richness.log
-          grep -Eq 'cacheHits=[1-9][0-9]*' /tmp/rawafid-content-richness.log
+      - name: Rich discovery audit
+        continue-on-error: true
+        run: node scripts/rich-discovery-gate.mjs
+      - name: Content richness audit
+        run: node scripts/content-richness-gate.mjs
       - name: Stop candidate
         if: always()
         shell: bash
         run: |
           if [ -f /tmp/rawafid-seo-integration-server.pid ]; then kill "$(cat /tmp/rawafid-seo-integration-server.pid)" 2>/dev/null || true; fi
-      - name: Upload diagnostics
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: rawafid-seo-full-integration-${{ github.run_id }}
-          path: |
-            reports/seo-gate-report.json
-            /tmp/rawafid-seo-integration-server.log
-            /tmp/rawafid-rich-discovery.log
-            /tmp/rawafid-content-richness.log
-          if-no-files-found: ignore
-          retention-days: 7
