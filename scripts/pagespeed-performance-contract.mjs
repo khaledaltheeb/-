@@ -2,8 +2,10 @@ import fs from 'node:fs';
 
 const read = (file) => fs.readFileSync(file, 'utf8');
 const layout = read('app/layout.tsx');
+const homepage = read('app/page.tsx');
 const loader = read('components/rawafid-assistant-loader.tsx');
 const brand = read('components/rawafid-brand.tsx');
+const nextConfig = read('next.config.ts');
 const wrangler = read('wrangler.jsonc');
 const productionBuild = read('scripts/cloudflare-production-build.sh');
 
@@ -28,6 +30,12 @@ requireText(layout, "@/components/rawafid-assistant-loader", 'the root layout mu
 requireText(loader, "dynamic(() => import('./rawafid-assistant')", 'the assistant implementation must remain code-split');
 requireText(loader, 'AUTO_OPEN_AFTER_MS = 12000', 'the assistant must remain outside the initial Lighthouse window');
 requireText(brand, 'prefetch={false}', 'the homepage brand must not prefetch the route it is already on');
+requireText(homepage, 'toolname="searchRawafid"', 'the homepage search form must remain registered as a WebMCP tool');
+requireText(homepage, 'tooldescription="Search Rawafid', 'the homepage WebMCP tool must retain a meaningful tool description');
+requireText(homepage, 'toolautosubmit=""', 'the safe search WebMCP tool must remain directly invokable by agents');
+requireText(homepage, 'toolparamdescription="The user\'s Arabic or English search query', 'the WebMCP search input must retain an explicit parameter description');
+requireText(homepage, 'required', 'the WebMCP search query must remain required so its generated JSON Schema is explicit');
+requireText(nextConfig, 'tools=(self)', 'the Permissions-Policy must explicitly allow same-origin WebMCP tools');
 requireText(wrangler, '"NEXT_PUBLIC_ENABLE_GTM": "false"', 'production must keep the CPU-heavy GTM container disabled');
 requireText(wrangler, '"NEXT_PUBLIC_ENABLE_DIRECT_GA": "true"', 'production must keep direct GA4 enabled');
 requireText(productionBuild, "NEXT_PUBLIC_ENABLE_GTM='false'", 'the direct production build must keep GTM disabled');
@@ -39,4 +47,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log('PageSpeed performance contract passed: GA4 remains enabled but delayed beyond the critical path, heavy GTM is gated, font LCP is non-blocking, and the assistant is lazy-loaded.');
+console.log('PageSpeed performance contract passed: GA4 remains enabled but delayed beyond the critical path, heavy GTM is gated, font LCP is non-blocking, the assistant is lazy-loaded, and the homepage WebMCP search tool remains registered with an explicit valid schema contract.');
