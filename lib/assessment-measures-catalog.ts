@@ -64,6 +64,41 @@ const evidenceOverrides: Record<string, Partial<AssessmentMeasure>> = {
       { label: 'PubMed — PDDS validation in ambulatory older adults with MS (2025)', url: 'https://pubmed.ncbi.nlm.nih.gov/40117985/', role: 'evidence' },
     ],
   },
+  'glasgow-outcome-scale-extended': {
+    nameAr: 'مقياس غلاسكو الموسع للمآل',
+    nameEn: 'Extended Glasgow Outcome Scale',
+    acronym: 'GOSE',
+    version: '8-category structured outcome scale',
+    summary: 'مقياس عالمي من ثماني فئات لتوصيف المآل الوظيفي بعد إصابة الدماغ، ويكون أكثر موثوقية عندما يطبق عبر مقابلة منظمة وتعليمات تسجيل ثابتة.',
+    purpose: 'توصيف المآل العام بعد إصابة الدماغ الرضّية ومتابعة التعافي أو استخدامه كمخرج في الدراسات السريرية.',
+    construct: 'المآل الوظيفي العام والاستقلال بعد إصابة الدماغ',
+    populations: ['الأشخاص بعد إصابة دماغ رضّية', 'سياقات أبحاث إصابات الدماغ والمتابعة العصبية التأهيلية'],
+    settings: ['جراحة الأعصاب', 'التأهيل العصبي', 'عيادات إصابات الدماغ', 'البحوث السريرية'],
+    categories: ['brain-injury', 'neurological-outcomes', 'rehabilitation-outcomes'],
+    administrationMode: 'مقابلة منظمة مع الشخص و/أو مقدم الرعاية وفق دليل GOSE، ثم تعيين واحدة من ثماني فئات للمآل.',
+    administrationTime: 'عادة عدة دقائق إلى نحو 15 دقيقة بحسب تعقيد الحالة وتوفر مخبر مناسب.',
+    equipment: ['دليل المقابلة المنظمة للنسخة المستخدمة', 'معلومات موثوقة عن الاستقلال والأنشطة قبل الإصابة وبعدها'],
+    scoring: 'تصنف النتيجة على ثماني درجات مرتبة من الوفاة إلى التعافي الجيد الأعلى. يجب استخدام المقابلة المنظمة وتعريفات الفئات نفسها وعدم استنتاج الدرجة من GCS أو من وصف موجز غير كافٍ.',
+    interpretation: 'GOSE مقياس مآل رتبي عالمي؛ الدرجة الأعلى تعكس استقلالًا ومآلًا أفضل، لكنها لا تصف كل جوانب الإدراك أو المشاركة أو جودة الحياة.',
+    limitations: ['يتأثر بالتدريب وطريقة المقابلة ومصدر المعلومات.', 'قد يحدث اختلاف بين المقيمين إذا لم تستخدم مقابلة منظمة.', 'لا يلتقط جميع العجز المعرفي أو النفسي الدقيق.', 'العلاقة بين فئات GOSE ليست فواصل كمية متساوية.'],
+    administrationSteps: ['ثبت نسخة ودليل GOSE المستخدمين.', 'اجمع معلومات الاستقلال والأنشطة والعمل والعلاقات الاجتماعية وفق المقابلة المنظمة.', 'استوضح الفروق بين القيود الناتجة عن إصابة الدماغ وبين الحالات السابقة.', 'عيّن الفئة وفق قواعد الدليل لا بالانطباع الحر.', 'وثق مصدر المعلومات وأي عدم يقين.'],
+    safetyNotes: ['GOSE ليس أداة فرز طارئ ولا يحدد وحده الأهلية للعلاج أو التأهيل.', 'لا تستخدم انخفاض الدرجة لتبرير سحب علاج أو حرمان من خدمات تأهيلية.', 'المآل الفردي يحتاج تقييمًا عصبيًا وتأهيليًا متعدد الأبعاد.'],
+    rightsStatus: 'public-domain',
+    rightsLabel: 'Public Domain — موثق في CDISC QRS',
+    rightsNote: 'CDISC يدرج Extended Glasgow Outcome Scale بحالة Public Domain. تبقى المواد التدريبية أو الترجمات المنشورة من جهات أخرى مستقلة حقوقيًا.',
+    rightsVerifiedOn: '2026-09-05',
+    arabicStatus: 'validated-version-reported',
+    arabicLabel: 'توجد ترجمة عربية/مغاربية مدروسة للمقابلة المنظمة',
+    arabicNote: 'نشرت دراسة 2025 تقييمًا لترجمة المقابلة المنظمة لـGOSE لدى 123 مريضًا بإصابة دماغية في المغرب وأظهرت اتفاقًا مرتفعًا بين المقيمين. هذا دليل سياقي مهم لكنه لا يثبت تلقائيًا تكافؤ كل صياغة عربية أو حق إعادة نشر نص الترجمة.',
+    fullArabicFormPublished: false,
+    fullArabicFormNote: 'لا ننشر نص مقابلة عربية كاملًا قبل مراجعة النسخة المنشورة وحقوقها ومطابقة المصطلحات.',
+    sources: [
+      { label: 'CDISC QRS — GOSE Public Domain status', url: 'https://www.cdisc.org/standards/foundational/qrs/extended-glasgow-outcome-scale', role: 'rights' },
+      { label: 'PubMed — structured GOSE interview guidelines', url: 'https://pubmed.ncbi.nlm.nih.gov/9726257/', role: 'original' },
+      { label: 'PubMed — Moroccan translation/interrater reliability study (2025)', url: 'https://pubmed.ncbi.nlm.nih.gov/40021118/', role: 'translation' },
+    ],
+    related: ['glasgow-coma-scale-ninds', 'modified-rankin-scale', 'mayo-portland-adaptability-inventory-4', 'disability-rating-scale', 'rivermead-post-concussion-questionnaire'],
+  },
 };
 
 export const assessmentMeasures: AssessmentMeasure[] = [
@@ -79,10 +114,20 @@ export const assessmentMeasures: AssessmentMeasure[] = [
   ...assessmentMeasuresWave10,
 ].map((measure) => ({ ...measure, ...(evidenceOverrides[measure.slug] ?? {}) }));
 
+export const assessmentMeasureAliases: Record<string, string> = {
+  'extended-glasgow-outcome-scale': 'glasgow-outcome-scale-extended',
+};
+
 export const assessmentMeasureSlugs = assessmentMeasures.map((measure) => measure.slug);
+export const assessmentMeasureRouteSlugs = [...assessmentMeasureSlugs, ...Object.keys(assessmentMeasureAliases)];
+
+export function getCanonicalAssessmentMeasureSlug(slug: string) {
+  return assessmentMeasureAliases[slug] ?? slug;
+}
 
 export function getAssessmentMeasure(slug: string) {
-  return assessmentMeasures.find((measure) => measure.slug === slug) ?? null;
+  const canonicalSlug = getCanonicalAssessmentMeasureSlug(slug);
+  return assessmentMeasures.find((measure) => measure.slug === canonicalSlug) ?? null;
 }
 
 export function getAssessmentMeasureCategory(slug: string) {
