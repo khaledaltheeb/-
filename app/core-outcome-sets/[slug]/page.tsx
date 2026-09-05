@@ -5,7 +5,7 @@ import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import { buildSeoMetadata, SITE_URL } from '@/lib/seo';
 import { coreOutcomeRegistry, getCoreOutcomeRecord } from '@/lib/core-outcome-sets/registry';
-import { getInstrumentCrosswalkForCos } from '@/lib/core-outcome-sets/instrument-crosswalk-registry';
+import { getInstrumentCrosswalkForCos } from '@/lib/core-outcome-sets/instrument-crosswalk';
 import styles from '@/components/assessment-measures.module.css';
 
 type PageProps = { params: Promise<{ slug: string }> };
