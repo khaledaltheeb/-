@@ -76,6 +76,16 @@ for (const selector of ['.community-directory-shell', '.community-badge', '.comm
   if (!communityScoped.includes(selector)) fail(`route-scoped community CSS missing ${selector}`);
 }
 
+const sectorShared = read('app/sector-pages.css');
+const sectorScoped = read('app/sector-pages-scoped.css');
+for (const selector of ['.breadcrumbs', '.mobile-bottom-nav']) {
+  if (!sectorShared.includes(selector)) fail(`shared sector navigation CSS missing ${selector}`);
+}
+for (const selector of ['.sector-hero', '.sector-search', '.sector-quick-nav', '.category-public-grid', '.public-category-card']) {
+  if (sectorShared.includes(selector)) fail(`sector-only selector leaked back into global sector-pages.css: ${selector}`);
+  if (!sectorScoped.includes(selector)) fail(`route-scoped sector CSS missing ${selector}`);
+}
+
 const systemPortals = read('app/system-portals-v1.css');
 const accountSystem = read('app/account-system-v1.css');
 for (const selector of ['.join-shell', '.verification-controls']) {
@@ -94,6 +104,8 @@ const routeCssContracts = [
   ['app/community/join/layout.tsx', ["'../../dashboard-v3-scoped.css'", "'../../portal-scoped.css'", "'../../theme-admin-v4-scoped.css'"]],
   ['app/join/layout.tsx', ["'../system-portals-v1.css'", "'../portal-scoped.css'"]],
   ['app/theme-preview/layout.tsx', ["'../dashboard-v3-scoped.css'", "'../portal-scoped.css'", "'../cms-internal.css'", "'../theme-admin-v4-scoped.css'", "'../theme-preview-scoped.css'"]],
+  ['app/sectors/layout.tsx', ["'../institutional-public-v1.css'", "'../sector-pages-scoped.css'"]],
+  ['app/sections/layout.tsx', ["'../institutional-public-v1.css'", "'../sector-pages-scoped.css'"]],
   ['app/login/layout.tsx', ["'../account-system-v1.css'", "'../theme-admin-v4-scoped.css'"]],
   ['app/register/layout.tsx', ["'../account-system-v1.css'", "'../theme-admin-v4-scoped.css'"]],
   ['app/forgot-password/layout.tsx', ["'../account-system-v1.css'", "'../theme-admin-v4-scoped.css'"]],
@@ -110,5 +122,5 @@ for (const [file, needles] of routeCssContracts) {
 }
 
 if (!process.exitCode) {
-  console.log(`Rawafid central theme import graph passed: ${importedCss.length} unique compatibility modules; dashboard/admin/auth/account/join/portal/community CSS remains route-scoped.`);
+  console.log(`Rawafid central theme import graph passed: ${importedCss.length} unique compatibility modules; dashboard/admin/auth/account/join/portal/community/sector CSS remains route-scoped.`);
 }
