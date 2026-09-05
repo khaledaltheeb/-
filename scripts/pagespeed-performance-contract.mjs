@@ -14,6 +14,16 @@ const wrangler = read('wrangler.jsonc');
 const productionBuild = read('scripts/cloudflare-production-build.sh');
 const deployWorkflow = read('.github/workflows/deploy-production.yml');
 const qualityWorkflow = read('.github/workflows/quality.yml');
+const portalStub = read('app/portal.css');
+const dashboardStub = read('app/dashboard-v3.css');
+const mediaStub = read('app/media-v3.css');
+const adminThemeStub = read('app/theme-admin-v4.css');
+const portalShell = read('app/portal-shell.css');
+const routePortal = read('app/route-portal.css');
+const routeDashboard = read('app/route-dashboard-v3.css');
+const routeMedia = read('app/route-media-v3.css');
+const routeAdminTheme = read('app/route-theme-admin-v4.css');
+const executableCss = (source) => source.replace(/\/\*[\s\S]*?\*\//g, '').trim();
 
 const failures = [];
 const requireText = (source, token, message) => {
@@ -40,6 +50,29 @@ requireText(layout, '<WebMcpImperativeTools />', 'the imperative WebMCP tool boo
 requireText(loader, "dynamic(() => import('./rawafid-assistant')", 'the assistant implementation must remain code-split');
 requireText(loader, 'AUTO_OPEN_AFTER_MS = 12000', 'the assistant must remain outside the initial Lighthouse performance window');
 requireText(brand, 'prefetch={false}', 'the homepage brand must not prefetch the route it is already on');
+
+for (const [name, source] of Object.entries({ portalStub, dashboardStub, mediaStub, adminThemeStub })) {
+  if (executableCss(source)) failures.push(`${name} must remain a comment-only compatibility stub so protected CSS does not enter the homepage bundle`);
+}
+for (const token of ["@import './route-portal.css'", "@import './route-dashboard-v3.css'", "@import './route-media-v3.css'", "@import './route-theme-admin-v4.css'"]) {
+  requireText(portalShell, token, `route-scoped portal entry must retain ${token}`);
+}
+requireText(routePortal, '.account-overview', 'route portal CSS must retain account/portal selectors');
+requireText(routeDashboard, '.dashboard-shell', 'route dashboard CSS must retain dashboard selectors');
+requireText(routeMedia, '.media-library-grid', 'route media CSS must retain media-library selectors');
+requireText(routeAdminTheme, '.admin-app-shell', 'route admin theme must retain admin selectors');
+for (const file of [
+  'app/admin/layout.tsx', 'app/account/layout.tsx', 'app/specialist/layout.tsx', 'app/center/layout.tsx',
+  'app/mfa/layout.tsx', 'app/join/layout.tsx', 'app/login/layout.tsx', 'app/register/layout.tsx',
+  'app/forgot-password/layout.tsx', 'app/reset-password/layout.tsx', 'app/share/layout.tsx', 'app/offline/layout.tsx',
+  'app/community/join/layout.tsx',
+]) {
+  requireText(read(file), 'portal-shell.css', `${file} must retain route-scoped protected CSS`);
+}
+for (const file of ['app/specialists/layout.tsx', 'app/centers/layout.tsx']) {
+  requireText(read(file), 'location-map-scoped.css', `${file} must retain public profile map styling after portal CSS isolation`);
+}
+requireText(read('app/location-map-scoped.css'), '.location-map-frame', 'public profile map CSS must retain map frame styling');
 
 requireText(homepage, 'toolname="searchRawafid"', 'the homepage search form must remain registered as a WebMCP tool');
 requireText(homepage, 'tooldescription="Search Rawafid', 'the homepage WebMCP tool must retain a meaningful tool description');
@@ -94,4 +127,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log('PageSpeed performance contract passed: the text LCP uses a zero-network system font, GA4 remains deferred but interaction-aware, heavy GTM is gated, Cloudflare-incompatible CSS inlining is forbidden, every homepage WebMCP surface remains covered, the imperative WebMCP schema remains strict, and production verification stays fast.');
+console.log('PageSpeed performance contract passed: the text LCP uses a zero-network system font, GA4 remains deferred but interaction-aware, protected portal/admin/auth CSS stays route-scoped, public profile map styling is preserved, heavy GTM is gated, Cloudflare-incompatible CSS inlining is forbidden, every homepage WebMCP surface remains covered, and production verification stays fast.');
