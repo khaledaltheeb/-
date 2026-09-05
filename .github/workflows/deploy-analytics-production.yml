@@ -29,9 +29,11 @@ jobs:
       NEXT_PUBLIC_SITE_URL: https://healthrenewal.org
       NEXT_PUBLIC_ALLOW_INDEXING: 'true'
       NEXT_PUBLIC_ENABLE_ANALYTICS: 'true'
+      NEXT_PUBLIC_ENABLE_GTM: 'false'
       NEXT_PUBLIC_GTM_ID: GTM-WBLQVBG4
       NEXT_PUBLIC_GA_MEASUREMENT_ID: G-VLZMV8Y4JP
       NEXT_PUBLIC_ENABLE_DIRECT_GA: 'true'
+      ENABLE_RAWAFID_ASSISTANT: 'true'
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: 1910e1ad3c793fd568ba1caafe34f964
       GH_TOKEN: ${{ github.token }}
@@ -85,9 +87,11 @@ jobs:
           test "${NEXT_PUBLIC_SITE_URL}" = 'https://healthrenewal.org'
           test "${NEXT_PUBLIC_ALLOW_INDEXING}" = 'true'
           test "${NEXT_PUBLIC_ENABLE_ANALYTICS}" = 'true'
+          test "${NEXT_PUBLIC_ENABLE_GTM}" = 'false'
           test "${NEXT_PUBLIC_GTM_ID}" = 'GTM-WBLQVBG4'
           test "${NEXT_PUBLIC_GA_MEASUREMENT_ID}" = 'G-VLZMV8Y4JP'
           test "${NEXT_PUBLIC_ENABLE_DIRECT_GA}" = 'true'
+          test "${ENABLE_RAWAFID_ASSISTANT}" = 'true'
           grep -q 'NEXT_PUBLIC_GTM_ID' app/layout.tsx
           grep -q 'NEXT_PUBLIC_GA_MEASUREMENT_ID' app/layout.tsx
           grep -q 'NEXT_PUBLIC_ENABLE_ANALYTICS' app/layout.tsx
@@ -96,6 +100,7 @@ jobs:
           grep -q 'siteName: BRAND_NAME' app/layout.tsx
           grep -q 'siteName: BRAND_NAME' lib/seo.ts
           grep -q '"NEXT_PUBLIC_ENABLE_ANALYTICS": "true"' wrangler.jsonc
+          grep -q '"NEXT_PUBLIC_ENABLE_GTM": "false"' wrangler.jsonc
           grep -q '"NEXT_PUBLIC_GTM_ID": "GTM-WBLQVBG4"' wrangler.jsonc
           grep -q '"NEXT_PUBLIC_GA_MEASUREMENT_ID": "G-VLZMV8Y4JP"' wrangler.jsonc
           grep -q '"NEXT_PUBLIC_ENABLE_DIRECT_GA": "true"' wrangler.jsonc
@@ -144,16 +149,18 @@ jobs:
             lower_home="${home,,}"
 
             title_ok=false
-            gtm_ok=false
+            gtm_ok=true
             ga_ok=false
+            assistant_ok=false
             canonical_ok=false
             brand_ok=false
             index_ok=true
             robots_ok=false
 
             [[ "${home}" == *'<title>منصة روافد'* ]] && title_ok=true
-            [[ "${home}" == *'GTM-WBLQVBG4'* ]] && gtm_ok=true
+            [[ "${home}" == *'GTM-WBLQVBG4'* ]] && gtm_ok=false
             [[ "${home}" == *'G-VLZMV8Y4JP'* ]] && ga_ok=true
+            [[ "${home}" == *'فتح مساعد روافد'* ]] && assistant_ok=true
             [[ "${lower_home}" == *'rel="canonical"'* && "${home}" == *'https://healthrenewal.org/'* ]] && canonical_ok=true
             [[ "${home}" == *'منصة روافد'* ]] && brand_ok=true
             if [[ "${lower_home}" =~ \<meta[^\>]*name=[\"\']robots[\"\'][^\>]*content=[\"\'][^\"\']*noindex ]] \
@@ -163,10 +170,10 @@ jobs:
             [[ "${robots}" == *'https://healthrenewal.org/sitemap.xml'* ]] && robots_ok=true
 
             echo "Live verification attempt ${attempt}: title=${title_ok} gtm=${gtm_ok} ga=${ga_ok} canonical=${canonical_ok} brand=${brand_ok} index=${index_ok} robots=${robots_ok}"
-            if [[ "${title_ok}" == true && "${gtm_ok}" == true && "${ga_ok}" == true \
+            if [[ "${title_ok}" == true && "${gtm_ok}" == true && "${ga_ok}" == true && "${assistant_ok}" == true \
               && "${canonical_ok}" == true && "${brand_ok}" == true \
               && "${index_ok}" == true && "${robots_ok}" == true ]]; then
-              echo 'Production deployment verified: site name, canonical, indexability, sitemap discovery and analytics are live.'
+              echo 'Production deployment verified: direct GA4 and the assistant are live, the heavy GTM container is absent, and discovery metadata is valid.'
               exit 0
             fi
             sleep 5

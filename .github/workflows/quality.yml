@@ -24,6 +24,7 @@ jobs:
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
       NEXT_PUBLIC_SITE_URL: https://healthrenewal.org
       NEXT_PUBLIC_ALLOW_INDEXING: 'true'
+      SEO_GATE_BASE_URL: http://127.0.0.1:3000
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7

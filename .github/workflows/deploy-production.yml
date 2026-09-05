@@ -18,6 +18,7 @@ jobs:
       NEXT_PUBLIC_SITE_URL: https://healthrenewal.org
       NEXT_PUBLIC_ALLOW_INDEXING: 'true'
       NEXT_PUBLIC_ENABLE_ANALYTICS: 'true'
+      NEXT_PUBLIC_ENABLE_GTM: 'false'
       NEXT_PUBLIC_GTM_ID: GTM-WBLQVBG4
       NEXT_PUBLIC_GA_MEASUREMENT_ID: G-VLZMV8Y4JP
       NEXT_PUBLIC_ENABLE_DIRECT_GA: 'true'
@@ -54,6 +55,9 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: PageSpeed performance contract
+        run: npm run performance:validate
+
       - name: Build Cloudflare production Worker
         env:
           CI: 'false'
@@ -71,8 +75,20 @@ jobs:
           curl -fsS --retry 6 --retry-delay 2 --retry-all-errors "${base}/?deploy=${stamp}" >/tmp/home.html
           curl -fsS --retry 6 --retry-delay 2 --retry-all-errors "${base}/robots.txt?deploy=${stamp}" >/tmp/robots.txt
           curl -fsS --retry 6 --retry-delay 2 --retry-all-errors "${base}/sitemap.xml?deploy=${stamp}" >/tmp/sitemap.xml
+          curl -fsSI --retry 6 --retry-delay 2 --retry-all-errors "https://www.healthrenewal.org/?deploy=${stamp}" >/tmp/www-redirect.headers
           grep -q 'Sitemap: https://healthrenewal.org/sitemap.xml' /tmp/robots.txt
           grep -q 'healthrenewal.org' /tmp/home.html
+          grep -qi '^location: https://healthrenewal.org/' /tmp/www-redirect.headers
+          grep -q 'G-VLZMV8Y4JP' /tmp/home.html
+          grep -q 'فتح مساعد روافد' /tmp/home.html
+          if grep -q 'workers.dev' /tmp/home.html /tmp/sitemap.xml; then
+            echo 'Production output unexpectedly leaked a workers.dev URL.' >&2
+            exit 1
+          fi
+          if grep -q 'GTM-WBLQVBG4' /tmp/home.html; then
+            echo 'Production homepage unexpectedly loaded the disabled CPU-heavy GTM container.' >&2
+            exit 1
+          fi
           if grep -qi 'noindex' /tmp/home.html; then
             echo 'Production homepage is unexpectedly noindex.' >&2
             exit 1
