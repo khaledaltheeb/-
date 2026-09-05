@@ -7,34 +7,14 @@ const base = (process.env.VISUAL_BASE_URL || process.env.SMOKE_BASE_URL || 'http
 if (!executablePath) throw new Error('VISUAL_CHROME_PATH is required for page-image browser regression.');
 
 const fixtures = [
-  {
-    name: 'long-arabic-article',
-    kind: 'article',
-    title: 'دليل عربي موسع لفهم الاحتياجات النفسية والاجتماعية والتعليمية ووضع خطة عملية واضحة قابلة للمتابعة مع الأسرة والمختصين دون مبالغة أو حشو',
-  },
-  {
-    name: 'mixed-bidi-encyclopedia',
-    kind: 'encyclopedia',
-    title: 'اضطراب ADHD ونتائج PHQ-9 وGAD-7: كيف نفهم الأرقام 2026/2027 والحدود العلمية دون تحويلها إلى تشخيص ذاتي؟',
-  },
-  {
-    name: 'oversized-token-care',
-    kind: 'care-guide',
-    title: 'PseudopseudohypoparathyroidismPseudopseudohypoparathyroidismPseudopseudohypoparathyroidism: دليل عملي للأسرة',
-  },
-  {
-    name: 'diacritized-special-needs',
-    kind: 'special-needs',
-    title: 'التَّقييمُ الوظيفيُّ والتَّربويُّ للأطفال: كيف تُقرأُ النَّتائجُ وتُحدَّدُ الأولويَّاتُ بصورةٍ مسؤولة؟',
-  },
-  {
-    name: 'escaping-comparison',
-    kind: 'comparison',
-    title: 'مقارنة <50%> و"الدرجة المرتفعة": ماذا تعني النتائج؟ وما الذي لا يمكن استنتاجه منها؟',
-  },
+  { name: 'long-arabic-article', kind: 'article', title: 'دليل عربي موسع لفهم الاحتياجات النفسية والاجتماعية والتعليمية ووضع خطة عملية واضحة قابلة للمتابعة مع الأسرة والمختصين دون مبالغة أو حشو' },
+  { name: 'mixed-bidi-encyclopedia', kind: 'encyclopedia', title: 'اضطراب ADHD ونتائج PHQ-9 وGAD-7: كيف نفهم الأرقام 2026/2027 والحدود العلمية دون تحويلها إلى تشخيص ذاتي؟' },
+  { name: 'oversized-token-care', kind: 'care-guide', title: 'PseudopseudohypoparathyroidismPseudopseudohypoparathyroidismPseudopseudohypoparathyroidism: دليل عملي للأسرة' },
+  { name: 'diacritized-special-needs', kind: 'special-needs', title: 'التَّقييمُ الوظيفيُّ والتَّربويُّ للأطفال: كيف تُقرأُ النَّتائجُ وتُحدَّدُ الأولويَّاتُ بصورةٍ مسؤولة؟' },
+  { name: 'escaping-comparison', kind: 'comparison', title: 'مقارنة <50%> و"الدرجة المرتفعة": ماذا تعني النتائج؟ وما الذي لا يمكن استنتاجه منها؟' },
 ];
 
-const TITLE_SAFE = { left: 120, right: 1160, top: 245, bottom: 535 };
+const TITLE_SAFE = { left: 600, right: 1160, top: 280, bottom: 455 };
 const TOLERANCE = 4;
 
 function assertWithin(name, box) {
@@ -46,11 +26,7 @@ function assertWithin(name, box) {
   if (bottom > TITLE_SAFE.bottom + TOLERANCE) throw new Error(`${name}: bottom overflow ${bottom} > ${TITLE_SAFE.bottom}`);
 }
 
-const browser = await chromium.launch({
-  executablePath,
-  headless: true,
-  args: ['--no-sandbox', '--disable-dev-shm-usage'],
-});
+const browser = await chromium.launch({ executablePath, headless: true, args: ['--no-sandbox', '--disable-dev-shm-usage'] });
 
 try {
   for (const fixture of fixtures) {
@@ -64,42 +40,29 @@ try {
     const contentType = response.headers()['content-type'] || '';
     if (!contentType.includes('image/svg+xml')) throw new Error(`${fixture.name}: expected image/svg+xml, got ${contentType}`);
 
-    await page.evaluate(async () => {
-      if (document.fonts?.ready) await document.fonts.ready;
-    });
+    await page.evaluate(async () => { if (document.fonts?.ready) await document.fonts.ready; });
 
     const result = await page.evaluate(() => {
       const svg = document.querySelector('svg');
       const clip = document.querySelector('#page-title-safe rect');
+      const subjectPanel = [...document.querySelectorAll('rect')].find((node) => node.getAttribute('x') === '92' && node.getAttribute('width') === '520');
       const titleElements = [...document.querySelectorAll('g[clip-path="url(#page-title-safe)"] text')];
       const titleBoxes = titleElements.map((element) => {
         const box = element.getBBox();
-        return {
-          text: element.textContent || '',
-          x: box.x,
-          y: box.y,
-          width: box.width,
-          height: box.height,
-          anchor: element.getAttribute('text-anchor'),
-          direction: element.getAttribute('direction'),
-        };
+        return { text: element.textContent || '', x: box.x, y: box.y, width: box.width, height: box.height, anchor: element.getAttribute('text-anchor'), direction: element.getAttribute('direction') };
       });
       return {
         canvas: svg ? { width: svg.getAttribute('width'), height: svg.getAttribute('height'), viewBox: svg.getAttribute('viewBox') } : null,
         clip: clip ? { x: clip.getAttribute('x'), y: clip.getAttribute('y'), width: clip.getAttribute('width'), height: clip.getAttribute('height') } : null,
+        hasSubjectPanel: Boolean(subjectPanel),
         titleBoxes,
       };
     });
 
-    if (!result.canvas || result.canvas.width !== '1280' || result.canvas.height !== '720' || result.canvas.viewBox !== '0 0 1280 720') {
-      throw new Error(`${fixture.name}: page-image canvas contract changed.`);
-    }
-    if (!result.clip || result.clip.x !== '100' || result.clip.y !== '225' || result.clip.width !== '1080' || result.clip.height !== '330') {
-      throw new Error(`${fixture.name}: page-image clipping safe area changed unexpectedly.`);
-    }
-    if (!result.titleBoxes.length || result.titleBoxes.length > 3) {
-      throw new Error(`${fixture.name}: expected 1-3 title lines, got ${result.titleBoxes.length}.`);
-    }
+    if (!result.canvas || result.canvas.width !== '1280' || result.canvas.height !== '720' || result.canvas.viewBox !== '0 0 1280 720') throw new Error(`${fixture.name}: page-image canvas contract changed.`);
+    if (!result.clip || result.clip.x !== '590' || result.clip.y !== '255' || result.clip.width !== '590' || result.clip.height !== '225') throw new Error(`${fixture.name}: page-image title clipping safe area changed unexpectedly.`);
+    if (!result.hasSubjectPanel) throw new Error(`${fixture.name}: visual-first subject illustration panel is missing.`);
+    if (!result.titleBoxes.length || result.titleBoxes.length > 2) throw new Error(`${fixture.name}: Google-preferred image must keep the title to 1-2 lines, got ${result.titleBoxes.length}.`);
 
     for (const [index, box] of result.titleBoxes.entries()) {
       if (!box.text.trim()) throw new Error(`${fixture.name}: empty title line ${index + 1}.`);
@@ -109,15 +72,12 @@ try {
 
     for (let index = 1; index < result.titleBoxes.length; index += 1) {
       const previousBottom = result.titleBoxes[index - 1].y + result.titleBoxes[index - 1].height;
-      if (result.titleBoxes[index].y < previousBottom - TOLERANCE) {
-        throw new Error(`${fixture.name}: page-image title lines overlap vertically.`);
-      }
+      if (result.titleBoxes[index].y < previousBottom - TOLERANCE) throw new Error(`${fixture.name}: page-image title lines overlap vertically.`);
     }
-
     await page.close();
   }
 
-  console.log(`Page-image browser regression passed: ${fixtures.length} pathological 1280x720 fixtures stay inside the rendered safe area with correct RTL anchoring.`);
+  console.log(`Page-image browser regression passed: ${fixtures.length} visual-first 1280x720 fixtures keep Arabic text to at most two lines inside the protected Google-preview safe area.`);
 } finally {
   await browser.close();
 }

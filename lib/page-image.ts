@@ -1,5 +1,6 @@
 export type PageImageKind =
   | 'article'
+  | 'quick-info'
   | 'encyclopedia'
   | 'care-guide'
   | 'special-needs'
@@ -10,6 +11,7 @@ export type PageImageKind =
 
 const VALID_KINDS = new Set<PageImageKind>([
   'article',
+  'quick-info',
   'encyclopedia',
   'care-guide',
   'special-needs',
@@ -25,6 +27,7 @@ export function normalizePageImageKind(value?: string | null): PageImageKind {
 
 export function pageImageKindLabel(kind: PageImageKind) {
   switch (kind) {
+    case 'quick-info': return 'معلومات سريعة · روافد';
     case 'encyclopedia': return 'الموسوعة المعرفية · روافد';
     case 'care-guide': return 'دليل رعاية عملي · روافد';
     case 'special-needs': return 'الاحتياجات الخاصة والدمج · روافد';
