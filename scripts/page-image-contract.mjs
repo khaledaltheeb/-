@@ -26,7 +26,7 @@ requireMatch('Page image route', route, /const TITLE_MAX_WIDTH = 560/, 'Google-p
 requireMatch('Page image route', route, /maxLines:\s*2/, 'preferred image title must stay at one or two lines.');
 requireMatch('Page image route', route, /maxFontSize:\s*50/, 'preferred image title maximum size changed unexpectedly.');
 requireMatch('Page image route', route, /minFontSize:\s*36/, 'preferred image title minimum size changed unexpectedly.');
-requireMatch('Page image route', route, /subjectIllustration\(kind, palette\.accent, palette\.soft\)/, 'topic-specific visual illustration must remain dominant in generated fallback.');
+requireMatch('Page image route', route, /subjectIllustration\(kind, palette\.accent\)/, 'topic-specific visual illustration must remain dominant in generated fallback.');
 requireMatch('Page image route', route, /x="92" y="92" width="520" height="536"/, 'visual-first subject panel must remain present.');
 requireMatch('Page image route', route, /clipPath id="page-title-safe"/, 'title clipping guard missing.');
 requireMatch('Page image route', route, /fitSeoCardText/, 'runtime-safe text fitting must remain active.');
