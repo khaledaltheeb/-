@@ -4,6 +4,8 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import './admin-ui.css';
 import './admin-operations.css';
+import './admin-shell-v3.css';
+import './block-editor-v3.css';
 
 type AdminNavItem = readonly [href: string, label: string];
 type AdminNavGroup = { label: string; items: AdminNavItem[] };
