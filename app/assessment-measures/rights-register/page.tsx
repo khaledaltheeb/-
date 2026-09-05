@@ -4,6 +4,7 @@ import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import { buildSeoMetadata, SITE_URL } from '@/lib/seo';
 import { arabicStatusBadge, assessmentMeasures, rightsBadge } from '@/lib/assessment-measures-catalog';
+import { assessmentMeasuresRightsReview } from '@/lib/assessment-measures-rights-review';
 import styles from '@/components/assessment-measures.module.css';
 
 export const metadata: Metadata = buildSeoMetadata({
@@ -38,15 +39,16 @@ export default function AssessmentMeasureRightsRegisterPage() {
         <section className={styles.hero}>
           <span className={styles.eyebrow}>شفافية حقوقية قابلة للتدقيق</span>
           <h1>سجل حقوق المقاييس</h1>
-          <p>يعرض هذا السجل ما تحققنا منه لكل أداة في الإصدار الحالي. حقوق الأداة الأصلية لا تُعمم على ترجمتها العربية، وعبارة «مجاني» وحدها لا تكفي لإعادة نشر نموذج كامل.</p>
+          <p>يعرض هذا السجل ما تحققنا منه لكل أداة منشورة في المكتبة. حقوق الأداة الأصلية لا تعمم على ترجمتها العربية، وعبارة «مجاني» وحدها لا تكفي لإعادة نشر نموذج كامل.</p>
           <div className={styles.heroActions}>
             <Link className={styles.primaryAction} href="/assessment-measures/">المكتبة</Link>
+            <Link className={styles.secondaryAction} href="/assessment-measures/rights-review/">{assessmentMeasuresRightsReview.length} أداة مهمة قيد مراجعة الحقوق</Link>
             <Link className={styles.secondaryAction} href="/assessment-measures/methodology/">منهجية التحقق</Link>
           </div>
         </section>
 
         <section className={styles.section} aria-labelledby="register-title">
-          <div className={styles.sectionHead}><div><h2 id="register-title">الإصدار الحالي: {assessmentMeasures.length} مقياسًا</h2><p>تاريخ التحقق يخص سجل الحقوق في روافد، ولا يعني أن شروط صاحب الحق لن تتغير مستقبلًا.</p></div></div>
+          <div className={styles.sectionHead}><div><h2 id="register-title">الإصدار الحالي: {assessmentMeasures.length} مقياسًا قابلًا للنشر المرجعي وفق سجل الحقوق</h2><p>تاريخ التحقق يخص سجل الحقوق في روافد، ولا يعني أن شروط صاحب الحق لن تتغير مستقبلًا.</p></div></div>
           <div className={styles.tableWrap}>
             <table className={styles.table}>
               <thead><tr><th>المقياس</th><th>حقوق الأصل</th><th>حالة العربية</th><th>النشر العربي الكامل</th><th>آخر تحقق</th><th>مصدر الحقوق</th></tr></thead>
@@ -65,7 +67,10 @@ export default function AssessmentMeasureRightsRegisterPage() {
           </div>
         </section>
 
-        <section className={styles.section}><div className={styles.callout}><strong>مبدأ النشر:</strong> إذا تعارض مصدران للحقوق، أو أصبحت شروط صاحب الأداة غير واضحة، ننتقل تلقائيًا إلى التفسير الأكثر تحفظًا ونوقف إعادة نشر النموذج إلى أن يُحسم الوضع.</div></section>
+        <section className={styles.section}>
+          <div className={styles.callout}><strong>لماذا يوجد سجل آخر؟</strong> الأدوات المقيدة أو غير المحسومة لا تختفي من المرجع؛ نضعها في <Link href="/assessment-measures/rights-review/">قائمة مراجعة الحقوق</Link> ونشرح ما يمكن عرضه دون إعادة نشر المحتوى المحمي.</div>
+        </section>
+        <section className={styles.section}><div className={styles.callout}><strong>مبدأ النشر:</strong> إذا تعارض مصدران للحقوق، أو أصبحت شروط صاحب الأداة غير واضحة، ننتقل تلقائيًا إلى التفسير الأكثر تحفظًا ونوقف إعادة نشر النموذج إلى أن يحسم الوضع.</div></section>
       </main>
       <SiteFooter />
     </>

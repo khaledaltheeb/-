@@ -1,6 +1,6 @@
 import {
   arabicStatusBadge,
-  assessmentMeasureCategories,
+  assessmentMeasureCategories as assessmentMeasureCategoriesBase,
   assessmentMeasures as assessmentMeasuresWave1,
   rightsBadge,
   type AssessmentMeasure,
@@ -9,9 +9,17 @@ import {
 } from '@/lib/assessment-measures';
 import { assessmentMeasuresWave2 } from '@/lib/assessment-measures-wave2';
 import { assessmentMeasuresWave3 } from '@/lib/assessment-measures-wave3';
+import { assessmentMeasuresWave4 } from '@/lib/assessment-measures-wave4';
+import { assessmentMeasuresWave5 } from '@/lib/assessment-measures-wave5';
+import { assessmentMeasureCategoriesWave4 } from '@/lib/assessment-measures-wave4-categories';
 
 export type { AssessmentMeasure, ArabicMeasureStatus, MeasureRightsStatus };
-export { arabicStatusBadge, assessmentMeasureCategories, rightsBadge };
+export { arabicStatusBadge, rightsBadge };
+
+export const assessmentMeasureCategories = [
+  ...assessmentMeasureCategoriesBase,
+  ...assessmentMeasureCategoriesWave4,
+];
 
 const evidenceOverrides: Record<string, Partial<AssessmentMeasure>> = {
   'karnofsky-performance-scale': {
@@ -47,6 +55,8 @@ export const assessmentMeasures: AssessmentMeasure[] = [
   ...assessmentMeasuresWave1,
   ...assessmentMeasuresWave2,
   ...assessmentMeasuresWave3,
+  ...assessmentMeasuresWave4,
+  ...assessmentMeasuresWave5,
 ].map((measure) => ({ ...measure, ...(evidenceOverrides[measure.slug] ?? {}) }));
 
 export const assessmentMeasureSlugs = assessmentMeasures.map((measure) => measure.slug);
