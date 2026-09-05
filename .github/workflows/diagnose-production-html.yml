@@ -19,8 +19,15 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          url="https://healthrenewal.org/?htmldiag=${GITHUB_RUN_ID}"
+          base="https://healthrenewal.org"
+          url="$base/?htmldiag=${GITHUB_RUN_ID}"
           curl -fsS --compressed --retry 4 --retry-delay 1 "$url" -o /tmp/home.html
+          sprite_status="$(curl -sS -o /tmp/rawafid-icons.svg -w '%{http_code}' --retry 4 --retry-delay 1 "$base/rawafid-icons.svg")"
+          echo "SPRITE_HTTP_STATUS=$sprite_status"
+          test "$sprite_status" = "200"
+          printf 'SPRITE_RAW_BYTES='; wc -c < /tmp/rawafid-icons.svg
+          grep -q 'id="platform-knowledge"' /tmp/rawafid-icons.svg
+          grep -q 'id="nav-home"' /tmp/rawafid-icons.svg
           python - <<'PY'
           from pathlib import Path
           import re
@@ -31,6 +38,7 @@ jobs:
           print(f'HTML_RAW_BYTES={len(raw)}')
           print(f'HTML_CHARS={len(text)}')
           print(f'STYLE_LINKS={len(re.findall(r"<link[^>]+rel=[\"\']stylesheet[\"\']", text, re.I))}')
+          print(f'ICON_SPRITE_REFS={text.count("/rawafid-icons.svg#")}')
 
           sector_links=re.findall(r'href=[\"\'](/sectors/[^\"\']+)', text)
           print(f'SECTOR_LINK_INSTANCES={len(sector_links)}')
