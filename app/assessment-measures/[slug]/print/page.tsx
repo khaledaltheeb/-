@@ -4,7 +4,7 @@ import { notFound, permanentRedirect } from 'next/navigation';
 import AssessmentMeasureOperationalForm from '@/components/assessment-measure-operational-form';
 import MeasurePrintButton from '@/components/measure-print-button';
 import { assessmentMeasureRouteSlugs, getAssessmentMeasure, getCanonicalAssessmentMeasureSlug } from '@/lib/assessment-measures-catalog';
-import { getOperationalMaterial } from '@/lib/assessment-measure-operational';
+import { getOperationalMaterial } from '@/lib/assessment-measure-operational-catalog';
 import styles from '@/components/assessment-measures.module.css';
 
 type PageProps = { params: Promise<{ slug: string }> };
