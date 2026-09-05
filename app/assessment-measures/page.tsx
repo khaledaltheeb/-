@@ -84,6 +84,7 @@ export default async function AssessmentMeasuresPage({ searchParams }: PageProps
           <div className={styles.heroActions}>
             <a className={styles.primaryAction} href="#library">استكشف المقاييس</a>
             <Link className={styles.secondaryAction} href="/assessment-measures/compare/">قارن المقاييس</Link>
+            <Link className={styles.secondaryAction} href="/assessment-measures/rights-register/">سجل الحقوق</Link>
             <Link className={styles.secondaryAction} href="/assessment-measures/methodology/">منهجية التحقق والحقوق</Link>
           </div>
           <div className={styles.stats} aria-label="إحصاءات الإصدار الحالي">
@@ -92,7 +93,7 @@ export default async function AssessmentMeasuresPage({ searchParams }: PageProps
             <div className={styles.stat}><strong>{arabicEvidenceCount}</strong><span>لها نسخة/دراسة عربية منشورة</span></div>
             <div className={styles.stat}><strong>{arabicProtocolCount}</strong><span>بروتوكولات عربية تشغيلية جاهزة</span></div>
           </div>
-          <div className={styles.notice}>لا ننشر بنود ترجمة عربية كاملة لمجرد أن الأصل مجاني. حقوق الأصل وحقوق الترجمة مساران منفصلان، ويُثبت مصدر كل نسخة قبل عرضها.</div>
+          <div className={styles.notice}>لا ننشر بنود ترجمة عربية كاملة لمجرد أن الأصل مجاني. حقوق الأصل وحقوق الترجمة مساران منفصلان، ويُثبت مصدر كل نسخة قبل عرضها. <Link href="/assessment-measures/rights-register/">راجع سجل الحقوق الكامل.</Link></div>
         </section>
 
         <section className={styles.section} aria-labelledby="categories-title">
