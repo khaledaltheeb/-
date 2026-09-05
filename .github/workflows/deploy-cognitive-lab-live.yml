@@ -11,6 +11,7 @@ on:
       - 'lib/cognitive-lab/**'
       - 'scripts/cognitive-lab-contract.mjs'
       - 'scripts/cognitive-lab-extension-audit-contract.mjs'
+      - '.github/open-next-fast-ci.config.ts'
       - '.github/workflows/deploy-cognitive-lab-live.yml'
   workflow_dispatch:
 
@@ -19,7 +20,7 @@ permissions:
   statuses: write
 
 concurrency:
-  group: rawafid-production-deploy
+  group: rawafid-cognitive-staging-deploy
   cancel-in-progress: true
 
 jobs:
@@ -131,20 +132,18 @@ jobs:
             "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" \
             -d '{"state":"success","context":"deploy/cognitive/validated","description":"Cognitive Lab contracts and semantic audit passed"}' >/dev/null
 
-      - name: Type check and lint
-        run: |
-          npm run typecheck
-          npm run lint
+      - name: Lint
+        run: npm run lint
 
       - name: Mark code quality passed
         shell: bash
         run: |
           curl --fail --silent --show-error -X POST -H "Authorization: Bearer ${GH_TOKEN}" -H 'Accept: application/vnd.github+json' -H 'X-GitHub-Api-Version: 2022-11-28' \
             "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" \
-            -d '{"state":"success","context":"deploy/cognitive/code-quality","description":"TypeScript and ESLint passed"}' >/dev/null
+            -d '{"state":"success","context":"deploy/cognitive/code-quality","description":"ESLint passed; TypeScript is enforced by the OpenNext Next build"}' >/dev/null
 
       - name: Build Cloudflare Worker with OpenNext
-        run: npx opennextjs-cloudflare build
+        run: npx opennextjs-cloudflare build --openNextConfigPath .github/open-next-fast-ci.config.ts
 
       - name: Mark Worker build passed
         shell: bash
