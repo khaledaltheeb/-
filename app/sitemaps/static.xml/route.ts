@@ -21,6 +21,7 @@ export async function GET() {
     { path:'/assessment-measures/compare/', changeFrequency:'monthly', priority:.72 },
     { path:'/assessment-measures/methodology/', changeFrequency:'monthly', priority:.7 },
     { path:'/assessment-measures/rights-register/', changeFrequency:'monthly', priority:.68 },
+    { path:'/assessment-measures/rights-review/', changeFrequency:'monthly', priority:.66 },
     ...assessmentMeasureSlugs.map((slug) => ({ path:`/assessment-measures/${slug}/`, changeFrequency:'monthly' as const, priority:.74 })),
     ...assessmentMeasureCategories.map((category) => ({ path:`/assessment-measures/category/${category.slug}/`, changeFrequency:'monthly' as const, priority:.7 })),
     { path:'/resources', changeFrequency:'weekly', priority:.68 },
