@@ -127,6 +127,19 @@ export async function updateSession(request: NextRequest) {
   };
   let response = NextResponse.next({ request: { headers: forwardedHeaders() } });
 
+  // The canonical homepage is a first-class route and must never depend on the
+  // database-backed legacy redirect registry. Anonymous GET/HEAD traffic can pass
+  // straight through to the prerendered ISR response. Signed-in visitors still use
+  // the full Supabase path so session refresh semantics remain unchanged.
+  const hasAuthCookie = hasSupabaseAuthCookie(request.cookies.getAll());
+  if (
+    trustedPathname === '/'
+    && ['GET', 'HEAD'].includes(request.method)
+    && !hasAuthCookie
+  ) {
+    return response;
+  }
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
@@ -199,7 +212,7 @@ export async function updateSession(request: NextRequest) {
   }
 
   const isProtected = protectedPrefixes.some((prefix) => isPrefix(request.nextUrl.pathname, prefix));
-  const shouldCheckAuth = isProtected || hasSupabaseAuthCookie(request.cookies.getAll());
+  const shouldCheckAuth = isProtected || hasAuthCookie;
   const claimsResult = shouldCheckAuth ? await supabase.auth.getClaims() : null;
   const claims = claimsResult?.data?.claims;
 
