@@ -5,6 +5,7 @@ import SiteFooter from '@/components/site-footer';
 import { buildSeoMetadata, SITE_URL } from '@/lib/seo';
 import { coreOutcomeRegistry } from '@/lib/core-outcome-sets/registry';
 import { instrumentCrosswalk, instrumentCrosswalkStats } from '@/lib/core-outcome-sets/instrument-crosswalk';
+import { measurementCoverageStats, unmappedCoreOutcomeMeasurementCoverage } from '@/lib/core-outcome-sets/measurement-coverage';
 import styles from '@/components/assessment-measures.module.css';
 
 export const metadata: Metadata = buildSeoMetadata({
@@ -70,6 +71,34 @@ export default function InstrumentCrosswalkPage() {
             <article className={styles.methodCard}><h3>{instrumentCrosswalkStats.referenceRights}</h3><p>موجودة مرجعيًا لكن شروط المالك تمنع التعامل معها كنسخ حرة</p></article>
             <article className={styles.methodCard}><h3>{instrumentCrosswalkStats.notInLibrary}</h3><p>فجوات مكتبة تحتاج إضافة أو تدقيق حقوق/نسخة</p></article>
             <article className={styles.methodCard}><h3>{instrumentCrosswalkStats.arabicPsychometricContext}</h3><p>لها دليل سيكومتري عربي محدد السياق موثق في هذه الدفعة</p></article>
+          </div>
+        </section>
+
+        <section className={styles.section} aria-labelledby="coverage-title">
+          <div className={styles.sectionHead}><div><h2 id="coverage-title">تغطية COS نفسها — هل لكل مجموعة instrument mapping؟</h2><p>هذا المؤشر يقيس اكتمال الربط داخل روافد، لا وجود الأدوات عالميًا. عدم وجود mapping هنا لا يعني أن COS لا يملك أدوات قياس أو أن الأدوات غير موجودة في المصادر الأصلية.</p></div></div>
+          <div className={styles.methodGrid}>
+            <article className={styles.methodCard}><h3>{measurementCoverageStats.totalCos}</h3><p>إجمالي Core Outcome Sets في السجل التشغيلي</p></article>
+            <article className={styles.methodCard}><h3>{measurementCoverageStats.mappedCos}</h3><p>COS لديها أداة واحدة على الأقل مرتبطة في الـcrosswalk</p></article>
+            <article className={styles.methodCard}><h3>{measurementCoverageStats.mappingGaps}</h3><p>COS لها توصية/مسار قياس معروف لكن ربط الأدوات لم يكتمل بعد</p></article>
+            <article className={styles.methodCard}><h3>{measurementCoverageStats.outcomeOnly}</h3><p>COS لا توجد لها توصية أداة مثبتة في سجل روافد حتى الآن؛ تبقى WHAT فقط</p></article>
+            <article className={styles.methodCard}><h3>{measurementCoverageStats.unmappedCos}</h3><p>COS بلا أي instrument mapping حاليًا وتدخل قائمة التدقيق التالية</p></article>
+          </div>
+          <div className={styles.notice}><strong>قاعدة عدم الاستنتاج:</strong> «لا mapping في روافد» ≠ «لا توجد أداة». إذا كانت حالة القياس explicit أو linked فالمطلوب هو استخراج الأداة الدقيقة من المصدر وتدقيق إصدارها وحقوقها وعربيتها. وإذا كانت not-established فلا نخترع HOW لمجرد ملء الفراغ.</div>
+          <div className={styles.grid}>
+            {unmappedCoreOutcomeMeasurementCoverage.map((record) => (
+              <article className={styles.card} key={record.slug}>
+                <div className={styles.cardMeta}>
+                  <span className={styles.badge}>{record.coverageLabel}</span>
+                  <span className={styles.badge}>{record.measurementStatusLabel}</span>
+                </div>
+                <h3>{record.condition}</h3>
+                <p>{record.healthArea}</p>
+                <div className={styles.cardFoot}><span><strong>الإجراء التالي:</strong> {record.nextAction}</span></div>
+                <div className={styles.sourceLinks}>
+                  <Link href={`/core-outcome-sets/${record.slug}/`}>فتح COS ومصدره الكامل ←</Link>
+                </div>
+              </article>
+            ))}
           </div>
         </section>
 
