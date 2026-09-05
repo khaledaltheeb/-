@@ -10,6 +10,7 @@ import {
   type OperationalSection,
 } from '@/lib/assessment-measure-operational';
 import { assessmentOperationalFullFormsWave1 } from '@/lib/assessment-measure-operational-full-forms-wave1';
+import { assessmentOperationalFullFormsWave2 } from '@/lib/assessment-measure-operational-full-forms-wave2';
 
 export type {
   AssessmentOperationalMaterial,
@@ -21,8 +22,10 @@ export type {
   OperationalSection,
 };
 
+// Rights-verified explicit materials always override the universal recording-sheet fallback.
 export const explicitOperationalMaterials: Record<string, AssessmentOperationalMaterial> = {
   ...assessmentOperationalFullFormsWave1,
+  ...assessmentOperationalFullFormsWave2,
 };
 
 export function getOperationalMaterial(measure: AssessmentMeasure): AssessmentOperationalMaterial {
