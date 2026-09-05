@@ -95,6 +95,10 @@ assert(hub.includes('المقاييس وأدوات التقييم المستخد
 assert(hub.includes('/assessment-measures/compare/'), 'comparison route is not linked from the hub');
 assert(hub.includes('/assessment-measures/methodology/'), 'methodology route is not linked from the hub');
 
+const rightsRegister = read('app/assessment-measures/rights-register/page.tsx');
+assert(rightsRegister.includes('assessmentMeasures.map'), 'rights register must derive from the canonical catalog');
+assert(rightsRegister.includes("source.role === 'rights'"), 'rights register must expose an authoritative rights source');
+
 const header = read('components/site-header.tsx');
 assert(header.includes('/assessment-measures/'), 'assessment measures library is not present in global navigation');
 
@@ -102,6 +106,7 @@ const sitemap = read('app/sitemaps/static.xml/route.ts');
 assert(sitemap.includes("from '@/lib/assessment-measures-catalog'"), 'static sitemap must use the aggregated catalog');
 assert(sitemap.includes('/assessment-measures/compare/'), 'comparison route missing from static sitemap');
 assert(sitemap.includes('/assessment-measures/methodology/'), 'methodology route missing from static sitemap');
+assert(sitemap.includes('/assessment-measures/rights-register/'), 'rights register route missing from static sitemap');
 
 const requiredRoutes = [
   'app/assessment-measures/page.tsx',
@@ -109,6 +114,7 @@ const requiredRoutes = [
   'app/assessment-measures/category/[slug]/page.tsx',
   'app/assessment-measures/compare/page.tsx',
   'app/assessment-measures/methodology/page.tsx',
+  'app/assessment-measures/rights-register/page.tsx',
 ];
 for (const route of requiredRoutes) {
   assert(fs.existsSync(path.join(root, route)), `required route missing: ${route}`);
