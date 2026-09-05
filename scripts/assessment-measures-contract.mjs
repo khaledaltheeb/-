@@ -160,15 +160,26 @@ assert(rightsRegister.includes('/assessment-measures/rights-review/'), 'rights r
 const rightsReviewPage = read('app/assessment-measures/rights-review/page.tsx');
 assert(rightsReviewPage.includes('assessmentMeasuresRightsReview.map'), 'rights review page must derive from the canonical restricted queue');
 assert(rightsReviewPage.includes('Granted لـCDISC'), 'rights review page must explain that Granted is not a Rawafid reproduction license');
+assert(rightsReviewPage.includes('<tr id={item.slug} key={item.slug}>'), 'restricted rights review rows must expose stable anchors for search results');
+assert(rightsReviewPage.includes("url: `${SITE_URL}/assessment-measures/rights-review/#${item.slug}`"), 'restricted rights JSON-LD must point to its stable Rawafid anchor');
 
 const header = read('components/site-header.tsx');
 assert(header.includes('/assessment-measures/'), 'assessment measures library is not present in global navigation');
 
 const unifiedSearch = read('app/search/page.tsx');
 assert(unifiedSearch.includes("from '@/lib/assessment-measures-catalog'"), 'unified search must import the canonical assessment catalog');
+assert(unifiedSearch.includes("from '@/lib/assessment-measures-rights-review'"), 'unified search must import the restricted assessment rights queue');
 assert(unifiedSearch.includes('function searchAssessmentMeasures'), 'assessment-specific search scoring is missing');
-assert(unifiedSearch.includes('...measures, ...expanded'), 'assessment results are not merged into unified results');
+assert(unifiedSearch.includes('function searchRestrictedAssessmentMeasures'), 'restricted assessment search scoring is missing');
+assert(unifiedSearch.includes('const restrictedMeasures = searchRestrictedAssessmentMeasures(q, 20);'), 'restricted assessment search is not executed');
+assert(unifiedSearch.includes('...measures, ...restrictedMeasures, ...expanded'), 'restricted assessment results are not merged into unified results');
+assert(unifiedSearch.includes('`/assessment-measures/rights-review/#${measure.slug}`'), 'restricted assessment result must deep-link to the rights review row');
+assert(unifiedSearch.includes('مقياس مرجعي مقيد'), 'restricted assessment results must carry a visible rights-boundary label');
 assert(unifiedSearch.includes("href=\"/assessment-measures/\""), 'assessment library is missing from search discovery navigation');
+assert(unifiedSearch.includes("href=\"/assessment-measures/rights-review/\""), 'restricted rights review is missing from search discovery navigation');
+for (const searchableRestricted of ['mmse-2-standard-version', 'montreal-cognitive-assessment', 'hospital-anxiety-depression-scale']) {
+  assert(rightsReview.includes(`slug: '${searchableRestricted}'`), `representative restricted search fixture missing: ${searchableRestricted}`);
+}
 
 const sitemap = read('app/sitemaps/static.xml/route.ts');
 assert(sitemap.includes("from '@/lib/assessment-measures-catalog'"), 'static sitemap must use the aggregated catalog');
@@ -191,5 +202,5 @@ for (const route of requiredRoutes) {
 }
 
 if (!process.exitCode) {
-  console.log(`ASSESSMENT_MEASURES_CONTRACT_PASS: ${blocks.length} reusable measures, ${restrictedSlugs.length} restricted references, ${uniqueSlugs.size} unique public slugs, 16 categories, rights/evidence/safety/Arabic/search checks passed.`);
+  console.log(`ASSESSMENT_MEASURES_CONTRACT_PASS: ${blocks.length} reusable measures, ${restrictedSlugs.length} restricted searchable references, ${uniqueSlugs.size} unique public slugs, 16 categories, rights/evidence/safety/Arabic/search checks passed.`);
 }
