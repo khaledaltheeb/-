@@ -85,7 +85,7 @@ for (let i = 18; i <= 24; i += 1) assert(wave5.includes(`HAMD24-${i}`), `HAMD-24
 assert(wave5.includes('HAMD24-18-TIME'), 'HAMD-24 diurnal time/direction field missing');
 assert(wave5.includes('معلومات وصفية لا تدخل المجموع'), 'HAMD-24 diurnal time must remain non-scored');
 assert(wave5.includes('19 و20 و22–24 = 0–4، و21 = 0–2'), 'HAMD-24 item-range provenance missing');
-assert(wave5.includes('الحد الأقصى 52') && wave5.includes('0–76'), 'HAMD-24 52-plus-24 / total 0-76 structure missing');
+assert(wave5.includes('حد أقصى 52') && wave5.includes('0–76'), 'HAMD-24 52-plus-24 / total 0-76 structure missing');
 assert(wave5.includes('العجز/الشعور بالعجز Helplessness') && wave5.includes('اليأس Hopelessness') && wave5.includes('انعدام القيمة Worthlessness'), 'HAMD-24 items 22-24 labels missing');
 assert(wave5.includes('لا تُعرض على أنها ترجمة عربية محققة'), 'HAMD-24 Arabic validation boundary missing');
 assert(wave5.includes('بند الانتحار يُفسر ويُتصرف بشأنه مستقلًا'), 'HAMD-24 suicide safety boundary missing');
