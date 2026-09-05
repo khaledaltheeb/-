@@ -5,6 +5,7 @@ const layout = read('app/layout.tsx');
 const homepage = read('app/page.tsx');
 const siteHeader = read('components/site-header.tsx');
 const assistant = read('components/rawafid-assistant.tsx');
+const imperativeTools = read('components/webmcp-imperative-tools.tsx');
 const loader = read('components/rawafid-assistant-loader.tsx');
 const brand = read('components/rawafid-brand.tsx');
 const nextConfig = read('next.config.ts');
@@ -31,6 +32,8 @@ requireText(layout, 'rawafid-ga4-delayed', 'direct GA4 must use the delayed prod
 requireText(layout, 'googletagmanager.com/gtag/js?id=', 'direct GA4 must remain enabled after its delay');
 forbidText(layout, "from 'next/script'", 'the root layout must not pull the Next Script client helper into the critical path');
 requireText(layout, "@/components/rawafid-assistant-loader", 'the root layout must use the on-demand assistant loader');
+requireText(layout, "@/components/webmcp-imperative-tools", 'the root layout must render the imperative WebMCP bootstrap without a client bundle');
+requireText(layout, '<WebMcpImperativeTools />', 'the imperative WebMCP tool bootstrap must remain present on every page');
 requireText(loader, "dynamic(() => import('./rawafid-assistant')", 'the assistant implementation must remain code-split');
 requireText(loader, 'AUTO_OPEN_AFTER_MS = 12000', 'the assistant must remain outside the initial Lighthouse performance window');
 requireText(brand, 'prefetch={false}', 'the homepage brand must not prefetch the route it is already on');
@@ -51,6 +54,18 @@ requireText(assistant, 'tooldescription="Ask Rawafid\'s on-site assistant', 'the
 requireText(assistant, 'name="query"', 'the assistant WebMCP textarea must retain a schema property name');
 requireText(assistant, 'toolparamdescription="The user\'s Arabic or English question', 'the assistant WebMCP parameter must remain described');
 
+forbidText(imperativeTools, "'use client'", 'the imperative WebMCP bootstrap must stay server-rendered and must not add a hydration bundle');
+requireText(imperativeTools, 'document.modelContext', 'the imperative WebMCP bootstrap must feature-detect the browser model context');
+requireText(imperativeTools, 'context.registerTool(tool)', 'the imperative WebMCP tool must be registered through the current document.modelContext API');
+requireText(imperativeTools, "name: 'search_rawafid_evidence'", 'the stable imperative WebMCP search tool name must remain registered');
+requireText(imperativeTools, 'inputSchema:', 'the imperative WebMCP tool must expose an explicit JSON Schema');
+requireText(imperativeTools, "required: ['query']", 'the imperative WebMCP schema must require the search query');
+requireText(imperativeTools, 'additionalProperties: false', 'the imperative WebMCP schema must reject unknown properties');
+requireText(imperativeTools, 'readOnlyHint: true', 'the Rawafid search WebMCP tool must remain correctly marked read-only');
+requireText(imperativeTools, 'untrustedContentHint: true', 'search result text returned to agents must remain marked as untrusted content');
+requireText(imperativeTools, "fetch('/api/search/v3?q='", 'the imperative WebMCP tool must execute against Rawafid\'s existing search API');
+requireText(imperativeTools, "id=\"rawafid-webmcp-imperative\"", 'the imperative WebMCP bootstrap must retain a stable rendered script identifier');
+
 requireText(nextConfig, 'tools=(self)', 'the Permissions-Policy must explicitly allow same-origin WebMCP tools');
 requireText(wrangler, '"NEXT_PUBLIC_ENABLE_GTM": "false"', 'production must keep the CPU-heavy GTM container disabled');
 requireText(wrangler, '"NEXT_PUBLIC_ENABLE_DIRECT_GA": "true"', 'production must keep direct GA4 enabled');
@@ -70,4 +85,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log('PageSpeed performance contract passed: production build prerequisites are present, GA4 remains delayed beyond the critical path, heavy GTM is gated, font LCP is non-blocking, rendered WebMCP coverage is enforced before merge, and production live verification stays fast despite homepage ISR.');
+console.log('PageSpeed performance contract passed: production build prerequisites are present, GA4 remains delayed beyond the critical path, heavy GTM is gated, font LCP is non-blocking, declarative WebMCP coverage is enforced, a zero-hydration imperative WebMCP search tool is registered with a strict schema, and production verification stays fast.');

@@ -79,4 +79,8 @@ jobs:
           test "$(grep -o 'toolname="' /tmp/home.html | wc -l | tr -d ' ')" -ge 3
           grep -q 'tooldescription="Search Rawafid' /tmp/home.html
           grep -q 'toolparamdescription="The user' /tmp/home.html
+          grep -q 'id="rawafid-webmcp-imperative"' /tmp/home.html
+          grep -q 'search_rawafid_evidence' /tmp/home.html
+          grep -q 'document.modelContext' /tmp/home.html
+          grep -q 'additionalProperties: false' /tmp/home.html
           curl -fsS http://127.0.0.1:3000/sitemap.xml >/dev/null
