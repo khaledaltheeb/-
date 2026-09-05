@@ -4,17 +4,17 @@ import { notFound } from 'next/navigation';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import { buildSeoMetadata, SITE_URL } from '@/lib/seo';
-import { coreOutcomeRegistry, getCoreOutcomeRecord } from '@/lib/core-outcome-sets/registry';
+import { getCoreOutcomeRecord } from '@/lib/core-outcome-sets/registry';
 import { getInstrumentCrosswalkForCos } from '@/lib/core-outcome-sets/instrument-crosswalk-registry';
 import styles from '@/components/assessment-measures.module.css';
 
 type PageProps = { params: Promise<{ slug: string }> };
 
-export const dynamicParams = false;
-
-export function generateStaticParams() {
-  return coreOutcomeRegistry.map((item) => ({ slug: item.slug }));
-}
+// OpenNext/Cloudflare currently fails while serving these prerendered dynamic
+// App Router paths even though the production build generates them correctly.
+// The data is local/versioned, so SSR avoids the broken dynamic-SSG serving
+// path without introducing a database dependency or changing public URLs.
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
