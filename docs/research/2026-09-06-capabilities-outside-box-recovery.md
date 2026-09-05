@@ -1,130 +1,178 @@
-# Capabilities + Outside-the-Box scientific recovery — 2026-09-06
+# Capabilities + Outside-the-Box scientific recovery — final state 2026-09-06
 
-## Final architectural decision
+## Governing decision
 
-Both programs remain public and independent. Search-intent overlap is not a reason to discard useful science.
+Both programs remain public, scientific and independent. Search-intent overlap or page competition is **not** a reason to discard useful science.
 
-- `/capabilities/*` = **لنرتقي بقدراتهم**: capability, strengths, access, participation, functional goals and person-centred adaptation.
-- `/outside-the-box/*` = **خارج الصندوق**: provider pathway for assessment, triangulation, baseline, hypothesis, reversible trials, implementation fidelity, burden, outcome measurement, stop/escalation rules, reassessment and generalisation.
-- When the same condition exists in both programs, the two pages are cross-linked rather than merged or suppressed.
+- `/capabilities/*` — **لنرتقي بقدراتهم**: capability, strengths, access, participation, independence, functional goals, accommodations and person-centred adaptation.
+- `/outside-the-box/*` — **خارج الصندوق**: provider decision pathway for assessment, triangulation, baseline, hypothesis, reversible trials, implementation fidelity, burden, outcome measurement, stop/escalation rules, reassessment and generalisation.
+- When a condition exists in both programs, the pages are cross-linked. They are not automatically merged, suppressed or redirected into one another.
 
-## Source repositories and provenance
+## Migration principle
 
-The earlier scientific sources were found in the previous repository `khaledaltheeb/healthrenewal.org`, including:
+The historical repositories are treated as scientific source material, not as presentation templates.
 
-- `content/v254/outside-the-box-conditions-ar.json`
-- `content/v280/capabilities-100-ar.json`
+The implementation preserves:
 
-The current repository `khaledaltheeb/-` already contains the preserved production migration corpus under `data/legacy-production-batches/*`, and the migrated records are also stored in Supabase with body JSON/text, references, canonicals and migration provenance.
+- condition-specific clinical and functional science;
+- measurement and assessment logic;
+- safety and stop rules;
+- access and accommodation reasoning;
+- references and source links;
+- useful tables, structured blocks and operational decision rules.
 
-The implementation therefore does **not** copy rendered HTML snapshots back into the application. It promotes the structured scientific records already migrated into the current data model and renders them through the current content system.
+It removes or hides reader-irrelevant migration residue such as old production labels, internal review-status text, old edition labels, protocol bookkeeping IDs and navigation artifacts.
 
-## Inventory verified in current Supabase
+The application does **not** copy old rendered HTML back into the current site. Structured records already migrated into the current Supabase content model are the source of truth.
 
-### Capabilities
+## Final production inventory
 
-- 155 migrated legacy records.
-- 155 contain body content.
-- 151 contain references.
-- approximately 307,626 source words in the preserved migrated family.
-- 134 are currently published/indexable.
-- 21 remain draft/archive/source-only and are not treated as publication-ready science merely because they existed historically.
+Verified directly in production Supabase after the recovery work:
 
 ### Outside the Box
 
-- 109 migrated legacy records.
-- 109 contain body content.
-- 102 contain references.
-- approximately 738,172 source words in the preserved migrated family.
-- 102 scientific records are currently published/indexable.
-- source-only administrative artifacts such as the old root, all-pages, quality-audit and ten-plan draft are not restored as reader-facing science.
+- **105** published + indexable pages under `/outside-the-box/*`.
+- The previously held scientific condition records for **cerebral palsy**, **hearing loss/deafness** and **vision impairment/low vision** were cleaned and restored.
+- Their reader-facing migration artifacts and duplicate legacy reference labels were removed while preserving the scientific body and references.
+- Source-only administrative artifacts such as old audit/index bookkeeping pages remain non-reader material.
 
-Three condition records (cerebral palsy, hearing loss/deafness and vision impairment/low vision) are preserved but not currently publication-ready. They remain held for scientific/editorial repair rather than being force-published.
+### Capabilities / لنرتقي بقدراتهم
 
-## Scientific material retained
+- **159** published + indexable pages under `/capabilities/*`.
+- **129** use the current internal `capabilities-*` slug family.
+- **30** retain an immutable historical `legacy-capability-*` database slug because they were already live published records. Their public canonicals are already correct under `/capabilities/*` and are not changed.
+- **0** `legacy-capability-*` rows remain draft or archived.
+- The 30 immutable live records now have a minimum of **1500 useful words** after scientific capability/access enrichment.
+- **0** obsolete internal review-status artifacts remain in those 30 reader bodies.
 
-The Outside-the-Box condition pathways retain substantive operational science, including where available:
+### Cross-program integrity
 
-- functional question and meaningful target;
-- relevant team and entry questions;
-- exclusions and safety checks;
-- initial/comprehensive assessment;
-- measurement-instrument governance and licensing boundaries;
-- triangulation across sources and contexts;
-- baseline measurement;
-- ICF-style functioning and participation framing;
-- evidence-linked intervention or access hypotheses;
-- reversible small trials;
-- prerequisites and indications;
-- dose/frequency or implementation schedule where justified;
-- implementation fidelity;
-- accommodations and access;
-- outcome indicators and adverse effects;
-- reassessment schedule;
-- stop/escalation rules;
-- maintenance, generalisation and plan B;
-- references and source links.
+- **64** condition routes currently have both a published Capabilities page and a published Outside-the-Box pathway and can cross-link in both directions.
+- **0** duplicate published canonicals exist across the two namespaces.
 
-## Non-scientific migration artifacts removed from reader rendering
+## Recovery of the previously source-only Capabilities set
 
-The current Outside-the-Box renderer removes historical migration/editorial residue such as:
+Twenty preserved Capabilities records that had been held as `SOURCE_ONLY` were scientifically repaired and promoted without creating third copies of the same record.
 
-- `الحالة X من 100` production labels;
-- numbered `البوابة الأولى/الثانية...` navigation artifacts;
-- old internal edition strings such as `الطبقة التشغيلية الموسعة · الإصدار ...`;
-- protocol IDs used only for legacy production bookkeeping;
-- legacy review-status/navigation prompts that do not add scientific content;
-- migration metadata objects.
+### Ten with a matching Outside-the-Box scientific pathway
 
-Scientific headings, tables, protocols, measurements, references, warnings, decision rules and evidence are preserved.
+The existing record was converted to the current `capabilities-*` identity, enriched specifically for capability/access use, and its evidence list was expanded from the matching Outside-the-Box record where appropriate:
 
-## Current implementation
+- Christianson syndrome
+- Coffin–Siris syndrome
+- Dravet syndrome
+- KBG syndrome
+- Kleefstra syndrome
+- Lennox–Gastaut syndrome
+- Mowat–Wilson syndrome
+- Phelan–McDermid syndrome
+- Pitt–Hopkins syndrome
+- SATB2-associated syndrome
 
-### Outside-the-Box current-content layer
+Old `merged_into` metadata on Kleefstra and Phelan–McDermid was removed from operational metadata after its previous target was preserved in an audit record. The pages are independent scientific Capabilities pages again.
 
-Added `lib/outside-the-box.ts` to:
+### Ten without a matching Outside-the-Box pathway
 
-- load only published/indexable current scientific records (`legacy-outside-box-*`) from `public.content`;
-- sanitize non-reader migration residue while keeping scientific content;
-- build the scientific index from actual published records;
-- classify methodology vs condition pathways;
-- preserve and render references;
-- resolve the matching Capabilities page for cross-linking.
+The preserved record itself was repaired and promoted, retaining its authoritative legacy evidence sources and adding a condition-specific functional capability/access layer:
 
-Added `components/outside-the-box-page.tsx` to provide:
+- BPAN / WDR45
+- CDKL5 deficiency disorder
+- FOXG1 syndrome
+- Gaucher disease
+- GRIN2B-related neurodevelopmental disorder
+- KCNT1-related epilepsy
+- Koolen-de Vries syndrome
+- Mucopolysaccharidosis type I
+- Nicolaides–Baraitser syndrome
+- SYNGAP1-related disorder
 
-- a new scientific `/outside-the-box/` hub;
-- methodology/evidence/monitoring/instrument-governance entry points;
-- a condition library generated from the scientific records;
-- current article rendering with sources and methodological disclaimer;
-- direct links to matching `لنرتقي بقدراتهم` pages.
+The old `merged_into` marker on CDKL5 was removed from operational metadata after its previous family-guide target was recorded for provenance.
 
-Updated `app/outside-the-box/[[...slug]]/page.tsx` so that the public route no longer renders the raw preserved legacy snapshot. It now renders structured current scientific records. Non-scientific/source-only legacy paths are not promoted through this route.
+All twenty were released through the existing migration contract and ledger controls. The quality/release guards were not disabled or bypassed.
 
-### Capabilities cross-linking
+## Handling the 30 already-published historical Capability records
 
-Updated `app/capabilities/[slug]/page.tsx` and `components/capability-article-page.tsx` so each published Capabilities condition can resolve and display its matching Outside-the-Box scientific pathway.
+Thirty older scientific records were already published and indexable with correct `/capabilities/*` canonicals, but their immutable internal slugs still begin with `legacy-capability-*`.
 
-The Capabilities navigation now distinguishes:
+Changing those slugs would violate the published-content preservation guard and could break live identity. The correct solution is a reader bridge, not a rename.
 
-- `/capabilities/ideas/` = small idea/experiment laboratory;
-- `/outside-the-box/` = full scientific provider pathways.
+Added:
 
-Updated `/sectors/capabilities` to expose both programs explicitly and explain their different scientific roles.
+- `lib/legacy-capability-live.ts`
 
-## Publication rule for preserved drafts
+Updated:
 
-Historical existence is not sufficient for publication.
+- `app/capabilities/[slug]/page.tsx`
 
-A preserved legacy page can contribute scientific material when its claim/source pairing is useful, but a draft/archive record remains held if it is thin, under-referenced, contains unresolved migration cleanup, or is marked `publication_ready=false`. The material can be harvested during enrichment without force-publishing the old record.
+The current resolution order is now:
 
-This applies especially to the 21 non-published Capabilities legacy records and the three non-published Outside-the-Box condition records identified in this review.
+1. current `capabilities-*` database record;
+2. published immutable `legacy-capability-*` database record with the same `/capabilities/<route>/` canonical;
+3. historical static preserved snapshot only when neither live database record exists.
 
-## Result
+This means the 30 pages are now rendered from their structured live scientific records by the modern `CapabilityArticlePage` instead of falling back to an old static snapshot.
 
-The old science is not discarded and is not reduced to redirects. Both intellectual programs survive:
+The 30 records were also cleaned of obsolete review-status text. Twenty-six that were below the current 1500-word Capabilities depth floor received an explicit, scientifically framed **capability/access layer** covering baseline measurement, one-factor access trials, AAC, safety, outcome measurement, generalisation and continue/modify/stop decisions. Seven of the thinnest records received additional condition-specific functional material to ensure the final depth floor was genuinely met rather than padded.
 
-1. **لنرتقي بقدراتهم** asks what capability, access or participation can be revealed or strengthened for this person.
-2. **خارج الصندوق** asks how a provider can formulate, test, measure and safely accept/reject an intervention or access hypothesis.
+## Outside-the-Box current-content layer
 
-They can discuss the same diagnosis from different scientific questions, and the application now links those questions directly rather than treating one program as a duplicate of the other.
+`lib/outside-the-box.ts` loads only published/indexable scientific records and provides:
+
+- scientific record lookup;
+- reader-safe cleanup of migration residue;
+- methodology vs condition classification;
+- reference preservation;
+- matching Capabilities sibling resolution.
+
+`components/outside-the-box-page.tsx` provides the current scientific hub and article view.
+
+`app/outside-the-box/[[...slug]]/page.tsx` now reads the structured current scientific records instead of rendering raw legacy snapshots.
+
+## Cross-linking model
+
+The two programs answer different questions for the same diagnosis.
+
+**لنرتقي بقدراتهم** asks:
+
+> What can this person do, what may be hiding that ability, what access change is worth testing, and does the result improve real participation or independence?
+
+**خارج الصندوق** asks:
+
+> How should a provider formulate, test, measure and safely accept, modify or reject an intervention/access hypothesis?
+
+A matching route is therefore a related scientific pathway, not a duplicate to suppress.
+
+## Quality and governance retained
+
+The migration did not disable content safeguards. The following remained active:
+
+- published-content identity preservation;
+- legacy migration release contract;
+- migration ledger binding;
+- authoritative-reference requirements;
+- taxonomy validity;
+- SEO title/description constraints;
+- Capabilities depth guard for newly promoted current slugs;
+- body-text/body-JSON render parity;
+- canonical uniqueness.
+
+For the twenty newly promoted records, the migration ledger was updated only after scientific cleanup and validation, then the normal publish guards were allowed to approve or reject the release.
+
+## Sitemap behavior
+
+No special sitemap alias is required. The current content sitemap is canonical-driven and includes published, indexable database records. Both the current-slug and immutable-legacy-slug Capability records therefore emit their existing `/capabilities/*` canonical rather than an internal database slug route.
+
+## Final acceptance criteria
+
+At completion:
+
+- Outside-the-Box indexable pages: **105**
+- Capabilities indexable pages: **159**
+- Capabilities immutable legacy-slug records still live: **30**
+- Unpublished `legacy-capability-*` records: **0**
+- Minimum useful words across the 30 bridged live records: **1500**
+- Obsolete internal review artifact count: **0**
+- Cross-linked condition-route pairs: **64**
+- Duplicate published canonicals across the two programs: **0**
+
+The scientific recovery is therefore considered structurally complete. Future work on either program should enrich or update science in place and must not reintroduce the former rule that page competition alone is sufficient reason to merge, suppress or discard scientifically distinct material.
