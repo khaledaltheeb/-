@@ -72,9 +72,27 @@ export default async function HomePage() {
             <h1 id="home-title">روافد: <em>الصحة النفسية والتربية الخاصة</em> في منصة معرفية مترابطة.</h1>
             <p>استكشف محتوى عربيًا موثوقًا في الصحة النفسية، التوحد، صعوبات التعلم، التربية الخاصة والدامجة، سرطان الأطفال، الإدمان والتعافي ودعم الأسرة؛ مع أدلة عملية ودليل للمختصين والمراكز.</p>
 
-            <form className="search rawafid-search" action="/search" method="get" role="search">
+            <form
+              className="search rawafid-search"
+              action="/search"
+              method="get"
+              role="search"
+              toolname="searchRawafid"
+              tooldescription="Search Rawafid's Arabic knowledge, care guides, evidence guides, specialists, centers, and related resources using a user-provided query."
+              toolautosubmit=""
+            >
               <label className="sr-only" htmlFor="home-search">البحث في منصة روافد</label>
-              <input id="home-search" name="q" type="search" minLength={2} maxLength={160} autoComplete="off" placeholder="ابحث عن حالة، توحد، صعوبات تعلم، سرطان أطفال، مختص، مركز، دليل أو سؤال..." />
+              <input
+                id="home-search"
+                name="q"
+                type="search"
+                required
+                minLength={2}
+                maxLength={160}
+                autoComplete="off"
+                toolparamdescription="The user's Arabic or English search query for a condition, topic, guide, specialist, center, resource, or question on Rawafid."
+                placeholder="ابحث عن حالة، توحد، صعوبات تعلم، سرطان أطفال، مختص، مركز، دليل أو سؤال..."
+              />
               <button type="submit">ابحث في روافد</button>
             </form>
 
