@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import '../media-v3-scoped.css';
 import '../dashboard-v3-scoped.css';
 import '../system-portals-v1.css';
 import '../portal-scoped.css';
