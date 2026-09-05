@@ -65,6 +65,17 @@ const evidenceOverrides: Record<string, Partial<AssessmentMeasure>> = {
       { label: 'PubMed — PDDS validation in ambulatory older adults with MS (2025)', url: 'https://pubmed.ncbi.nlm.nih.gov/40117985/', role: 'evidence' },
     ],
   },
+  'satisfaction-with-life-scale': {
+    rightsStatus: 'open-reuse',
+    rightsLabel: 'Copyrighted — free non-commercial use with attribution',
+    rightsNote: 'الموقع الرسمي للمؤلف Ed Diener يوضح أن SWLS محمي بحقوق النشر، لكنه متاح دون طلب إذن أو دفع رسوم للباحثين وللاستخدام غير التجاري بشرط نسبة المقياس إلى المؤلفين. لذلك تستخدم روافد التصنيف الأكثر تحفظًا ولا تصف المقياس بأنه Public Domain.',
+    rightsVerifiedOn: '2026-09-05',
+    sources: [
+      { label: 'Ed Diener — official SWLS permissions, form and translations', url: 'https://eddiener.com/satisfaction-with-life-scale-swls/', role: 'rights' },
+      { label: 'Ed Diener — general scale permissions (non-commercial with attribution)', url: 'https://eddiener.com/scales/', role: 'rights' },
+      { label: 'CDISC QRS — SWLS registry record', url: 'https://www.cdisc.org/standards/foundational/qrs', role: 'evidence' },
+    ],
+  },
   'glasgow-outcome-scale-extended': {
     nameAr: 'مقياس غلاسكو الموسع للمآل',
     nameEn: 'Extended Glasgow Outcome Scale',
