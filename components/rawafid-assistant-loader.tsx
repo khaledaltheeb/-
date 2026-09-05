@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
-import styles from './rawafid-assistant.module.css';
+import styles from './rawafid-assistant-launcher.module.css';
 
 const STORAGE_KEY = 'rawafid-assistant-auto-open-v1';
 const AUTO_OPEN_AFTER_MS = 12000;
