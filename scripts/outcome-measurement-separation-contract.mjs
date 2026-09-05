@@ -49,7 +49,7 @@ if (exists(cosPagePath)) {
 if (exists(cosRegistryPath)) {
   const registry = read(cosRegistryPath);
   const slugCount = (registry.match(/\bslug:\s*'/g) || []).length;
-  assert(slugCount >= 8, `Operational COS registry must contain at least 8 verified records; found ${slugCount}`);
+  assert(slugCount >= 12, `Operational COS registry must contain at least 12 verified records; found ${slugCount}`);
   for (const field of ['measurementStatus', 'arabicReview', 'cometUrl', 'lastVerified', 'qualityNote', 'rawafidSectors']) {
     assert(registry.includes(field), `COS registry must preserve field: ${field}`);
   }
@@ -62,11 +62,18 @@ if (exists(cosRegistryPath)) {
     'cerebral-palsy-lower-limb-surgery',
     'musculoskeletal-rehabilitation-core-measures',
     'critical-illness-physical-rehabilitation-practice',
+    'adult-depression-anxiety-ichom-standard-set',
+    'adult-epilepsy-ichom-standard-set',
+    'genetic-intellectual-disability-core-pro-set',
+    'international-burn-care-cos',
   ]) {
     assert(registry.includes(`slug: '${requiredSlug}'`), `COS registry must retain seeded record ${requiredSlug}`);
   }
   assert(registry.includes("instrumentAdaptation: 'not-assessed'"), 'Registry must not imply Arabic instrument validation without evidence');
   assert(registry.includes("measurementStatus: 'not-established'"), 'Registry must support an explicit no-COMS/not-established state');
+  assert(registry.includes("stage: 'published'"), 'Registry must support published records whose COMET Current Stage is not applicable instead of mislabelling them completed');
+  assert(registry.includes('Current Stage: Not Applicable'), 'Published ICHOM mental-health record must preserve COMET stage nuance');
+  assert(registry.includes('Core PROM Set لم يُحسم بعد'), 'GID record must preserve the separation between the 2026 core PRO set and future PROM selection');
 }
 
 if (exists(cosDetailPath)) {
