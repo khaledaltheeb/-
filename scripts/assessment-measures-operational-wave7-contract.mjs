@@ -12,6 +12,7 @@ const assert = (condition, message) => {
 
 const wave7 = read('lib/assessment-measure-operational-full-forms-wave7.ts');
 const catalog = read('lib/assessment-measure-operational-catalog.ts');
+const measureCatalog = read('lib/assessment-measures-catalog.ts');
 const rightsReview = read('lib/assessment-measures-rights-review.ts');
 
 const slugs = [...wave7.matchAll(/^\s{2}'([^']+)': \{/gm)].map((match) => match[1]);
@@ -103,6 +104,11 @@ assert(wave7.includes('Much better than'), 'GCGI treatment-preference high ancho
 assert(wave7.includes('لا تجمع البنود الخمسة في total score'), 'GCGI no-total-score rule missing');
 assert(wave7.includes('لا تخلط GCGI pain v1 مع Clinical Global Impression'), 'GCGI/CGI separation missing');
 assert(wave7.includes('هذا السجل يصحح الالتباس'), 'GCGI corrective provenance disclosure missing');
+assert(measureCatalog.includes("'general-clinical-global-impression':"), 'GCGI metadata override missing from main measure catalog');
+assert(measureCatalog.includes("version: 'GCGI v1 — ACTTION/STANDARDS pain-response questionnaire'"), 'GCGI catalog version identity is not corrected');
+assert(measureCatalog.includes("nameEn: 'General Clinical Global Impressions — Pain'"), 'GCGI catalog English identity is not pain-specific');
+assert(measureCatalog.includes('لا يوجد مجموع كلي'), 'GCGI catalog must reject a composite total');
+assert(measureCatalog.includes("related: ['clinical-global-impression', 'pain-intensity', 'pain-relief']"), 'GCGI catalog must explicitly separate/link CGI and pain measures');
 
 // Rights-restricted instruments remain out of public full-form waves.
 const restrictedSlugs = [...rightsReview.matchAll(/^\s{4}slug: '([^']+)'/gm)].map((match) => match[1]);
@@ -111,5 +117,5 @@ for (const restricted of restrictedSlugs) {
 }
 
 if (!process.exitCode) {
-  console.log(`ASSESSMENT_OPERATIONAL_WAVE7_PASS: ${slugs.length} operational materials + scoring/version/language/rights boundaries verified.`);
+  console.log(`ASSESSMENT_OPERATIONAL_WAVE7_PASS: ${slugs.length} operational materials + scoring/version/language/rights/metadata boundaries verified.`);
 }
