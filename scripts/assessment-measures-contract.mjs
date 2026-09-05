@@ -31,9 +31,10 @@ const blocks = [
   ...extractMeasureBlocks('lib/assessment-measures-wave3.ts', 'export const assessmentMeasuresWave3: AssessmentMeasure[] = ['),
   ...extractMeasureBlocks('lib/assessment-measures-wave4.ts', 'export const assessmentMeasuresWave4: AssessmentMeasure[] = ['),
   ...extractMeasureBlocks('lib/assessment-measures-wave5.ts', 'export const assessmentMeasuresWave5: AssessmentMeasure[] = ['),
+  ...extractMeasureBlocks('lib/assessment-measures-wave6.ts', 'export const assessmentMeasuresWave6: AssessmentMeasure[] = ['),
 ];
 
-assert(blocks.length >= 37, `expected at least 37 verified measures, found ${blocks.length}`);
+assert(blocks.length >= 46, `expected at least 46 verified measures, found ${blocks.length}`);
 
 const slugs = blocks.map((entry) => entry.slug);
 const uniqueSlugs = new Set(slugs);
@@ -56,6 +57,9 @@ const allowedCategories = new Set([
   'symptom-burden',
   'respiratory-function',
   'vision',
+  'dermatology',
+  'gastroenterology',
+  'critical-care',
 ]);
 const fullArabicProtocolAllowlist = new Set(['timed-up-and-go', '10-meter-walk-test', '6-minute-walk-test']);
 
@@ -102,6 +106,7 @@ const sourceFiles = [
   read('lib/assessment-measures-wave3.ts'),
   read('lib/assessment-measures-wave4.ts'),
   read('lib/assessment-measures-wave5.ts'),
+  read('lib/assessment-measures-wave6.ts'),
 ].join('\n');
 assert(!/http:\/\//.test(sourceFiles), 'measure sources must not use insecure HTTP URLs');
 assert(sourceFiles.includes("const CDISC_QRS = 'https://") || sourceFiles.includes('https://www.cdisc.org/standards/foundational/qrs'), 'CDISC rights registry reference must remain HTTPS');
@@ -112,14 +117,20 @@ assert(
   catalog.includes('assessmentMeasuresWave2') &&
   catalog.includes('assessmentMeasuresWave3') &&
   catalog.includes('assessmentMeasuresWave4') &&
-  catalog.includes('assessmentMeasuresWave5'),
-  'catalog aggregator must include all five verified waves',
+  catalog.includes('assessmentMeasuresWave5') &&
+  catalog.includes('assessmentMeasuresWave6'),
+  'catalog aggregator must include all six verified waves',
 );
 assert(catalog.includes('assessmentMeasureCategoriesWave4'), 'canonical catalog must include wave-four category expansion');
+assert(catalog.includes('assessmentMeasureCategoriesWave6'), 'canonical catalog must include wave-six category expansion');
 
 const categoriesWave4 = read('lib/assessment-measures-wave4-categories.ts');
 for (const category of ['movement-disorders', 'cognition-neuropsychology', 'trauma-stress', 'substance-use-addiction', 'symptom-burden', 'respiratory-function', 'vision']) {
   assert(categoriesWave4.includes(`slug: '${category}'`), `wave-four category definition missing: ${category}`);
+}
+const categoriesWave6 = read('lib/assessment-measures-wave6-categories.ts');
+for (const category of ['dermatology', 'gastroenterology', 'critical-care']) {
+  assert(categoriesWave6.includes(`slug: '${category}'`), `wave-six category definition missing: ${category}`);
 }
 
 const rightsReview = read('lib/assessment-measures-rights-review.ts');
@@ -145,6 +156,20 @@ const pcl5 = blocks.find((entry) => entry.slug === 'ptsd-checklist-for-dsm5');
 assert(Boolean(pcl5), 'PCL-5 must be included in verified catalog');
 assert(Boolean(pcl5 && pcl5.block.includes("arabicStatus: 'validated-version-reported'")), 'PCL-5 must preserve documented Arabic validation status');
 assert(Boolean(pcl5 && pcl5.block.includes('National Center for PTSD')), 'PCL-5 must preserve official VA rights provenance');
+
+const auditSr = blocks.find((entry) => entry.slug === 'alcohol-use-disorders-identification-test-self-report');
+assert(Boolean(auditSr), 'AUDIT-SR must be included in verified catalog');
+assert(Boolean(auditSr && auditSr.block.includes("arabicStatus: 'validated-version-reported'")), 'AUDIT-SR must preserve its documented Arabic validation status');
+assert(Boolean(auditSr && auditSr.block.includes('107 سجناء')), 'AUDIT-SR Arabic evidence must retain its population limitation');
+
+const apache = blocks.find((entry) => entry.slug === 'apache-ii');
+assert(Boolean(apache), 'APACHE II must be included in verified catalog');
+assert(Boolean(apache && apache.block.includes('لا تستخدم APACHE II لتقرير سحب العلاج')), 'APACHE II must preserve explicit individual-decision safety boundary');
+assert(Boolean(apache && apache.block.includes('لن تنشر روافد حاسبة وفيات فردية')), 'APACHE II must not expose an individual mortality calculator');
+
+const ravlt = blocks.find((entry) => entry.slug === 'rey-auditory-verbal-learning-test');
+assert(Boolean(ravlt), 'RAVLT must be included in verified catalog');
+assert(Boolean(ravlt && ravlt.block.includes('لا تستخدم قائمة مترجمة محليًا مع معايير إنجليزية')), 'RAVLT must preserve language/norm boundary');
 
 const hub = read('app/assessment-measures/page.tsx');
 assert(hub.includes('المقاييس وأدوات التقييم المستخدمة عالميًا'), 'public hub title changed unexpectedly');
@@ -202,5 +227,5 @@ for (const route of requiredRoutes) {
 }
 
 if (!process.exitCode) {
-  console.log(`ASSESSMENT_MEASURES_CONTRACT_PASS: ${blocks.length} reusable measures, ${restrictedSlugs.length} restricted searchable references, ${uniqueSlugs.size} unique public slugs, 16 categories, rights/evidence/safety/Arabic/search checks passed.`);
+  console.log(`ASSESSMENT_MEASURES_CONTRACT_PASS: ${blocks.length} reusable measures, ${restrictedSlugs.length} restricted searchable references, ${uniqueSlugs.size} unique public slugs, 19 categories, rights/evidence/safety/Arabic/search checks passed.`);
 }
