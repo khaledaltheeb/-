@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react';
-import Link from 'next/link';
+import Link from '@/components/static-link';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import PlatformIcon from '@/components/platform-icon';
