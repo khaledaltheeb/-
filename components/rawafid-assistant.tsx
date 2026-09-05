@@ -184,15 +184,25 @@ export default function RawafidAssistant({ initialOpen = false }: { initialOpen?
               ))}
             </div>
 
-            <form className={styles.form} onSubmit={submit} role="search">
+            <form
+              className={styles.form}
+              onSubmit={submit}
+              role="search"
+              toolname="askRawafidAssistant"
+              tooldescription="Ask Rawafid's on-site assistant to analyze an Arabic or English question and search Rawafid's published content for relevant evidence and resources."
+            >
               <textarea
                 ref={inputRef}
                 className={styles.input}
+                name="query"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
+                required
+                minLength={2}
                 maxLength={220}
                 rows={1}
                 aria-label="سؤالك لمساعد روافد"
+                toolparamdescription="The user's Arabic or English question for Rawafid's on-site evidence and resource search assistant."
                 placeholder="مثال: طفلي عمره 4 سنوات يفهم الكلام لكنه لا يتكلم جيدًا، ماذا أفعل؟"
               />
               <button className={styles.submit} type="submit" disabled={loading}>{loading ? 'أحلل…' : 'اسأل'}</button>
