@@ -53,8 +53,8 @@ requireMatch('Browser regression', browserRegression, /getBBox\(\)/, 'real rende
 
 requireMatch('Quality workflow', qualityWorkflow, /Page image 1280x720 safe-area browser regression/, 'page-image browser regression must remain blocking in Quality.');
 requireMatch('Quality workflow', qualityWorkflow, /VISUAL_CHROME_PATH="\$CHROME_BIN" node scripts\/page-image-browser-regression\.mjs/, 'Quality must execute the real-Chrome page-image regression.');
-requireMatch('Quality workflow', qualityWorkflow, /Full sitemap SEO gate[\s\S]*timeout-minutes:\s*30/, 'Full Sitemap SEO timeout contract must be preserved.');
-requireMatch('Quality workflow', qualityWorkflow, /Rich results and discovery gate \(advisory\)[\s\S]*timeout-minutes:\s*20/, 'Rich Discovery timeout contract must be preserved.');
+requireMatch('Quality workflow', qualityWorkflow, /Full sitemap SEO gate[\s\S]*if:\s*github\.event_name == 'push'[\s\S]*continue-on-error:\s*true/, 'Full Sitemap SEO gate must remain push-only and advisory under the current promotion-gated workflow.');
+requireMatch('Quality workflow', qualityWorkflow, /Rich results and discovery gate \(advisory\)[\s\S]*if:\s*github\.event_name == 'push'[\s\S]*continue-on-error:\s*true/, 'Rich Discovery gate must remain push-only and advisory under the current promotion-gated workflow.');
 
 const expectedKinds = { capability: 'capability', comparison: 'comparison', family: 'family-guide', addiction: 'addiction', careGuide: 'care-guide', content: 'article', encyclopedia: 'encyclopedia', specialNeeds: 'special-needs' };
 for (const [name, source] of Object.entries(templates)) {
