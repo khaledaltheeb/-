@@ -3,11 +3,12 @@ import Link from 'next/link';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import { buildSeoMetadata, SITE_URL } from '@/lib/seo';
+import { coreOutcomeRegistry } from '@/lib/core-outcome-sets/registry';
 import styles from '@/components/assessment-measures.module.css';
 
 export const metadata: Metadata = buildSeoMetadata({
   title: 'Core Outcome Sets — ما النتائج التي ينبغي قياسها؟',
-  description: 'دليل عربي يوضح الفرق بين Core Outcome Set (COS) وCore Outcome Measurement Set (COMS) وأدوات قياس النتائج والخصائص السيكومترية وتكييف COS للسياق المحلي والتكييف العربي لأداة القياس، مع مسار بحث وتطبيق مستند إلى COMET وCOSMIN.',
+  description: 'دليل وسجل عربي يوضح الفرق بين Core Outcome Set (COS) وCore Outcome Measurement Set (COMS) وأدوات قياس النتائج والخصائص السيكومترية وتكييف COS للسياق المحلي والتكييف العربي لأداة القياس، مع سجلات تطبيقية موثقة من COMET.',
   path: '/core-outcome-sets/',
   index: true,
   follow: true,
@@ -19,14 +20,15 @@ export const metadata: Metadata = buildSeoMetadata({
 
 const schema = {
   '@context': 'https://schema.org',
-  '@type': 'WebPage',
+  '@type': 'CollectionPage',
   '@id': `${SITE_URL}/core-outcome-sets/#page`,
   url: `${SITE_URL}/core-outcome-sets/`,
   name: 'Core Outcome Sets — ما النتائج التي ينبغي قياسها؟',
-  description: 'دليل تطبيقي عربي للفصل بين النتائج الأساسية وأدوات القياس وجودتها وملاءمة COS للسياق المحلي والتكييف العربي للأداة.',
+  description: 'دليل تطبيقي وسجل عربي للفصل بين النتائج الأساسية وأدوات القياس وجودتها وملاءمة COS للسياق المحلي والتكييف العربي للأداة.',
   inLanguage: 'ar',
   isPartOf: { '@id': `${SITE_URL}/#website` },
   publisher: { '@id': `${SITE_URL}/#organization` },
+  hasPart: coreOutcomeRegistry.map((item) => ({ '@id': `${SITE_URL}/core-outcome-sets/${item.slug}/#page`, name: item.titleAr })),
 };
 
 const layers = [
@@ -78,11 +80,27 @@ export default function CoreOutcomeSetsPage() {
           <p>الـCore Outcome Set (COS) ليس مقياسًا نفسيًا أو استبيانًا. هو مجموعة دنيا متفق عليها من النتائج التي ينبغي قياسها والإبلاغ عنها في مجال صحي محدد. بعد تثبيت النتائج الأساسية تبدأ خطوة منفصلة: اختيار أدوات القياس المناسبة لكل نتيجة، ثم فحص جودة القياس والحقوق والنسخة العربية.</p>
           <div className={styles.heroActions}>
             <a className={styles.primaryAction} href="https://www.comet-initiative.org/Studies" target="_blank" rel="noreferrer">ابحث في قاعدة COMET ↗</a>
+            <Link className={styles.secondaryAction} href="#registry">السجل التطبيقي في روافد</Link>
             <Link className={styles.secondaryAction} href="/assessment-measures/">مكتبة أدوات القياس</Link>
             <Link className={styles.secondaryAction} href="/assessment-measures/methodology/">منهجية الجودة والتكييف العربي</Link>
             <Link className={styles.secondaryAction} href="/assessment-lab/">العودة إلى Assessment Lab</Link>
           </div>
           <div className={styles.notice}><strong>قاعدة الفصل:</strong> COS يحدد <strong>WHAT</strong>، وأداة القياس تحدد <strong>HOW</strong>. بعض مشاريع COS تضيف مرحلة اختيار أدوات محددة؛ عندها نتعامل معها كـCOMS أو كتوصيات قياس موثقة، لا نفترضها من وجود COS وحده.</div>
+        </section>
+
+        <section className={styles.section} id="registry" aria-labelledby="registry-title">
+          <div className={styles.sectionHead}><div><span className={styles.eyebrow}>Operational registry · سجل تشغيلي</span><h2 id="registry-title">Core Outcome Sets موثقة ومفصولة عن أدوات القياس</h2><p>هذه ليست قائمة أسماء فقط. كل سجل يثبت النطاق والنتائج الأساسية وحالة توصيات القياس وحالة المراجعة العربية. نبدأ بالمجالات الأعلى صلة بقطاعات روافد، ونبقي أي فجوة على حالها بدل ملئها باستنتاج غير موثق.</p></div></div>
+          <div className={styles.grid}>
+            {coreOutcomeRegistry.map((item) => (
+              <Link className={styles.card} href={`/core-outcome-sets/${item.slug}/`} key={item.slug}>
+                <div className={styles.cardMeta}><span className={styles.badge}>{item.healthArea}</span><span className={styles.badge}>{item.stageLabel}</span></div>
+                <h3>{item.titleAr}</h3>
+                <p>{item.condition}</p>
+                <div className={styles.cardFoot}><span>{item.coreOutcomes.length} نتائج/مجالات مسجلة</span><span>{item.measurementStatusLabel}</span></div>
+              </Link>
+            ))}
+          </div>
+          <div className={styles.callout}><strong>حالة العربية في هذه الدفعة:</strong> لا تحمل أي بطاقة شارة «متحقق عربيًا» ما لم توجد مراجعة منفصلة للحقوق والتكييف والخصائص السيكومترية. السجل يوضح هذا صراحة داخل كل صفحة.</div>
         </section>
 
         <section className={styles.section} aria-labelledby="layers-title">
