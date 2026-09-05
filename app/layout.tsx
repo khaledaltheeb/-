@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/next-script-for-ga -- GTM is explicitly opt-in and disabled in production; using Next's third-party helper would reintroduce client overhead into the critical path. */
 import type { Metadata, Viewport } from 'next';
 import { Noto_Sans_Arabic } from 'next/font/google';
 import { BRAND_NAME, DEFAULT_DESCRIPTION, INDEXING_ENABLED, SITE_URL, organizationJsonLd } from '@/lib/seo';
