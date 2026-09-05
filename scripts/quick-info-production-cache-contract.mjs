@@ -2,11 +2,12 @@
 import { readFile } from 'node:fs/promises';
 
 const read = (path) => readFile(path, 'utf8');
-const [workflow, config, fingerprint, cached] = await Promise.all([
+const [workflow, config, fingerprint, cached, generator] = await Promise.all([
   read('.github/workflows/deploy-production.yml'),
   read('.github/open-next-production-cache.config.ts'),
   read('scripts/quick-info-social-cache-key.mjs'),
   read('scripts/build-quick-info-cards-cached.mjs'),
+  read('scripts/build-quick-info-cards.mjs'),
 ]);
 
 const failures = [];
@@ -30,6 +31,8 @@ forbidText(workflow, 'quick-info-social-${{ runner.os }}-\n', 'Quick Info image 
 requireText(config, 'node scripts/build-quick-info-cards-cached.mjs', 'production OpenNext config must invoke the cache-aware image builder');
 requireText(config, 'npx next build', 'production OpenNext config must still perform the full Next production build');
 requireText(fingerprint, "'scripts/build-quick-info-cards-cached.mjs'", 'cache validator changes must invalidate the image fingerprint');
+requireText(fingerprint, "url.searchParams.set('limit', '1000')", 'Quick Info fingerprint must cover the current publication scale beyond 500 pages');
+requireText(generator, "url.searchParams.set('limit', '1000')", 'Quick Info image generation must cover the current publication scale beyond 500 pages');
 requireText(cached, "stat(path)).size", 'restored Quick Info cache must verify every image file is non-empty');
 requireText(cached, 'manifest.items.length !== manifest.count', 'restored Quick Info cache must validate manifest cardinality');
 
@@ -38,4 +41,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log('Quick Info production cache contract passed: exact fingerprinting, fail-closed generation, deep cache validation, conditional image runtime, cached OpenNext build, and live OG/Discover probes are wired.');
+console.log('Quick Info production cache contract passed: 1000-page coverage, exact fingerprinting, fail-closed generation, deep cache validation, conditional image runtime, cached OpenNext build, and live OG/Discover probes are wired.');
