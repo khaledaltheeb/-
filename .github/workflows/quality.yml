@@ -1,8 +1,10 @@
 name: Rawafid Fast Quality Gate
 
 # Routine publishing must stay fast. Deep SEO crawls, Lighthouse, visual
-# regression, migration audits, and architecture-wide contracts are intentionally
-# excluded from this gate and are run only from dedicated manual workflows.
+# regression, migration audits, architecture-wide contracts, and generated
+# Quick Info social-card assets are intentionally excluded from this gate.
+# Those generated images are a publishing concern; the routine PR gate verifies
+# that the application builds and serves correctly without regenerating them.
 on:
   pull_request:
     branches: [main, cloudflare-workers-deploy]
@@ -40,30 +42,8 @@ jobs:
           restore-keys: |
             next-quality-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
 
-      - name: Compute Quick Info social image fingerprint
-        id: quick-info-fingerprint
-        run: node scripts/quick-info-social-cache-key.mjs
-
-      - name: Restore Quick Info social images
-        id: quick-info-cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            public/quick-info/og
-            public/quick-info/discover
-            public/quick-info/social-images-manifest.json
-          key: quick-info-social-${{ runner.os }}-${{ steps.quick-info-fingerprint.outputs.fingerprint }}
-
       - name: Install locked dependencies
         run: npm ci --no-audit --no-fund
-
-      - name: Install build image dependencies
-        if: steps.quick-info-cache.outputs.cache-hit != 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends fontconfig fonts-noto-core librsvg2-bin
 
       - name: Type check
         run: npm run typecheck
@@ -73,12 +53,9 @@ jobs:
 
       - name: Build
         shell: bash
-        env:
-          QUICK_INFO_SOCIAL_CACHE_HIT: ${{ steps.quick-info-cache.outputs.cache-hit }}
         run: |
           set -euo pipefail
           node scripts/build_psych_encyclopedia_assets.mjs
-          node scripts/build-quick-info-cards-cached.mjs
           node scripts/build-daily-tools-route-manifest.mjs
           node scripts/build_expanded_encyclopedia_assets.mjs
           node scripts/materialize-legacy-static-assets.mjs
