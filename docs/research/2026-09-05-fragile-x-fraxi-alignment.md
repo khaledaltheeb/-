@@ -13,9 +13,11 @@ Align the existing Arabic Fragile X reference centre with current public Fragile
 - FraXI — About Fragile X / resource hub: https://fraxi.org/information/
 - FraXI — Helping Someone with Fragile X Syndrome: https://fraxi.org/information/helping-someone-with-fragile-x-syndrome/
 - FraXI — The Strengths of Fragile X Syndrome: https://fraxi.org/information/the-strengths-of-fragile-x-syndrome/
+- FraXI — Sexuality: https://fraxi.org/information/sexuality/
 - FraXI — Our Research: https://fraxi.org/research/our-research/
 - FraXI — Family Associations by Country: https://fraxi.org/about/family-associations/
 - FraXI — Fragile X Clinics by Country: https://fraxi.org/information/fragile-x-clinics-by-country/
+- FraXI — Become a Member: https://fraxi.org/about/become-a-member/
 - Herring et al. (2024), *The joys of fragile X: Understanding the strengths of fragile X and delivering a diagnosis in a helpful, holistic way*: https://journals.sagepub.com/doi/10.1177/27546330241287685
 - Johnson et al. (2024), *A holistic approach to fragile X syndrome integrated guidance for person-centred care*: https://onlinelibrary.wiley.com/doi/full/10.1111/jar.13214
 - CDC — Healthcare Providers: Top 5 Things to Know About FXS (updated 2026-04-27): https://www.cdc.gov/fragile-x-syndrome/hcp/facts/index.html
@@ -31,6 +33,7 @@ The main gap was not missing disease coverage. It was partner/source alignment:
 2. Strengths-based, holistic diagnosis language existed in the post-diagnosis page but was not sufficiently visible at the root level.
 3. Family support needed a more explicit method for deciding when to use family-network guidance versus clinical/genetic/legal sources.
 4. The MENA diagnostic page needed a dated, precise reading of FraXI's public network directories and an explicit rule against inferring unavailable services from directory presence/absence.
+5. Existing adulthood and puberty/sexuality pages already covered supported decision-making, consent and safety, but did not yet map these sections directly to FraXI's current practical resources.
 
 ## Production changes completed
 
@@ -104,6 +107,40 @@ Post-update verification:
 - 10 claim-source mappings;
 - 10 explicit search-intent questions.
 
+### `fragile-x-adulthood-transition-independence`
+
+Added:
+- direct alignment with FraXI's person-centred transition and independent-living guidance;
+- explicit emphasis that transition meetings and decisions involve the young person as much as possible;
+- a small-goal, graded-support method for increasing control of daily life without treating independence as all-or-nothing.
+
+Post-update verification:
+- published and indexed;
+- 3,108 Arabic words;
+- 31 H2 / 5 H3;
+- 8 structured FAQ items;
+- 9 references;
+- 10 claim-source mappings;
+- 10 explicit search-intent questions.
+
+### `fragile-x-puberty-sexuality-safety`
+
+Added:
+- accessible, early teaching of body boundaries, consent and help-seeking;
+- decision-specific treatment of consent capacity rather than inferring capacity from the FXS diagnosis alone;
+- explicit separation between general principles and country-specific law;
+- digital relationship safety, image-sharing and coercion/exploitation literacy;
+- direct source mapping to FraXI Sexuality and Relationships material.
+
+Post-update verification:
+- published and indexed;
+- 2,863 Arabic words;
+- 37 H2 / 6 H3;
+- 8 structured FAQ items;
+- 12 references;
+- 11 claim-source mappings;
+- 10 explicit search-intent questions.
+
 ## Partner-attribution boundary
 
 No content has been labelled as “reviewed by FragilX Maroc”, “approved by FraXI”, “family priorities from Morocco”, or equivalent. The current email relationship supports contact and an offer to help, but the requested Morocco-specific family questions, terminology, resources and review comments have not yet been supplied in substantive form.
@@ -114,9 +151,17 @@ Therefore:
 - FragilX Maroc-specific priorities, terminology or service claims must wait for direct written or published evidence;
 - review or endorsement status must never be inferred from correspondence or a reaction to an email.
 
+## Membership / network readiness finding
+
+FraXI's current membership page makes a formal Full Membership application premature for Rawafid/Health Renewal at this stage. Full Membership is designed for a constituted national Fragile X family association that is registered as a non-profit charity and is family-run, including at least 75% family members/persons with FXS on its Board and a Chair within that group; FraXI also requests organisational and financial reporting. A provisional non-voting full member can be considered before three years of registered existence, but the foundational registered/family-association criteria still matter.
+
+Associate Membership exists for corporations, non-family associations and family organisations not yet registered charities. Affiliate Group status is specifically for family groups working toward a national registered family association and is also family-led. These routes have annual fees under FraXI's published structure.
+
+Strategic conclusion: do not claim that Rawafid is ready to become the Jordan Full Member and do not force an unsuitable category. The better current request to FraXI/Kristin is for guidance on a pre-membership or structured-network pathway for Jordan/MENA while Rawafid demonstrates value, completes its legal registration, and learns what governance model FraXI would consider appropriate. Any future formal application should be based on the actual governance/family representation and registration status at that time.
+
 ## Anti-duplication decision
 
-No new “strengths” URL was created in this pass. The existing reference centre, post-diagnosis, family and adulthood pages already own the relevant search intents, and the V6 anti-cannibalization rule favors enrichment until a genuinely distinct Arabic user decision is identified.
+No new “strengths”, “autonomy” or “consent” URL was created in this pass. The existing reference centre, post-diagnosis, family, adulthood and puberty/sexuality pages already own these search intents, and the V6 anti-cannibalization rule favors enrichment until a genuinely distinct Arabic user decision is identified.
 
 ## Next partner-triggered implementation
 
