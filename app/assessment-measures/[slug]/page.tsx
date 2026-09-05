@@ -52,6 +52,8 @@ export default async function AssessmentMeasureDetailPage({ params }: PageProps)
     .map((categorySlug) => assessmentMeasureCategories.find((item) => item.slug === categorySlug))
     .filter((item): item is NonNullable<typeof item> => Boolean(item));
   const related = measure.related.map((relatedSlug) => getAssessmentMeasure(relatedSlug)).filter((item): item is NonNullable<typeof item> => Boolean(item));
+  const operationalSources = (operationalMaterial.officialDownloads ?? []).map((item) => ({ role: 'original' as const, url: item.url, label: item.label }));
+  const visibleSources = [...measure.sources, ...operationalSources].filter((source, index, all) => all.findIndex((candidate) => candidate.url === source.url) === index);
 
   const breadcrumb = {
     '@context': 'https://schema.org',
@@ -193,7 +195,7 @@ export default async function AssessmentMeasureDetailPage({ params }: PageProps)
 
             <section className={styles.panel} aria-labelledby="sources-title">
               <h2 id="sources-title">المصادر الأصلية والحقوق</h2>
-              <div className={styles.sourceList}>{[...measure.sources, ...operationalMaterial.officialDownloads?.map((item) => ({ role: 'original' as const, url: item.url, label: item.label })) ?? []].filter((source, index, all) => all.findIndex((candidate) => candidate.url === source.url) === index).map((source) => <a key={`${source.role}-${source.url}`} href={source.url} target="_blank" rel="noreferrer">{source.label} ↗</a>)}</div>
+              <div className={styles.sourceList}>{visibleSources.map((source) => <a key={`${source.role}-${source.url}`} href={source.url} target="_blank" rel="noreferrer">{source.label} ↗</a>)}</div>
               <p>RMD مصدر للأدلة والمعلومات عن المقاييس، وليس بالضرورة مالك حقوق الأداة. لذلك نعرض مصدر الحقوق بصورة مستقلة.</p>
             </section>
 
