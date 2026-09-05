@@ -45,6 +45,11 @@ jobs:
       - name: Quick Info production cache contract
         run: node scripts/quick-info-production-cache-contract.mjs
 
+      - name: Performance shell contract
+        run: |
+          node --check public/rawafid-assistant.js
+          npm run performance:validate
+
       - name: Build
         shell: bash
         run: |
@@ -86,4 +91,9 @@ jobs:
           grep -q 'search_rawafid_evidence' /tmp/home.html
           grep -q 'document.modelContext' /tmp/home.html
           grep -q 'additionalProperties: false' /tmp/home.html
+          grep -q 'data-rawafid-assistant-launcher' /tmp/home.html
+          grep -q 'id="rawafid-assistant-bootstrap"' /tmp/home.html
+          curl -fsS http://127.0.0.1:3000/rawafid-assistant.js >/tmp/rawafid-assistant.js
+          grep -q 'toolname="askRawafidAssistant"' /tmp/rawafid-assistant.js
+          curl -fsS http://127.0.0.1:3000/rawafid-assistant.css >/dev/null
           curl -fsS http://127.0.0.1:3000/sitemap.xml >/dev/null
