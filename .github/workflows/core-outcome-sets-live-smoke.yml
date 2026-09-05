@@ -1,0 +1,60 @@
+name: Core Outcome Sets Live Smoke
+
+on:
+  workflow_run:
+    workflows: ['Deploy Production Fast']
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: core-outcome-sets-live-smoke
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Verify Core Outcome Sets public routes
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://healthrenewal.org'
+          stamp="${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+
+          paths=(
+            '/core-outcome-sets/'
+            '/core-outcome-sets/addiction-ichom-standard-set/'
+            '/core-outcome-sets/opioid-use-disorder-cos/'
+            '/core-outcome-sets/autism-ichom-standard-set/'
+            '/core-outcome-sets/instrument-crosswalk/'
+          )
+
+          for path in "${paths[@]}"; do
+            echo "LIVE_CHECK ${path}"
+            body="$(mktemp)"
+            code="$(curl -sS -L \
+              -H 'Cache-Control: no-cache, no-store, max-age=0' \
+              -H 'Pragma: no-cache' \
+              --retry 4 --retry-delay 2 --retry-all-errors \
+              -o "${body}" -w '%{http_code}' \
+              "${base}${path}?smoke=${stamp}")"
+
+            if [ "${code}" != '200' ]; then
+              echo "Expected HTTP 200 for ${path}; received ${code}." >&2
+              head -c 1000 "${body}" >&2 || true
+              exit 1
+            fi
+
+            if grep -qi 'Internal Server Error' "${body}"; then
+              echo "Internal Server Error body detected for ${path}." >&2
+              exit 1
+            fi
+
+            test -s "${body}"
+            echo "LIVE_OK ${path}"
+          done
