@@ -19,6 +19,7 @@ export async function GET() {
     { path:'/assessment-lab', changeFrequency:'monthly', priority:.76 },
     ...assessmentSlugs.map((slug) => ({ path:`/assessment-lab/${slug}`, changeFrequency:'monthly' as const, priority:.7 })),
     { path:'/core-outcome-sets/', changeFrequency:'monthly', priority:.8 },
+    { path:'/core-outcome-sets/instrument-crosswalk/', changeFrequency:'monthly', priority:.8 },
     ...coreOutcomeRegistrySlugs.map((slug) => ({ path:`/core-outcome-sets/${slug}/`, changeFrequency:'monthly' as const, priority:.78 })),
     { path:'/assessment-measures/', changeFrequency:'weekly', priority:.84 },
     { path:'/assessment-measures/compare/', changeFrequency:'monthly', priority:.72 },

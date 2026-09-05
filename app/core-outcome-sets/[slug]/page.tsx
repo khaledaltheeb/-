@@ -5,6 +5,7 @@ import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import { buildSeoMetadata, SITE_URL } from '@/lib/seo';
 import { coreOutcomeRegistry, getCoreOutcomeRecord } from '@/lib/core-outcome-sets/registry';
+import { getInstrumentCrosswalkForCos } from '@/lib/core-outcome-sets/instrument-crosswalk';
 import styles from '@/components/assessment-measures.module.css';
 
 type PageProps = { params: Promise<{ slug: string }> };
@@ -36,6 +37,7 @@ export default async function CoreOutcomeSetDetailPage({ params }: PageProps) {
   const { slug } = await params;
   const item = getCoreOutcomeRecord(slug);
   if (!item) notFound();
+  const crosswalk = getInstrumentCrosswalkForCos(item.slug);
 
   const schema = {
     '@context': 'https://schema.org',
@@ -68,6 +70,7 @@ export default async function CoreOutcomeSetDetailPage({ params }: PageProps) {
           <div className={styles.heroActions}>
             <a className={styles.primaryAction} href={item.source.cometUrl} target="_blank" rel="noreferrer">السجل الأصلي في COMET ↗</a>
             {item.source.doi ? <a className={styles.secondaryAction} href={item.source.doi} target="_blank" rel="noreferrer">المنشور/DOI ↗</a> : null}
+            <Link className={styles.secondaryAction} href="/core-outcome-sets/instrument-crosswalk/">خريطة الأدوات والدليل العربي</Link>
             <Link className={styles.secondaryAction} href="/assessment-measures/">مكتبة أدوات القياس</Link>
           </div>
           <div className={styles.notice}><strong>حالة روافد:</strong> السجل موثق من المصدر، لكن التقييم العربي لا يُفترض تلقائيًا. حالة ملاءمة COS للسياق العربي وحالة النسخ العربية من الأدوات موضحتان أدناه كلٌ على حدة.</div>
@@ -101,11 +104,29 @@ export default async function CoreOutcomeSetDetailPage({ params }: PageProps) {
           </div>
         </section>
 
+        {crosswalk.length > 0 ? <section className={styles.section} aria-labelledby="instrument-crosswalk-title">
+          <div className={styles.sectionHead}><div><h2 id="instrument-crosswalk-title">ما حالة الأدوات المرتبطة بهذا COS داخل روافد؟</h2><p>هذه الطبقة تتبع الأدوات التي دققناها حتى الآن ولا تدعي اكتمال COMS كله.</p></div></div>
+          <div className={styles.grid}>
+            {crosswalk.map((instrument) => <article className={styles.card} key={instrument.id}>
+              <div className={styles.cardMeta}><span className={styles.badge}>{instrument.rawafidStatusLabel}</span><span className={styles.badge}>{instrument.arabicEvidenceLabel}</span></div>
+              <h3>{instrument.acronym}</h3>
+              <p>{instrument.instrument}</p>
+              <div className={styles.cardFoot}><span><strong>الحقوق:</strong> {instrument.rightsNote}</span></div>
+              <div className={styles.cardFoot}><span><strong>العربية:</strong> {instrument.arabicEvidenceNote}</span></div>
+              <div className={styles.sourceLinks}>
+                {instrument.internalPath ? <Link href={instrument.internalPath}>سجل الأداة في روافد ←</Link> : null}
+                {instrument.evidenceUrl ? <a href={instrument.evidenceUrl} target="_blank" rel="noreferrer">مصدر الدليل ↗</a> : null}
+              </div>
+            </article>)}
+          </div>
+          <div className={styles.sourceLinks}><Link href="/core-outcome-sets/instrument-crosswalk/">افتح الـInstrument Crosswalk الكامل ←</Link></div>
+        </section> : null}
+
         <section className={styles.section} aria-labelledby="arabic-review-title">
           <div className={styles.sectionHead}><div><h2 id="arabic-review-title">حالة التقييم العربي</h2><p>نحافظ على فصلين: ملاءمة COS نفسه للسياق المحلي، وملاءمة أداة القياس باللغة العربية.</p></div></div>
           <div className={styles.methodGrid}>
             <article className={styles.methodCard}><h3>ملاءمة COS للسياق العربي</h3><p>{item.arabicReview.cosContext === 'not-assessed' ? 'غير مقيمة بعد.' : 'تحتاج مراجعة محلية منظمة قبل التبني المباشر.'}</p></article>
-            <article className={styles.methodCard}><h3>التكييف والتحقق العربي للأدوات</h3><p>غير مقيم بعد على مستوى الأدوات المرتبطة بهذا السجل.</p></article>
+            <article className={styles.methodCard}><h3>التكييف والتحقق العربي للأدوات</h3><p>{crosswalk.length > 0 ? `تم تدقيق ${crosswalk.length.toLocaleString('ar')} أداة/عائلة أدوات مرتبطة في الـCrosswalk الحالي؛ راجع كل بطاقة لأن الحالات تتراوح بين دليل سيكومتري سياقي وترجمة رسمية وفجوة غير مدققة.` : 'غير مقيم بعد على مستوى الأدوات المرتبطة بهذا السجل.'}</p></article>
           </div>
           <div className={styles.callout}>{item.arabicReview.note}</div>
         </section>
@@ -127,6 +148,7 @@ export default async function CoreOutcomeSetDetailPage({ params }: PageProps) {
               <a href={item.source.cometUrl} target="_blank" rel="noreferrer">COMET Initiative — السجل الأصلي ↗</a>
               {item.source.doi ? <a href={item.source.doi} target="_blank" rel="noreferrer">المنشور الأصلي / DOI ↗</a> : null}
               {item.source.secondaryUrl ? <a href={item.source.secondaryUrl} target="_blank" rel="noreferrer">مصدر/دراسة مرتبطة ↗</a> : null}
+              <Link href="/core-outcome-sets/instrument-crosswalk/">خريطة الأدوات والدليل العربي</Link>
               <Link href="/core-outcome-sets/">العودة إلى سجل Core Outcome Sets</Link>
             </div>
           </div>
