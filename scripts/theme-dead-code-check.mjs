@@ -3,19 +3,20 @@ import path from 'node:path';
 
 const root = process.cwd();
 const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
+const fail = (message) => { console.error(`THEME IMPORT CHECK FAILED: ${message}`); process.exitCode = 1; };
+const executableCss = (body) => body.replace(/\/\*[\s\S]*?\*\//g, '').trim();
+
 const themeEntry = read('app/rawafid-theme.css');
 const importedCss = [...themeEntry.matchAll(/@import\s+['"]\.\/(.+?\.css)['"]/g)].map((match) => match[1]);
 const duplicates = importedCss.filter((value, index) => importedCss.indexOf(value) !== index);
 
 if (duplicates.length) {
-  console.error(`THEME IMPORT CHECK FAILED: duplicate imports: ${[...new Set(duplicates)].join(', ')}`);
-  process.exitCode = 1;
+  fail(`duplicate imports: ${[...new Set(duplicates)].join(', ')}`);
 }
 
 for (const file of importedCss) {
   if (!fs.existsSync(path.join(root, 'app', file))) {
-    console.error(`THEME IMPORT CHECK FAILED: missing app/${file}`);
-    process.exitCode = 1;
+    fail(`missing app/${file}`);
   }
 }
 
@@ -27,18 +28,67 @@ const adminOperationsRoute = read('app/admin/admin-operations.css');
 
 for (const cssImport of ["'./admin-ui.css'", "'./admin-operations.css'"]) {
   if (!adminLayout.includes(cssImport)) {
-    console.error(`THEME IMPORT CHECK FAILED: admin layout missing route-scoped ${cssImport}`);
-    process.exitCode = 1;
+    fail(`admin layout missing route-scoped ${cssImport}`);
   }
 }
 
 if (adminUiStub.includes('.advanced-fields') || adminOperationsStub.includes('.admin-list')) {
-  console.error('THEME IMPORT CHECK FAILED: admin-only selectors leaked back into the public compatibility stubs');
-  process.exitCode = 1;
+  fail('admin-only selectors leaked back into the public compatibility stubs');
 }
 if (!adminUiRoute.includes('.advanced-fields') || !adminOperationsRoute.includes('.admin-list')) {
-  console.error('THEME IMPORT CHECK FAILED: route-scoped admin CSS is missing required admin selectors');
-  process.exitCode = 1;
+  fail('route-scoped admin CSS is missing required admin selectors');
 }
 
-if (!process.exitCode) console.log(`Rawafid central theme import graph passed: ${importedCss.length} unique compatibility modules; admin-only CSS remains route-scoped.`);
+const dashboardStub = read('app/dashboard-v3.css');
+const dashboardScoped = read('app/dashboard-v3-scoped.css');
+if (executableCss(dashboardStub)) {
+  fail('dashboard-v3.css must remain a non-executable compatibility stub');
+}
+for (const selector of ['.dashboard-shell', '.dashboard-card', '.admin-heading']) {
+  if (!dashboardScoped.includes(selector)) fail(`route-scoped dashboard CSS missing ${selector}`);
+}
+
+const adminThemeStub = read('app/theme-admin-v4.css');
+const adminThemeScoped = read('app/theme-admin-v4-scoped.css');
+if (executableCss(adminThemeStub)) {
+  fail('theme-admin-v4.css must remain a non-executable compatibility stub');
+}
+for (const selector of ['.admin-app-shell', '.dashboard-card', '.auth-shell', '.status-shell']) {
+  if (!adminThemeScoped.includes(selector)) fail(`route-scoped admin theme missing ${selector}`);
+}
+
+const systemPortals = read('app/system-portals-v1.css');
+const accountSystem = read('app/account-system-v1.css');
+for (const selector of ['.join-shell', '.verification-controls']) {
+  if (!systemPortals.includes(selector)) fail(`system portal CSS missing ${selector}`);
+}
+for (const selector of ['.account-shell', '.auth-register-callout']) {
+  if (!accountSystem.includes(selector)) fail(`account system CSS missing ${selector}`);
+}
+
+const routeCssContracts = [
+  ['app/admin/layout.tsx', ["'../dashboard-v3-scoped.css'", "'../system-portals-v1.css'", "'../theme-admin-v4-scoped.css'"]],
+  ['app/account/layout.tsx', ["'../dashboard-v3-scoped.css'", "'../system-portals-v1.css'", "'../account-system-v1.css'", "'../theme-admin-v4-scoped.css'"]],
+  ['app/specialist/layout.tsx', ["'../dashboard-v3-scoped.css'", "'../theme-admin-v4-scoped.css'"]],
+  ['app/center/layout.tsx', ["'../dashboard-v3-scoped.css'", "'../theme-admin-v4-scoped.css'"]],
+  ['app/mfa/layout.tsx', ["'../dashboard-v3-scoped.css'", "'../account-system-v1.css'", "'../theme-admin-v4-scoped.css'"]],
+  ['app/community/join/layout.tsx', ["'../../dashboard-v3-scoped.css'", "'../../theme-admin-v4-scoped.css'"]],
+  ['app/join/layout.tsx', ["'../system-portals-v1.css'"]],
+  ['app/login/layout.tsx', ["'../account-system-v1.css'", "'../theme-admin-v4-scoped.css'"]],
+  ['app/register/layout.tsx', ["'../account-system-v1.css'", "'../theme-admin-v4-scoped.css'"]],
+  ['app/forgot-password/layout.tsx', ["'../account-system-v1.css'", "'../theme-admin-v4-scoped.css'"]],
+  ['app/reset-password/layout.tsx', ["'../account-system-v1.css'", "'../theme-admin-v4-scoped.css'"]],
+  ['app/offline/layout.tsx', ["'../theme-admin-v4-scoped.css'"]],
+  ['app/share/layout.tsx', ["'../theme-admin-v4-scoped.css'"]],
+];
+
+for (const [file, needles] of routeCssContracts) {
+  const body = read(file);
+  for (const needle of needles) {
+    if (!body.includes(needle)) fail(`${file} missing route-scoped CSS import ${needle}`);
+  }
+}
+
+if (!process.exitCode) {
+  console.log(`Rawafid central theme import graph passed: ${importedCss.length} unique compatibility modules; dashboard/admin/auth/account/join CSS remains route-scoped.`);
+}
