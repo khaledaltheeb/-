@@ -21,12 +21,14 @@ type Category = { id: string; sector_id: string | null; parent_id: string | null
 
 export default async function SectorsIndex() {
   const supabase = await createClient();
-  const [{ data: sectors }, { data: categories }] = await Promise.all([
+  const [{ data: sectors }, { data: categories }, capabilityResult] = await Promise.all([
     supabase.from('sectors').select('id,slug,name_ar,description,accent,sort_order').eq('is_active', true).eq('visibility', 'public').order('sort_order').order('name_ar'),
     supabase.from('categories').select('id,sector_id,parent_id').eq('is_active', true).eq('visibility', 'public'),
+    supabase.from('content').select('id', { count: 'exact', head: true }).eq('status', 'published').eq('robots_index', true).like('canonical_url', '/capabilities/%'),
   ]);
   const rows = (sectors ?? []) as Sector[];
   const categoryRows = (categories ?? []) as Category[];
+  const capabilityPublishedCount = capabilityResult.count ?? 0;
   const breadcrumbs = breadcrumbJsonLd([{ name: 'الرئيسية', path: '/' }, { name: 'القطاعات', path: '/sectors' }]);
   const collection = {
     '@context': 'https://schema.org',
@@ -82,9 +84,11 @@ export default async function SectorsIndex() {
             <h2>{sector.name_ar}</h2>
             <p>{sector.description || 'قطاع رئيسي يجمع موضوعات مترابطة ضمن بنية معرفية وخدمية واضحة.'}</p>
             <div className="sector-metrics">
-              {sectorCategories.length === 0
-                ? <span>مسار متخصص مباشر</span>
-                : <><span>{rootCount.toLocaleString('ar')} أقسام رئيسية</span>{childCount > 0 && <span>{childCount.toLocaleString('ar')} أقسام فرعية</span>}</>}
+              {sector.slug === 'capabilities'
+                ? <><span>{capabilityPublishedCount.toLocaleString('ar')} صفحة مرتبطة مباشرة</span><span>برنامج عابر للتخصصات</span></>
+                : sectorCategories.length === 0
+                  ? <span>مسار متخصص مباشر</span>
+                  : <><span>{rootCount.toLocaleString('ar')} أقسام رئيسية</span>{childCount > 0 && <span>{childCount.toLocaleString('ar')} أقسام فرعية</span>}</>}
             </div>
             <span className="sector-open">استكشف القطاع ←</span>
           </Link>;
