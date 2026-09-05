@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 
 export const metadata = buildSeoMetadata({
   title: 'لنرتقي بقدراتهم | قطاع القدرات والبروتوكولات والأدوات العملية',
-  description: 'قطاع تطبيقي لاكتشاف القدرات وإزالة حواجز الأداء: 100 دليل حالة، بروتوكول عملي، منهجية أدلة، أوراق قابلة للطباعة وأفكار مبتكرة قابلة للقياس.',
+  description: 'قطاع تطبيقي لاكتشاف القدرات وإزالة حواجز الأداء: 100 دليل حالة، بروتوكول عملي، منهجية أدلة، أوراق قابلة للطباعة ومسار علمي موازٍ في خارج الصندوق.',
   path: '/sectors/capabilities',
   index: true,
   keywords: ['لنرتقي بقدراتهم', 'اكتشاف القدرات', 'التربية الخاصة', 'الدمج', 'البروتوكولات', 'أوراق عمل', 'التكييفات', 'الدعم الوظيفي'],
@@ -31,8 +31,9 @@ const paths = [
   { href: '/capabilities/registry/', title: 'أدلة الحالات المئة', text: 'مئة حالة ضمن ستة مجالات، مع الوصول إلى الدليل التفصيلي لكل حالة بدل التعميم على الأشخاص.' },
   { href: '/capabilities/protocol/', title: 'البروتوكول العملي', text: 'تسع مراحل من الأمان وصوت الشخص إلى التجربة والقياس والنقل واتخاذ القرار.' },
   { href: '/capabilities/printables/', title: 'أوراق قابلة للطباعة', text: 'خط أساس، تجربة تكييف، الأمان، التواصل، الطاقة، التقدم وقرار الفريق في نماذج قابلة للطباعة.' },
-  { href: '/capabilities/ideas/', title: 'أفكار خارج الصندوق', text: 'تجارب صغيرة مبتكرة، لكل منها حاجز محدد ومقياس نتيجة وقاعدة توقف، لا نصائح عشوائية.' },
+  { href: '/capabilities/ideas/', title: 'مختبر الأفكار السريعة', text: 'تجارب صغيرة مبتكرة، لكل منها حاجز محدد ومقياس نتيجة وقاعدة توقف، لا نصائح عشوائية.' },
   { href: '/capabilities/methodology/', title: 'المنهجية والأدلة', text: 'كيف نختار المصادر، نحد الادعاء، نتعامل مع التباين الفردي، ونفرق بين القوة المحتملة والقصة الجذابة غير المثبتة.' },
+  { href: '/outside-the-box/', title: 'خارج الصندوق — المسارات العلمية', text: 'القسم العلمي الموازي لمقدم الخدمة: تقييم متعدد المصادر، خط أساس، فرضيات وتجارب قابلة للعكس، جودة تنفيذ، قياس، توقف وتعميم.' },
 ];
 
 const principles = [
@@ -121,13 +122,13 @@ export default async function CapabilitiesSectorPage() {
         </nav>
 
         <section style={{ maxWidth: 1050, margin: '0 auto 2rem', padding: 'clamp(2.5rem,7vw,6rem) clamp(1.25rem,4vw,4rem)', borderRadius: 30, background: '#f7fbfa', border: '1px solid rgba(7,95,97,.14)' }}>
-          <span className="eyebrow">قطاع تطبيقي مرتبط بمكتبته الحقيقية</span>
+          <span className="eyebrow">قطاع تطبيقي مرتبط بمكتبته العلمية الحقيقية</span>
           <h1 style={{ fontSize: 'clamp(2.2rem,5vw,4.5rem)', lineHeight: 1.2, margin: '.8rem 0 1rem' }}>لنرتقي بقدراتهم</h1>
           <p style={{ maxWidth: 820, fontSize: 'clamp(1.1rem,2vw,1.4rem)', lineHeight: 2 }}>
             لا نسأل: «ما الموهبة التي يمنحها هذا التشخيص؟». نسأل سؤالًا أدق وأكثر احترامًا للإنسان: <strong>ما الذي يستطيع هذا الشخص فعله، وما الذي قد يخفي قدرته، وما التعديل الذي يستحق التجربة، وكيف نعرف أن النتيجة مفيدة وآمنة ومستدامة؟</strong>
           </p>
           <p style={{ maxWidth: 820, lineHeight: 2, color: 'var(--muted, #53686b)' }}>
-            هذه الصفحة لا تعتمد على فئة فارغة في شجرة الأقسام. هي الآن تقرأ مباشرةً مكتبة <code>/capabilities/*</code> المنشورة، لذلك يبقى لكل دليل مساره وCanonical الخاص به من دون نسخ أو إنشاء صفحات مكررة.
+            هذا هو مسار القدرة والوصول والمشاركة. أما <Link href="/outside-the-box/">«خارج الصندوق»</Link> فهو مسار علمي مستقل وموازٍ لمقدم الخدمة يركز على التقييم والفرضية والتجربة والقياس وجودة التنفيذ وقواعد التوقف. تُربط الصفحات المناظرة بين المسارين عندما تتوافر للحالة نفسها.
           </p>
           <div className="public-stat-strip">
             <span>{rows.length.toLocaleString('ar')} صفحة فعلية مرتبطة بالبرنامج</span>
@@ -166,7 +167,7 @@ export default async function CapabilitiesSectorPage() {
           <div className="section-heading">
             <span>المكتبة الأساسية</span>
             <h2 id="core-capabilities-title">أدلة الحالات المئة مرتبطة مباشرة بالقطاع</h2>
-            <p>هذه ليست نسخًا جديدة؛ الروابط أدناه تشير إلى السجلات الأصلية نفسها في برنامج القدرات.</p>
+            <p>كل رابط يقود إلى دليل القدرة والوصول الخاص بالحالة؛ وإذا كان لها مسار علمي في «خارج الصندوق» فستجد الربط المتبادل داخل الصفحة نفسها.</p>
           </div>
           <div className="related-content-grid">
             {core.slice(0, 18).map((row) => (
@@ -174,7 +175,7 @@ export default async function CapabilitiesSectorPage() {
                 <span className="content-type-pill">الحالة {legacyRank(row)}</span>
                 <h3><Link href={capabilityHref(row)}>{row.title}</Link></h3>
                 {row.excerpt && <p>{row.excerpt}</p>}
-                <Link href={capabilityHref(row)}>فتح الدليل الأصلي ←</Link>
+                <Link href={capabilityHref(row)}>فتح الدليل ←</Link>
               </article>
             ))}
           </div>
@@ -185,7 +186,7 @@ export default async function CapabilitiesSectorPage() {
           <div className="section-heading">
             <span>امتداد تخصصي</span>
             <h2 id="extended-capabilities-title">صفحات إضافية مرتبطة بالبرنامج خارج السجل الأساسي</h2>
-            <p>هذه الصفحات كانت غير ظاهرة بوضوح من صفحة القطاع رغم أن Canonical الخاص بها يقع داخل <code>/capabilities/</code>. أصبحت الآن قابلة للاكتشاف من القطاع مباشرة.</p>
+            <p>صفحات تخصصية إضافية ضمن برنامج القدرات، مع الحفاظ على مساراتها المستقلة وربطها بالمصادر والمسارات الموازية حيث تتوافر.</p>
           </div>
           <div className="related-content-grid">
             {extendedConditions.map((row) => (
@@ -233,8 +234,8 @@ export default async function CapabilitiesSectorPage() {
           <h2 style={{ marginTop: 0 }}>المصادر ليست زينة في نهاية الصفحة</h2>
           <p>تُبنى الأدلة على مزيج من الإرشادات والمراجع الرسمية، المراجعات المنهجية، الدراسات المحكمة والمصادر المتخصصة المناسبة للسؤال. من الجهات المستخدمة بحسب الموضوع: منظمة الصحة العالمية، PubMed/NCBI، NICE، CDC، ASHA، UNICEF، CAST، GeneReviews، AAIDD، IES وغيرها. وجود اسم جهة في المراجع لا يعني شراكة أو اعتمادًا منها.</p>
           <div style={{ display: 'flex', gap: '.75rem', flexWrap: 'wrap' }}>
-            <Link href="/capabilities/methodology/" className="button">اقرأ المنهجية</Link>
-            <Link href="/capabilities/ideas/" className="button button-secondary">أفكار خارج الصندوق</Link>
+            <Link href="/capabilities/methodology/" className="button">اقرأ منهجية القدرات</Link>
+            <Link href="/outside-the-box/" className="button button-secondary">خارج الصندوق — المكتبة العلمية</Link>
             <Link href="/sources" className="button button-secondary">منهج المصادر في المنصة</Link>
           </div>
         </section>
