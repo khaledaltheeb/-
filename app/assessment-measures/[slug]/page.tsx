@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound, permanentRedirect } from 'next/navigation';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
+import AssessmentMeasureOperationalForm from '@/components/assessment-measure-operational-form';
 import { buildSeoMetadata, SITE_URL } from '@/lib/seo';
 import {
   arabicStatusBadge,
@@ -12,6 +13,7 @@ import {
   getCanonicalAssessmentMeasureSlug,
   rightsBadge,
 } from '@/lib/assessment-measures-catalog';
+import { getOperationalMaterial } from '@/lib/assessment-measure-operational';
 import styles from '@/components/assessment-measures.module.css';
 
 type PageProps = { params: Promise<{ slug: string }> };
@@ -25,15 +27,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const measure = getAssessmentMeasure(slug);
   if (!measure) return {};
   return buildSeoMetadata({
-    title: `${measure.nameAr} (${measure.acronym}) — دليل الاستخدام والحقوق`,
-    description: `${measure.summary} تعرّف إلى طريقة التطبيق والتسجيل وحدود التفسير والنسخة العربية وحقوق الاستخدام والمصادر الموثوقة.`,
+    title: `${measure.nameAr} (${measure.acronym}) — النموذج ودليل الاستخدام`,
+    description: `${measure.summary} النموذج/ورقة التطبيق، طريقة الاستخدام والتسجيل، حدود التفسير، النسخة العربية، الحقوق والمصادر الموثوقة.`,
     path: `/assessment-measures/${measure.slug}/`,
     index: true,
     follow: true,
     type: 'article',
-    keywords: [measure.nameAr, measure.nameEn, measure.acronym, measure.construct, 'طريقة الاستخدام', 'تفسير الدرجة', 'حقوق الاستخدام'],
+    keywords: [measure.nameAr, measure.nameEn, measure.acronym, measure.construct, 'نموذج قابل للطباعة', 'طريقة الاستخدام', 'تفسير الدرجة', 'حقوق الاستخدام'],
     relatedTerms: measure.populations,
-    searchIntents: [`طريقة استخدام ${measure.acronym}`, `تفسير ${measure.acronym}`, `هل ${measure.acronym} مجاني`, `النسخة العربية من ${measure.acronym}`],
+    searchIntents: [`نموذج ${measure.acronym}`, `تحميل ${measure.acronym}`, `طريقة استخدام ${measure.acronym}`, `تفسير ${measure.acronym}`, `النسخة العربية من ${measure.acronym}`],
   });
 }
 
@@ -44,11 +46,14 @@ export default async function AssessmentMeasureDetailPage({ params }: PageProps)
 
   const measure = getAssessmentMeasure(canonicalSlug);
   if (!measure) notFound();
+  const operationalMaterial = getOperationalMaterial(measure);
 
   const categoryRecords = measure.categories
     .map((categorySlug) => assessmentMeasureCategories.find((item) => item.slug === categorySlug))
     .filter((item): item is NonNullable<typeof item> => Boolean(item));
   const related = measure.related.map((relatedSlug) => getAssessmentMeasure(relatedSlug)).filter((item): item is NonNullable<typeof item> => Boolean(item));
+  const operationalSources = (operationalMaterial.officialDownloads ?? []).map((item) => ({ role: 'original' as const, url: item.url, label: item.label }));
+  const visibleSources = [...measure.sources, ...operationalSources].filter((source, index, all) => all.findIndex((candidate) => candidate.url === source.url) === index);
 
   const breadcrumb = {
     '@context': 'https://schema.org',
@@ -75,7 +80,7 @@ export default async function AssessmentMeasureDetailPage({ params }: PageProps)
       alternateName: measure.acronym,
       description: measure.purpose,
     },
-    citation: measure.sources.map((source) => source.url),
+    citation: [...new Set([...measure.sources.map((source) => source.url), ...operationalMaterial.sourceUrls])],
   };
 
   return (
@@ -91,14 +96,18 @@ export default async function AssessmentMeasureDetailPage({ params }: PageProps)
           <div className={styles.detailHeroMain}>
             <div className={styles.cardMeta}>
               <span className={styles.badge}>{rightsBadge(measure.rightsStatus)}</span>
+              <span className={operationalMaterial.completeness === 'exact-public-domain-form' ? styles.badgeSoft : styles.badgeWarn}>
+                {operationalMaterial.completeness === 'exact-public-domain-form' ? 'النموذج/السلم مدرج' : 'ورقة تطبيق وتسجيل'}
+              </span>
               <span className={measure.fullArabicFormPublished ? styles.badgeSoft : styles.badgeWarn}>{arabicStatusBadge(measure.arabicStatus)}</span>
             </div>
             <h1>{measure.nameAr} <span>({measure.acronym})</span></h1>
             <div className={styles.english} lang="en" dir="ltr">{measure.nameEn} · {measure.version}</div>
             <p className={styles.summary}>{measure.summary}</p>
             <div className={styles.heroActions}>
-              <a className={styles.primaryAction} href="#usage">دليل الاستخدام</a>
-              <a className={styles.secondaryAction} href="#rights">الحقوق والنسخة العربية</a>
+              <a className={styles.primaryAction} href="#form">فتح المقياس / ورقة التطبيق</a>
+              <Link className={styles.secondaryAction} href={`/assessment-measures/${measure.slug}/print/`}>طباعة / حفظ PDF</Link>
+              <a className={styles.secondaryAction} href="#usage">دليل الاستخدام</a>
               <Link className={styles.secondaryAction} href={`/assessment-measures/compare/?measure=${encodeURIComponent(measure.slug)}`}>أضف إلى المقارنة</Link>
             </div>
           </div>
@@ -106,8 +115,8 @@ export default async function AssessmentMeasureDetailPage({ params }: PageProps)
           <aside className={styles.rightsPanel} aria-label="ملخص الحقوق والإتاحة">
             <h2>حالة الاستخدام</h2>
             <div className={styles.rightsRow}><span>الأصل</span><strong>{measure.rightsLabel}</strong></div>
+            <div className={styles.rightsRow}><span>المادة التشغيلية على روافد</span><strong>{operationalMaterial.completeness === 'exact-public-domain-form' ? 'النموذج/السلم نفسه متاح' : operationalMaterial.completeness === 'standardized-protocol-sheet' ? 'بروتوكول تطبيق وتسجيل متاح' : 'ورقة تسجيل وتشغيل متاحة'}</strong></div>
             <div className={styles.rightsRow}><span>النسخة العربية</span><strong>{measure.arabicLabel}</strong></div>
-            <div className={styles.rightsRow}><span>النموذج العربي الكامل على روافد</span><strong>{measure.fullArabicFormPublished ? 'متاح كإجراء/بروتوكول عربي موثق' : 'غير منشور حتى اكتمال تحقق النسخة'}</strong></div>
             <div className={styles.rightsRow}><span>آخر تحقق للحقوق</span><strong>{measure.rightsVerifiedOn}</strong></div>
           </aside>
         </section>
@@ -126,8 +135,19 @@ export default async function AssessmentMeasureDetailPage({ params }: PageProps)
               </div>
             </section>
 
+            <section id="form" aria-labelledby="form-title">
+              <div className={styles.formIntro}>
+                <div>
+                  <h2 id="form-title">المقياس / ورقة التطبيق</h2>
+                  <p>هذه هي طبقة الاستخدام العملي: البنود أو المهام عندما تسمح الحقوق، وخانات التطبيق والتسجيل والحساب والسلامة والمصادر.</p>
+                </div>
+                <Link className={styles.primaryAction} href={`/assessment-measures/${measure.slug}/print/`}>نسخة A4 للطباعة</Link>
+              </div>
+              <AssessmentMeasureOperationalForm material={operationalMaterial} />
+            </section>
+
             <section className={styles.panel} id="usage" aria-labelledby="usage-title">
-              <h2 id="usage-title">دليل الاستخدام</h2>
+              <h2 id="usage-title">دليل الاستخدام التفصيلي</h2>
               <h3>ما الذي تحتاجه؟</h3>
               <ul>{measure.equipment.map((item) => <li key={item}>{item}</li>)}</ul>
               <h3>خطوات التطبيق</h3>
@@ -161,8 +181,8 @@ export default async function AssessmentMeasureDetailPage({ params }: PageProps)
               <h3>حالة العربية</h3>
               <p>{measure.arabicNote}</p>
               <div className={styles.statusBox}>
-                <strong>{measure.fullArabicFormPublished ? 'ما هو منشور بالعربية؟' : 'لماذا لا نعرض النموذج العربي كاملًا الآن؟'}</strong>
-                <p>{measure.fullArabicFormNote}</p>
+                <strong>{operationalMaterial.completeness === 'exact-public-domain-form' ? 'ما الذي نعرضه الآن؟' : 'لماذا قد لا نعرض نص البنود كاملًا؟'}</strong>
+                <p>{operationalMaterial.completeness === 'exact-public-domain-form' ? 'أدرجنا النموذج أو السلم نفسه عندما وجدنا أساسًا حقوقيًا ومصدرًا كافيًا، مع إبقاء حدود الترجمة منفصلة.' : measure.fullArabicFormNote}</p>
               </div>
             </section>
           </div>
@@ -175,7 +195,7 @@ export default async function AssessmentMeasureDetailPage({ params }: PageProps)
 
             <section className={styles.panel} aria-labelledby="sources-title">
               <h2 id="sources-title">المصادر الأصلية والحقوق</h2>
-              <div className={styles.sourceList}>{measure.sources.map((source) => <a key={`${source.role}-${source.url}`} href={source.url} target="_blank" rel="noreferrer">{source.label} ↗</a>)}</div>
+              <div className={styles.sourceList}>{visibleSources.map((source) => <a key={`${source.role}-${source.url}`} href={source.url} target="_blank" rel="noreferrer">{source.label} ↗</a>)}</div>
               <p>RMD مصدر للأدلة والمعلومات عن المقاييس، وليس بالضرورة مالك حقوق الأداة. لذلك نعرض مصدر الحقوق بصورة مستقلة.</p>
             </section>
 

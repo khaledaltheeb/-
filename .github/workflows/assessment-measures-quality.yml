@@ -6,10 +6,14 @@ on:
       - 'app/assessment-measures/**'
       - 'app/search/page.tsx'
       - 'lib/assessment-measures*.ts'
+      - 'lib/assessment-measure-operational.ts'
       - 'components/assessment-measures.module.css'
+      - 'components/assessment-measure-operational-form.tsx'
+      - 'components/measure-print-button.tsx'
       - 'components/site-header.tsx'
       - 'app/sitemaps/static.xml/route.ts'
       - 'scripts/assessment-measures-contract.mjs'
+      - 'scripts/assessment-measures-operational-contract.mjs'
       - '.assessment-measures-plan.md'
       - '.github/workflows/assessment-measures-quality.yml'
   workflow_dispatch:
@@ -31,6 +35,8 @@ jobs:
         run: npm ci --no-audit --no-fund
       - name: Validate assessment-measures contract
         run: node scripts/assessment-measures-contract.mjs
+      - name: Validate operational assessment library
+        run: node scripts/assessment-measures-operational-contract.mjs
       - name: Type check
         run: npm run typecheck
       - name: Lint
