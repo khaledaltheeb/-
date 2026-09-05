@@ -1,13 +1,6 @@
-name: Validate Social Work Build
+name: Validate Social Work Build (Manual Deep Check)
 
 on:
-  push:
-    branches: [social-work-institutional-20260902]
-  pull_request:
-    paths:
-      - 'app/evidence-guides/social-work/**'
-      - 'lib/social-work-*.ts'
-      - 'data/social-work-recovery/**'
   workflow_dispatch:
 
 permissions:
