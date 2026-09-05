@@ -1,0 +1,5 @@
+/* Route-scoped portal/admin/auth CSS entry. Keep this out of the public root bundle. */
+@import './route-portal.css';
+@import './route-dashboard-v3.css';
+@import './route-media-v3.css';
+@import './route-theme-admin-v4.css';
