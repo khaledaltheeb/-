@@ -1,0 +1,42 @@
+.root{
+  position:fixed;
+  left:max(16px,env(safe-area-inset-left));
+  bottom:max(16px,env(safe-area-inset-bottom));
+  z-index:1100;
+  font-family:var(--font-arabic),Tahoma,Arial,sans-serif;
+}
+.launcher{
+  width:58px;
+  height:58px;
+  border:0;
+  border-radius:18px;
+  background:#075f61;
+  color:#fff;
+  box-shadow:0 12px 32px rgba(4,52,54,.24);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:1px;
+  cursor:pointer;
+  touch-action:manipulation;
+  transition:transform .18s ease,box-shadow .18s ease;
+}
+.launcher:hover{transform:translateY(-2px);box-shadow:0 16px 38px rgba(4,52,54,.3)}
+.launcherIcon{display:grid;place-items:center;width:25px;height:25px}
+.launcherIcon svg{width:25px;height:25px}
+.launcherLabel{display:none;font:800 8.5px/1.1 inherit}
+.launcher:focus-visible{outline:3px solid #f6b84a;outline-offset:3px}
+@media(max-width:760px){
+  :global(.mobile-bottom-nav a[href="/search"]){visibility:hidden;pointer-events:none}
+  .root{left:auto;right:calc(20vw + 5px);bottom:max(7px,env(safe-area-inset-bottom))}
+  .launcher{width:calc(20vw - 3px);height:52px;border-radius:10px;box-shadow:0 4px 14px rgba(4,52,54,.16);gap:1px}
+  .launcher:hover{transform:none;box-shadow:0 4px 14px rgba(4,52,54,.16)}
+  .launcherIcon{width:20px;height:20px}
+  .launcherIcon svg{width:20px;height:20px}
+  .launcherLabel{display:block}
+}
+@media(prefers-reduced-motion:reduce){
+  .launcher{transition:none}
+  .launcher:hover{transform:none}
+}
