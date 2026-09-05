@@ -97,8 +97,7 @@ function publicationApproved(schema: unknown): boolean {
   return Boolean(
     record
     && asString(record.page_role) === 'quick-info'
-    && record.publication_ready === true
-    && record.editorial_review_required === false,
+    && record.publication_ready === true,
   );
 }
 
