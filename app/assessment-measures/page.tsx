@@ -9,7 +9,7 @@ import {
   assessmentMeasures,
   getMeasuresByCategory,
   rightsBadge,
-} from '@/lib/assessment-measures';
+} from '@/lib/assessment-measures-catalog';
 import styles from '@/components/assessment-measures.module.css';
 
 export const metadata: Metadata = buildSeoMetadata({
@@ -83,6 +83,7 @@ export default async function AssessmentMeasuresPage({ searchParams }: PageProps
           <p>مرجع عربي منظم يوضح ماذا يقيس كل مقياس، لمن صُمم، كيف يُطبق ويُسجل، ما حدود تفسيره، هل توجد نسخة عربية موثقة، وما الذي تسمح به حقوق الاستخدام وإعادة النشر. إدراج الأداة هنا لا يعني اعتمادًا عالميًا موحدًا ولا يحول أداة فحص أو نتائج إلى تشخيص مستقل.</p>
           <div className={styles.heroActions}>
             <a className={styles.primaryAction} href="#library">استكشف المقاييس</a>
+            <Link className={styles.secondaryAction} href="/assessment-measures/compare/">قارن المقاييس</Link>
             <Link className={styles.secondaryAction} href="/assessment-measures/methodology/">منهجية التحقق والحقوق</Link>
           </div>
           <div className={styles.stats} aria-label="إحصاءات الإصدار الحالي">
@@ -113,7 +114,7 @@ export default async function AssessmentMeasuresPage({ searchParams }: PageProps
         <section className={styles.section} id="library" aria-labelledby="library-title">
           <div className={styles.sectionHead}>
             <div><h2 id="library-title">المكتبة الموثقة</h2><p>ابحث بالاسم العربي أو الإنجليزي أو الاختصار أو الغرض.</p></div>
-            <Link href="/assessment-measures/methodology/">ماذا تعني حالات الحقوق؟ ←</Link>
+            <Link href="/assessment-measures/compare/">فتح المقارنة ←</Link>
           </div>
           <form className={styles.toolbar} action="/assessment-measures/" method="get" role="search">
             <label htmlFor="assessment-measures-query">البحث في المقاييس</label>
@@ -141,7 +142,7 @@ export default async function AssessmentMeasuresPage({ searchParams }: PageProps
         </section>
 
         <section className={styles.section} aria-labelledby="use-title">
-          <div className={styles.sectionHead}><div><h2 id="use-title">كيف تستخدم القسم؟</h2><p>ثلاث خطوات تمنع أكثر أخطاء استخدام المقاييس شيوعًا.</p></div></div>
+          <div className={styles.sectionHead}><div><h2 id="use-title">كيف تستخدم القسم؟</h2><p>أربع خطوات تمنع أكثر أخطاء استخدام المقاييس شيوعًا.</p></div></div>
           <div className={styles.methodGrid}>
             <article className={styles.methodCard}><h3>1. اختر البنية الصحيحة</h3><p>ابدأ بالبنية المراد قياسها: توازن، سرعة مشي، اكتئاب، عجز أو مشاركة. لا تبدأ باسم مقياس مشهور ثم تجبره على سؤال لا يقيسه.</p></article>
             <article className={styles.methodCard}><h3>2. طابق المجتمع والبروتوكول</h3><p>تحقق أن المقياس دُرس على مجتمع قريب من حالتك وأن طريقة التطبيق والمسافة والزمن والنسخة اللغوية متطابقة مع المرجع الذي ستقارن به.</p></article>
