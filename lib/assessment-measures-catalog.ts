@@ -10,6 +10,7 @@ import {
 import { assessmentMeasuresWave2 } from '@/lib/assessment-measures-wave2';
 import { assessmentMeasuresWave3 } from '@/lib/assessment-measures-wave3';
 import { assessmentMeasuresWave4 } from '@/lib/assessment-measures-wave4';
+import { assessmentMeasuresWave5 } from '@/lib/assessment-measures-wave5';
 import { assessmentMeasureCategoriesWave4 } from '@/lib/assessment-measures-wave4-categories';
 
 export type { AssessmentMeasure, ArabicMeasureStatus, MeasureRightsStatus };
@@ -55,6 +56,7 @@ export const assessmentMeasures: AssessmentMeasure[] = [
   ...assessmentMeasuresWave2,
   ...assessmentMeasuresWave3,
   ...assessmentMeasuresWave4,
+  ...assessmentMeasuresWave5,
 ].map((measure) => ({ ...measure, ...(evidenceOverrides[measure.slug] ?? {}) }));
 
 export const assessmentMeasureSlugs = assessmentMeasures.map((measure) => measure.slug);
