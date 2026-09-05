@@ -19,6 +19,7 @@ const operationalFiles = [
   'lib/assessment-measure-operational-full-forms-wave3.ts',
   'lib/assessment-measure-operational-full-forms-wave4.ts',
   'lib/assessment-measure-operational-full-forms-wave5.ts',
+  'lib/assessment-measure-operational-full-forms-wave6.ts',
 ];
 
 for (const file of [...measureFiles, ...operationalFiles, 'lib/assessment-measures-rights-review.ts']) {
