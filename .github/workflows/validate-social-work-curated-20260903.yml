@@ -1,17 +1,15 @@
-name: Validate Social Work Curated 2026-09-03
+name: Social Work Contracts Fast
 
 on:
   pull_request:
     paths:
       - 'app/evidence-guides/social-work/**'
+      - 'app/sitemaps/social-work.xml/**'
+      - 'app/sitemap.xml/**'
+      - 'lib/social-work-*.ts'
       - 'lib/social-work-curated/**'
-      - 'lib/social-work-curated-*.ts'
-      - 'lib/social-work-provenance-repair.ts'
       - 'data/social-work-recovery/**'
-      - 'scripts/social-work-curated-*.mjs'
-      - 'scripts/social-work-email-source-coverage-contract.mjs'
-      - 'scripts/social-work-institutional-contract.mjs'
-      - 'scripts/social-work-recovery-contract.mjs'
+      - 'scripts/social-work-*.mjs'
       - 'scripts/recover-social-work-sector.mjs'
       - '.github/workflows/validate-social-work-curated-20260903.yml'
   workflow_dispatch:
@@ -20,11 +18,11 @@ permissions:
   contents: read
 
 concurrency:
-  group: validate-social-work-curated-${{ github.event.pull_request.number || github.ref }}
+  group: social-work-contracts-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
-  curated-contracts:
+  contracts:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -35,25 +33,19 @@ jobs:
           cache: npm
       - name: Install locked dependencies
         run: npm ci --no-audit --no-fund
-      - name: Foundation curated contract
-        run: node scripts/social-work-curated-foundation-contract.mjs
-      - name: Rights curated contract
-        run: node scripts/social-work-curated-rights-contract.mjs
-      - name: Advanced family curated contract
-        run: node scripts/social-work-curated-family-contract.mjs
-      - name: Community curated contract
-        run: node scripts/social-work-curated-community-contract.mjs
-      - name: Life-course curated contract
-        run: node scripts/social-work-curated-life-course-contract.mjs
-      - name: Structural curated contract
-        run: node scripts/social-work-curated-structural-contract.mjs
-      - name: Cross-wave 10-of-10 contract
-        run: node scripts/social-work-curated-10of10-contract.mjs
-      - name: Direct-email source coverage contract
-        run: node scripts/social-work-email-source-coverage-contract.mjs
-      - name: Institutional source contract
-        run: node scripts/social-work-institutional-contract.mjs
-      - name: Recovery provenance migration contract
-        run: node scripts/social-work-recovery-contract.mjs
-      - name: Type check
-        run: npm run typecheck
+      - name: Social Work domain contracts
+        run: |
+          node scripts/social-work-curated-foundation-contract.mjs
+          node scripts/social-work-curated-rights-contract.mjs
+          node scripts/social-work-curated-family-contract.mjs
+          node scripts/social-work-curated-community-contract.mjs
+          node scripts/social-work-curated-life-course-contract.mjs
+          node scripts/social-work-curated-structural-contract.mjs
+          node scripts/social-work-curated-10of10-contract.mjs
+          node scripts/social-work-email-source-coverage-contract.mjs
+          node scripts/social-work-institutional-contract.mjs
+          node scripts/social-work-recovery-contract.mjs
+          node scripts/social-work-talentia-contract.mjs
+          node scripts/social-work-research-depth-contract.mjs
+      - name: Build and TypeScript coverage
+        run: echo 'Covered once by Rawafid Fast Quality Gate for every pull request; intentionally not duplicated here.'
