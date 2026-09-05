@@ -9,6 +9,7 @@ on:
       - 'app/search/page.tsx'
       - 'lib/assessment-measures*.ts'
       - 'lib/assessment-measure-operational*.ts'
+      - 'lib/core-outcome-sets/**'
       - 'components/assessment-measures.module.css'
       - 'components/assessment-measure-operational-form.tsx'
       - 'components/measure-print-button.tsx'

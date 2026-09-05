@@ -2,6 +2,7 @@ import { sitemapResponse } from '@/lib/sitemap-xml';
 import { infographics } from '@/lib/practical-resources';
 import { assessmentSlugs } from '@/lib/assessment-lab/catalog';
 import { assessmentMeasureCategories, assessmentMeasureSlugs } from '@/lib/assessment-measures-catalog';
+import { coreOutcomeRegistrySlugs } from '@/lib/core-outcome-sets/registry';
 
 export async function GET() {
   return sitemapResponse([
@@ -18,6 +19,7 @@ export async function GET() {
     { path:'/assessment-lab', changeFrequency:'monthly', priority:.76 },
     ...assessmentSlugs.map((slug) => ({ path:`/assessment-lab/${slug}`, changeFrequency:'monthly' as const, priority:.7 })),
     { path:'/core-outcome-sets/', changeFrequency:'monthly', priority:.8 },
+    ...coreOutcomeRegistrySlugs.map((slug) => ({ path:`/core-outcome-sets/${slug}/`, changeFrequency:'monthly' as const, priority:.78 })),
     { path:'/assessment-measures/', changeFrequency:'weekly', priority:.84 },
     { path:'/assessment-measures/compare/', changeFrequency:'monthly', priority:.72 },
     { path:'/assessment-measures/methodology/', changeFrequency:'monthly', priority:.7 },
