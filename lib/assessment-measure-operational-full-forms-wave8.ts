@@ -57,7 +57,7 @@ export const assessmentOperationalFullFormsWave8: Record<string, AssessmentOpera
   'heaviness-of-smoking-index': {
     slug: 'heaviness-of-smoking-index',
     kind: 'full-instrument',
-    completeness: 'exact-public-domain-form',
+    completeness: 'standardized-protocol-sheet',
     titleAr: 'مؤشر شدة التدخين (HSI)',
     titleEn: 'Heaviness of Smoking Index (HSI)',
     version: 'Original two-item HSI — cigarettes only',
