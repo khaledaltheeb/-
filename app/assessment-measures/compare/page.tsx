@@ -3,7 +3,7 @@ import Link from 'next/link';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import { buildSeoMetadata } from '@/lib/seo';
-import { arabicStatusBadge, assessmentMeasures, rightsBadge } from '@/lib/assessment-measures';
+import { arabicStatusBadge, assessmentMeasures, rightsBadge } from '@/lib/assessment-measures-catalog';
 import styles from '@/components/assessment-measures.module.css';
 
 export const metadata: Metadata = buildSeoMetadata({
