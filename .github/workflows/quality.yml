@@ -42,6 +42,9 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Quick Info production cache contract
+        run: node scripts/quick-info-production-cache-contract.mjs
+
       - name: Build
         shell: bash
         run: |
