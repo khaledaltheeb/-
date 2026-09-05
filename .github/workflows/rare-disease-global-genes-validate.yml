@@ -9,14 +9,7 @@ on:
       - 'app/sitemaps/rare-disease.xml/**'
       - 'app/sitemap.xml/route.ts'
       - 'scripts/rare-disease-global-genes-contract.mjs'
-  push:
-    branches: [main]
-    paths:
-      - 'lib/rare-disease-global-genes-pages.ts'
-      - 'app/evidence-guides/rare-disease/**'
-      - 'app/sitemaps/rare-disease.xml/**'
-      - 'app/sitemap.xml/route.ts'
-      - 'scripts/rare-disease-global-genes-contract.mjs'
+  workflow_dispatch:
 
 permissions:
   contents: read
