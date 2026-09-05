@@ -1,0 +1,36 @@
+import type { InstrumentCrosswalkRecord } from '@/lib/core-outcome-sets/instrument-crosswalk';
+
+export const childhoodCancerInstrumentMappings: readonly InstrumentCrosswalkRecord[] = [
+  {
+    id: 'pedsql-4-generic-core-23',
+    instrument: 'PedsQL 4.0 Generic Core Scales — 23 item',
+    acronym: 'PedsQL 4.0 Generic Core 23',
+    linkedCosSlugs: ['childhood-cancer-quality-of-survival'],
+    rawafidStatus: 'not-in-library',
+    rawafidStatusLabel: 'Source-mapped; not yet operational in Rawafid',
+    rightsStatus: 'owner-conditions',
+    rightsNote: 'PedsQL instruments and translations are owner-controlled and distributed under Mapi/ePROVIDE terms. Mapping is not republication permission.',
+    arabicEvidence: 'psychometric-context',
+    arabicEvidenceLabel: 'Arabic psychometric evidence — Jordan context',
+    arabicEvidenceNote: 'Jordanian validation supports the Arabic PedsQL 4.0 Generic Core forms studied; this is not automatic validation for every age form or Arabic population.',
+    evidenceUrl: 'https://pubmed.ncbi.nlm.nih.gov/21564151/',
+    evidenceCitation: 'Nature Medicine childhood-cancer consensus DOI 10.1038/s41591-023-02339-y; Arabiat et al. 2011 DOI 10.1111/j.1471-6712.2011.00889.x; Mapi licensing applies',
+    lastVerified: '2026-09-06',
+  },
+  {
+    id: 'pedsql-multidimensional-fatigue-18',
+    instrument: 'PedsQL Multidimensional Fatigue Scale — 18 item',
+    acronym: 'PedsQL Fatigue 18',
+    linkedCosSlugs: ['childhood-cancer-quality-of-survival'],
+    rawafidStatus: 'not-in-library',
+    rawafidStatusLabel: 'Source-mapped; not yet operational in Rawafid',
+    rightsStatus: 'owner-conditions',
+    rightsNote: 'PedsQL Fatigue is owner-controlled; questionnaire text is not reproduced in Rawafid without permission.',
+    arabicEvidence: 'psychometric-context',
+    arabicEvidenceLabel: 'Arabic psychometric evidence — Jordan pediatric oncology context',
+    arabicEvidenceNote: 'A Jordanian study supports reliability and construct validity for the Arabic fatigue scale in the studied sample; wider generalization requires separate evidence.',
+    evidenceUrl: 'https://pubmed.ncbi.nlm.nih.gov/28541759/',
+    evidenceCitation: 'Nature Medicine childhood-cancer consensus DOI 10.1038/s41591-023-02339-y; Arabic fatigue study DOI 10.1080/24694193.2017.1316791; Mapi licensing applies',
+    lastVerified: '2026-09-06',
+  },
+];

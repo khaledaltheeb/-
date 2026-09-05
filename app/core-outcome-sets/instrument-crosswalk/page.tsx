@@ -4,7 +4,7 @@ import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import { buildSeoMetadata, SITE_URL } from '@/lib/seo';
 import { coreOutcomeRegistry } from '@/lib/core-outcome-sets/registry';
-import { instrumentCrosswalk, instrumentCrosswalkStats } from '@/lib/core-outcome-sets/instrument-crosswalk';
+import { instrumentCrosswalk, instrumentCrosswalkStats } from '@/lib/core-outcome-sets/instrument-crosswalk-registry';
 import { measurementCoverageStats, unmappedCoreOutcomeMeasurementCoverage } from '@/lib/core-outcome-sets/measurement-coverage';
 import styles from '@/components/assessment-measures.module.css';
 
@@ -66,11 +66,13 @@ export default function InstrumentCrosswalkPage() {
         <section className={styles.section} aria-labelledby="stats-title">
           <div className={styles.sectionHead}><div><h2 id="stats-title">حالة الربط الحالية</h2><p>الأرقام تصف السجل الحالي في روافد فقط، ولا تعني غياب الأداة عالميًا إذا كانت غير موجودة لدينا.</p></div></div>
           <div className={styles.methodGrid}>
-            <article className={styles.methodCard}><h3>{instrumentCrosswalkStats.total}</h3><p>أداة/عائلة أدوات مدققة في الـcrosswalk الأول</p></article>
+            <article className={styles.methodCard}><h3>{instrumentCrosswalkStats.total}</h3><p>أداة/عائلة أدوات موثقة في الـCrosswalk الحالي</p></article>
+            <article className={styles.methodCard}><h3>{instrumentCrosswalkStats.wave2}</h3><p>سجلًا جديدًا في Wave 2 من مصادر ICHOM/المشروع الأصلي</p></article>
             <article className={styles.methodCard}><h3>{instrumentCrosswalkStats.operationalFull}</h3><p>متاحة كنموذج تشغيلي كامل في مكتبة روافد</p></article>
             <article className={styles.methodCard}><h3>{instrumentCrosswalkStats.referenceRights}</h3><p>موجودة مرجعيًا لكن شروط المالك تمنع التعامل معها كنسخ حرة</p></article>
             <article className={styles.methodCard}><h3>{instrumentCrosswalkStats.notInLibrary}</h3><p>فجوات مكتبة تحتاج إضافة أو تدقيق حقوق/نسخة</p></article>
-            <article className={styles.methodCard}><h3>{instrumentCrosswalkStats.arabicPsychometricContext}</h3><p>لها دليل سيكومتري عربي محدد السياق موثق في هذه الدفعة</p></article>
+            <article className={styles.methodCard}><h3>{instrumentCrosswalkStats.arabicPsychometricContext}</h3><p>لها دليل سيكومتري عربي محدد السياق موثق في السجل</p></article>
+            <article className={styles.methodCard}><h3>{instrumentCrosswalkStats.officialArabicTranslation}</h3><p>لها ترجمة عربية رسمية/لغوية موثقة دون تعميم الصلاحية السيكومترية</p></article>
           </div>
         </section>
 
