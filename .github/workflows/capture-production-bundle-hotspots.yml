@@ -20,7 +20,12 @@ env:
   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
   NEXT_PUBLIC_SITE_URL: https://healthrenewal.org
   NEXT_PUBLIC_ALLOW_INDEXING: 'true'
-  NEXT_PUBLIC_ENABLE_ANALYTICS: 'false'
+  NEXT_PUBLIC_ENABLE_ANALYTICS: 'true'
+  NEXT_PUBLIC_ENABLE_GTM: 'false'
+  NEXT_PUBLIC_GTM_ID: GTM-WBLQVBG4
+  NEXT_PUBLIC_GA_MEASUREMENT_ID: G-VLZMV8Y4JP
+  NEXT_PUBLIC_ENABLE_DIRECT_GA: 'true'
+  ENABLE_RAWAFID_ASSISTANT: 'true'
 
 jobs:
   capture:
@@ -33,7 +38,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          payload="$(jq -n --arg state pending --arg context 'analyze/bundle-hotspots' --arg description 'Capturing largest production bundle chunks' --arg target_url "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}" '{state:$state,context:$context,description:$description,target_url:$target_url}')"
+          payload="$(jq -n --arg state pending --arg context 'analyze/bundle-hotspots' --arg description 'Capturing server and homepage client bundle hotspots' --arg target_url "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}" '{state:$state,context:$context,description:$description,target_url:$target_url}')"
           curl -fsS -X POST -H "Authorization: Bearer ${GH_TOKEN}" -H 'Accept: application/vnd.github+json' -H 'X-GitHub-Api-Version: 2022-11-28' "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" -d "$payload" >/dev/null
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -44,25 +49,81 @@ jobs:
         run: npm ci --no-audit --no-fund
       - name: Build production Worker
         run: npx opennextjs-cloudflare build --env production
-      - name: Collect hotspot files and signatures
+      - name: Collect server and homepage client hotspots
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p bundle-hotspots/chunks bundle-hotspots/meta
+          mkdir -p bundle-hotspots/chunks bundle-hotspots/client-chunks bundle-hotspots/meta bundle-hotspots/homepage
+
           cp .open-next/server-functions/default/handler.mjs.meta.json bundle-hotspots/meta/
-          find .open-next/server-functions/default/.next/server/chunks -type f -name '*.js' -printf '%s %p\n' | sort -nr > bundle-hotspots/all-chunks.txt
-          sed -n '1,12p' bundle-hotspots/all-chunks.txt > bundle-hotspots/largest-chunks.txt
+          find .open-next/server-functions/default/.next/server/chunks -type f -name '*.js' -printf '%s %p\n' | sort -nr > bundle-hotspots/all-server-chunks.txt
+          sed -n '1,12p' bundle-hotspots/all-server-chunks.txt > bundle-hotspots/largest-server-chunks.txt
           while read -r bytes path; do
             cp --parents "$path" bundle-hotspots/chunks/
-          done < bundle-hotspots/largest-chunks.txt
+          done < bundle-hotspots/largest-server-chunks.txt
+
+          find .open-next/assets/_next/static/chunks -type f -name '*.js' -printf '%s %p\n' | sort -nr > bundle-hotspots/all-client-chunks.txt
+          sed -n '1,30p' bundle-hotspots/all-client-chunks.txt > bundle-hotspots/largest-client-chunks.txt
+
+          homepage_html="$(find .open-next -type f \( -path '*/server/app/index.html' -o -path '*/server/app/page.html' \) | head -n 1 || true)"
+          if [ -z "$homepage_html" ]; then
+            homepage_html="$(find .open-next -type f -name '*.html' | grep -E '/(app/)?index\.html$' | head -n 1 || true)"
+          fi
+          if [ -n "$homepage_html" ]; then
+            cp "$homepage_html" bundle-hotspots/homepage/index.html
+            grep -Eo '/_next/static/chunks/[^"<> ]+\.js' "$homepage_html" | sort -u > bundle-hotspots/homepage/client-chunk-urls.txt || true
+            grep -Eo '/_next/static/css/[^"<> ]+\.css' "$homepage_html" | sort -u > bundle-hotspots/homepage/css-urls.txt || true
+          else
+            : > bundle-hotspots/homepage/client-chunk-urls.txt
+            : > bundle-hotspots/homepage/css-urls.txt
+          fi
+
+          : > bundle-hotspots/homepage/client-chunks.txt
+          while read -r url; do
+            [ -n "$url" ] || continue
+            rel="${url#/_next/}"
+            path=".open-next/assets/_next/${rel}"
+            if [ -f "$path" ]; then
+              bytes="$(stat -c '%s' "$path")"
+              gzip_bytes="$(gzip -c "$path" | wc -c)"
+              printf '%s %s %s\n' "$bytes" "$gzip_bytes" "$url" >> bundle-hotspots/homepage/client-chunks.txt
+              cp "$path" bundle-hotspots/client-chunks/
+            fi
+          done < bundle-hotspots/homepage/client-chunk-urls.txt
+          sort -nr -o bundle-hotspots/homepage/client-chunks.txt bundle-hotspots/homepage/client-chunks.txt
+
+          : > bundle-hotspots/homepage/css-files.txt
+          while read -r url; do
+            [ -n "$url" ] || continue
+            rel="${url#/_next/}"
+            path=".open-next/assets/_next/${rel}"
+            if [ -f "$path" ]; then
+              bytes="$(stat -c '%s' "$path")"
+              gzip_bytes="$(gzip -c "$path" | wc -c)"
+              printf '%s %s %s\n' "$bytes" "$gzip_bytes" "$url" >> bundle-hotspots/homepage/css-files.txt
+            fi
+          done < bundle-hotspots/homepage/css-urls.txt
+          sort -nr -o bundle-hotspots/homepage/css-files.txt bundle-hotspots/homepage/css-files.txt
+
+          awk '{raw += $1; gzip += $2} END {printf "homepage_client_raw_bytes=%d\nhomepage_client_gzip_bytes=%d\n", raw, gzip}' bundle-hotspots/homepage/client-chunks.txt > bundle-hotspots/homepage/totals.txt
+          awk '{raw += $1; gzip += $2} END {printf "homepage_css_raw_bytes=%d\nhomepage_css_gzip_bytes=%d\n", raw, gzip}' bundle-hotspots/homepage/css-files.txt >> bundle-hotspots/homepage/totals.txt
+
           find .open-next/server-functions/default/.next/server -maxdepth 2 -type f \( -name '*manifest*.json' -o -name '*.nft.json' \) -print0 | xargs -0 -r cp --parents -t bundle-hotspots/meta/
-          echo '--- likely source/module markers in top 3 chunks ---' | tee bundle-hotspots/signatures.txt
-          sed -n '1,3p' bundle-hotspots/largest-chunks.txt | while read -r bytes path; do
+
+          echo '--- likely source/module markers in top 3 server chunks ---' | tee bundle-hotspots/signatures.txt
+          sed -n '1,3p' bundle-hotspots/largest-server-chunks.txt | while read -r bytes path; do
             echo "### $bytes $path" | tee -a bundle-hotspots/signatures.txt
             grep -Eo '([A-Za-z0-9_.@-]+/){2,}[A-Za-z0-9_./@\[\]-]+\.(ts|tsx|js|jsx|json|mjs|cjs)' "$path" | sort | uniq -c | sort -nr | sed -n '1,250p' | tee -a bundle-hotspots/signatures.txt || true
             echo '-- frequent long quoted fragments --' | tee -a bundle-hotspots/signatures.txt
             grep -Eo '"[^"\\]{80,}"' "$path" | sed -n '1,200p' | tee -a bundle-hotspots/signatures.txt || true
           done
+
+          echo '--- homepage client chunks (raw gzip url) ---'
+          cat bundle-hotspots/homepage/client-chunks.txt
+          echo '--- homepage css (raw gzip url) ---'
+          cat bundle-hotspots/homepage/css-files.txt
+          echo '--- homepage totals ---'
+          cat bundle-hotspots/homepage/totals.txt
       - uses: actions/upload-artifact@v4
         with:
           name: production-bundle-hotspots
@@ -77,6 +138,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Production bundle hotspots captured'; else state=failure; description='Production bundle hotspot capture failed'; fi
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Production and homepage bundle hotspots captured'; else state=failure; description='Production bundle hotspot capture failed'; fi
           payload="$(jq -n --arg state "$state" --arg context 'analyze/bundle-hotspots' --arg description "$description" --arg target_url "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}" '{state:$state,context:$context,description:$description,target_url:$target_url}')"
           curl -fsS -X POST -H "Authorization: Bearer ${GH_TOKEN}" -H 'Accept: application/vnd.github+json' -H 'X-GitHub-Api-Version: 2022-11-28' "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" -d "$payload" >/dev/null
