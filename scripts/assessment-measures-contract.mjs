@@ -32,9 +32,10 @@ const blocks = [
   ...extractMeasureBlocks('lib/assessment-measures-wave4.ts', 'export const assessmentMeasuresWave4: AssessmentMeasure[] = ['),
   ...extractMeasureBlocks('lib/assessment-measures-wave5.ts', 'export const assessmentMeasuresWave5: AssessmentMeasure[] = ['),
   ...extractMeasureBlocks('lib/assessment-measures-wave6.ts', 'export const assessmentMeasuresWave6: AssessmentMeasure[] = ['),
+  ...extractMeasureBlocks('lib/assessment-measures-wave7.ts', 'export const assessmentMeasuresWave7: AssessmentMeasure[] = ['),
 ];
 
-assert(blocks.length >= 46, `expected at least 46 verified measures, found ${blocks.length}`);
+assert(blocks.length >= 55, `expected at least 55 verified measures, found ${blocks.length}`);
 
 const slugs = blocks.map((entry) => entry.slug);
 const uniqueSlugs = new Set(slugs);
@@ -60,6 +61,8 @@ const allowedCategories = new Set([
   'dermatology',
   'gastroenterology',
   'critical-care',
+  'hepatology-liver-disease',
+  'cardiovascular-risk',
 ]);
 const fullArabicProtocolAllowlist = new Set(['timed-up-and-go', '10-meter-walk-test', '6-minute-walk-test']);
 
@@ -107,6 +110,7 @@ const sourceFiles = [
   read('lib/assessment-measures-wave4.ts'),
   read('lib/assessment-measures-wave5.ts'),
   read('lib/assessment-measures-wave6.ts'),
+  read('lib/assessment-measures-wave7.ts'),
 ].join('\n');
 assert(!/http:\/\//.test(sourceFiles), 'measure sources must not use insecure HTTP URLs');
 assert(sourceFiles.includes("const CDISC_QRS = 'https://") || sourceFiles.includes('https://www.cdisc.org/standards/foundational/qrs'), 'CDISC rights registry reference must remain HTTPS');
@@ -118,11 +122,13 @@ assert(
   catalog.includes('assessmentMeasuresWave3') &&
   catalog.includes('assessmentMeasuresWave4') &&
   catalog.includes('assessmentMeasuresWave5') &&
-  catalog.includes('assessmentMeasuresWave6'),
-  'catalog aggregator must include all six verified waves',
+  catalog.includes('assessmentMeasuresWave6') &&
+  catalog.includes('assessmentMeasuresWave7'),
+  'catalog aggregator must include all seven verified waves',
 );
 assert(catalog.includes('assessmentMeasureCategoriesWave4'), 'canonical catalog must include wave-four category expansion');
 assert(catalog.includes('assessmentMeasureCategoriesWave6'), 'canonical catalog must include wave-six category expansion');
+assert(catalog.includes('assessmentMeasureCategoriesWave7'), 'canonical catalog must include wave-seven category expansion');
 
 const categoriesWave4 = read('lib/assessment-measures-wave4-categories.ts');
 for (const category of ['movement-disorders', 'cognition-neuropsychology', 'trauma-stress', 'substance-use-addiction', 'symptom-burden', 'respiratory-function', 'vision']) {
@@ -131,6 +137,10 @@ for (const category of ['movement-disorders', 'cognition-neuropsychology', 'trau
 const categoriesWave6 = read('lib/assessment-measures-wave6-categories.ts');
 for (const category of ['dermatology', 'gastroenterology', 'critical-care']) {
   assert(categoriesWave6.includes(`slug: '${category}'`), `wave-six category definition missing: ${category}`);
+}
+const categoriesWave7 = read('lib/assessment-measures-wave7-categories.ts');
+for (const category of ['hepatology-liver-disease', 'cardiovascular-risk']) {
+  assert(categoriesWave7.includes(`slug: '${category}'`), `wave-seven category definition missing: ${category}`);
 }
 
 const rightsReview = read('lib/assessment-measures-rights-review.ts');
@@ -170,6 +180,41 @@ assert(Boolean(apache && apache.block.includes('لن تنشر روافد حاس�
 const ravlt = blocks.find((entry) => entry.slug === 'rey-auditory-verbal-learning-test');
 assert(Boolean(ravlt), 'RAVLT must be included in verified catalog');
 assert(Boolean(ravlt && ravlt.block.includes('لا تستخدم قائمة مترجمة محليًا مع معايير إنجليزية')), 'RAVLT must preserve language/norm boundary');
+
+const sofa = blocks.find((entry) => entry.slug === 'sofa-27mar2024');
+assert(Boolean(sofa), 'SOFA 27MAR2024 must be included in verified catalog');
+assert(Boolean(sofa && sofa.block.includes('لا تستخدم SOFA وحده لتشخيص الإنتان أو لاستبعاد العلاج أو لتقرير سحب الدعم الحيوي')), 'SOFA must preserve explicit no-withdrawal/no-denial boundary');
+assert(Boolean(sofa && sofa.block.includes('لا تحول روافد SOFA إلى حاسبة وفاة فردية')), 'SOFA must not expose an individual mortality calculator');
+
+const meld = blocks.find((entry) => entry.slug === 'model-for-end-stage-liver-disease');
+assert(Boolean(meld), 'MELD must be included in verified catalog');
+assert(Boolean(meld && meld.block.includes('MELD 3.0')), 'MELD page must distinguish historical MELD from current MELD 3.0 allocation policy');
+assert(Boolean(meld && meld.block.includes('لا تنشر روافد حاسبة MELD عامة')), 'MELD must not expose a versionless general calculator');
+
+const assign = blocks.find((entry) => entry.slug === 'assign-cardiovascular-risk-score');
+assert(Boolean(assign), 'ASSIGN must be included in verified catalog');
+assert(Boolean(assign && assign.block.includes('لا تحوّل روافد النموذج إلى حاسبة عربية عامة')), 'ASSIGN must preserve population-calibration boundary');
+assert(Boolean(assign && assign.block.includes('تبالغ في الخطر')), 'ASSIGN must preserve recalibration warning');
+
+for (const timedSlug of ['four-stair-ascend', 'four-stair-descend', 'rising-from-floor']) {
+  const timed = blocks.find((entry) => entry.slug === timedSlug);
+  assert(Boolean(timed), `${timedSlug}: timed functional test must be included`);
+  assert(Boolean(timed && timed.block.includes("rightsStatus: 'public-domain'")), `${timedSlug}: timed functional test must preserve Public Domain status`);
+}
+
+const hbi = blocks.find((entry) => entry.slug === 'harvey-bradshaw-index');
+assert(Boolean(hbi), 'HBI must be included in verified catalog');
+assert(Boolean(hbi && hbi.block.includes("related: ['crohns-disease-activity-index-v1']")), 'HBI must link to CDAI for comparison');
+
+const painRelief = blocks.find((entry) => entry.slug === 'pain-relief-cdisc');
+assert(Boolean(painRelief), 'Pain Relief must be included in verified catalog');
+assert(Boolean(painRelief && painRelief.block.includes("related: ['pain-intensity-cdisc']")), 'Pain Relief must link to Pain Intensity');
+
+const bode = blocks.find((entry) => entry.slug === 'bode-index');
+assert(Boolean(bode), 'BODE Index must be included in verified catalog');
+assert(Boolean(bode && bode.block.includes('modified-medical-research-council-dyspnea-scale')), 'BODE must link to mMRC');
+assert(Boolean(bode && bode.block.includes('6-minute-walk-test')), 'BODE must link to 6MWT');
+assert(Boolean(bode && bode.block.includes('لا تستخدم BODE وحده لتحديد أهلية علاج')), 'BODE must preserve individual-decision safety boundary');
 
 const hub = read('app/assessment-measures/page.tsx');
 assert(hub.includes('المقاييس وأدوات التقييم المستخدمة عالميًا'), 'public hub title changed unexpectedly');
@@ -227,5 +272,5 @@ for (const route of requiredRoutes) {
 }
 
 if (!process.exitCode) {
-  console.log(`ASSESSMENT_MEASURES_CONTRACT_PASS: ${blocks.length} reusable measures, ${restrictedSlugs.length} restricted searchable references, ${uniqueSlugs.size} unique public slugs, 19 categories, rights/evidence/safety/Arabic/search checks passed.`);
+  console.log(`ASSESSMENT_MEASURES_CONTRACT_PASS: ${blocks.length} reusable measures, ${restrictedSlugs.length} restricted searchable references, ${uniqueSlugs.size} unique public slugs, 21 categories, rights/evidence/safety/Arabic/search checks passed.`);
 }
