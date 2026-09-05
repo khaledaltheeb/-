@@ -32,6 +32,14 @@ jobs:
           node-version: 24
           cache: npm
 
+      - name: Restore Next build cache
+        uses: actions/cache@v4
+        with:
+          path: .next/cache
+          key: next-quality-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-${{ github.sha }}
+          restore-keys: |
+            next-quality-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
+
       - name: Compute Quick Info social image fingerprint
         id: quick-info-fingerprint
         run: node scripts/quick-info-social-cache-key.mjs
@@ -50,6 +58,7 @@ jobs:
         run: npm ci --no-audit --no-fund
 
       - name: Install build image dependencies
+        if: steps.quick-info-cache.outputs.cache-hit != 'true'
         shell: bash
         run: |
           set -euo pipefail
