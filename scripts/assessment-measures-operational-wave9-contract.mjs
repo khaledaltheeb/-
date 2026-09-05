@@ -52,8 +52,8 @@ assert(hsiOperational.includes("completeness: 'standardized-protocol-sheet'"), '
 assert(hsiOperational.includes("code: 'HSI-TTFC'"), 'HSI time-to-first-cigarette item missing');
 assert(hsiOperational.includes("code: 'HSI-CPD'"), 'HSI cigarettes-per-day item missing');
 assert(!hsiOperational.includes("code: 'HSI-3'"), 'HSI must remain exactly two scored items');
-assert(hsiOperational.includes('خلال 5 دقائق') && hsiOperational.includes('بعد أكثر من 60 دقيقة'), 'HSI TTFC response categories incomplete');
-assert(hsiOperational.includes('10 سجائر أو أقل') && hsiOperational.includes('31 سيجارة أو أكثر'), 'HSI CPD response categories incomplete');
+assert(operational.includes('خلال 5 دقائق') && operational.includes('بعد أكثر من 60 دقيقة'), 'HSI TTFC response categories incomplete');
+assert(operational.includes('10 سجائر أو أقل') && operational.includes('31 سيجارة أو أكثر'), 'HSI CPD response categories incomplete');
 assert(hsiOperational.includes('المجموع الكلي من 0 إلى 6'), 'HSI operational score range missing');
 assert(hsiOperational.includes('السجائر فقط'), 'HSI cigarette-only scope must remain explicit');
 assert(hsiOperational.includes('الشيشة') && hsiOperational.includes('السجائر الإلكترونية'), 'HSI must explicitly reject unsupported conversion from other nicotine products');
