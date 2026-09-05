@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import '../dashboard-v3.css';
 import './admin-ui.css';
 import './admin-operations.css';
 import './admin-shell-v3.css';
