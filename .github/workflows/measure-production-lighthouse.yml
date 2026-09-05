@@ -17,11 +17,12 @@ concurrency:
 jobs:
   lighthouse:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/setup-node@v7
         with:
           node-version: 24
+
       - name: Run mobile Lighthouse against live production
         shell: bash
         run: |
@@ -33,7 +34,7 @@ jobs:
             --form-factor=mobile \
             --screenEmulation.mobile=true \
             --throttling-method=simulate \
-            --chrome-flags='--headless --no-sandbox --disable-dev-shm-usage' \
+            --chrome-flags='--headless=new --no-sandbox --disable-dev-shm-usage' \
             --quiet
           node - <<'NODE'
           const fs = require('fs');
@@ -56,10 +57,100 @@ jobs:
           console.log('LIGHTHOUSE_RESULT=' + JSON.stringify(out));
           fs.writeFileSync('/tmp/lighthouse-summary.json', JSON.stringify(out, null, 2));
           NODE
+
+      - name: Run Agentic Browsing WebMCP Lighthouse audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes lighthouse@13.4.1 https://healthrenewal.org/ \
+            --output=json \
+            --output-path=/tmp/lighthouse-agentic.json \
+            --only-categories=agentic-browsing \
+            --form-factor=mobile \
+            --screenEmulation.mobile=true \
+            --throttling-method=simulate \
+            --chrome-flags='--headless=new --no-sandbox --disable-dev-shm-usage --enable-experimental-web-platform-features --enable-features=WebMCP,DevToolsWebMCPSupport' \
+            --quiet
+
+          node - <<'NODE'
+          const fs = require('fs');
+          const r = JSON.parse(fs.readFileSync('/tmp/lighthouse-agentic.json', 'utf8'));
+          const category = r.categories?.['agentic-browsing'];
+          if (!category) {
+            console.error('WEBMCP_LIGHTHOUSE_FAILED: agentic-browsing category is missing');
+            process.exit(1);
+          }
+
+          const formCoverage = r.audits?.['webmcp-form-coverage'];
+          const registered = r.audits?.['webmcp-registered-tools'];
+          const schemaValidity = r.audits?.['webmcp-schema-validity'];
+          for (const [id, audit] of Object.entries({
+            'webmcp-form-coverage': formCoverage,
+            'webmcp-registered-tools': registered,
+            'webmcp-schema-validity': schemaValidity,
+          })) {
+            if (!audit) {
+              console.error(`WEBMCP_LIGHTHOUSE_FAILED: missing audit ${id}`);
+              process.exit(1);
+            }
+          }
+
+          const tools = [];
+          const visit = (value) => {
+            if (Array.isArray(value)) {
+              for (const item of value) visit(item);
+              return;
+            }
+            if (!value || typeof value !== 'object') return;
+            if (typeof value.tool === 'string') tools.push(value.tool);
+            for (const child of Object.values(value)) visit(child);
+          };
+          visit(registered.details);
+          const uniqueTools = [...new Set(tools)].sort();
+
+          const expectedStaticTools = [
+            'searchRawafid',
+            'searchRawafidHeader',
+            'searchRawafidMobile',
+            'search_rawafid_evidence',
+          ];
+          const missingTools = expectedStaticTools.filter((name) => !uniqueTools.includes(name));
+          const formCoverageItems = Array.isArray(formCoverage?.details?.items) ? formCoverage.details.items : [];
+
+          const out = {
+            categoryScore: category.score == null ? null : Math.round(category.score * 100),
+            registeredTools: uniqueTools,
+            registeredToolsMode: registered.scoreDisplayMode,
+            formCoverageMode: formCoverage.scoreDisplayMode,
+            uncoveredForms: formCoverageItems.length,
+            schemaScore: schemaValidity.score,
+            schemaMode: schemaValidity.scoreDisplayMode,
+            schemaIssues: Array.isArray(schemaValidity?.details?.items) ? schemaValidity.details.items : [],
+          };
+          console.log('WEBMCP_LIGHTHOUSE_RESULT=' + JSON.stringify(out));
+          fs.writeFileSync('/tmp/lighthouse-webmcp-summary.json', JSON.stringify(out, null, 2));
+
+          if (missingTools.length) {
+            console.error('WEBMCP_LIGHTHOUSE_FAILED: expected tools not registered: ' + missingTools.join(', '));
+            process.exit(1);
+          }
+          if (formCoverage.scoreDisplayMode !== 'notApplicable' && formCoverageItems.length > 0) {
+            console.error(`WEBMCP_LIGHTHOUSE_FAILED: ${formCoverageItems.length} form(s) still lack declarative annotations`);
+            process.exit(1);
+          }
+          if (schemaValidity.score !== 1) {
+            console.error(`WEBMCP_LIGHTHOUSE_FAILED: schema validity score is ${schemaValidity.score}`);
+            process.exit(1);
+          }
+          console.log('WEBMCP_LIGHTHOUSE_OK: all static forms are covered, imperative + declarative tools are registered, and schemas are valid.');
+          NODE
+
       - uses: actions/upload-artifact@v4
         with:
           name: production-lighthouse
           path: |
             /tmp/lighthouse.json
             /tmp/lighthouse-summary.json
+            /tmp/lighthouse-agentic.json
+            /tmp/lighthouse-webmcp-summary.json
           retention-days: 2
