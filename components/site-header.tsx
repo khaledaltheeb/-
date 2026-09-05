@@ -102,9 +102,27 @@ export default async function SiteHeader() {
               </div>
             </details>
           </nav>
-          <form className="header-search" action="/search" method="get" role="search">
+          <form
+            className="header-search"
+            action="/search"
+            method="get"
+            role="search"
+            toolname="searchRawafidHeader"
+            tooldescription="Search Rawafid from the site header for Arabic or English knowledge, guides, specialists, centers, and resources."
+            toolautosubmit=""
+          >
             <label className="sr-only" htmlFor="header-search-input">البحث في منصة روافد</label>
-            <input id="header-search-input" name="q" type="search" placeholder="حالة، دليل أو خدمة" maxLength={120} enterKeyHint="search" />
+            <input
+              id="header-search-input"
+              name="q"
+              type="search"
+              required
+              minLength={2}
+              maxLength={120}
+              enterKeyHint="search"
+              toolparamdescription="The user's Arabic or English search query from the site header."
+              placeholder="حالة، دليل أو خدمة"
+            />
             <button type="submit">بحث</button>
           </form>
           <div className="header-actions">
@@ -114,7 +132,29 @@ export default async function SiteHeader() {
           <details className="mobile-menu">
             <summary aria-label="فتح قائمة التنقل"><SiteNavIcon name="more" /><span>القائمة</span></summary>
             <div className="mobile-menu-panel">
-              <form className="mobile-search" action="/search" method="get" role="search"><label className="sr-only" htmlFor="mobile-search-input">البحث في منصة روافد</label><input id="mobile-search-input" name="q" type="search" placeholder="حالة، دليل أو خدمة" maxLength={120} enterKeyHint="search" /><button type="submit">بحث</button></form>
+              <form
+                className="mobile-search"
+                action="/search"
+                method="get"
+                role="search"
+                toolname="searchRawafidMobile"
+                tooldescription="Search Rawafid from the mobile navigation for Arabic or English knowledge, guides, specialists, centers, and resources."
+                toolautosubmit=""
+              >
+                <label className="sr-only" htmlFor="mobile-search-input">البحث في منصة روافد</label>
+                <input
+                  id="mobile-search-input"
+                  name="q"
+                  type="search"
+                  required
+                  minLength={2}
+                  maxLength={120}
+                  enterKeyHint="search"
+                  toolparamdescription="The user's Arabic or English search query from the mobile navigation."
+                  placeholder="حالة، دليل أو خدمة"
+                />
+                <button type="submit">بحث</button>
+              </form>
               <a href="/">الرئيسية</a><a href="/about">من نحن</a><a href="/sectors">جميع القطاعات</a><a href="/sections">جميع الأقسام</a><a href="/sectors/pediatric-oncology">سرطان الأطفال</a><a href="/care-guides/">أدلة التعامل والرعاية</a><a href="/evidence-guides/">الأدلة العلمية</a><a href="/encyclopedia/">الموسوعة المختصرة — الصفحات المحفوظة</a>
               <span className="mobile-menu-label">الدليل والخدمات</span>
               {serviceLinks.map((link) => <a key={link.href} href={link.href}>{link.label}</a>)}
