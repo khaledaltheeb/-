@@ -57,6 +57,7 @@ requireText(productionBuild, "NEXT_PUBLIC_ENABLE_GTM='false'", 'the direct produ
 requireText(productionBuild, "NEXT_PUBLIC_ENABLE_DIRECT_GA='true'", 'the direct production build must keep direct GA4 enabled');
 requireText(productionBuild, "ENABLE_RAWAFID_ASSISTANT='true'", 'the static production build must keep the assistant enabled');
 
+requireText(deployWorkflow, 'librsvg2-bin', 'production deployment must install rsvg-convert because the production build renders Quick Info SVG cards');
 requireText(deployWorkflow, 'for tool in searchRawafid searchRawafidHeader searchRawafidMobile; do', 'production live verification must assert all server-rendered homepage WebMCP tools');
 requireText(deployWorkflow, 'grep -q \'tooldescription="Search Rawafid\' /tmp/home.html', 'production live verification must assert a WebMCP tool description in rendered HTML');
 requireText(deployWorkflow, 'grep -q \'toolparamdescription="The user\' /tmp/home.html', 'production live verification must assert WebMCP parameter schema metadata in rendered HTML');
@@ -66,4 +67,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log('PageSpeed performance contract passed: GA4 remains enabled but delayed beyond the critical path, heavy GTM is gated, font LCP is non-blocking, and every homepage search/assistant form that can enter the DOM has an explicit WebMCP contract.');
+console.log('PageSpeed performance contract passed: production build prerequisites are present, GA4 remains delayed beyond the critical path, heavy GTM is gated, font LCP is non-blocking, and every homepage search/assistant form that can enter the DOM has an explicit WebMCP contract.');
