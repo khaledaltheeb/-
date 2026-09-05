@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import CapabilityArticlePage from '@/components/capability-article-page';
 import LegacyPreservedPageView from '@/components/legacy-preserved-page';
 import { getCapabilityRecord, getCapabilityRegistryItems } from '@/lib/capabilities';
+import { getOutsideBoxSibling } from '@/lib/outside-the-box';
 import { getLegacyPreservedPage, legacyPreservedMetadata } from '@/lib/legacy-preserved-page';
 import { buildSeoMetadata } from '@/lib/seo';
 
@@ -59,6 +60,9 @@ export default async function CapabilityDetailPage({ params }: { params: Params 
     if (!preserved) notFound();
     return <LegacyPreservedPageView page={preserved} route={route} />;
   }
-  const registryItems = slug === 'registry' ? await getCapabilityRegistryItems() : [];
-  return <CapabilityArticlePage record={record} routeSlug={slug} registryItems={registryItems} />;
+  const [registryItems, outsideBoxSibling] = await Promise.all([
+    slug === 'registry' ? getCapabilityRegistryItems() : Promise.resolve([]),
+    getOutsideBoxSibling(slug),
+  ]);
+  return <CapabilityArticlePage record={record} routeSlug={slug} registryItems={registryItems} outsideBoxSibling={outsideBoxSibling} />;
 }
