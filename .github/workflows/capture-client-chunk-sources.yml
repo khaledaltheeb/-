@@ -1,0 +1,71 @@
+name: Capture client chunk sources
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/capture-client-chunk-sources.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: capture-client-chunk-sources
+  cancel-in-progress: true
+
+env:
+  NEXT_PUBLIC_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
+  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
+  NEXT_PUBLIC_SITE_URL: https://healthrenewal.org
+  NEXT_PUBLIC_ALLOW_INDEXING: 'true'
+  NEXT_PUBLIC_ENABLE_ANALYTICS: 'true'
+  NEXT_PUBLIC_ENABLE_GTM: 'false'
+  NEXT_PUBLIC_GTM_ID: GTM-WBLQVBG4
+  NEXT_PUBLIC_GA_MEASUREMENT_ID: G-VLZMV8Y4JP
+  NEXT_PUBLIC_ENABLE_DIRECT_GA: 'true'
+  ENABLE_RAWAFID_ASSISTANT: 'true'
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Install image build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends fontconfig fonts-noto-core librsvg2-bin
+      - name: Restore Next build cache
+        uses: actions/cache@v4
+        with:
+          path: .next/cache
+          key: next-build-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-${{ github.sha }}
+          restore-keys: |
+            next-build-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
+      - name: Build production Worker
+        run: npx opennextjs-cloudflare build --env production
+      - name: Collect largest client chunks and manifests
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p client-chunk-sources/chunks client-chunk-sources/manifests
+          find .open-next/assets/_next/static/chunks -type f -name '*.js' -printf '%s %p\n' | sort -nr > client-chunk-sources/all-client-chunks.txt
+          sed -n '1,12p' client-chunk-sources/all-client-chunks.txt > client-chunk-sources/largest-client-chunks.txt
+          sed -n '1,6p' client-chunk-sources/largest-client-chunks.txt | while read -r bytes path; do
+            cp "$path" client-chunk-sources/chunks/
+            printf '\n### %s %s\n' "$bytes" "$path" >> client-chunk-sources/signatures.txt
+            grep -Eo '[A-Za-z0-9_./@-]{5,}' "$path" | grep -E '(react|next|supabase|rawafid|assistant|router|link|navigation|cookie|auth|lucide)' | sort | uniq -c | sort -nr | head -n 120 >> client-chunk-sources/signatures.txt || true
+          done
+          find .open-next -type f \( -name '*manifest*.json' -o -name '*.nft.json' \) -size -2M -print0 | xargs -0 -r cp --parents -t client-chunk-sources/manifests/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: client-chunk-sources
+          path: client-chunk-sources
+          if-no-files-found: error
+          retention-days: 2
