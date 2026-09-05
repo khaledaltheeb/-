@@ -25,12 +25,12 @@ The retained legacy source remains preserved in `private.legacy_migration_items`
 
 ## Current Outside-the-Box GOLD count
 
-**45 condition pages**.
+**50 condition pages**.
 
 Current verification state:
 
 - minimum direct references per GOLD page: **5**
-- average direct references per GOLD page: **7.2**
+- average direct references per GOLD page: **7.3**
 - GOLD pages containing PubMed search URLs: **0**
 - exact repeated scientific paragraph/list/table blocks across GOLD pages: **0**
 
@@ -83,6 +83,11 @@ Shared structural headings are allowed; copied condition science is not.
 43. `legacy-outside-box-osteogenesis-imperfecta`
 44. `legacy-outside-box-spinal-muscular-atrophy`
 45. `legacy-outside-box-congenital-cmv`
+46. `legacy-outside-box-ehlers-danlos-syndromes`
+47. `legacy-outside-box-epilepsy-functional-support`
+48. `legacy-outside-box-lennox-gastaut-syndrome`
+49. `legacy-outside-box-achondroplasia`
+50. `legacy-outside-box-duchenne-muscular-dystrophy`
 
 ## Scientific design invariant
 
@@ -103,22 +108,22 @@ GOLD is not permanent. A page is reopened whenever newer direct evidence materia
 
 ## Anti-filler rule
 
-Exact structured-block comparison is rerun as the corpus grows. At 45 GOLD pages, **no scientific paragraph, list or table of 100+ characters was duplicated exactly across two or more pages**. Repeated editorial headings such as `قواعد القرار` or `قوة الدليل وحدوده` are permitted because they provide predictable navigation; the science beneath them must remain condition-specific.
+At 50 GOLD pages, exact structured-block comparison still finds **zero scientific paragraphs, lists or tables of 100+ characters duplicated exactly across two or more pages**. Repeated editorial headings such as `قواعد القرار` or `قوة الدليل وحدوده` are permitted because they provide predictable navigation; the science beneath them must remain condition-specific.
 
 ## Next DEEP conversion wave
 
 Continue the original audit order with:
 
-- `legacy-outside-box-ehlers-danlos-syndromes`
-- `legacy-outside-box-epilepsy-functional-support`
-- `legacy-outside-box-lennox-gastaut-syndrome`
-- `legacy-outside-box-achondroplasia`
-- `legacy-outside-box-duchenne-muscular-dystrophy`
 - `legacy-outside-box-phenylketonuria`
 - `legacy-outside-box-infantile-epileptic-spasms-syndrome`
 - `legacy-outside-box-sleep-difficulties-neurodevelopmental`
 - `legacy-outside-box-spina-bifida`
 - `legacy-outside-box-acquired-brain-injury`
+- `legacy-outside-box-rare-neurodevelopmental-undiagnosed`
+- `legacy-outside-box-smith-magenis-syndrome`
+- `legacy-outside-box-adnp-syndrome`
+- `legacy-outside-box-aicardi-syndrome`
+- `legacy-outside-box-sturge-weber-syndrome`
 
 After all Outside-the-Box DEEP pages:
 
