@@ -34,7 +34,9 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci --ignore-scripts
-      - run: node scripts/research-integrations-contract.mjs
-      - run: node scripts/source-registry-v1-contract.mjs
-      - run: npm run typecheck
-      - run: npm run lint
+      - name: Research integration contract
+        run: node scripts/research-integrations-contract.mjs
+      - name: Source registry contract
+        run: node scripts/source-registry-v1-contract.mjs
+      - name: Repository quality coverage
+        run: echo 'TypeScript, lint, Next build, and runtime smoke are enforced once by Rawafid Fast Quality Gate for every pull request.'
