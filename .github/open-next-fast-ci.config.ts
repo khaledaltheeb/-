@@ -2,7 +2,7 @@ import { defineCloudflareConfig } from '@opennextjs/cloudflare';
 
 const config = defineCloudflareConfig();
 
-export default {
+const fastCiConfig = {
   ...config,
   buildCommand: [
     'node scripts/build_psych_encyclopedia_assets.mjs',
@@ -12,3 +12,5 @@ export default {
     'npx next build',
   ].join(' && '),
 };
+
+export default fastCiConfig;
