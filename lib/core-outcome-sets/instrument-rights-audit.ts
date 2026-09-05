@@ -3,7 +3,7 @@ import type { InstrumentCrosswalkRecord } from '@/lib/core-outcome-sets/instrume
 const NHS_NCCR = 'https://digital.nhs.uk/services/national-clinical-content-repository-copyright-licensing-service/nccr-tools-and-measures-library';
 const KIDSCREEN_TERMS = 'https://www.kidscreen.org/english/terms-of-use/';
 const SURE_TERMS = 'https://www.kcl.ac.uk/research/sure-substance-use-recovery-evaluator';
-const HSI_SAMHSA = 'https://www.ncbi.nlm.nih.gov/books/NBK574912/box/p2.b7/?report=objectonly';
+const HSI_PHENX = 'https://www.phenxtoolkit.org/protocols/view/330201?origin=browse';
 
 const auditedOverrides: Record<string, Partial<InstrumentCrosswalkRecord>> = {
   'kidscreen-10': {
@@ -52,12 +52,13 @@ const auditedOverrides: Record<string, Partial<InstrumentCrosswalkRecord>> = {
     lastVerified: '2026-09-06',
   },
   'heaviness-of-smoking-index': {
-    rawafidStatus: 'not-in-library',
-    rawafidStatusLabel: 'فجوة حقوق قبل التشغيل — لا يُستنتج Public Domain من تقرير SAMHSA',
-    rightsStatus: 'not-reviewed',
-    rightsNote: 'يعرض SAMHSA/NCBI صيغة HSI داخل تقرير حكومي مفتوح، لكن العرض نفسه موسوم بأنه Adapted with permission. لذلك لا نعامل نص HSI أو scoring كملك عام لمجرد أن التقرير المحيط Public Domain؛ يلزم تثبيت مصدر الأداة وحق إعادة استخدامها بصورة مستقلة.',
-    evidenceUrl: HSI_SAMHSA,
-    evidenceCitation: 'SAMHSA TIP 63 / NCBI Bookshelf — HSI exhibit is explicitly marked “Adapted with permission”; instrument rights remain unresolved for Rawafid',
+    rightsStatus: 'rawafid-provenance-verified',
+    rightsNote: 'PhenX Toolkit يدرج Heaviness of Smoking Index نفسه كبروتوكول freely available ويصرح بأن permission not required for use. هذا دليل مباشر على حق الاستخدام ويتقدم على الاستنتاج المحافظ السابق من عرض SAMHSA الذي وصف نسخته المعروضة بأنها Adapted with permission.',
+    arabicEvidence: 'related-version-only',
+    arabicEvidenceLabel: 'دليل عربي مرتبط عبر FTND/FTCD — لا يساوي تحقق HSI عربي مستقل',
+    arabicEvidenceNote: 'توجد دراسات عربية منشورة لـFTND/FTCD، وهما يتضمنان بندي زمن أول سيجارة وعدد السجائر اليومية اللذين يبني عليهما HSI. لا تنقل روافد الثبات أو العتبات من FTND/FTCD إلى HSI كأداة مستقلة، وتصف الصياغة العربية الحالية كتقديم تشغيلي لا كنسخة معيارية عربية محققة.',
+    evidenceUrl: HSI_PHENX,
+    evidenceCitation: 'PhenX Toolkit — Heaviness of Smoking Index: freely available; permission not required for use. Original scoring: Heatherton et al., Br J Addict 1989; PMID 2758152',
     lastVerified: '2026-09-06',
   },
 };
@@ -67,6 +68,7 @@ export function applyInstrumentRightsAudit(record: InstrumentCrosswalkRecord): I
   if (!override) return record;
 
   const restricted = override.rawafidStatus === 'reference-rights';
+  const reusable = override.rightsStatus === 'rawafid-provenance-verified';
   return {
     ...record,
     ...override,
@@ -76,7 +78,9 @@ export function applyInstrumentRightsAudit(record: InstrumentCrosswalkRecord): I
       record.catalogSyncNote,
       restricted
         ? 'تدقيق الحقوق اللاحق يمنع تحويل وجود سجل داخلي أو سهولة الوصول إلى إذن لإعادة النشر؛ حالة المالك تتقدم على الترقية الآلية.'
-        : 'تدقيق الحقوق اللاحق أبقى الأداة غير تشغيلية حتى يثبت حق النسخة نفسها.',
+        : reusable
+          ? 'تدقيق الحقوق اللاحق وثّق حق استخدام الأداة من مصدر مباشر؛ تبقى دقة النسخة واللغة والدليل السيكومتري قيودًا مستقلة ولا تُعمم تلقائيًا.'
+          : 'تدقيق الحقوق اللاحق أبقى الأداة غير تشغيلية حتى يثبت حق النسخة نفسها.',
     ].filter(Boolean).join(' '),
   };
 }
