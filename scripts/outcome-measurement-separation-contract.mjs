@@ -17,6 +17,7 @@ const cosDetailPath = 'app/core-outcome-sets/[slug]/page.tsx';
 const cosCrosswalkPagePath = 'app/core-outcome-sets/instrument-crosswalk/page.tsx';
 const cosRegistryPath = 'lib/core-outcome-sets/registry.ts';
 const cosCrosswalkPath = 'lib/core-outcome-sets/instrument-crosswalk.ts';
+const cosCoveragePath = 'lib/core-outcome-sets/measurement-coverage.ts';
 const searchPath = 'app/search/page.tsx';
 const labPath = 'app/assessment-lab/page.tsx';
 const measuresPath = 'app/assessment-measures/page.tsx';
@@ -28,6 +29,7 @@ assert(exists(cosDetailPath), 'Core Outcome Set detail route must exist');
 assert(exists(cosCrosswalkPagePath), 'COS instrument crosswalk page must exist');
 assert(exists(cosRegistryPath), 'Core Outcome Set registry must exist');
 assert(exists(cosCrosswalkPath), 'COS instrument crosswalk data must exist');
+assert(exists(cosCoveragePath), 'COS measurement coverage audit must exist');
 assert(exists(searchPath), 'Unified search page must exist');
 assert(exists(labPath), 'Assessment Lab page must exist');
 assert(exists(measuresPath), 'Assessment Measures page must exist');
@@ -99,6 +101,19 @@ if (exists(cosCrosswalkPath)) {
   assert(crosswalk.includes('دليل GAD-7 العربي لا يُنقل تلقائيًا إلى GAD-2'), 'Crosswalk must prevent parent-instrument evidence from being transferred to GAD-2');
   assert(crosswalk.includes('الأردن') && crosswalk.includes('Columbia Lighthouse Project'), 'C-SSRS record must preserve country-specific Arabic translation provenance');
   assert(crosswalk.includes('HealthMeasures') && crosswalk.includes('ترجمات PROMIS محمية'), 'PROMIS records must preserve translation permissions');
+  assert(crosswalk.includes("catalogSync?: 'seed'"), 'Crosswalk must retain catalog synchronization state');
+  assert(crosswalk.includes('automaticPromotionBlockedIds'), 'Crosswalk must retain exact-version family promotion safeguards');
+}
+
+if (exists(cosCoveragePath)) {
+  const coverage = read(cosCoveragePath);
+  assert(coverage.includes('linkedCosSlugs.includes(record.slug)'), 'Coverage audit must derive mappings from structured crosswalk links');
+  assert(coverage.includes("record.measurementStatus === 'explicit'"), 'Coverage audit must distinguish explicit measurement recommendations');
+  assert(coverage.includes("record.measurementStatus === 'linked'"), 'Coverage audit must distinguish linked measurement recommendations');
+  assert(coverage.includes("coverageStatus: 'outcome-only'"), 'Coverage audit must preserve an outcome-only/no-established-HOW state');
+  assert(coverage.includes('mappedInstrumentCount: 0'), 'Coverage audit must explicitly represent unmapped COS records');
+  assert(coverage.includes('measurementCoverageStats'), 'Coverage audit must expose aggregate COS coverage statistics');
+  assert(coverage.includes('unmappedCoreOutcomeMeasurementCoverage'), 'Coverage audit must expose the actionable unmapped COS queue');
 }
 
 if (exists(cosCrosswalkPagePath)) {
@@ -107,6 +122,10 @@ if (exists(cosCrosswalkPagePath)) {
   assert(crosswalkPage.includes('instrumentCrosswalk.map'), 'Crosswalk page must render structured instrument records');
   assert(crosswalkPage.includes('كيف نقرر أن الأداة «جاهزة بالعربية»؟'), 'Crosswalk page must expose Arabic readiness criteria');
   assert(crosswalkPage.includes('C-SSRS تحتاج تدريبًا'), 'Crosswalk page must preserve safety boundary for suicide-risk tools');
+  assert(crosswalkPage.includes('measurementCoverageStats'), 'Crosswalk page must expose COS-level mapping coverage statistics');
+  assert(crosswalkPage.includes('unmappedCoreOutcomeMeasurementCoverage.map'), 'Crosswalk page must render the unmapped COS audit queue');
+  assert(crosswalkPage.includes('«لا mapping في روافد» ≠ «لا توجد أداة»'), 'Crosswalk page must not equate a Rawafid mapping gap with global instrument absence');
+  assert(crosswalkPage.includes('لا نخترع HOW'), 'Crosswalk page must preserve the no-invented-measurement boundary');
 }
 
 if (exists(cosDetailPath)) {
