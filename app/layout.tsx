@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/next-script-for-ga -- GTM is explicitly opt-in and disabled in production; using Next's third-party helper would reintroduce client overhead into the critical path. */
 import type { Metadata, Viewport } from 'next';
-import { Noto_Sans_Arabic } from 'next/font/google';
+import type { CSSProperties } from 'react';
 import { BRAND_NAME, DEFAULT_DESCRIPTION, INDEXING_ENABLED, SITE_URL, organizationJsonLd } from '@/lib/seo';
 import { founderJsonLd } from '@/lib/founder';
 import RawafidAssistantLoader from '@/components/rawafid-assistant-loader';
@@ -15,15 +15,8 @@ import './rawafid-theme.css';
 */
 
 const DEFAULT_SOCIAL_IMAGE = `${SITE_URL}/seo-card`;
-const GA_FALLBACK_DELAY_MS = 7000;
-
-const arabicFont = Noto_Sans_Arabic({
-  subsets: ['arabic'],
-  display: 'optional',
-  variable: '--font-arabic',
-  preload: false,
-  fallback: ['Tahoma', 'Arial'],
-});
+const GA_FALLBACK_DELAY_MS = 20000;
+const systemFontVariable = { '--font-arabic': 'system-ui' } as CSSProperties;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -132,7 +125,7 @@ function delayedGaBootstrap(gaId: string) {
     document.head.appendChild(script);
   }
   ['pointerdown', 'keydown', 'touchstart'].forEach(function(eventName) {
-    window.addEventListener(eventName, load, { once: true });
+    window.addEventListener(eventName, load, { once: true, passive: eventName !== 'keydown' });
   });
   window.setTimeout(load, fallbackDelay);
 })(${JSON.stringify(gaId)}, ${GA_FALLBACK_DELAY_MS});
@@ -161,7 +154,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   const gaId = validatedAnalyticsId(process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID, /^G-[A-Z0-9]+$/i);
 
   return (
-    <html lang="ar" dir="rtl" className={arabicFont.variable}>
+    <html lang="ar" dir="rtl" style={systemFontVariable}>
       <body id="top">
         {analyticsEnabled && gtmEnabled && gtmId ? (
           <>

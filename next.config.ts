@@ -14,6 +14,12 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  // The public shell has one small route-level stylesheet but Lighthouse reports
+  // that its discovery blocks first paint. Next's CSS inlining removes that
+  // extra critical-path request while keeping the authored cascade unchanged.
+  experimental: {
+    inlineCss: true,
+  },
   // Keep exact historical URLs available while middleware continues to normalize
   // non-legacy trailing-slash requests to the platform's modern no-slash form.
   skipTrailingSlashRedirect: true,
