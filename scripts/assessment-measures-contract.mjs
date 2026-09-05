@@ -30,9 +30,10 @@ const blocks = [
   ...extractMeasureBlocks('lib/assessment-measures-wave2.ts', 'export const assessmentMeasuresWave2: AssessmentMeasure[] = ['),
   ...extractMeasureBlocks('lib/assessment-measures-wave3.ts', 'export const assessmentMeasuresWave3: AssessmentMeasure[] = ['),
   ...extractMeasureBlocks('lib/assessment-measures-wave4.ts', 'export const assessmentMeasuresWave4: AssessmentMeasure[] = ['),
+  ...extractMeasureBlocks('lib/assessment-measures-wave5.ts', 'export const assessmentMeasuresWave5: AssessmentMeasure[] = ['),
 ];
 
-assert(blocks.length >= 35, `expected at least 35 verified measures, found ${blocks.length}`);
+assert(blocks.length >= 37, `expected at least 37 verified measures, found ${blocks.length}`);
 
 const slugs = blocks.map((entry) => entry.slug);
 const uniqueSlugs = new Set(slugs);
@@ -62,7 +63,7 @@ for (const { slug, file, block } of blocks) {
   assert(/rightsStatus: '(public-domain|open-reuse)'/.test(block), `${slug}: rightsStatus missing or unsupported (${file})`);
   assert(/rightsVerifiedOn: '\d{4}-\d{2}-\d{2}'/.test(block), `${slug}: rightsVerifiedOn missing (${file})`);
   assert(/role: 'rights'/.test(block), `${slug}: authoritative rights source missing (${file})`);
-  assert(/role: 'evidence'/.test(block) || /role: 'original'/.test(block), `${slug}: evidence/original source missing (${file})`);
+  assert(/role: 'evidence'/.test(block) || /role: 'original'/.test(block) || /role: 'translation'/.test(block), `${slug}: evidence/original/translation source missing (${file})`);
   assert(/safetyNotes: \[/.test(block), `${slug}: safety notes missing (${file})`);
   assert(/limitations: \[/.test(block), `${slug}: limitations missing (${file})`);
   assert(/administrationSteps: \[/.test(block), `${slug}: administration steps missing (${file})`);
@@ -100,17 +101,19 @@ const sourceFiles = [
   read('lib/assessment-measures-wave2.ts'),
   read('lib/assessment-measures-wave3.ts'),
   read('lib/assessment-measures-wave4.ts'),
+  read('lib/assessment-measures-wave5.ts'),
 ].join('\n');
 assert(!/http:\/\//.test(sourceFiles), 'measure sources must not use insecure HTTP URLs');
-assert(sourceFiles.includes("const CDISC_QRS = 'https://"), 'CDISC rights registry constant must remain HTTPS');
+assert(sourceFiles.includes("const CDISC_QRS = 'https://") || sourceFiles.includes('https://www.cdisc.org/standards/foundational/qrs'), 'CDISC rights registry reference must remain HTTPS');
 
 const catalog = read('lib/assessment-measures-catalog.ts');
 assert(
   catalog.includes('assessmentMeasuresWave1') &&
   catalog.includes('assessmentMeasuresWave2') &&
   catalog.includes('assessmentMeasuresWave3') &&
-  catalog.includes('assessmentMeasuresWave4'),
-  'catalog aggregator must include all four verified waves',
+  catalog.includes('assessmentMeasuresWave4') &&
+  catalog.includes('assessmentMeasuresWave5'),
+  'catalog aggregator must include all five verified waves',
 );
 assert(catalog.includes('assessmentMeasureCategoriesWave4'), 'canonical catalog must include wave-four category expansion');
 
@@ -137,6 +140,11 @@ assert(!/http:\/\//.test(rightsReview), 'restricted rights review sources must u
 assert((rightsReview.match(/rightsVerifiedOn: '2026-09-05'/g) ?? []).length >= restrictedSlugs.length, 'every restricted item must carry a rights verification date');
 assert((rightsReview.match(/whyReferenceOnly:/g) ?? []).length >= restrictedSlugs.length, 'every restricted item must explain why it is reference-only');
 assert((rightsReview.match(/safeUseOnRawafid:/g) ?? []).length >= restrictedSlugs.length, 'every restricted item must define safe Rawafid handling');
+
+const pcl5 = blocks.find((entry) => entry.slug === 'ptsd-checklist-for-dsm5');
+assert(Boolean(pcl5), 'PCL-5 must be included in verified catalog');
+assert(Boolean(pcl5 && pcl5.block.includes("arabicStatus: 'validated-version-reported'")), 'PCL-5 must preserve documented Arabic validation status');
+assert(Boolean(pcl5 && pcl5.block.includes('National Center for PTSD')), 'PCL-5 must preserve official VA rights provenance');
 
 const hub = read('app/assessment-measures/page.tsx');
 assert(hub.includes('المقاييس وأدوات التقييم المستخدمة عالميًا'), 'public hub title changed unexpectedly');
