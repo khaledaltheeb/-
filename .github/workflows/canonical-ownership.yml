@@ -3,8 +3,7 @@ name: Canonical Ownership Gate
 on:
   pull_request:
     branches: [main, cloudflare-workers-deploy]
-  push:
-    branches: [main, foundation-v3, final-hardening]
+  workflow_dispatch:
 
 concurrency:
   group: canonical-ownership-${{ github.ref }}
@@ -17,9 +16,6 @@ jobs:
   canonical-ownership:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    env:
-      NEXT_PUBLIC_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
-      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
