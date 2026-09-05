@@ -119,6 +119,25 @@ for (const category of ['movement-disorders', 'cognition-neuropsychology', 'trau
   assert(categoriesWave4.includes(`slug: '${category}'`), `wave-four category definition missing: ${category}`);
 }
 
+const rightsReview = read('lib/assessment-measures-rights-review.ts');
+const rightsReviewMarker = 'export const assessmentMeasuresRightsReview: AssessmentMeasureRightsReviewItem[] = [';
+const rightsReviewIndex = rightsReview.indexOf(rightsReviewMarker);
+assert(rightsReviewIndex >= 0, 'restricted rights review queue marker missing');
+const rightsReviewBody = rightsReviewIndex >= 0 ? rightsReview.slice(rightsReviewIndex) : '';
+const restrictedSlugs = [...rightsReviewBody.matchAll(/^\s{4}slug: '([^']+)',/gm)].map((match) => match[1]);
+assert(restrictedSlugs.length >= 11, `expected at least 11 restricted/reference-only instruments, found ${restrictedSlugs.length}`);
+assert(new Set(restrictedSlugs).size === restrictedSlugs.length, 'duplicate slug in restricted rights review queue');
+for (const restrictedSlug of restrictedSlugs) {
+  assert(!uniqueSlugs.has(restrictedSlug), `${restrictedSlug}: restricted instrument must not also appear in reusable catalog`);
+}
+for (const status of ['granted-to-cdisc', 'author-permission-required', 'denied', 'no-response-received']) {
+  assert(rightsReview.includes(`status: '${status}'`), `restricted rights review queue missing status class: ${status}`);
+}
+assert(!/http:\/\//.test(rightsReview), 'restricted rights review sources must use HTTPS');
+assert((rightsReview.match(/rightsVerifiedOn: '2026-09-05'/g) ?? []).length >= restrictedSlugs.length, 'every restricted item must carry a rights verification date');
+assert((rightsReview.match(/whyReferenceOnly:/g) ?? []).length >= restrictedSlugs.length, 'every restricted item must explain why it is reference-only');
+assert((rightsReview.match(/safeUseOnRawafid:/g) ?? []).length >= restrictedSlugs.length, 'every restricted item must define safe Rawafid handling');
+
 const hub = read('app/assessment-measures/page.tsx');
 assert(hub.includes('المقاييس وأدوات التقييم المستخدمة عالميًا'), 'public hub title changed unexpectedly');
 assert(hub.includes('/assessment-measures/compare/'), 'comparison route is not linked from the hub');
@@ -128,6 +147,11 @@ assert(hub.includes('/assessment-measures/rights-register/'), 'rights register i
 const rightsRegister = read('app/assessment-measures/rights-register/page.tsx');
 assert(rightsRegister.includes('assessmentMeasures.map'), 'rights register must derive from the canonical catalog');
 assert(rightsRegister.includes("source.role === 'rights'"), 'rights register must expose an authoritative rights source');
+assert(rightsRegister.includes('/assessment-measures/rights-review/'), 'rights register must link to restricted rights review queue');
+
+const rightsReviewPage = read('app/assessment-measures/rights-review/page.tsx');
+assert(rightsReviewPage.includes('assessmentMeasuresRightsReview.map'), 'rights review page must derive from the canonical restricted queue');
+assert(rightsReviewPage.includes('Granted لـCDISC'), 'rights review page must explain that Granted is not a Rawafid reproduction license');
 
 const header = read('components/site-header.tsx');
 assert(header.includes('/assessment-measures/'), 'assessment measures library is not present in global navigation');
@@ -143,6 +167,7 @@ assert(sitemap.includes("from '@/lib/assessment-measures-catalog'"), 'static sit
 assert(sitemap.includes('/assessment-measures/compare/'), 'comparison route missing from static sitemap');
 assert(sitemap.includes('/assessment-measures/methodology/'), 'methodology route missing from static sitemap');
 assert(sitemap.includes('/assessment-measures/rights-register/'), 'rights register route missing from static sitemap');
+assert(sitemap.includes('/assessment-measures/rights-review/'), 'restricted rights review route missing from static sitemap');
 
 const requiredRoutes = [
   'app/assessment-measures/page.tsx',
@@ -151,11 +176,12 @@ const requiredRoutes = [
   'app/assessment-measures/compare/page.tsx',
   'app/assessment-measures/methodology/page.tsx',
   'app/assessment-measures/rights-register/page.tsx',
+  'app/assessment-measures/rights-review/page.tsx',
 ];
 for (const route of requiredRoutes) {
   assert(fs.existsSync(path.join(root, route)), `required route missing: ${route}`);
 }
 
 if (!process.exitCode) {
-  console.log(`ASSESSMENT_MEASURES_CONTRACT_PASS: ${blocks.length} measures, ${uniqueSlugs.size} unique slugs, 16 categories, rights/evidence/safety/Arabic/search checks passed.`);
+  console.log(`ASSESSMENT_MEASURES_CONTRACT_PASS: ${blocks.length} reusable measures, ${restrictedSlugs.length} restricted references, ${uniqueSlugs.size} unique public slugs, 16 categories, rights/evidence/safety/Arabic/search checks passed.`);
 }
