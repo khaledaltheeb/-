@@ -37,7 +37,10 @@ jobs:
               'theme-preview-' 'dashboard-' 'communication-' 'inbox-' 'appointment-' \
               'search-' 'content-' 'article-' 'structured-' 'mega-' 'media-' \
               'rawafid-home' 'rawafid-hero' 'rawafid-section' 'site-header' 'site-footer'; do
-              count="$(grep -o "$family" "$file" | wc -l | tr -d ' ')"
+              count="$(( (grep -o "$family" "$file" || true) | wc -l | tr -d ' ' ))" 2>/dev/null || true
+              if ! [[ "$count" =~ ^[0-9]+$ ]]; then
+                count="$( (grep -o "$family" "$file" || true) | wc -l | tr -d ' ' )"
+              fi
               printf '%-24s %s\n' "$family" "$count"
             done
             echo '--- largest selector/rule fragments ---'
