@@ -2,7 +2,9 @@
   "name": "rawafid-platform",
   "version": "0.1.0",
   "private": true,
-  "engines": { "node": ">=22.0.0" },
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "scripts": {
     "dev": "node scripts/build_psych_encyclopedia_assets.mjs && node scripts/build-daily-tools-route-manifest.mjs && node scripts/build_expanded_encyclopedia_assets.mjs && node scripts/materialize-legacy-static-assets.mjs && next dev",
     "build": "node scripts/build_psych_encyclopedia_assets.mjs && node scripts/build-quick-info-cards.mjs && node scripts/build-daily-tools-route-manifest.mjs && node scripts/build_expanded_encyclopedia_assets.mjs && node scripts/materialize-legacy-static-assets.mjs && next build",
@@ -63,7 +65,7 @@
     "@supabase/ssr": "^0.12.4",
     "@supabase/supabase-js": "^2.110.9",
     "lucide-react": "^0.536.0",
-    "next": "^16.0.0",
+    "next": "16.2.12",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
@@ -73,7 +75,7 @@
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "eslint": "^9.0.0",
-    "eslint-config-next": "^16.0.0",
+    "eslint-config-next": "16.2.12",
     "typescript": "^5.9.0",
     "wrangler": "^4.115.0"
   }
