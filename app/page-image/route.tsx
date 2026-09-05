@@ -50,7 +50,7 @@ function titleLayout(value: string) {
   return { ...layout, startY };
 }
 
-function subjectIllustration(kind: PageImageKind, accent: string, soft: string) {
+function subjectIllustration(kind: PageImageKind, accent: string) {
   const common = `fill="none" stroke="${accent}" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"`;
   switch (kind) {
     case 'quick-info':
@@ -94,7 +94,7 @@ export function GET(request: Request) {
   <rect x="52" y="42" width="1176" height="636" rx="44" fill="#fff" fill-opacity=".94" stroke="#d9e8e5"/>
   <rect x="92" y="92" width="520" height="536" rx="38" fill="${palette.soft}"/>
   <circle cx="352" cy="360" r="206" fill="#fff" fill-opacity=".66"/>
-  ${subjectIllustration(kind, palette.accent, palette.soft)}
+  ${subjectIllustration(kind, palette.accent)}
   <rect x="1048" y="84" width="86" height="86" rx="26" fill="${palette.accent}"/>
   <text x="1091" y="141" font-family="Noto Sans Arabic,Tahoma,Arial,sans-serif" font-size="41" font-weight="850" fill="#fff" text-anchor="middle">ر</text>
   <text x="1015" y="115" font-family="Noto Sans Arabic,Tahoma,Arial,sans-serif" font-size="31" font-weight="800" fill="#123b3c" text-anchor="start" direction="rtl" unicode-bidi="plaintext">منصة روافد</text>
