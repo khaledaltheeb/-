@@ -1,5 +1,5 @@
 import { coreOutcomeRegistry } from '@/lib/core-outcome-sets/registry';
-import { instrumentCrosswalk } from '@/lib/core-outcome-sets/instrument-crosswalk';
+import { instrumentCrosswalk } from '@/lib/core-outcome-sets/instrument-crosswalk-registry';
 
 export type CoreOutcomeMeasurementCoverageStatus =
   | 'mapped'

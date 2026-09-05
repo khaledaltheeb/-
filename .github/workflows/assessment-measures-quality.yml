@@ -24,6 +24,7 @@ on:
       - 'scripts/assessment-measures-operational-wave7-contract.mjs'
       - 'scripts/assessment-measures-operational-coverage.mjs'
       - 'scripts/outcome-measurement-separation-contract.mjs'
+      - 'scripts/cos-instrument-mapping-wave2-contract.mjs'
       - '.assessment-measures-plan.md'
       - '.github/workflows/assessment-measures-quality.yml'
   workflow_dispatch:
@@ -61,6 +62,8 @@ jobs:
         run: node scripts/assessment-measures-operational-coverage.mjs
       - name: Validate COS and measurement separation
         run: node scripts/outcome-measurement-separation-contract.mjs
+      - name: Validate COS instrument mapping Wave 2
+        run: node scripts/cos-instrument-mapping-wave2-contract.mjs
       - name: Type check
         run: npm run typecheck
       - name: Lint
