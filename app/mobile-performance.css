@@ -1,0 +1,44 @@
+/* Mobile-only paint/layout guard.
+ * Preserve the Rawafid visual hierarchy while avoiding expensive translucent
+ * compositing on constrained devices and deferring off-screen section work.
+ */
+@media (max-width: 760px) {
+  body::before {
+    display: none;
+  }
+
+  .site-header {
+    background: rgba(255,254,251,.985);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .mobile-bottom-nav {
+    background: rgba(255,254,251,.99);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .rawafid-visual-card,
+  .rawafid-trust-bar {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .rawafid-trust-bar {
+    background: rgba(255,254,251,.98);
+  }
+
+  .rawafid-section,
+  .site-footer {
+    content-visibility: auto;
+  }
+
+  .rawafid-section {
+    contain-intrinsic-size: auto 760px;
+  }
+
+  .site-footer {
+    contain-intrinsic-size: auto 560px;
+  }
+}
