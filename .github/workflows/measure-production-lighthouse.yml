@@ -17,11 +17,12 @@ concurrency:
 jobs:
   lighthouse:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/setup-node@v7
         with:
           node-version: 24
+
       - name: Run mobile Lighthouse against live production
         shell: bash
         run: |
@@ -33,7 +34,7 @@ jobs:
             --form-factor=mobile \
             --screenEmulation.mobile=true \
             --throttling-method=simulate \
-            --chrome-flags='--headless --no-sandbox --disable-dev-shm-usage' \
+            --chrome-flags='--headless=new --no-sandbox --disable-dev-shm-usage' \
             --quiet
           node - <<'NODE'
           const fs = require('fs');
@@ -56,10 +57,71 @@ jobs:
           console.log('LIGHTHOUSE_RESULT=' + JSON.stringify(out));
           fs.writeFileSync('/tmp/lighthouse-summary.json', JSON.stringify(out, null, 2));
           NODE
+
+      - name: Run Agentic Browsing WebMCP Lighthouse audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes lighthouse@13.4.1 https://healthrenewal.org/ \
+            --output=json \
+            --output-path=/tmp/lighthouse-agentic.json \
+            --only-categories=agentic-browsing \
+            --form-factor=mobile \
+            --screenEmulation.mobile=true \
+            --throttling-method=simulate \
+            --chrome-flags='--headless=new --no-sandbox --disable-dev-shm-usage --enable-experimental-web-platform-features --enable-features=WebMCPTesting,DevToolsWebMCPSupport' \
+            --quiet
+
+          node - <<'NODE'
+          const fs = require('fs');
+          const r = JSON.parse(fs.readFileSync('/tmp/lighthouse-agentic.json', 'utf8'));
+          const ids = ['webmcp-form-coverage', 'webmcp-registered-tools', 'webmcp-schema-validity'];
+          const category = r.categories?.['agentic-browsing'];
+          if (!category) {
+            console.error('WEBMCP_LIGHTHOUSE_FAILED: agentic-browsing category is missing');
+            process.exit(1);
+          }
+
+          const summarizeAudit = (audit) => ({
+            score: audit?.score ?? null,
+            scoreDisplayMode: audit?.scoreDisplayMode ?? null,
+            title: audit?.title ?? null,
+            displayValue: audit?.displayValue ?? null,
+            explanation: audit?.explanation ?? null,
+            detailsType: audit?.details?.type ?? null,
+            items: Array.isArray(audit?.details?.items) ? audit.details.items : [],
+          });
+
+          const audits = Object.fromEntries(ids.map((id) => [id, summarizeAudit(r.audits?.[id])]));
+          const out = {
+            categoryScore: category.score == null ? null : Math.round(category.score * 100),
+            audits,
+          };
+
+          console.log('WEBMCP_LIGHTHOUSE_RESULT=' + JSON.stringify(out));
+          for (const id of ids) {
+            const audit = r.audits?.[id];
+            if (!audit) {
+              console.error(`WEBMCP_LIGHTHOUSE_FAILED: missing audit ${id}`);
+              process.exitCode = 1;
+              continue;
+            }
+            if (audit.scoreDisplayMode === 'error' || audit.score === 0) {
+              console.error(`WEBMCP_LIGHTHOUSE_FAILED: ${id} score=${audit.score} mode=${audit.scoreDisplayMode}`);
+              process.exitCode = 1;
+            }
+          }
+
+          fs.writeFileSync('/tmp/lighthouse-webmcp-summary.json', JSON.stringify(out, null, 2));
+          if (process.exitCode) process.exit(process.exitCode);
+          NODE
+
       - uses: actions/upload-artifact@v4
         with:
           name: production-lighthouse
           path: |
             /tmp/lighthouse.json
             /tmp/lighthouse-summary.json
+            /tmp/lighthouse-agentic.json
+            /tmp/lighthouse-webmcp-summary.json
           retention-days: 2
