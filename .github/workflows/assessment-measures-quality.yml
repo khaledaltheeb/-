@@ -3,6 +3,8 @@ name: Assessment Measures Quality
 on:
   pull_request:
     paths:
+      - 'app/assessment-lab/**'
+      - 'app/core-outcome-sets/**'
       - 'app/assessment-measures/**'
       - 'app/search/page.tsx'
       - 'lib/assessment-measures*.ts'
@@ -10,6 +12,7 @@ on:
       - 'components/site-header.tsx'
       - 'app/sitemaps/static.xml/route.ts'
       - 'scripts/assessment-measures-contract.mjs'
+      - 'scripts/outcome-measurement-separation-contract.mjs'
       - '.assessment-measures-plan.md'
       - '.github/workflows/assessment-measures-quality.yml'
   workflow_dispatch:
@@ -31,6 +34,8 @@ jobs:
         run: npm ci --no-audit --no-fund
       - name: Validate assessment-measures contract
         run: node scripts/assessment-measures-contract.mjs
+      - name: Validate COS and measurement separation
+        run: node scripts/outcome-measurement-separation-contract.mjs
       - name: Type check
         run: npm run typecheck
       - name: Lint
