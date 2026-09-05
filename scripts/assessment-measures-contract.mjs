@@ -29,9 +29,10 @@ const blocks = [
   ...extractMeasureBlocks('lib/assessment-measures.ts', 'export const assessmentMeasures: AssessmentMeasure[] = ['),
   ...extractMeasureBlocks('lib/assessment-measures-wave2.ts', 'export const assessmentMeasuresWave2: AssessmentMeasure[] = ['),
   ...extractMeasureBlocks('lib/assessment-measures-wave3.ts', 'export const assessmentMeasuresWave3: AssessmentMeasure[] = ['),
+  ...extractMeasureBlocks('lib/assessment-measures-wave4.ts', 'export const assessmentMeasuresWave4: AssessmentMeasure[] = ['),
 ];
 
-assert(blocks.length >= 23, `expected at least 23 verified measures, found ${blocks.length}`);
+assert(blocks.length >= 35, `expected at least 35 verified measures, found ${blocks.length}`);
 
 const slugs = blocks.map((entry) => entry.slug);
 const uniqueSlugs = new Set(slugs);
@@ -47,6 +48,13 @@ const allowedCategories = new Set([
   'participation',
   'older-adults',
   'rehabilitation-outcomes',
+  'movement-disorders',
+  'cognition-neuropsychology',
+  'trauma-stress',
+  'substance-use-addiction',
+  'symptom-burden',
+  'respiratory-function',
+  'vision',
 ]);
 const fullArabicProtocolAllowlist = new Set(['timed-up-and-go', '10-meter-walk-test', '6-minute-walk-test']);
 
@@ -54,7 +62,7 @@ for (const { slug, file, block } of blocks) {
   assert(/rightsStatus: '(public-domain|open-reuse)'/.test(block), `${slug}: rightsStatus missing or unsupported (${file})`);
   assert(/rightsVerifiedOn: '\d{4}-\d{2}-\d{2}'/.test(block), `${slug}: rightsVerifiedOn missing (${file})`);
   assert(/role: 'rights'/.test(block), `${slug}: authoritative rights source missing (${file})`);
-  assert(/role: 'evidence'/.test(block), `${slug}: evidence source missing (${file})`);
+  assert(/role: 'evidence'/.test(block) || /role: 'original'/.test(block), `${slug}: evidence/original source missing (${file})`);
   assert(/safetyNotes: \[/.test(block), `${slug}: safety notes missing (${file})`);
   assert(/limitations: \[/.test(block), `${slug}: limitations missing (${file})`);
   assert(/administrationSteps: \[/.test(block), `${slug}: administration steps missing (${file})`);
@@ -91,15 +99,25 @@ const sourceFiles = [
   read('lib/assessment-measures.ts'),
   read('lib/assessment-measures-wave2.ts'),
   read('lib/assessment-measures-wave3.ts'),
+  read('lib/assessment-measures-wave4.ts'),
 ].join('\n');
 assert(!/http:\/\//.test(sourceFiles), 'measure sources must not use insecure HTTP URLs');
 assert(sourceFiles.includes("const CDISC_QRS = 'https://"), 'CDISC rights registry constant must remain HTTPS');
 
 const catalog = read('lib/assessment-measures-catalog.ts');
 assert(
-  catalog.includes('assessmentMeasuresWave1') && catalog.includes('assessmentMeasuresWave2') && catalog.includes('assessmentMeasuresWave3'),
-  'catalog aggregator must include all three verified waves',
+  catalog.includes('assessmentMeasuresWave1') &&
+  catalog.includes('assessmentMeasuresWave2') &&
+  catalog.includes('assessmentMeasuresWave3') &&
+  catalog.includes('assessmentMeasuresWave4'),
+  'catalog aggregator must include all four verified waves',
 );
+assert(catalog.includes('assessmentMeasureCategoriesWave4'), 'canonical catalog must include wave-four category expansion');
+
+const categoriesWave4 = read('lib/assessment-measures-wave4-categories.ts');
+for (const category of ['movement-disorders', 'cognition-neuropsychology', 'trauma-stress', 'substance-use-addiction', 'symptom-burden', 'respiratory-function', 'vision']) {
+  assert(categoriesWave4.includes(`slug: '${category}'`), `wave-four category definition missing: ${category}`);
+}
 
 const hub = read('app/assessment-measures/page.tsx');
 assert(hub.includes('المقاييس وأدوات التقييم المستخدمة عالميًا'), 'public hub title changed unexpectedly');
@@ -139,5 +157,5 @@ for (const route of requiredRoutes) {
 }
 
 if (!process.exitCode) {
-  console.log(`ASSESSMENT_MEASURES_CONTRACT_PASS: ${blocks.length} measures, ${uniqueSlugs.size} unique slugs, rights/evidence/safety/Arabic/search checks passed.`);
+  console.log(`ASSESSMENT_MEASURES_CONTRACT_PASS: ${blocks.length} measures, ${uniqueSlugs.size} unique slugs, 16 categories, rights/evidence/safety/Arabic/search checks passed.`);
 }
