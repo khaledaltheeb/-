@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from 'next';
-import Script from 'next/script';
 import { Noto_Sans_Arabic } from 'next/font/google';
 import { BRAND_NAME, DEFAULT_DESCRIPTION, INDEXING_ENABLED, SITE_URL, organizationJsonLd } from '@/lib/seo';
 import { founderJsonLd } from '@/lib/founder';
@@ -14,6 +13,7 @@ import './rawafid-theme.css';
 */
 
 const DEFAULT_SOCIAL_IMAGE = `${SITE_URL}/seo-card`;
+const GA_FALLBACK_DELAY_MS = 7000;
 
 const arabicFont = Noto_Sans_Arabic({
   subsets: ['arabic'],
@@ -113,6 +113,30 @@ function validatedAnalyticsId(value: string | undefined, pattern: RegExp) {
   return pattern.test(normalized) ? normalized : '';
 }
 
+function delayedGaBootstrap(gaId: string) {
+  return `
+(function(id, fallbackDelay) {
+  var loaded = false;
+  function load() {
+    if (loaded) return;
+    loaded = true;
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = window.gtag || function(){window.dataLayer.push(arguments);};
+    window.gtag('js', new Date());
+    window.gtag('config', id);
+    var script = document.createElement('script');
+    script.async = true;
+    script.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(id);
+    document.head.appendChild(script);
+  }
+  ['pointerdown', 'keydown', 'touchstart'].forEach(function(eventName) {
+    window.addEventListener(eventName, load, { once: true });
+  });
+  window.setTimeout(load, fallbackDelay);
+})(${JSON.stringify(gaId)}, ${GA_FALLBACK_DELAY_MS});
+`;
+}
+
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const organizationSchema = organizationJsonLd();
   const founderSchema = founderJsonLd(SITE_URL);
@@ -128,9 +152,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body id="top">
         {analyticsEnabled && gtmEnabled && gtmId ? (
           <>
-            <Script id="rawafid-gtm" strategy="afterInteractive">
-              {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${gtmId}');`}
-            </Script>
+            <script
+              id="rawafid-gtm"
+              dangerouslySetInnerHTML={{ __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${gtmId}');` }}
+            />
             <noscript>
               <iframe
                 src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`}
@@ -143,12 +168,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           </>
         ) : null}
         {analyticsEnabled && directGaEnabled && gaId ? (
-          <>
-            <Script src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`} strategy="lazyOnload" />
-            <Script id="rawafid-ga4" strategy="afterInteractive">
-              {`window.dataLayer=window.dataLayer||[];function gtag(){window.dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${gaId}');`}
-            </Script>
-          </>
+          <script id="rawafid-ga4-delayed" dangerouslySetInnerHTML={{ __html: delayedGaBootstrap(gaId) }} />
         ) : null}
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema).replace(/</g, '\\u003c') }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(founderSchema).replace(/</g, '\\u003c') }} />
