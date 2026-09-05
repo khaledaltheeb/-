@@ -1,12 +1,13 @@
 import type { Metadata } from 'next';
-import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import ArticleFeaturedImage from '@/components/article-featured-image';
 import ContentRenderer from '@/components/content-renderer';
 import LegacyPreservedPageView from '@/components/legacy-preserved-page';
 import SiteFooter from '@/components/site-footer';
 import SiteHeader from '@/components/site-header';
 import { getLegacyPreservedPage, legacyPreservedMetadata } from '@/lib/legacy-preserved-page';
+import { resolveVisiblePageImage } from '@/lib/page-image';
 import { buildSeoMetadata, breadcrumbJsonLd, SITE_URL } from '@/lib/seo';
 import { getSpecialNeedsRecord, getSpecialNeedsRelated, safeSpecialNeedsReferences, specialNeedsCanonical } from '@/lib/special-needs';
 
@@ -75,6 +76,8 @@ export default async function SpecialNeedsPage({ params }: { params: Params }) {
   const related = await getSpecialNeedsRelated(record.id);
   const faqItems = visibleFaq(record.body_json);
   const audiences = Array.isArray(record.audience) ? record.audience.map(String) : [];
+  const pageVisual = resolveVisiblePageImage({ title: record.title, kind: 'special-needs', featuredImageUrl: record.featured_image_url, featuredImageAlt: record.featured_image_alt });
+  const pageVisualUrl = pageVisual.src.startsWith('https://') ? pageVisual.src : `${SITE_URL}${pageVisual.src}`;
   const breadcrumbs = breadcrumbJsonLd([
     { name: 'الرئيسية', path: '/' },
     ...(slug.length ? [{ name: 'ذوو الاحتياجات الخاصة', path: '/special-needs/' }] : []),
@@ -94,7 +97,7 @@ export default async function SpecialNeedsPage({ params }: { params: Params }) {
     lastReviewed: record.last_reviewed_at || undefined,
     publisher: { '@id': `${SITE_URL}/#organization` },
     author: record.author_display_name ? { '@type': 'Organization', name: record.author_display_name } : { '@id': `${SITE_URL}/#organization` },
-    image: record.featured_image_url || undefined,
+    image: pageVisualUrl,
     citation: references.flatMap((reference) => reference.url ? [reference.url] : []),
     isPartOf: { '@id': `${SITE_URL}/#website` },
   };
@@ -135,7 +138,7 @@ export default async function SpecialNeedsPage({ params }: { params: Params }) {
           <Link href="/search/?sector=special-needs-inclusion">البحث</Link>
         </nav>
         <div className="article-body">
-          {record.featured_image_url ? <figure className="article-featured-image"><Image src={record.featured_image_url} alt={record.featured_image_alt || record.title} width={1200} height={675} sizes="(max-width: 900px) 100vw, 900px" priority={!slug.length} unoptimized /></figure> : null}
+          <ArticleFeaturedImage title={record.title} kind="special-needs" featuredImageUrl={record.featured_image_url} featuredImageAlt={record.featured_image_alt} priority={!slug.length} />
           <ContentRenderer bodyJson={record.body_json} bodyText={record.body_text} recordId={record.id} />
         </div>
         {record.medical_disclaimer ? <aside className="medical-disclaimer" aria-label="حدود المحتوى"><strong>تنبيه صحي ومنهجي</strong><p>{record.medical_disclaimer}</p><Link href="/disclaimer">إخلاء المسؤولية الكامل</Link></aside> : null}
