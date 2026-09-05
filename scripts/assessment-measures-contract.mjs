@@ -35,10 +35,11 @@ const waveSpecs = [
   ['lib/assessment-measures-wave7.ts', 'export const assessmentMeasuresWave7: AssessmentMeasure[] = ['],
   ['lib/assessment-measures-wave8.ts', 'export const assessmentMeasuresWave8: AssessmentMeasure[] = ['],
   ['lib/assessment-measures-wave9.ts', 'export const assessmentMeasuresWave9: AssessmentMeasure[] = ['],
+  ['lib/assessment-measures-wave10.ts', 'export const assessmentMeasuresWave10: AssessmentMeasure[] = ['],
 ];
 
 const blocks = waveSpecs.flatMap(([file, marker]) => extractMeasureBlocks(file, marker));
-assert(blocks.length >= 69, `expected at least 69 verified measures, found ${blocks.length}`);
+assert(blocks.length >= 76, `expected at least 76 verified measures, found ${blocks.length}`);
 
 const slugs = blocks.map((entry) => entry.slug);
 const uniqueSlugs = new Set(slugs);
@@ -69,6 +70,8 @@ const allowedCategories = new Set([
   'infectious-disease-severity',
   'oncology-staging',
   'pediatric-puberty-development',
+  'disorders-of-consciousness',
+  'acute-kidney-injury',
 ]);
 const fullArabicProtocolAllowlist = new Set(['timed-up-and-go', '10-meter-walk-test', '6-minute-walk-test']);
 
@@ -113,10 +116,10 @@ assert(!/http:\/\//.test(sourceFiles), 'measure sources must not use insecure HT
 assert(sourceFiles.includes("const CDISC_QRS = 'https://") || sourceFiles.includes('https://www.cdisc.org/standards/foundational/qrs'), 'CDISC rights registry reference must remain HTTPS');
 
 const catalog = read('lib/assessment-measures-catalog.ts');
-for (let wave = 1; wave <= 9; wave += 1) {
+for (let wave = 1; wave <= 10; wave += 1) {
   assert(catalog.includes(`assessmentMeasuresWave${wave}`), `catalog aggregator must include assessmentMeasuresWave${wave}`);
 }
-for (const categoryWave of [4, 6, 7, 8, 9]) {
+for (const categoryWave of [4, 6, 7, 8, 9, 10]) {
   assert(catalog.includes(`assessmentMeasureCategoriesWave${categoryWave}`), `canonical catalog must include wave-${categoryWave} category expansion`);
 }
 
@@ -126,6 +129,7 @@ const categoryFiles = [
   ['lib/assessment-measures-wave7-categories.ts', ['hepatology-liver-disease', 'cardiovascular-risk']],
   ['lib/assessment-measures-wave8-categories.ts', ['infectious-disease-severity', 'oncology-staging']],
   ['lib/assessment-measures-wave9-categories.ts', ['pediatric-puberty-development']],
+  ['lib/assessment-measures-wave10-categories.ts', ['disorders-of-consciousness', 'acute-kidney-injury']],
 ];
 for (const [file, categories] of categoryFiles) {
   const source = read(file);
@@ -216,6 +220,24 @@ mustInclude('observer-global-impression', 'patient-global-impression', 'OGI must
 mustInclude('observer-global-impression', 'clinical-global-impression', 'OGI must link to CGI');
 mustInclude('observer-global-impression', 'لا تستخدم OGI لتخمين أعراض داخلية', 'OGI must preserve observability boundary');
 
+// Wave 10 boundaries.
+mustInclude('jfk-coma-recovery-scale-revised', 'لا تستخدم CRS-R منفردًا للتنبؤ الحتمي بالمآل أو لتبرير سحب العلاج أو حرمان المريض من التأهيل', 'CRS-R must preserve no-withdrawal/no-rehabilitation-denial boundary');
+mustInclude('jfk-coma-recovery-scale-revised', 'glasgow-coma-scale-ninds', 'CRS-R must link to GCS');
+mustInclude('jfk-coma-recovery-scale-revised', 'disability-rating-scale', 'CRS-R must link to DRS');
+mustInclude('kdigo-acute-kidney-injury-stage', 'لا تستخدم مرحلة KDIGO وحدها لاتخاذ قرار بدء أو إيقاف غسيل الكلى', 'KDIGO must preserve kidney-replacement decision boundary');
+mustInclude('kdigo-acute-kidney-injury-stage', 'baseline', 'KDIGO must preserve baseline kidney-function documentation');
+mustInclude('expanded-drs-postacute-interview-survivor', 'نسخة الناجي', 'Expanded DRS-PI survivor must preserve source identity');
+mustInclude('expanded-drs-postacute-interview-survivor', 'لا تستخدم الدرجة وحدها لتحديد أهلية خدمات التأهيل', 'Expanded DRS-PI survivor must preserve service-eligibility boundary');
+mustInclude('expanded-drs-postacute-interview-caregiver', 'مصدر التقرير هو مقدم الرعاية', 'Expanded DRS-PI caregiver must preserve proxy-source documentation');
+mustInclude('expanded-drs-postacute-interview-caregiver', 'لا تستخدم تقرير مقدم الرعاية وحده لحجب صوت الناجي', 'Expanded DRS-PI caregiver must preserve survivor-voice boundary');
+mustInclude('international-physical-activity-questionnaire-short-form-self-administered', "arabicStatus: 'validated-version-reported'", 'IPAQ-SF must preserve Arabic evidence status');
+mustInclude('international-physical-activity-questionnaire-short-form-self-administered', 'accelerometer', 'IPAQ-SF must preserve criterion-validity limitation');
+mustInclude('international-physical-activity-questionnaire-short-form-self-administered', 'international-physical-activity-questionnaire-long-form', 'IPAQ-SF must link to IPAQ-LF');
+mustInclude('vignos-lower-extremity-rating-scale', 'لا تطلب تجربة درج أو نهوض غير آمن', 'Vignos must preserve fall-safety boundary');
+mustInclude('vignos-lower-extremity-rating-scale', 'four-stair-ascend', 'Vignos must link to stair performance testing');
+mustInclude('west-haven-hepatic-encephalopathy-grade', 'لا تستخدم مستوى الأمونيا وحده', 'West Haven must preserve ammonia diagnostic boundary');
+mustInclude('west-haven-hepatic-encephalopathy-grade', 'glasgow-coma-scale-ninds', 'West Haven must link to GCS for severe altered consciousness context');
+
 const hub = read('app/assessment-measures/page.tsx');
 assert(hub.includes('المقاييس وأدوات التقييم المستخدمة عالميًا'), 'public hub title changed unexpectedly');
 for (const route of ['/assessment-measures/compare/', '/assessment-measures/methodology/', '/assessment-measures/rights-register/']) assert(hub.includes(route), `hub link missing: ${route}`);
@@ -263,5 +285,5 @@ const requiredRoutes = [
 for (const route of requiredRoutes) assert(fs.existsSync(path.join(root, route)), `required route missing: ${route}`);
 
 if (!process.exitCode) {
-  console.log(`ASSESSMENT_MEASURES_CONTRACT_PASS: ${blocks.length} reusable measures, ${restrictedSlugs.length} restricted searchable references, ${uniqueSlugs.size} unique public slugs, 24 categories, rights/evidence/safety/Arabic/search checks passed.`);
+  console.log(`ASSESSMENT_MEASURES_CONTRACT_PASS: ${blocks.length} reusable measures, ${restrictedSlugs.length} restricted searchable references, ${uniqueSlugs.size} unique public slugs, 26 categories, rights/evidence/safety/Arabic/search checks passed.`);
 }
