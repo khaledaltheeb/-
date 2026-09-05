@@ -73,10 +73,10 @@ jobs:
           fi
 
           curl -fsS http://127.0.0.1:3000/ >/tmp/home.html
-          for tool in searchRawafid searchRawafidHeader searchRawafidMobile; do
+          for tool in searchRawafid searchRawafidHeader searchRawafidMobile searchRawafidFooter; do
             grep -q "toolname=\"${tool}\"" /tmp/home.html
           done
-          test "$(grep -o 'toolname="' /tmp/home.html | wc -l | tr -d ' ')" -ge 3
+          test "$(grep -o 'toolname="' /tmp/home.html | wc -l | tr -d ' ')" -ge 4
           grep -q 'tooldescription="Search Rawafid' /tmp/home.html
           grep -q 'toolparamdescription="The user' /tmp/home.html
           grep -q 'id="rawafid-webmcp-imperative"' /tmp/home.html
