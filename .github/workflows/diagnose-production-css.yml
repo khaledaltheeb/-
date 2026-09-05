@@ -1,0 +1,45 @@
+name: Diagnose Production CSS
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/diagnose-production-css.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Inspect live homepage CSS
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://healthrenewal.org'
+          curl -fsS --retry 4 --retry-delay 1 "$base/?cssdiag=${GITHUB_RUN_ID}" -o /tmp/home.html
+          grep -Eo '/_next/static/(chunks|css)/[^"<> ]+\.css' /tmp/home.html | sort -u > /tmp/css-urls.txt || true
+          echo '=== CSS URLs ==='
+          cat /tmp/css-urls.txt
+          while read -r url; do
+            [ -n "$url" ] || continue
+            file="/tmp/$(basename "$url")"
+            curl -fsS --retry 4 --retry-delay 1 "$base$url" -o "$file"
+            echo
+            echo "=== $(basename "$url") ==="
+            printf 'raw_bytes='; wc -c < "$file"
+            printf 'gzip_bytes='; gzip -c "$file" | wc -c
+            for family in \
+              'admin:' 'cms-' 'directory-' 'profile-' 'portal-' 'community-' \
+              'theme-preview-' 'dashboard-' 'communication-' 'inbox-' 'appointment-' \
+              'search-' 'content-' 'article-' 'structured-' 'mega-' 'media-' \
+              'rawafid-home' 'rawafid-hero' 'rawafid-section' 'site-header' 'site-footer'; do
+              count="$(grep -o "$family" "$file" | wc -l | tr -d ' ')"
+              printf '%-24s %s\n' "$family" "$count"
+            done
+            echo '--- largest selector/rule fragments ---'
+            tr '}' '}\n' < "$file" | awk 'length($0)>80{print length($0), substr($0,1,220)}' | sort -nr | head -n 80 || true
+          done < /tmp/css-urls.txt
