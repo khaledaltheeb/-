@@ -17,6 +17,7 @@ const publicEnhancements = read('app/public-enhancements.css');
 const visualStability = read('app/visual-stability.css');
 const megaNav = read('app/mega-nav-v3.css');
 const adminTheme = read('app/theme-admin-v4.css');
+const adminThemeScoped = read('app/theme-admin-v4-scoped.css');
 const themeLib = read('lib/theme.ts');
 const agents = read('AGENTS.md');
 
@@ -42,8 +43,12 @@ for (const rule of ['.site-header', '.rawafid-hero', '.rawafid-platform-grid']) 
 
 if (!/@media\s*\(max-width:\s*720px\)/.test(theme)) fail('central theme missing mobile breakpoint');
 if (!/@media\s*\(prefers-reduced-motion:\s*reduce\)/.test(theme)) fail('central theme missing reduced-motion contract');
-if (!theme.includes("@import './theme-admin-v4.css'")) fail('central theme must load the scoped V4 admin layer');
-if (!adminTheme.includes('.admin-app-shell') || !adminTheme.includes('.dashboard-card')) fail('admin V4 layer missing core admin selectors');
+if (!theme.includes("@import './theme-admin-v4.css'")) fail('central theme must preserve the admin compatibility entry point');
+const adminThemeExecutable = adminTheme.replace(/\/\*[\s\S]*?\*\//g, '').trim();
+if (adminThemeExecutable) fail('theme-admin-v4.css must remain a non-executable compatibility stub so admin CSS cannot leak into public critical CSS');
+for (const selector of ['.admin-app-shell', '.dashboard-card', '.auth-shell', '.status-shell']) {
+  if (!adminThemeScoped.includes(selector)) fail(`route-scoped admin V4 layer missing ${selector}`);
+}
 
 if (!brand.includes('<strong>منصة روافد</strong>')) fail('shared brand component must use the full institutional brand name');
 for (const token of ['--rf-v5-aqua:', '--rf-v5-glass:', '--rf-v5-shadow-hover:']) {
