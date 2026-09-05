@@ -80,6 +80,41 @@ jobs:
       - name: Deploy Cloudflare production Worker
         run: npx opennextjs-cloudflare deploy --env production
 
+      - name: Assessment Lab runtime diagnostic
+        shell: bash
+        run: |
+          set +e
+          base="https://healthrenewal.org"
+          stamp="${GITHUB_SHA}"
+          : >/tmp/worker-tail.log
+          timeout 25s npx wrangler tail rawafid-platform-production --format json --status error >/tmp/worker-tail.log 2>&1 &
+          tail_pid=$!
+          sleep 5
+          for path in \
+            /assessment-lab \
+            /assessment-lab/avoidance-cycle \
+            /assessment-lab/mood-daily \
+            /assessment-lab/sleep-quality \
+            /cognitive-lab/simple-reaction \
+            /guided-assessment/questions-001
+          do
+            safe_name="$(printf '%s' "$path" | tr '/-' '__')"
+            code="$(curl -sS -H 'x-rawafid-diagnostic: assessment-lab' -o "/tmp/${safe_name}.html" -w '%{http_code}' "${base}${path}?diagnostic=${stamp}")"
+            printf '%s -> HTTP %s\n' "$path" "$code"
+            if [ "$code" -ge 500 ]; then
+              printf 'body: '
+              head -c 240 "/tmp/${safe_name}.html"
+              printf '\n'
+            fi
+          done
+          sleep 5
+          kill "$tail_pid" 2>/dev/null || true
+          wait "$tail_pid" 2>/dev/null || true
+          echo '--- Cloudflare Worker error tail ---'
+          cat /tmp/worker-tail.log || true
+          echo '--- end Worker error tail ---'
+          exit 0
+
       - name: Minimal live verification
         shell: bash
         run: |
