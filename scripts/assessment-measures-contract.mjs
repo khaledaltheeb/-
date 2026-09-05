@@ -39,11 +39,13 @@ const waveSpecs = [
 ];
 
 const blocks = waveSpecs.flatMap(([file, marker]) => extractMeasureBlocks(file, marker));
-assert(blocks.length >= 76, `expected at least 76 verified measures, found ${blocks.length}`);
+assert(blocks.length >= 75, `expected at least 75 verified conceptual measures, found ${blocks.length}`);
 
 const slugs = blocks.map((entry) => entry.slug);
 const uniqueSlugs = new Set(slugs);
 assert(uniqueSlugs.size === slugs.length, `duplicate measure slug detected: ${slugs.filter((slug, index) => slugs.indexOf(slug) !== index).join(', ')}`);
+assert(uniqueSlugs.has('glasgow-outcome-scale-extended'), 'canonical GOSE slug must remain in reusable catalog');
+assert(!uniqueSlugs.has('extended-glasgow-outcome-scale'), 'duplicate GOSE alias must never re-enter reusable catalog');
 
 const allowedCategories = new Set([
   'mobility-walking',
@@ -122,6 +124,12 @@ for (let wave = 1; wave <= 10; wave += 1) {
 for (const categoryWave of [4, 6, 7, 8, 9, 10]) {
   assert(catalog.includes(`assessmentMeasureCategoriesWave${categoryWave}`), `canonical catalog must include wave-${categoryWave} category expansion`);
 }
+assert(catalog.includes("'extended-glasgow-outcome-scale': 'glasgow-outcome-scale-extended'"), 'legacy GOSE slug must resolve through explicit alias mapping');
+assert(catalog.includes("'glasgow-outcome-scale-extended': {"), 'canonical GOSE evidence override is missing');
+assert(catalog.includes("arabicStatus: 'validated-version-reported'"), 'canonical GOSE override must preserve documented Arabic validation status');
+assert(catalog.includes('123 مريضًا'), 'canonical GOSE override must preserve Moroccan validation sample context');
+assert(catalog.includes('لا تستخدم انخفاض الدرجة لتبرير سحب علاج أو حرمان من خدمات تأهيلية'), 'canonical GOSE override must preserve no-withdrawal/no-rehabilitation-denial boundary');
+assert(catalog.includes('https://www.cdisc.org/standards/foundational/qrs/extended-glasgow-outcome-scale'), 'canonical GOSE override must preserve authoritative CDISC rights source');
 
 const categoryFiles = [
   ['lib/assessment-measures-wave4-categories.ts', ['movement-disorders', 'cognition-neuropsychology', 'trauma-stress', 'substance-use-addiction', 'symptom-burden', 'respiratory-function', 'vision']],
@@ -181,10 +189,11 @@ mustInclude('bode-index', 'modified-medical-research-council-dyspnea-scale', 'BO
 mustInclude('bode-index', '6-minute-walk-test', 'BODE must link to 6MWT');
 mustInclude('bode-index', 'لا تستخدم BODE وحده لتحديد أهلية علاج', 'BODE must preserve individual-decision safety boundary');
 
-// Wave 8 boundaries.
-mustInclude('extended-glasgow-outcome-scale', "arabicStatus: 'validated-version-reported'", 'GOSE must preserve documented Arabic/Moroccan translation evidence status');
-mustInclude('extended-glasgow-outcome-scale', '123 مريضًا', 'GOSE Arabic evidence must preserve the Moroccan sample context');
-mustInclude('extended-glasgow-outcome-scale', 'لا تستخدم انخفاض الدرجة لتبرير سحب علاج أو حرمان من خدمات تأهيلية', 'GOSE must preserve no-withdrawal/no-rehabilitation-denial boundary');
+// Canonical GOSE boundaries after deduplication.
+mustInclude('glasgow-outcome-scale-extended', "rightsStatus: 'public-domain'", 'canonical GOSE must preserve Public Domain status in base record');
+assert(!bySlug('extended-glasgow-outcome-scale'), 'duplicate GOSE data record must remain removed');
+
+// Wave 8 boundaries excluding the deduplicated GOSE data row.
 mustInclude('framingham-cvd-10-year-risk', 'روافد لا تقدم حاسبة Framingham فردية عامة', 'Framingham must not expose a generic individual calculator');
 mustInclude('framingham-cvd-10-year-risk', 'دون تحقق محلي', 'Framingham must preserve local population-calibration boundary');
 mustInclude('atlas-cdi-score', 'لا تستخدم ATLAS لتأخير علاج CDI شديد أو مهدد للحياة', 'ATLAS must preserve urgent-treatment safety boundary');
@@ -242,6 +251,11 @@ const hub = read('app/assessment-measures/page.tsx');
 assert(hub.includes('المقاييس وأدوات التقييم المستخدمة عالميًا'), 'public hub title changed unexpectedly');
 for (const route of ['/assessment-measures/compare/', '/assessment-measures/methodology/', '/assessment-measures/rights-register/']) assert(hub.includes(route), `hub link missing: ${route}`);
 
+const detailRoute = read('app/assessment-measures/[slug]/page.tsx');
+assert(detailRoute.includes('permanentRedirect'), 'assessment detail route must preserve permanent redirects for aliases');
+assert(detailRoute.includes('getCanonicalAssessmentMeasureSlug'), 'assessment detail route must canonicalize aliased slugs');
+assert(detailRoute.includes('assessmentMeasureRouteSlugs'), 'assessment detail static params must include legacy aliases');
+
 const rightsRegister = read('app/assessment-measures/rights-register/page.tsx');
 assert(rightsRegister.includes('assessmentMeasures.map'), 'rights register must derive from the canonical catalog');
 assert(rightsRegister.includes("source.role === 'rights'"), 'rights register must expose an authoritative rights source');
@@ -272,6 +286,7 @@ for (const searchableRestricted of ['mmse-2-standard-version', 'montreal-cogniti
 const sitemap = read('app/sitemaps/static.xml/route.ts');
 assert(sitemap.includes("from '@/lib/assessment-measures-catalog'"), 'static sitemap must use the aggregated catalog');
 for (const route of ['/assessment-measures/compare/', '/assessment-measures/methodology/', '/assessment-measures/rights-register/', '/assessment-measures/rights-review/']) assert(sitemap.includes(route), `static sitemap route missing: ${route}`);
+assert(!sitemap.includes('assessmentMeasureRouteSlugs'), 'sitemap must index canonical measure slugs only, not aliases');
 
 const requiredRoutes = [
   'app/assessment-measures/page.tsx',
@@ -285,5 +300,5 @@ const requiredRoutes = [
 for (const route of requiredRoutes) assert(fs.existsSync(path.join(root, route)), `required route missing: ${route}`);
 
 if (!process.exitCode) {
-  console.log(`ASSESSMENT_MEASURES_CONTRACT_PASS: ${blocks.length} reusable measures, ${restrictedSlugs.length} restricted searchable references, ${uniqueSlugs.size} unique public slugs, 26 categories, rights/evidence/safety/Arabic/search checks passed.`);
+  console.log(`ASSESSMENT_MEASURES_CONTRACT_PASS: ${blocks.length} unique conceptual reusable measures, ${restrictedSlugs.length} restricted searchable references, ${uniqueSlugs.size} unique public slugs, 26 categories, GOSE canonicalization and rights/evidence/safety/Arabic/search checks passed.`);
 }
