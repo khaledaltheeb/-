@@ -21,6 +21,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
+      NEXT_PUBLIC_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
       NEXT_PUBLIC_SITE_URL: https://healthrenewal.org
       NEXT_PUBLIC_ALLOW_INDEXING: 'true'
       NEXT_PUBLIC_ENABLE_ANALYTICS: 'true'
@@ -29,6 +31,7 @@ jobs:
       NEXT_PUBLIC_GA_MEASUREMENT_ID: G-VLZMV8Y4JP
       NEXT_PUBLIC_ENABLE_DIRECT_GA: 'true'
       ENABLE_RAWAFID_ASSISTANT: 'true'
+      QUICK_INFO_SOCIAL_IMAGES_REQUIRED: 'true'
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: 1910e1ad3c793fd568ba1caafe34f964
     steps:
@@ -45,6 +48,20 @@ jobs:
           node-version: 24
           cache: npm
 
+      - name: Compute Quick Info social image fingerprint
+        id: quick-info-fingerprint
+        run: node scripts/quick-info-social-cache-key.mjs
+
+      - name: Restore exact Quick Info social image cache
+        id: quick-info-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            public/quick-info/og
+            public/quick-info/discover
+            public/quick-info/social-images-manifest.json
+          key: quick-info-social-${{ runner.os }}-${{ steps.quick-info-fingerprint.outputs.fingerprint }}
+
       - name: Restore Next build cache
         uses: actions/cache@v4
         with:
@@ -56,7 +73,8 @@ jobs:
       - name: Install locked dependencies
         run: npm ci --no-audit --no-fund
 
-      - name: Install Quick Info image runtime
+      - name: Install Quick Info image runtime on cache miss
+        if: steps.quick-info-cache.outputs.cache-hit != 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -78,7 +96,8 @@ jobs:
       - name: Build Cloudflare production Worker
         env:
           CI: 'false'
-        run: npx opennextjs-cloudflare build --env production
+          QUICK_INFO_SOCIAL_CACHE_HIT: ${{ steps.quick-info-cache.outputs.cache-hit }}
+        run: npx opennextjs-cloudflare build --env production --openNextConfigPath .github/open-next-production-cache.config.ts
 
       - name: Deploy Cloudflare production Worker
         run: npx opennextjs-cloudflare deploy --env production
@@ -127,6 +146,21 @@ jobs:
           if (openapi.openapi !== '3.1.0' || openapi.info?.version !== '1.2.0') throw new Error('live OpenAPI version mismatch');
           NODE
           echo 'LIVE_OK public API'
+
+          echo 'LIVE_CHECK Quick Info social images'
+          quick_info_slug="$(node - <<'NODE'
+          const fs = require('node:fs');
+          const manifest = JSON.parse(fs.readFileSync('public/quick-info/social-images-manifest.json', 'utf8'));
+          const slug = manifest?.items?.[0]?.slug;
+          if (!slug) process.exit(1);
+          process.stdout.write(String(slug));
+          NODE
+          )"
+          curl -fsS --retry 6 --retry-delay 2 --retry-all-errors "${base}/quick-info/og/${quick_info_slug}.png?deploy=${stamp}" >/tmp/quick-info-og.png
+          curl -fsS --retry 6 --retry-delay 2 --retry-all-errors "${base}/quick-info/discover/${quick_info_slug}.png?deploy=${stamp}" >/tmp/quick-info-discover.png
+          test -s /tmp/quick-info-og.png
+          test -s /tmp/quick-info-discover.png
+          echo "LIVE_OK Quick Info social images: ${quick_info_slug}"
 
           echo 'LIVE_CHECK assessment-lab/avoidance-cycle'
           curl -fsS --retry 6 --retry-delay 2 --retry-all-errors "${base}/assessment-lab/avoidance-cycle?deploy=${stamp}" >/tmp/assessment-avoidance.html
