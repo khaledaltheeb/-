@@ -42,10 +42,8 @@ jobs:
         run: npm run cognitive-lab:validate
       - name: Audit extension semantics and balance
         run: node scripts/cognitive-lab-extension-audit-contract.mjs
-      - name: Type check
-        run: npm run typecheck
-      - name: Lint cognitive implementation
-        run: npx eslint app/cognitive-lab app/sitemaps/cognitive-lab.xml/route.ts components/cognitive-lab-browser.tsx components/cognitive-lab-runner.tsx components/cognitive-lab-extension-runner.tsx lib/cognitive-lab scripts/cognitive-lab-contract.mjs scripts/cognitive-lab-extension-audit-contract.mjs
+      - name: Repository quality coverage
+        run: echo 'TypeScript and repository-wide lint are enforced once by Rawafid Fast Quality Gate; OpenNext below also performs its production build validation.'
       - name: Build Cloudflare Worker with OpenNext
         run: npx opennextjs-cloudflare build
       - name: Validate Wrangler package
