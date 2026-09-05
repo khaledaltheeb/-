@@ -8,7 +8,7 @@ on:
       - 'app/assessment-measures/**'
       - 'app/search/page.tsx'
       - 'lib/assessment-measures*.ts'
-      - 'lib/assessment-measure-operational.ts'
+      - 'lib/assessment-measure-operational*.ts'
       - 'components/assessment-measures.module.css'
       - 'components/assessment-measure-operational-form.tsx'
       - 'components/measure-print-button.tsx'
