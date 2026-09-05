@@ -1,10 +1,9 @@
 name: Measure Production Lighthouse
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/measure-production-lighthouse.yml'
+  workflow_run:
+    workflows: ['Deploy Production Fast']
+    types: [completed]
   workflow_dispatch:
 
 permissions:
@@ -16,6 +15,7 @@ concurrency:
 
 jobs:
   lighthouse:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
