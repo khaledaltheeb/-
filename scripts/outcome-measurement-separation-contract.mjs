@@ -15,6 +15,7 @@ const assert = (condition, message) => {
 const cosPagePath = 'app/core-outcome-sets/page.tsx';
 const cosDetailPath = 'app/core-outcome-sets/[slug]/page.tsx';
 const cosRegistryPath = 'lib/core-outcome-sets/registry.ts';
+const searchPath = 'app/search/page.tsx';
 const labPath = 'app/assessment-lab/page.tsx';
 const measuresPath = 'app/assessment-measures/page.tsx';
 const methodologyPath = 'app/assessment-measures/methodology/page.tsx';
@@ -23,6 +24,7 @@ const sitemapPath = 'app/sitemaps/static.xml/route.ts';
 assert(exists(cosPagePath), 'Core Outcome Sets page must exist');
 assert(exists(cosDetailPath), 'Core Outcome Set detail route must exist');
 assert(exists(cosRegistryPath), 'Core Outcome Set registry must exist');
+assert(exists(searchPath), 'Unified search page must exist');
 assert(exists(labPath), 'Assessment Lab page must exist');
 assert(exists(measuresPath), 'Assessment Measures page must exist');
 assert(exists(methodologyPath), 'Assessment Measures methodology page must exist');
@@ -83,6 +85,17 @@ if (exists(cosDetailPath)) {
   assert(detail.includes('حالة التقييم العربي'), 'COS detail page must expose Arabic review status');
   assert(detail.includes('كيف نقيس؟ — COMS / measurement recommendations'), 'COS detail page must separate HOW from WHAT');
   assert(detail.includes('السجل الأصلي في COMET'), 'COS detail page must preserve source traceability');
+}
+
+if (exists(searchPath)) {
+  const search = read(searchPath);
+  assert(search.includes("coreOutcomeRegistry"), 'Unified search must import the structured COS registry');
+  assert(search.includes('function searchCoreOutcomeSets'), 'Unified search must expose a dedicated COS search function');
+  assert(search.includes('const coreOutcomeSets = searchCoreOutcomeSets'), 'Unified search pipeline must execute COS search');
+  assert(search.includes('...coreOutcomeSets'), 'COS search results must participate in unified result ranking');
+  assert(search.includes('/core-outcome-sets/${item.slug}/'), 'COS search results must resolve to detail pages');
+  assert(search.includes("href=\"/core-outcome-sets/\""), 'Search discovery UI must expose the COS registry');
+  assert(search.includes('مجموعات النتائج الأساسية'), 'Search explanatory copy must mention Core Outcome Sets as a distinct content layer');
 }
 
 if (exists(labPath)) {
