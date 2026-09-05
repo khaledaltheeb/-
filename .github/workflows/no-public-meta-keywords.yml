@@ -8,14 +8,7 @@ on:
       - 'lib/semantic-seo-safe.ts'
       - 'scripts/no-public-meta-keywords-contract.mjs'
       - '.github/workflows/no-public-meta-keywords.yml'
-  push:
-    branches: [main]
-    paths:
-      - 'lib/seo.ts'
-      - 'lib/semantic-seo.ts'
-      - 'lib/semantic-seo-safe.ts'
-      - 'scripts/no-public-meta-keywords-contract.mjs'
-      - '.github/workflows/no-public-meta-keywords.yml'
+  workflow_dispatch:
 
 permissions:
   contents: read
