@@ -14,7 +14,9 @@ const assert = (condition, message) => {
 
 const cosPagePath = 'app/core-outcome-sets/page.tsx';
 const cosDetailPath = 'app/core-outcome-sets/[slug]/page.tsx';
+const cosCrosswalkPagePath = 'app/core-outcome-sets/instrument-crosswalk/page.tsx';
 const cosRegistryPath = 'lib/core-outcome-sets/registry.ts';
+const cosCrosswalkPath = 'lib/core-outcome-sets/instrument-crosswalk.ts';
 const searchPath = 'app/search/page.tsx';
 const labPath = 'app/assessment-lab/page.tsx';
 const measuresPath = 'app/assessment-measures/page.tsx';
@@ -23,7 +25,9 @@ const sitemapPath = 'app/sitemaps/static.xml/route.ts';
 
 assert(exists(cosPagePath), 'Core Outcome Sets page must exist');
 assert(exists(cosDetailPath), 'Core Outcome Set detail route must exist');
+assert(exists(cosCrosswalkPagePath), 'COS instrument crosswalk page must exist');
 assert(exists(cosRegistryPath), 'Core Outcome Set registry must exist');
+assert(exists(cosCrosswalkPath), 'COS instrument crosswalk data must exist');
 assert(exists(searchPath), 'Unified search page must exist');
 assert(exists(labPath), 'Assessment Lab page must exist');
 assert(exists(measuresPath), 'Assessment Measures page must exist');
@@ -78,12 +82,41 @@ if (exists(cosRegistryPath)) {
   assert(registry.includes('Core PROM Set لم يُحسم بعد'), 'GID record must preserve the separation between the 2026 core PRO set and future PROM selection');
 }
 
+if (exists(cosCrosswalkPath)) {
+  const crosswalk = read(cosCrosswalkPath);
+  const recordCount = (crosswalk.match(/\bid:\s*'/g) || []).length;
+  assert(recordCount >= 12, `Instrument crosswalk must contain at least 12 audited instrument records; found ${recordCount}`);
+  for (const field of ['rawafidStatus', 'rightsStatus', 'arabicEvidence', 'arabicEvidenceNote', 'linkedCosSlugs', 'lastVerified']) {
+    assert(crosswalk.includes(field), `Instrument crosswalk must preserve field: ${field}`);
+  }
+  for (const requiredInstrument of ['phq-9', 'gad-7', 'whodas-2-12', 'rcads', 'c-ssrs-screening', 'gad-2', 'qolie-10', 'promis-cognition-sleep', 'gmfm', 'promis-pain-fatigue', 'eq-5d-5l']) {
+    assert(crosswalk.includes(`id: '${requiredInstrument}'`), `Instrument crosswalk must retain audited record ${requiredInstrument}`);
+  }
+  assert(crosswalk.includes("rawafidStatus: 'operational-full'"), 'Crosswalk must distinguish operational instruments');
+  assert(crosswalk.includes("rawafidStatus: 'reference-rights'"), 'Crosswalk must distinguish rights-limited references');
+  assert(crosswalk.includes("rawafidStatus: 'not-in-library'"), 'Crosswalk must expose library gaps rather than hiding them');
+  assert(crosswalk.includes('دليل RCADS-25 العربي') || crosswalk.includes('RCADS25-Arabic'), 'Crosswalk must preserve exact-version caveat for RCADS');
+  assert(crosswalk.includes('دليل GAD-7 العربي لا يُنقل تلقائيًا إلى GAD-2'), 'Crosswalk must prevent parent-instrument evidence from being transferred to GAD-2');
+  assert(crosswalk.includes('الأردن') && crosswalk.includes('Columbia Lighthouse Project'), 'C-SSRS record must preserve country-specific Arabic translation provenance');
+  assert(crosswalk.includes('HealthMeasures') && crosswalk.includes('ترجمات PROMIS محمية'), 'PROMIS records must preserve translation permissions');
+}
+
+if (exists(cosCrosswalkPagePath)) {
+  const crosswalkPage = read(cosCrosswalkPagePath);
+  assert(crosswalkPage.includes('قاعدة exact-version'), 'Crosswalk page must explain exact-version matching');
+  assert(crosswalkPage.includes('instrumentCrosswalk.map'), 'Crosswalk page must render structured instrument records');
+  assert(crosswalkPage.includes('كيف نقرر أن الأداة «جاهزة بالعربية»؟'), 'Crosswalk page must expose Arabic readiness criteria');
+  assert(crosswalkPage.includes('C-SSRS تحتاج تدريبًا'), 'Crosswalk page must preserve safety boundary for suicide-risk tools');
+}
+
 if (exists(cosDetailPath)) {
   const detail = read(cosDetailPath);
   assert(detail.includes('generateStaticParams'), 'COS detail pages must be statically enumerable');
   assert(detail.includes('getCoreOutcomeRecord'), 'COS detail page must resolve structured registry data');
+  assert(detail.includes('getInstrumentCrosswalkForCos'), 'COS detail page must resolve linked instrument crosswalk records');
   assert(detail.includes('حالة التقييم العربي'), 'COS detail page must expose Arabic review status');
   assert(detail.includes('كيف نقيس؟ — COMS / measurement recommendations'), 'COS detail page must separate HOW from WHAT');
+  assert(detail.includes('ما حالة الأدوات المرتبطة بهذا COS داخل روافد؟'), 'COS detail page must expose linked instrument readiness');
   assert(detail.includes('السجل الأصلي في COMET'), 'COS detail page must preserve source traceability');
 }
 
@@ -141,6 +174,7 @@ if (exists(methodologyPath)) {
 if (exists(sitemapPath)) {
   const sitemap = read(sitemapPath);
   assert(sitemap.includes("path:'/core-outcome-sets/'"), 'Static sitemap must include Core Outcome Sets');
+  assert(sitemap.includes("path:'/core-outcome-sets/instrument-crosswalk/'"), 'Static sitemap must include COS instrument crosswalk');
   assert(sitemap.includes('coreOutcomeRegistrySlugs'), 'Static sitemap must include COS registry detail routes');
 }
 
