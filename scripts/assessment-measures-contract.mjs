@@ -28,9 +28,10 @@ function extractMeasureBlocks(file, marker) {
 const blocks = [
   ...extractMeasureBlocks('lib/assessment-measures.ts', 'export const assessmentMeasures: AssessmentMeasure[] = ['),
   ...extractMeasureBlocks('lib/assessment-measures-wave2.ts', 'export const assessmentMeasuresWave2: AssessmentMeasure[] = ['),
+  ...extractMeasureBlocks('lib/assessment-measures-wave3.ts', 'export const assessmentMeasuresWave3: AssessmentMeasure[] = ['),
 ];
 
-assert(blocks.length >= 20, `expected at least 20 verified measures, found ${blocks.length}`);
+assert(blocks.length >= 23, `expected at least 23 verified measures, found ${blocks.length}`);
 
 const slugs = blocks.map((entry) => entry.slug);
 const uniqueSlugs = new Set(slugs);
@@ -86,12 +87,19 @@ for (const { slug, block } of blocks) {
   }
 }
 
-const sourceFiles = [read('lib/assessment-measures.ts'), read('lib/assessment-measures-wave2.ts')].join('\n');
+const sourceFiles = [
+  read('lib/assessment-measures.ts'),
+  read('lib/assessment-measures-wave2.ts'),
+  read('lib/assessment-measures-wave3.ts'),
+].join('\n');
 assert(!/http:\/\//.test(sourceFiles), 'measure sources must not use insecure HTTP URLs');
 assert(sourceFiles.includes("const CDISC_QRS = 'https://"), 'CDISC rights registry constant must remain HTTPS');
 
 const catalog = read('lib/assessment-measures-catalog.ts');
-assert(catalog.includes('assessmentMeasuresWave1') && catalog.includes('assessmentMeasuresWave2'), 'catalog aggregator must include both verified waves');
+assert(
+  catalog.includes('assessmentMeasuresWave1') && catalog.includes('assessmentMeasuresWave2') && catalog.includes('assessmentMeasuresWave3'),
+  'catalog aggregator must include all three verified waves',
+);
 
 const hub = read('app/assessment-measures/page.tsx');
 assert(hub.includes('المقاييس وأدوات التقييم المستخدمة عالميًا'), 'public hub title changed unexpectedly');
