@@ -1,0 +1,36 @@
+name: Assessment Measures Quality
+
+on:
+  pull_request:
+    paths:
+      - 'app/assessment-measures/**'
+      - 'lib/assessment-measures*.ts'
+      - 'components/assessment-measures.module.css'
+      - 'components/site-header.tsx'
+      - 'app/sitemaps/static.xml/route.ts'
+      - 'scripts/assessment-measures-contract.mjs'
+      - '.assessment-measures-plan.md'
+      - '.github/workflows/assessment-measures-quality.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Validate assessment-measures contract
+        run: node scripts/assessment-measures-contract.mjs
+      - name: Type check
+        run: npm run typecheck
+      - name: Lint
+        run: npm run lint
