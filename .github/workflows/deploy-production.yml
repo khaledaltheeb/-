@@ -69,6 +69,12 @@ jobs:
       - name: PageSpeed performance contract
         run: npm run performance:validate
 
+      - name: Public API architecture contracts
+        run: |
+          node scripts/public-api-v1-contract.mjs
+          node scripts/source-registry-v1-contract.mjs
+          node scripts/research-integrations-contract.mjs
+
       - name: Build Cloudflare production Worker
         env:
           CI: 'false'
@@ -103,6 +109,24 @@ jobs:
           echo 'LIVE_CHECK sitemap'
           curl -fsS --retry 6 --retry-delay 2 --retry-all-errors "${base}/sitemap.xml?deploy=${stamp}" >/tmp/sitemap.xml
           echo 'LIVE_OK sitemap'
+
+          echo 'LIVE_CHECK public API'
+          curl -fsS \
+            -H 'Cache-Control: no-cache, no-store, max-age=0' \
+            --retry 6 --retry-delay 2 --retry-all-errors \
+            "${base}/api/v1" >/tmp/api-v1.json
+          curl -fsS \
+            -H 'Cache-Control: no-cache, no-store, max-age=0' \
+            --retry 6 --retry-delay 2 --retry-all-errors \
+            "${base}/api/openapi.json" >/tmp/openapi.json
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const discovery = JSON.parse(fs.readFileSync('/tmp/api-v1.json', 'utf8'));
+          const openapi = JSON.parse(fs.readFileSync('/tmp/openapi.json', 'utf8'));
+          if (discovery.version !== '1.2.0') throw new Error('live Public API discovery version mismatch');
+          if (openapi.openapi !== '3.1.0' || openapi.info?.version !== '1.2.0') throw new Error('live OpenAPI version mismatch');
+          NODE
+          echo 'LIVE_OK public API'
 
           echo 'LIVE_CHECK assessment-lab/avoidance-cycle'
           curl -fsS --retry 6 --retry-delay 2 --retry-all-errors "${base}/assessment-lab/avoidance-cycle?deploy=${stamp}" >/tmp/assessment-avoidance.html

@@ -25,29 +25,7 @@ on:
       - 'scripts/source-registry-v1-contract.mjs'
       - 'scripts/research-integrations-contract.mjs'
       - '.github/workflows/public-api-v1.yml'
-  push:
-    branches: [main]
-    paths:
-      - 'app/api/v1/**'
-      - 'app/api/openapi.json/**'
-      - 'app/feed.xml/**'
-      - 'app/feed.json/**'
-      - 'app/magazine/feed.xml/**'
-      - 'app/developers/**'
-      - 'lib/public-api-v1.ts'
-      - 'lib/partner-api-v1.ts'
-      - 'lib/feed-http.ts'
-      - 'lib/research-integrations/**'
-      - 'supabase/migrations/20260901032000_public_api_v1_change_log.sql'
-      - 'supabase/migrations/20260901035000_partner_api_core_v1.sql'
-      - 'supabase/migrations/20260901212203_source_connection_metadata_v1.sql'
-      - 'supabase/migrations/20260901215918_source_governance_provenance_v1.sql'
-      - 'supabase/migrations/20260901221854_source_governance_provenance_indexes_v1.sql'
-      - 'supabase/migrations/20260901223500_datacite_content_relations_v1.sql'
-      - 'scripts/public-api-v1-contract.mjs'
-      - 'scripts/source-registry-v1-contract.mjs'
-      - 'scripts/research-integrations-contract.mjs'
-      - '.github/workflows/public-api-v1.yml'
+  workflow_dispatch:
 
 permissions:
   contents: read
