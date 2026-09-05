@@ -4,6 +4,7 @@ import { Noto_Sans_Arabic } from 'next/font/google';
 import { BRAND_NAME, DEFAULT_DESCRIPTION, INDEXING_ENABLED, SITE_URL, organizationJsonLd } from '@/lib/seo';
 import { founderJsonLd } from '@/lib/founder';
 import RawafidAssistantLoader from '@/components/rawafid-assistant-loader';
+import WebMcpImperativeTools from '@/components/webmcp-imperative-tools';
 import './rawafid-theme.css';
 
 /* Compatibility modules now live behind the central entry point:
@@ -184,6 +185,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         ) : null}
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, '\\u003c') }} />
         {children}
+        <WebMcpImperativeTools />
         {assistantEnabled ? <RawafidAssistantLoader /> : null}
         <script dangerouslySetInnerHTML={{ __html: serviceWorkerBootstrap }} />
       </body>
