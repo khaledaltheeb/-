@@ -8,6 +8,7 @@ const brand = read('components/rawafid-brand.tsx');
 const nextConfig = read('next.config.ts');
 const wrangler = read('wrangler.jsonc');
 const productionBuild = read('scripts/cloudflare-production-build.sh');
+const deployWorkflow = read('.github/workflows/deploy-production.yml');
 
 const failures = [];
 const requireText = (source, token, message) => {
@@ -41,10 +42,13 @@ requireText(wrangler, '"NEXT_PUBLIC_ENABLE_DIRECT_GA": "true"', 'production must
 requireText(productionBuild, "NEXT_PUBLIC_ENABLE_GTM='false'", 'the direct production build must keep GTM disabled');
 requireText(productionBuild, "NEXT_PUBLIC_ENABLE_DIRECT_GA='true'", 'the direct production build must keep direct GA4 enabled');
 requireText(productionBuild, "ENABLE_RAWAFID_ASSISTANT='true'", 'the static production build must keep the assistant enabled');
+requireText(deployWorkflow, 'grep -q \'toolname="searchRawafid"\' /tmp/home.html', 'production live verification must assert the WebMCP tool name in rendered HTML');
+requireText(deployWorkflow, 'grep -q \'tooldescription="Search Rawafid\' /tmp/home.html', 'production live verification must assert the WebMCP tool description in rendered HTML');
+requireText(deployWorkflow, 'grep -q \'toolparamdescription="The user\' /tmp/home.html', 'production live verification must assert the WebMCP parameter schema metadata in rendered HTML');
 
 if (failures.length) {
   for (const failure of failures) console.error(`PAGESPEED PERFORMANCE CONTRACT FAILED: ${failure}`);
   process.exit(1);
 }
 
-console.log('PageSpeed performance contract passed: GA4 remains enabled but delayed beyond the critical path, heavy GTM is gated, font LCP is non-blocking, the assistant is lazy-loaded, and the homepage WebMCP search tool remains registered with an explicit valid schema contract.');
+console.log('PageSpeed performance contract passed: GA4 remains enabled but delayed beyond the critical path, heavy GTM is gated, font LCP is non-blocking, the assistant is lazy-loaded, and WebMCP is guarded both at source and in production live verification.');
