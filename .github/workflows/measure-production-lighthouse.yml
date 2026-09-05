@@ -1,0 +1,65 @@
+name: Measure Production Lighthouse
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/measure-production-lighthouse.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: measure-production-lighthouse
+  cancel-in-progress: true
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Run mobile Lighthouse against live production
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes lighthouse@13.4.1 https://healthrenewal.org/ \
+            --output=json \
+            --output-path=/tmp/lighthouse.json \
+            --only-categories=performance,accessibility,best-practices,seo \
+            --form-factor=mobile \
+            --screenEmulation.mobile=true \
+            --throttling-method=simulate \
+            --chrome-flags='--headless --no-sandbox --disable-dev-shm-usage' \
+            --quiet
+          node - <<'NODE'
+          const fs = require('fs');
+          const r = JSON.parse(fs.readFileSync('/tmp/lighthouse.json','utf8'));
+          const a = r.audits;
+          const c = r.categories;
+          const out = {
+            performance: Math.round(c.performance.score * 100),
+            accessibility: Math.round(c.accessibility.score * 100),
+            bestPractices: Math.round(c['best-practices'].score * 100),
+            seo: Math.round(c.seo.score * 100),
+            fcpMs: Math.round(a['first-contentful-paint'].numericValue),
+            lcpMs: Math.round(a['largest-contentful-paint'].numericValue),
+            tbtMs: Math.round(a['total-blocking-time'].numericValue),
+            cls: Number(a['cumulative-layout-shift'].numericValue.toFixed(4)),
+            speedIndexMs: Math.round(a['speed-index'].numericValue),
+            unusedJsBytes: Math.round(a['unused-javascript']?.details?.overallSavingsBytes || 0),
+            unusedCssBytes: Math.round(a['unused-css-rules']?.details?.overallSavingsBytes || 0),
+          };
+          console.log('LIGHTHOUSE_RESULT=' + JSON.stringify(out));
+          fs.writeFileSync('/tmp/lighthouse-summary.json', JSON.stringify(out, null, 2));
+          NODE
+      - uses: actions/upload-artifact@v4
+        with:
+          name: production-lighthouse
+          path: |
+            /tmp/lighthouse.json
+            /tmp/lighthouse-summary.json
+          retention-days: 2
