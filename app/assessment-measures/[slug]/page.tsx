@@ -10,7 +10,7 @@ import {
   assessmentMeasureSlugs,
   getAssessmentMeasure,
   rightsBadge,
-} from '@/lib/assessment-measures';
+} from '@/lib/assessment-measures-catalog';
 import styles from '@/components/assessment-measures.module.css';
 
 type PageProps = { params: Promise<{ slug: string }> };
@@ -95,6 +95,7 @@ export default async function AssessmentMeasureDetailPage({ params }: PageProps)
             <div className={styles.heroActions}>
               <a className={styles.primaryAction} href="#usage">دليل الاستخدام</a>
               <a className={styles.secondaryAction} href="#rights">الحقوق والنسخة العربية</a>
+              <Link className={styles.secondaryAction} href={`/assessment-measures/compare/?measure=${encodeURIComponent(measure.slug)}`}>أضف إلى المقارنة</Link>
             </div>
           </div>
 
