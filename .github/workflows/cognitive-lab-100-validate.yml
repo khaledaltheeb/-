@@ -12,6 +12,7 @@ on:
       - 'scripts/cognitive-lab-contract.mjs'
       - 'scripts/cognitive-lab-extension-audit-contract.mjs'
       - '.github/workflows/cognitive-lab-100-validate.yml'
+      - '.github/open-next-fast-ci.config.ts'
 
 concurrency:
   group: cognitive-lab-100-${{ github.ref }}
@@ -42,16 +43,7 @@ jobs:
         run: npm run cognitive-lab:validate
       - name: Audit extension semantics and balance
         run: node scripts/cognitive-lab-extension-audit-contract.mjs
-      - name: Build Next candidate
-        shell: bash
-        run: |
-          set -euo pipefail
-          node scripts/build_psych_encyclopedia_assets.mjs
-          node scripts/build-daily-tools-route-manifest.mjs
-          node scripts/build_expanded_encyclopedia_assets.mjs
-          node scripts/materialize-legacy-static-assets.mjs
-          npx next build
-      - name: Package Cloudflare Worker
-        run: npx opennextjs-cloudflare build --skipNextBuild
+      - name: Build Cloudflare Worker with fast OpenNext config
+        run: npx opennextjs-cloudflare build --openNextConfigPath .github/open-next-fast-ci.config.ts
       - name: Validate Wrangler package
         run: npx wrangler deploy --dry-run
