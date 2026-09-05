@@ -56,7 +56,7 @@ jobs:
       - name: Install locked dependencies
         run: npm ci --no-audit --no-fund
 
-      - name: Install production image dependencies
+      - name: Install Quick Info image runtime
         shell: bash
         run: |
           set -euo pipefail
