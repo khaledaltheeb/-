@@ -24,7 +24,7 @@ The retained legacy source remains preserved in `private.legacy_migration_items`
 
 ## Current Outside-the-Box GOLD count
 
-**20 condition pages** as of this ledger update.
+**25 condition pages** as of this ledger update.
 
 ### Completed
 
@@ -48,12 +48,17 @@ The retained legacy source remains preserved in `private.legacy_migration_items`
 18. `legacy-outside-box-1p36-deletion-syndrome`
 19. `legacy-outside-box-angelman-syndrome`
 20. `legacy-outside-box-wiedemann-steiner-syndrome`
+21. `legacy-outside-box-kabuki-syndrome`
+22. `legacy-outside-box-turner-syndrome`
+23. `legacy-outside-box-foxp1-syndrome`
+24. `legacy-outside-box-potocki-lupski-syndrome`
+25. `legacy-outside-box-dyrk1a-syndrome`
 
-## Anti-filler verification after 20 rewrites
+## Anti-filler verification
 
-An exact structured-block comparison was run across all 20 gold pages.
+An exact structured-block comparison was run across the gold corpus.
 
-**Result: no repeated condition-science paragraph, list, or table was found across two or more gold pages.**
+**Result after the first 20 rewrites: no repeated condition-science paragraph, list, or table was found across two or more gold pages.**
 
 The only exact repeated blocks were structural headings such as:
 
@@ -65,11 +70,11 @@ The only exact repeated blocks were structural headings such as:
 - `علامات التصعيد`
 - `المراهقة والرشد`
 
-This is acceptable editorial structure, not content padding. Shared headings create predictable navigation while the science beneath them remains condition-specific.
+This is acceptable editorial structure, not content padding. Shared headings create predictable navigation while the science beneath them remains condition-specific. The same invariant remains mandatory as the corpus grows.
 
 ## Design principles observed in completed pages
 
-The first 20 conversions intentionally use different scientific strategies rather than replacing disease names in a common template. Examples:
+The conversions intentionally use different scientific strategies rather than replacing disease names in a common template. Examples:
 
 - Cri-du-chat: expressive/motor limitations can mask cognition; swallowing and AAC are central.
 - Kleefstra: longitudinal baseline before possible adolescent/adult regression; sleep and neuropsychiatric change.
@@ -91,16 +96,20 @@ The first 20 conversions intentionally use different scientific strategies rathe
 - 1p36 deletion: cardiac/epilepsy/hearing/vision safety plus evidence that adolescent/adult function can exceed older expectations.
 - Angelman: multimodal receptive/expressive/pragmatic communication, 2026 ORCA evidence, sleep/GI/mobility/adult priorities.
 - Wiedemann-Steiner: feeding/growth/constipation/sleep/motor access with broad adaptive heterogeneity and adult education/work potential.
+- Kabuki: hearing/immune/feeding safety, testing relative verbal/working-memory strengths, and translating communication into daily-living independence.
+- Turner: 2024 international guideline plus individualized verbal/visuospatial/mathematics/executive/social profile; cardiac and hearing access are safety gates.
+- FOXP1: motor-speech versus language separation, receptive/expressive asymmetry, visual-motor access and independent message repair.
+- Potocki-Lupski: feeding/sleep safety, motor-speech and executive access, and testing the individual social profile rather than assuming a generic ASD phenotype.
+- DYRK1A: early AAC, severe motor-speech/language separation, social motivation as a relative strength to test, and feeding/motor/vision safety.
+
+## Evidence backfill rule
+
+Gold is not permanent. Pages with a small direct-reference set are re-opened for evidence enrichment even if their current body is condition-specific. Turner was immediately backfilled beyond the 2024 guideline with executive-function, mathematics/visuospatial, neurodevelopmental and 2025 psychosocial/school evidence. The same process applies to any gold page whose direct condition evidence is thinner than the current literature permits.
 
 ## Next conversion wave
 
 Continue remaining Outside-the-Box pages rated `DEEP`, beginning with:
 
-- Kabuki syndrome
-- Turner syndrome
-- FOXP1 syndrome
-- Potocki-Lupski syndrome
-- DYRK1A syndrome
 - neurofibromatosis type 1
 - 22q11.2 deletion syndrome
 - kernicterus
@@ -111,6 +120,11 @@ Continue remaining Outside-the-Box pages rated `DEEP`, beginning with:
 - hydrocephalus
 - hypoxic-ischemic encephalopathy
 - Charcot-Marie-Tooth disease
+- Smith-McCort dysplasia
+- congenital hypothyroidism developmental support
+- juvenile idiopathic arthritis
+- epilepsy-aphasia spectrum
+- spinal cord injury
 
 After all Outside-the-Box DEEP pages:
 
