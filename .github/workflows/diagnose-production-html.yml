@@ -1,0 +1,58 @@
+name: Diagnose Production HTML
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/diagnose-production-html.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Inspect live homepage HTML
+        shell: bash
+        run: |
+          set -euo pipefail
+          url="https://healthrenewal.org/?htmldiag=${GITHUB_RUN_ID}"
+          curl -fsS --compressed --retry 4 --retry-delay 1 "$url" -o /tmp/home.html
+          python - <<'PY'
+          from pathlib import Path
+          import re, html as htmlmod
+          text=Path('/tmp/home.html').read_text('utf-8', errors='ignore')
+          raw=text.encode('utf-8')
+          print(f'HTML_RAW_BYTES={len(raw)}')
+          print(f'HTML_CHARS={len(text)}')
+          print(f'SCRIPT_TAGS={len(re.findall(r"<script\\b", text, re.I))}')
+          print(f'STYLE_LINKS={len(re.findall(r"<link[^>]+rel=[\"\']stylesheet[\"\']", text, re.I))}')
+          sector_links=re.findall(r'href=[\"\'](/sectors/[^\"\']+)', text)
+          print(f'SECTOR_LINK_INSTANCES={len(sector_links)}')
+          print(f'UNIQUE_SECTOR_LINKS={len(set(sector_links))}')
+          print(f'ALL_SECTORS_LINKS={len(re.findall(r"href=[\"\']/sectors[\"\']", text))}')
+          print(f'NEXT_DATA_MARKERS={text.count("self.__next_f.push") + text.count("__next_f.push")}')
+          next_scripts=re.findall(r'<script[^>]*>(.*?)</script>', text, re.I|re.S)
+          payloads=[s for s in next_scripts if '__next_f.push' in s or 'self.__next_f.push' in s]
+          print(f'RSC_SCRIPT_COUNT={len(payloads)}')
+          print(f'RSC_SCRIPT_BYTES={sum(len(s.encode("utf-8")) for s in payloads)}')
+          jsonld=[s for s in next_scripts if 'application/ld+json' in s or 'schema.org' in s]
+          print(f'JSONLD_APPROX_BYTES={sum(len(s.encode("utf-8")) for s in jsonld)}')
+          # Approximate rendered markup before RSC payload starts.
+          first_rsc=min([text.find('<script') if False else len(text)] + [m.start() for m in re.finditer(r'<script[^>]*>[^<]*(?:self\.)?__next_f\.push', text, re.I|re.S)])
+          print(f'HTML_BEFORE_FIRST_RSC_BYTES={len(text[:first_rsc].encode("utf-8"))}')
+          # Most repeated hrefs reveal duplicated navigation markup.
+          hrefs=re.findall(r'href=[\"\']([^\"\']+)', text)
+          from collections import Counter
+          print('TOP_REPEATED_HREFS:')
+          for href,count in Counter(hrefs).most_common(25):
+              print(f'{count}\t{href[:180]}')
+          # Largest inline scripts by byte size.
+          print('LARGEST_INLINE_SCRIPTS:')
+          sizes=sorted((len(s.encode('utf-8')), i, ('RSC' if '__next_f.push' in s else 'INLINE')) for i,s in enumerate(next_scripts), reverse=True)
+          for size,i,kind in sizes[:15]:
+              print(f'{size}\t{kind}\tindex={i}')
+          PY
