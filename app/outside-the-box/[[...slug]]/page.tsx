@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import OutsideTheBoxArticlePage, { OutsideTheBoxHubPage } from '@/components/outside-the-box-page';
-import { getCapabilitySibling, getOutsideBoxIndexItems, getOutsideBoxRecord } from '@/lib/outside-the-box';
+import { getOutsideBoxIndexItems, getOutsideBoxRecord } from '@/lib/outside-the-box';
+import { createClient } from '@/lib/supabase/server';
 import { buildSeoMetadata } from '@/lib/seo';
 
 type Params = Promise<{ slug?: string[] }>;
@@ -14,6 +15,25 @@ const ROOT_METADATA = buildSeoMetadata({
   index: true,
   keywords: ['خارج الصندوق', 'التقييم الوظيفي', 'ICF', 'خط الأساس', 'تصميم الحالة المفردة', 'جودة التنفيذ', 'التربية الخاصة', 'التأهيل'],
 });
+
+async function getPublishedCapabilitySibling(routeSlug: string) {
+  const supabase = await createClient();
+  const canonical = `/capabilities/${routeSlug}/`;
+  const { data } = await supabase
+    .from('content')
+    .select('title,canonical_url')
+    .eq('canonical_url', canonical)
+    .eq('status', 'published')
+    .eq('robots_index', true)
+    .lte('published_at', new Date().toISOString())
+    .maybeSingle();
+
+  if (!data) return null;
+  return {
+    title: typeof data.title === 'string' ? data.title.trim() : '',
+    href: typeof data.canonical_url === 'string' && data.canonical_url.trim() ? data.canonical_url.trim() : canonical,
+  };
+}
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug = [] } = await params;
@@ -51,6 +71,6 @@ export default async function OutsideTheBoxRoute({ params }: { params: Params })
   const record = await getOutsideBoxRecord(routeSlug);
   if (!record) notFound();
 
-  const capabilitySibling = await getCapabilitySibling(routeSlug);
+  const capabilitySibling = await getPublishedCapabilitySibling(routeSlug);
   return <OutsideTheBoxArticlePage record={record} routeSlug={routeSlug} capabilitySibling={capabilitySibling} />;
 }
