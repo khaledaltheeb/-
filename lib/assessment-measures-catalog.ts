@@ -13,9 +13,11 @@ import { assessmentMeasuresWave4 } from '@/lib/assessment-measures-wave4';
 import { assessmentMeasuresWave5 } from '@/lib/assessment-measures-wave5';
 import { assessmentMeasuresWave6 } from '@/lib/assessment-measures-wave6';
 import { assessmentMeasuresWave7 } from '@/lib/assessment-measures-wave7';
+import { assessmentMeasuresWave8 } from '@/lib/assessment-measures-wave8';
 import { assessmentMeasureCategoriesWave4 } from '@/lib/assessment-measures-wave4-categories';
 import { assessmentMeasureCategoriesWave6 } from '@/lib/assessment-measures-wave6-categories';
 import { assessmentMeasureCategoriesWave7 } from '@/lib/assessment-measures-wave7-categories';
+import { assessmentMeasureCategoriesWave8 } from '@/lib/assessment-measures-wave8-categories';
 
 export type { AssessmentMeasure, ArabicMeasureStatus, MeasureRightsStatus };
 export { arabicStatusBadge, rightsBadge };
@@ -25,6 +27,7 @@ export const assessmentMeasureCategories = [
   ...assessmentMeasureCategoriesWave4,
   ...assessmentMeasureCategoriesWave6,
   ...assessmentMeasureCategoriesWave7,
+  ...assessmentMeasureCategoriesWave8,
 ];
 
 const evidenceOverrides: Record<string, Partial<AssessmentMeasure>> = {
@@ -65,6 +68,7 @@ export const assessmentMeasures: AssessmentMeasure[] = [
   ...assessmentMeasuresWave5,
   ...assessmentMeasuresWave6,
   ...assessmentMeasuresWave7,
+  ...assessmentMeasuresWave8,
 ].map((measure) => ({ ...measure, ...(evidenceOverrides[measure.slug] ?? {}) }));
 
 export const assessmentMeasureSlugs = assessmentMeasures.map((measure) => measure.slug);
