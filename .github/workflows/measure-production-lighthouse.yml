@@ -112,6 +112,7 @@ jobs:
             'searchRawafid',
             'searchRawafidHeader',
             'searchRawafidMobile',
+            'searchRawafidFooter',
             'search_rawafid_evidence',
           ];
           const missingTools = expectedStaticTools.filter((name) => !uniqueTools.includes(name));
@@ -142,10 +143,11 @@ jobs:
             console.error(`WEBMCP_LIGHTHOUSE_FAILED: schema validity score is ${schemaValidity.score}`);
             process.exit(1);
           }
-          console.log('WEBMCP_LIGHTHOUSE_OK: all static forms are covered, imperative + declarative tools are registered, and schemas are valid.');
+          console.log('WEBMCP_LIGHTHOUSE_OK: all static forms are covered, all five expected imperative + declarative tools are registered, and schemas are valid.');
           NODE
 
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: production-lighthouse
           path: |
