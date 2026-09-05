@@ -16,7 +16,8 @@ const theme = read('app/rawafid-theme.css');
 const publicEnhancements = read('app/public-enhancements.css');
 const visualStability = read('app/visual-stability.css');
 const megaNav = read('app/mega-nav-v3.css');
-const adminTheme = read('app/theme-admin-v4.css');
+const adminTheme = read('app/route-theme-admin-v4.css');
+const portalShell = read('app/portal-shell.css');
 const themeLib = read('lib/theme.ts');
 const agents = read('AGENTS.md');
 
@@ -42,8 +43,11 @@ for (const rule of ['.site-header', '.rawafid-hero', '.rawafid-platform-grid']) 
 
 if (!/@media\s*\(max-width:\s*720px\)/.test(theme)) fail('central theme missing mobile breakpoint');
 if (!/@media\s*\(prefers-reduced-motion:\s*reduce\)/.test(theme)) fail('central theme missing reduced-motion contract');
-if (!theme.includes("@import './theme-admin-v4.css'")) fail('central theme must load the scoped V4 admin layer');
-if (!adminTheme.includes('.admin-app-shell') || !adminTheme.includes('.dashboard-card')) fail('admin V4 layer missing core admin selectors');
+if (!theme.includes("@import './theme-admin-v4.css'")) fail('central theme must retain the lightweight admin compatibility stub');
+for (const token of ["@import './route-portal.css'", "@import './route-dashboard-v3.css'", "@import './route-media-v3.css'", "@import './route-theme-admin-v4.css'"]) {
+  if (!portalShell.includes(token)) fail(`route-scoped portal entry missing ${token}`);
+}
+if (!adminTheme.includes('.admin-app-shell') || !adminTheme.includes('.dashboard-card')) fail('route-scoped admin V4 layer missing core admin selectors');
 
 if (!brand.includes('<strong>منصة روافد</strong>')) fail('shared brand component must use the full institutional brand name');
 for (const token of ['--rf-v5-aqua:', '--rf-v5-glass:', '--rf-v5-shadow-hover:']) {
