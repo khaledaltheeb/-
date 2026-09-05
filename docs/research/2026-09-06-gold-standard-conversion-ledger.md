@@ -25,7 +25,7 @@ The retained legacy source remains preserved in `private.legacy_migration_items`
 
 ## Current Outside-the-Box GOLD count
 
-**50 condition pages**.
+**60 condition pages**.
 
 Current verification state:
 
@@ -88,6 +88,16 @@ Shared structural headings are allowed; copied condition science is not.
 48. `legacy-outside-box-lennox-gastaut-syndrome`
 49. `legacy-outside-box-achondroplasia`
 50. `legacy-outside-box-duchenne-muscular-dystrophy`
+51. `legacy-outside-box-phenylketonuria`
+52. `legacy-outside-box-infantile-epileptic-spasms-syndrome`
+53. `legacy-outside-box-sleep-difficulties-neurodevelopmental`
+54. `legacy-outside-box-spina-bifida`
+55. `legacy-outside-box-acquired-brain-injury`
+56. `legacy-outside-box-rare-neurodevelopmental-undiagnosed`
+57. `legacy-outside-box-smith-magenis-syndrome`
+58. `legacy-outside-box-adnp-syndrome`
+59. `legacy-outside-box-aicardi-syndrome`
+60. `legacy-outside-box-sturge-weber-syndrome`
 
 ## Scientific design invariant
 
@@ -108,22 +118,22 @@ GOLD is not permanent. A page is reopened whenever newer direct evidence materia
 
 ## Anti-filler rule
 
-At 50 GOLD pages, exact structured-block comparison still finds **zero scientific paragraphs, lists or tables of 100+ characters duplicated exactly across two or more pages**. Repeated editorial headings such as `قواعد القرار` or `قوة الدليل وحدوده` are permitted because they provide predictable navigation; the science beneath them must remain condition-specific.
+At 60 GOLD pages, exact structured-block comparison still finds **zero scientific paragraphs, lists or tables of 100+ characters duplicated exactly across two or more pages**. Repeated editorial headings such as `قواعد القرار` or `قوة الدليل وحدوده` are permitted because they provide predictable navigation; the science beneath them must remain condition-specific.
 
 ## Next DEEP conversion wave
 
 Continue the original audit order with:
 
-- `legacy-outside-box-phenylketonuria`
-- `legacy-outside-box-infantile-epileptic-spasms-syndrome`
-- `legacy-outside-box-sleep-difficulties-neurodevelopmental`
-- `legacy-outside-box-spina-bifida`
-- `legacy-outside-box-acquired-brain-injury`
-- `legacy-outside-box-rare-neurodevelopmental-undiagnosed`
-- `legacy-outside-box-smith-magenis-syndrome`
-- `legacy-outside-box-adnp-syndrome`
-- `legacy-outside-box-aicardi-syndrome`
-- `legacy-outside-box-sturge-weber-syndrome`
+- `legacy-outside-box-smith-lemli-opitz-syndrome`
+- `legacy-outside-box-cornelia-de-lange-syndrome`
+- `legacy-outside-box-satb2-associated-syndrome`
+- `legacy-outside-box-tuberous-sclerosis-complex`
+- `legacy-outside-box-congenital-zika-syndrome`
+- `legacy-outside-box-prader-willi-syndrome`
+- tic / Tourette functional support
+- central auditory processing difficulties
+- auditory neuropathy spectrum
+- CHARGE syndrome
 
 After all Outside-the-Box DEEP pages:
 
