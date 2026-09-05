@@ -1,11 +1,12 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import ContentRenderer from '@/components/content-renderer';
+import ArticleFeaturedImage from '@/components/article-featured-image';
 import FamilyGuideBrowser from '@/components/family-guide-browser';
 import { breadcrumbJsonLd, SITE_URL } from '@/lib/seo';
 import { familyGuidePageRole, safeFamilyGuideReferences, visibleFamilyGuideFaq, type FamilyGuideItem, type FamilyGuideRecord } from '@/lib/family-guide';
+import { resolveVisiblePageImage } from '@/lib/page-image';
 import { contentReviewProvenance } from '@/lib/review-provenance';
 import styles from './family-guide-article-page.module.css';
 
@@ -18,6 +19,10 @@ export default function FamilyGuideArticlePage({ record, items = [] }: Props) {
   const review = contentReviewProvenance(record);
   const canonical = record.canonical_url || '/family-guide/';
   const url = canonical.startsWith('https://') ? canonical : `${SITE_URL}${canonical}`;
+  const canonicalPath = new URL(url).pathname;
+  const routeSlug = role === 'hub' ? 'hub' : (canonicalPath.match(/^\/family-guide\/([^/]+)\/?$/)?.[1] || '');
+  const pageVisual = resolveVisiblePageImage({ title: record.title, slug: routeSlug, kind: 'family-guide', featuredImageUrl: record.featured_image_url, featuredImageAlt: record.featured_image_alt });
+  const pageVisualUrl = pageVisual.src.startsWith('https://') ? pageVisual.src : `${SITE_URL}${pageVisual.src}`;
   const breadcrumbs = breadcrumbJsonLd([
     { name: 'الرئيسية', path: '/' },
     { name: 'دليل الأسرة', path: '/family-guide/' },
@@ -28,7 +33,7 @@ export default function FamilyGuideArticlePage({ record, items = [] }: Props) {
     description: record.seo_description || record.excerpt || undefined, inLanguage: 'ar', datePublished: record.published_at || undefined,
     dateModified: record.updated_at || undefined, lastReviewed: review.lastReviewedAt || undefined,
     publisher: { '@id': `${SITE_URL}/#organization` }, isPartOf: { '@id': `${SITE_URL}/#website` },
-    image: record.featured_image_url ? (record.featured_image_url.startsWith('https://') ? record.featured_image_url : `${SITE_URL}${record.featured_image_url}`) : undefined,
+    image: pageVisualUrl,
   };
   const contentSchema: Record<string, unknown> = role === 'hub'
     ? { ...common, '@type': 'CollectionPage', mainEntity: { '@type': 'ItemList', numberOfItems: items.length, itemListElement: items.map((item) => ({ '@type': 'ListItem', position: item.rank, name: item.title, url: `${SITE_URL}${item.href}` })) } }
@@ -55,7 +60,7 @@ export default function FamilyGuideArticlePage({ record, items = [] }: Props) {
           <nav className={styles.sectionNav} aria-label="التنقل في دليل الأسرة"><Link href="/family-guide/">الفهرس</Link><Link href="/capabilities/">مرجع القدرات</Link><Link href="/care-guides/">أدلة الرعاية</Link></nav>
           {role === 'hub' && items.length ? <FamilyGuideBrowser items={items} /> : null}
           <div className="article-body">
-            {record.featured_image_url ? <figure className="article-featured-image"><Image src={record.featured_image_url} alt={record.featured_image_alt || record.title} width={1200} height={675} sizes="(max-width:900px) 100vw, 900px" priority={role === 'hub'} unoptimized /></figure> : null}
+            <ArticleFeaturedImage title={record.title} slug={routeSlug} kind="family-guide" featuredImageUrl={record.featured_image_url} featuredImageAlt={record.featured_image_alt} priority={role === 'hub'} />
             <ContentRenderer bodyJson={record.body_json} bodyText={record.body_text} recordId={record.id} />
           </div>
           {record.medical_disclaimer ? <aside className="medical-disclaimer" aria-label="تنبيه صحي"><strong>تنبيه منهجي وصحي</strong><p>{record.medical_disclaimer}</p><Link href="/disclaimer">إخلاء المسؤولية الكامل</Link></aside> : null}

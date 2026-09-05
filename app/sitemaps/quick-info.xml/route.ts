@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { genericPageImagePath } from '@/lib/page-image';
 import { createClient } from '@/lib/supabase/server';
 import { INDEXING_ENABLED, SITE_URL } from '@/lib/seo';
 
@@ -8,7 +9,7 @@ const DB_BATCH_SIZE = 1000;
 const QUICK_INFO_HUB = { path: '/quick-info/' } as const;
 
 type JsonRecord = Record<string, unknown>;
-type QuickInfoSitemapRecord = { id: string; slug: string; canonical_url: string | null; updated_at: string | null; schema_json: JsonRecord | null };
+type QuickInfoSitemapRecord = { id: string; slug: string; title: string; canonical_url: string | null; updated_at: string | null; schema_json: JsonRecord | null };
 
 function asRecord(value: unknown): JsonRecord | null { return value && typeof value === 'object' && !Array.isArray(value) ? value as JsonRecord : null; }
 function asString(value: unknown) { return typeof value === 'string' ? value.trim() : ''; }
@@ -40,7 +41,7 @@ export async function GET(request: Request) {
     const requestedRows = batchEnd - batchStart + 1;
     const { data: batch, error } = await supabase
       .from('content')
-      .select('id,slug,canonical_url,updated_at,schema_json')
+      .select('id,slug,title,canonical_url,updated_at,schema_json')
       .like('slug', 'quick-info-%')
       .eq('status', 'published')
       .eq('robots_index', true)
@@ -60,7 +61,9 @@ export async function GET(request: Request) {
     if (!routeSlug || !/^[a-z0-9][a-z0-9-]*$/.test(routeSlug)) return [];
     const canonicalUrl = asString(row.canonical_url) || `/quick-info/${routeSlug}/`;
     if (canonicalUrl !== `/quick-info/${routeSlug}/`) return [];
-    return [{ routeSlug, canonicalUrl, updatedAt: typeof row.updated_at === 'string' ? row.updated_at : null }];
+    const title = asString(row.title);
+    if (!title) return [];
+    return [{ routeSlug, title, canonicalUrl, updatedAt: typeof row.updated_at === 'string' ? row.updated_at : null }];
   });
 
   const rows: string[] = [];
@@ -70,9 +73,8 @@ export async function GET(request: Request) {
   }
 
   for (const item of items) {
-    const discoverUrl = absolute(`/quick-info/discover/${item.routeSlug}.png`);
-    const cardUrl = absolute(`/quick-info/og/${item.routeSlug}.png`);
-    rows.push(`<url><loc>${escapeXml(absolute(item.canonicalUrl))}</loc>${item.updatedAt ? `<lastmod>${escapeXml(new Date(item.updatedAt).toISOString())}</lastmod>` : ''}<changefreq>monthly</changefreq><priority>0.7</priority><image:image><image:loc>${escapeXml(discoverUrl)}</image:loc></image:image><image:image><image:loc>${escapeXml(cardUrl)}</image:loc></image:image></url>`);
+    const preferredImageUrl = absolute(genericPageImagePath(item.title, 'quick-info'));
+    rows.push(`<url><loc>${escapeXml(absolute(item.canonicalUrl))}</loc>${item.updatedAt ? `<lastmod>${escapeXml(new Date(item.updatedAt).toISOString())}</lastmod>` : ''}<changefreq>monthly</changefreq><priority>0.7</priority><image:image><image:loc>${escapeXml(preferredImageUrl)}</image:loc></image:image></url>`);
   }
 
   return response(rows.join(''));

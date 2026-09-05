@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { genericPageImagePath } from '@/lib/page-image';
 import { SITE_URL } from '@/lib/seo';
 
 type JsonRecord = Record<string, unknown>;
@@ -165,11 +166,12 @@ export async function getQuickInfoRecord(routeSlug: string): Promise<QuickInfoRe
   if (!publicationApproved(record.schema_json)) return null;
   const expectedCanonical = `/quick-info/${safeSlug}/`;
   if (record.canonical_url && record.canonical_url !== expectedCanonical) return null;
+  const preferredImagePath = genericPageImagePath(record.title, 'quick-info');
   return {
     ...record,
     body_json: sanitizeQuickInfoBodyJson(record.body_json),
-    featured_image_url: quickInfoDiscoverUrl(safeSlug),
-    featured_image_alt: `صورة معلومات سريعة مهيأة للاكتشاف من منصة روافد بعنوان «${record.title}»`,
+    featured_image_url: `${SITE_URL}${preferredImagePath}`,
+    featured_image_alt: `صورة توضيحية بصرية لمعلومة «${record.title}» من منصة روافد`,
   };
 }
 
