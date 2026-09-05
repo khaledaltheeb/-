@@ -13,7 +13,7 @@ import {
 import styles from '@/components/assessment-measures.module.css';
 
 export const metadata: Metadata = buildSeoMetadata({
-  title: 'المقاييس وأدوات قياس النتائج المستخدمة عالميًا',
+  title: 'المقاييس وأدوات التقييم المستخدمة عالميًا',
   description: 'مكتبة عربية موثقة لأدوات قياس النتائج: الغرض، الفئة، التطبيق، الخصائص القياسية، النسخ العربية، حدود التفسير وحقوق إعادة الاستخدام، مع فصل واضح عن Core Outcome Sets.',
   path: '/assessment-measures/',
   index: true,
@@ -51,7 +51,7 @@ export default async function AssessmentMeasuresPage({ searchParams }: PageProps
     '@type': 'CollectionPage',
     '@id': `${SITE_URL}/assessment-measures/#page`,
     url: `${SITE_URL}/assessment-measures/`,
-    name: 'المقاييس وأدوات قياس النتائج المستخدمة عالميًا',
+    name: 'المقاييس وأدوات التقييم المستخدمة عالميًا',
     description: 'مكتبة عربية موثقة لأدوات قياس النتائج مع الأدلة وحقوق الاستخدام وحدود التفسير.',
     inLanguage: 'ar',
     isPartOf: { '@id': `${SITE_URL}/#website` },
@@ -79,7 +79,7 @@ export default async function AssessmentMeasuresPage({ searchParams }: PageProps
 
         <section className={styles.hero} aria-labelledby="assessment-measures-title">
           <span className={styles.eyebrow}>HOW TO MEASURE · حقوق + أدلة + استخدام مسؤول</span>
-          <h1 id="assessment-measures-title">المقاييس وأدوات قياس النتائج المستخدمة عالميًا</h1>
+          <h1 id="assessment-measures-title">المقاييس وأدوات التقييم المستخدمة عالميًا</h1>
           <p>هذه المكتبة تجيب عن سؤال <strong>«كيف نقيس نتيجة محددة؟»</strong>. إذا كان السؤال الأول هو <strong>«ما النتائج التي ينبغي قياسها أصلًا؟»</strong> فابدأ من Core Outcome Sets. بعد تحديد النتيجة، توثق هذه المكتبة الأداة والغرض والمجتمع وطريقة التطبيق والخصائص القياسية والنسخة العربية والحقوق، من دون تحويل أداة فحص أو درجة إلى تشخيص مستقل.</p>
           <div className={styles.heroActions}>
             <Link className={styles.primaryAction} href="/core-outcome-sets/">ابدأ من Core Outcome Sets</Link>
