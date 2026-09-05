@@ -36,10 +36,11 @@ const waveSpecs = [
   ['lib/assessment-measures-wave8.ts', 'export const assessmentMeasuresWave8: AssessmentMeasure[] = ['],
   ['lib/assessment-measures-wave9.ts', 'export const assessmentMeasuresWave9: AssessmentMeasure[] = ['],
   ['lib/assessment-measures-wave10.ts', 'export const assessmentMeasuresWave10: AssessmentMeasure[] = ['],
+  ['lib/assessment-measures-wave11.ts', 'export const assessmentMeasuresWave11: AssessmentMeasure[] = ['],
 ];
 
 const blocks = waveSpecs.flatMap(([file, marker]) => extractMeasureBlocks(file, marker));
-assert(blocks.length >= 75, `expected at least 75 verified conceptual measures, found ${blocks.length}`);
+assert(blocks.length >= 80, `expected at least 80 verified conceptual measures, found ${blocks.length}`);
 
 const slugs = blocks.map((entry) => entry.slug);
 const uniqueSlugs = new Set(slugs);
@@ -118,7 +119,7 @@ assert(!/http:\/\//.test(sourceFiles), 'measure sources must not use insecure HT
 assert(sourceFiles.includes("const CDISC_QRS = 'https://") || sourceFiles.includes('https://www.cdisc.org/standards/foundational/qrs'), 'CDISC rights registry reference must remain HTTPS');
 
 const catalog = read('lib/assessment-measures-catalog.ts');
-for (let wave = 1; wave <= 10; wave += 1) {
+for (let wave = 1; wave <= 11; wave += 1) {
   assert(catalog.includes(`assessmentMeasuresWave${wave}`), `catalog aggregator must include assessmentMeasuresWave${wave}`);
 }
 for (const categoryWave of [4, 6, 7, 8, 9, 10]) {
@@ -247,6 +248,31 @@ mustInclude('vignos-lower-extremity-rating-scale', 'four-stair-ascend', 'Vignos 
 mustInclude('west-haven-hepatic-encephalopathy-grade', 'لا تستخدم مستوى الأمونيا وحده', 'West Haven must preserve ammonia diagnostic boundary');
 mustInclude('west-haven-hepatic-encephalopathy-grade', 'glasgow-coma-scale-ninds', 'West Haven must link to GCS for severe altered consciousness context');
 
+// Wave 11 boundaries.
+mustInclude('ascvd-pooled-cohort-equations-10-year-risk', "rightsStatus: 'public-domain'", 'ASCVD PCE must preserve Public Domain status');
+mustInclude('ascvd-pooled-cohort-equations-10-year-risk', 'PREVENT-ASCVD', 'ASCVD PCE page must explicitly preserve the 2026 PREVENT replacement context');
+mustInclude('ascvd-pooled-cohort-equations-10-year-risk', 'لا تنشر روافد حاسبة ASCVD/PCE عامة لتوجيه علاج خفض الدهون في 2026', 'ASCVD PCE must not expose a current lipid-treatment calculator');
+mustInclude('ascvd-pooled-cohort-equations-10-year-risk', 'framingham-cvd-10-year-risk', 'ASCVD PCE must link to Framingham for historical comparison');
+
+mustInclude('barnes-akathisia-rating-scale', "rightsStatus: 'public-domain'", 'BARS must preserve Public Domain status');
+mustInclude('barnes-akathisia-rating-scale', 'أفكار إيذاء النفس', 'BARS must preserve severe-distress/self-harm safety boundary');
+mustInclude('barnes-akathisia-rating-scale', 'abnormal-involuntary-movement-scale', 'BARS must link to AIMS for differential movement-disorder context');
+
+mustInclude('brooke-upper-extremity-rating-scale', "rightsStatus: 'public-domain'", 'Brooke Upper Extremity Rating Scale must preserve Public Domain status');
+mustInclude('brooke-upper-extremity-rating-scale', 'vignos-lower-extremity-rating-scale', 'Brooke must link to Vignos for complementary neuromuscular function');
+mustInclude('brooke-upper-extremity-rating-scale', 'لا تطلب حركة تسبب ألمًا أو خطر سقوط', 'Brooke must preserve movement-safety boundary');
+
+mustInclude('hamilton-depression-rating-scale-17', "arabicStatus: 'version-review-required'", 'HAMD-17 must not inherit Arabic validation from shorter Hamilton versions');
+mustInclude('hamilton-depression-rating-scale-17', '153 متحدثًا بالعربية', 'HAMD-17 Arabic note must preserve the HAMD-7 Saudi sample context');
+mustInclude('hamilton-depression-rating-scale-17', 'لا يجوز نقل صلاحية تلك الترجمات إلى بنود HAMD-17 السبعة عشر', 'HAMD-17 must preserve cross-version translation boundary');
+mustInclude('hamilton-depression-rating-scale-17', 'ليس أداة مستقلة لتقييم خطر الانتحار', 'HAMD-17 must preserve suicide-risk assessment boundary');
+mustInclude('hamilton-depression-rating-scale-17', 'hamilton-depression-rating-scale-24', 'HAMD-17 must link to HAMD-24 without merging versions');
+
+mustInclude('cdc-hiv-surveillance-stage-2014', "rightsStatus: 'public-domain'", 'CDC HIV 2014 surveillance stage must preserve Public Domain status');
+mustInclude('cdc-hiv-surveillance-stage-2014', 'stage 0', 'CDC HIV 2014 must preserve stage 0 timing concept');
+mustInclude('cdc-hiv-surveillance-stage-2014', 'لا تستخدم CDC HIV surveillance stage لتحديد بدء العلاج أو وقفه أو تأخيره', 'CDC HIV stage must preserve surveillance-only treatment boundary');
+mustInclude('cdc-hiv-surveillance-stage-2014', 'بيانات HIV حساسة', 'CDC HIV stage must preserve privacy boundary');
+
 const hub = read('app/assessment-measures/page.tsx');
 assert(hub.includes('المقاييس وأدوات التقييم المستخدمة عالميًا'), 'public hub title changed unexpectedly');
 for (const route of ['/assessment-measures/compare/', '/assessment-measures/methodology/', '/assessment-measures/rights-register/']) assert(hub.includes(route), `hub link missing: ${route}`);
@@ -300,5 +326,5 @@ const requiredRoutes = [
 for (const route of requiredRoutes) assert(fs.existsSync(path.join(root, route)), `required route missing: ${route}`);
 
 if (!process.exitCode) {
-  console.log(`ASSESSMENT_MEASURES_CONTRACT_PASS: ${blocks.length} unique conceptual reusable measures, ${restrictedSlugs.length} restricted searchable references, ${uniqueSlugs.size} unique public slugs, 26 categories, GOSE canonicalization and rights/evidence/safety/Arabic/search checks passed.`);
+  console.log(`ASSESSMENT_MEASURES_CONTRACT_PASS: ${blocks.length} unique conceptual reusable measures, ${restrictedSlugs.length} restricted searchable references, ${uniqueSlugs.size} unique public slugs, 26 categories, GOSE canonicalization plus Wave 11 rights/evidence/safety/Arabic/search checks passed.`);
 }
