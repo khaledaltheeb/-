@@ -106,6 +106,12 @@ assert(rightsRegister.includes("source.role === 'rights'"), 'rights register mus
 const header = read('components/site-header.tsx');
 assert(header.includes('/assessment-measures/'), 'assessment measures library is not present in global navigation');
 
+const unifiedSearch = read('app/search/page.tsx');
+assert(unifiedSearch.includes("from '@/lib/assessment-measures-catalog'"), 'unified search must import the canonical assessment catalog');
+assert(unifiedSearch.includes('function searchAssessmentMeasures'), 'assessment-specific search scoring is missing');
+assert(unifiedSearch.includes('...measures, ...expanded'), 'assessment results are not merged into unified results');
+assert(unifiedSearch.includes("href=\"/assessment-measures/\""), 'assessment library is missing from search discovery navigation');
+
 const sitemap = read('app/sitemaps/static.xml/route.ts');
 assert(sitemap.includes("from '@/lib/assessment-measures-catalog'"), 'static sitemap must use the aggregated catalog');
 assert(sitemap.includes('/assessment-measures/compare/'), 'comparison route missing from static sitemap');
@@ -125,5 +131,5 @@ for (const route of requiredRoutes) {
 }
 
 if (!process.exitCode) {
-  console.log(`ASSESSMENT_MEASURES_CONTRACT_PASS: ${blocks.length} measures, ${uniqueSlugs.size} unique slugs, rights/evidence/safety/Arabic-state checks passed.`);
+  console.log(`ASSESSMENT_MEASURES_CONTRACT_PASS: ${blocks.length} measures, ${uniqueSlugs.size} unique slugs, rights/evidence/safety/Arabic/search checks passed.`);
 }
