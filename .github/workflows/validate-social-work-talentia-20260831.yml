@@ -1,14 +1,10 @@
-name: Validate Talentia Social Work expansion
+name: Validate Talentia Social Work expansion (Manual Deep Check)
 
 on:
-  pull_request:
-    paths:
-      - 'lib/social-work-talentia-pages.ts'
-      - 'app/evidence-guides/social-work/**'
-      - 'app/sitemaps/social-work.xml/**'
-      - 'app/sitemap.xml/**'
-      - 'scripts/social-work-talentia-contract.mjs'
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   validate:
