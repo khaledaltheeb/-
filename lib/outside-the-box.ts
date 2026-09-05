@@ -45,6 +45,27 @@ const NON_READER_ARTIFACTS = [
 const SHARED_LAYER_START = /^الطبقة التشغيلية الموسعة\s*[·•]\s*الإصدار\s+\d+$/u;
 const SHARED_LAYER_END = new Set(['البوابة الخامسة', 'ما المتوقع من الحالة؟']);
 
+const SHARED_SECTION_RANGES = [
+  ['أسئلة الدخول الإلزامية', 'ما يجب استبعاده أو تفسيره أولًا'],
+  ['تثليث الأدلة', 'خط الأساس المقترح'],
+  ['سجل BTR‑ICF الأصلي غير التشخيصي', 'الأفكار المناسبة والبروتوكولات'],
+  ['الجدول الزمني لمراقبة الاستجابة', 'إعادة التقييم: هل وصلنا؟ وما العائق والخطة البديلة؟'],
+  ['هل وصلنا إلى المنشود؟', 'الخطة البديلة الخاصة'],
+] as const;
+
+const REMOVE_FROM_HEADING = 'مراجع هذه الحالة والمنهج';
+
+const SHARED_CONDITION_TEXT = new Set([
+  'تُسجل كفرضية أو تشخيص موثق مع مصدره وتاريخه، ولا يستنتج التشخيص من هذه الصفحة.',
+  'الحد الأدنى: ثلاث نقاط مستقلة قبل التدخل تحت شروط موثقة، ما لم تفرض السلامة بدء الدعم فورًا.',
+  'هذه خيارات اختبار مهني، وليست حزمة إلزامية. ابدأ بالخيار الأكثر اتصالًا بالهدف وبأقل عبء، وثبّت ما تغير حتى يمكن تفسير الاستجابة.',
+  'يحوّل الفريق العبارة السابقة إلى هدف يحدد السلوك والسياق ومستوى المساعدة ومؤشر الأداء والمدة . المتوقع العلمي هو الوصول إلى نقطة قرار أو اتجاه قابل للتفسير ضمن مدة محددة؛ أما مقدار التحسن الفردي فلا يُضمن.',
+  'غيّر متغيرًا واحدًا، أعد خط الأساس عند تغير الهدف، وحدد موعد قرار جديدًا.',
+  'عند خطر مباشر أو وشيك استخدم خدمات الطوارئ أو الصحة أو الحماية المحلية المناسبة؛ هذه الصفحة لا تحدد رقم بلدك.',
+]);
+
+const SHARED_OUTCOME_TABLE_HEADERS = ['المرحلة', 'المستوى المتوقع', 'ما الذي يثبت الوصول؟'];
+
 function asRecord(value: unknown): JsonRecord | null {
   return value && typeof value === 'object' && !Array.isArray(value) ? value as JsonRecord : null;
 }
@@ -63,46 +84,119 @@ function blockText(value: unknown) {
   return row ? asString(row.text) : '';
 }
 
+function normalizedLine(value: string) {
+  return value.trim().replace(/^#{1,6}\s*/u, '').trim();
+}
+
+function isSharedOutcomeTable(value: unknown) {
+  const row = asRecord(value);
+  if (!row || row.type !== 'table' || !Array.isArray(row.headers)) return false;
+  const headers = row.headers.map((item) => asString(item));
+  return headers.length === SHARED_OUTCOME_TABLE_HEADERS.length
+    && headers.every((item, index) => item === SHARED_OUTCOME_TABLE_HEADERS[index]);
+}
+
+function removeBlockRange(blocks: unknown[], startText: string, endText: string) {
+  const start = blocks.findIndex((block) => blockText(block) === startText);
+  if (start < 0) return blocks;
+  const end = blocks.findIndex((block, index) => index > start && blockText(block) === endText);
+  if (end < 0) return blocks;
+  return [...blocks.slice(0, start), ...blocks.slice(end)];
+}
+
+function removeLineRange(lines: string[], startText: string, endText: string) {
+  const start = lines.findIndex((line) => normalizedLine(line) === startText);
+  if (start < 0) return lines;
+  const end = lines.findIndex((line, index) => index > start && normalizedLine(line) === endText);
+  if (end < 0) return lines;
+  return [...lines.slice(0, start), ...lines.slice(end)];
+}
+
 /**
- * Legacy condition records contain an expanded "ten plans" layer copied almost
- * verbatim across the condition library. The source stays intact in Supabase for
- * provenance/research, but publishing that layer on every condition page inflates
- * page length without adding condition-specific evidence. Keep the condition's
- * assessment/ideas plus its outcome, monitoring, reassessment and reference gates;
- * publish the shared operating method once through the methodology pages instead.
+ * The legacy source contains a large shared "ten plans" layer copied into nearly
+ * every condition. It remains untouched in Supabase for provenance, but is not
+ * reader content: publishing it on every condition inflates length without adding
+ * condition-specific evidence.
  */
 function pruneSharedTenPlanLayer(blocks: unknown[]) {
   const start = blocks.findIndex((block) => SHARED_LAYER_START.test(blockText(block)));
   if (start < 0) return blocks;
-
   const end = blocks.findIndex((block, index) => index > start && SHARED_LAYER_END.has(blockText(block)));
   if (end < 0) return blocks;
-
   return [...blocks.slice(0, start), ...blocks.slice(end)];
 }
 
 function pruneSharedTenPlanText(value: string) {
   const lines = value.split('\n');
-  const start = lines.findIndex((line) => SHARED_LAYER_START.test(line.trim()));
+  const start = lines.findIndex((line) => SHARED_LAYER_START.test(normalizedLine(line)));
   if (start < 0) return value;
-
-  const end = lines.findIndex((line, index) => index > start && SHARED_LAYER_END.has(line.trim()));
+  const end = lines.findIndex((line, index) => index > start && SHARED_LAYER_END.has(normalizedLine(line)));
   if (end < 0) return value;
-
   return [...lines.slice(0, start), ...lines.slice(end)].join('\n');
 }
 
+/**
+ * Condition pages also repeated universal assessment/monitoring prose around the
+ * useful condition-specific material. The universal method belongs in the
+ * methodology, evidence-standard and monitoring pages. Keep local exclusions,
+ * tools, baseline, condition ideas, functional target, Plan B, red flags and the
+ * structured reference list; remove only exact shared scaffolding.
+ */
+function pruneSharedConditionScaffold(blocks: unknown[]) {
+  let next = [...blocks];
+  const isLegacyCondition = SHARED_SECTION_RANGES.every(([start]) => next.some((block) => blockText(block) === start));
+  if (!isLegacyCondition) return next;
+
+  for (const [start, end] of SHARED_SECTION_RANGES) {
+    next = removeBlockRange(next, start, end);
+  }
+
+  const referencesStart = next.findIndex((block) => blockText(block) === REMOVE_FROM_HEADING);
+  if (referencesStart >= 0) next = next.slice(0, referencesStart);
+
+  return next.filter((block) => {
+    const text = blockText(block);
+    if (SHARED_CONDITION_TEXT.has(text)) return false;
+    if (isSharedOutcomeTable(block)) return false;
+    return true;
+  });
+}
+
+function pruneSharedConditionText(value: string) {
+  let lines = pruneSharedTenPlanText(value).split('\n');
+  const isLegacyCondition = SHARED_SECTION_RANGES.every(([start]) => lines.some((line) => normalizedLine(line) === start));
+  if (!isLegacyCondition) return lines.join('\n');
+
+  for (const [start, end] of SHARED_SECTION_RANGES) {
+    lines = removeLineRange(lines, start, end);
+  }
+
+  const referencesStart = lines.findIndex((line) => normalizedLine(line) === REMOVE_FROM_HEADING);
+  if (referencesStart >= 0) lines = lines.slice(0, referencesStart);
+
+  return lines
+    .filter((line) => !SHARED_CONDITION_TEXT.has(normalizedLine(line)))
+    .join('\n');
+}
+
 export function sanitizeOutsideBoxText(value: string) {
-  return pruneSharedTenPlanText(value)
+  return pruneSharedConditionText(value)
     .split('\n')
-    .filter((line) => !isReaderArtifact(line))
+    .filter((line) => !isReaderArtifact(normalizedLine(line)))
     .join('\n')
     .replace(/\n{3,}/g, '\n\n')
     .trim();
 }
 
 function sanitizeOutsideBoxValue(value: unknown): unknown {
-  if (typeof value === 'string') return value.split('\n').filter((line) => !isReaderArtifact(line)).join('\n').replace(/\n{3,}/g, '\n\n').trim();
+  if (typeof value === 'string') {
+    return value
+      .split('\n')
+      .filter((line) => !isReaderArtifact(normalizedLine(line)))
+      .join('\n')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+  }
   if (Array.isArray(value)) {
     return value
       .map(sanitizeOutsideBoxValue)
@@ -111,7 +205,6 @@ function sanitizeOutsideBoxValue(value: unknown): unknown {
 
   const row = asRecord(value);
   if (!row) return value;
-
   if (typeof row.text === 'string' && isReaderArtifact(row.text)) return null;
 
   const next: JsonRecord = {};
@@ -126,11 +219,9 @@ export function sanitizeOutsideBoxBody(value: unknown) {
   const source = asRecord(value);
   if (!source || !Array.isArray(source.blocks)) return sanitizeOutsideBoxValue(value);
 
-  const sourceWithoutSharedLayer = {
-    ...source,
-    blocks: pruneSharedTenPlanLayer(source.blocks),
-  };
-  const root = sanitizeOutsideBoxValue(sourceWithoutSharedLayer);
+  const withoutTenPlans = pruneSharedTenPlanLayer(source.blocks);
+  const withoutSharedScaffold = pruneSharedConditionScaffold(withoutTenPlans);
+  const root = sanitizeOutsideBoxValue({ ...source, blocks: withoutSharedScaffold });
   const row = asRecord(root);
   if (!row || !Array.isArray(row.blocks)) return root;
   return { ...row, blocks: row.blocks.filter(Boolean) };
