@@ -42,9 +42,16 @@ jobs:
         run: npm run cognitive-lab:validate
       - name: Audit extension semantics and balance
         run: node scripts/cognitive-lab-extension-audit-contract.mjs
-      - name: Repository quality coverage
-        run: echo 'TypeScript and repository-wide lint are enforced once by Rawafid Fast Quality Gate; OpenNext below also performs its production build validation.'
-      - name: Build Cloudflare Worker with OpenNext
-        run: npx opennextjs-cloudflare build
+      - name: Build Next candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/build_psych_encyclopedia_assets.mjs
+          node scripts/build-daily-tools-route-manifest.mjs
+          node scripts/build_expanded_encyclopedia_assets.mjs
+          node scripts/materialize-legacy-static-assets.mjs
+          npx next build
+      - name: Package Cloudflare Worker
+        run: npx opennextjs-cloudflare build --skipNextBuild
       - name: Validate Wrangler package
         run: npx wrangler deploy --dry-run
