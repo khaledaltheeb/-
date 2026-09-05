@@ -1,0 +1,146 @@
+{
+  "batch_id": "expanded-encyclopedia-010-addiction-professional-terms-a",
+  "status": "editorial-source",
+  "records": [
+    {
+      "content_type": "glossary_term",
+      "slug": "sbirt",
+      "canonical_term": "التحري والتدخل الموجز والإحالة إلى العلاج",
+      "english_name": "Screening, Brief Intervention, and Referral to Treatment (SBIRT)",
+      "aliases": ["SBIRT", "إس بيرت", "التحري والتدخل القصير والإحالة للعلاج"],
+      "category_slug": "substance-addiction",
+      "title": "SBIRT: التحري والتدخل الموجز والإحالة إلى العلاج في رعاية استخدام المواد",
+      "excerpt": "SBIRT نموذج صحة عامة يربط التحري السريع بتدخل موجز ثم إحالة منظمة للعلاج عند الحاجة، ويستخدم للاكتشاف المبكر دون اعتبار نتيجة التحري تشخيصًا نهائيًا.",
+      "definition": "SBIRT هو نموذج متكامل للصحة العامة يجمع التحري عن استخدام المواد، والتدخل الموجز الملائم للخطورة، والإحالة إلى علاج متخصص عندما تشير الحاجة السريرية إلى ذلك.",
+      "presentation_or_use": "يستخدم في الرعاية الأولية والطوارئ والمستشفيات وبعض البيئات المجتمعية والتعليمية لالتقاط الاستخدام المحفوف بالمخاطر مبكرًا وربط الأشخاص بمستوى الاستجابة المناسب بدل انتظار تفاقم الضرر.",
+      "mechanisms_or_context": "تبدأ العملية بأداة تحرٍ مناسبة للسياق، ثم محادثة موجزة تركز على الوعي والدافعية عند الملاءمة، ثم انتقال منظم إلى رعاية أكثر تخصصًا إذا أظهر التقييم حاجة أكبر.",
+      "assessment_or_practice": "ينبغي أن يحدد البرنامج من يتحرى، وبأي أداة، وكيف توثق النتيجة، ومن يقدم التدخل الموجز، وكيف تتحول الإحالة من اسم جهة أو رقم هاتف إلى وصول قابل للمتابعة.",
+      "boundary": "التحري ليس تشخيصًا، والتدخل الموجز ليس بديلًا عن علاج اضطراب استخدام المواد عندما يكون العلاج مطلوبًا، كما أن الإحالة لا تعني أن الشخص دخل العلاج أو استمر فيه فعليًا.",
+      "faq": [
+        {"question": "هل النتيجة الإيجابية في SBIRT تعني وجود اضطراب استخدام مواد؟", "answer": "لا. نتيجة التحري تحدد الحاجة إلى تقييم أو استجابة إضافية، لكنها لا تكفي وحدها لإثبات تشخيص سريري."},
+        {"question": "هل SBIRT مناسب فقط للرعاية الأولية؟", "answer": "لا. يستخدم في عدة نقاط تماس مثل الرعاية الأولية والطوارئ والمستشفيات والبيئات المجتمعية، مع تكييف سير العمل حسب السياق."}
+      ],
+      "references": [
+        {"title": "SBIRT: Screening, Brief Intervention, and Referral to Treatment", "publisher": "SAMHSA", "year": "2026", "url": "https://www.samhsa.gov/substance-use/treatment/sbirt"},
+        {"title": "TAP 33: Systems-Level Implementation of Screening, Brief Intervention, and Referral to Treatment", "publisher": "SAMHSA", "year": "2024", "url": "https://www.samhsa.gov/resource/ebp/tap-33-systems-level-implementation-screening-brief-intervention-referral-treatment"}
+      ],
+      "primary_keyword": "SBIRT بالعربي",
+      "secondary_keywords": ["التحري عن استخدام المواد", "التدخل الموجز", "الإحالة إلى العلاج"],
+      "semantic_terms": ["screening", "brief intervention", "referral to treatment", "early intervention"],
+      "related_slugs": ["screening-substance-use", "brief-intervention-substance-use", "warm-handoff"],
+      "classification_status": "addiction-professional-term"
+    },
+    {
+      "content_type": "glossary_term",
+      "slug": "medications-for-opioid-use-disorder",
+      "canonical_term": "أدوية علاج اضطراب استخدام الأفيونات",
+      "english_name": "Medications for Opioid Use Disorder (MOUD)",
+      "aliases": ["MOUD", "أدوية OUD", "العلاج الدوائي لاضطراب استخدام الأفيونات"],
+      "category_slug": "substance-addiction",
+      "title": "MOUD: أدوية علاج اضطراب استخدام الأفيونات وما الذي يعنيه المصطلح؟",
+      "excerpt": "MOUD مصطلح يشير إلى الأدوية المستخدمة ضمن علاج اضطراب استخدام الأفيونات، بوصفها علاجًا قائمًا على الدليل لا مجرد استبدال مادة بأخرى، مع اختلاف التوفر والتنظيم محليًا.",
+      "definition": "MOUD اختصار لأدوية علاج اضطراب استخدام الأفيونات، ويشير إلى استخدام أدوية مثبتة ضمن خطة علاج سريرية لتقليل أعراض الانسحاب والرغبة والمخاطر وتحسين الاستمرار في الرعاية بحسب الحالة.",
+      "presentation_or_use": "يظهر المصطلح في الإرشادات وبرامج العلاج والرعاية الأولية والطوارئ وخدمات التعافي عند مناقشة الخيارات الدوائية لاضطراب استخدام الأفيونات وربطها بالدعم النفسي والاجتماعي والمتابعة المستمرة.",
+      "mechanisms_or_context": "تختلف الأدوية في آلياتها وطرق تقديمها وشروط استخدامها، لكن الفكرة المشتركة أن العلاج الدوائي جزء مشروع من علاج اضطراب استخدام الأفيونات وليس دليلًا على فشل التعافي.",
+      "assessment_or_practice": "يحتاج الاستخدام المهني للمصطلح إلى فصل القرار السريري عن القواعد التنظيمية؛ اختيار الدواء وملاءمته وتوافره والترخيص لوصفه أو صرفه يجب التحقق منه داخل النظام الصحي المحلي.",
+      "boundary": "MOUD ليس اسم دواء واحدًا ولا بروتوكول جرعات ذاتي، ولا يعني أن كل دواء متاح أو مرخص بالطريقة نفسها في كل بلد، ولا ينبغي نقل المتطلبات التنظيمية الأمريكية إلى المنطقة العربية تلقائيًا.",
+      "faq": [
+        {"question": "هل MOUD يعني استبدال إدمان بإدمان؟", "answer": "لا. الأدوية المستخدمة علاجيًا ضمن رعاية منظمة هي خيارات علاجية قائمة على الدليل، ويجب التمييز بين العلاج الطبي المنظم واضطراب الاستخدام القهري."},
+        {"question": "هل أدوية MOUD متاحة بالطريقة نفسها في كل بلد؟", "answer": "لا. التوفر والترخيص ونطاق الممارسة وأنظمة الصرف تختلف بين البلدان، لذلك يلزم التحقق من النظام المحلي."}
+      ],
+      "references": [
+        {"title": "Treatment Options for Substance Use Disorder", "publisher": "SAMHSA", "year": "2026", "url": "https://www.samhsa.gov/substance-use/treatment/options"},
+        {"title": "Medication for Opioid Use Disorder (MOUD) Tool Kit for Peer Recovery Specialists", "publisher": "AMERSA", "year": "2022", "url": "https://amersa.org/wp-content/uploads/amersa-moud-toolkit.pdf"}
+      ],
+      "primary_keyword": "MOUD بالعربي",
+      "secondary_keywords": ["أدوية علاج اضطراب استخدام الأفيونات", "علاج OUD", "علاج الإدمان بالأدوية"],
+      "semantic_terms": ["opioid use disorder", "medications", "buprenorphine", "methadone", "naltrexone"],
+      "related_slugs": ["opioid-use-disorder", "methadone", "buprenorphine"],
+      "classification_status": "addiction-professional-term"
+    },
+    {
+      "content_type": "glossary_term",
+      "slug": "warm-handoff",
+      "canonical_term": "الإحالة الدافئة ونقل الرعاية النشط",
+      "english_name": "Warm Handoff",
+      "aliases": ["Warm Referral", "الإحالة الدافئة", "النقل الدافئ للرعاية"],
+      "category_slug": "substance-addiction",
+      "title": "الإحالة الدافئة: ما الفرق بين نقل الرعاية النشط والإحالة التقليدية؟",
+      "excerpt": "الإحالة الدافئة هي انتقال نشط بين مقدمين أو خدمات، يتضمن اتصالًا وتعريفًا ومشاركة المعلومات الضرورية بموافقة مناسبة بدل الاكتفاء بإعطاء اسم جهة أو رقم هاتف.",
+      "definition": "الإحالة الدافئة هي عملية ربط نشط بين الشخص والخدمة التالية تتجاوز الإحالة السلبية، عبر اتصال أو تقديم مباشر وتوضيح المسؤولية والخطوة التالية بما يقلل فجوة الانتقال بين الخدمات.",
+      "presentation_or_use": "تستخدم عند الانتقال من الطوارئ أو المستشفى أو الرعاية الأولية إلى علاج اضطرابات استخدام المواد، وعند الربط بخدمات التعافي أو الصحة النفسية أو الدعم الاجتماعي بعد موافقة مناسبة.",
+      "mechanisms_or_context": "تعالج الإحالة الدافئة مشكلة فقدان الأشخاص بين قرار الإحالة والوصول الفعلي، من خلال جعل جهة مرسلة ومستقبلة واضحتين وتأكيد قناة الاتصال وخطة بديلة عند تعذر الموعد أو الخدمة.",
+      "assessment_or_practice": "الممارسة الجيدة تسأل هل قبلت الجهة المستقبلة الحالة، وهل عرف الشخص ماذا سيحدث ومتى، وما الحد الأدنى من المعلومات اللازمة، ومن سيتابع إذا لم يكتمل الوصول.",
+      "boundary": "الإحالة الدافئة لا تضمن بدء العلاج أو الاحتفاظ به، ولا تبرر مشاركة ملف كامل دون أساس مناسب، كما أنها ليست مجرد إرسال رسالة أو تسليم رقم هاتف ثم إغلاق الحالة.",
+      "faq": [
+        {"question": "ما الذي يجعل الإحالة دافئة؟", "answer": "وجود ربط نشط ومسؤولية انتقال واضحة، مثل تعريف مباشر أو اتصال مؤكد مع الخدمة المستقبلة وخطة متابعة بدل الاكتفاء بمعلومة اتصال."},
+        {"question": "هل الإحالة الدافئة تضمن أن الشخص سيستمر في العلاج؟", "answer": "لا. يمكن أن تحسن عملية الربط وتقلل بعض فجوات الانتقال، لكن الاستمرار يتأثر بعوامل متعددة ولا يمكن ضمانه بمجرد الإحالة."}
+      ],
+      "references": [
+        {"title": "Treatment Considerations for Youth and Young Adults with Serious Emotional Disturbances and Serious Mental Illnesses and Co-occurring Substance Use", "publisher": "SAMHSA / NCBI Bookshelf", "year": "2024", "url": "https://www.ncbi.nlm.nih.gov/books/NBK596269/"},
+        {"title": "Strategies to support substance use disorder care transitions from acute-care to community-based settings: a scoping review and typology", "publisher": "Addiction Science & Clinical Practice", "year": "2023", "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10621088/"}
+      ],
+      "primary_keyword": "الإحالة الدافئة",
+      "secondary_keywords": ["Warm Handoff بالعربي", "نقل الرعاية", "الإحالة النشطة"],
+      "semantic_terms": ["care transition", "active linkage", "care navigation", "referral"],
+      "related_slugs": ["sbirt", "care-transition", "peer-navigation"],
+      "classification_status": "addiction-professional-term"
+    },
+    {
+      "content_type": "glossary_term",
+      "slug": "contingency-management",
+      "canonical_term": "إدارة الحوافز السلوكية في علاج اضطرابات استخدام المواد",
+      "english_name": "Contingency Management (CM)",
+      "aliases": ["Contingency Management", "CM", "إدارة التعزيزات المشروطة"],
+      "category_slug": "substance-addiction",
+      "title": "Contingency Management: إدارة الحوافز السلوكية في علاج اضطرابات استخدام المواد",
+      "excerpt": "إدارة الحوافز السلوكية تدخل سلوكي منظم يربط تعزيزات محددة بسلوك علاجي قابل للتحقق، وله قاعدة دليل مهمة خصوصًا في اضطرابات استخدام المنبهات ضمن برامج مضبوطة.",
+      "definition": "Contingency Management تدخل سلوكي منظم يستخدم مبادئ التعزيز لتقديم حوافز محددة عند تحقق سلوك علاجي متفق عليه وقابل للقياس، بهدف دعم المشاركة أو الامتناع أو أهداف علاجية محددة.",
+      "presentation_or_use": "يستخدم داخل برامج علاج منظمة وخصوصًا في بعض اضطرابات استخدام المنبهات، حيث تحدد السلوكيات المستهدفة وطريقة التحقق والحوافز وسير البرنامج مسبقًا وتراجع النتائج بانتظام.",
+      "mechanisms_or_context": "يعتمد على التعلم السلوكي والتعزيز الفوري والشفاف؛ فعندما تكون العلاقة بين السلوك المستهدف والنتيجة واضحة وقريبة زمنيًا يمكن أن تدعم تكرار السلوك العلاجي المرغوب.",
+      "assessment_or_practice": "التطبيق المؤسسي يحتاج بروتوكولًا وحوكمة وتدريبًا ومراقبة نزاهة التنفيذ، مع التحقق من القواعد المالية والقانونية المحلية وعدم نسخ حدود التمويل الأمريكية إلى أنظمة أخرى.",
+      "boundary": "إدارة الحوافز ليست رشوة عشوائية ولا وصفة منزلية ولا برنامجًا ماليًا يبتكره الفرد؛ قواعد التمويل والحدود المذكورة في وثائق SAMHSA تخص سياقات أمريكية ولا تصبح معيارًا عالميًا تلقائيًا.",
+      "faq": [
+        {"question": "هل Contingency Management مجرد دفع المال للمريض؟", "answer": "لا. هو تدخل سلوكي منظم يحدد السلوك المستهدف والتحقق والتعزيز والحوكمة مسبقًا، وليس مكافآت عشوائية بلا إطار علاجي."},
+        {"question": "هل قواعد قيمة الحوافز الأمريكية تنطبق في كل بلد؟", "answer": "لا. القيود التمويلية والتنظيمية الأمريكية مرتبطة ببرامج وجهات محددة، ويجب التحقق من القوانين والسياسات المحلية قبل التطبيق."}
+      ],
+      "references": [
+        {"title": "Using SAMHSA Funds to Implement Evidence-Based Contingency Management Services", "publisher": "SAMHSA", "year": "2025", "url": "https://www.samhsa.gov/resource/ebp/using-samhsa-funds-implement-evidence-based-contingency-management-services"},
+        {"title": "Stimulant Use Disorder: Evidence-Based Treatment and Contingency Management Training", "publisher": "Grayken Center for Addiction Training / Boston Medical Center", "year": "2026", "url": "https://www.addictiontraining.org/training/pre-recorded/course/?category=&id=56&start=0"}
+      ],
+      "primary_keyword": "Contingency Management بالعربي",
+      "secondary_keywords": ["إدارة الحوافز السلوكية", "علاج اضطراب استخدام المنبهات", "التعزيز المشروط"],
+      "semantic_terms": ["behavioral reinforcement", "stimulant use disorder", "treatment fidelity", "incentives"],
+      "related_slugs": ["stimulant-use-disorder", "behavioral-reinforcement", "treatment-fidelity"],
+      "classification_status": "addiction-professional-term"
+    },
+    {
+      "content_type": "glossary_term",
+      "slug": "substance-use-coercion",
+      "canonical_term": "الإكراه المرتبط باستخدام المواد",
+      "english_name": "Substance Use Coercion",
+      "aliases": ["Substance Use Coercion", "إكراه استخدام المواد", "إكراه مرتبط بالإدمان"],
+      "category_slug": "substance-addiction",
+      "title": "الإكراه المرتبط باستخدام المواد: تقاطع العنف من الشريك مع استخدام المواد والرعاية",
+      "excerpt": "الإكراه المرتبط باستخدام المواد يصف أساليب سيطرة مرتبطة بالمادة أو العلاج أو التعافي داخل سياق العنف من الشريك، وقد تشمل إجبار الاستخدام أو تخريب الوصول للرعاية.",
+      "definition": "الإكراه المرتبط باستخدام المواد هو نمط من السيطرة في سياق العنف من الشريك يستخدم المادة أو الوصول إليها أو العلاج أو التعافي كوسيلة للإجبار أو التخريب أو زيادة الاعتماد والخطر.",
+      "presentation_or_use": "قد يظهر في إجبار شخص على استخدام مادة، أو تعطيل دوائه أو مواعيده، أو تهديده بمعلومات عن استخدامه، أو استغلال أعراض الانسحاب والاعتماد لمنع الخروج أو طلب المساعدة.",
+      "mechanisms_or_context": "يقع المفهوم عند تقاطع خدمات اضطرابات استخدام المواد والعنف الأسري، وقد يبقى غير مرئي عندما يسأل كل نظام عن مجاله فقط دون فهم كيف تستخدم المادة كأداة سيطرة.",
+      "assessment_or_practice": "الاستجابة المهنية تركز على سؤال آمن وخاص، وعدم إجبار الإفصاح، وحماية السرية، والتخطيط للسلامة، والتعاون مع خدمات العنف والرعاية عند موافقة الشخص وبما يلائم القانون المحلي.",
+      "boundary": "المصطلح ليس تشخيصًا طبيًا ولا يعني أن كل عنف من الشريك يتضمن إكراهًا متعلقًا بالمواد، كما لا يبرر مواجهة الشريك أو مشاركة المعلومات بطريقة قد تزيد الخطر.",
+      "faq": [
+        {"question": "هل الإكراه المرتبط باستخدام المواد يقتصر على إجبار الشخص على التعاطي؟", "answer": "لا. قد يشمل أيضًا تخريب العلاج أو الأدوية أو التعافي أو الوصول للخدمة واستخدام معلومات المادة للتهديد والسيطرة."},
+        {"question": "هل يجب مطالبة الشخص بالإفصاح عن العنف حتى يحصل على علاج الإدمان؟", "answer": "لا. الرعاية الآمنة لا تجعل الإفصاح شرطًا للعلاج، وتوازن بين الخصوصية والسلامة والخيارات التي يحددها الشخص ضمن المتطلبات المحلية."}
+      ],
+      "references": [
+        {"title": "Substance Use Coercion ECHO Toolkit: Building Capacity at the Intersections of OUD/SUD and Intimate Partner Violence", "publisher": "AMERSA", "year": "2026", "url": "https://amersa.org/project/episode-2-substance-use-coercion/"},
+        {"title": "AMERSA Resources: Substance Use Coercion ECHO Toolkit", "publisher": "AMERSA", "year": "2026", "url": "https://amersa.org/education/amersa-resources/"}
+      ],
+      "primary_keyword": "الإكراه المرتبط باستخدام المواد",
+      "secondary_keywords": ["Substance Use Coercion بالعربي", "العنف من الشريك والإدمان", "تخريب علاج الإدمان"],
+      "semantic_terms": ["intimate partner violence", "coercive control", "safety planning", "survivor-centered care"],
+      "related_slugs": ["intimate-partner-violence", "trauma-informed-care", "confidentiality"],
+      "classification_status": "addiction-professional-term"
+    }
+  ]
+}

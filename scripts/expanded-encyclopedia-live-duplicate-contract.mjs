@@ -9,6 +9,10 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const BATCH_DIR = path.join(ROOT, 'data', 'expanded-encyclopedia', 'batches');
 const TERM_LIKE_TYPES = ['condition', 'glossary_term', 'assessment', 'intervention'];
 const PAGE_SIZE = 1000;
+const EXPLICIT_CANONICAL_ALIASES = new Map([
+  ['disqualifying-positive', 'discounting-the-positive'],
+  ['inter-rater-reliability', 'interrater-reliability'],
+]);
 
 const clean = (value) => typeof value === 'string' ? value.trim().replace(/\s+/gu, ' ') : '';
 const cleanList = (value) => Array.isArray(value) ? value.map(clean).filter(Boolean) : [];
@@ -32,23 +36,13 @@ function normalizeTermIdentity(value) {
 }
 
 function localIdentityValues(record) {
-  return [
-    record.canonical_term,
-    record.english_name,
-    record.primary_keyword,
-    ...cleanList(record.aliases),
-  ].map(clean).filter(Boolean);
+  return [record.canonical_term, record.english_name, record.primary_keyword, ...cleanList(record.aliases)]
+    .map(clean)
+    .filter(Boolean);
 }
 
 function databaseIdentityValues(record) {
-  // A legacy/contextual page such as «الاجترار الفكري: في العلاقات» is not
-  // the same canonical identity as the general term «الاجترار الفكري».
-  // Compare the complete title and its explicit primary keyword; never strip
-  // a subtitle because doing so manufactures a duplicate that the source row
-  // itself does not claim.
-  return [record.primary_keyword, record.title]
-    .map(clean)
-    .filter(Boolean);
+  return [record.primary_keyword, record.title].map(clean).filter(Boolean);
 }
 
 async function loadLocalTerms() {
@@ -56,9 +50,7 @@ async function loadLocalTerms() {
   const records = [];
   for (const file of files) {
     const payload = JSON.parse(await fs.readFile(path.join(BATCH_DIR, file), 'utf8'));
-    if (!isRecord(payload) || !Array.isArray(payload.records)) {
-      throw new Error(`${file}: missing records[]`);
-    }
+    if (!isRecord(payload) || !Array.isArray(payload.records)) throw new Error(`${file}: missing records[]`);
     for (const record of payload.records) {
       if (!isRecord(record)) throw new Error(`${file}: invalid record`);
       const slug = clean(record.slug);
@@ -72,17 +64,12 @@ async function loadLocalTerms() {
 async function loadPublishedCanonicalContent() {
   const baseUrl = clean(process.env.NEXT_PUBLIC_SUPABASE_URL).replace(/\/$/u, '');
   const key = clean(process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY);
-  if (!/^https:\/\//u.test(baseUrl) || !key) {
-    throw new Error('NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY are required');
-  }
+  if (!/^https:\/\//u.test(baseUrl) || !key) throw new Error('NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY are required');
 
   const params = new URLSearchParams({
     select: 'slug,title,content_type,primary_keyword',
     status: 'eq.published',
     content_type: `in.(${TERM_LIKE_TYPES.join(',')})`,
-    // Legacy migration routes are intentionally preserved as noindex history.
-    // They must not block the single indexable canonical term rebuilt under
-    // the expanded encyclopedia; true published non-legacy peers still do.
     'schema_json->legacy_migration': 'is.null',
     order: 'slug.asc',
   });
@@ -113,31 +100,40 @@ async function loadPublishedCanonicalContent() {
 }
 
 async function main() {
-  const [localTerms, publishedRows] = await Promise.all([
-    loadLocalTerms(),
-    loadPublishedCanonicalContent(),
-  ]);
+  const [localTerms, publishedRows] = await Promise.all([loadLocalTerms(), loadPublishedCanonicalContent()]);
 
   const databaseIdentities = new Map();
   for (const row of publishedRows) {
     if (!isRecord(row)) continue;
-    const source = `db:${clean(row.content_type) || 'content'}:${clean(row.slug) || 'unknown'}`;
+    const dbSlug = clean(row.slug);
+    const source = `db:${clean(row.content_type) || 'content'}:${dbSlug || 'unknown'}`;
     for (const value of databaseIdentityValues(row)) {
       const normalized = normalizeTermIdentity(value);
       if (!normalized) continue;
       const bucket = databaseIdentities.get(normalized) ?? [];
-      bucket.push({ source, value });
+      bucket.push({ source, value, slug: dbSlug });
       databaseIdentities.set(normalized, bucket);
     }
   }
 
   const conflicts = [];
+  let canonicalOwners = 0;
+  let explicitAliases = 0;
+
   for (const { file, slug, record } of localTerms) {
     for (const value of localIdentityValues(record)) {
       const normalized = normalizeTermIdentity(value);
       if (!normalized) continue;
       const matches = databaseIdentities.get(normalized) ?? [];
       for (const match of matches) {
+        if (match.slug === slug) {
+          canonicalOwners += 1;
+          continue;
+        }
+        if (EXPLICIT_CANONICAL_ALIASES.get(slug) === match.slug) {
+          explicitAliases += 1;
+          continue;
+        }
         conflicts.push({ file, slug, local: value, database: match.value, source: match.source });
       }
     }
@@ -148,15 +144,13 @@ async function main() {
       `${item.slug}\u0000${normalizeTermIdentity(item.local)}\u0000${item.source}`,
       item,
     ])).values()];
-    console.error(`EXPANDED_ENCYCLOPEDIA_LIVE_DEDUP: ${unique.length} conflict(s) detected`);
-    for (const item of unique.slice(0, 100)) {
-      console.error(`- ${item.slug} (${item.file}): «${item.local}» conflicts with ${item.source} «${item.database}»`);
-    }
+    console.error(`EXPANDED_ENCYCLOPEDIA_LIVE_DEDUP: ${unique.length} true conflict(s) detected`);
+    for (const item of unique.slice(0, 100)) console.error(`- ${item.slug} (${item.file}): «${item.local}» conflicts with ${item.source} «${item.database}»`);
     if (unique.length > 100) console.error(`... ${unique.length - 100} more conflict(s)`);
     process.exit(1);
   }
 
-  console.log(`EXPANDED_ENCYCLOPEDIA_LIVE_DEDUP: ${localTerms.length} local terms checked against ${publishedRows.length} published canonical-like DB pages; no conflicts`);
+  console.log(`EXPANDED_ENCYCLOPEDIA_LIVE_DEDUP: ${localTerms.length} local terms checked against ${publishedRows.length} published canonical-like DB pages; no true conflicts (${canonicalOwners} same-slug canonical-owner matches, ${explicitAliases} explicit redirected aliases)`);
 }
 
 main().catch((error) => {
