@@ -1,0 +1,55 @@
+import fs from 'node:fs';
+import path from 'node:path';
+
+const root = process.cwd();
+const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
+const extractSlugs = (text) => [...text.matchAll(/\bslug:\s*'([^']+)'/g)].map((match) => match[1]);
+const unique = (values) => [...new Set(values)];
+
+const measureFiles = [
+  'lib/assessment-measures.ts',
+  ...Array.from({ length: 10 }, (_, index) => `lib/assessment-measures-wave${index + 2}.ts`),
+];
+const operationalFiles = [
+  'lib/assessment-measure-operational.ts',
+  'lib/assessment-measure-operational-full-forms-wave1.ts',
+  'lib/assessment-measure-operational-full-forms-wave2.ts',
+  'lib/assessment-measure-operational-full-forms-wave3.ts',
+  'lib/assessment-measure-operational-full-forms-wave4.ts',
+];
+
+const allMeasures = unique(measureFiles.flatMap((file) => extractSlugs(read(file)))).sort();
+const explicitOperational = unique(operationalFiles.flatMap((file) => extractSlugs(read(file)))).sort();
+const rightsRestricted = unique(extractSlugs(read('lib/assessment-measures-rights-review.ts'))).sort();
+
+const allSet = new Set(allMeasures);
+const explicitSet = new Set(explicitOperational);
+const restrictedSet = new Set(rightsRestricted);
+
+const explicitInCatalog = explicitOperational.filter((slug) => allSet.has(slug));
+const restrictedInCatalog = rightsRestricted.filter((slug) => allSet.has(slug));
+const unresolved = allMeasures.filter((slug) => !explicitSet.has(slug) && !restrictedSet.has(slug));
+const explicitRestrictedCollision = explicitOperational.filter((slug) => restrictedSet.has(slug));
+const orphanExplicit = explicitOperational.filter((slug) => !allSet.has(slug));
+
+const report = {
+  totalCatalogMeasures: allMeasures.length,
+  explicitOperationalMeasures: explicitInCatalog.length,
+  rightsRestrictedReferenceOnly: restrictedInCatalog.length,
+  unresolvedForExplicitOrRightsClassification: unresolved.length,
+  explicitRestrictedCollision,
+  orphanExplicit,
+  unresolved,
+};
+
+console.log('ASSESSMENT_OPERATIONAL_COVERAGE_REPORT');
+console.log(JSON.stringify(report, null, 2));
+
+if (explicitRestrictedCollision.length) {
+  console.error(`ASSESSMENT_OPERATIONAL_COVERAGE_FAIL: restricted measures reproduced explicitly: ${explicitRestrictedCollision.join(', ')}`);
+  process.exitCode = 1;
+}
+
+if (!process.exitCode) {
+  console.log('ASSESSMENT_OPERATIONAL_COVERAGE_PASS: no rights-restricted explicit-form collision. Unresolved list is the deterministic next-work queue.');
+}
