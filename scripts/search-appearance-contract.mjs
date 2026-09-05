@@ -41,7 +41,6 @@ requireAll(seo, [
   "'@type': 'Organization'",
   "'@type': 'WebSite'",
   "alternateName: [BRAND_SHORT, 'Rawafid']",
-  "alternateName: [BRAND_SHORT, 'Rawafid', SITE_HOSTNAME]",
   "name: BRAND_NAME",
   "'@type': 'ImageObject'",
   "publisher: { '@id': `${SITE_URL}/#organization` }",
@@ -51,6 +50,9 @@ requireAll(seo, [
   "process.env.NEXT_PUBLIC_ALLOW_INDEXING === 'true' && !IS_TEMPORARY_HOST",
 ], 'structured identity and domain safety');
 
+if (seo.includes("alternateName: [BRAND_SHORT, 'Rawafid', SITE_HOSTNAME]")) {
+  throw new Error('structured identity: hostname must remain the canonical URL host, not a WebSite alternate name');
+}
 if (seo.includes("'@type': 'SearchAction'")) {
   throw new Error('structured identity: deprecated sitelinks SearchAction must not return');
 }
