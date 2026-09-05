@@ -263,7 +263,8 @@ export async function createRawafidAssistant(root, options = {}) {
     }
 
     if (requestController) requestController.abort();
-    requestController = new AbortController();
+    const controller = new AbortController();
+    requestController = controller;
     loading = true;
     submit.disabled = true;
     submit.textContent = 'أحلل…';
@@ -276,7 +277,7 @@ export async function createRawafidAssistant(root, options = {}) {
         method: 'GET',
         cache: 'no-store',
         headers: { accept: 'application/json' },
-        signal: requestController.signal,
+        signal: controller.signal,
       });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
@@ -306,10 +307,12 @@ export async function createRawafidAssistant(root, options = {}) {
         status.textContent = 'تعذر تنفيذ البحث الآن. يمكنك استخدام صفحة البحث المتقدم.';
       }
     } finally {
-      loading = false;
-      submit.disabled = false;
-      submit.textContent = 'اسأل';
-      requestController = null;
+      if (requestController === controller) {
+        loading = false;
+        submit.disabled = false;
+        submit.textContent = 'اسأل';
+        requestController = null;
+      }
     }
   }
 
