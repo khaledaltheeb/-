@@ -13,7 +13,7 @@ import {
   getCanonicalAssessmentMeasureSlug,
   rightsBadge,
 } from '@/lib/assessment-measures-catalog';
-import { getOperationalMaterial } from '@/lib/assessment-measure-operational';
+import { getOperationalMaterial } from '@/lib/assessment-measure-operational-catalog';
 import styles from '@/components/assessment-measures.module.css';
 
 type PageProps = { params: Promise<{ slug: string }> };
