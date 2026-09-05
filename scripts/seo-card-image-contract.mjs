@@ -55,8 +55,8 @@ requireMatch('SEO card browser regression', browserRegression, /CONTEXT = \{ lef
 requireMatch('SEO card browser regression', browserRegression, /title and context are visually colliding/, 'browser regression must reject title/context collisions.');
 requireMatch('Quality workflow', qualityWorkflow, /SEO card Arabic safe-area browser regression/, 'SEO card browser regression must stay wired into the blocking quality workflow.');
 requireMatch('Quality workflow', qualityWorkflow, /VISUAL_CHROME_PATH="\$CHROME_BIN" node scripts\/seo-card-browser-regression\.mjs/, 'quality workflow must execute the SEO card browser regression with the real Chrome binary.');
-requireMatch('Quality workflow', qualityWorkflow, /Full sitemap SEO gate[\s\S]*timeout-minutes:\s*30/, 'bounded Full Sitemap SEO advisory timeout must be preserved.');
-requireMatch('Quality workflow', qualityWorkflow, /Rich results and discovery gate \(advisory\)[\s\S]*timeout-minutes:\s*20/, 'bounded Rich Discovery advisory timeout must be preserved.');
+requireMatch('Quality workflow', qualityWorkflow, /Full sitemap SEO gate[\s\S]*if:\s*github\.event_name == 'push'[\s\S]*continue-on-error:\s*true/, 'Full Sitemap SEO gate must remain push-only and advisory under the current promotion-gated workflow.');
+requireMatch('Quality workflow', qualityWorkflow, /Rich results and discovery gate \(advisory\)[\s\S]*if:\s*github\.event_name == 'push'[\s\S]*continue-on-error:\s*true/, 'Rich Discovery gate must remain push-only and advisory under the current promotion-gated workflow.');
 
 requireMatch('SEO metadata', seo, /fallbackSocialImagePath/, 'central fallback image resolver must remain present.');
 requireMatch('SEO metadata', seo, /\/seo-card\?title=/, 'pages without curated images must retain the safe central fallback.');
