@@ -12,6 +12,7 @@ if (!SUPABASE_URL || !SUPABASE_KEY) {
 
 const localInputs = [
   'scripts/build-quick-info-cards.mjs',
+  'scripts/build-quick-info-cards-cached.mjs',
   'data/quick-info-visuals.json',
   'public/assets/brand/logo-mark.svg',
 ];
