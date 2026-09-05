@@ -63,9 +63,28 @@ export default function SiteFooter() {
         <div className="footer-brand-block">
           <RawafidBrand className="footer-brand" />
           <p>منصة عربية مؤسسية تربط المعرفة الموثوقة بالأدلة العملية والرعاية الأسرية والخدمات المهنية، مع مسارات واضحة للصحة النفسية وسرطان الأطفال والتعافي والدمج والتمكين.</p>
-          <form className="footer-search" action="/search" method="get" role="search">
+          <form
+            className="footer-search"
+            action="/search"
+            method="get"
+            role="search"
+            toolname="searchRawafidFooter"
+            tooldescription="Search Rawafid from the site footer for published Arabic and English knowledge, evidence guides, care guides, specialists, centers, and related resources."
+            toolautosubmit=""
+          >
             <label className="sr-only" htmlFor="footer-search-input">البحث في منصة روافد</label>
-            <input id="footer-search-input" name="q" type="search" placeholder="ابحث عن معلومة أو دليل أو خدمة" maxLength={120} enterKeyHint="search" />
+            <input
+              id="footer-search-input"
+              name="q"
+              type="search"
+              required
+              minLength={2}
+              maxLength={120}
+              autoComplete="off"
+              enterKeyHint="search"
+              toolparamdescription="The user's Arabic or English footer search query for information, evidence, a guide, specialist, center, service, or resource on Rawafid."
+              placeholder="ابحث عن معلومة أو دليل أو خدمة"
+            />
             <button type="submit">بحث</button>
           </form>
         </div>
