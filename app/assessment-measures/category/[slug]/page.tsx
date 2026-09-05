@@ -10,7 +10,7 @@ import {
   getAssessmentMeasureCategory,
   getMeasuresByCategory,
   rightsBadge,
-} from '@/lib/assessment-measures';
+} from '@/lib/assessment-measures-catalog';
 import styles from '@/components/assessment-measures.module.css';
 
 type PageProps = { params: Promise<{ slug: string }> };
@@ -81,6 +81,7 @@ export default async function AssessmentMeasureCategoryPage({ params }: PageProp
             <div className={styles.stat}><strong>{measures.filter((measure) => measure.arabicStatus === 'validated-version-reported').length}</strong><span>دليل عربي منشور</span></div>
             <div className={styles.stat}><strong>{measures.filter((measure) => measure.fullArabicFormPublished).length}</strong><span>بروتوكول عربي جاهز</span></div>
           </div>
+          <div className={styles.heroActions}><Link className={styles.secondaryAction} href="/assessment-measures/compare/">قارن مقاييس هذه المكتبة</Link></div>
         </section>
 
         <section className={styles.section}>
