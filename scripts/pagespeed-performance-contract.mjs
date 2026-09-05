@@ -4,6 +4,7 @@ const read = (file) => fs.readFileSync(file, 'utf8');
 const layout = read('app/layout.tsx');
 const homepage = read('app/page.tsx');
 const siteHeader = read('components/site-header.tsx');
+const siteFooter = read('components/site-footer.tsx');
 const assistant = read('components/rawafid-assistant.tsx');
 const imperativeTools = read('components/webmcp-imperative-tools.tsx');
 const loader = read('components/rawafid-assistant-loader.tsx');
@@ -49,6 +50,12 @@ requireText(siteHeader, 'toolname="searchRawafidMobile"', 'the mobile navigation
 requireText(siteHeader, 'toolparamdescription="The user\'s Arabic or English search query from the site header."', 'the header WebMCP search parameter must remain described');
 requireText(siteHeader, 'toolparamdescription="The user\'s Arabic or English search query from the mobile navigation."', 'the mobile WebMCP search parameter must remain described');
 
+requireText(siteFooter, 'toolname="searchRawafidFooter"', 'the site footer search form must remain covered by WebMCP');
+requireText(siteFooter, 'tooldescription="Search Rawafid from the site footer', 'the footer WebMCP tool must retain a meaningful description');
+requireText(siteFooter, 'toolautosubmit=""', 'the safe footer search WebMCP tool must remain directly invokable by agents');
+requireText(siteFooter, 'toolparamdescription="The user\'s Arabic or English footer search query', 'the footer WebMCP search parameter must remain described');
+requireText(siteFooter, 'required', 'the footer WebMCP search query must remain required so its generated JSON Schema is explicit');
+
 requireText(assistant, 'toolname="askRawafidAssistant"', 'the lazy Rawafid assistant form must remain covered by WebMCP when it appears');
 requireText(assistant, 'tooldescription="Ask Rawafid\'s on-site assistant', 'the assistant WebMCP tool must retain a meaningful description');
 requireText(assistant, 'name="query"', 'the assistant WebMCP textarea must retain a schema property name');
@@ -74,7 +81,7 @@ requireText(productionBuild, "NEXT_PUBLIC_ENABLE_DIRECT_GA='true'", 'the direct 
 requireText(productionBuild, "ENABLE_RAWAFID_ASSISTANT='true'", 'the static production build must keep the assistant enabled');
 
 requireText(deployWorkflow, 'librsvg2-bin', 'production deployment must install rsvg-convert because the production build renders Quick Info SVG cards');
-requireText(qualityWorkflow, 'for tool in searchRawafid searchRawafidHeader searchRawafidMobile; do', 'fast quality runtime smoke must assert all server-rendered homepage WebMCP tools before merge');
+requireText(qualityWorkflow, 'for tool in searchRawafid searchRawafidHeader searchRawafidMobile searchRawafidFooter; do', 'fast quality runtime smoke must assert all server-rendered homepage WebMCP search tools before merge');
 requireText(qualityWorkflow, 'grep -q \'tooldescription="Search Rawafid\' /tmp/home.html', 'fast quality runtime smoke must assert a rendered WebMCP tool description');
 requireText(qualityWorkflow, 'grep -q \'toolparamdescription="The user\' /tmp/home.html', 'fast quality runtime smoke must assert rendered WebMCP parameter schema metadata');
 requireText(deployWorkflow, 'WEBMCP_LIVE_DIAGNOSTIC', 'production live verification must retain a non-blocking WebMCP diagnostic');
@@ -85,4 +92,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log('PageSpeed performance contract passed: production build prerequisites are present, GA4 remains delayed beyond the critical path, heavy GTM is gated, font LCP is non-blocking, declarative WebMCP coverage is enforced, a zero-hydration imperative WebMCP search tool is registered with a strict schema, and production verification stays fast.');
+console.log('PageSpeed performance contract passed: production build prerequisites are present, GA4 remains delayed beyond the critical path, heavy GTM is gated, font LCP is non-blocking, every server-rendered homepage search surface plus the lazy assistant has declarative WebMCP coverage, a zero-hydration imperative WebMCP search tool is registered with a strict schema, and production verification stays fast.');
