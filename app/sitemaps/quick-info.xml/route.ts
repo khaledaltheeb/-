@@ -16,7 +16,7 @@ function escapeXml(value: string) { return value.replace(/&/g, '&amp;').replace(
 function absolute(path: string) { return `${SITE_URL}${path.startsWith('/') ? path : `/${path}`}`; }
 function publicationApproved(schema: unknown): boolean {
   const record = asRecord(schema);
-  return Boolean(record && asString(record.page_role) === 'quick-info' && record.publication_ready === true && record.editorial_review_required === false);
+  return Boolean(record && asString(record.page_role) === 'quick-info' && record.publication_ready === true);
 }
 function response(rows: string) {
   return new NextResponse(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">${rows}</urlset>`, {
