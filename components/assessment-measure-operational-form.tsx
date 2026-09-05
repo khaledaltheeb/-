@@ -3,11 +3,16 @@ import styles from '@/components/assessment-measures.module.css';
 
 function OperationalInput({ item }: { item: OperationalItem }) {
   if (item.type === 'choice' || item.type === 'task-score') {
+    const allowsMultiple = item.code.startsWith('LEC');
     return (
       <div className={styles.formOptions} role="group" aria-label={item.labelAr}>
         {(item.options ?? []).map((option) => (
           <label key={`${item.code}-${option.value}`} className={styles.formOption}>
-            <input type="radio" name={item.code} value={option.value} />
+            <input
+              type={allowsMultiple ? 'checkbox' : 'radio'}
+              name={allowsMultiple ? `${item.code}-${option.value}` : item.code}
+              value={option.value}
+            />
             <span>{option.labelAr}</span>
           </label>
         ))}
@@ -101,10 +106,12 @@ export default function AssessmentMeasureOperationalForm({ material, printable =
         <ul>{material.interpretationGuardrails.map((rule) => <li key={rule}>{rule}</li>)}</ul>
       </section>
 
-      <section className={styles.formSafety}>
-        <h3>قواعد الإيقاف والسلامة</h3>
-        <ul>{material.stopRules.map((rule) => <li key={rule}>{rule}</li>)}</ul>
-      </section>
+      {material.stopRules.length > 0 && (
+        <section className={styles.formSafety}>
+          <h3>قواعد الإيقاف والسلامة</h3>
+          <ul>{material.stopRules.map((rule) => <li key={rule}>{rule}</li>)}</ul>
+        </section>
+      )}
 
       {material.officialDownloads && material.officialDownloads.length > 0 && (
         <section className={styles.formBlock}>
