@@ -22,6 +22,7 @@ export type {
   OperationalSection,
 };
 
+// Rights-verified explicit materials always override the universal recording-sheet fallback.
 export const explicitOperationalMaterials: Record<string, AssessmentOperationalMaterial> = {
   ...assessmentOperationalFullFormsWave1,
   ...assessmentOperationalFullFormsWave2,
