@@ -4,6 +4,7 @@ import {
   type InstrumentCrosswalkRecord,
 } from '@/lib/core-outcome-sets/instrument-crosswalk';
 import { instrumentCrosswalkWave2Seed } from '@/lib/core-outcome-sets/instrument-crosswalk-wave2';
+import { applyInstrumentRightsAudit } from '@/lib/core-outcome-sets/instrument-rights-audit';
 
 const normalizeAcronym = (value: string) => value.toUpperCase().replace(/[^A-Z0-9]+/g, '');
 
@@ -41,7 +42,7 @@ function upgradeBaseRecord(record: InstrumentCrosswalkRecord): InstrumentCrosswa
     evidenceUrl: 'https://www.kidscreen.org/english/questionnaires/',
     evidenceCitation: 'KIDSCREEN official questionnaires/language versions — KIDSCREEN-10 fully open-access; Arabic/Arabian versions listed',
     lastVerified: '2026-09-06',
-    catalogSyncNote: [record.catalogSyncNote, 'تم تدقيق حقوق/توفر KIDSCREEN-10 والترجمة العربية من المصدر الرسمي في Wave 2؛ لم تُنقل أي صلاحية سيكومترية محلية تلقائيًا.'].filter(Boolean).join(' '),
+    catalogSyncNote: [record.catalogSyncNote, 'تم تدقيق توفر KIDSCREEN-10 والترجمة العربية من المصدر الرسمي في Wave 2؛ تدقيق الحقوق التفصيلي اللاحق يطبق بعد هذه الطبقة ولا تُنقل أي صلاحية سيكومترية محلية تلقائيًا.'].filter(Boolean).join(' '),
   };
 }
 
@@ -104,11 +105,12 @@ function resolveWave2AgainstAssessmentCatalog(record: InstrumentCrosswalkRecord)
 
 const upgradedBaseInstrumentCrosswalk = baseInstrumentCrosswalk.map(upgradeBaseRecord);
 const resolvedWave2InstrumentCrosswalk = instrumentCrosswalkWave2Seed.map(resolveWave2AgainstAssessmentCatalog);
-
-export const instrumentCrosswalk: readonly InstrumentCrosswalkRecord[] = [
+const rightsAuditedInstrumentCrosswalk = [
   ...upgradedBaseInstrumentCrosswalk,
   ...resolvedWave2InstrumentCrosswalk,
-];
+].map(applyInstrumentRightsAudit);
+
+export const instrumentCrosswalk: readonly InstrumentCrosswalkRecord[] = rightsAuditedInstrumentCrosswalk;
 
 export function getInstrumentCrosswalkForCos(cosSlug: string) {
   return instrumentCrosswalk.filter((item) => item.linkedCosSlugs.includes(cosSlug));
