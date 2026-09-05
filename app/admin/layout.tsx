@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import '../dashboard-v3-scoped.css';
 import '../system-portals-v1.css';
+import '../cms-internal.css';
 import './admin-ui.css';
 import './admin-operations.css';
 import './admin-shell-v3.css';
