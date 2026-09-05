@@ -51,10 +51,12 @@ assert(audit.includes('https://www.kcl.ac.uk/research/sure-substance-use-recover
 const hsiStart = audit.indexOf("'heaviness-of-smoking-index': {");
 const hsiEnd = audit.indexOf('\n  },', hsiStart);
 const hsi = audit.slice(hsiStart, hsiEnd);
-assert(hsi.includes("rawafidStatus: 'not-in-library'"), 'HSI must remain non-operational while rights are unresolved');
-assert(hsi.includes("rightsStatus: 'not-reviewed'"), 'HSI rights must not be upgraded without direct evidence');
-assert(hsi.includes('Adapted with permission'), 'HSI permission caveat from SAMHSA/NCBI must remain explicit');
-assert(audit.includes('NBK574912'), 'HSI SAMHSA/NCBI evidence URL missing');
+assert(!hsi.includes('rawafidStatus:'), 'HSI rights overlay must not force a non-operational status after catalog promotion');
+assert(hsi.includes("rightsStatus: 'rawafid-provenance-verified'"), 'HSI direct reuse evidence must remain verified');
+assert(hsi.includes("arabicEvidence: 'related-version-only'"), 'HSI Arabic evidence must remain related-version-only until direct validation is verified');
+assert(hsi.includes('freely available') && hsi.includes('permission not required for use'), 'HSI PhenX reuse terms must remain explicit');
+assert(hsi.includes('phenxtoolkit.org/protocols/view/330201'), 'HSI direct PhenX protocol URL missing');
+assert(!hsi.includes("rightsStatus: 'not-reviewed'"), 'HSI must not regress to unresolved rights after direct PhenX verification');
 
 assert(!audit.includes("'phq-2-autism': {"), 'PHQ-2 must not be blocked by the rights audit overlay');
 assert(registry.includes("applyInstrumentRightsAudit } from '@/lib/core-outcome-sets/instrument-rights-audit'"), 'crosswalk registry must import rights audit overlay');
@@ -62,5 +64,5 @@ assert(registry.includes('].map(applyInstrumentRightsAudit);'), 'rights audit mu
 assert(registry.indexOf('resolveWave2AgainstAssessmentCatalog') < registry.indexOf('].map(applyInstrumentRightsAudit);'), 'rights audit must execute after catalog sync logic');
 
 if (!process.exitCode) {
-  console.log('COS_INSTRUMENT_RIGHTS_AUDIT_OK restricted=5 unresolved=1 phq2_unblocked=true');
+  console.log('COS_INSTRUMENT_RIGHTS_AUDIT_OK restricted=5 reusable_hsi=1 phq2_unblocked=true');
 }
