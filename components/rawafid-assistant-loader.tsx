@@ -76,14 +76,14 @@ const assistantBootstrap = String.raw`
 export default function RawafidAssistantLoader() {
   return (
     <>
-      <div className={styles.root} dir="rtl" data-rawafid-assistant-root>
+      <div className={styles.root} dir="rtl" data-rawafid-assistant-root="true">
         <button
           type="button"
           className={styles.launcher}
           aria-label="فتح مساعد روافد"
           aria-expanded="false"
           aria-controls="rawafid-assistant-panel"
-          data-rawafid-assistant-launcher
+          data-rawafid-assistant-launcher="true"
         >
           <span className={styles.launcherIcon} aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
