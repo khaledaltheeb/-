@@ -58,13 +58,18 @@ requireText(productionBuild, "NEXT_PUBLIC_ENABLE_DIRECT_GA='true'", 'the direct 
 requireText(productionBuild, "ENABLE_RAWAFID_ASSISTANT='true'", 'the static production build must keep the assistant enabled');
 
 requireText(deployWorkflow, 'librsvg2-bin', 'production deployment must install rsvg-convert because the production build renders Quick Info SVG cards');
-requireText(deployWorkflow, 'for tool in searchRawafid searchRawafidHeader searchRawafidMobile; do', 'production live verification must assert all server-rendered homepage WebMCP tools');
-requireText(deployWorkflow, 'grep -q \'tooldescription="Search Rawafid\' /tmp/home.html', 'production live verification must assert a WebMCP tool description in rendered HTML');
-requireText(deployWorkflow, 'grep -q \'toolparamdescription="The user\' /tmp/home.html', 'production live verification must assert WebMCP parameter schema metadata in rendered HTML');
+requireText(deployWorkflow, 'webmcp_ready=0', 'production live WebMCP verification must tolerate ISR propagation instead of failing on the first cached response');
+requireText(deployWorkflow, 'for attempt in $(seq 1 36); do', 'production live WebMCP verification must retry across the homepage ISR window');
+requireText(deployWorkflow, 'WEBMCP_ATTEMPT', 'production live WebMCP verification must expose diagnostic tool-name evidence');
+requireText(deployWorkflow, 'toolname="searchRawafid"', 'production live verification must assert the homepage WebMCP tool');
+requireText(deployWorkflow, 'toolname="searchRawafidHeader"', 'production live verification must assert the desktop header WebMCP tool');
+requireText(deployWorkflow, 'toolname="searchRawafidMobile"', 'production live verification must assert the mobile header WebMCP tool');
+requireText(deployWorkflow, 'tooldescription="Search Rawafid', 'production live verification must assert a WebMCP tool description in rendered HTML');
+requireText(deployWorkflow, 'toolparamdescription="The user', 'production live verification must assert WebMCP parameter schema metadata in rendered HTML');
 
 if (failures.length) {
   for (const failure of failures) console.error(`PAGESPEED PERFORMANCE CONTRACT FAILED: ${failure}`);
   process.exit(1);
 }
 
-console.log('PageSpeed performance contract passed: production build prerequisites are present, GA4 remains delayed beyond the critical path, heavy GTM is gated, font LCP is non-blocking, and every homepage search/assistant form that can enter the DOM has an explicit WebMCP contract.');
+console.log('PageSpeed performance contract passed: production build prerequisites are present, GA4 remains delayed beyond the critical path, heavy GTM is gated, font LCP is non-blocking, every homepage search/assistant form has an explicit WebMCP contract, and live validation is ISR-aware.');
