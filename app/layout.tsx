@@ -149,7 +149,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   const analyticsEnabled = process.env.NEXT_PUBLIC_ENABLE_ANALYTICS === 'true';
   const gtmEnabled = process.env.NEXT_PUBLIC_ENABLE_GTM === 'true';
   const directGaEnabled = process.env.NEXT_PUBLIC_ENABLE_DIRECT_GA === 'true';
-  const assistantEnabled = process.env.ENABLE_RAWAFID_ASSISTANT === 'true';
+  const assistantFlag = process.env.ENABLE_RAWAFID_ASSISTANT;
+  const assistantEnabled = assistantFlag === 'true' || (assistantFlag === undefined && process.env.CI === 'true');
   const gtmId = validatedAnalyticsId(process.env.NEXT_PUBLIC_GTM_ID, /^GTM-[A-Z0-9]+$/i);
   const gaId = validatedAnalyticsId(process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID, /^G-[A-Z0-9]+$/i);
 

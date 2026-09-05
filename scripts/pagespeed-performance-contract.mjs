@@ -5,7 +5,8 @@ const layout = read('app/layout.tsx');
 const homepage = read('app/page.tsx');
 const siteHeader = read('components/site-header.tsx');
 const siteFooter = read('components/site-footer.tsx');
-const assistant = read('components/rawafid-assistant.tsx');
+const assistant = read('public/rawafid-assistant.js');
+const assistantStyles = read('public/rawafid-assistant.css');
 const imperativeTools = read('components/webmcp-imperative-tools.tsx');
 const loader = read('components/rawafid-assistant-loader.tsx');
 const brand = read('components/rawafid-brand.tsx');
@@ -37,9 +38,30 @@ forbidText(layout, "from 'next/script'", 'the root layout must not pull the Next
 requireText(layout, "@/components/rawafid-assistant-loader", 'the root layout must use the on-demand assistant loader');
 requireText(layout, "@/components/webmcp-imperative-tools", 'the root layout must render the imperative WebMCP bootstrap without a client bundle');
 requireText(layout, '<WebMcpImperativeTools />', 'the imperative WebMCP tool bootstrap must remain present on every page');
-requireText(loader, "dynamic(() => import('./rawafid-assistant')", 'the assistant implementation must remain code-split');
-requireText(loader, 'AUTO_OPEN_AFTER_MS = 12000', 'the assistant must remain outside the initial Lighthouse performance window');
+
+forbidText(homepage, "from 'next/link'", 'the homepage must not pull Next Link/router behavior into its server-only navigation shell');
+requireText(homepage, "@/components/static-link", 'the homepage must retain server-only HTML navigation');
+forbidText(brand, "from 'next/link'", 'the shared brand must not pull Next Link/router behavior into the public shell');
+requireText(brand, "@/components/static-link", 'the shared brand must use the server-only static-link helper');
 requireText(brand, 'prefetch={false}', 'the homepage brand must not prefetch the route it is already on');
+
+forbidText(loader, "'use client'", 'the assistant launcher must stay server-rendered and add no React hydration boundary');
+forbidText(loader, "from 'next/dynamic'", 'the assistant launcher must not load the Next dynamic client helper');
+forbidText(loader, 'useEffect', 'the assistant launcher must not require React effects in the initial page');
+forbidText(loader, 'useState', 'the assistant launcher must not require React state in the initial page');
+requireText(loader, "import('/rawafid-assistant.js')", 'the assistant implementation must remain a browser-native lazy import');
+requireText(loader, 'AUTO_OPEN_AFTER_MS = 12000', 'the assistant must remain outside the initial Lighthouse performance window');
+requireText(loader, 'data-rawafid-assistant-launcher', 'the zero-hydration launcher must remain server-rendered and addressable');
+requireText(loader, 'id="rawafid-assistant-bootstrap"', 'the assistant must retain a stable inline bootstrap identifier');
+requireText(assistant, "link.href = '/rawafid-assistant.css'", 'full assistant styling must stay lazy and outside the initial stylesheet path');
+requireText(assistantStyles, '.rawafid-assistant-panel', 'the lazy assistant stylesheet must retain panel styling');
+requireText(assistant, "fetch(`/api/search/v3?q=${encodeURIComponent(query)}&limit=6${contextParam}`", 'the lazy assistant must keep using Rawafid search rather than an external model');
+requireText(assistant, 'RISK_PATTERN', 'the lazy assistant must preserve immediate-risk handling');
+requireText(assistant, 'safeDestination', 'assistant result navigation must remain restricted to same-origin destinations');
+requireText(assistant, 'toolname="askRawafidAssistant"', 'the lazy Rawafid assistant form must remain covered by WebMCP when it appears');
+requireText(assistant, 'tooldescription="Ask Rawafid\'s on-site assistant', 'the assistant WebMCP tool must retain a meaningful description');
+requireText(assistant, 'name="query"', 'the assistant WebMCP textarea must retain a schema property name');
+requireText(assistant, 'toolparamdescription="The user\'s Arabic or English question', 'the assistant WebMCP parameter must remain described');
 
 requireText(homepage, 'toolname="searchRawafid"', 'the homepage search form must remain registered as a WebMCP tool');
 requireText(homepage, 'tooldescription="Search Rawafid', 'the homepage WebMCP tool must retain a meaningful tool description');
@@ -57,11 +79,6 @@ requireText(siteFooter, 'tooldescription="Search Rawafid from the site footer', 
 requireText(siteFooter, 'toolautosubmit=""', 'the safe footer search WebMCP tool must remain directly invokable by agents');
 requireText(siteFooter, 'toolparamdescription="The user\'s Arabic or English footer search query', 'the footer WebMCP search parameter must remain described');
 requireText(siteFooter, 'required', 'the footer WebMCP search query must remain required so its generated JSON Schema is explicit');
-
-requireText(assistant, 'toolname="askRawafidAssistant"', 'the lazy Rawafid assistant form must remain covered by WebMCP when it appears');
-requireText(assistant, 'tooldescription="Ask Rawafid\'s on-site assistant', 'the assistant WebMCP tool must retain a meaningful description');
-requireText(assistant, 'name="query"', 'the assistant WebMCP textarea must retain a schema property name');
-requireText(assistant, 'toolparamdescription="The user\'s Arabic or English question', 'the assistant WebMCP parameter must remain described');
 
 forbidText(imperativeTools, "'use client'", 'the imperative WebMCP bootstrap must stay server-rendered and must not add a hydration bundle');
 requireText(imperativeTools, 'document.modelContext', 'the imperative WebMCP bootstrap must feature-detect the browser model context');
@@ -94,4 +111,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log('PageSpeed performance contract passed: the text LCP uses a zero-network system font, GA4 remains deferred but interaction-aware, heavy GTM is gated, Cloudflare-incompatible CSS inlining is forbidden, every homepage WebMCP surface remains covered, the imperative WebMCP schema remains strict, and production verification stays fast.');
+console.log('PageSpeed performance contract passed: the homepage shell and assistant launcher stay server-only, the full assistant is browser-native lazy-loaded, the text LCP uses a zero-network system font, GA4 remains deferred but interaction-aware, heavy GTM is gated, WebMCP coverage remains intact, and production verification stays fast.');
