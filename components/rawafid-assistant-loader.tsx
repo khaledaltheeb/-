@@ -30,6 +30,10 @@ const assistantBootstrap = String.raw`
   }
 
   function activate(autoOpened) {
+    if (!autoOpened && autoTimer) {
+      window.clearTimeout(autoTimer);
+      autoTimer = 0;
+    }
     if (api) {
       api.open();
       return;
