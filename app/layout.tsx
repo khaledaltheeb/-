@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/next-script-for-ga -- GTM is explicitly opt-in and disabled in production; using Next's third-party helper would reintroduce client overhead into the critical path. */
-import type { CSSProperties, Metadata, Viewport } from 'react';
-import type { Metadata as NextMetadata, Viewport as NextViewport } from 'next';
+import type { Metadata, Viewport } from 'next';
+import type { CSSProperties } from 'react';
 import { BRAND_NAME, DEFAULT_DESCRIPTION, INDEXING_ENABLED, SITE_URL, organizationJsonLd } from '@/lib/seo';
 import { founderJsonLd } from '@/lib/founder';
 import RawafidAssistantLoader from '@/components/rawafid-assistant-loader';
@@ -17,9 +17,6 @@ import './rawafid-theme.css';
 const DEFAULT_SOCIAL_IMAGE = `${SITE_URL}/seo-card`;
 const GA_FALLBACK_DELAY_MS = 20000;
 const systemFontVariable = { '--font-arabic': 'system-ui' } as CSSProperties;
-
-type Metadata = NextMetadata;
-type Viewport = NextViewport;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
