@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars -- generic parameters must match React's declarations for module augmentation */
 import 'react';
 
 declare module 'react' {
