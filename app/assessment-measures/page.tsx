@@ -14,14 +14,14 @@ import styles from '@/components/assessment-measures.module.css';
 
 export const metadata: Metadata = buildSeoMetadata({
   title: 'المقاييس وأدوات التقييم المستخدمة عالميًا',
-  description: 'مكتبة عربية موثقة للمقاييس وأدوات التقييم المستخدمة عالميًا: الغرض، الفئة، التطبيق، التسجيل، النسخ العربية، حدود التفسير وحقوق إعادة الاستخدام.',
+  description: 'مكتبة عربية موثقة لأدوات قياس النتائج: الغرض، الفئة، التطبيق، الخصائص القياسية، النسخ العربية، حدود التفسير وحقوق إعادة الاستخدام، مع فصل واضح عن Core Outcome Sets.',
   path: '/assessment-measures/',
   index: true,
   follow: true,
   type: 'website',
-  keywords: ['مقاييس التقييم', 'أدوات التقييم', 'مقاييس التأهيل', 'مقاييس الصحة النفسية', 'مقاييس السكتة الدماغية', 'اختبارات التوازن', 'RMD', 'Rehabilitation Measures Database'],
-  relatedTerms: ['measurement instruments', 'outcome measures', 'rehabilitation measures', 'assessment tools'],
-  searchIntents: ['اختيار مقياس تقييم', 'طريقة استخدام مقياس', 'هل المقياس مجاني', 'هل توجد نسخة عربية'],
+  keywords: ['مقاييس التقييم', 'أدوات قياس النتائج', 'measurement instruments', 'outcome measures', 'Core Outcome Set', 'COSMIN', 'مقاييس التأهيل', 'مقاييس الصحة النفسية', 'مقاييس السكتة الدماغية', 'اختبارات التوازن', 'RMD', 'Rehabilitation Measures Database'],
+  relatedTerms: ['measurement instruments', 'outcome measures', 'rehabilitation measures', 'assessment tools', 'how to measure'],
+  searchIntents: ['اختيار مقياس تقييم', 'كيف أقيس نتيجة صحية', 'طريقة استخدام مقياس', 'هل المقياس مجاني', 'هل توجد نسخة عربية'],
 });
 
 type PageProps = {
@@ -52,7 +52,7 @@ export default async function AssessmentMeasuresPage({ searchParams }: PageProps
     '@id': `${SITE_URL}/assessment-measures/#page`,
     url: `${SITE_URL}/assessment-measures/`,
     name: 'المقاييس وأدوات التقييم المستخدمة عالميًا',
-    description: 'مكتبة عربية موثقة للمقاييس وأدوات التقييم مع الأدلة وحقوق الاستخدام وحدود التفسير.',
+    description: 'مكتبة عربية موثقة لأدوات قياس النتائج مع الأدلة وحقوق الاستخدام وحدود التفسير.',
     inLanguage: 'ar',
     isPartOf: { '@id': `${SITE_URL}/#website` },
     publisher: { '@id': `${SITE_URL}/#organization` },
@@ -74,31 +74,42 @@ export default async function AssessmentMeasuresPage({ searchParams }: PageProps
       <main className={styles.shell}>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema).replace(/</g, '\\u003c') }} />
         <nav className={styles.breadcrumbs} aria-label="مسار الصفحة">
-          <Link href="/">الرئيسية</Link><span>/</span><span aria-current="page">المقاييس وأدوات التقييم</span>
+          <Link href="/">الرئيسية</Link><span>/</span><span aria-current="page">المقاييس وأدوات قياس النتائج</span>
         </nav>
 
         <section className={styles.hero} aria-labelledby="assessment-measures-title">
-          <span className={styles.eyebrow}>مكتبة حقوق + أدلة + استخدام مسؤول</span>
+          <span className={styles.eyebrow}>HOW TO MEASURE · حقوق + أدلة + استخدام مسؤول</span>
           <h1 id="assessment-measures-title">المقاييس وأدوات التقييم المستخدمة عالميًا</h1>
-          <p>مرجع عربي منظم يوضح ماذا يقيس كل مقياس، لمن صُمم، كيف يُطبق ويُسجل، ما حدود تفسيره، هل توجد نسخة عربية موثقة، وما الذي تسمح به حقوق الاستخدام وإعادة النشر. إدراج الأداة هنا لا يعني اعتمادًا عالميًا موحدًا ولا يحول أداة فحص أو نتائج إلى تشخيص مستقل.</p>
+          <p>هذه المكتبة تجيب عن سؤال <strong>«كيف نقيس نتيجة محددة؟»</strong>. إذا كان السؤال الأول هو <strong>«ما النتائج التي ينبغي قياسها أصلًا؟»</strong> فابدأ من Core Outcome Sets. بعد تحديد النتيجة، توثق هذه المكتبة الأداة والغرض والمجتمع وطريقة التطبيق والخصائص القياسية والنسخة العربية والحقوق، من دون تحويل أداة فحص أو درجة إلى تشخيص مستقل.</p>
           <div className={styles.heroActions}>
-            <a className={styles.primaryAction} href="#library">استكشف المقاييس</a>
+            <Link className={styles.primaryAction} href="/core-outcome-sets/">ابدأ من Core Outcome Sets</Link>
+            <a className={styles.secondaryAction} href="#library">استكشف أدوات القياس</a>
             <Link className={styles.secondaryAction} href="/assessment-measures/compare/">قارن المقاييس</Link>
             <Link className={styles.secondaryAction} href="/assessment-measures/rights-register/">سجل الحقوق</Link>
-            <Link className={styles.secondaryAction} href="/assessment-measures/methodology/">منهجية التحقق والحقوق</Link>
+            <Link className={styles.secondaryAction} href="/assessment-measures/methodology/">الخصائص السيكومترية والتكييف العربي</Link>
           </div>
           <div className={styles.stats} aria-label="إحصاءات الإصدار الحالي">
-            <div className={styles.stat}><strong>{assessmentMeasures.length}</strong><span>مقياسًا في الإصدار الأول الموثق</span></div>
+            <div className={styles.stat}><strong>{assessmentMeasures.length}</strong><span>أداة في الإصدار الأول الموثق</span></div>
             <div className={styles.stat}><strong>{publicDomainCount}</strong><span>أصلًا بحالة Public Domain موثقة</span></div>
             <div className={styles.stat}><strong>{arabicEvidenceCount}</strong><span>لها نسخة/دراسة عربية منشورة</span></div>
             <div className={styles.stat}><strong>{arabicProtocolCount}</strong><span>بروتوكولات عربية تشغيلية جاهزة</span></div>
           </div>
-          <div className={styles.notice}>لا ننشر بنود ترجمة عربية كاملة لمجرد أن الأصل مجاني. حقوق الأصل وحقوق الترجمة مساران منفصلان، ويُثبت مصدر كل نسخة قبل عرضها. <Link href="/assessment-measures/rights-register/">راجع سجل الحقوق الكامل.</Link></div>
+          <div className={styles.notice}><strong>COS ≠ أداة قياس.</strong> Core Outcome Set يحدد الحد الأدنى من النتائج التي ينبغي قياسها؛ اختيار أداة لكل نتيجة خطوة لاحقة. بعض مشاريع COS تنشر أيضًا توصيات قياس أو Core Outcome Measurement Set (COMS)، وحينها نوثق التوصية صراحة ولا نفترضها. ولا ننشر بنود ترجمة عربية كاملة لمجرد أن الأصل مجاني: حقوق الأصل وحقوق الترجمة مساران منفصلان.</div>
+        </section>
+
+        <section className={styles.section} aria-labelledby="decision-title">
+          <div className={styles.sectionHead}><div><h2 id="decision-title">مكان هذه المكتبة في سلسلة القرار</h2><p>ابدأ بالسؤال العلمي ثم انتقل إلى الأداة، وليس العكس.</p></div></div>
+          <div className={styles.methodGrid}>
+            <article className={styles.methodCard}><h3>1. WHAT — ما الذي يجب قياسه؟</h3><p>ابحث عن COS ملائم للحالة والسكان والتدخل والسياق. إذا لم يوجد أو لم يتطابق نطاقه، وثّق ذلك بدل فرضه.</p><Link href="/core-outcome-sets/">دليل Core Outcome Sets ←</Link></article>
+            <article className={styles.methodCard}><h3>2. HOW — كيف نقيس النتيجة؟</h3><p>ابحث عن أداة تقيس البناء نفسه، وميّز بين أداة أوصى بها COS/COMS وأداة مرشحة وجدتها من مصادر أخرى.</p></article>
+            <article className={styles.methodCard}><h3>3. QUALITY — هل القياس صالح؟</h3><p>راجع خصائص القياس في المجتمع والسياق المقصودين: الصلاحية والثبات وخطأ القياس والاستجابة، لا السمعة أو عدد الاستشهادات فقط.</p><Link href="/assessment-measures/methodology/#measurement-properties">خصائص القياس ←</Link></article>
+            <article className={styles.methodCard}><h3>4. ARABIC — هل النسخة العربية جاهزة؟</h3><p>نفصل بين حق الترجمة، وجود ترجمة، التكييف الثقافي، التحقق السيكومتري والتكافؤ بين اللغات أو المجموعات.</p><Link href="/assessment-measures/methodology/#arabic-adaptation">مسار التكييف العربي ←</Link></article>
+          </div>
         </section>
 
         <section className={styles.section} aria-labelledby="categories-title">
           <div className={styles.sectionHead}>
-            <div><h2 id="categories-title">ابدأ بما تريد قياسه</h2><p>المقياس الواحد قد يظهر في أكثر من مجموعة لأن الاستخدامات السريرية والوظيفية متداخلة.</p></div>
+            <div><h2 id="categories-title">ابدأ بالبنية التي تريد قياسها</h2><p>الأداة الواحدة قد تظهر في أكثر من مجموعة لأن الاستخدامات السريرية والوظيفية متداخلة. وجود الأداة هنا لا يعني أنها جزء من COS بعينه.</p></div>
           </div>
           <div className={styles.categoryGrid}>
             {assessmentMeasureCategories.map((item) => {
