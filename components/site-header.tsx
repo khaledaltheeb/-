@@ -6,6 +6,7 @@ import { getPublicSectors } from '@/lib/public-taxonomy';
 const primaryLinks = [
   { href: '/sectors', label: 'القطاعات', secondary: false },
   { href: '/sections', label: 'الأقسام', secondary: false },
+  { href: '/assessment-measures/', label: 'المقاييس وأدوات التقييم', secondary: false },
   { href: '/sectors/pediatric-oncology', label: 'سرطان الأطفال', secondary: false },
   { href: '/care-guides/', label: 'أدلة التعامل والرعاية', secondary: true },
   { href: '/evidence-guides/', label: 'الأدلة العلمية', secondary: true },
@@ -23,6 +24,7 @@ const intentLinks = [
 
 const serviceLinks = [
   { href: '/daily-tools/', label: 'الأدوات اليومية', icon: 'tools' as const },
+  { href: '/assessment-measures/', label: 'مكتبة المقاييس العالمية', icon: 'review' as const },
   { href: '/specialists', label: 'العثور على مختص', icon: 'specialist' as const },
   { href: '/centers', label: 'العثور على مركز', icon: 'center' as const },
   { href: '/cognitive-lab', label: 'المختبر المعرفي', icon: 'tools' as const },
@@ -155,7 +157,7 @@ export default async function SiteHeader() {
                 />
                 <button type="submit">بحث</button>
               </form>
-              <a href="/">الرئيسية</a><a href="/about">من نحن</a><a href="/sectors">جميع القطاعات</a><a href="/sections">جميع الأقسام</a><a href="/sectors/pediatric-oncology">سرطان الأطفال</a><a href="/care-guides/">أدلة التعامل والرعاية</a><a href="/evidence-guides/">الأدلة العلمية</a><a href="/encyclopedia/">الموسوعة المختصرة — الصفحات المحفوظة</a>
+              <a href="/">الرئيسية</a><a href="/about">من نحن</a><a href="/sectors">جميع القطاعات</a><a href="/sections">جميع الأقسام</a><a href="/assessment-measures/">المقاييس وأدوات التقييم</a><a href="/sectors/pediatric-oncology">سرطان الأطفال</a><a href="/care-guides/">أدلة التعامل والرعاية</a><a href="/evidence-guides/">الأدلة العلمية</a><a href="/encyclopedia/">الموسوعة المختصرة — الصفحات المحفوظة</a>
               <span className="mobile-menu-label">الدليل والخدمات</span>
               {serviceLinks.map((link) => <a key={link.href} href={link.href}>{link.label}</a>)}
               <a href="/login" data-auth-guest>تسجيل الدخول</a>
