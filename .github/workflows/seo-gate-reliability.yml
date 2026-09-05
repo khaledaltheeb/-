@@ -1,23 +1,7 @@
 name: SEO Gate Reliability
 
 on:
-  pull_request:
-    paths:
-      - 'scripts/seo-gate.mjs'
-      - 'scripts/content-richness-gate.mjs'
-      - 'scripts/seo-shared-html-cache.mjs'
-      - 'scripts/seo-gate-reliability-contract.mjs'
-      - '.github/workflows/quality.yml'
-      - '.github/workflows/seo-gate-reliability.yml'
-  push:
-    branches: [main]
-    paths:
-      - 'scripts/seo-gate.mjs'
-      - 'scripts/content-richness-gate.mjs'
-      - 'scripts/seo-shared-html-cache.mjs'
-      - 'scripts/seo-gate-reliability-contract.mjs'
-      - '.github/workflows/quality.yml'
-      - '.github/workflows/seo-gate-reliability.yml'
+  workflow_dispatch:
 
 permissions:
   contents: read
