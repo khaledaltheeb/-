@@ -5,10 +5,10 @@ import { buildSeoMetadata } from '@/lib/seo';
 
 export const metadata = buildSeoMetadata({
   title: 'أفكار خارج الصندوق | لنرتقي بقدراتهم',
-  description: 'أفكار عملية مبتكرة لاختبار الحواجز وكشف القدرة في التعلم والتواصل والتنظيم والطاقة والحركة والمشاركة، مع مقياس واضح وقاعدة توقف.',
+  description: 'مختبر أفكار وتجارب صغيرة لاختبار الحواجز وكشف القدرة بأمان، مع خط أساس وقياس جودة التنفيذ وقرار للاستمرار أو التعديل أو الإيقاف.',
   path: '/capabilities/ideas/',
   index: true,
-  keywords: ['أفكار مبتكرة', 'التربية الخاصة', 'التكييفات', 'اكتشاف القدرات', 'الدعم الوظيفي', 'الوصول'],
+  keywords: ['أفكار مبتكرة', 'التربية الخاصة', 'التكييفات', 'اكتشاف القدرات', 'الدعم الوظيفي', 'الوصول', 'تجربة فردية', 'قياس وظيفي'],
 });
 
 const ideas = [
@@ -98,6 +98,42 @@ const ideas = [
   },
 ];
 
+const recoveredDecisionLayers = [
+  ['1. سؤال وظيفي حقيقي', 'ابدأ بهدف يهم الشخص: تعلم، تواصل، حركة، استقلال، عمل، لعب أو مشاركة؛ لا بهدف صيغ فقط ليتوافق مع التشخيص.'],
+  ['2. فحص السلامة والسياق', 'راجع الألم، التغير الصحي، النوم، النوبات، الأدوية، الضيق الحاد أو أي عامل قد يجعل انخفاض الأداء تفسيرًا غير صالح للقدرة.'],
+  ['3. خط أساس قصير', 'سجّل كيف تحدث المهمة الآن قبل التعديل: الدقة، الوقت، نوع المساعدة، الجهد، الرضا والأثر بعد المهمة.'],
+  ['4. فرضية حاجز واحدة', 'صغ فرضية قابلة للاختبار: هل العائق هو طريقة العرض، الاستجابة، الحركة، الذاكرة، التنظيم، البيئة، التواصل، الحس أو الطاقة؟'],
+  ['5. تعديل واحد قابل للعكس', 'اختبر تغييرًا صغيرًا قدر الإمكان بحيث يمكن معرفة ما الذي صنع الفرق ويمكن التراجع عنه بسهولة إن لم يفد.'],
+  ['6. حق الاختيار والرفض', 'وفّر وسيلة مفهومة للموافقة والتوقف وطلب المساعدة أو البديل. الامتثال ليس مقياسًا كافيًا لنجاح التجربة.'],
+  ['7. راقب جودة التنفيذ', 'إذا لم يطبق التعديل كما صُمم، لا نستنتج أنه فشل. سجّل ما نُفذ فعلًا ومن قدم المساعدة وكم مرة.'],
+  ['8. قِس النتيجة والعبء معًا', 'التحسن الحقيقي لا يُختزل في نتيجة أفضل؛ أضف الجهد، التعب، الألم، الضيق، الاستقلال والرضا إلى الحكم.'],
+  ['9. اختبر النقل إلى الحياة', 'أعد المهارة في سياق ثانٍ أو موقف يومي حقيقي قبل وصفها بأنها قدرة مستقرة أو حل ناجح.'],
+  ['10. قرار مسبق: استمر، عدّل أو أوقف', 'حدد قبل التجربة ما الذي يكفي للاستمرار، ومتى نصلح التنفيذ، ومتى نغير الفرضية، ومتى نتوقف أو نصعّد لتقييم متخصص.'],
+];
+
+const decisionMatrix = [
+  {
+    result: 'تحسن واضح',
+    fidelity: 'التنفيذ جيد',
+    decision: 'كرّر للتأكد، ثم اختبر التعميم وخفف المساعدة تدريجيًا إذا بقي العبء مقبولًا.',
+  },
+  {
+    result: 'تحسن واضح',
+    fidelity: 'التنفيذ غير ثابت',
+    decision: 'لا تنسب التحسن للتعديل بعد. ثبّت التنفيذ وكرر التجربة قبل اعتمادها.',
+  },
+  {
+    result: 'لا تحسن مهم',
+    fidelity: 'التنفيذ غير ثابت',
+    decision: 'أصلح التطبيق أولًا؛ النتيجة الحالية لا تختبر الفرضية بصورة عادلة.',
+  },
+  {
+    result: 'لا تحسن مهم',
+    fidelity: 'التنفيذ جيد',
+    decision: 'أوقف أو عدّل التعديل وارجع إلى فرضية الحاجز بدل تكرار الشيء نفسه بلا مبرر.',
+  },
+];
+
 export default function CapabilityIdeasPage() {
   return (
     <>
@@ -106,25 +142,79 @@ export default function CapabilityIdeasPage() {
         <nav className="breadcrumbs" aria-label="مسار الصفحة">
           <Link href="/">الرئيسية</Link><span>/</span><Link href="/sectors/capabilities">لنرتقي بقدراتهم</Link><span>/</span><span aria-current="page">أفكار خارج الصندوق</span>
         </nav>
-        <header style={{ maxWidth: 900, margin: '0 auto 2.5rem' }}>
-          <span className="eyebrow">تجارب صغيرة، لا وصفات جاهزة</span>
+
+        <header style={{ maxWidth: 940, margin: '0 auto 2.5rem' }}>
+          <span className="eyebrow">مختبر أفكار وتجارب صغيرة — لا وصفات جاهزة</span>
           <h1>أفكار خارج الصندوق</h1>
           <p style={{ fontSize: '1.12rem', lineHeight: 2 }}>
-            الإبداع هنا لا يعني تجربة أي شيء. الفكرة الجيدة تبدأ بحاجز محدد، تغيّر عنصرًا واحدًا، تقيس الأثر، وتحترم حق الشخص في الرفض. إذا لم تتحسن المشاركة أو الاستقلال، أو ارتفع الألم أو التعب أو الضيق، فالتعديل لا يصبح جيدًا لمجرد أنه مبتكر.
+            الإبداع هنا لا يعني تجربة أي شيء. الفكرة الجيدة تبدأ بحاجز محدد، تُبنى على معرفة أو دليل ذي صلة، تغيّر عنصرًا يمكن اختباره، وتقيس الأثر والعبء معًا. الهدف ليس «إصلاح الشخص»، بل اكتشاف ما الذي قد يصبح ممكنًا عندما نزيل عائقًا، نغيّر البيئة أو نعيد تصميم المهمة باحترام وأمان.
           </p>
+          <p style={{ lineHeight: 1.95, color: 'var(--muted, #53686b)' }}>
+            استعدنا هنا أفضل المنطق التشغيلي من برنامج «خارج الصندوق» الأقدم، لكننا لم ننقل صفحاته المكررة أو خططه الجاهزة حرفيًا. النسخة الحالية هي المسار المرجعي، وتستخدم ما كان قويًا في الأصل: خط الأساس، التجربة المضبوطة، جودة التنفيذ، قاعدة القرار، التعميم وخطة بديلة.
+          </p>
+          <div className="public-stat-strip"><span>12 فكرة عملية</span><span>10 طبقات قرار</span><span>مصفوفة تنفيذ × نتيجة</span></div>
         </header>
 
-        <div style={{ maxWidth: 1000, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(290px,1fr))', gap: '1rem' }}>
-          {ideas.map((idea) => (
-            <article key={idea.title} style={{ border: '1px solid rgba(7,95,97,.16)', borderRadius: 20, padding: '1.4rem', background: '#fff' }}>
-              <h2 style={{ fontSize: '1.25rem', marginTop: 0 }}>{idea.title}</h2>
-              <p><strong>المشكلة:</strong> {idea.problem}</p>
-              <p><strong>جرّب:</strong> {idea.try}</p>
-              <p><strong>قِس:</strong> {idea.measure}</p>
-              <p style={{ marginBottom: 0 }}><strong>توقف أو عدّل عندما:</strong> {idea.stop}</p>
-            </article>
-          ))}
-        </div>
+        <section style={{ maxWidth: 1000, margin: '0 auto 2rem' }}>
+          <div className="section-heading">
+            <span>الفكرة الأصلية — بصياغة أكثر أمانًا</span>
+            <h2>الإبداع يصبح مفيدًا عندما يمكن اختباره</h2>
+            <p>كل بطاقة أدناه تربط سؤالًا عمليًا بتغيير صغير ومقياس وقاعدة توقف. لا تُستخدم البطاقات كعلاج موصوف، بل كطريقة منظمة للتفكير والتجربة ضمن حدود الشخص والسياق والفريق المناسب.</p>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(290px,1fr))', gap: '1rem' }}>
+            {ideas.map((idea) => (
+              <article key={idea.title} style={{ border: '1px solid rgba(7,95,97,.16)', borderRadius: 20, padding: '1.4rem', background: '#fff' }}>
+                <h3 style={{ fontSize: '1.25rem', marginTop: 0 }}>{idea.title}</h3>
+                <p><strong>المشكلة:</strong> {idea.problem}</p>
+                <p><strong>جرّب:</strong> {idea.try}</p>
+                <p><strong>قِس:</strong> {idea.measure}</p>
+                <p style={{ marginBottom: 0 }}><strong>توقف أو عدّل عندما:</strong> {idea.stop}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section style={{ maxWidth: 1000, margin: '3rem auto', padding: 'clamp(1.5rem,4vw,3rem)', borderRadius: 26, background: '#f7fbfa', border: '1px solid rgba(7,95,97,.14)' }}>
+          <div className="section-heading">
+            <span>مستعاد من المنهجية الأصلية</span>
+            <h2>عشر طبقات تحول «الفكرة» إلى تجربة قابلة للمراجعة</h2>
+            <p>البرنامج القديم احتوى بنية شديدة التفصيل. بدل إعادة «100 حالة × 10 خطط» كقوالب جاهزة، استعدنا جوهرها كعشرة أسئلة قرار يمكن تطبيقها على أي تجربة دون ادعاء أنها خطة شخصية جاهزة.</p>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: '1rem' }}>
+            {recoveredDecisionLayers.map(([title, text]) => (
+              <article key={title} style={{ background: '#fff', borderRadius: 18, padding: '1.25rem', border: '1px solid rgba(7,95,97,.12)' }}>
+                <h3 style={{ marginTop: 0, fontSize: '1.08rem' }}>{title}</h3>
+                <p style={{ marginBottom: 0, lineHeight: 1.8 }}>{text}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section style={{ maxWidth: 1000, margin: '3rem auto', lineHeight: 1.9 }}>
+          <div className="section-heading">
+            <span>لا تحكم على الفكرة قبل الحكم على تنفيذها</span>
+            <h2>مصفوفة بسيطة: النتيجة × جودة التنفيذ</h2>
+            <p>من أفضل عناصر النسخة القديمة الفصل بين فشل الفكرة وفشل تنفيذها. استخدم هذه المصفوفة قبل اتخاذ قرار نهائي.</p>
+          </div>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 680 }}>
+              <thead><tr><th style={{ textAlign: 'right', padding: '1rem' }}>النتيجة</th><th style={{ textAlign: 'right', padding: '1rem' }}>جودة التنفيذ</th><th style={{ textAlign: 'right', padding: '1rem' }}>القرار الأقرب</th></tr></thead>
+              <tbody>
+                {decisionMatrix.map((row) => <tr key={`${row.result}-${row.fidelity}`} style={{ borderTop: '1px solid rgba(7,95,97,.14)' }}><td style={{ padding: '1rem', verticalAlign: 'top' }}><strong>{row.result}</strong></td><td style={{ padding: '1rem', verticalAlign: 'top' }}>{row.fidelity}</td><td style={{ padding: '1rem', verticalAlign: 'top' }}>{row.decision}</td></tr>)}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section style={{ maxWidth: 900, margin: '3rem auto', lineHeight: 1.9 }}>
+          <h2>ما الذي لم نُعد نشره من النسخة القديمة؟</h2>
+          <ul>
+            <li><strong>لم نعد إنشاء مكتبة ثانية من الحالات:</strong> دليل الحالة الحالي في <code>/capabilities/*</code> يبقى المرجع الأساسي حتى لا تتنافس صفحتان على السؤال نفسه.</li>
+            <li><strong>لم ننشر «1000 خطة» باعتبارها خططًا جاهزة:</strong> ما كان مفيدًا فيها تحول إلى طبقات قرار وتجربة، لأن الخطة الحقيقية تحتاج سياق الشخص وموافقته وفريقه وقياسه.</li>
+            <li><strong>لم نستعد الصفحة القديمة الرقيقة كواجهة:</strong> احتفظنا بالفكرة القوية وتركنا البنية القديمة التي لم تعد تمثل مستوى الموقع الحالي.</li>
+            <li><strong>لم ننسخ اختبارات أو أدوات محمية:</strong> حوكمة أدوات القياس مكانها في مختبر التقييم، مع مراعاة الصلاحية، النسخة، اللغة، الثقافة، الترخيص وإمكانية الوصول.</li>
+          </ul>
+        </section>
 
         <section style={{ maxWidth: 900, margin: '3rem auto', lineHeight: 1.9 }}>
           <h2>كيف تحوّل الفكرة إلى تجربة آمنة؟</h2>
@@ -133,27 +223,37 @@ export default function CapabilityIdeasPage() {
             <li>حدد حاجزًا واحدًا يمكن تغييره دون تغيير جوهر المهارة.</li>
             <li>سجّل خط أساس بسيطًا قبل التعديل.</li>
             <li>غيّر عنصرًا واحدًا فقط إن أمكن.</li>
-            <li>قِس الأداء والاستقلال والجهد والرضا معًا.</li>
+            <li>سجّل جودة التنفيذ، لا النتيجة وحدها.</li>
+            <li>قِس الأداء والاستقلال والجهد والرضا والآثار غير المرغوبة معًا.</li>
             <li>أعد التجربة في وقت أو سياق ثانٍ قبل التعميم.</li>
-            <li>احتفظ بما يفيد، وعدّل أو أوقف ما لا يفيد.</li>
+            <li>احتفظ بما يفيد، وعدّل أو أوقف ما لا يفيد وفق قاعدة قرار مسبقة.</li>
           </ol>
           <div style={{ display: 'flex', gap: '.75rem', flexWrap: 'wrap' }}>
             <Link href="/capabilities/printables/" className="button">استخدم أوراق القياس</Link>
             <Link href="/capabilities/protocol/" className="button button-secondary">البروتوكول الكامل</Link>
+            <Link href="/capabilities/methodology/" className="button button-secondary">المنهجية والأدلة</Link>
+            <Link href="/capabilities/registry/" className="button button-secondary">أدلة الحالات</Link>
           </div>
         </section>
 
         <section style={{ maxWidth: 900, margin: '0 auto 3rem', lineHeight: 1.9 }}>
           <h2>الأساس العلمي</h2>
-          <p>هذه الأفكار مبنية على مبادئ الوظيفة والمشاركة وإزالة الحواجز، التصميم الشامل للتعلم، التقنية المساعدة، القرار المشترك، والتقييم الفردي المتكرر. وهي لا تفترض أن لتشخيص بعينه موهبة ثابتة، ولا تستبدل العلاج أو التأهيل المتخصص.</p>
+          <p>يعتمد المختبر على مبادئ الوظيفة والمشاركة وإزالة الحواجز، التصميم الشامل للتعلم، التقنية المساعدة، القرار المشترك، التقييم المتكرر للفرد، وتصاميم التجارب الفردية عندما تكون مناسبة. وهو لا يفترض أن لتشخيص بعينه موهبة ثابتة، ولا يستبدل العلاج أو التأهيل أو التقييم المتخصص.</p>
           <ul>
             <li><a href="https://www.who.int/standards/classifications/international-classification-of-functioning-disability-and-health" target="_blank" rel="noreferrer">World Health Organization — ICF</a></li>
             <li><a href="https://www.who.int/news-room/fact-sheets/detail/assistive-technology" target="_blank" rel="noreferrer">World Health Organization — Assistive technology</a></li>
+            <li><a href="https://ies.ed.gov/ncee/wwc/Document/229" target="_blank" rel="noreferrer">What Works Clearinghouse — Single-Case Design Standards</a></li>
             <li><a href="https://udlguidelines.cast.org/" target="_blank" rel="noreferrer">CAST — UDL Guidelines 3.0</a></li>
             <li><a href="https://www.unicef.org/education/inclusive-education" target="_blank" rel="noreferrer">UNICEF — Inclusive education</a></li>
             <li><a href="https://www.nice.org.uk/guidance/ng197" target="_blank" rel="noreferrer">NICE — Shared decision making</a></li>
+            <li><a href="https://www.cosmin.nl/" target="_blank" rel="noreferrer">COSMIN — Measurement properties and outcome instruments</a></li>
           </ul>
         </section>
+
+        <aside className="medical-disclaimer" style={{ maxWidth: 900, margin: '0 auto 4rem' }}>
+          <strong>حدود الاستخدام</strong>
+          <p>هذه الصفحة إطار للتفكير والتجربة الوظيفية العامة، وليست وصفة علاج أو خطة فردية. أي تجربة قد تتداخل مع حالة صحية أو نفسية أو علاج أو جهاز أو خطر سلامة تحتاج إلى مراجعة المختص المناسب، ويظل حق الشخص في الاختيار والرفض والتوقف جزءًا من القرار.</p>
+        </aside>
       </main>
       <SiteFooter />
     </>
