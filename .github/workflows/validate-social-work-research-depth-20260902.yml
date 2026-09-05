@@ -1,13 +1,10 @@
-name: Validate Social Work Research Depth 2026-09-02
+name: Validate Social Work Research Depth (Manual Deep Check)
 
 on:
-  pull_request:
-    paths:
-      - 'lib/social-work-research-depth.ts'
-      - 'app/evidence-guides/social-work/**'
-      - 'scripts/social-work-research-depth-contract.mjs'
-      - '.github/workflows/validate-social-work-research-depth-20260902.yml'
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   validate:
