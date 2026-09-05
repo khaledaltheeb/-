@@ -11,6 +11,7 @@ const nextConfig = read('next.config.ts');
 const wrangler = read('wrangler.jsonc');
 const productionBuild = read('scripts/cloudflare-production-build.sh');
 const deployWorkflow = read('.github/workflows/deploy-production.yml');
+const qualityWorkflow = read('.github/workflows/quality.yml');
 
 const failures = [];
 const requireText = (source, token, message) => {
@@ -58,18 +59,15 @@ requireText(productionBuild, "NEXT_PUBLIC_ENABLE_DIRECT_GA='true'", 'the direct 
 requireText(productionBuild, "ENABLE_RAWAFID_ASSISTANT='true'", 'the static production build must keep the assistant enabled');
 
 requireText(deployWorkflow, 'librsvg2-bin', 'production deployment must install rsvg-convert because the production build renders Quick Info SVG cards');
-requireText(deployWorkflow, 'webmcp_ready=0', 'production live WebMCP verification must tolerate ISR propagation instead of failing on the first cached response');
-requireText(deployWorkflow, 'for attempt in $(seq 1 36); do', 'production live WebMCP verification must retry across the homepage ISR window');
-requireText(deployWorkflow, 'WEBMCP_ATTEMPT', 'production live WebMCP verification must expose diagnostic tool-name evidence');
-requireText(deployWorkflow, 'toolname="searchRawafid"', 'production live verification must assert the homepage WebMCP tool');
-requireText(deployWorkflow, 'toolname="searchRawafidHeader"', 'production live verification must assert the desktop header WebMCP tool');
-requireText(deployWorkflow, 'toolname="searchRawafidMobile"', 'production live verification must assert the mobile header WebMCP tool');
-requireText(deployWorkflow, 'tooldescription="Search Rawafid', 'production live verification must assert a WebMCP tool description in rendered HTML');
-requireText(deployWorkflow, 'toolparamdescription="The user', 'production live verification must assert WebMCP parameter schema metadata in rendered HTML');
+requireText(qualityWorkflow, 'for tool in searchRawafid searchRawafidHeader searchRawafidMobile; do', 'fast quality runtime smoke must assert all server-rendered homepage WebMCP tools before merge');
+requireText(qualityWorkflow, 'grep -q \'tooldescription="Search Rawafid\' /tmp/home.html', 'fast quality runtime smoke must assert a rendered WebMCP tool description');
+requireText(qualityWorkflow, 'grep -q \'toolparamdescription="The user\' /tmp/home.html', 'fast quality runtime smoke must assert rendered WebMCP parameter schema metadata');
+requireText(deployWorkflow, 'WEBMCP_LIVE_DIAGNOSTIC', 'production live verification must retain a non-blocking WebMCP diagnostic');
+forbidText(deployWorkflow, 'for attempt in $(seq 1 36); do', 'production deployment must not spend up to six minutes waiting for homepage ISR propagation');
 
 if (failures.length) {
   for (const failure of failures) console.error(`PAGESPEED PERFORMANCE CONTRACT FAILED: ${failure}`);
   process.exit(1);
 }
 
-console.log('PageSpeed performance contract passed: production build prerequisites are present, GA4 remains delayed beyond the critical path, heavy GTM is gated, font LCP is non-blocking, every homepage search/assistant form has an explicit WebMCP contract, and live validation is ISR-aware.');
+console.log('PageSpeed performance contract passed: production build prerequisites are present, GA4 remains delayed beyond the critical path, heavy GTM is gated, font LCP is non-blocking, rendered WebMCP coverage is enforced before merge, and production live verification stays fast despite homepage ISR.');
