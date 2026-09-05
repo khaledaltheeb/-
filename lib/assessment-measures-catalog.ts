@@ -16,6 +16,7 @@ import { assessmentMeasuresWave7 } from '@/lib/assessment-measures-wave7';
 import { assessmentMeasuresWave8 } from '@/lib/assessment-measures-wave8';
 import { assessmentMeasuresWave9 } from '@/lib/assessment-measures-wave9';
 import { assessmentMeasuresWave10 } from '@/lib/assessment-measures-wave10';
+import { assessmentMeasuresWave11 } from '@/lib/assessment-measures-wave11';
 import { assessmentMeasureCategoriesWave4 } from '@/lib/assessment-measures-wave4-categories';
 import { assessmentMeasureCategoriesWave6 } from '@/lib/assessment-measures-wave6-categories';
 import { assessmentMeasureCategoriesWave7 } from '@/lib/assessment-measures-wave7-categories';
@@ -112,6 +113,7 @@ export const assessmentMeasures: AssessmentMeasure[] = [
   ...assessmentMeasuresWave8,
   ...assessmentMeasuresWave9,
   ...assessmentMeasuresWave10,
+  ...assessmentMeasuresWave11,
 ].map((measure) => ({ ...measure, ...(evidenceOverrides[measure.slug] ?? {}) }));
 
 export const assessmentMeasureAliases: Record<string, string> = {
