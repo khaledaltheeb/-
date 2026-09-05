@@ -86,19 +86,41 @@ jobs:
           set -euo pipefail
           base="https://healthrenewal.org"
           stamp="${GITHUB_SHA}"
+
+          echo 'LIVE_CHECK homepage'
           curl -fsS --retry 6 --retry-delay 2 --retry-all-errors "${base}/?deploy=${stamp}" >/tmp/home.html
-          curl -fsS --retry 6 --retry-delay 2 --retry-all-errors "${base}/robots.txt?deploy=${stamp}" >/tmp/robots.txt
-          curl -fsS --retry 6 --retry-delay 2 --retry-all-errors "${base}/sitemap.xml?deploy=${stamp}" >/tmp/sitemap.xml
-          curl -fsS --retry 6 --retry-delay 2 --retry-all-errors "${base}/assessment-lab/avoidance-cycle?deploy=${stamp}" >/tmp/assessment-avoidance.html
-          curl -fsS --retry 6 --retry-delay 2 --retry-all-errors "${base}/assessment-lab/mood-daily?deploy=${stamp}" >/tmp/assessment-mood.html
-          curl -fsSI --retry 6 --retry-delay 2 --retry-all-errors "https://www.healthrenewal.org/?deploy=${stamp}" >/tmp/www-redirect.headers
-          grep -q 'Sitemap: https://healthrenewal.org/sitemap.xml' /tmp/robots.txt
           grep -q 'healthrenewal.org' /tmp/home.html
+          grep -q 'toolname="searchRawafid"' /tmp/home.html
+          grep -q 'tooldescription="Search Rawafid' /tmp/home.html
+          grep -q 'toolparamdescription="The user' /tmp/home.html
+          echo 'LIVE_OK homepage + WebMCP declarative annotations'
+
+          echo 'LIVE_CHECK robots'
+          curl -fsS --retry 6 --retry-delay 2 --retry-all-errors "${base}/robots.txt?deploy=${stamp}" >/tmp/robots.txt
+          grep -q 'Sitemap: https://healthrenewal.org/sitemap.xml' /tmp/robots.txt
+          echo 'LIVE_OK robots'
+
+          echo 'LIVE_CHECK sitemap'
+          curl -fsS --retry 6 --retry-delay 2 --retry-all-errors "${base}/sitemap.xml?deploy=${stamp}" >/tmp/sitemap.xml
+          echo 'LIVE_OK sitemap'
+
+          echo 'LIVE_CHECK assessment-lab/avoidance-cycle'
+          curl -fsS --retry 6 --retry-delay 2 --retry-all-errors "${base}/assessment-lab/avoidance-cycle?deploy=${stamp}" >/tmp/assessment-avoidance.html
+          grep -q 'دائرة التجنب' /tmp/assessment-avoidance.html
+          echo 'LIVE_OK assessment-lab/avoidance-cycle'
+
+          echo 'LIVE_CHECK assessment-lab/mood-daily'
+          curl -fsS --retry 6 --retry-delay 2 --retry-all-errors "${base}/assessment-lab/mood-daily?deploy=${stamp}" >/tmp/assessment-mood.html
+          grep -q 'متابعة المزاج اليومية' /tmp/assessment-mood.html
+          echo 'LIVE_OK assessment-lab/mood-daily'
+
+          echo 'LIVE_CHECK www redirect'
+          curl -fsSI --retry 6 --retry-delay 2 --retry-all-errors "https://www.healthrenewal.org/?deploy=${stamp}" >/tmp/www-redirect.headers
           grep -qi '^location: https://healthrenewal.org/' /tmp/www-redirect.headers
+          echo 'LIVE_OK www redirect'
+
           grep -q 'G-VLZMV8Y4JP' /tmp/home.html
           grep -q 'فتح مساعد روافد' /tmp/home.html
-          grep -q 'دائرة التجنب' /tmp/assessment-avoidance.html
-          grep -q 'متابعة المزاج اليومية' /tmp/assessment-mood.html
           if grep -q 'workers.dev' /tmp/home.html /tmp/sitemap.xml; then
             echo 'Production output unexpectedly leaked a workers.dev URL.' >&2
             exit 1
