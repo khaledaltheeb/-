@@ -26,7 +26,7 @@ const forbidText = (source, token, message) => {
 forbidText(layout, "from 'next/font/google'", 'the homepage text LCP must not depend on a downloaded webfont');
 requireText(layout, "const systemFontVariable = { '--font-arabic': 'system-ui' }", 'the Arabic UI must retain a zero-network system font fallback');
 requireText(layout, 'style={systemFontVariable}', 'the zero-network Arabic font variable must be present on the root document');
-requireText(nextConfig, 'inlineCss: true', 'generated route CSS must remain inlined to remove stylesheet discovery from the first-paint critical path');
+forbidText(nextConfig, 'inlineCss: true', 'Next inlineCss must stay disabled because it expands the OpenNext Worker beyond Cloudflare size limits');
 requireText(layout, "process.env.NEXT_PUBLIC_ENABLE_GTM === 'true'", 'GTM must remain behind an explicit opt-in gate');
 requireText(layout, 'analyticsEnabled && gtmEnabled && gtmId', 'the GTM loader must enforce the opt-in gate');
 requireText(layout, 'const GA_FALLBACK_DELAY_MS = 20000', 'direct GA4 must remain outside the initial PageSpeed measurement window');
@@ -94,4 +94,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log('PageSpeed performance contract passed: route CSS is inlined, the text LCP uses a zero-network system font, GA4 remains deferred but interaction-aware, heavy GTM is gated, every homepage WebMCP surface remains covered, the imperative WebMCP schema remains strict, and production verification stays fast.');
+console.log('PageSpeed performance contract passed: the text LCP uses a zero-network system font, GA4 remains deferred but interaction-aware, heavy GTM is gated, Cloudflare-incompatible CSS inlining is forbidden, every homepage WebMCP surface remains covered, the imperative WebMCP schema remains strict, and production verification stays fast.');
