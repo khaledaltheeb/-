@@ -14,6 +14,7 @@ import {
   type CapabilityRecord,
   type CapabilityRegistryItem,
 } from '@/lib/capabilities';
+import type { OutsideBoxSibling } from '@/lib/outside-the-box';
 import { contentReviewProvenance } from '@/lib/review-provenance';
 import { breadcrumbJsonLd, SITE_URL } from '@/lib/seo';
 
@@ -22,6 +23,7 @@ type Props = {
   record: CapabilityRecord;
   routeSlug?: string;
   registryItems?: CapabilityRegistryItem[];
+  outsideBoxSibling?: OutsideBoxSibling | null;
 };
 
 const DEFAULT_DISCLAIMER = 'هذا المحتوى تثقيفي وعملي عام. لا يشخّص حالة، ولا يصف علاجًا فرديًا، ولا يستبدل التقييم الطبي أو النفسي أو التأهيلي المتخصص. عند وجود ألم، تدهور، أعراض جديدة أو مخاطر سلامة، تُقدَّم الرعاية المهنية المناسبة على أي تجربة وظيفية.';
@@ -68,13 +70,14 @@ function ReferenceNav({ end = false }: { end?: boolean }) {
       <Link href="/capabilities/registry/">أدلة الحالات المئة</Link>
       <Link href="/capabilities/protocol/">البروتوكول العملي</Link>
       <Link href="/capabilities/printables/">أوراق قابلة للطباعة</Link>
-      <Link href="/capabilities/ideas/">أفكار خارج الصندوق</Link>
+      <Link href="/capabilities/ideas/">مختبر الأفكار السريعة</Link>
       <Link href="/capabilities/methodology/">المنهجية والأدلة</Link>
+      <Link href="/outside-the-box/">خارج الصندوق — المسارات العلمية</Link>
     </nav>
   );
 }
 
-export default function CapabilityArticlePage({ record, routeSlug, registryItems = [] }: Props) {
+export default function CapabilityArticlePage({ record, routeSlug, registryItems = [], outsideBoxSibling }: Props) {
   const references = safeCapabilityReferences(record.references_json);
   const sanitizedBody = sanitizeCapabilityBody(record.body_json);
   const faqItems = visibleCapabilityFaq(sanitizedBody);
@@ -142,7 +145,8 @@ export default function CapabilityArticlePage({ record, routeSlug, registryItems
             { '@type': 'HowTo', name: 'بروتوكول اكتشاف وتنمية القدرة', url: `${SITE_URL}/capabilities/protocol/` },
             { '@type': 'Article', name: 'منهجية اكتشاف القدرات', url: `${SITE_URL}/capabilities/methodology/` },
             { '@type': 'CollectionPage', name: 'أوراق قابلة للطباعة', url: `${SITE_URL}/capabilities/printables/` },
-            { '@type': 'CollectionPage', name: 'أفكار خارج الصندوق', url: `${SITE_URL}/capabilities/ideas/` },
+            { '@type': 'CollectionPage', name: 'مختبر الأفكار السريعة', url: `${SITE_URL}/capabilities/ideas/` },
+            { '@type': 'CollectionPage', name: 'خارج الصندوق — المسارات العلمية', url: `${SITE_URL}/outside-the-box/` },
           ],
         }
       : role === 'protocol' && steps.length > 0
@@ -221,6 +225,14 @@ export default function CapabilityArticlePage({ record, routeSlug, registryItems
           </header>
 
           <ReferenceNav />
+
+          {outsideBoxSibling ? (
+            <aside style={{ margin: '1.4rem 0', padding: '1.1rem 1.25rem', borderRadius: 16, border: '1px solid rgba(7,95,97,.17)', background: '#f7fbfa' }}>
+              <strong>المسار العلمي الموازي في «خارج الصندوق»</strong>
+              <p style={{ marginBottom: '.65rem', lineHeight: 1.8 }}>هذه الصفحة تركز على القدرة ونقاط القوة والوصول. للمسار التشغيلي الموازي — التقييم، خط الأساس، التجربة، القياس، جودة التنفيذ وقواعد التوقف — افتح صفحة «خارج الصندوق» المناظرة.</p>
+              <Link href={outsideBoxSibling.href}>{outsideBoxSibling.title} ←</Link>
+            </aside>
+          ) : null}
 
           {role === 'registry' && registry.length > 0 ? <CapabilitiesRegistryBrowser items={registry} /> : null}
 
