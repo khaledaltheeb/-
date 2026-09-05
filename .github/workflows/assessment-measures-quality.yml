@@ -18,6 +18,7 @@ on:
       - 'scripts/assessment-measures-contract.mjs'
       - 'scripts/assessment-measures-operational-contract.mjs'
       - 'scripts/assessment-measures-operational-wave3-contract.mjs'
+      - 'scripts/assessment-measures-operational-wave4-contract.mjs'
       - 'scripts/outcome-measurement-separation-contract.mjs'
       - '.assessment-measures-plan.md'
       - '.github/workflows/assessment-measures-quality.yml'
@@ -44,6 +45,8 @@ jobs:
         run: node scripts/assessment-measures-operational-contract.mjs
       - name: Validate operational assessment Wave 3
         run: node scripts/assessment-measures-operational-wave3-contract.mjs
+      - name: Validate operational assessment Wave 4
+        run: node scripts/assessment-measures-operational-wave4-contract.mjs
       - name: Validate COS and measurement separation
         run: node scripts/outcome-measurement-separation-contract.mjs
       - name: Type check
