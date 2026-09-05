@@ -4,6 +4,7 @@ const read = (file) => fs.readFileSync(file, 'utf8');
 const layout = read('app/layout.tsx');
 const homepage = read('app/page.tsx');
 const siteHeader = read('components/site-header.tsx');
+const assistant = read('components/rawafid-assistant.tsx');
 const loader = read('components/rawafid-assistant-loader.tsx');
 const brand = read('components/rawafid-brand.tsx');
 const nextConfig = read('next.config.ts');
@@ -30,7 +31,7 @@ requireText(layout, 'googletagmanager.com/gtag/js?id=', 'direct GA4 must remain 
 forbidText(layout, "from 'next/script'", 'the root layout must not pull the Next Script client helper into the critical path');
 requireText(layout, "@/components/rawafid-assistant-loader", 'the root layout must use the on-demand assistant loader');
 requireText(loader, "dynamic(() => import('./rawafid-assistant')", 'the assistant implementation must remain code-split');
-requireText(loader, 'AUTO_OPEN_AFTER_MS = 12000', 'the assistant must remain outside the initial Lighthouse window');
+requireText(loader, 'AUTO_OPEN_AFTER_MS = 12000', 'the assistant must remain outside the initial Lighthouse performance window');
 requireText(brand, 'prefetch={false}', 'the homepage brand must not prefetch the route it is already on');
 
 requireText(homepage, 'toolname="searchRawafid"', 'the homepage search form must remain registered as a WebMCP tool');
@@ -44,6 +45,11 @@ requireText(siteHeader, 'toolname="searchRawafidMobile"', 'the mobile navigation
 requireText(siteHeader, 'toolparamdescription="The user\'s Arabic or English search query from the site header."', 'the header WebMCP search parameter must remain described');
 requireText(siteHeader, 'toolparamdescription="The user\'s Arabic or English search query from the mobile navigation."', 'the mobile WebMCP search parameter must remain described');
 
+requireText(assistant, 'toolname="askRawafidAssistant"', 'the lazy Rawafid assistant form must remain covered by WebMCP when it appears');
+requireText(assistant, 'tooldescription="Ask Rawafid\'s on-site assistant', 'the assistant WebMCP tool must retain a meaningful description');
+requireText(assistant, 'name="query"', 'the assistant WebMCP textarea must retain a schema property name');
+requireText(assistant, 'toolparamdescription="The user\'s Arabic or English question', 'the assistant WebMCP parameter must remain described');
+
 requireText(nextConfig, 'tools=(self)', 'the Permissions-Policy must explicitly allow same-origin WebMCP tools');
 requireText(wrangler, '"NEXT_PUBLIC_ENABLE_GTM": "false"', 'production must keep the CPU-heavy GTM container disabled');
 requireText(wrangler, '"NEXT_PUBLIC_ENABLE_DIRECT_GA": "true"', 'production must keep direct GA4 enabled');
@@ -51,7 +57,7 @@ requireText(productionBuild, "NEXT_PUBLIC_ENABLE_GTM='false'", 'the direct produ
 requireText(productionBuild, "NEXT_PUBLIC_ENABLE_DIRECT_GA='true'", 'the direct production build must keep direct GA4 enabled');
 requireText(productionBuild, "ENABLE_RAWAFID_ASSISTANT='true'", 'the static production build must keep the assistant enabled');
 
-requireText(deployWorkflow, 'for tool in searchRawafid searchRawafidHeader searchRawafidMobile; do', 'production live verification must assert all static homepage WebMCP tools');
+requireText(deployWorkflow, 'for tool in searchRawafid searchRawafidHeader searchRawafidMobile; do', 'production live verification must assert all server-rendered homepage WebMCP tools');
 requireText(deployWorkflow, 'grep -q \'tooldescription="Search Rawafid\' /tmp/home.html', 'production live verification must assert a WebMCP tool description in rendered HTML');
 requireText(deployWorkflow, 'grep -q \'toolparamdescription="The user\' /tmp/home.html', 'production live verification must assert WebMCP parameter schema metadata in rendered HTML');
 
@@ -60,4 +66,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log('PageSpeed performance contract passed: GA4 remains enabled but delayed beyond the critical path, heavy GTM is gated, font LCP is non-blocking, the assistant is lazy-loaded, and all static homepage WebMCP search forms are guarded at source and in production live verification.');
+console.log('PageSpeed performance contract passed: GA4 remains enabled but delayed beyond the critical path, heavy GTM is gated, font LCP is non-blocking, and every homepage search/assistant form that can enter the DOM has an explicit WebMCP contract.');
