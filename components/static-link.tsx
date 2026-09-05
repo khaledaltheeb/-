@@ -6,6 +6,7 @@ type StaticLinkProps = Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'href' | 'c
   prefetch?: boolean;
 };
 
-export default function StaticLink({ href, children, prefetch: _prefetch, ...props }: StaticLinkProps) {
+export default function StaticLink({ href, children, prefetch, ...props }: StaticLinkProps) {
+  void prefetch;
   return <a href={href} {...props}>{children}</a>;
 }
