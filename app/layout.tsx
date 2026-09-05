@@ -141,6 +141,17 @@ function delayedGaBootstrap(gaId: string) {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const organizationSchema = organizationJsonLd();
   const founderSchema = founderJsonLd(SITE_URL);
+  const structuredData = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        ...organizationSchema['@graph'][0],
+        founder: { '@id': `${SITE_URL}/#founder` },
+      },
+      organizationSchema['@graph'][1],
+      founderSchema['@graph'][0],
+    ],
+  };
   const analyticsEnabled = process.env.NEXT_PUBLIC_ENABLE_ANALYTICS === 'true';
   const gtmEnabled = process.env.NEXT_PUBLIC_ENABLE_GTM === 'true';
   const directGaEnabled = process.env.NEXT_PUBLIC_ENABLE_DIRECT_GA === 'true';
@@ -171,8 +182,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         {analyticsEnabled && directGaEnabled && gaId ? (
           <script id="rawafid-ga4-delayed" dangerouslySetInnerHTML={{ __html: delayedGaBootstrap(gaId) }} />
         ) : null}
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema).replace(/</g, '\\u003c') }} />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(founderSchema).replace(/</g, '\\u003c') }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, '\\u003c') }} />
         {children}
         {assistantEnabled ? <RawafidAssistantLoader /> : null}
         <script dangerouslySetInnerHTML={{ __html: serviceWorkerBootstrap }} />

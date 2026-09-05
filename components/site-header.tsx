@@ -59,7 +59,9 @@ const authEnhancementScript = `
 `;
 
 export default async function SiteHeader() {
-  const sectors = await getPublicSectors(50);
+  // The global header is rendered on every public page. Keep the mega-nav focused
+  // on the highest-priority sectors; the complete directory remains at /sectors.
+  const sectors = await getPublicSectors(8);
 
   return (
     <>
@@ -85,6 +87,7 @@ export default async function SiteHeader() {
                       {sectors.map((sector) => <a key={sector.slug} href={'/sectors/' + sector.slug}><i style={{ background: sector.accent || '#08716d' }} aria-hidden="true" /><span>{sector.name_ar}</span></a>)}
                       {sectors.length === 0 && <div className="mega-empty"><strong>لا توجد قطاعات عامة متاحة حاليًا</strong><span>ستظهر القطاعات هنا بعد اعتمادها.</span></div>}
                     </div>
+                    <a href="/sectors">عرض جميع القطاعات ←</a>
                   </section>
                   <section className="mega-nav-column">
                     <h2>ابدأ من احتياجك</h2>
@@ -113,8 +116,6 @@ export default async function SiteHeader() {
             <div className="mobile-menu-panel">
               <form className="mobile-search" action="/search" method="get" role="search"><label className="sr-only" htmlFor="mobile-search-input">البحث في منصة روافد</label><input id="mobile-search-input" name="q" type="search" placeholder="حالة، دليل أو خدمة" maxLength={120} enterKeyHint="search" /><button type="submit">بحث</button></form>
               <a href="/">الرئيسية</a><a href="/about">من نحن</a><a href="/sectors">جميع القطاعات</a><a href="/sections">جميع الأقسام</a><a href="/sectors/pediatric-oncology">سرطان الأطفال</a><a href="/care-guides/">أدلة التعامل والرعاية</a><a href="/evidence-guides/">الأدلة العلمية</a><a href="/encyclopedia/">الموسوعة المختصرة — الصفحات المحفوظة</a>
-              <span className="mobile-menu-label">القطاعات</span>
-              {sectors.map((sector) => <a key={sector.slug} href={'/sectors/' + sector.slug}>{sector.name_ar}</a>)}
               <span className="mobile-menu-label">الدليل والخدمات</span>
               {serviceLinks.map((link) => <a key={link.href} href={link.href}>{link.label}</a>)}
               <a href="/login" data-auth-guest>تسجيل الدخول</a>
