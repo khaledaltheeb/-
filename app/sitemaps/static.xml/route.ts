@@ -1,6 +1,7 @@
 import { sitemapResponse } from '@/lib/sitemap-xml';
 import { infographics } from '@/lib/practical-resources';
 import { assessmentSlugs } from '@/lib/assessment-lab/catalog';
+import { editorialEvidenceGuides } from '@/lib/editorial-evidence-guides';
 
 export async function GET() {
   return sitemapResponse([
@@ -11,11 +12,14 @@ export async function GET() {
     { path:'/addiction', changeFrequency:'weekly', priority:.82 },
     { path:'/about', changeFrequency:'monthly', priority:.7 },
     { path:'/press', changeFrequency:'monthly', priority:.66 },
+    { path:'/media', changeFrequency:'monthly', priority:.66 },
+    { path:'/external-review', changeFrequency:'monthly', priority:.62 },
     { path:'/start-here', changeFrequency:'monthly', priority:.78 },
     { path:'/campaigns/all-families-reading-challenge-2026', changeFrequency:'weekly', priority:.78 },
     { path:'/guided-assessment', changeFrequency:'monthly', priority:.68 },
     { path:'/assessment-lab', changeFrequency:'monthly', priority:.76 },
     ...assessmentSlugs.map((slug) => ({ path:`/assessment-lab/${slug}`, changeFrequency:'monthly' as const, priority:.7 })),
+    ...editorialEvidenceGuides.map((item) => ({ path:item.canonical_url, changeFrequency:'monthly' as const, priority:.72 })),
     { path:'/resources', changeFrequency:'weekly', priority:.68 },
     { path:'/resources/worksheets', changeFrequency:'monthly', priority:.66 },
     { path:'/resources/infographics', changeFrequency:'monthly', priority:.7 },
