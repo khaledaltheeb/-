@@ -31,6 +31,10 @@ if (exists(cosPagePath)) {
   assert(cos.includes('الحالة أو المجال الصحي'), 'COS scope must include health condition/domain');
   assert(cos.includes('السكان المستهدفون'), 'COS scope must include target population');
   assert(cos.includes('التدخلات'), 'COS scope must include intervention applicability');
+  assert(cos.includes('تبنّي أو تكييف COS للسياق العربي ≠ تكييف أداة القياس إلى العربية'), 'COS contextual adoption/adaptation must remain separate from Arabic instrument adaptation');
+  assert(cos.includes('ترجمة أو تلخيص COS بالعربية لا يثبت ملاءمته الثقافية للسياق العربي'), 'Arabic translation of a COS must not be presented as proof of contextual applicability');
+  assert(cos.includes('ملاءمة مجموعة النتائج') || cos.includes('ملاءمة <strong>مجموعة النتائج</strong>'), 'COS page must preserve the distinction between outcome-set applicability and instrument applicability');
+  assert(cos.includes('https://doi.org/10.1186/s13063-026-09834-w'), 'COS contextual-adaptation section must retain the Kenya adoption/adaptation example');
   assert(cos.includes('حقوق + تكييف لغوي/ثقافي + تحقق سيكومتري مناسب'), 'Arabic status must not collapse rights, adaptation and psychometrics');
   assert(cos.includes('https://www.comet-initiative.org/Studies'), 'COS page must link to the COMET database');
   assert(cos.includes('https://www.cosmin.nl/finding-right-tool/developing-core-outcome-set/'), 'COS page must link to COSMIN/COMET instrument-selection guidance');
