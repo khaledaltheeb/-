@@ -1,222 +1,130 @@
-# Capabilities + Outside-the-Box recovery analysis — 2026-09-06
+# Capabilities + Outside-the-Box scientific recovery — 2026-09-06
 
-Scope: current production data, current `main` routes, and preserved legacy Outside-the-Box program.
+## Final architectural decision
 
-## Executive decision
+Both programs remain public and independent. Search-intent overlap is not a reason to discard useful science.
 
-The two programs are related but should not remain two competing condition libraries.
+- `/capabilities/*` = **لنرتقي بقدراتهم**: capability, strengths, access, participation, functional goals and person-centred adaptation.
+- `/outside-the-box/*` = **خارج الصندوق**: provider pathway for assessment, triangulation, baseline, hypothesis, reversible trials, implementation fidelity, burden, outcome measurement, stop/escalation rules, reassessment and generalisation.
+- When the same condition exists in both programs, the two pages are cross-linked rather than merged or suppressed.
 
-- `/capabilities/*` is the canonical successor for condition-level capability, access, participation and functional-improvement guidance.
-- `/capabilities/ideas/` is the correct home for the creative experimentation method: small reversible trials, evidence linkage, baseline, fidelity, burden, stop rules and generalization.
-- `/outside-the-box/*` contains substantial legacy material worth harvesting, but the old condition pages should not be republished as a second canonical library.
-- Legacy material should be migrated selectively into the current capability guide for the same condition, then the legacy route can be retired/redirected only after its unique material has been accounted for.
-- Measurement-instrument governance from the old program belongs in Assessment Lab rather than in the Ideas page.
+## Source repositories and provenance
 
-## Current Capabilities program
+The earlier scientific sources were found in the previous repository `khaledaltheeb/healthrenewal.org`, including:
 
-Production query on published canonical `/capabilities/%` pages found:
+- `content/v254/outside-the-box-conditions-ar.json`
+- `content/v280/capabilities-100-ar.json`
 
-- 140 published canonical capability pages.
-- 139 indexable pages.
-- 100 core condition guides with `legacy_rank` 1–100.
-- 30 additional condition-level capability pages outside the core ranked registry.
-- 10 supporting/research/methodology pages using normalized `capabilities-*` slugs.
+The current repository `khaledaltheeb/-` already contains the preserved production migration corpus under `data/legacy-production-batches/*`, and the migrated records are also stored in Supabase with body JSON/text, references, canonicals and migration provenance.
 
-The database sector row `capabilities` has zero taxonomy categories, while the actual capability program is loaded directly from `content` records under `/capabilities/*`. This caused the general sector taxonomy to make the sector appear empty even though the program itself is substantial.
+The implementation therefore does **not** copy rendered HTML snapshots back into the application. It promotes the structured scientific records already migrated into the current data model and renders them through the current content system.
 
-### Repair completed
+## Inventory verified in current Supabase
 
-`app/sectors/capabilities/page.tsx` was converted into a dynamic bridge to the real capability library. It now queries published indexed `/capabilities/%` content directly and exposes:
+### Capabilities
 
-1. the 100 ranked core guides;
-2. extended condition guides;
-3. methodology/research/supporting records;
-4. protocol, printables, ideas and methodology routes.
+- 155 migrated legacy records.
+- 155 contain body content.
+- 151 contain references.
+- approximately 307,626 source words in the preserved migrated family.
+- 134 are currently published/indexable.
+- 21 remain draft/archive/source-only and are not treated as publication-ready science merely because they existed historically.
 
-No pages were duplicated and no canonical URLs were changed.
+### Outside the Box
 
-`app/sectors/page.tsx` now also reports the actual directly-linked capability-page count for the `capabilities` card instead of presenting a zero-category sector as if it had no material.
+- 109 migrated legacy records.
+- 109 contain body content.
+- 102 contain references.
+- approximately 738,172 source words in the preserved migrated family.
+- 102 scientific records are currently published/indexable.
+- source-only administrative artifacts such as the old root, all-pages, quality-audit and ten-plan draft are not restored as reader-facing science.
 
-Commits:
-- `0604171a7fa3d473a0801dc4ce9bc99ab72eb1b7`
-- `f79ae14051fe7558f1e9ac9d4d8682dd8a21cb6e`
+Three condition records (cerebral palsy, hearing loss/deafness and vision impairment/low vision) are preserved but not currently publication-ready. They remain held for scientific/editorial repair rather than being force-published.
 
-## Current Ideas page
+## Scientific material retained
 
-`app/capabilities/ideas/page.tsx` already existed in the current repository and is indexable at `/capabilities/ideas/`.
+The Outside-the-Box condition pathways retain substantive operational science, including where available:
 
-Its original current-generation design contained 12 useful micro-experiments, each structured as:
-
-- problem;
-- try;
-- measure;
-- stop/modify rule.
-
-Examples include removing writing as an unintended access barrier, externalizing memory into the environment, changing task order before adding training, extending response latency, comparing equivalent task presentations, reducing environmental friction, using interests as an access gateway, measuring the cost of success, testing transfer across contexts, replacing human prompts with user-controlled tools, making refusal measurable, and starting from real-life participation rather than isolated drills.
-
-The page was originally introduced by commit `4def2c1b2aee770e87d079d9c980265effdc427c` (`Add evidence-informed outside-the-box capability ideas`).
-
-### Recovery enhancement completed
-
-The page has now been upgraded rather than replaced. It preserves the 12 current micro-experiments and restores the strongest operational concepts from the legacy program as:
-
-- 10 decision layers from goal/safety/baseline through hypothesis, reversible change, consent, implementation fidelity, burden, generalization and pre-agreed continue/modify/stop decisions;
-- a 2×2 outcome × implementation-fidelity decision matrix;
-- explicit explanation of what was deliberately not restored;
-- stronger links to protocol, printables, methodology and registry;
-- evidence links including WHO ICF, WHO assistive technology, WWC single-case standards, CAST UDL, UNICEF inclusive education, NICE shared decision making and COSMIN.
-
-Commit: `c21b448a284bb578e93090fe5c889bc6eb112724`.
-
-## Legacy Outside-the-Box program found
-
-The original program is preserved through `/outside-the-box/*` routes and legacy records. Repository provenance explicitly connects the older condition library (`content/v254/outside-the-box-conditions-ar.json`) with the later capabilities program (`content/v280/capabilities-100-ar.json`).
-
-The legacy program contains roughly 109 preserved routes/records across condition pages, methodology, evidence standards, monitoring, instruments and program artifacts.
-
-### The unpublished/root material
-
-The old root record `legacy-landing-outside-the-box` is a draft/noindex page and is thin (~1.4k characters, no external references). Its own audit metadata classifies it as a rebuild candidate rather than publication-ready. It should not be restored as-is.
-
-Other old administrative/landing artifacts such as the all-pages and quality-audit records likewise should not be revived as public content.
-
-### The condition pages are different
-
-Many of the old condition pages are not thin. They are long operational documents, often approximately 43k–46k characters with roughly 13–19 references. Examples examined include Fragile X, autism and Down syndrome, with similarly deep pages across the old library.
-
-Their common operational structure includes:
-
-- functional question and target;
-- relevant team;
-- entry questions and exclusions;
-- assessment options;
-- triangulation;
-- baseline;
-- ICF-style functional register;
-- multiple evidence-linked ideas/experiments;
-- customizable plan components;
+- functional question and meaningful target;
+- relevant team and entry questions;
+- exclusions and safety checks;
+- initial/comprehensive assessment;
+- measurement-instrument governance and licensing boundaries;
+- triangulation across sources and contexts;
+- baseline measurement;
+- ICF-style functioning and participation framing;
+- evidence-linked intervention or access hypotheses;
+- reversible small trials;
 - prerequisites and indications;
-- fidelity;
-- accommodations/access;
-- reassessment;
+- dose/frequency or implementation schedule where justified;
+- implementation fidelity;
+- accommodations and access;
+- outcome indicators and adverse effects;
+- reassessment schedule;
 - stop/escalation rules;
-- outcome monitoring;
-- plan B and generalization.
+- maintenance, generalisation and plan B;
+- references and source links.
 
-These elements contain real reusable value.
+## Non-scientific migration artifacts removed from reader rendering
 
-## Similarity / duplication analysis
+The current Outside-the-Box renderer removes historical migration/editorial residue such as:
 
-Exact-slug legacy/current condition pairs were compared using PostgreSQL trigram text similarity.
+- `الحالة X من 100` production labels;
+- numbered `البوابة الأولى/الثانية...` navigation artifacts;
+- old internal edition strings such as `الطبقة التشغيلية الموسعة · الإصدار ...`;
+- protocol IDs used only for legacy production bookkeeping;
+- legacy review-status/navigation prompts that do not add scientific content;
+- migration metadata objects.
 
-For 47 matched condition pairs:
+Scientific headings, tables, protocols, measurements, references, warnings, decision rules and evidence are preserved.
 
-- average similarity: ~0.428;
-- minimum: ~0.360;
-- maximum: ~0.510;
-- 39 pairs: 0.40–0.55;
-- 8 pairs: below 0.40;
-- none: >=0.55.
+## Current implementation
 
-Interpretation: the two generations are not simple copied prose. The old pages contain substantial unique operational detail, while the current capability pages generally use clearer person-centred/access-oriented framing. However, they still answer overlapping search intent for the same named condition. Keeping both as equal indexed canonical libraries would create information-architecture and search-intent competition.
+### Outside-the-Box current-content layer
 
-Therefore the correct operation is **selective harvest + canonical consolidation**, not wholesale duplication.
+Added `lib/outside-the-box.ts` to:
 
-## Legacy modules: value assessment
+- load only published/indexable current scientific records (`legacy-outside-box-*`) from `public.content`;
+- sanitize non-reader migration residue while keeping scientific content;
+- build the scientific index from actual published records;
+- classify methodology vs condition pathways;
+- preserve and render references;
+- resolve the matching Capabilities page for cross-linking.
 
-### `legacy-outside-box-evidence-standard` — KEEP / MERGE, high value
+Added `components/outside-the-box-page.tsx` to provide:
 
-Strong concepts:
-- no generalization beyond evidence;
-- capacities are not diagnostic stereotypes;
-- source type must match claim type;
-- explicit uncertainty;
-- participation and rights;
-- validity/psychometrics/version/language/culture/licensing/accessibility for assessments;
-- rejection of stereotypes such as treating a diagnosis as proof of a specific talent.
+- a new scientific `/outside-the-box/` hub;
+- methodology/evidence/monitoring/instrument-governance entry points;
+- a condition library generated from the scientific records;
+- current article rendering with sources and methodological disclaimer;
+- direct links to matching `لنرتقي بقدراتهم` pages.
 
-Relevant sources include WHO ICF, UN CRPD, Standards for Educational and Psychological Testing, COSMIN, ITC and NICE shared decision making.
+Updated `app/outside-the-box/[[...slug]]/page.tsx` so that the public route no longer renders the raw preserved legacy snapshot. It now renders structured current scientific records. Non-scientific/source-only legacy paths are not promoted through this route.
 
-Destination: current capability methodology + Assessment Lab governance.
+### Capabilities cross-linking
 
-### `legacy-outside-box-methodology` — HARVEST, very high value
+Updated `app/capabilities/[slug]/page.tsx` and `components/capability-article-page.tsx` so each published Capabilities condition can resolve and display its matching Outside-the-Box scientific pathway.
 
-A large methodology document covering decision-first assessment, multi-source/ICF assessment, person-centred outcomes, safety and consent, hypothesis formation, formal and functional assessment, triangulation, small experiments, repeated measures, shared decisions, goal scaling and tool governance.
+The Capabilities navigation now distinguishes:
 
-It overlaps current `/capabilities/methodology/` and `/capabilities/protocol/`, so republishing the whole legacy document would be redundant. It should remain a source reservoir for systematic enrichment.
+- `/capabilities/ideas/` = small idea/experiment laboratory;
+- `/outside-the-box/` = full scientific provider pathways.
 
-### `legacy-outside-box-monitoring-matrix` — MIGRATE, very high value
+Updated `/sectors/capabilities` to expose both programs explicitly and explain their different scientific roles.
 
-One of the most distinctive legacy assets. It separates outcome from implementation fidelity and includes baseline, adverse effects, person satisfaction, generalization, decision rules and missing-data/graphing considerations.
+## Publication rule for preserved drafts
 
-Destination: current Ideas page + printables/protocol. The core 2×2 matrix has already been restored to `/capabilities/ideas/`.
+Historical existence is not sufficient for publication.
 
-### `legacy-outside-box-instruments` — MOVE TO ASSESSMENT LAB, high value
+A preserved legacy page can contribute scientific material when its claim/source pairing is useful, but a draft/archive record remains held if it is thin, under-referenced, contains unresolved migration cleanup, or is marked `publication_ready=false`. The material can be harvested during enrichment without force-publishing the old record.
 
-Contains instrument-registry governance: construct, version, population, language, validity/reliability/error, licensing, accessibility/adaptation, review cycle and permitted-use classification. The legacy schema also retained a sizeable tool list.
+This applies especially to the 21 non-published Capabilities legacy records and the three non-published Outside-the-Box condition records identified in this review.
 
-This should not become a list of copied instruments inside Outside-the-Box. Its governance logic belongs to Assessment Lab where Core Outcome Sets, measurement instruments, psychometrics and Arabic adaptation can be separated correctly.
+## Result
 
-### `legacy-outside-box-ten-plan-methodology` — KEEP THE LOGIC, NOT THE PUBLIC FORMAT
+The old science is not discarded and is not reduced to redirects. Both intellectual programs survive:
 
-The legacy idea was effectively `100 conditions × 10 plans = 1000 plan-like instances`. The ten recurring functions covered safety/diagnostic context, shared functional goals, access redesign, communication/choice, several evidence-linked intervention hypotheses, team/fidelity, participation/capability opportunity discovery, maintenance/generalization and reassessment.
+1. **لنرتقي بقدراتهم** asks what capability, access or participation can be revealed or strengthened for this person.
+2. **خارج الصندوق** asks how a provider can formulate, test, measure and safely accept/reject an intervention or access hypothesis.
 
-The editorial metadata itself does not mark this draft as public-ready. Publishing a thousand apparent plans would also risk pseudo-personalized advice and heavy template duplication.
-
-Destination: convert the ten-plan logic into decision layers/questions rather than ready-made plans. This conversion is now implemented in `/capabilities/ideas/`.
-
-### `legacy-outside-box-review-governance` — MERGE, medium/high value
-
-Useful governance and review logic. Merge into methodology/editorial governance, not a standalone competing public page unless a distinct reader need is demonstrated.
-
-### Legacy root/all-pages/quality-audit artifacts — DO NOT RESTORE
-
-They are program artifacts rather than strong user-facing resources and are weaker than the current program architecture.
-
-## Target architecture
-
-### Canonical public program
-
-`/sectors/capabilities`
-→ program/sector landing dynamically connected to real library
-
-`/capabilities/`
-→ capability/access reference hub
-
-`/capabilities/registry/`
-→ 100 core condition registry
-
-`/capabilities/<condition>/`
-→ one canonical condition-level guide
-
-`/capabilities/ideas/`
-→ innovation/micro-experiment laboratory
-
-`/capabilities/protocol/`
-→ operational protocol
-
-`/capabilities/printables/`
-→ worksheets/measurement supports
-
-`/capabilities/methodology/`
-→ evidence and governance
-
-### Legacy migration rule
-
-For every `/outside-the-box/<condition>/` page:
-
-1. identify its matching current capability page;
-2. diff the operational components, not just prose;
-3. harvest genuinely unique useful content into the current canonical page;
-4. update sources and remove obsolete/generalized claims;
-5. preserve consent, burden, safety and stop rules;
-6. verify no protected instrument content is reproduced;
-7. only after the harvest is complete, retire/redirect or noindex the legacy route according to the migration policy.
-
-Do **not** redirect the entire old library before this harvest, because many old pages contain unique operational content that is not reproduced in the current page.
-
-## Final value judgement
-
-The original idea absolutely deserves preservation. Its strongest contribution is not “unusual tips”; it is a disciplined way to connect evidence, function, access, small experiments, measurement and person preference to discover better ways of participating in real life.
-
-The part that should be discarded is the old duplicated publication architecture and template-heavy presentation, not the intellectual method.
+They can discuss the same diagnosis from different scientific questions, and the application now links those questions directly rather than treating one program as a duplicate of the other.
