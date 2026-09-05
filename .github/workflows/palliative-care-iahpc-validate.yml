@@ -9,14 +9,7 @@ on:
       - 'app/sitemaps/palliative-care.xml/**'
       - 'app/sitemap.xml/route.ts'
       - 'scripts/palliative-care-iahpc-contract.mjs'
-  push:
-    branches: [main]
-    paths:
-      - 'lib/palliative-care-iahpc-pages.ts'
-      - 'app/evidence-guides/palliative-care/**'
-      - 'app/sitemaps/palliative-care.xml/**'
-      - 'app/sitemap.xml/route.ts'
-      - 'scripts/palliative-care-iahpc-contract.mjs'
+  workflow_dispatch:
 
 permissions:
   contents: read
