@@ -42,6 +42,9 @@ const NON_READER_ARTIFACTS = [
   /^فتح المرجع المباشر الخاص بالحالة أو قاعدة الحالة/u,
 ];
 
+const SHARED_LAYER_START = /^الطبقة التشغيلية الموسعة\s*[·•]\s*الإصدار\s+\d+$/u;
+const SHARED_LAYER_END = new Set(['البوابة الخامسة', 'ما المتوقع من الحالة؟']);
+
 function asRecord(value: unknown): JsonRecord | null {
   return value && typeof value === 'object' && !Array.isArray(value) ? value as JsonRecord : null;
 }
@@ -55,8 +58,42 @@ function isReaderArtifact(text: string) {
   return NON_READER_ARTIFACTS.some((pattern) => pattern.test(normalized));
 }
 
+function blockText(value: unknown) {
+  const row = asRecord(value);
+  return row ? asString(row.text) : '';
+}
+
+/**
+ * Legacy condition records contain an expanded "ten plans" layer copied almost
+ * verbatim across the condition library. The source stays intact in Supabase for
+ * provenance/research, but publishing that layer on every condition page inflates
+ * page length without adding condition-specific evidence. Keep the condition's
+ * assessment/ideas plus its outcome, monitoring, reassessment and reference gates;
+ * publish the shared operating method once through the methodology pages instead.
+ */
+function pruneSharedTenPlanLayer(blocks: unknown[]) {
+  const start = blocks.findIndex((block) => SHARED_LAYER_START.test(blockText(block)));
+  if (start < 0) return blocks;
+
+  const end = blocks.findIndex((block, index) => index > start && SHARED_LAYER_END.has(blockText(block)));
+  if (end < 0) return blocks;
+
+  return [...blocks.slice(0, start), ...blocks.slice(end)];
+}
+
+function pruneSharedTenPlanText(value: string) {
+  const lines = value.split('\n');
+  const start = lines.findIndex((line) => SHARED_LAYER_START.test(line.trim()));
+  if (start < 0) return value;
+
+  const end = lines.findIndex((line, index) => index > start && SHARED_LAYER_END.has(line.trim()));
+  if (end < 0) return value;
+
+  return [...lines.slice(0, start), ...lines.slice(end)].join('\n');
+}
+
 export function sanitizeOutsideBoxText(value: string) {
-  return value
+  return pruneSharedTenPlanText(value)
     .split('\n')
     .filter((line) => !isReaderArtifact(line))
     .join('\n')
@@ -65,7 +102,7 @@ export function sanitizeOutsideBoxText(value: string) {
 }
 
 function sanitizeOutsideBoxValue(value: unknown): unknown {
-  if (typeof value === 'string') return sanitizeOutsideBoxText(value);
+  if (typeof value === 'string') return value.split('\n').filter((line) => !isReaderArtifact(line)).join('\n').replace(/\n{3,}/g, '\n\n').trim();
   if (Array.isArray(value)) {
     return value
       .map(sanitizeOutsideBoxValue)
@@ -86,7 +123,14 @@ function sanitizeOutsideBoxValue(value: unknown): unknown {
 }
 
 export function sanitizeOutsideBoxBody(value: unknown) {
-  const root = sanitizeOutsideBoxValue(value);
+  const source = asRecord(value);
+  if (!source || !Array.isArray(source.blocks)) return sanitizeOutsideBoxValue(value);
+
+  const sourceWithoutSharedLayer = {
+    ...source,
+    blocks: pruneSharedTenPlanLayer(source.blocks),
+  };
+  const root = sanitizeOutsideBoxValue(sourceWithoutSharedLayer);
   const row = asRecord(root);
   if (!row || !Array.isArray(row.blocks)) return root;
   return { ...row, blocks: row.blocks.filter(Boolean) };
@@ -119,12 +163,14 @@ export function outsideBoxContentSlug(routeSlug: string) {
 
 export async function getOutsideBoxRecord(routeSlug: string): Promise<CapabilityRecord | null> {
   const supabase = await createClient();
+  const now = new Date().toISOString();
   const { data } = await supabase
     .from('content')
     .select('id,slug,title,excerpt,body_json,body_text,content_type,audience,seo_title,seo_description,canonical_url,robots_index,robots_follow,published_at,updated_at,featured_image_url,featured_image_alt,primary_keyword,secondary_keywords,semantic_terms,author_display_name,reviewer_display_name,reviewer_credentials,last_reviewed_at,references_json,medical_disclaimer,schema_json')
     .eq('slug', outsideBoxContentSlug(routeSlug))
     .eq('status', 'published')
     .eq('robots_index', true)
+    .lte('published_at', now)
     .maybeSingle();
 
   return (data as CapabilityRecord | null) ?? null;
@@ -132,11 +178,13 @@ export async function getOutsideBoxRecord(routeSlug: string): Promise<Capability
 
 export async function getOutsideBoxIndexItems(): Promise<OutsideBoxIndexItem[]> {
   const supabase = await createClient();
+  const now = new Date().toISOString();
   const { data, error } = await supabase
     .from('content')
     .select('slug,title,excerpt,canonical_url,references_json')
     .eq('status', 'published')
     .eq('robots_index', true)
+    .lte('published_at', now)
     .like('slug', 'legacy-outside-box-%')
     .like('canonical_url', '/outside-the-box/%')
     .limit(150);
@@ -166,12 +214,14 @@ export async function getOutsideBoxIndexItems(): Promise<OutsideBoxIndexItem[]> 
 
 export async function getCapabilitySibling(routeSlug: string): Promise<OutsideBoxSibling | null> {
   const supabase = await createClient();
+  const now = new Date().toISOString();
   const { data } = await supabase
     .from('content')
     .select('title,canonical_url')
-    .eq('slug', `capabilities-${routeSlug}`)
+    .eq('canonical_url', `/capabilities/${routeSlug}/`)
     .eq('status', 'published')
     .eq('robots_index', true)
+    .lte('published_at', now)
     .maybeSingle();
   if (!data) return null;
   return {
