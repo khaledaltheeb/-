@@ -34,10 +34,11 @@ const waveSpecs = [
   ['lib/assessment-measures-wave6.ts', 'export const assessmentMeasuresWave6: AssessmentMeasure[] = ['],
   ['lib/assessment-measures-wave7.ts', 'export const assessmentMeasuresWave7: AssessmentMeasure[] = ['],
   ['lib/assessment-measures-wave8.ts', 'export const assessmentMeasuresWave8: AssessmentMeasure[] = ['],
+  ['lib/assessment-measures-wave9.ts', 'export const assessmentMeasuresWave9: AssessmentMeasure[] = ['],
 ];
 
 const blocks = waveSpecs.flatMap(([file, marker]) => extractMeasureBlocks(file, marker));
-assert(blocks.length >= 62, `expected at least 62 verified measures, found ${blocks.length}`);
+assert(blocks.length >= 69, `expected at least 69 verified measures, found ${blocks.length}`);
 
 const slugs = blocks.map((entry) => entry.slug);
 const uniqueSlugs = new Set(slugs);
@@ -67,6 +68,7 @@ const allowedCategories = new Set([
   'cardiovascular-risk',
   'infectious-disease-severity',
   'oncology-staging',
+  'pediatric-puberty-development',
 ]);
 const fullArabicProtocolAllowlist = new Set(['timed-up-and-go', '10-meter-walk-test', '6-minute-walk-test']);
 
@@ -111,10 +113,10 @@ assert(!/http:\/\//.test(sourceFiles), 'measure sources must not use insecure HT
 assert(sourceFiles.includes("const CDISC_QRS = 'https://") || sourceFiles.includes('https://www.cdisc.org/standards/foundational/qrs'), 'CDISC rights registry reference must remain HTTPS');
 
 const catalog = read('lib/assessment-measures-catalog.ts');
-for (let wave = 1; wave <= 8; wave += 1) {
+for (let wave = 1; wave <= 9; wave += 1) {
   assert(catalog.includes(`assessmentMeasuresWave${wave}`), `catalog aggregator must include assessmentMeasuresWave${wave}`);
 }
-for (const categoryWave of [4, 6, 7, 8]) {
+for (const categoryWave of [4, 6, 7, 8, 9]) {
   assert(catalog.includes(`assessmentMeasureCategoriesWave${categoryWave}`), `canonical catalog must include wave-${categoryWave} category expansion`);
 }
 
@@ -123,6 +125,7 @@ const categoryFiles = [
   ['lib/assessment-measures-wave6-categories.ts', ['dermatology', 'gastroenterology', 'critical-care']],
   ['lib/assessment-measures-wave7-categories.ts', ['hepatology-liver-disease', 'cardiovascular-risk']],
   ['lib/assessment-measures-wave8-categories.ts', ['infectious-disease-severity', 'oncology-staging']],
+  ['lib/assessment-measures-wave9-categories.ts', ['pediatric-puberty-development']],
 ];
 for (const [file, categories] of categoryFiles) {
   const source = read(file);
@@ -189,6 +192,30 @@ mustInclude('valg-small-cell-lung-cancer-staging', 'NCI', 'VALG must preserve cu
 mustInclude('clinical-global-impression', 'general-clinical-global-impression', 'CGI must remain distinct from and linked to GCGI');
 mustInclude('clinical-global-impression', "rightsStatus: 'public-domain'", 'CGI must preserve Public Domain status');
 
+// Wave 9 boundaries.
+mustInclude('child-pugh-classification', 'model-for-end-stage-liver-disease', 'Child-Pugh must link to MELD for comparison');
+mustInclude('child-pugh-classification', 'لا تستخدم Child-Pugh وحده لتحديد أهلية زراعة الكبد', 'Child-Pugh must preserve transplant/treatment decision boundary');
+mustInclude('roland-morris-disability-questionnaire', "arabicStatus: 'validated-version-reported'", 'RMDQ must preserve documented Arabic validation status');
+mustInclude('roland-morris-disability-questionnaire', '201 مريضًا', 'RMDQ Arabic evidence must preserve the MSA validation sample context');
+mustInclude('roland-morris-disability-questionnaire', 'لا يعني أن روافد يملك حق نسخ نص الترجمة المنشورة حرفيًا', 'RMDQ must preserve translation-rights boundary');
+mustInclude('rutgeerts-score', 'i2a/i2b', 'Rutgeerts must distinguish original i2 from modified i2a/i2b');
+mustInclude('rutgeerts-score', 'simple-endoscopic-score-crohns-disease-v1', 'Rutgeerts must link to SES-CD');
+mustInclude('covi-anxiety-scale', 'hamilton-anxiety-rating-scale', 'COVI must link to HAM-A');
+mustInclude('covi-anxiety-scale', 'generalized-anxiety-disorder-7', 'COVI must link to GAD-7');
+mustInclude('covi-anxiety-scale', 'ليس أداة تشخيص مستقلة', 'COVI must preserve non-diagnostic boundary');
+for (const tannerSlug of ['tanner-scale-boy', 'tanner-scale-girl']) {
+  const entry = bySlug(tannerSlug);
+  assert(Boolean(entry), `${tannerSlug}: Tanner measure missing`);
+  assert(Boolean(entry && entry.block.includes("rightsStatus: 'public-domain'")), `${tannerSlug}: Tanner measure must preserve Public Domain status`);
+  assert(Boolean(entry && entry.block.includes('لا تعرض روافد صورًا حساسة')), `${tannerSlug}: Tanner page must prohibit sensitive images`);
+  assert(Boolean(entry && entry.block.includes('لا يُقدَّم كتقييم ذاتي')), `${tannerSlug}: Tanner page must prohibit self-staging`);
+  assert(Boolean(entry && !entry.block.includes('data:image')), `${tannerSlug}: embedded image data is prohibited`);
+  assert(Boolean(entry && !entry.block.includes('<img')), `${tannerSlug}: image markup is prohibited in Tanner measure data`);
+}
+mustInclude('observer-global-impression', 'patient-global-impression', 'OGI must link to PGI');
+mustInclude('observer-global-impression', 'clinical-global-impression', 'OGI must link to CGI');
+mustInclude('observer-global-impression', 'لا تستخدم OGI لتخمين أعراض داخلية', 'OGI must preserve observability boundary');
+
 const hub = read('app/assessment-measures/page.tsx');
 assert(hub.includes('المقاييس وأدوات التقييم المستخدمة عالميًا'), 'public hub title changed unexpectedly');
 for (const route of ['/assessment-measures/compare/', '/assessment-measures/methodology/', '/assessment-measures/rights-register/']) assert(hub.includes(route), `hub link missing: ${route}`);
@@ -236,5 +263,5 @@ const requiredRoutes = [
 for (const route of requiredRoutes) assert(fs.existsSync(path.join(root, route)), `required route missing: ${route}`);
 
 if (!process.exitCode) {
-  console.log(`ASSESSMENT_MEASURES_CONTRACT_PASS: ${blocks.length} reusable measures, ${restrictedSlugs.length} restricted searchable references, ${uniqueSlugs.size} unique public slugs, 23 categories, rights/evidence/safety/Arabic/search checks passed.`);
+  console.log(`ASSESSMENT_MEASURES_CONTRACT_PASS: ${blocks.length} reusable measures, ${restrictedSlugs.length} restricted searchable references, ${uniqueSlugs.size} unique public slugs, 24 categories, rights/evidence/safety/Arabic/search checks passed.`);
 }
