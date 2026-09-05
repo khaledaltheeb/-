@@ -17,6 +17,7 @@ export async function GET() {
     { path:'/guided-assessment', changeFrequency:'monthly', priority:.68 },
     { path:'/assessment-lab', changeFrequency:'monthly', priority:.76 },
     ...assessmentSlugs.map((slug) => ({ path:`/assessment-lab/${slug}`, changeFrequency:'monthly' as const, priority:.7 })),
+    { path:'/core-outcome-sets/', changeFrequency:'monthly', priority:.8 },
     { path:'/assessment-measures/', changeFrequency:'weekly', priority:.84 },
     { path:'/assessment-measures/compare/', changeFrequency:'monthly', priority:.72 },
     { path:'/assessment-measures/methodology/', changeFrequency:'monthly', priority:.7 },
