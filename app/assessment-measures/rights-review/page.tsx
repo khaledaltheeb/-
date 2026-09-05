@@ -40,7 +40,8 @@ export default function AssessmentMeasuresRightsReviewPage() {
         '@type': 'ListItem',
         position: index + 1,
         name: `${item.nameAr} (${item.acronym})`,
-        url: item.rightsSource,
+        url: `${SITE_URL}/assessment-measures/rights-review/#${item.slug}`,
+        sameAs: item.rightsSource,
       })),
     },
   };
@@ -83,7 +84,7 @@ export default function AssessmentMeasuresRightsReviewPage() {
           <div className={styles.tableWrap}>
             <table className={styles.table}>
               <thead><tr><th>الأداة</th><th>المجال</th><th>حالة الحقوق</th><th>لماذا لا ننشر النموذج؟</th><th>ما الذي نعرضه بأمان؟</th><th>المصدر</th></tr></thead>
-              <tbody>{assessmentMeasuresRightsReview.map((item) => <tr key={item.slug}>
+              <tbody>{assessmentMeasuresRightsReview.map((item) => <tr id={item.slug} key={item.slug}>
                 <td><strong>{item.nameAr}</strong><br /><span lang="en" dir="ltr">{item.nameEn} · {item.acronym}</span></td>
                 <td>{item.domain}</td>
                 <td><strong>{assessmentMeasureRightsReviewStatusLabels[item.status]}</strong><br /><small>تحقق: {item.rightsVerifiedOn}</small></td>

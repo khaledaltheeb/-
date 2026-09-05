@@ -6,6 +6,10 @@ import { createClient } from '@/lib/supabase/server';
 import { searchCognitivePages } from '@/lib/cognitive-program';
 import { assessmentMeasures } from '@/lib/assessment-measures-catalog';
 import {
+  assessmentMeasuresRightsReview,
+  assessmentMeasureRightsReviewStatusLabels,
+} from '@/lib/assessment-measures-rights-review';
+import {
   getExpandedEncyclopediaIndex,
   type ExpandedEncyclopediaIndexRecord,
 } from '@/lib/expanded-encyclopedia';
@@ -130,6 +134,48 @@ function searchAssessmentMeasures(query: string, limit = 30): R[] {
       subtitle: `المقاييس وأدوات التقييم — ${measure.construct}`,
       excerpt: measure.summary,
       destination: `/assessment-measures/${measure.slug}/`,
+      score,
+    }];
+  }).sort((a, b) => b.score - a.score || a.title.localeCompare(b.title, 'ar')).slice(0, limit);
+}
+
+function searchRestrictedAssessmentMeasures(query: string, limit = 20): R[] {
+  const normalizedQuery = normalizeSearch(query);
+  const queryTokens = normalizedQuery.split(' ').filter(Boolean);
+  if (!normalizedQuery || queryTokens.length === 0) return [];
+
+  return assessmentMeasuresRightsReview.flatMap((measure): R[] => {
+    const nameAr = normalizeSearch(measure.nameAr);
+    const nameEn = normalizeSearch(measure.nameEn);
+    const acronym = normalizeSearch(measure.acronym);
+    const domain = normalizeSearch(measure.domain);
+    const status = normalizeSearch(assessmentMeasureRightsReviewStatusLabels[measure.status]);
+    const reason = normalizeSearch(measure.whyReferenceOnly);
+    const safeUse = normalizeSearch(measure.safeUseOnRawafid);
+    const searchable = [nameAr, nameEn, acronym, domain, status, reason, safeUse].join(' ');
+    if (!queryTokens.every((token) => searchable.includes(token))) return [];
+
+    let score = 170;
+    if (acronym === normalizedQuery) score = 355;
+    else if (nameAr === normalizedQuery) score = 345;
+    else if (nameEn === normalizedQuery) score = 340;
+    else if (nameAr.includes(normalizedQuery)) score = 310;
+    else if (nameEn.includes(normalizedQuery)) score = 305;
+    else if (acronym.includes(normalizedQuery)) score = 300;
+    else if (domain === normalizedQuery) score = 250;
+    else if (domain.includes(normalizedQuery)) score = 225;
+    else if (status.includes(normalizedQuery)) score = 205;
+    else if (reason.includes(normalizedQuery) || safeUse.includes(normalizedQuery)) score = 190;
+    score += Math.min(queryTokens.length * 3, 15);
+
+    return [{
+      entity_type: 'content',
+      entity_id: `assessment-measure-rights:${measure.slug}`,
+      slug: measure.slug,
+      title: `${measure.nameAr} — ${measure.acronym}`,
+      subtitle: `مقياس مرجعي مقيد — ${assessmentMeasureRightsReviewStatusLabels[measure.status]}`,
+      excerpt: `${measure.whyReferenceOnly} ${measure.safeUseOnRawafid}`,
+      destination: `/assessment-measures/rights-review/#${measure.slug}`,
       score,
     }];
   }).sort((a, b) => b.score - a.score || a.title.localeCompare(b.title, 'ar')).slice(0, limit);
@@ -314,17 +360,18 @@ export async function PlatformSearchExperience({ searchParams, routeBase = '/sea
     }));
 
     const measures = searchAssessmentMeasures(q, 30);
+    const restrictedMeasures = searchRestrictedAssessmentMeasures(q, 20);
     const expanded = searchExpandedEncyclopedia(q, expandedIndex, 75);
     const psych = searchPsychEncyclopedia(q, psychIndex, 75);
     const by = new Map<string, R>();
-    for (const x of [...db, ...measures, ...expanded, ...generated, ...psych]) {
+    for (const x of [...db, ...measures, ...restrictedMeasures, ...expanded, ...generated, ...psych]) {
       const old = by.get(x.destination);
       if (!old || Number(x.score) > Number(old.score)) by.set(x.destination, x);
     }
     results = [...by.values()]
       .sort((a, b) => Number(b.score) - Number(a.score) || a.title.localeCompare(b.title, 'ar'))
       .slice(0, 100);
-    if (dbError && measures.length === 0 && generated.length === 0 && expanded.length === 0 && psych.length === 0) error = 'تعذر تنفيذ البحث الآن.';
+    if (dbError && measures.length === 0 && restrictedMeasures.length === 0 && generated.length === 0 && expanded.length === 0 && psych.length === 0) error = 'تعذر تنفيذ البحث الآن.';
   }
 
   const visible = type ? results.filter((x) => x.entity_type === type) : results;
@@ -339,14 +386,15 @@ export async function PlatformSearchExperience({ searchParams, routeBase = '/sea
       <section className="search-hero">
         <span className="eyebrow">بحث موحد ودلالي</span>
         <h1>{legacyIntro ? 'اكتب سؤالك بلغتك الطبيعية' : 'ابحث في منصة روافد'}</h1>
-        <p>{legacyIntro ? 'هذا هو مسار البحث الذكي التاريخي بعد نقله إلى محرك روافد الحالي. اكتب المصطلح أو السؤال كما تفكر فيه، وسيبحث المحرك في المحتوى والقطاعات والمختصين والمراكز والمقاييس وأدوات التقييم والموسوعة الموسعة والموسوعة المختصرة.' : 'ابحث في المحتوى والقطاعات والأقسام والمختصين والمراكز والمقاييس وأدوات التقييم والموسوعات من نقطة واحدة، ثم استخدم الفلاتر للوصول إلى النوع الأقرب لاحتياجك.'}</p>
+        <p>{legacyIntro ? 'هذا هو مسار البحث الذكي التاريخي بعد نقله إلى محرك روافد الحالي. اكتب المصطلح أو السؤال كما تفكر فيه، وسيبحث المحرك في المحتوى والقطاعات والمختصين والمراكز والمقاييس المتاحة والمراجع الحقوقية المقيدة والموسوعة الموسعة والموسوعة المختصرة.' : 'ابحث في المحتوى والقطاعات والأقسام والمختصين والمراكز والمقاييس المتاحة والأدوات المرجعية المقيدة والموسوعات من نقطة واحدة، ثم استخدم الفلاتر للوصول إلى النوع الأقرب لاحتياجك.'}</p>
         <form className="search search-page-form" action={routeBase} method="get" role="search">
           <label className="sr-only" htmlFor={legacyIntro ? 'legacy-platform-search' : 'platform-search'}>عبارة البحث</label>
-          <input id={legacyIntro ? 'legacy-platform-search' : 'platform-search'} name="q" type="search" minLength={2} maxLength={160} defaultValue={q} placeholder="مثال: PHQ-9، التوازن، القلق الاجتماعي، دعم الأسرة، مختص في عمّان..." autoComplete="off" />
+          <input id={legacyIntro ? 'legacy-platform-search' : 'platform-search'} name="q" type="search" minLength={2} maxLength={160} defaultValue={q} placeholder="مثال: PHQ-9، MoCA، MMSE، التوازن، القلق الاجتماعي، مختص في عمّان..." autoComplete="off" />
           <button type="submit">بحث</button>
         </form>
         <nav className="search-discovery-links" aria-label="مسارات استكشاف سريعة">
           <Link href="/assessment-measures/">المقاييس وأدوات التقييم</Link>
+          <Link href="/assessment-measures/rights-review/">المقاييس المقيدة حقوقيًا</Link>
           <Link href="/sections/cognitive-processes">الموسوعة الموسعة</Link>
           <Link href="/encyclopedia/">الموسوعة المختصرة</Link>
           <Link href="/sectors">القطاعات</Link>
@@ -359,8 +407,8 @@ export async function PlatformSearchExperience({ searchParams, routeBase = '/sea
       {legacyIntro && <section className="search-state" aria-labelledby="legacy-search-method">
         <h2 id="legacy-search-method">كيف نُقلت وظيفة البحث الذكي؟</h2>
         <p>احتفظنا بالفكرة المفيدة من الصفحة القديمة بدل تحويل عنوانها: البحث باللغة الطبيعية والمرادفات، وإظهار النتائج من أكثر من نوع محتوى. أفضل استعلام عادةً جملة قصيرة واضحة؛ ويمكن تجربة مرادف أو مصطلح تقني عندما لا تظهر النتيجة المقصودة.</p>
-        <p>المحرك الحالي يجمع نتائج قاعدة المنصة مع مكتبة المقاييس وأدوات التقييم وفهرس الموسوعة الموسعة والموسوعة المختصرة ومحتوى العمليات المعرفية، ثم يوحّد الوجهات المتكررة ويرتبها بحسب درجة المطابقة. لذلك لا تعتمد النتائج على قائمة المصطلحات القديمة الثابتة.</p>
-        <p><strong>حد مهم:</strong> البحث أداة للوصول إلى المعرفة، وليس محرك تشخيص. في الموضوعات الصحية أو النفسية الحساسة ارجع إلى الصفحة الكاملة ومراجعها وحدودها بدل بناء قرار شخصي على مقتطف نتيجة البحث.</p>
+        <p>المحرك الحالي يجمع نتائج قاعدة المنصة مع مكتبة المقاييس القابلة للاستخدام وسجل الأدوات المقيدة حقوقيًا وفهرس الموسوعة الموسعة والموسوعة المختصرة ومحتوى العمليات المعرفية، ثم يوحّد الوجهات المتكررة ويرتبها بحسب درجة المطابقة.</p>
+        <p><strong>حد مهم:</strong> البحث أداة للوصول إلى المعرفة، وليس محرك تشخيص. وجود أداة مقيدة في النتائج يعني أننا نوثقها ونوضح طريق الوصول القانوني إليها؛ ولا يعني أن روافد يعيد نشر نموذجها أو مفتاح تسجيلها.</p>
       </section>}
       {!q && !legacyIntro && <section className="search-start" aria-labelledby="search-start-title">
         <div className="search-start-head"><span className="eyebrow">ابدأ من الخريطة المناسبة</span><h2 id="search-start-title">لست مضطرًا إلى معرفة المصطلح الدقيق</h2><p>يمكنك الدخول من مجال رئيسي أو مكتبة متخصصة، ثم تضييق المسار من داخلها.</p></div>
@@ -375,7 +423,7 @@ export async function PlatformSearchExperience({ searchParams, routeBase = '/sea
         </nav>
         <section className="search-results" aria-live="polite">
           <div className="search-summary"><strong>{visible.length.toLocaleString('ar')}</strong><span>نتيجة لعبارة «{q}»</span></div>
-          {visible.length === 0 && <div className="search-state search-empty"><h2>لا توجد نتائج مطابقة</h2><p>جرّب مرادفًا أو مصطلحًا أوسع، أو انتقل مباشرة إلى إحدى المكتبات الرئيسية.</p><div className="search-empty-links"><Link href="/assessment-measures/">المقاييس وأدوات التقييم</Link><Link href="/sections/cognitive-processes">الموسوعة الموسعة</Link><Link href="/encyclopedia/">الموسوعة المختصرة</Link><Link href="/sections">الأقسام</Link><Link href="/care-guides/">أدلة الرعاية</Link><Link href="/evidence-guides/">الأدلة العلمية</Link></div></div>}
+          {visible.length === 0 && <div className="search-state search-empty"><h2>لا توجد نتائج مطابقة</h2><p>جرّب مرادفًا أو مصطلحًا أوسع، أو انتقل مباشرة إلى إحدى المكتبات الرئيسية.</p><div className="search-empty-links"><Link href="/assessment-measures/">المقاييس وأدوات التقييم</Link><Link href="/assessment-measures/rights-review/">المقاييس المقيدة</Link><Link href="/sections/cognitive-processes">الموسوعة الموسعة</Link><Link href="/encyclopedia/">الموسوعة المختصرة</Link><Link href="/sections">الأقسام</Link><Link href="/care-guides/">أدلة الرعاية</Link><Link href="/evidence-guides/">الأدلة العلمية</Link></div></div>}
           <div className="search-result-list">
             {visible.map((x) => <article className="search-result-card" key={`${x.entity_type}-${x.entity_id}`}>
               <div className="result-type">{labels[x.entity_type]}</div>
