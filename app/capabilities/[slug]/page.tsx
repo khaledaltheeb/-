@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import CapabilityArticlePage from '@/components/capability-article-page';
 import LegacyPreservedPageView from '@/components/legacy-preserved-page';
 import { getCapabilityRecord, getCapabilityRegistryItems } from '@/lib/capabilities';
+import { getPublishedLegacyCapabilityRecord } from '@/lib/legacy-capability-live';
 import { getOutsideBoxSibling } from '@/lib/outside-the-box';
 import { getLegacyPreservedPage, legacyPreservedMetadata } from '@/lib/legacy-preserved-page';
 import { buildSeoMetadata } from '@/lib/seo';
@@ -15,6 +16,12 @@ const legacyRoute = (slug: string) => `/capabilities/${slug}/`;
 const getCapabilityPage = cache(async (slug: string) => {
   const record = await getCapabilityRecord(slug);
   if (record) return { record, preserved: null };
+
+  // Published science migrated from the historical capabilities library keeps
+  // its immutable database slug, but is rendered by the current capability UI.
+  const publishedLegacyRecord = await getPublishedLegacyCapabilityRecord(slug);
+  if (publishedLegacyRecord) return { record: publishedLegacyRecord, preserved: null };
+
   return { record: null, preserved: await getLegacyPreservedPage(legacyRoute(slug)) };
 });
 
