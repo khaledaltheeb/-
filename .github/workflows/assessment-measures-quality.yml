@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'app/assessment-measures/**'
+      - 'app/search/page.tsx'
       - 'lib/assessment-measures*.ts'
       - 'components/assessment-measures.module.css'
       - 'components/site-header.tsx'
