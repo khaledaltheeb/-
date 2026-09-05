@@ -54,7 +54,6 @@ for (const { slug, file, block } of blocks) {
   assert(/rightsVerifiedOn: '\d{4}-\d{2}-\d{2}'/.test(block), `${slug}: rightsVerifiedOn missing (${file})`);
   assert(/role: 'rights'/.test(block), `${slug}: authoritative rights source missing (${file})`);
   assert(/role: 'evidence'/.test(block), `${slug}: evidence source missing (${file})`);
-  assert(/https:\/\//.test(block), `${slug}: no HTTPS source found (${file})`);
   assert(/safetyNotes: \[/.test(block), `${slug}: safety notes missing (${file})`);
   assert(/limitations: \[/.test(block), `${slug}: limitations missing (${file})`);
   assert(/administrationSteps: \[/.test(block), `${slug}: administration steps missing (${file})`);
@@ -87,6 +86,10 @@ for (const { slug, block } of blocks) {
   }
 }
 
+const sourceFiles = [read('lib/assessment-measures.ts'), read('lib/assessment-measures-wave2.ts')].join('\n');
+assert(!/http:\/\//.test(sourceFiles), 'measure sources must not use insecure HTTP URLs');
+assert(sourceFiles.includes("const CDISC_QRS = 'https://"), 'CDISC rights registry constant must remain HTTPS');
+
 const catalog = read('lib/assessment-measures-catalog.ts');
 assert(catalog.includes('assessmentMeasuresWave1') && catalog.includes('assessmentMeasuresWave2'), 'catalog aggregator must include both verified waves');
 
@@ -94,6 +97,7 @@ const hub = read('app/assessment-measures/page.tsx');
 assert(hub.includes('المقاييس وأدوات التقييم المستخدمة عالميًا'), 'public hub title changed unexpectedly');
 assert(hub.includes('/assessment-measures/compare/'), 'comparison route is not linked from the hub');
 assert(hub.includes('/assessment-measures/methodology/'), 'methodology route is not linked from the hub');
+assert(hub.includes('/assessment-measures/rights-register/'), 'rights register is not linked from the hub');
 
 const rightsRegister = read('app/assessment-measures/rights-register/page.tsx');
 assert(rightsRegister.includes('assessmentMeasures.map'), 'rights register must derive from the canonical catalog');
