@@ -38,7 +38,7 @@ assert(wave3.includes('PHQ15-APPLICABLE'), 'PHQ-15 applicability count missing')
 assert(wave3.includes('13 somatic symptoms') || wave3.includes('الأعراض الجسدية الأساسية'), 'PHQ-15 must distinguish the core somatic block');
 assert(wave3.includes('بندا PHQ-9 اللذان يدخلان في PHQ-15'), 'PHQ-15 fatigue/sleep scoring provenance missing');
 assert(wave3.includes('0–28'), 'PHQ-15 non-applicable menstrual-item raw maximum boundary missing');
-assert(wave3.includes('لا تعوّضها بدرجة مخترعة'), 'PHQ-15 menstrual applicability guardrail missing');
+assert(wave3.includes('لا تعوّضه بدرجة مخترعة'), 'PHQ-15 menstrual applicability guardrail missing');
 assert(wave3.includes('ارتفاع الدرجة لا يعني أن الأعراض «نفسية فقط»'), 'PHQ-15 medical-causation guardrail missing');
 assert(wave3.includes('https://loinc.org/69728-4/panel'), 'PHQ-15 LOINC item/terms source missing');
 assert(wave3.includes('PMC5585978'), 'PHQ-15 Arabic validation source missing');
