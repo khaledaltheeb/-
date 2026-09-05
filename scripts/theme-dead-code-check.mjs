@@ -57,6 +57,25 @@ for (const selector of ['.admin-app-shell', '.dashboard-card', '.auth-shell', '.
   if (!adminThemeScoped.includes(selector)) fail(`route-scoped admin theme missing ${selector}`);
 }
 
+const portalShared = read('app/portal.css');
+const portalScoped = read('app/portal-scoped.css');
+if (!portalShared.includes('.portal-notice')) {
+  fail('portal.css must retain the shared public portal notice states');
+}
+for (const selector of ['.account-overview', '.specialist-form', '.verification-card', '.user-access-card']) {
+  if (portalShared.includes(selector)) fail(`portal-only selector leaked back into global portal.css: ${selector}`);
+  if (!portalScoped.includes(selector)) fail(`route-scoped portal CSS missing ${selector}`);
+}
+
+const communityStub = read('app/community.css');
+const communityScoped = read('app/community-scoped.css');
+if (executableCss(communityStub)) {
+  fail('community.css must remain a non-executable compatibility stub');
+}
+for (const selector of ['.community-directory-shell', '.community-badge', '.community-profile-hero']) {
+  if (!communityScoped.includes(selector)) fail(`route-scoped community CSS missing ${selector}`);
+}
+
 const systemPortals = read('app/system-portals-v1.css');
 const accountSystem = read('app/account-system-v1.css');
 for (const selector of ['.join-shell', '.verification-controls']) {
@@ -67,13 +86,14 @@ for (const selector of ['.account-shell', '.auth-register-callout']) {
 }
 
 const routeCssContracts = [
-  ['app/admin/layout.tsx', ["'../dashboard-v3-scoped.css'", "'../system-portals-v1.css'", "'../theme-admin-v4-scoped.css'"]],
-  ['app/account/layout.tsx', ["'../dashboard-v3-scoped.css'", "'../system-portals-v1.css'", "'../account-system-v1.css'", "'../theme-admin-v4-scoped.css'"]],
-  ['app/specialist/layout.tsx', ["'../dashboard-v3-scoped.css'", "'../theme-admin-v4-scoped.css'"]],
-  ['app/center/layout.tsx', ["'../dashboard-v3-scoped.css'", "'../theme-admin-v4-scoped.css'"]],
+  ['app/admin/layout.tsx', ["'../dashboard-v3-scoped.css'", "'../system-portals-v1.css'", "'../portal-scoped.css'", "'../theme-admin-v4-scoped.css'"]],
+  ['app/account/layout.tsx', ["'../dashboard-v3-scoped.css'", "'../system-portals-v1.css'", "'../portal-scoped.css'", "'../account-system-v1.css'", "'../theme-admin-v4-scoped.css'"]],
+  ['app/specialist/layout.tsx', ["'../dashboard-v3-scoped.css'", "'../portal-scoped.css'", "'../theme-admin-v4-scoped.css'"]],
+  ['app/center/layout.tsx', ["'../dashboard-v3-scoped.css'", "'../portal-scoped.css'", "'../theme-admin-v4-scoped.css'"]],
   ['app/mfa/layout.tsx', ["'../dashboard-v3-scoped.css'", "'../account-system-v1.css'", "'../theme-admin-v4-scoped.css'"]],
-  ['app/community/join/layout.tsx', ["'../../dashboard-v3-scoped.css'", "'../../theme-admin-v4-scoped.css'"]],
-  ['app/join/layout.tsx', ["'../system-portals-v1.css'"]],
+  ['app/community/join/layout.tsx', ["'../../dashboard-v3-scoped.css'", "'../../portal-scoped.css'", "'../../theme-admin-v4-scoped.css'"]],
+  ['app/join/layout.tsx', ["'../system-portals-v1.css'", "'../portal-scoped.css'"]],
+  ['app/theme-preview/layout.tsx', ["'../dashboard-v3-scoped.css'", "'../portal-scoped.css'", "'../cms-internal.css'", "'../theme-admin-v4-scoped.css'", "'../theme-preview-scoped.css'"]],
   ['app/login/layout.tsx', ["'../account-system-v1.css'", "'../theme-admin-v4-scoped.css'"]],
   ['app/register/layout.tsx', ["'../account-system-v1.css'", "'../theme-admin-v4-scoped.css'"]],
   ['app/forgot-password/layout.tsx', ["'../account-system-v1.css'", "'../theme-admin-v4-scoped.css'"]],
@@ -90,5 +110,5 @@ for (const [file, needles] of routeCssContracts) {
 }
 
 if (!process.exitCode) {
-  console.log(`Rawafid central theme import graph passed: ${importedCss.length} unique compatibility modules; dashboard/admin/auth/account/join CSS remains route-scoped.`);
+  console.log(`Rawafid central theme import graph passed: ${importedCss.length} unique compatibility modules; dashboard/admin/auth/account/join/portal/community CSS remains route-scoped.`);
 }
