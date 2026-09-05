@@ -25,7 +25,7 @@ The retained legacy source remains preserved in `private.legacy_migration_items`
 
 ## Current Outside-the-Box GOLD count
 
-**60 condition pages**.
+**65 condition pages**.
 
 Current verification state:
 
@@ -98,6 +98,11 @@ Shared structural headings are allowed; copied condition science is not.
 58. `legacy-outside-box-adnp-syndrome`
 59. `legacy-outside-box-aicardi-syndrome`
 60. `legacy-outside-box-sturge-weber-syndrome`
+61. `legacy-outside-box-smith-lemli-opitz-syndrome`
+62. `legacy-outside-box-cornelia-de-lange-syndrome`
+63. `legacy-outside-box-satb2-associated-syndrome`
+64. `legacy-outside-box-tuberous-sclerosis-complex`
+65. `legacy-outside-box-congenital-zika-syndrome`
 
 ## Scientific design invariant
 
@@ -118,22 +123,22 @@ GOLD is not permanent. A page is reopened whenever newer direct evidence materia
 
 ## Anti-filler rule
 
-At 60 GOLD pages, exact structured-block comparison still finds **zero scientific paragraphs, lists or tables of 100+ characters duplicated exactly across two or more pages**. Repeated editorial headings such as `قواعد القرار` or `قوة الدليل وحدوده` are permitted because they provide predictable navigation; the science beneath them must remain condition-specific.
+At 65 GOLD pages, exact structured-block comparison still finds **zero scientific paragraphs, lists or tables of 100+ characters duplicated exactly across two or more pages**. Repeated editorial headings such as `قواعد القرار` or `قوة الدليل وحدوده` are permitted because they provide predictable navigation; the science beneath them must remain condition-specific.
 
 ## Next DEEP conversion wave
 
 Continue the original audit order with:
 
-- `legacy-outside-box-smith-lemli-opitz-syndrome`
-- `legacy-outside-box-cornelia-de-lange-syndrome`
-- `legacy-outside-box-satb2-associated-syndrome`
-- `legacy-outside-box-tuberous-sclerosis-complex`
-- `legacy-outside-box-congenital-zika-syndrome`
 - `legacy-outside-box-prader-willi-syndrome`
 - tic / Tourette functional support
 - central auditory processing difficulties
 - auditory neuropathy spectrum
 - CHARGE syndrome
+- hearing loss / deafness
+- developmental coordination disorder
+- developmental language disorder
+- intellectual developmental disorder
+- deafblindness
 
 After all Outside-the-Box DEEP pages:
 
