@@ -1,3 +1,5 @@
+import { assessmentMeasures } from '@/lib/assessment-measures-catalog';
+
 export type InstrumentCrosswalkRecord = {
   id: string;
   instrument: string;
@@ -14,9 +16,12 @@ export type InstrumentCrosswalkRecord = {
   evidenceUrl?: string;
   evidenceCitation: string;
   lastVerified: string;
+  catalogSync?: 'seed' | 'auto-promoted' | 'rights-conflict' | 'blocked-family' | 'no-exact-match' | 'ambiguous-exact-match';
+  catalogMatchedSlug?: string;
+  catalogSyncNote?: string;
 };
 
-export const instrumentCrosswalk: readonly InstrumentCrosswalkRecord[] = [
+const instrumentCrosswalkSeed: readonly InstrumentCrosswalkRecord[] = [
   {
     id: 'phq-9',
     instrument: 'Patient Health Questionnaire-9',
@@ -210,6 +215,90 @@ export const instrumentCrosswalk: readonly InstrumentCrosswalkRecord[] = [
   },
 ] as const;
 
+const normalizeAcronym = (value: string) => value.toUpperCase().replace(/[^A-Z0-9]+/g, '');
+
+const automaticPromotionBlockedIds = new Set([
+  'rcads',
+  'gmfm',
+  'promis-cognition-sleep',
+  'promis-pain-fatigue',
+]);
+
+const assessmentCatalogByAcronym = new Map<string, (typeof assessmentMeasures)[number][]>();
+for (const measure of assessmentMeasures) {
+  const key = normalizeAcronym(measure.acronym);
+  if (!key) continue;
+  const matches = assessmentCatalogByAcronym.get(key) ?? [];
+  matches.push(measure);
+  assessmentCatalogByAcronym.set(key, matches);
+}
+
+function resolveAgainstAssessmentCatalog(record: InstrumentCrosswalkRecord): InstrumentCrosswalkRecord {
+  const key = normalizeAcronym(record.acronym);
+  const matches = key ? (assessmentCatalogByAcronym.get(key) ?? []) : [];
+
+  if (automaticPromotionBlockedIds.has(record.id)) {
+    return {
+      ...record,
+      catalogSync: 'blocked-family',
+      catalogSyncNote: 'التزام exact-version: هذه عائلة أو سجل متعدد الإصدارات ولا يُرقّى تلقائيًا بمجرد تطابق اسم/اختصار عام.',
+    };
+  }
+
+  if (matches.length === 0) {
+    return { ...record, catalogSync: 'no-exact-match' };
+  }
+
+  if (matches.length > 1) {
+    return {
+      ...record,
+      catalogSync: 'ambiguous-exact-match',
+      catalogSyncNote: `وُجد ${matches.length} تطابقات للاختصار نفسه في Catalog؛ يلزم حسم الإصدار يدويًا قبل تغيير الحالة.`,
+    };
+  }
+
+  const match = matches[0];
+
+  if (
+    record.rawafidStatus === 'not-in-library' &&
+    record.rightsStatus !== 'owner-conditions' &&
+    record.rightsStatus !== 'license-or-permission-required'
+  ) {
+    return {
+      ...record,
+      rawafidStatus: 'operational-full',
+      rawafidStatusLabel: 'متاح تشغيليًا في مكتبة روافد — مزامن تلقائيًا مع Assessment Measures Catalog',
+      internalPath: `/assessment-measures/${match.slug}/`,
+      rightsStatus: 'rawafid-provenance-verified',
+      rightsNote: `${record.rightsNote} تمت مزامنة التوفر التشغيلي من Assessment Measures Catalog بعد تطابق اختصار فريد؛ حالة الحقوق الحالية في Catalog: ${match.rightsLabel}.`,
+      catalogSync: 'auto-promoted',
+      catalogMatchedSlug: match.slug,
+      catalogSyncNote: 'تمت الترقية من فجوة مكتبة لأن الأداة ظهرت كتطابق acronym فريد في Catalog ذي provenance/rights موثق، دون نقل أي دليل عربي بين الإصدارات.',
+    };
+  }
+
+  if (
+    record.rightsStatus === 'owner-conditions' ||
+    record.rightsStatus === 'license-or-permission-required'
+  ) {
+    return {
+      ...record,
+      catalogSync: 'rights-conflict',
+      catalogMatchedSlug: match.slug,
+      catalogSyncNote: 'يوجد تطابق في Catalog، لكن سجل COS يحمل قيود مالك/ترخيص؛ لا تُرقّى الحالة آليًا حتى تُحسم حقوق الإصدار المقصود صراحة.',
+    };
+  }
+
+  return {
+    ...record,
+    catalogSync: 'seed',
+    catalogMatchedSlug: match.slug,
+    catalogSyncNote: 'التطابق التشغيلي الحالي متسق مع Assessment Measures Catalog.',
+  };
+}
+
+export const instrumentCrosswalk: readonly InstrumentCrosswalkRecord[] = instrumentCrosswalkSeed.map(resolveAgainstAssessmentCatalog);
+
 export function getInstrumentCrosswalkForCos(cosSlug: string) {
   return instrumentCrosswalk.filter((item) => item.linkedCosSlugs.includes(cosSlug));
 }
@@ -220,4 +309,6 @@ export const instrumentCrosswalkStats = {
   referenceRights: instrumentCrosswalk.filter((item) => item.rawafidStatus === 'reference-rights').length,
   notInLibrary: instrumentCrosswalk.filter((item) => item.rawafidStatus === 'not-in-library').length,
   arabicPsychometricContext: instrumentCrosswalk.filter((item) => item.arabicEvidence === 'psychometric-context').length,
+  autoPromoted: instrumentCrosswalk.filter((item) => item.catalogSync === 'auto-promoted').length,
+  catalogRightsConflicts: instrumentCrosswalk.filter((item) => item.catalogSync === 'rights-conflict').length,
 };
