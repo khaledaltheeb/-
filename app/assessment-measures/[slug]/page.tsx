@@ -1,14 +1,15 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import { buildSeoMetadata, SITE_URL } from '@/lib/seo';
 import {
   arabicStatusBadge,
   assessmentMeasureCategories,
-  assessmentMeasureSlugs,
+  assessmentMeasureRouteSlugs,
   getAssessmentMeasure,
+  getCanonicalAssessmentMeasureSlug,
   rightsBadge,
 } from '@/lib/assessment-measures-catalog';
 import styles from '@/components/assessment-measures.module.css';
@@ -16,7 +17,7 @@ import styles from '@/components/assessment-measures.module.css';
 type PageProps = { params: Promise<{ slug: string }> };
 
 export function generateStaticParams() {
-  return assessmentMeasureSlugs.map((slug) => ({ slug }));
+  return assessmentMeasureRouteSlugs.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -38,7 +39,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function AssessmentMeasureDetailPage({ params }: PageProps) {
   const { slug } = await params;
-  const measure = getAssessmentMeasure(slug);
+  const canonicalSlug = getCanonicalAssessmentMeasureSlug(slug);
+  if (canonicalSlug !== slug) permanentRedirect(`/assessment-measures/${canonicalSlug}/`);
+
+  const measure = getAssessmentMeasure(canonicalSlug);
   if (!measure) notFound();
 
   const categoryRecords = measure.categories
