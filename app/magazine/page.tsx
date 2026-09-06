@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import { buildSeoMetadata, SITE_URL } from '@/lib/seo';
@@ -66,22 +67,22 @@ function Pagination({ page, totalPages, params }: {
   const pages = Array.from({ length: end - start + 1 }, (_, index) => start + index);
   return (
     <nav className={styles.pagination} aria-label="ترقيم صفحات القراءات العربية">
-      {page > 1 && <a href={hrefWith(params, { ap: page - 1 }, 'arabic-analyses')}>السابق</a>}
-      {start > 1 && <a href={hrefWith(params, { ap: 1 }, 'arabic-analyses')}>1</a>}
+      {page > 1 && <Link href={hrefWith(params, { ap: page - 1 }, 'arabic-analyses')}>السابق</Link>}
+      {start > 1 && <Link href={hrefWith(params, { ap: 1 }, 'arabic-analyses')}>1</Link>}
       {start > 2 && <span aria-hidden="true">…</span>}
       {pages.map((value) => (
-        <a
+        <Link
           key={value}
           className={value === page ? styles.activePage : undefined}
           aria-current={value === page ? 'page' : undefined}
           href={hrefWith(params, { ap: value }, 'arabic-analyses')}
         >
           {value}
-        </a>
+        </Link>
       ))}
       {end < totalPages - 1 && <span aria-hidden="true">…</span>}
-      {end < totalPages && <a href={hrefWith(params, { ap: totalPages }, 'arabic-analyses')}>{totalPages}</a>}
-      {page < totalPages && <a href={hrefWith(params, { ap: page + 1 }, 'arabic-analyses')}>التالي</a>}
+      {end < totalPages && <Link href={hrefWith(params, { ap: totalPages }, 'arabic-analyses')}>{totalPages}</Link>}
+      {page < totalPages && <Link href={hrefWith(params, { ap: page + 1 }, 'arabic-analyses')}>التالي</Link>}
     </nav>
   );
 }
@@ -150,7 +151,7 @@ export default async function MagazinePage({ searchParams }: Props) {
           <div className={styles.qualityStrip}>
             <span><strong>المجلة:</strong> صفحات عربية محررة فقط</span>
             <span><strong>المرصد:</strong> ميتاداتا وسجلات مرشحة للمراجعة</span>
-            <span><a href="/magazine/research-observatory/">فتح مرصد الأبحاث الحديثة ←</a></span>
+            <span><Link href="/magazine/research-observatory/">فتح مرصد الأبحاث الحديثة ←</Link></span>
           </div>
         </section>
 
@@ -180,13 +181,13 @@ export default async function MagazinePage({ searchParams }: Props) {
             <input type="hidden" name="ap" value="1" />
             <div className={styles.filterActions}>
               <button type="submit">تطبيق البحث</button>
-              {(aq || kind) && <a href="/magazine/#arabic-analyses">مسح الفلاتر</a>}
+              {(aq || kind) && <Link href="/magazine/#arabic-analyses">مسح الفلاتر</Link>}
             </div>
           </form>
 
           <div className={styles.chips} aria-label="أنواع الأدلة">
             {magazineOverview.kinds.map((value) => (
-              <a key={value} href={hrefWith(params, { kind: value, ap: 1 }, 'arabic-analyses')}>{value}</a>
+              <Link key={value} href={hrefWith(params, { kind: value, ap: 1 }, 'arabic-analyses')}>{value}</Link>
             ))}
           </div>
           <div className={styles.resultSummary}>
@@ -205,9 +206,9 @@ export default async function MagazinePage({ searchParams }: Props) {
                       <span>{evidenceKind(item)}</span>
                       {item.published_at && <time dateTime={item.published_at}>{formatDate(item.published_at)}</time>}
                     </div>
-                    <h3><a href={href}>{item.title}</a></h3>
+                    <h3><Link href={href}>{item.title}</Link></h3>
                     {item.excerpt && <p>{item.excerpt}</p>}
-                    <a className={styles.readMore} href={href}>قراءة التحليل كاملًا ←</a>
+                    <Link className={styles.readMore} href={href}>قراءة التحليل كاملًا ←</Link>
                   </article>
                 );
               })}
