@@ -25,6 +25,7 @@ import { assessmentOperationalFullFormsWave12 } from '@/lib/assessment-measure-o
 import { assessmentOperationalFullFormsWave13 } from '@/lib/assessment-measure-operational-full-forms-wave13';
 import { assessmentOperationalFullFormsWave14 } from '@/lib/assessment-measure-operational-full-forms-wave14';
 import { assessmentOperationalFullFormsWave15 } from '@/lib/assessment-measure-operational-full-forms-wave15';
+import { assessmentOperationalFullFormsWave16 } from '@/lib/assessment-measure-operational-full-forms-wave16';
 
 export type {
   AssessmentOperationalMaterial,
@@ -56,6 +57,7 @@ export const explicitOperationalMaterials: Record<string, AssessmentOperationalM
   ...assessmentOperationalFullFormsWave13,
   ...assessmentOperationalFullFormsWave14,
   ...assessmentOperationalFullFormsWave15,
+  ...assessmentOperationalFullFormsWave16,
 };
 
 export function hasExplicitOperationalMaterial(slug: string): boolean {
