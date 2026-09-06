@@ -1,0 +1,36 @@
+name: Current Main Assessment Backlog
+
+on:
+  push:
+    branches:
+      - assessment-sectors-audit-20260906
+    paths:
+      - '.github/workflows/current-main-assessment-backlog.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Switch to current main source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git checkout --detach origin/main
+          echo "MAIN_SHA=$(git rev-parse HEAD)"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Report current operational coverage
+        run: node scripts/assessment-measures-operational-coverage.mjs
