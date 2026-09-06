@@ -87,7 +87,8 @@ requireAll(robots, [
   "'Bytespider'",
   "'CCBot'",
   "'meta-externalagent'",
-  "'/search?'",
+  "'/search'",
+  "'/ai-search'",
   "'/api/private/'",
 ], 'robots discovery');
 requireAll(sitemapXml, ['INDEXING_ENABLED', 'SITE_URL'], 'sitemap indexability gate');
