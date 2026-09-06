@@ -20,7 +20,7 @@ const mastery=(task:MathLogicTask)=>task==='patterns'?'إكمال معظم ال�
 
 export const mathLogicActivities:MathLogicActivity[]=mathLogicSeriesPlans.flatMap(series=>Array.from({length:5},(_,i)=>i+1).flatMap(level=>labels.map((x,idx)=>({
  slug:`level-${level}-${x.kind}`,seriesSlug:series.slug,seriesNumber:series.number,seriesTitle:series.title,taskType:series.taskType,level,kind:x.kind,label:x.label,title:`${series.title} - المستوى ${level} - ${x.label}`,age:series.ages,duration:series.duration,purpose:series.purpose,instruction:instruction(series.taskType,x.kind),progression:series.progression[level-1],observation:series.observation,mastery:mastery(series.taskType),seed:series.number*100+level*10+idx
-})))));
+}))));
 export const mathLogicActivityCount=mathLogicActivities.length;
 export const mathLogicTestCount=mathLogicActivities.filter(a=>a.kind==='test').length;
 export const getMathLogicSeries=(slug:string)=>mathLogicSeriesPlans.find(s=>s.slug===slug);
