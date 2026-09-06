@@ -32,6 +32,7 @@ on:
       - 'scripts/assessment-measures-operational-wave14-contract.mjs'
       - 'scripts/assessment-measures-operational-wave16-contract.mjs'
       - 'scripts/assessment-measures-operational-wave17-contract.mjs'
+      - 'scripts/assessment-measures-operational-wave18-contract.mjs'
       - 'scripts/assessment-measures-operational-coverage.mjs'
       - 'scripts/outcome-measurement-separation-contract.mjs'
       - 'scripts/cos-instrument-mapping-wave2-contract.mjs'
@@ -93,7 +94,9 @@ jobs:
         run: node scripts/assessment-measures-operational-wave16-contract.mjs
       - name: Validate operational assessment Wave 17
         run: node scripts/assessment-measures-operational-wave17-contract.mjs
-      - name: Audit operational coverage
+      - name: Validate operational assessment Wave 18 final closure
+        run: node scripts/assessment-measures-operational-wave18-contract.mjs
+      - name: Audit operational coverage — require zero unresolved
         run: node scripts/assessment-measures-operational-coverage.mjs
       - name: Validate COS and measurement separation
         run: node scripts/outcome-measurement-separation-contract.mjs
