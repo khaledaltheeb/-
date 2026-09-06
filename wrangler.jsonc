@@ -2,12 +2,29 @@
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "rawafid-platform-staging",
   "account_id": "1910e1ad3c793fd568ba1caafe34f964",
-  "main": ".open-next/worker.js",
+  "main": "./custom-worker.js",
   "compatibility_date": "2026-08-09",
-  "compatibility_flags": ["nodejs_compat"],
+  "compatibility_flags": ["nodejs_compat", "enable_ctx_exports"],
   "workers_dev": true,
   "preview_urls": true,
   "minify": true,
+  "cache": {
+    "enabled": true
+  },
+  "exports": {
+    "default": {
+      "type": "worker",
+      "cache": {
+        "enabled": false
+      }
+    },
+    "OpenNextBackend": {
+      "type": "worker",
+      "cache": {
+        "enabled": true
+      }
+    }
+  },
   "vars": {
     "NEXT_PUBLIC_SUPABASE_URL": "https://ghljwfwqsyfnthvlzxjy.supabase.co",
     "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY": "sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs",

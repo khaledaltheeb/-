@@ -1,0 +1,98 @@
+name: Workers Cache Gateway Quality
+
+on:
+  pull_request:
+    paths:
+      - 'custom-worker.js'
+      - 'wrangler.jsonc'
+      - '.github/open-next-production-cache.config.ts'
+      - '.github/workflows/workers-cache-gateway-quality.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  gateway:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
+      NEXT_PUBLIC_SITE_URL: https://healthrenewal.org
+      NEXT_PUBLIC_ALLOW_INDEXING: 'true'
+      NEXT_PUBLIC_ENABLE_ANALYTICS: 'true'
+      NEXT_PUBLIC_ENABLE_GTM: 'false'
+      NEXT_PUBLIC_GTM_ID: GTM-WBLQVBG4
+      NEXT_PUBLIC_GA_MEASUREMENT_ID: G-VLZMV8Y4JP
+      NEXT_PUBLIC_ENABLE_DIRECT_GA: 'true'
+      ENABLE_RAWAFID_ASSISTANT: 'true'
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Install production image runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends fontconfig fonts-noto-core librsvg2-bin
+
+      - name: Validate gateway safety contract
+        run: |
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const gateway = fs.readFileSync('custom-worker.js', 'utf8');
+          const wrangler = fs.readFileSync('wrangler.jsonc', 'utf8');
+          const failures = [];
+          const requireText = (source, token, message) => {
+            if (!source.includes(token)) failures.push(message);
+          };
+
+          requireText(wrangler, '"main": "./custom-worker.js"', 'Wrangler must deploy the custom gateway entrypoint');
+          requireText(wrangler, '"enable_ctx_exports"', 'ctx.exports loopback support must remain enabled');
+          requireText(wrangler, '"cache": {\n    "enabled": true', 'Workers Caching must remain enabled for the backend namespace');
+          requireText(wrangler, '"default": {\n      "type": "worker",\n      "cache": {\n        "enabled": false', 'the public gateway entrypoint must never be cached');
+          requireText(wrangler, '"OpenNextBackend": {\n      "type": "worker",\n      "cache": {\n        "enabled": true', 'only the OpenNext backend entrypoint should be cache-enabled');
+
+          requireText(gateway, "url.hostname.toLowerCase() === WWW_HOST", 'www canonicalization must happen before the cached backend');
+          requireText(gateway, 'hasSupabaseAuthCookie(request)', 'Supabase auth-cookie traffic must bypass the public cache');
+          requireText(gateway, "name.startsWith('sb-') && name.includes('-auth-token')", 'the auth-cookie detector must match the server-side Supabase convention');
+          requireText(gateway, '!CACHEABLE_METHODS.has(request.method)', 'mutation methods must bypass the public cache');
+          requireText(gateway, "'/account'", 'protected account routes must remain on the uncached gateway path');
+          requireText(gateway, "'/api'", 'API routes must remain on the uncached gateway path');
+          requireText(gateway, 'ctx.exports.OpenNextBackend({', 'anonymous public requests must use the cached loopback backend');
+          requireText(gateway, "props: { audience: 'anonymous-public' }", 'the cached backend must be partitioned with explicit ctx.props');
+          requireText(gateway, 'return handler.fetch(request, env, ctx);', 'bypassed requests must execute OpenNext directly');
+
+          if (failures.length) {
+            for (const failure of failures) console.error(`WORKERS CACHE GATEWAY CONTRACT FAILED: ${failure}`);
+            process.exit(1);
+          }
+          console.log('Workers Cache gateway safety contract passed.');
+          NODE
+
+      - name: Build production OpenNext Worker
+        env:
+          CI: 'false'
+          QUICK_INFO_SOCIAL_IMAGES_REQUIRED: 'false'
+        run: npx opennextjs-cloudflare build --env production --openNextConfigPath .github/open-next-production-cache.config.ts
+
+      - name: Wrangler production dry run
+        run: npx wrangler deploy --dry-run --env production --outdir .wrangler-dry-run
+
+      - name: Verify emitted bundle contains gateway boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -d .wrangler-dry-run
+          grep -R -q --binary-files=text 'anonymous-public' .wrangler-dry-run
+          grep -R -q --binary-files=text 'OpenNextBackend' .wrangler-dry-run
+          echo 'Workers Cache gateway is present in the deployable production bundle.'
