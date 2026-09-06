@@ -127,7 +127,24 @@ jobs:
 
           echo 'LIVE_CHECK sitemap'
           curl -fsS --retry 6 --retry-delay 2 --retry-all-errors "${base}/sitemap.xml?deploy=${stamp}" >/tmp/sitemap.xml
-          echo 'LIVE_OK sitemap'
+          grep -q '/sitemaps/accessibility.xml' /tmp/sitemap.xml
+          curl -fsS --retry 6 --retry-delay 2 --retry-all-errors "${base}/sitemaps/accessibility.xml?deploy=${stamp}" >/tmp/accessibility-sitemap.xml
+          grep -q 'https://healthrenewal.org/accessibility/sensory-accessibility/' /tmp/accessibility-sitemap.xml
+          echo 'LIVE_OK sitemap and accessibility sitemap'
+
+          echo 'LIVE_CHECK sensory accessibility page'
+          curl -fsS \
+            -H 'Cache-Control: no-cache, no-store, max-age=0' \
+            -H 'Pragma: no-cache' \
+            --retry 6 --retry-delay 2 --retry-all-errors \
+            "${base}/accessibility/sensory-accessibility/?deploy=${stamp}" >/tmp/sensory-accessibility.html
+          grep -q 'إمكانية الوصول الحسي' /tmp/sensory-accessibility.html
+          grep -q 'SpectrumScan' /tmp/sensory-accessibility.html
+          if grep -qi 'noindex' /tmp/sensory-accessibility.html; then
+            echo 'Sensory accessibility page is unexpectedly noindex.' >&2
+            exit 1
+          fi
+          echo 'LIVE_OK sensory accessibility page'
 
           echo 'LIVE_CHECK public API'
           curl -fsS \
