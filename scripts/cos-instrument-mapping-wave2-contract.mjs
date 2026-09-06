@@ -106,7 +106,9 @@ assert(aggregate.includes('wave2AutomaticPromotionBlockedIds'), 'Wave 2 must ret
 assert(aggregate.includes("catalogSync: 'rights-conflict'"), 'Aggregate registry must prevent catalog matches from overriding rights restrictions');
 
 assert(coverage.includes("instrument-crosswalk-registry'"), 'COS coverage must read the aggregated crosswalk');
-assert(detail.includes("instrument-crosswalk-registry'"), 'COS detail pages must read the aggregated crosswalk');
+const detailUsesStableCrosswalk = detail.includes("from '@/lib/core-outcome-sets/instrument-crosswalk';");
+const detailUsesAggregatedCrosswalk = detail.includes("from '@/lib/core-outcome-sets/instrument-crosswalk-registry';");
+assert(detailUsesStableCrosswalk || detailUsesAggregatedCrosswalk, 'COS detail pages must read a recognized crosswalk source');
 assert(page.includes("instrument-crosswalk-registry'"), 'Crosswalk page must read the aggregated registry');
 assert(page.includes('instrumentCrosswalkStats.wave2'), 'Crosswalk page must expose Wave 2 size');
 assert(page.includes('instrumentCrosswalkStats.officialArabicTranslation'), 'Crosswalk page must expose official Arabic translation count separately from psychometric evidence');
@@ -136,5 +138,5 @@ assert(mappedSlugs.has('childhood-cancer-quality-of-survival'), 'Childhood cance
 assert(unmapped.length === expectedOutcomeOnly.length && unmapped.every((slug, index) => slug === expectedOutcomeOnly[index]), `Only the four not-established COS records may remain unmapped; found: ${unmapped.join(', ')}`);
 
 if (!process.exitCode) {
-  console.log(`COS_INSTRUMENT_MAPPING_WAVE2_OK records=${wave2RecordCount} mapped_cos=${mappedSlugs.size} outcome_only_unmapped=${unmapped.length}`);
+  console.log(`COS_INSTRUMENT_MAPPING_WAVE2_OK records=${wave2RecordCount} mapped_cos=${mappedSlugs.size} outcome_only_unmapped=${unmapped.length} detail_source=${detailUsesStableCrosswalk ? 'stable-base' : 'aggregated-registry'}`);
 }

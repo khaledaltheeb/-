@@ -98,7 +98,16 @@ if (exists(cosCrosswalkPath)) {
   assert(crosswalk.includes("rawafidStatus: 'reference-rights'"), 'Crosswalk must distinguish rights-limited references');
   assert(crosswalk.includes("rawafidStatus: 'not-in-library'"), 'Crosswalk must expose library gaps rather than hiding them');
   assert(crosswalk.includes('دليل RCADS-25 العربي') || crosswalk.includes('RCADS25-Arabic'), 'Crosswalk must preserve exact-version caveat for RCADS');
-  assert(crosswalk.includes('دليل GAD-7 العربي لا يُنقل تلقائيًا إلى GAD-2'), 'Crosswalk must prevent parent-instrument evidence from being transferred to GAD-2');
+
+  const gad2Start = crosswalk.indexOf("id: 'gad-2'");
+  const gad2End = crosswalk.indexOf('\n  },', gad2Start);
+  const gad2 = crosswalk.slice(gad2Start, gad2End);
+  assert(gad2Start >= 0, 'Crosswalk must retain GAD-2');
+  assert(gad2.includes("rightsStatus: 'rawafid-provenance-verified'"), 'GAD-2 may be promoted only after direct rights verification');
+  assert(gad2.includes("arabicEvidence: 'psychometric-context'"), 'GAD-2 Arabic evidence must be direct but context-specific');
+  assert(gad2.includes('NBK92248') && gad2.includes('42084504'), 'GAD-2 promotion must retain direct GAD-2 rights and Arabic evidence sources');
+  assert(!gad2.includes('Sawaya'), 'GAD-2 evidence must not be inferred only from the parent GAD-7 Arabic study');
+
   assert(crosswalk.includes('الأردن') && crosswalk.includes('Columbia Lighthouse Project'), 'C-SSRS record must preserve country-specific Arabic translation provenance');
   assert(crosswalk.includes('HealthMeasures') && crosswalk.includes('ترجمات PROMIS محمية'), 'PROMIS records must preserve translation permissions');
   assert(crosswalk.includes("catalogSync?: 'seed'"), 'Crosswalk must retain catalog synchronization state');
@@ -130,7 +139,12 @@ if (exists(cosCrosswalkPagePath)) {
 
 if (exists(cosDetailPath)) {
   const detail = read(cosDetailPath);
-  assert(detail.includes('generateStaticParams'), 'COS detail pages must be statically enumerable');
+  const usesStaticEnumeration = detail.includes('generateStaticParams');
+  const usesDynamicCloudflareRoute = detail.includes("export const dynamic = 'force-dynamic'") && detail.includes('const { slug } = await params;');
+  assert(usesStaticEnumeration || usesDynamicCloudflareRoute, 'COS detail pages must be statically enumerable or explicitly dynamic for the Cloudflare runtime');
+  if (usesDynamicCloudflareRoute) {
+    assert(detail.includes('if (!item) notFound();'), 'Dynamic COS detail pages must preserve notFound() for unknown slugs');
+  }
   assert(detail.includes('getCoreOutcomeRecord'), 'COS detail page must resolve structured registry data');
   assert(detail.includes('getInstrumentCrosswalkForCos'), 'COS detail page must resolve linked instrument crosswalk records');
   assert(detail.includes('حالة التقييم العربي'), 'COS detail page must expose Arabic review status');

@@ -6,6 +6,7 @@ import {
 import { instrumentCrosswalkWave2Seed } from '@/lib/core-outcome-sets/instrument-crosswalk-wave2';
 import { applyInstrumentRightsAudit } from '@/lib/core-outcome-sets/instrument-rights-audit';
 import { applyInstrumentRightsAuditWave4 } from '@/lib/core-outcome-sets/instrument-rights-audit-wave4';
+import { applyInstrumentRightsAuditWave5 } from '@/lib/core-outcome-sets/instrument-rights-audit-wave5';
 
 const normalizeAcronym = (value: string) => value.toUpperCase().replace(/[^A-Z0-9]+/g, '');
 
@@ -110,7 +111,8 @@ const rightsAuditedInstrumentCrosswalkWave3 = [
   ...upgradedBaseInstrumentCrosswalk,
   ...resolvedWave2InstrumentCrosswalk,
 ].map(applyInstrumentRightsAudit);
-const rightsAuditedInstrumentCrosswalk = rightsAuditedInstrumentCrosswalkWave3.map(applyInstrumentRightsAuditWave4);
+const rightsAuditedInstrumentCrosswalkWave4 = rightsAuditedInstrumentCrosswalkWave3.map(applyInstrumentRightsAuditWave4);
+const rightsAuditedInstrumentCrosswalk = rightsAuditedInstrumentCrosswalkWave4.map(applyInstrumentRightsAuditWave5);
 
 export const instrumentCrosswalk: readonly InstrumentCrosswalkRecord[] = rightsAuditedInstrumentCrosswalk;
 
