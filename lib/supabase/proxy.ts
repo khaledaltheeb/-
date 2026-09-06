@@ -54,13 +54,15 @@ const encyclopediaConditionAliases = new Set([
 ]);
 
 const REDIRECT_TTL_MS = 60_000;
-const REDIRECT_CACHE_LIMIT = 500;
 const LEGACY_ROUTE_TTL_MS = 300_000;
 const LEGACY_ROUTE_CACHE_LIMIT = 2_000;
 
-type RedirectCacheItem = { destination: string | null; status: 301 | 302 | 307 | 308; expiresAt: number };
+type RedirectStatus = 301 | 302 | 307 | 308;
+type RedirectCacheItem = { destination: string; status: RedirectStatus };
+type RedirectRegistry = { entries: Map<string, RedirectCacheItem>; expiresAt: number };
 type LegacyRouteCacheItem = { exists: boolean; expiresAt: number };
-const redirectCache = new Map<string, RedirectCacheItem>();
+
+let redirectRegistry: RedirectRegistry | null = null;
 const legacyRouteCache = new Map<string, LegacyRouteCacheItem>();
 
 function isPrefix(pathname: string, prefix: string) {
@@ -72,7 +74,7 @@ function canResolveRedirect(request: NextRequest) {
   return !redirectExcludedPrefixes.some((prefix) => isPrefix(request.nextUrl.pathname, prefix));
 }
 
-function validRedirectStatus(value: number): value is 301 | 302 | 307 | 308 {
+function validRedirectStatus(value: number): value is RedirectStatus {
   return value === 301 || value === 302 || value === 307 || value === 308;
 }
 
@@ -180,33 +182,58 @@ export async function updateSession(request: NextRequest) {
     return legacyExists;
   }
 
-  if (canResolveRedirect(request)) {
-    const cached = redirectCache.get(request.nextUrl.pathname);
-    let destination = cached && cached.expiresAt > Date.now() ? cached.destination : null;
-    let status: 301 | 302 | 307 | 308 = cached && cached.expiresAt > Date.now() ? cached.status : 301;
-
-    if (!cached || cached.expiresAt <= Date.now()) {
-      const { data, error } = await supabase
-        .from('redirects')
-        .select('destination_path,status_code')
-        .eq('source_path', request.nextUrl.pathname)
-        .eq('is_active', true)
-        .maybeSingle();
-
-      if (!error && data) {
-        destination = typeof data.destination_path === 'string' ? data.destination_path : null;
-        status = validRedirectStatus(Number(data.status_code)) ? Number(data.status_code) as 301 | 302 | 307 | 308 : 301;
-      }
-
-      if (redirectCache.size >= REDIRECT_CACHE_LIMIT) redirectCache.clear();
-      redirectCache.set(request.nextUrl.pathname, { destination, status, expiresAt: Date.now() + REDIRECT_TTL_MS });
+  async function getActiveRedirect(pathnameToResolve: string) {
+    const now = Date.now();
+    if (redirectRegistry && redirectRegistry.expiresAt > now) {
+      return redirectRegistry.entries.get(pathnameToResolve) ?? null;
     }
 
-    if (destination && destination.startsWith('/') && !destination.startsWith('//')) {
+    const { data, error } = await supabase
+      .from('redirects')
+      .select('source_path,destination_path,status_code')
+      .eq('is_active', true);
+
+    if (!error && data) {
+      const entries = new Map<string, RedirectCacheItem>();
+      for (const row of data) {
+        const source = typeof row.source_path === 'string' ? row.source_path : null;
+        const destination = typeof row.destination_path === 'string' ? row.destination_path : null;
+        if (!source || !destination) continue;
+        const numericStatus = Number(row.status_code);
+        entries.set(source, {
+          destination,
+          status: validRedirectStatus(numericStatus) ? numericStatus : 301,
+        });
+      }
+      redirectRegistry = { entries, expiresAt: now + REDIRECT_TTL_MS };
+      return entries.get(pathnameToResolve) ?? null;
+    }
+
+    // Fail open for public content availability, but preserve redirect behavior when
+    // a bulk registry refresh has a transient failure by falling back to the existing
+    // exact-path lookup for this request only.
+    const { data: fallbackData, error: fallbackError } = await supabase
+      .from('redirects')
+      .select('destination_path,status_code')
+      .eq('source_path', pathnameToResolve)
+      .eq('is_active', true)
+      .maybeSingle();
+
+    if (fallbackError || !fallbackData || typeof fallbackData.destination_path !== 'string') return null;
+    const numericStatus = Number(fallbackData.status_code);
+    return {
+      destination: fallbackData.destination_path,
+      status: validRedirectStatus(numericStatus) ? numericStatus : 301,
+    } satisfies RedirectCacheItem;
+  }
+
+  if (canResolveRedirect(request)) {
+    const redirect = await getActiveRedirect(request.nextUrl.pathname);
+    if (redirect?.destination.startsWith('/') && !redirect.destination.startsWith('//')) {
       if (!(await isLegacyProductionRoute())) {
         const target = request.nextUrl.clone();
-        target.pathname = destination;
-        return NextResponse.redirect(target, status);
+        target.pathname = redirect.destination;
+        return NextResponse.redirect(target, redirect.status);
       }
     }
   }
