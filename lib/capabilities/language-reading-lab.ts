@@ -20,7 +20,7 @@ const taskInstruction=(task:LanguageReadingTask,kind:LanguageReadingKind)=>{
 const masteryByTask=(task:LanguageReadingTask)=>task==='rhyming'?'دقة لا تقل عن 80% عبر مجموعة جديدة مع تلميحات قليلة، مع تفسير الاختيار صوتيًا عند القدرة.':task==='initial-sound'?'عزل الصوت الأول في معظم الكلمات الجديدة دون تحويل المهمة إلى تسمية اسم الحرف.':task==='syllable-awareness'?'عد المقاطع بدقة في أغلب الكلمات وفق النطق الفصيح المحدد، مع ثبات الأداء في محاولة ثانية.':task==='letter-discrimination'?'تمييز الهدف بدقة عالية مع أخطاء محدودة في النقاط/الموضع عبر صفوف جديدة.':task==='letter-picture-match'?'مطابقة معظم الصور بالحرف الصحيح بعد تسمية الصورة وعزل الصوت الأول، دون تخمين من اللون أو الموقع.':'ترتيب الأحداث منطقيًا مع القدرة على شرح سبب واحد على الأقل للترتيب عند مستوى اللغة المناسب.';
 export const languageReadingActivities:LanguageReadingActivity[]=languageReadingSeriesPlans.flatMap(series=>Array.from({length:5},(_,i)=>i+1).flatMap(level=>labels.map((x,idx)=>({
  slug:`level-${level}-${x.kind}`,seriesSlug:series.slug,seriesNumber:series.number,seriesTitle:series.title,taskType:series.taskType,level,kind:x.kind,label:x.label,title:`${series.title} - المستوى ${level} - ${x.label}`,age:series.ages,duration:series.duration,purpose:series.purpose,instruction:taskInstruction(series.taskType,x.kind),progression:series.progression[level-1],observation:series.observation,mastery:masteryByTask(series.taskType),seed:series.number*100+level*10+idx
-})))));
+}))));
 export const languageReadingActivityCount=languageReadingActivities.length;
 export const languageReadingTestCount=languageReadingActivities.filter(a=>a.kind==='test').length;
 export const getLanguageReadingSeries=(slug:string)=>languageReadingSeriesPlans.find(s=>s.slug===slug);
