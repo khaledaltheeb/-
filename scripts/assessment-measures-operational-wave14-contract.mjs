@@ -30,15 +30,17 @@ for (const slug of slugs) assert(form.includes(`'${slug}': {`), `missing Wave 14
 assert(new Set([...form.matchAll(/^\s{2}'([^']+)': \{/gm)].map((match) => match[1])).size === slugs.length, 'Wave 14 must contain exactly five unique top-level measure records');
 assert(!/http:\/\//.test(form), 'Wave 14 sources must use HTTPS');
 
-// SES-CD V1: exact public-domain four-variable structure across five ileocolonic segments.
+// SES-CD V1: the form is generated from five named segments and four variables per segment.
 assert(form.includes("completeness: 'exact-public-domain-form'"), 'Wave 14 must retain exact public-domain form classification where justified');
-for (const segment of ['ILEUM', 'RIGHT', 'TRANSVERSE', 'LEFT', 'RECTUM']) {
-  for (const variable of ['ULCER-SIZE', 'ULCERATED-SURFACE', 'AFFECTED-SURFACE', 'NARROWING']) {
-    assert(form.includes(`SES-${segment}-${variable}`), `SES-CD missing ${segment} ${variable}`);
-  }
+for (const segment of ["['ILEUM', 'اللفائفي النهائي']", "['RIGHT', 'القولون الأيمن']", "['TRANSVERSE', 'القولون المستعرض']", "['LEFT', 'القولون الأيسر/السيني']", "['RECTUM', 'المستقيم']"]) {
+  assert(form.includes(segment), `SES-CD segment definition missing: ${segment}`);
+}
+for (const variable of ['ULCER-SIZE', 'ULCERATED-SURFACE', 'AFFECTED-SURFACE', 'NARROWING']) {
+  assert(form.includes(`SES-\${code}-${variable}`), `SES-CD generated variable missing: ${variable}`);
 }
 assert(form.includes("code: 'SES-CD-TOTAL'") && form.includes('max: 56'), 'SES-CD total 0-56 field missing');
 assert(form.includes('تضيق لا يمكن عبوره'), 'SES-CD impassable narrowing category missing');
+assert(form.includes('مجموع درجات التضيق') && form.includes('11'), 'SES-CD stenosis subtotal maximum 11 boundary missing');
 assert(form.includes('القطاعات غير القابلة للتقييم'), 'SES-CD unevaluated-segment safeguard missing');
 assert(form.includes('simple-endoscopic-score-crohns-disease-version-1'), 'SES-CD CDISC provenance missing');
 assert(form.includes('15472670'), 'SES-CD original validation source missing');
@@ -76,20 +78,26 @@ assert(form.includes('موقع IPAQ الرسمي') && form.includes('open access
 assert(form.includes('28738790'), 'IPAQ adapted Arabic validation source missing');
 assert(form.includes('لا تعمم صلاحيتها تلقائيًا على كل دولة عربية'), 'IPAQ Arabic population-generalization guardrail missing');
 
-// NEI VFQ-25: scoring companion only, with official recoding and translation boundary.
+// NEI VFQ-25: 26 raw slots are generated programmatically for the Version 2000 base set.
 assert(form.includes("completeness: 'recording-and-scoring-sheet'"), 'VFQ/MPAI companion boundary missing');
-for (let i = 1; i <= 26; i += 1) assert(form.includes(`VFQ-RAW-${i}`), `VFQ raw-response placeholder missing: ${i}`);
+assert(form.includes('Array.from({ length: 26 }'), 'VFQ Version 2000 must generate 26 raw-response slots');
+assert(form.includes('`VFQ-RAW-${index + 1}`'), 'VFQ raw-response generator code missing');
 for (const code of ['VFQ-GENERAL-HEALTH', 'VFQ-GENERAL-VISION', 'VFQ-NEAR', 'VFQ-DISTANCE', 'VFQ-DRIVING', 'VFQ-COMPOSITE']) {
   assert(form.includes(`code: '${code}'`), `VFQ scoring field missing: ${code}`);
 }
+assert(form.includes('26 سؤالًا') && form.includes('25 منها vision-targeted'), 'VFQ Version 2000 26-base/25-vision-targeted distinction missing');
 assert(form.includes('general health') && form.includes('vision-targeted composite'), 'VFQ composite/general-health boundary missing');
 assert(form.includes('لا تعيد طباعة نص تلك الترجمة'), 'VFQ Arabic copyright/validation boundary missing');
 assert(form.includes('manual_cm2000.pdf'), 'VFQ official Version 2000 scoring manual missing');
 assert(form.includes('25349812'), 'VFQ Arabic validation source missing');
 
-// MPAI-4: companion must use official 29 scored items + associated factors and preserve recoding/T-score boundaries.
-for (const token of ['MPAI4-1', 'MPAI4-29', 'MPAI4-ASSOC-30', 'MPAI4-ASSOC-35', 'MPAI4-ABILITY', 'MPAI4-ADJUSTMENT', 'MPAI4-PARTICIPATION', 'MPAI4-TOTAL', 'MPAI4-T-SCORE']) {
-  assert(form.includes(token), `MPAI-4 field missing: ${token}`);
+// MPAI-4: 29 scored slots + 6 associated factors are generated, with official rescored raw ranges and T-score boundary.
+assert(form.includes('Array.from({ length: 29 }'), 'MPAI-4 must generate 29 scored item slots');
+assert(form.includes('`MPAI4-${index + 1}`'), 'MPAI-4 scored-item generator missing');
+assert(form.includes('Array.from({ length: 6 }'), 'MPAI-4 must generate six associated-factor slots');
+assert(form.includes('`MPAI4-ASSOC-${index + 30}`'), 'MPAI-4 associated-factor generator missing');
+for (const token of ['MPAI4-ABILITY', 'MPAI4-ADJUSTMENT', 'MPAI4-PARTICIPATION', 'MPAI4-TOTAL', 'MPAI4-T-SCORE']) {
+  assert(form.includes(token), `MPAI-4 summary field missing: ${token}`);
 }
 assert(form.includes('max: 47') && form.includes('max: 46') && form.includes('max: 30') && form.includes('max: 111'), 'MPAI-4 official rescored raw ranges missing');
 assert(form.includes('29 فقط تدخل الدرجات الرئيسية') && form.includes('الستة الإضافية'), 'MPAI-4 29-scored/6-associated structure missing');
@@ -108,5 +116,5 @@ assert(catalog.includes("assessmentOperationalFullFormsWave14 } from '@/lib/asse
 assert(catalog.includes('...assessmentOperationalFullFormsWave14'), 'operational catalog Wave 14 spread missing');
 
 if (!process.exitCode) {
-  console.log('ASSESSMENT_OPERATIONAL_WAVE14_OK measures=5 ses_cd=5_segments_x4_variables cdai=8_variable_formula ipaq=long_form_scoring_companion vfq25=official_version_2000_scoring_companion mpai4=official_manual_scoring_companion rights=public_domain_or_official_use_boundaries');
+  console.log('ASSESSMENT_OPERATIONAL_WAVE14_OK measures=5 ses_cd=5_segments_x4_variables_stenosis_max11_total56 cdai=8_variable_formula ipaq=long_form_scoring_companion vfq25=version2000_26base_25vision mpai4=29_scored_plus6_associated rights=public_domain_or_official_use_boundaries');
 }
