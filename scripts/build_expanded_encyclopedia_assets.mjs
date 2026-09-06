@@ -131,31 +131,50 @@ function pageSections(raw) {
   const practice = clean(raw.assessment_or_practice);
   const boundary = clean(raw.boundary);
   const type = clean(raw.content_type);
+  const isCondition = type === 'condition';
   const isIntervention = type === 'intervention';
   const isAssessment = type === 'assessment';
 
-  const contextHeading = isIntervention
-    ? 'كيف يعمل وما حدود الدليل؟'
-    : isAssessment
-      ? 'كيف يُستخدم في التقييم؟'
-      : `كيف يظهر ${term} أو يُستخدم سريريًا؟`;
-  const mechanismHeading = isIntervention
-    ? 'الاستخدام والممارسة المسؤولة'
-    : isAssessment
-      ? 'ما الذي يؤثر في التفسير؟'
-      : 'الأسباب والآليات والسياق';
+  const contextHeading = isCondition
+    ? `كيف يظهر ${term}؟`
+    : isIntervention
+      ? 'كيف يعمل وما حدود الدليل؟'
+      : isAssessment
+        ? 'كيف يُستخدم في التقييم؟'
+        : `كيف يُفهم ${term} في السياق النفسي؟`;
+  const boundaryHeading = isCondition
+    ? 'ما الذي يميّزه وما حدوده التشخيصية؟'
+    : isIntervention
+      ? 'حدود التدخل وما لا يثبته الدليل'
+      : isAssessment
+        ? 'حدود القياس وما لا تعنيه النتيجة'
+        : 'حدود المفهوم وما لا يعنيه';
+  const mechanismHeading = isCondition
+    ? 'العوامل المرتبطة والآليات والسياق'
+    : isIntervention
+      ? 'آلية العمل والتطبيق المسؤول'
+      : isAssessment
+        ? 'العوامل المؤثرة في القياس والتفسير'
+        : 'الآليات والسياق والعوامل المرتبطة';
+  const practiceHeading = isCondition
+    ? 'كيف يُقيّم أو يُشخّص بصورة مسؤولة؟'
+    : isIntervention
+      ? 'متى يحتاج التطبيق إلى مختص؟'
+      : isAssessment
+        ? 'كيف تُفسّر النتائج بصورة مسؤولة؟'
+        : 'كيف يُقاس أو يُطبّق المفهوم؟';
 
   return [
-    { type: 'paragraph', text: `${term}${english ? ` (${english})` : ''} مصطلح يحتاج إلى فهم دقيق للسياق وعدم تحويله تلقائيًا إلى تشخيص. ${intro}` },
+    { type: 'paragraph', text: `${term}${english ? ` (${english})` : ''}. ${intro}` },
     { type: 'heading', level: 2, text: `ما هو ${term}؟` },
     { type: 'paragraph', text: intro },
     { type: 'heading', level: 2, text: contextHeading },
     { type: 'paragraph', text: presentation },
-    { type: 'heading', level: 3, text: 'حدود المصطلح وما لا يعنيه' },
+    { type: 'heading', level: 3, text: boundaryHeading },
     { type: 'paragraph', text: boundary },
     { type: 'heading', level: 2, text: mechanismHeading },
     { type: 'paragraph', text: mechanisms },
-    { type: 'heading', level: 2, text: isIntervention ? 'متى يحتاج التطبيق إلى مختص؟' : 'كيف يُقيّم أو يُفهم بصورة أدق؟' },
+    { type: 'heading', level: 2, text: practiceHeading },
     { type: 'paragraph', text: practice },
     { type: 'heading', level: 2, text: 'أسئلة شائعة' },
     { type: 'faq', items: faq(raw.faq) },
