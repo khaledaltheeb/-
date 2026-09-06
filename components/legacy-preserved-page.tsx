@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import Link from 'next/link';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
@@ -10,14 +11,14 @@ import {
   type LegacyPreservedPage,
 } from '@/lib/legacy-preserved-page';
 
-type Props = { page: LegacyPreservedPage; route: string };
+type Props = { page: LegacyPreservedPage; route: string; lead?: ReactNode };
 
 function familyLabel(value: string | null): string {
   if (!value) return 'المحتوى التاريخي';
   return value.replace(/[-_]+/g, ' ').trim() || 'المحتوى التاريخي';
 }
 
-export default function LegacyPreservedPageView({ page, route }: Props) {
+export default function LegacyPreservedPageView({ page, route, lead }: Props) {
   const current = page.current_content;
   const canonical = current?.canonical_url || legacyCanonicalPath(route);
   const title = current?.title || page.h1 || page.title || 'محتوى محفوظ';
@@ -39,16 +40,18 @@ export default function LegacyPreservedPageView({ page, route }: Props) {
     isPartOf: { '@id': `${SITE_URL}/#website` },
     publisher: { '@id': `${SITE_URL}/#organization` },
   } : null;
+  const HistoricalHeading = lead ? 'h2' : 'h1';
 
   return <><SiteHeader /><main className="article-shell">
     {sectorCollectionSchema ? <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(sectorCollectionSchema).replace(/</g, '\u003c') }} /> : null}
     <nav className="breadcrumbs" aria-label="مسار الصفحة">
       <Link href="/">الرئيسية</Link><span>/</span><span>{current ? 'محتوى روافد المراجع' : familyLabel(page.source_family)}</span><span>/</span><span aria-current="page">{title}</span>
     </nav>
+    {lead}
     <article>
       <header className="article-hero">
-        <span className="eyebrow">{current ? 'محتوى منشور ومراجع' : 'نسخة إنتاجية محفوظة'}</span>
-        <h1>{title}</h1>
+        <span className="eyebrow">{current ? 'محتوى منشور ومراجع' : lead ? 'السجل التاريخي المحفوظ' : 'نسخة إنتاجية محفوظة'}</span>
+        <HistoricalHeading>{title}</HistoricalHeading>
         {(current?.excerpt || page.meta_description) ? <p>{current?.excerpt || page.meta_description}</p> : null}
         <div className="article-meta">
           <span>{current ? `المسار المعتمد: ${canonical}` : `المسار الأصلي محفوظ: ${canonical}`}</span>

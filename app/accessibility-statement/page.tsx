@@ -1,5 +1,72 @@
-import LegacyPreservedRoute, { preservedRouteMetadata } from '@/components/legacy-preserved-route';
-const route='/accessibility-statement/';
-export const dynamic='force-dynamic';
-export async function generateMetadata(){return preservedRouteMetadata(route);}
-export default function AccessibilityStatementLanding(){return <LegacyPreservedRoute route={route}/>;}
+import LegacyPreservedRoute from '@/components/legacy-preserved-route';
+import { buildSeoMetadata } from '@/lib/seo';
+
+const route = '/accessibility-statement/';
+
+export const metadata = buildSeoMetadata({
+  title: 'بيان الإتاحة والوصول الرقمي',
+  description: 'بيان الإتاحة في منصة روافد: معيار WCAG 2.2 AA المستهدف، حالة التوافق، الاختبارات، القيود المعروفة، وآلية الإبلاغ عن عوائق الوصول.',
+  path: '/accessibility-statement',
+  index: true,
+  keywords: ['الإتاحة الرقمية', 'الوصول الرقمي', 'WCAG 2.2', 'إمكانية الوصول', 'روافد'],
+});
+
+function AccessibilityStatementCurrent() {
+  return (
+    <section className="trust-page-content" aria-labelledby="accessibility-current-title">
+      <header className="trust-page-hero">
+        <span className="eyebrow">الإتاحة الرقمية · بيان حالي</span>
+        <h1 id="accessibility-current-title">بيان الإتاحة والوصول الرقمي</h1>
+        <p>تعمل منصة روافد على جعل خدماتها ومحتواها قابلة للاستخدام من أوسع نطاق ممكن من الأشخاص، بما في ذلك مستخدمو التقنيات المساعدة. نستهدف إرشادات WCAG 2.2 بالمستوى AA للواجهات العامة، ولا نعلن تحقق امتثال شامل قبل وجود تدقيق موثق يغطي النطاق المعلن.</p>
+      </header>
+
+      <section>
+        <h2>المعيار وحالة التوافق</h2>
+        <p><strong>المعيار المستهدف:</strong> Web Content Accessibility Guidelines (WCAG) 2.2، المستوى AA.</p>
+        <p><strong>حالة التوافق المعلنة حاليًا:</strong> لم تُصدر روافد بعد ادعاء توافق شامل للموقع كله مع WCAG 2.2 AA. اجتياز فحوص آلية أو درجات Lighthouse لا يُعامل وحده كدليل امتثال، لأن التحقق الكامل يحتاج مراجعة بشرية واختبار مسارات فعلية وتقنيات مساعدة.</p>
+      </section>
+
+      <section>
+        <h2>ما نطبقه في المنصة</h2>
+        <ul>
+          <li>بنية دلالية للعناوين والمعالم والتنقل والعناصر التفاعلية.</li>
+          <li>دعم لوحة المفاتيح وحالات تركيز مرئية في المسارات القابلة للتفاعل.</li>
+          <li>تباين مقروء وعدم الاعتماد على اللون وحده لإيصال المعنى.</li>
+          <li>نصوص بديلة للصور المعلوماتية ومعالجة مناسبة للعناصر الزخرفية.</li>
+          <li>ربط الحقول بالتسميات والتعليمات ورسائل الخطأ في النماذج.</li>
+          <li>دعم التكبير وإعادة تدفق المحتوى والشاشات الصغيرة واتجاه الكتابة من اليمين إلى اليسار.</li>
+          <li>اختبارات انحدار تقنية وإتاحة ضمن بوابات الجودة للموقع.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>برنامج التحقق</h2>
+        <p>يتضمن برنامج التحقق مراجعة التنقل بلوحة المفاتيح، ترتيب التركيز، التكبير وإعادة التدفق، التباين، أسماء وأدوار العناصر، البدائل النصية، النماذج، الجداول، الرسائل الديناميكية، المحتوى المتعدد الوسائط، والصفحات الحرجة. نستخدم الفحص الآلي لاكتشاف فئات من المشكلات، ثم نحتاج فحصًا يدويًا لتأكيد سلوك الواجهة في سياق الاستخدام الحقيقي.</p>
+      </section>
+
+      <section>
+        <h2>القيود المعروفة</h2>
+        <p>روافد منصة كبيرة ومتنامية تضم صفحات حديثة، مواد تاريخية محفوظة، أدوات تفاعلية، ملفات ووثائق، ومكونات يجري تحديثها تدريجيًا. قد تظهر عوائق متفرقة في بعض الأسطح القديمة أو المحتوى المستورد أو التفاعلات المعقدة. وجود عائق في جزء من المنصة لا يعني أن الوصول إلى بقية الخدمات متوقف، لكنه يُسجل كخلل يحتاج معالجة وفق أثره على المستخدم.</p>
+      </section>
+
+      <section>
+        <h2>الإبلاغ عن عائق وصول</h2>
+        <p>إذا واجهت صعوبة في قراءة محتوى، استخدام لوحة المفاتيح، فهم عنصر، الوصول إلى نموذج، أو تشغيل جزء من الموقع بتقنية مساعدة، أرسل وصفًا للمشكلة إلى <a href="mailto:contact@healthrenewal.org">contact@healthrenewal.org</a>. يفيد أن تتضمن الرسالة رابط الصفحة، الجهاز والمتصفح، والتقنية المساعدة إن وجدت. لا ترسل بيانات صحية أو شخصية حساسة لمجرد الإبلاغ عن مشكلة إتاحة.</p>
+      </section>
+
+      <section>
+        <h2>التحسين المستمر</h2>
+        <p>تُعامل عوائق الوصول التي تمنع إكمال مهمة أساسية كأعطال وظيفية، لا كملاحظات شكلية فقط. ويُحدّث هذا البيان عندما يتغير نطاق الاختبارات أو حالة التوافق المعلنة أو القنوات التشغيلية الخاصة بالإتاحة.</p>
+      </section>
+
+      <section>
+        <h2>السجل التاريخي</h2>
+        <p>يعرض الجزء التالي النسخة التاريخية المحفوظة التي كانت منشورة على هذا المسار قبل البيان الحالي. نحتفظ بها لأغراض الاستمرارية والتتبع، ولا ينبغي تفسيرها بوصفها وصفًا أحدث من هذا البيان.</p>
+      </section>
+    </section>
+  );
+}
+
+export default function AccessibilityStatementPage() {
+  return <LegacyPreservedRoute route={route} lead={<AccessibilityStatementCurrent />} />;
+}
