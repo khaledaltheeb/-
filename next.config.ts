@@ -56,6 +56,29 @@ const nextConfig: NextConfig = {
         destination: '/encyclopedia/cluttering/',
         permanent: true,
       },
+      // Canonical consolidation: CAS had two additional diagnostic/reference pages.
+      // Keep functional Capabilities, Outside-the-Box and school-support routes
+      // independent, but route overlapping diagnostic intent to the core reference.
+      {
+        source: '/content/special-ed-encyclopedia-childhood-apraxia-of-speech',
+        destination: '/encyclopedia/childhood-apraxia-speech/',
+        permanent: true,
+      },
+      {
+        source: '/content/special-ed-encyclopedia-childhood-apraxia-of-speech/',
+        destination: '/encyclopedia/childhood-apraxia-speech/',
+        permanent: true,
+      },
+      {
+        source: '/special-needs/communication/childhood-apraxia-of-speech',
+        destination: '/encyclopedia/childhood-apraxia-speech/',
+        permanent: true,
+      },
+      {
+        source: '/special-needs/communication/childhood-apraxia-of-speech/',
+        destination: '/encyclopedia/childhood-apraxia-speech/',
+        permanent: true,
+      },
     ];
   },
   async rewrites() {

@@ -7,6 +7,10 @@ const requiredRedirects = [
   ['/encyclopedia/cluttering-communication-disorder/', '/encyclopedia/cluttering/'],
   ['/content/cluttering-fluency-disorder', '/encyclopedia/cluttering/'],
   ['/content/cluttering-fluency-disorder/', '/encyclopedia/cluttering/'],
+  ['/content/special-ed-encyclopedia-childhood-apraxia-of-speech', '/encyclopedia/childhood-apraxia-speech/'],
+  ['/content/special-ed-encyclopedia-childhood-apraxia-of-speech/', '/encyclopedia/childhood-apraxia-speech/'],
+  ['/special-needs/communication/childhood-apraxia-of-speech', '/encyclopedia/childhood-apraxia-speech/'],
+  ['/special-needs/communication/childhood-apraxia-of-speech/', '/encyclopedia/childhood-apraxia-speech/'],
 ];
 
 const failures = [];
@@ -19,7 +23,7 @@ for (const [source, destination] of requiredRedirects) {
     continue;
   }
 
-  const block = config.slice(sourceIndex, sourceIndex + 260);
+  const block = config.slice(sourceIndex, sourceIndex + 300);
   if (!block.includes(destinationMarker)) failures.push(`${source} does not point to ${destination}`);
   if (!block.includes('permanent: true')) failures.push(`${source} is not permanent`);
 }
@@ -30,4 +34,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log(`Canonical consolidation contract passed for ${requiredRedirects.length} Cluttering route variants.`);
+console.log(`Canonical consolidation contract passed for ${requiredRedirects.length} protected route variants.`);
