@@ -207,13 +207,21 @@ for (const restricted of ['hospital-anxiety-and-depression-scale', 'columbia-sui
   assert(!fullFormsWave2.includes(`slug: '${restricted}'`), `restricted/non-open instrument must not be reproduced in Wave 2: ${restricted}`);
 }
 
-// Rendering and print architecture must use the aggregated operational catalog.
+// Rendering and print architecture must use the aggregated operational catalog and distinguish
+// reviewed explicit material from the universal documentation fallback without misleading users.
 assert(detailPage.includes("from '@/lib/assessment-measure-operational-catalog'"), 'measure detail page must load the aggregated full-form operational catalog');
-assert(detailPage.includes('<AssessmentMeasureOperationalForm material={operationalMaterial} />'), 'measure detail page must embed the operational form');
+assert(operationalCatalog.includes('export function hasExplicitOperationalMaterial'), 'catalog must expose explicit-versus-fallback status');
+assert(detailPage.includes('hasExplicitOperationalMaterial'), 'measure detail page must distinguish explicit operational material from fallback');
+assert(detailPage.includes('<AssessmentMeasureOperationalForm material={operationalMaterial} />'), 'measure detail page must embed the operational form/documentation sheet');
 assert(detailPage.includes('/print/'), 'measure detail page must expose a print route');
-assert(detailPage.includes('فتح المقياس / ورقة التطبيق'), 'measure detail page must visibly expose operational use');
+assert(detailPage.includes('فتح المادة التشغيلية'), 'explicit operational material must remain visibly accessible');
+assert(detailPage.includes('فتح ورقة التوثيق العامة'), 'generic fallback must remain visibly accessible without being called the instrument');
+assert(detailPage.includes('ورقة توثيق عامة — ليست نموذج المقياس'), 'detail page must visibly disclose that fallback is not the instrument');
+assert(detailPage.includes('لم تُنشر مادة تشغيلية صريحة بعد — المتاح ورقة توثيق عامة فقط'), 'detail page must disclose unresolved operational status');
 assert(printPage.includes("from '@/lib/assessment-measure-operational-catalog'"), 'print page must load the aggregated full-form operational catalog');
+assert(printPage.includes('hasExplicitOperationalMaterial'), 'print page must distinguish explicit material from fallback');
 assert(printPage.includes('robots: { index: false, follow: true }'), 'print routes must be noindex/follow');
+assert(printPage.includes('ورقة توثيق عامة — ليست نموذج المقياس'), 'fallback print page must disclose that it is not the original instrument');
 assert(printPage.includes('<AssessmentMeasureOperationalForm material={material} printable />'), 'print route must render the same canonical operational material');
 assert(printPage.includes('<MeasurePrintButton />'), 'print route must expose print/PDF control');
 assert(printButton.includes('window.print()'), 'print control must call browser print');
@@ -227,5 +235,5 @@ assert(css.includes('@page{size:A4'), 'print stylesheet must declare A4 page siz
 assert(css.includes('.printToolbar{display:none!important}'), 'print toolbar must be hidden from printed output');
 
 if (!process.exitCode) {
-  console.log(`ASSESSMENT_OPERATIONAL_CONTRACT_PASS: ${explicitSlugs.length} base forms/protocols + ${fullFormSlugs.length} Wave 1 + ${fullFormWave2Slugs.length} Wave 2 + universal fallback + A4 print architecture verified.`);
+  console.log(`ASSESSMENT_OPERATIONAL_CONTRACT_PASS: ${explicitSlugs.length} base forms/protocols + ${fullFormSlugs.length} Wave 1 + ${fullFormWave2Slugs.length} Wave 2 + truthful universal fallback + A4 print architecture verified.`);
 }
