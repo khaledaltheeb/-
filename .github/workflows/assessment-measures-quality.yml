@@ -31,6 +31,7 @@ on:
       - 'scripts/cos-instrument-rights-audit-contract.mjs'
       - 'scripts/cos-instrument-rights-audit-wave4-contract.mjs'
       - 'scripts/cos-instrument-rights-audit-wave6-contract.mjs'
+      - 'scripts/cos-instrument-rights-audit-qolie10-contract.mjs'
       - '.assessment-measures-plan.md'
       - '.github/workflows/assessment-measures-quality.yml'
   workflow_dispatch:
@@ -82,6 +83,8 @@ jobs:
         run: node scripts/cos-instrument-rights-audit-wave4-contract.mjs
       - name: Validate COS instrument rights audit Wave 6
         run: node scripts/cos-instrument-rights-audit-wave6-contract.mjs
+      - name: Validate QOLIE-10 rights audit
+        run: node scripts/cos-instrument-rights-audit-qolie10-contract.mjs
       - name: Type check
         run: npm run typecheck
       - name: Lint
