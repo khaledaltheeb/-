@@ -1,0 +1,28 @@
+name: Three Labs Full Live Audit
+
+on:
+  push:
+    branches: ['audit/three-labs-full-live-20260906']
+    paths:
+      - '.github/scripts/three-labs-full-live-audit.mjs'
+      - '.github/workflows/three-labs-full-live-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: three-labs-full-live-audit
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Audit every known Assessment Measures, Assessment Lab, and Cognitive Lab route
+        run: node .github/scripts/three-labs-full-live-audit.mjs
