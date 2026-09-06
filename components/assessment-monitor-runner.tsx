@@ -12,6 +12,7 @@ const responseOptions: Record<AssessmentResponseKind, readonly string[]> = {
   degree: ['إطلاقًا', 'بدرجة بسيطة', 'بدرجة متوسطة', 'بدرجة كبيرة', 'بدرجة كبيرة جدًا'],
   'yes-no': ['لا', 'إلى حد ما', 'نعم'],
 };
+const notApplicableOption = 'لا ينطبق / لم أجرّب';
 
 export default function AssessmentMonitorRunner({ title, referencePeriod, questions }: Props) {
   const [answers, setAnswers] = useState<Record<number, string>>({});
@@ -31,7 +32,7 @@ export default function AssessmentMonitorRunner({ title, referencePeriod, questi
       <div>
         <span className={styles.eyebrow}>متابعة ذاتية غير تشخيصية</span>
         <h2 id="monitor-runner-title">{title}</h2>
-        <p><strong>الفترة المرجعية: {referencePeriod}.</strong> اقرأ كل بند وفق هذه الفترة وبحسب صياغته؛ خيارات الإجابة تتغير بحسب ما إذا كان السؤال عن التكرار أو الدرجة أو وجود تجربة محددة. لا توجد إجابة صحيحة أو خاطئة.</p>
+        <p><strong>الفترة المرجعية: {referencePeriod}.</strong> اقرأ كل بند وفق هذه الفترة وبحسب صياغته؛ خيارات الإجابة تتغير بحسب ما إذا كان السؤال عن التكرار أو الدرجة أو وجود تجربة محددة. إذا كان البند يفترض موقفًا أو استراتيجية لم تحدث أو لم تجرّبها، اختر «{notApplicableOption}» بدل التخمين. لا توجد إجابة صحيحة أو خاطئة.</p>
       </div>
       <div className={styles.progress} aria-live="polite">
         <strong>{completion}%</strong>
@@ -41,7 +42,7 @@ export default function AssessmentMonitorRunner({ title, referencePeriod, questi
 
     <div className={styles.privacy}><strong>خصوصية:</strong> الإجابات والملاحظات تبقى في ذاكرة هذه الصفحة فقط. لا يوجد إرسال للخادم، ولا حفظ في الحساب أو Local Storage أو Session Storage. تنبيهات السلامة — عندما توجد في بند صريح — تُحدد محليًا من الإجابة نفسها ولا تُرسل إلى روافد. عند إغلاق الصفحة أو تحديثها تضيع الإجابات.</div>
 
-    <div className={styles.boundary}><strong>مهم:</strong> هذه الأداة ليست مقياسًا نفسيًا مقننًا ولا تحسب درجة تشخيصية أو درجة خطر. فائدتها في تنظيم الملاحظة ضمن الفترة المرجعية المحددة، وتجهيز أمثلة محددة لمناقشتها مع مختص عند الحاجة. تنبيه السلامة لا يعني أن الموقع أجرى تقييمًا سريريًا للخطر.</div>
+    <div className={styles.boundary}><strong>مهم:</strong> هذه الأداة ليست مقياسًا نفسيًا مقننًا ولا تحسب درجة تشخيصية أو درجة خطر. فائدتها في تنظيم الملاحظة ضمن الفترة المرجعية المحددة، وتجهيز أمثلة محددة لمناقشتها مع مختص عند الحاجة. تنبيه السلامة لا يعني أن الموقع أجرى تقييمًا سريريًا أو تشخيصيًا للخطر.</div>
 
     <div className={styles.axisList}>
       {axes.map((axis) => {
@@ -51,7 +52,7 @@ export default function AssessmentMonitorRunner({ title, referencePeriod, questi
           <legend>{axis}</legend>
           <div className={styles.axisMeta}>{axisAnswered} من {indexed.length} بنود مكتملة</div>
           {indexed.map(({ question, index }) => {
-            const options = responseOptions[question.responseKind];
+            const options = [...responseOptions[question.responseKind], notApplicableOption];
             const selectedAnswer = answers[index];
             const activeSafetySignal = question.safetySignal && selectedAnswer
               ? question.safetySignal.triggerValues.includes(selectedAnswer)
@@ -86,7 +87,7 @@ export default function AssessmentMonitorRunner({ title, referencePeriod, questi
 
     <section className={styles.interpretation} aria-labelledby="interpretation-title">
       <h3 id="interpretation-title">كيف تقرأ إجاباتك؟</h3>
-      <p>لا تجمع الإجابات في نسبة واحدة ولا تقارنها بدرجات أشخاص آخرين. راقب بدلًا من ذلك: ما المحور الذي يتكرر فيه التأثير، ما السياق الذي يزيده أو يخففه، وهل تغيرت قدرتك على أداء حياتك اليومية. هذه المعلومات أكثر فائدة من رقم كلي غير مقنن.</p>
+      <p>لا تجمع الإجابات في نسبة واحدة ولا تقارنها بدرجات أشخاص آخرين. وتجاهل البنود التي اخترت لها «{notApplicableOption}» عند مراجعة نمطك؛ فهي تعني أن السؤال لم يكن قابلًا للحكم في تجربتك الحالية. راقب بدلًا من ذلك: ما المحور الذي يتكرر فيه التأثير، ما السياق الذي يزيده أو يخففه، وهل تغيرت قدرتك على أداء حياتك اليومية. هذه المعلومات أكثر فائدة من رقم كلي غير مقنن.</p>
       {complete ? <p className={styles.completeNotice}><strong>اكتملت المتابعة.</strong> راجع ملاحظاتك، واختر مثالين أو ثلاثة تريد الاحتفاظ بهما أو مناقشتهما. يمكنك طباعة الصفحة؛ لن تُحفظ الإجابات على الموقع.</p> : <p>يمكنك التوقف في أي وقت. عدم إكمال الأداة لا يعني شيئًا سريريًا.</p>}
     </section>
 
