@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import { buildSeoMetadata, SITE_URL } from '@/lib/seo';
@@ -69,15 +70,15 @@ function Pagination({ page, totalPages, params }: {
   const pages = Array.from({ length: end - start + 1 }, (_, index) => start + index);
   return (
     <nav className={styles.pagination} aria-label="ترقيم صفحات مرصد الأبحاث">
-      {page > 1 && <a href={hrefWith(params, { rp: page - 1 })}>السابق</a>}
-      {start > 1 && <a href={hrefWith(params, { rp: 1 })}>1</a>}
+      {page > 1 && <Link href={hrefWith(params, { rp: page - 1 })}>السابق</Link>}
+      {start > 1 && <Link href={hrefWith(params, { rp: 1 })}>1</Link>}
       {start > 2 && <span aria-hidden="true">…</span>}
       {pages.map((value) => (
-        <a key={value} className={value === page ? styles.activePage : undefined} aria-current={value === page ? 'page' : undefined} href={hrefWith(params, { rp: value })}>{value}</a>
+        <Link key={value} className={value === page ? styles.activePage : undefined} aria-current={value === page ? 'page' : undefined} href={hrefWith(params, { rp: value })}>{value}</Link>
       ))}
       {end < totalPages - 1 && <span aria-hidden="true">…</span>}
-      {end < totalPages && <a href={hrefWith(params, { rp: totalPages })}>{totalPages}</a>}
-      {page < totalPages && <a href={hrefWith(params, { rp: page + 1 })}>التالي</a>}
+      {end < totalPages && <Link href={hrefWith(params, { rp: totalPages })}>{totalPages}</Link>}
+      {page < totalPages && <Link href={hrefWith(params, { rp: page + 1 })}>التالي</Link>}
     </nav>
   );
 }
@@ -141,10 +142,10 @@ export default async function ResearchObservatoryPage({ searchParams }: Props) {
           </div>
           <div className={styles.clusterGrid}>
             {catalogStats.clusters.map((item) => (
-              <a key={item.key} href={hrefWith(params, { cluster: item.key, rp: 1 })}>
+              <Link key={item.key} href={hrefWith(params, { cluster: item.key, rp: 1 })}>
                 <strong>{item.label}</strong>
                 <span>{item.count.toLocaleString('ar')} سجل</span>
-              </a>
+              </Link>
             ))}
           </div>
           <div className={styles.qualityStrip}>
@@ -152,7 +153,7 @@ export default async function ResearchObservatoryPage({ searchParams }: Props) {
             <span><strong>{catalogStats.openAccess.toLocaleString('ar')}</strong> وصول مفتوح</span>
             <span><strong>{catalogStats.last90Days.toLocaleString('ar')}</strong> من آخر 90 يومًا</span>
             <span>آخر مزامنة: <strong>{formatDateTime(catalogStats.lastSyncedAt) ?? '—'}</strong></span>
-            <span><a href="/magazine/">العودة إلى القراءات العربية الكاملة ←</a></span>
+            <span><Link href="/magazine/">العودة إلى القراءات العربية الكاملة ←</Link></span>
           </div>
         </section>
 
@@ -188,7 +189,7 @@ export default async function ResearchObservatoryPage({ searchParams }: Props) {
             <input type="hidden" name="rp" value="1" />
             <div className={styles.filterActions}>
               <button type="submit">تطبيق البحث</button>
-              {(rq || cluster || rtype) && <a href="/magazine/research-observatory/#research-catalog">مسح الفلاتر</a>}
+              {(rq || cluster || rtype) && <Link href="/magazine/research-observatory/#research-catalog">مسح الفلاتر</Link>}
             </div>
           </form>
 
