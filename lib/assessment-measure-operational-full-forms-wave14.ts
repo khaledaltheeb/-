@@ -6,7 +6,6 @@ const yesNoUnknown: OperationalOption[] = [
   { labelAr: 'غير معروف / غير موثق', value: 'unknown' },
 ];
 
-const score03: OperationalOption[] = [0, 1, 2, 3].map((score) => ({ labelAr: String(score), value: String(score), score }));
 const score04: OperationalOption[] = [0, 1, 2, 3, 4].map((score) => ({ labelAr: String(score), value: String(score), score }));
 
 const SES_CD_CDICS = 'https://www.cdisc.org/standards/foundational/qrs/simple-endoscopic-score-crohns-disease-version-1';
