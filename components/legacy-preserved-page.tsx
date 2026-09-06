@@ -2,6 +2,7 @@ import Link from 'next/link';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import ContentRenderer from '@/components/content-renderer';
+import ResearchEvidenceLearningNav from '@/components/research-evidence-learning-nav';
 import { SITE_URL } from '@/lib/seo';
 import {
   legacyCanonicalPath,
@@ -64,10 +65,12 @@ export default function LegacyPreservedPageView({ page, route }: Props) {
         <strong>حالة هذه النسخة</strong>
         <p>هذا هو المحتوى الذي كان منشورًا على المسار التاريخي نفسه. لم تُمنح هذه النسخة اعتماد دورة المراجعة العلمية الحالية بعد، لذلك تبقى غير مفهرسة إلى أن تكتمل مراجعتها.</p>
       </aside>}
+      {current ? <ResearchEvidenceLearningNav route={canonical} /> : null}
       <div className="article-body">
         <ContentRenderer bodyJson={bodyJson} bodyText={bodyText} recordId={current?.id || page.source_path} />
       </div>
       {current?.medical_disclaimer ? <aside className="medical-disclaimer" aria-label="حدود المحتوى الطبي"><strong>تنبيه</strong><p>{current.medical_disclaimer}</p></aside> : null}
+      {current ? <ResearchEvidenceLearningNav route={canonical} /> : null}
       {internalLinks.length ? <section className="article-related" aria-labelledby="legacy-related-title">
         <h2 id="legacy-related-title">روابط المسار الأصلي</h2>
         <ul>{internalLinks.map((item) => <li key={item.href}><Link href={item.href}>{item.title}</Link></li>)}</ul>
