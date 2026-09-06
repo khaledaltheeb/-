@@ -136,10 +136,11 @@ function auditRow(row) {
   if (!row.seo_title?.trim()) critical.push('missing SEO title');
   if (!row.seo_description?.trim()) critical.push('missing SEO description');
 
+  let primarySourcePresent = false;
   if (validHttpUrl(source) && refs.length) {
     const sourceKey = canonicalizeUrl(source);
     const sourceHost = new URL(source).hostname.replace(/^www\./, '');
-    const sourcePresent = refs.some((ref) => {
+    primarySourcePresent = refs.some((ref) => {
       const key = canonicalizeUrl(ref);
       if (key === sourceKey) return true;
       try {
@@ -149,7 +150,7 @@ function auditRow(row) {
         return false;
       }
     });
-    if (!sourcePresent) warnings.push('primary source not represented clearly in references');
+    if (!primarySourcePresent) warnings.push('primary source not represented clearly in references');
   }
 
   if (refs.length < 3) warnings.push(`fewer than 3 source records (${refs.length})`);
@@ -168,16 +169,35 @@ function auditRow(row) {
     row?.schema_json?.aim || '',
   ].join(' ');
   if (!containsAny(explicitAimText, [
-    'ما السؤال', 'سؤال البحث', 'السؤال البحثي', 'ماذا بحثت', 'ماذا اختبرت', 'ما الذي اختبر',
-    'هدف الدراسة', 'هدف البحث', 'الغرض', 'هدفت', 'تهدف', 'يهدف', 'استهدف', 'استهدفت', 'سعى', 'تسعى',
+    'ما السؤال', 'سؤال البحث', 'السؤال البحثي', 'السؤال الذي', 'السؤال الذي اختبر',
+    'ماذا بحثت', 'ماذا اختبرت', 'ما الذي اختبر', 'ما الذي اختبرته',
+    'هدف الدراسة', 'هدف البحث', 'الغرض', 'هدفت', 'تهدف', 'يهدف', 'استهدف', 'استهدفت',
+    'سعى', 'تسعى', 'بحثت الدراسة', 'تبحث الدراسة', 'بحثت الأطروحة', 'تبحث الأطروحة',
+    'حاولت تقدير', 'حاولت الدراسة', 'اختبرت الدراسة', 'تقارن الدراسة', 'قارنت الدراسة',
     ' aim ', 'objective', 'objectives', 'purpose',
   ])) warnings.push('research question/aim not explicit');
-  if (!containsAny(text, ['المنهج', 'المنهجية', 'كيف بُنيت', 'كيف بنيت', 'كيف جُمعت', 'كيف جمعت', 'كيف أُجريت', 'كيف أجريت', 'طريقة البحث', 'تصميم الدراسة', 'تصميم التجربة', 'التصميم'])) warnings.push('methods/design not explicit');
+
+  if (!containsAny(text, [
+    'المنهج', 'المنهجية', 'كيف بُنيت', 'كيف بنيت', 'كيف صُممت', 'كيف صممت',
+    'كيف جُمعت', 'كيف جمعت', 'كيف أُجريت', 'كيف أجريت', 'أُجريت الدراسة', 'أجريت الدراسة',
+    'صُممت الدراسة', 'صممت الدراسة', 'طريقة البحث', 'تصميم الدراسة', 'تصميم التجربة', 'التصميم',
+    'دراسة استعادية', 'دراسة مستقبلية', 'دراسة أترابية', 'دراسة مقطعية', 'دراسة نوعية',
+    'تجربة عشوائية', 'randomized', 'retrospective', 'prospective',
+  ])) warnings.push('methods/design not explicit');
+
   if (!containsAny(text, ['حدود', 'قيود', 'محدودية', 'limitations'])) warnings.push('limitations not explicit');
   if (!containsAny(text, ['ما الذي لا تثبت', 'ما الذي لا يثبت', 'لا تثبت', 'لا يثبت', 'لا تعني', 'لا يعني', 'لا تسمح', 'لا يمكن استنتاج', 'لا يمكن أن نستنتج'])) warnings.push('anti-overclaim section not explicit');
   if (!containsAny(text, ['الدلالة', 'التطبيق', 'عملي', 'قائمة تدقيق', 'ماذا يعني ذلك', 'ماذا تعني', 'للمؤسسات', 'للمدارس', 'للأسر', 'القرار', 'توصيات'])) warnings.push('practical interpretation not explicit');
-  if (!containsAny(text, ['أسئلة شائعة']) && !blocks.some((b) => b?.type === 'faq')) warnings.push('FAQ absent');
-  if (!containsAny(text, ['المصدر الأصلي', 'المقال الأصلي', 'الورقة الأصلية', 'بيانات التوثيق', 'doi', 'pmid', 'المراجع'])) warnings.push('primary-source section not explicit');
+
+  // FAQ is optional by the editorial standard: only require it when the content explicitly declares that it should exist.
+  const faqRequired = row?.schema_json?.requires_faq === true || row?.schema_json?.faq_required === true;
+  if (faqRequired && !containsAny(text, ['أسئلة شائعة']) && !blocks.some((b) => b?.type === 'faq')) warnings.push('FAQ absent');
+
+  // Provenance is already checked structurally through source_url + references_json.
+  // Do not force a redundant visible heading merely to satisfy the heuristic.
+  if (!primarySourcePresent && validHttpUrl(source) && !containsAny(text, ['المصدر الأصلي', 'المقال الأصلي', 'الورقة الأصلية', 'بيانات التوثيق', 'doi', 'pmid', 'المراجع'])) {
+    warnings.push('primary-source section not explicit');
+  }
 
   // Evidence-specific rules must be derived from the page classification, not from
   // incidental mentions of other study types in background text or references.
@@ -269,7 +289,9 @@ const md = [
   '',
   '- Depth is assessed from both structured block count and useful word count; a long, information-dense block is not treated as thin merely because block count is low.',
   '- Evidence-specific rules are derived from the explicit evidence classification, not incidental mentions in references or background text.',
-  '- Research aims may be expressed as a question, objective, purpose, or explicit aim; the audit does not require one fixed heading or wording.',
+  '- Research aims may be expressed as a question, objective, purpose, or explicit aim; the audit accepts common Arabic scientific formulations rather than requiring one fixed heading.',
+  '- FAQ is optional unless a page explicitly declares it required; the audit does not reward filler.',
+  '- Primary-source provenance is primarily validated from source_url and references_json, so a redundant visible heading is not required when provenance is already explicit.',
   '- A source-verified statement that a CI, heterogeneity statistic, certainty assessment, or search-scope detail is not reported/available satisfies the audit disclosure requirement; it never authorizes inference or fabrication.',
   '- This is a structural/provenance safety audit, not a substitute for reading the primary paper.',
   '- A page can score highly and still contain a scientific error; source-level verification remains mandatory.',
