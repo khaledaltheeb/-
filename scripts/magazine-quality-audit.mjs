@@ -63,6 +63,13 @@ function containsAny(text, patterns) {
   return patterns.some((pattern) => lower.includes(pattern.toLocaleLowerCase('ar')));
 }
 
+function explicitlyUnavailable(text, concept) {
+  const unavailable = /(?:غير\s+(?:متاح|متوفر|قابل\s+للتحقق|ظاهر)|لا\s+(?:يعرض|تعرض|يذكر|تذكر|يبلغ|تبلغ)|لم\s+(?:يُعرض|يعرض|تُعرض|تعرض|يُذكر|يذكر|تُذكر|تذكر|يُبلغ|يبلغ)|not\s+(?:available|reported|verifiable|accessible))/i;
+  return String(text || '')
+    .split(/[.!؟\n]+/)
+    .some((segment) => unavailable.test(segment) && concept.test(segment));
+}
+
 function validHttpUrl(value) {
   if (typeof value !== 'string' || !value.trim()) return false;
   try {
@@ -170,10 +177,14 @@ function auditRow(row) {
   const isTrial = !isProtocol && !isSystematic && !isMeta && !isScoping && /عشوائي|random|trial/i.test(evidence);
   const isObservational = /أتراب|مقطعي|حالات وشواهد|رصد|سجلي|cohort|cross-sectional|case-control|observational|registry/i.test(evidence);
 
+  const uncertaintyUnavailable = explicitlyUnavailable(text, /(?:95\s*%|فاصل\s*(?:الثقة|المصداقية)|confidence\s+interval|credible\s+interval|uncertainty|\bci\b|\bcri\b)/i);
+  const heterogeneityUnavailable = explicitlyUnavailable(text, /(?:i\s*²|\bi2\b|عدم\s+التجانس|التغاير|heterogeneity|inconsistency|عدم\s+الاتساق|transitivity)/i);
+  const certaintyUnavailable = explicitlyUnavailable(text, /(?:grade|يقين|جودة\s+الدليل|risk\s+of\s+bias|خطر\s+التحيز|تحيز)/i);
+
   if ((isSystematic || isMeta || isScoping) && !containsAny(text, ['قاعدة', 'قواعد', 'pubmed', 'medline', 'embase', 'cinahl', 'scopus', 'cochrane', 'بحثت', 'بُحثت', 'البحث في', 'مصادر البحث'])) warnings.push('review search scope/databases not explicit');
-  if (isMeta && !containsAny(text, ['فاصل ثقة', 'فاصل مصداقية', '95%', 'ci ', 'cri '])) warnings.push('meta-analysis uncertainty interval not explicit');
-  if (isMeta && !containsAny(text, ['i²', 'i2', 'عدم التجانس', 'التباين بين الدراسات', 'heterogeneity', 'عدم الاتساق', 'inconsistency', 'transitivity', 'الاتساق الشبكي'])) warnings.push(isNetworkMeta ? 'network meta-analysis heterogeneity/inconsistency not explicit' : 'meta-analysis heterogeneity not explicit');
-  if (isMeta && !containsAny(text, ['تحيز', 'risk of bias', 'grade', 'يقين', 'جودة الدليل', 'certainty'])) warnings.push('meta-analysis bias/certainty not explicit');
+  if (isMeta && !containsAny(text, ['فاصل ثقة', 'فاصل مصداقية', '95%', 'ci ', 'cri ']) && !uncertaintyUnavailable) warnings.push('meta-analysis uncertainty interval not explicit');
+  if (isMeta && !containsAny(text, ['i²', 'i2', 'عدم التجانس', 'التباين بين الدراسات', 'heterogeneity', 'عدم الاتساق', 'inconsistency', 'transitivity', 'الاتساق الشبكي']) && !heterogeneityUnavailable) warnings.push(isNetworkMeta ? 'network meta-analysis heterogeneity/inconsistency not explicit' : 'meta-analysis heterogeneity not explicit');
+  if (isMeta && !containsAny(text, ['تحيز', 'risk of bias', 'grade', 'يقين', 'جودة الدليل', 'certainty']) && !certaintyUnavailable) warnings.push('meta-analysis bias/certainty not explicit');
   if (isTrial && !containsAny(text, ['مجموعة', 'ضابط', 'الرعاية المعتادة', 'مقارنة', 'مقارن', 'control', 'comparator'])) warnings.push('trial comparator not explicit');
   if (isTrial && !containsAny(text, ['متابعة', 'أسبوع', 'شهر', 'follow-up', 'follow up', 'نقطة زمنية'])) warnings.push('trial follow-up/time point not explicit');
   if (isObservational && !containsAny(text, ['لا تثبت السببية', 'لا يثبت السببية', 'لا تثبت أن', 'ارتباط', 'association', 'caus'])) warnings.push('observational causality boundary not explicit');
@@ -244,6 +255,7 @@ const md = [
   '',
   '- Depth is assessed from both structured block count and useful word count; a long, information-dense block is not treated as thin merely because block count is low.',
   '- Evidence-specific rules are derived from the explicit evidence classification, not incidental mentions in references or background text.',
+  '- A source-verified statement that a CI, heterogeneity statistic, or certainty assessment is not reported/available satisfies the audit disclosure requirement; it never authorizes inference or fabrication.',
   '- This is a structural/provenance safety audit, not a substitute for reading the primary paper.',
   '- A page can score highly and still contain a scientific error; source-level verification remains mandatory.',
   '- A warning is a queue signal, not proof that the page is wrong.',
