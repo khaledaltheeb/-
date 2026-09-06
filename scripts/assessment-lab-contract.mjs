@@ -5,6 +5,7 @@ const readJson = (path) => JSON.parse(fs.readFileSync(path, 'utf8'));
 const monitors = readJson('data/assessment-lab/monitors.v1.json');
 const instruments = readJson('data/assessment-lab/instruments.v1.json');
 const publicationState = readJson('data/assessment-lab/publication-state.v1.json');
+const scientificStandard = readJson('data/assessment-lab/scientific-quality-standard.v1.json');
 const finalBankFiles = [
   'data/assessment-lab/question-banks.clarity-wave2.v1.json',
   'data/assessment-lab/question-banks.clarity-wave3.v1.json',
@@ -25,6 +26,18 @@ const fail = (message) => {
   console.error(`ASSESSMENT LAB CONTRACT FAILED: ${message}`);
   process.exitCode = 1;
 };
+
+if (scientificStandard.schema_version !== 2 || scientificStandard.status !== 'mandatory') fail('gold-standard scientific completeness schema v2 must remain mandatory');
+for (const field of ['construct_definition','intended_population','intended_use','prohibited_uses','reference_period','response_scale_semantics','applicability_response','domain_map','item_rationale','evidence_mapping_level','language_clarity_review','content_validity_review','privacy_statement','interpretation_boundary','functional_impact_guidance','safety_escalation','professional_referral_path','scientific_references','versioning','validation_stage']) {
+  if (!scientificStandard.minimum_requirements?.includes(field)) fail(`scientific completeness standard lost required field ${field}`);
+}
+for (const rule of ['validated_label_requires_empirical_validation','diagnostic_claims_without_validation_forbidden','cutoffs_without_criterion_study_forbidden','generic_template_only_tools_are_complete','mixed_response_semantics_forbidden','proprietary_item_copying_forbidden','forced_answer_when_item_not_applicable_forbidden','evidence_relation_must_disclose_mapping_level','profile_derived_evidence_cannot_be_labeled_direct','safety_signal_cannot_be_presented_as_clinical_risk_assessment']) {
+  if (rule === 'generic_template_only_tools_are_complete') {
+    if (scientificStandard.publication_rules?.[rule] !== false) fail('generic-template-only tools must never be considered complete');
+  } else if (scientificStandard.publication_rules?.[rule] !== true) fail(`scientific publication rule must remain enabled: ${rule}`);
+}
+if (scientificStandard.applicability_response?.required_label !== 'لا ينطبق / لم أجرّب') fail('gold-standard applicability response label drifted');
+if (!scientificStandard.evidence_mapping_levels?.['domain-reviewed'] || !scientificStandard.evidence_mapping_levels?.['profile-derived']) fail('both evidence-mapping disclosure levels are mandatory');
 
 if (monitors.length !== 60) fail(`expected 60 current local monitors, found ${monitors.length}`);
 if (instruments.length !== 10) fail(`expected 10 source/rights instrument pages, found ${instruments.length}`);
@@ -122,5 +135,5 @@ if (!detail.includes('/specialists')) fail('professional escalation path missing
 if (!hub.includes('9789240120785')) fail('2026 WHO self-help framework source missing');
 
 if (!process.exitCode) {
-  console.log('Assessment lab contract passed: 60 manually reviewed Rawafid tools / 960 explicit-response items + 10 source-rights pages = 70 published routes; all monitor pages have transparent evidence mapping, safety escalations are locked, historical banks and generic fallback remain outside runtime, non-applicable answers are supported, answers are not stored, and no fabricated diagnostic score is produced.');
+  console.log('Assessment lab contract passed: gold-standard v2 is mandatory; 60 manually reviewed Rawafid tools / 960 explicit-response items + 10 source-rights pages = 70 published routes; all monitor pages have transparent evidence mapping, safety escalations are locked, historical banks and generic fallback remain outside runtime, non-applicable answers are supported, answers are not stored, and no fabricated diagnostic score is produced.');
 }
