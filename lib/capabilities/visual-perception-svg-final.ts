@@ -5,6 +5,9 @@ const needsIndependentStimulus = new Set(['visual-discrimination','form-constanc
 
 export function renderVisualPerceptionWorksheet(a: VisualPerceptionActivity) {
   if (a.kind !== 'test' || !needsIndependentStimulus.has(a.taskType)) return renderBase(a);
+  if (a.taskType === 'visual-discrimination' && (a.level === 1 || a.level === 4)) {
+    return renderBase({ ...a, seed: a.seed + 1, variant: (a.variant + 1) % 7 });
+  }
   const adjusted: VisualPerceptionActivity = {
     ...a,
     seed: a.seed + 1009 + a.level * 37,
