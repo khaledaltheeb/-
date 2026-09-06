@@ -33,6 +33,29 @@ const nextConfig: NextConfig = {
         destination: '/content/fragile-x-school-iep-inclusion',
         permanent: true,
       },
+      // Canonical consolidation: three historical Cluttering pages addressed the
+      // same core search intent. Preserve both historical routes while making the
+      // shortest stable encyclopedia route the single public owner.
+      {
+        source: '/encyclopedia/cluttering-communication-disorder',
+        destination: '/encyclopedia/cluttering/',
+        permanent: true,
+      },
+      {
+        source: '/encyclopedia/cluttering-communication-disorder/',
+        destination: '/encyclopedia/cluttering/',
+        permanent: true,
+      },
+      {
+        source: '/content/cluttering-fluency-disorder',
+        destination: '/encyclopedia/cluttering/',
+        permanent: true,
+      },
+      {
+        source: '/content/cluttering-fluency-disorder/',
+        destination: '/encyclopedia/cluttering/',
+        permanent: true,
+      },
     ];
   },
   async rewrites() {
