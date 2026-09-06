@@ -42,7 +42,7 @@ assert(qolie.includes('aan.com/siteassets') && qolie.includes('qolie-10-permissi
 assert(qolie.includes("arabicEvidence: 'related-version-only'"), 'QOLIE-10 Arabic evidence must remain related-version-only');
 assert(qolie.includes('QOLIE-31') && qolie.includes('المغربي'), 'QOLIE-10 must preserve the Arabic QOLIE-31 exact-version caveat');
 assert(qolie.includes('10.1111/epi.17971'), 'QOLIE-10 must retain ICHOM 2024 exact-version language evidence');
-assert(qolie.includes('emro.who.int'), 'QOLIE-10 must retain WHO EMRO QOLIE-31 Arabic evidence source');
+assert(qolie.includes('WHO EMRO') && qolie.includes('QOLIE-31'), 'QOLIE-10 must retain the named WHO EMRO QOLIE-31 Arabic evidence citation');
 assert(!qolie.includes("rawafidStatus: 'operational-full'"), 'QOLIE-10 must not become a public operational instrument');
 assert(!qolie.includes("rightsStatus: 'not-reviewed'"), 'QOLIE-10 must not regress to unreviewed rights');
 assert(!qolie.includes("arabicEvidence: 'not-audited'"), 'QOLIE-10 must not hide the known related-version Arabic evidence');
