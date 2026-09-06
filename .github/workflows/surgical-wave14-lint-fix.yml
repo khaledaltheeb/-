@@ -1,0 +1,34 @@
+name: Surgical Wave14 Lint Fix
+
+on:
+  push:
+    branches:
+      - maintenance/surgical-wave14-lint-fix-20260906
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Remove the single unused helper on the target PR branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          target='feat/assessment-operational-wave14-20260906'
+          git fetch origin "$target"
+          git checkout -B "$target" "origin/$target"
+          sed -i "/^const score03: OperationalOption\[\]/d" lib/assessment-measure-operational-full-forms-wave14.ts
+          if git diff --quiet -- lib/assessment-measure-operational-full-forms-wave14.ts; then
+            echo 'No change required.'
+            exit 0
+          fi
+          git config user.name 'rawafid-maintenance'
+          git config user.email 'actions@users.noreply.github.com'
+          git add lib/assessment-measure-operational-full-forms-wave14.ts
+          git commit -m 'chore: remove unused Wave 14 score helper'
+          git push origin "HEAD:$target"
