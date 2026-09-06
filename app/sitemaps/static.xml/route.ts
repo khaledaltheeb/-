@@ -5,6 +5,7 @@ import { assessmentMeasureCategories, assessmentMeasureSlugs } from '@/lib/asses
 import { coreOutcomeRegistrySlugs } from '@/lib/core-outcome-sets/registry';
 import { bilateralActivities } from '@/lib/capabilities/bilateral-tracks';
 import { attentionActivities, attentionSeriesPlans } from '@/lib/capabilities/attention-lab';
+import { memoryActivities, memorySeriesPlans } from '@/lib/capabilities/memory-lab';
 
 export async function GET() {
   return sitemapResponse([
@@ -45,6 +46,9 @@ export async function GET() {
     { path:'/capabilities/kids-lab/attention/', changeFrequency:'weekly', priority:.8 },
     ...attentionSeriesPlans.map((series) => ({ path:`/capabilities/kids-lab/attention/${series.slug}/`, changeFrequency:'weekly' as const, priority:.76 })),
     ...attentionActivities.map((activity) => ({ path:`/capabilities/kids-lab/attention/${activity.seriesSlug}/${activity.slug}/`, changeFrequency:'monthly' as const, priority:.7 })),
+    { path:'/capabilities/kids-lab/memory/', changeFrequency:'weekly', priority:.8 },
+    ...memorySeriesPlans.map((series) => ({ path:`/capabilities/kids-lab/memory/${series.slug}/`, changeFrequency:'weekly' as const, priority:.76 })),
+    ...memoryActivities.map((activity) => ({ path:`/capabilities/kids-lab/memory/${activity.seriesSlug}/${activity.slug}/`, changeFrequency:'monthly' as const, priority:.7 })),
     { path:'/capabilities/kids-lab/bilateral-tracks/', changeFrequency:'weekly', priority:.76 },
     ...bilateralActivities.map((activity) => ({ path:`/capabilities/kids-lab/bilateral-tracks/${activity.slug}/`, changeFrequency:'monthly' as const, priority:.7 })),
     { path:'/downloads', changeFrequency:'weekly', priority:.62 },
