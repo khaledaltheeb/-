@@ -139,7 +139,12 @@ if (exists(cosCrosswalkPagePath)) {
 
 if (exists(cosDetailPath)) {
   const detail = read(cosDetailPath);
-  assert(detail.includes('generateStaticParams'), 'COS detail pages must be statically enumerable');
+  const usesStaticEnumeration = detail.includes('generateStaticParams');
+  const usesDynamicCloudflareRoute = detail.includes("export const dynamic = 'force-dynamic'") && detail.includes('const { slug } = await params;');
+  assert(usesStaticEnumeration || usesDynamicCloudflareRoute, 'COS detail pages must be statically enumerable or explicitly dynamic for the Cloudflare runtime');
+  if (usesDynamicCloudflareRoute) {
+    assert(detail.includes('if (!item) notFound();'), 'Dynamic COS detail pages must preserve notFound() for unknown slugs');
+  }
   assert(detail.includes('getCoreOutcomeRecord'), 'COS detail page must resolve structured registry data');
   assert(detail.includes('getInstrumentCrosswalkForCos'), 'COS detail page must resolve linked instrument crosswalk records');
   assert(detail.includes('حالة التقييم العربي'), 'COS detail page must expose Arabic review status');
