@@ -17,7 +17,7 @@ const instruction=(task:SocialTask,kind:SocialKind)=>{
 const mastery=(task:SocialTask)=>task==='social-cues'?'يذكر دليلًا واحدًا على الأقل ويميز بين الدليل والافتراض، ويقبل أكثر من احتمال عندما لا تكفي المعلومات.':task==='turn-taking-perspective'?'يتتبع الدور والمنظور أو المعرفة المختلفة دون افتراض أن الجميع يملك المعلومات نفسها، ويقترح تبادلًا يحترم الحدود.':'يولد حلين مناسبين على الأقل، يستبعد غير الآمن أو المتجاوز للحدود، ويذكر متى ينتقل إلى الخطة البديلة أو يطلب المساعدة.';
 export const socialActivities:SocialActivity[]=socialSeriesPlans.flatMap(series=>Array.from({length:5},(_,i)=>i+1).flatMap(level=>labels.map((x,idx)=>({
  slug:`level-${level}-${x.kind}`,seriesSlug:series.slug,seriesNumber:series.number,seriesTitle:series.title,taskType:series.taskType,level,kind:x.kind,label:x.label,title:`${series.title} - المستوى ${level} - ${x.label}`,age:series.ages,duration:series.duration,purpose:series.purpose,instruction:instruction(series.taskType,x.kind),progression:series.progression[level-1],observation:series.observation,mastery:mastery(series.taskType),seed:series.number*100+level*10+idx
-})))));
+}))));
 export const socialActivityCount=socialActivities.length;
 export const socialTestCount=socialActivities.filter(a=>a.kind==='test').length;
 export const getSocialSeries=(slug:string)=>socialSeriesPlans.find(s=>s.slug===slug);
