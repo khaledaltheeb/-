@@ -1,16 +1,61 @@
+import fs from 'node:fs';
+
 const BASE = 'https://healthrenewal.org';
-const tests = [
-  { path: '/assessment-lab/', require: ['اختبر نفسك'] },
-  { path: '/assessment-lab/mood-daily/', require: ['متابعة المزاج اليومية', 'متابعة ذاتية · لا تشخيص'] },
-  { path: '/assessment-lab/relationship-safety/', require: ['مؤشر الأمان في العلاقة', 'متابعة ذاتية · لا تشخيص'] },
-  { path: '/assessment-lab/phq-9-plus/', require: ['PHQ-9 — استبيان صحة المريض', 'أداة مصدرية · توثيق قبل الاستخدام'] },
-  { path: '/assessment-lab/mbi-source/', require: ['MBI — Maslach Burnout Inventory', 'أداة مصدرية · توثيق قبل الاستخدام'] },
-  { path: '/cognitive-lab/', require: ['100 نشاط معرفي واضح', 'تعلم ذاتي · خصوصية بالتصميم', 'الأساس العلمي وحدود الاستدلال'] },
-  { path: '/cognitive-lab/choice-reaction/', require: ['سرعة الاستجابة الاختيارية', 'تعليمي غير تشخيصي', 'اقرأ الأساس العلمي وحدود الاستدلال للمختبر'] },
-  { path: '/cognitive-lab/stroop-basic/', require: ['مهمة ستروب الأساسية', 'تعليمي غير تشخيصي'] },
-  { path: '/cognitive-lab/simon-conflict/', require: ['تعارض الموقع والاستجابة', 'تعليمي غير تشخيصي', 'توسعة بحثية 2026'] },
+const monitors = JSON.parse(fs.readFileSync('data/assessment-lab/monitors.v1.json', 'utf8'));
+const instruments = JSON.parse(fs.readFileSync('data/assessment-lab/instruments.v1.json', 'utf8'));
+
+const assessmentTests = [
+  {
+    path: '/assessment-lab/',
+    require: [
+      'اختبر نفسك',
+      '<strong>60</strong> أداة متابعة محلية',
+      '<strong>10</strong> صفحات أدوات مصدرية وحقوق',
+      '<strong>70</strong> مسارًا منشورًا',
+      'تمت المراجعة من قبل فريق روافد',
+    ],
+    canonicalPath: '/assessment-lab',
+    expectIndexable: true,
+    kind: 'assessment-hub',
+  },
+  ...monitors.map((row) => ({
+    path: `/assessment-lab/${row.slug}/`,
+    require: [
+      row.title,
+      'متابعة ذاتية · لا تشخيص',
+      '<strong>16</strong> بندًا',
+      'الملف العلمي للأداة',
+      'تمت المراجعة من قبل فريق روافد',
+      'لا تحفظ بياناتك',
+      'لا تجمع الإجابات في نسبة واحدة',
+    ],
+    canonicalPath: `/assessment-lab/${row.slug}`,
+    expectIndexable: true,
+    kind: 'rawafid-monitor',
+  })),
+  ...instruments.map((row) => ({
+    path: `/assessment-lab/${row.slug}/`,
+    require: [
+      row.title,
+      'أداة مصدرية · توثيق قبل الاستخدام',
+      'صفحة مصدر لا أداة تسجيل درجات',
+      row.source,
+      'تمت المراجعة من قبل فريق روافد',
+    ],
+    canonicalPath: `/assessment-lab/${row.slug}`,
+    expectIndexable: true,
+    kind: 'source-rights',
+  })),
 ];
 
+// Keep a small Cognitive Lab sentinel here; Cognitive Lab has its own deeper contract.
+const cognitiveSentinels = [
+  { path: '/cognitive-lab/', require: ['100 نشاط معرفي واضح', 'تعلم ذاتي · خصوصية بالتصميم', 'الأساس العلمي وحدود الاستدلال'], kind: 'cognitive-sentinel' },
+  { path: '/cognitive-lab/choice-reaction/', require: ['سرعة الاستجابة الاختيارية', 'تعليمي غير تشخيصي', 'اقرأ الأساس العلمي وحدود الاستدلال للمختبر'], kind: 'cognitive-sentinel' },
+  { path: '/cognitive-lab/stroop-basic/', require: ['مهمة ستروب الأساسية', 'تعليمي غير تشخيصي'], kind: 'cognitive-sentinel' },
+];
+
+const tests = [...assessmentTests, ...cognitiveSentinels];
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const normalize = (html) => html
   .replace(/&amp;/g, '&')
@@ -18,6 +63,26 @@ const normalize = (html) => html
   .replace(/&#x27;|&#39;/g, "'")
   .replace(/&lt;/g, '<')
   .replace(/&gt;/g, '>');
+
+function canonicalHref(body) {
+  return body.match(/<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)["'][^>]*>/i)?.[1]
+    ?? body.match(/<link[^>]+href=["']([^"']+)["'][^>]+rel=["']canonical["'][^>]*>/i)?.[1]
+    ?? null;
+}
+
+function hasNoindex(body) {
+  return /<meta[^>]+name=["']robots["'][^>]+content=["'][^"']*noindex/i.test(body)
+    || /<meta[^>]+content=["'][^"']*noindex[^"']*["'][^>]+name=["']robots["']/i.test(body);
+}
+
+function normalizedUrlPath(value) {
+  if (!value) return null;
+  try {
+    return new URL(value, BASE).pathname.replace(/\/$/, '') || '/';
+  } catch {
+    return null;
+  }
+}
 
 async function probe(test) {
   const attempts = [];
@@ -30,8 +95,9 @@ async function probe(test) {
         redirect: 'follow',
         signal: controller.signal,
         headers: {
-          'User-Agent': 'Rawafid-Assessment-Cognitive-Live-Smoke/1.1',
+          'User-Agent': 'Rawafid-Assessment-Cognitive-Live-Smoke/2.0',
           'Cache-Control': 'no-cache',
+          Pragma: 'no-cache',
           Accept: 'text/html,application/xhtml+xml',
         },
       });
@@ -41,17 +107,30 @@ async function probe(test) {
       if (response.status !== 200) issues.push(`HTTP ${response.status}`);
       if (/Internal Server Error|server-side exception|Application error/i.test(body)) issues.push('server error marker');
       if (Buffer.byteLength(rawBody) < 1000) issues.push(`small body: ${Buffer.byteLength(rawBody)} bytes`);
-      for (const required of test.require) if (!body.includes(required)) issues.push(`missing text: ${required}`);
+      for (const required of test.require ?? []) if (!body.includes(required)) issues.push(`missing text: ${required}`);
+
+      const canonical = canonicalHref(body);
+      if (test.canonicalPath) {
+        const actualCanonicalPath = normalizedUrlPath(canonical);
+        const expectedCanonicalPath = test.canonicalPath.replace(/\/$/, '') || '/';
+        if (actualCanonicalPath !== expectedCanonicalPath) {
+          issues.push(`canonical mismatch: ${canonical ?? 'missing'} expected ${expectedCanonicalPath}`);
+        }
+      }
+      if (test.expectIndexable && hasNoindex(body)) issues.push('unexpected noindex');
 
       const row = {
         path: test.path,
+        kind: test.kind,
         attempt,
         status: response.status,
         ok: issues.length === 0,
         issues,
         elapsedMs: Date.now() - started,
         bytes: Buffer.byteLength(rawBody),
+        canonical,
         cfRay: response.headers.get('cf-ray'),
+        cfCacheStatus: response.headers.get('cf-cache-status'),
         retryAfter: response.headers.get('retry-after'),
       };
       attempts.push(row);
@@ -60,6 +139,7 @@ async function probe(test) {
     } catch (error) {
       const row = {
         path: test.path,
+        kind: test.kind,
         attempt,
         status: 0,
         ok: false,
@@ -71,7 +151,8 @@ async function probe(test) {
     } finally {
       clearTimeout(timeout);
     }
-    await sleep(2500 * attempt);
+    // Deliberately back off: Cloudflare/Worker transients must not be mistaken for missing content.
+    await sleep(1800 * attempt);
   }
   return { ok: false, attempts, last: attempts.at(-1) };
 }
@@ -79,16 +160,29 @@ async function probe(test) {
 const results = [];
 for (const test of tests) {
   results.push({ test, result: await probe(test) });
-  await sleep(2200);
+  await sleep(650);
 }
 
 const failures = results.filter(({ result }) => !result.ok);
+const assessmentResults = results.filter(({ test }) => test.kind?.startsWith('assessment') || test.kind === 'rawafid-monitor' || test.kind === 'source-rights');
+const assessmentFailures = assessmentResults.filter(({ result }) => !result.ok);
+const transientAttempts = results
+  .flatMap(({ result }) => result.attempts)
+  .filter((row) => [403, 408, 409, 425, 429, 500, 502, 503, 504, 520, 521, 522, 523, 524].includes(row.status) || row.status === 0);
+
 const summary = {
   routes: tests.length,
   passed: results.length - failures.length,
   failed: failures.length,
+  assessmentLab: {
+    expectedPublicDetailRoutes: 70,
+    testedRoutesIncludingHub: assessmentResults.length,
+    passed: assessmentResults.length - assessmentFailures.length,
+    failed: assessmentFailures.length,
+  },
   failedAttempts: results.flatMap(({ result }) => result.attempts).filter((row) => !row.ok).length,
-  failures: failures.map(({ test, result }) => ({ path: test.path, last: result.last })),
+  transientAttempts: transientAttempts.length,
+  failures: failures.map(({ test, result }) => ({ path: test.path, kind: test.kind, last: result.last })),
 };
 console.log('ASSESSMENT_COGNITIVE_LIVE_SMOKE_SUMMARY');
 console.log(JSON.stringify(summary, null, 2));
