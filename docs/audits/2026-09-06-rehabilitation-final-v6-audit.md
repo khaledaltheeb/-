@@ -1,4 +1,4 @@
-# Rehabilitation sector — final V6 audit
+# Rehabilitation sector — final V6 and gap-led audit
 
 Date: 2026-09-06
 Production: https://healthrenewal.org
@@ -6,78 +6,72 @@ Sector slug: `rehabilitation-functioning`
 
 ## Executive result
 
-The rehabilitation expansion and consistency pass is complete for the current production state.
+The broad rehabilitation expansion has moved from quota-led publishing to evidence-led gap maintenance.
 
-### Production topology
+### Current production topology
 
-- **107** unique published/indexable pages are linked to at least one rehabilitation category.
-- **62** of those pages are canonically owned by the rehabilitation sector (`public.content.sector_id = rehabilitation-functioning`).
-- **45** are legitimate cross-links from other canonical sectors. Their primary ownership must not be forcibly moved into rehabilitation merely to satisfy a sector-count audit.
+- **109** unique published/indexable pages are linked to at least one rehabilitation category.
+- **62** pages are canonically owned by the rehabilitation sector (`public.content.sector_id = rehabilitation-functioning`).
+- **47** are intentional cross-links from other canonical sectors.
+- Cross-linked pages retain their original sector/category ownership; the rehabilitation relationship is secondary and must not be converted into primary ownership merely to simplify an audit.
 
-### Gold numeric floor across all 107 linked pages
+### Gold floor across all 109 linked pages
 
 - Minimum Arabic-word count: **2,500**.
 - Minimum reference count: **5**.
 - Pages below either floor: **0**.
 
-### Actual V6 release-gate validation
+## Actual V6 release-gate validation
 
-All **62/62 canonically rehabilitation-owned published pages** were re-submitted through `private.content_release_gate_v6` in one production transaction by updating `status=status` while supplying the institutional author temporarily.
+All **62/62 canonically rehabilitation-owned published pages** were re-submitted through the real production `private.content_release_gate_v6` trigger in one transaction by updating `status=status` and providing the institutional release-time author.
 
-The transaction committed without any exception. This is stronger evidence than a synthetic SQL checklist because the production trigger itself executed every V6 rule.
+The transaction committed without any exception. No gate was disabled or weakened.
 
-Result: **62/62 passed the actual production V6 release gate.**
+Result: **62/62 canonical rehabilitation-owned pages passed the actual V6 release gate.**
 
-## Important authorship-guard behavior
+## Institutional authorship guard
 
-A future audit must not treat a persisted `author_display_name IS NULL` on a published page as an automatic V6 failure.
+Future audits must not treat a persisted `author_display_name IS NULL` as an automatic failure.
 
 Production has a separate trigger:
 
 - `y_content_institutional_authorship_guard`
 - function: `private.enforce_rawafid_institutional_authorship()`
 
-Its intended behavior is:
+Its design is:
 
-1. V6 sees a visible author during approval/release and validates it.
+1. V6 sees the visible author at release time and validates it.
 2. The institutional-authorship guard stores that value in `schema_json.legacy_author_display_name`.
-3. The guard then clears `author_display_name` on the published row.
+3. It then clears the published row's `author_display_name`.
 
-After the final sector revalidation:
+After sector revalidation, all **62** canonical rehabilitation pages store `فريق تحرير منصة روافد` in `schema_json.legacy_author_display_name` and have the display field cleared by design.
 
-- all **62** rehabilitation-owned pages have `schema_json.legacy_author_display_name = "فريق تحرير منصة روافد"`;
-- all **62** have the published `author_display_name` field cleared by design.
+## V6 rules exercised
 
-Therefore, audits must distinguish **release-time author validation** from the **persisted institutional authorship representation**.
+For ordinary editorial pages, the production gate validates, among other conditions:
 
-## V6 rules exercised by the production gate
-
-For ordinary editorial pages, `private.content_release_gate_v6` validates, among other rules:
-
-- branded SEO title present and no longer than 47 characters;
-- meta description between 150 and 160 characters;
+- SEO title present and no longer than 47 characters;
+- meta description 150–160 characters;
 - primary keyword and canonical URL;
-- visible release-time author;
-- image alt text where a featured image exists;
+- release-time visible author;
+- featured-image alt text when applicable;
 - `content_contract_version >= 6`;
-- at least 2,500 Arabic words, except the explicit Quick Info variant;
+- at least 2,500 Arabic words for ordinary editorial pages;
 - at least 8 H2 and 4 H3 headings;
 - at least 6 structured FAQs;
 - at least 8 explicit search-intent questions;
 - at least 5 secondary keywords and 8 semantic terms;
-- no inline warning/danger callouts or duplicated disclaimer language;
-- empty `medical_disclaimer`, with the centralized `/disclaimer` route and exact label;
+- no warning/danger callouts or duplicated inline disclaimer language;
+- empty `medical_disclaimer` with the centralized `/disclaimer` route and exact label;
 - valid active canonical sector/category ownership;
-- taxonomy review, confidence >= 0.9, and a classification rationale of sufficient depth;
-- authoritative reference floor and at least two primary/guideline/systematic-review/official sources;
+- taxonomy review, confidence >= 0.9, and a sufficiently detailed classification rationale;
+- reference floor and at least two primary/guideline/systematic-review/official sources;
 - claim-to-source mapping floor;
 - reviewed source-version metadata;
 - `rewrite_method = evidence-led-rewrite` and passing originality metadata;
-- a documented page mechanism with purpose, audience, interaction model, and content model.
+- documented page mechanism: purpose, audience, interaction model, and content model.
 
-The final 62-page no-op release transaction passed these checks without disabling or weakening any gate.
-
-## Category coverage after the expansion
+## Category coverage after the latest gap-led links
 
 | Rehabilitation category | Published/indexable linked pages |
 | --- | ---: |
@@ -85,117 +79,105 @@ The final 62-page no-op release transaction passed these checks without disablin
 | Rehabilitation service pathways | 3 |
 | Rehabilitation professions and team | 9 |
 | Measurement and rehabilitation outcomes | 4 |
-| Neurological rehabilitation | 13 |
+| Neurological rehabilitation | **14** |
 | Musculoskeletal rehabilitation | 11 |
 | Cardiopulmonary rehabilitation | 8 |
-| Developmental and pediatric rehabilitation | 5 |
+| Developmental and pediatric rehabilitation | **6** |
 | Sensory rehabilitation | 8 |
 | Cancer rehabilitation | 4 |
 | Mental-health and psychosocial rehabilitation | 3 |
 | Adult and geriatric rehabilitation | 7 |
-| Assistive-technology rehabilitation | 5 |
+| Assistive-technology rehabilitation | **6** |
 | Family rehabilitation | 9 |
 | Community, educational, and vocational rehabilitation | 8 |
 | Telerehabilitation | 4 |
 | Emergency, conflict, and disaster rehabilitation | 5 |
 | Rehabilitation in Jordan and MENA | 4 |
 
-Category totals intentionally include cross-linked pages where a page has real relevance to more than one domain. They should not be interpreted as canonical ownership totals.
+Category totals intentionally include legitimate multi-category links, so they are not canonical ownership totals.
 
-## Legacy pages upgraded during the final consistency pass
+## Gap-led cross-linking instead of duplication
 
-The final audit deliberately stopped adding pages long enough to repair older published material that remained below the new gold standard.
+After reaching the initial 107-page checkpoint, the next audit compared the site as a whole—not just the rehabilitation sector—with current AAPM&R/PM&R KnowledgeNow topic coverage. Two important gaps were closed by strengthening and linking existing pages instead of creating duplicates.
 
-### Psychosocial and vocational mental health
+### Cerebral palsy
 
-- `legacy-library-therapies-therapies-19`
-  - upgraded from ~560 words to **2,653**;
-  - rebuilt around person-centred, rights-based psychosocial rehabilitation, work/education, housing, peer support, family, and recovery-oriented outcomes;
-  - **9** central source links.
+Existing high-quality page: `special-ed-encyclopedia-cerebral-palsy`.
 
-- `concept-1918`
-  - upgraded from ~630 words to **2,679**;
-  - rebuilt around staying at work, return-to-work planning, supported employment/IPS, reasonable accommodation, disclosure/privacy, relapse planning, and occupational participation;
-  - **8** central source links.
+Actions:
 
-### Functioning and goal systems
+- kept canonical ownership in the special-needs/inclusion sector;
+- confirmed the page already met the V6 depth standard: **2,535** Arabic words;
+- added AAPM&R Cerebral Palsy as a specialty source alongside CDC, AACPDM care pathways, WHO/ICF, ASHA AAC, and UNICEF inclusive education;
+- central source links increased to **8**;
+- linked the page secondarily to `developmental-rehabilitation`.
 
-- `legacy-special-needs-guides-assessment-icf-functioning-participation`
-  - repetitive legacy text replaced with a real ICF functioning profile;
-  - **2,602** words and **7** central sources;
-  - clarified functioning vs diagnosis, performance vs capacity, environmental factors, participation, strengths, and ethical coding boundaries.
+Outcome: developmental/pediatric rehabilitation increased **5 → 6** without publishing a duplicate cerebral-palsy guide.
 
-- `legacy-special-needs-guides-system-quality-rehabilitation-goal-review`
-  - repetitive legacy text replaced with a goal-review decision system;
-  - **2,599** words and **9** central sources;
-  - uses a continue / modify / stop / replace decision cycle with current NICE rehabilitation guidance and goal-attainment evidence.
+### Pressure-injury prevention
 
-### Family and early intervention
+Existing legacy page: `legacy-special-needs-guides-mobility-at-pressure-injury-prevention`.
 
-- `child-safety-vs-overprotection`
-  - upgraded to **2,750** words and **10** central sources;
-  - added the risk-vs-hazard distinction, developing autonomy, disability-inclusive play, and structured FAQ/claim mapping.
+The page was not linked immediately because its legacy body contained repetitive template-like material despite having sufficient raw length. It was rebuilt first using:
 
-- `legacy-special-needs-science-family-centered-rehabilitation`
-  - upgraded from ~744 words to **2,523**;
-  - **10** central sources;
-  - rebuilt around family partnership, child/person voice, coaching, burden, transitions, MPOC 2.0 boundaries, and Jordan early-intervention procedures.
+- AAPM&R Pressure Injury Management in CNS Disorders, updated 2026-06-18;
+- the Fourth Edition International Pressure Injury Guideline / Living Guideline, including 2025–2026 modules for skin/tissue assessment, repositioning and mobilization, seated individuals, support surfaces, nutrition, device-related pressure injuries, and healing;
+- WHO Wheelchair Provision Guidelines;
+- WHO ICF.
 
-- `legacy-special-needs-early-intervention-motor-development-routines`
-  - upgraded from ~871 words to **2,579**;
-  - **10** central sources;
-  - rebuilt around active motor learning, task-specific practice, routines, caregiver coaching, environmental design, mobility, and dose without inventing a universal dose.
+Final page state:
 
-- `legacy-special-needs-early-intervention-social-emotional-routines`
-  - upgraded from ~1,467 words to **2,660**;
-  - **10** central sources;
-  - rebuilt around responsive relationships, co-regulation, communication, peer/community participation, autonomy, neurodiversity, and caregiver-child relationship outcomes.
+- **2,789** Arabic words;
+- **21 H2**, **4 H3**, **8 structured FAQs**;
+- **10** central source links;
+- **8** claim-to-source mappings;
+- V6 contract metadata completed;
+- actual production V6 revalidation passed;
+- no protected classification photographs or guideline diagrams were reproduced.
 
-- `legacy-special-needs-early-intervention-transition-to-preschool-school`
-  - upgraded from ~1,022 words to **2,573**;
-  - **9** central sources;
-  - rebuilt as a real transition pathway with receiving/sending-team coordination, functional transition file, transport, sensory readiness, assistive-device continuity, first-30-days monitoring, and Jordan 2025–2026 inclusion/education context.
+The page remains canonically owned by the special-needs/inclusion sector and is now cross-linked secondarily to:
 
-### Neuropsychological rehabilitation
+- `neurological-rehabilitation`;
+- `assistive-technology-rehabilitation`.
 
-- `concept-1809`
-  - upgraded from ~481 words to **2,586**;
-  - **10** central sources;
-  - rebuilt around standardized + functional assessment, attention, memory, executive function, metacognition, fatigue, real-life money/medication/appointments, school/children, and transfer of strategies across contexts.
+Outcome: neurological rehabilitation **13 → 14** and assistive-technology rehabilitation **5 → 6** without duplicating the pressure-injury topic.
 
-### Parkinson-capabilities body-text repair
+## Major legacy-page upgrades already completed
 
-- `capabilities-parkinson-disease`
-  - body JSON already contained meaningful callout/list content that an earlier text-sync query had omitted;
-  - text synchronization was corrected to include callout and list payloads;
-  - final count: **2,517** Arabic words with **8** central sources.
+The final consistency pass rebuilt weaker legacy material rather than cosmetically updating metadata. Major examples include:
 
-### Limb difference across the lifespan
+- psychosocial rehabilitation: ~560 → **2,653** words;
+- psychosis and work: ~630 → **2,679**;
+- ICF functioning/participation profile: **2,602**;
+- rehabilitation goal review: **2,599**;
+- child safety vs overprotection: **2,750**;
+- person/family-centred rehabilitation: **2,523**;
+- early-intervention motor routines: **2,579**;
+- early-intervention social-emotional routines: **2,660**;
+- transition from early intervention to preschool/school: **2,573**;
+- neuropsychological rehabilitation: **2,586**;
+- Parkinson capabilities body-text synchronization: **2,517**;
+- limb difference across the lifespan: **2,678**;
+- pressure-injury prevention: **2,789**.
 
-- `legacy-outside-box-limb-difference-amputation`
-  - apparent 71-word audit result was caused by stale `body_text`; the JSON contained useful but structurally weak material;
-  - rebuilt into a distinct page rather than duplicating the clinical post-amputation guide;
-  - final: **2,678** words, **24 H2**, **6 H3**, **8 FAQs**, **9** central sources;
-  - unique scope: congenital vs acquired limb difference, childhood growth, prosthesis choice/non-use, natural strategies, school, sport, identity, body image, transitions, work, and user-defined outcomes.
+## New high-value clinical pathway in the final expansion pass
 
-## New high-value clinical pathway added during the final pass
+`polytrauma-rehabilitation-guide` was added as a distinct major-trauma rehabilitation pathway rather than treating post-ICU or burn rehabilitation as a substitute.
 
-- `polytrauma-rehabilitation-guide`
-  - **2,521** words;
-  - **8** central sources;
-  - built from AAPM&R Polytrauma, NICE major trauma, ERATIC 2025, WHO emergency rehabilitation, and related guidance;
-  - spans acute trauma, ICU/ward rehabilitation, weight-bearing precautions, cognition/brain injury, respiratory burden, pain, devices, caregiver preparation, discharge, community return, and vocational participation.
+- **2,521** Arabic words;
+- **8** central sources;
+- evidence families include AAPM&R Polytrauma, NICE major trauma, ERATIC 2025, and WHO emergency rehabilitation.
 
-## What “complete” means at this checkpoint
+## Audit decision
 
-For the current production corpus, the rehabilitation sector is no longer being expanded merely to increase page count.
+The rehabilitation program is now **gap-led, not quota-led**.
 
-The checkpoint is:
+A future page should be added only when a whole-site audit shows that:
 
-- no linked/indexable rehabilitation page below 2,500 Arabic words;
-- no linked/indexable rehabilitation page below five references;
-- all canonical rehabilitation-owned published pages have passed the actual V6 trigger in production;
-- cross-linked pages retain canonical ownership in their correct original sectors;
-- major legacy pages discovered by the audit were rebuilt rather than cosmetically relabeled.
+1. a clinically meaningful pathway is genuinely absent;
+2. an existing page cannot cover the gap without becoming semantically confused;
+3. new guidelines or high-impact evidence materially change a decision pathway;
+4. Jordan/MENA-specific service, workforce, rights, access, or system evidence creates a local gap; or
+5. a legacy page is materially weaker than the current evidence standard and should be rebuilt rather than duplicated.
 
-Future rehabilitation work should therefore be **gap-led and evidence-led**, not quota-led. New pages should be added only when they close a material clinical, service-system, local/regional, professional, or research gap that is not already covered by an existing durable guide.
+The whole-site search is now part of the mandatory pre-publication workflow: **find existing content → evaluate quality → enrich/link when possible → create a new page only when necessary**.
