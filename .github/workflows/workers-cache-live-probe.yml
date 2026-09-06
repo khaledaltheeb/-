@@ -26,21 +26,23 @@ jobs:
             local cookie="${3:-}"
             local headers
             headers="$(mktemp)"
-            if [[ -n "$cookie" ]]; then
-              curl -sS --compressed --max-time 30 \
-                -H 'Accept: text/html,application/json;q=0.9,*/*;q=0.8' \
-                -H "Cookie: $cookie" \
-                -D "$headers" -o /dev/null \
-                -w "$label status=%{http_code} ttfb=%{time_starttransfer} total=%{time_total}\n" \
-                "$url"
-            else
-              curl -sS --compressed --max-time 30 \
-                -H 'Accept: text/html,application/json;q=0.9,*/*;q=0.8' \
-                -D "$headers" -o /dev/null \
-                -w "$label status=%{http_code} ttfb=%{time_starttransfer} total=%{time_total}\n" \
-                "$url"
-            fi
-            tr -d '\r' < "$headers" | grep -Ei '^(HTTP/|cf-cache-status:|cache-control:|age:|set-cookie:|location:|vary:|x-nextjs-cache:|server:)' || true
+            {
+              if [[ -n "$cookie" ]]; then
+                curl -sS --compressed --max-time 30 \
+                  -H 'Accept: text/html,application/json;q=0.9,*/*;q=0.8' \
+                  -H "Cookie: $cookie" \
+                  -D "$headers" -o /dev/null \
+                  -w "$label status=%{http_code} ttfb=%{time_starttransfer} total=%{time_total}\n" \
+                  "$url"
+              else
+                curl -sS --compressed --max-time 30 \
+                  -H 'Accept: text/html,application/json;q=0.9,*/*;q=0.8' \
+                  -D "$headers" -o /dev/null \
+                  -w "$label status=%{http_code} ttfb=%{time_starttransfer} total=%{time_total}\n" \
+                  "$url"
+              fi
+              tr -d '\r' < "$headers" | grep -Ei '^(HTTP/|cf-cache-status:|cache-control:|age:|set-cookie:|location:|vary:|x-nextjs-cache:|server:)' || true
+            } >&2
             local cache_status
             cache_status="$(tr -d '\r' < "$headers" | awk -F': *' 'tolower($1)=="cf-cache-status" {print toupper($2)}' | tail -n1)"
             rm -f "$headers"
@@ -53,22 +55,22 @@ jobs:
           home2="$(probe 'home-2' "$base/")"
           sleep 1
           home3="$(probe 'home-3' "$base/")"
-          printf '\nHOME_CACHE_SEQUENCE=%s,%s,%s\n' "$home1" "$home2" "$home3"
+          printf 'HOME_CACHE_SEQUENCE=%s,%s,%s\n' "$home1" "$home2" "$home3"
 
           echo '===== anonymous static page warm/hit sequence ====='
           about1="$(probe 'about-1' "$base/about")"
           sleep 1
           about2="$(probe 'about-2' "$base/about")"
-          printf '\nABOUT_CACHE_SEQUENCE=%s,%s\n' "$about1" "$about2"
+          printf 'ABOUT_CACHE_SEQUENCE=%s,%s\n' "$about1" "$about2"
 
           echo '===== auth-cookie homepage must bypass public cache ====='
           auth_home="$(probe 'home-auth-cookie' "$base/" 'sb-probe-auth-token=invalid-probe-value')"
-          printf '\nAUTH_HOME_CACHE_STATUS=%s\n' "$auth_home"
+          printf 'AUTH_HOME_CACHE_STATUS=%s\n' "$auth_home"
 
           echo '===== login and API must remain uncached ====='
           login_status="$(probe 'login' "$base/login")"
           search_status="$(probe 'search-api' "$base/api/search/v3?q=autism")"
-          printf '\nLOGIN_CACHE_STATUS=%s\nSEARCH_CACHE_STATUS=%s\n' "$login_status" "$search_status"
+          printf 'LOGIN_CACHE_STATUS=%s\nSEARCH_CACHE_STATUS=%s\n' "$login_status" "$search_status"
 
           echo '===== www must canonicalize before cached backend ====='
           www_headers="$(mktemp)"
