@@ -76,6 +76,15 @@ export default function CapabilityPrintablesPage() {
           </div>
         </header>
 
+        <section className="no-print" style={{ maxWidth: 900, margin: '0 auto 2rem', padding: '1.5rem', borderRadius: 22, background: 'linear-gradient(135deg,#eaf7ff,#effbf3)', border: '1px solid #c8e4d5' }}>
+          <span className="eyebrow">جديد للأطفال</span>
+          <h2 style={{ margin: '.45rem 0 .6rem' }}>مختبر الأنشطة والاختبارات للأطفال</h2>
+          <p style={{ lineHeight: 1.9, marginTop: 0 }}>
+            مسار مستقل للأطفال داخل «لنرتقي بقدراتهم»: 67 سلسلة مهارية، خمسة مستويات لكل سلسلة، وفي كل مستوى تدريبان ثم اختبار إتقان مختلف بصريًا. الأوراق ملونة، واسعة، قابلة للمعاينة والطباعة، ومصنفة حسب المهارة والعمر.
+          </p>
+          <Link className="button" href="/capabilities/kids-lab/">افتح مختبر الأطفال</Link>
+        </section>
+
         <aside className="medical-disclaimer" style={{ maxWidth: 900, margin: '0 auto 2rem' }}>
           <strong>قبل الاستخدام</strong>
           <p>لا تُستخدم الأوراق لتأخير تقييم طبي أو نفسي أو تأهيلي مطلوب. أي نشاط يتداخل مع مخاطر صحية، نوبات، ألم، بلع، تنفس، حركة غير آمنة أو تدهور مفاجئ يحتاج توجيه المختص المناسب أولًا.</p>

@@ -3,6 +3,7 @@ import { infographics } from '@/lib/practical-resources';
 import { assessmentSlugs } from '@/lib/assessment-lab/catalog';
 import { assessmentMeasureCategories, assessmentMeasureSlugs } from '@/lib/assessment-measures-catalog';
 import { coreOutcomeRegistrySlugs } from '@/lib/core-outcome-sets/registry';
+import { bilateralActivities } from '@/lib/capabilities/bilateral-tracks';
 
 export async function GET() {
   return sitemapResponse([
@@ -39,6 +40,9 @@ export async function GET() {
     { path:'/audiences', changeFrequency:'monthly', priority:.66 },
     { path:'/capabilities/ideas/', changeFrequency:'monthly', priority:.68 },
     { path:'/capabilities/printables/', changeFrequency:'monthly', priority:.68 },
+    { path:'/capabilities/kids-lab/', changeFrequency:'weekly', priority:.78 },
+    { path:'/capabilities/kids-lab/bilateral-tracks/', changeFrequency:'weekly', priority:.76 },
+    ...bilateralActivities.map((activity) => ({ path:`/capabilities/kids-lab/bilateral-tracks/${activity.slug}/`, changeFrequency:'monthly' as const, priority:.7 })),
     { path:'/downloads', changeFrequency:'weekly', priority:.62 },
     { path:'/citation', changeFrequency:'monthly', priority:.58 },
     { path:'/sources', changeFrequency:'monthly', priority:.62 },
