@@ -93,6 +93,12 @@ for (const forbidden of ['localStorage', 'sessionStorage', 'fetch(']) {
   if (runner.includes(forbidden)) fail(`runner must not persist or transmit answers: ${forbidden}`);
 }
 if (!runner.includes('لا تجمع الإجابات في نسبة واحدة') || !runner.includes('لا تحسب درجة تشخيصية')) fail('runner must explicitly prohibit invalid aggregate or diagnostic scoring');
+if (!runner.includes("const notApplicableOption = 'لا ينطبق / لم أجرّب'")) fail('runner must allow a non-applicable/not-tried response rather than force false ratings');
+if (!runner.includes('إذا كان البند يفترض موقفًا أو استراتيجية لم تحدث أو لم تجرّبها')) fail('runner must explain when the non-applicable response should be used');
+if (!catalog.includes("'school-safeguarding'")) fail('school safeguarding safety kind missing');
+if (!catalog.includes("'هل تعرض الطالب لتنمر أو تهديد خلال الأسبوع الماضي؟'")) fail('school bullying/Threat safety override missing');
+if (!catalog.includes("level: 'priority'")) fail('school safeguarding must trigger a visible priority response');
+if (!catalog.includes("'كم مرة فاته جزء من تواصل مهم؟'")) fail('hearing-support Arabic clarity correction missing');
 if (!catalog.includes('getSourceInstrumentStatusLabel') || !detail.includes('getSourceInstrumentStatusLabel(instrument!.status)')) fail('source/rights routes must present a readable Arabic status instead of internal status codes');
 if (!runner.includes('questions.length')) fail('runner must render the full question bank length');
 if (!hub.includes('<strong>60</strong> أداة متابعة محلية') || !hub.includes('<strong>10</strong> صفحات أدوات مصدرية وحقوق') || !hub.includes('<strong>70</strong> مسارًا منشورًا')) fail('hub counts missing');
@@ -104,5 +110,5 @@ if (!detail.includes('/specialists')) fail('professional escalation path missing
 if (!hub.includes('9789240120785')) fail('2026 WHO self-help framework source missing');
 
 if (!process.exitCode) {
-  console.log('Assessment lab contract passed: 60 manually reviewed Rawafid tools / 960 explicit-response items + 10 source-rights pages = 70 published routes; historical banks and generic fallback remain outside runtime, answers are not stored, and no fabricated diagnostic score is produced.');
+  console.log('Assessment lab contract passed: 60 manually reviewed Rawafid tools / 960 explicit-response items + 10 source-rights pages = 70 published routes; historical banks and generic fallback remain outside runtime, non-applicable answers are supported, school safeguarding is explicit, answers are not stored, and no fabricated diagnostic score is produced.');
 }
