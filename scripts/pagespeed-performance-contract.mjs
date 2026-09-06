@@ -113,6 +113,9 @@ requireText(qualityWorkflow, 'for tool in searchRawafid searchRawafidHeader sear
 requireText(qualityWorkflow, 'grep -q \'tooldescription="Search Rawafid\' /tmp/home.html', 'fast quality runtime smoke must assert a rendered WebMCP tool description');
 requireText(qualityWorkflow, 'grep -q \'toolparamdescription="The user\' /tmp/home.html', 'fast quality runtime smoke must assert rendered WebMCP parameter schema metadata');
 requireText(lighthouseWorkflow, "'ask_rawafid_assistant'", 'production Agentic Lighthouse must require the imperative Rawafid assistant tool');
+requireText(lighthouseWorkflow, 'Prewarm canonical homepage cache', 'production Lighthouse must prewarm the canonical homepage before measuring it');
+requireText(lighthouseWorkflow, "url='https://healthrenewal.org/'", 'homepage prewarm must target the canonical root URL rather than a query-string diagnostic key');
+requireText(lighthouseWorkflow, 'HOMEPAGE_PREWARM_SECOND_TTFB=', 'homepage prewarm must emit its second-hit TTFB for diagnostics');
 requireText(deployWorkflow, 'WEBMCP_LIVE_DIAGNOSTIC', 'production live verification must retain a non-blocking WebMCP diagnostic');
 forbidText(deployWorkflow, 'for attempt in $(seq 1 36); do', 'production deployment must not spend up to six minutes waiting for homepage ISR propagation');
 
@@ -121,4 +124,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log('PageSpeed performance contract passed: the homepage shell and assistant launcher stay server-only, the full assistant is browser-native lazy-loaded, the text LCP uses a zero-network system font, GA4 remains deferred but interaction-aware, heavy GTM is gated, WebMCP declarative coverage remains intact, imperative search and assistant tools are lifecycle-safe, origin isolation is explicit, optional Origin Trial activation is wired, and production verification stays fast.');
+console.log('PageSpeed performance contract passed: the homepage shell and assistant launcher stay server-only, the full assistant is browser-native lazy-loaded, the text LCP uses a zero-network system font, GA4 remains deferred but interaction-aware, heavy GTM is gated, WebMCP declarative coverage remains intact, imperative search and assistant tools are lifecycle-safe, origin isolation is explicit, optional Origin Trial activation is wired, the canonical homepage is prewarmed before Lighthouse, and production verification stays fast.');

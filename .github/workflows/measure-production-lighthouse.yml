@@ -23,6 +23,21 @@ jobs:
         with:
           node-version: 24
 
+      - name: Prewarm canonical homepage cache
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://healthrenewal.org/'
+          curl -fsS --compressed --max-time 30 \
+            -H 'Accept: text/html,application/xhtml+xml' \
+            "$url" >/dev/null
+          sleep 1
+          curl -fsS --compressed --max-time 30 \
+            -H 'Accept: text/html,application/xhtml+xml' \
+            -o /dev/null \
+            -w 'HOMEPAGE_PREWARM_SECOND_TTFB=%{time_starttransfer}\n' \
+            "$url"
+
       - name: Run mobile Lighthouse against live production
         shell: bash
         run: |
