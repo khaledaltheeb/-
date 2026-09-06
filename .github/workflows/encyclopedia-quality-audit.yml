@@ -12,6 +12,7 @@ on:
       - 'app/encyclopedia/**'
       - 'lib/encyclopedia.ts'
       - 'next.config.ts'
+      - 'docs/encyclopedia/**'
       - 'supabase/migrations/*encyclopedia*'
       - '.github/workflows/encyclopedia-quality-audit.yml'
   push:
@@ -23,6 +24,7 @@ on:
       - 'app/encyclopedia/**'
       - 'lib/encyclopedia.ts'
       - 'next.config.ts'
+      - 'docs/encyclopedia/**'
       - 'supabase/migrations/*encyclopedia*'
       - '.github/workflows/encyclopedia-quality-audit.yml'
 
