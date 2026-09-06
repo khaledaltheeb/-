@@ -44,7 +44,7 @@ export const assessmentMeasuresRightsReview: AssessmentMeasureRightsReviewItem[]
     statusLabel: 'Granted to CDISC — إذن المالك مطلوب',
     whyReferenceOnly: 'حالة CDISC هي Granted، لذلك لا نعامل المقياس كـPublic Domain ولا نعيد نشر البنود أو الترجمة أو مفتاح التسجيل.',
     safeUseOnRawafid: 'دليل اختيار واستخدام وحقوق مع إحالة إلى الجهة المالكة أو الموزع المرخص.',
-    rightsSource: 'https://www.cdisc.org/standards/foundational/qrs/hospital-anxiety-and-depression-scale',
+    rightsSource: 'https://www.cdisc.org/standards/foundational/qrs/hospital-anxiety-depression-scale',
     rightsVerifiedOn: '2026-09-05',
   },
   {
@@ -188,6 +188,19 @@ export const assessmentMeasuresRightsReview: AssessmentMeasureRightsReviewItem[]
     whyReferenceOnly: 'CanChild يتيح score sheets ضمن شروط استخدام محددة للاستخدام الشخصي غير التجاري، بينما مواد GMFM تحمل حقوقًا محفوظة. كذلك GMFM-66 وGMFM-88 إصداران مختلفان ولا يجوز تحويل الاسم العام GMFM إلى نموذج واحد دون حسم الإصدار.',
     safeUseOnRawafid: 'شرح الفرق بين GMFM-66 وGMFM-88، الغرض وحدود الصلاحية، ثم الإحالة إلى CanChild الرسمي. لا نعيد توزيع score sheets أو manual أو scorer، ولا ننقل توفر GMFCS العربي إلى GMFM.',
     rightsSource: 'https://canchild.ca/resources/44-gross-motor-function-measure-gmfm/',
+    rightsVerifiedOn: '2026-09-06',
+  },
+  {
+    slug: 'quality-of-life-in-epilepsy-10',
+    nameAr: 'استبيان جودة الحياة في الصرع — 10 بنود',
+    nameEn: 'Quality of Life in Epilepsy-10',
+    acronym: 'QOLIE-10',
+    domain: 'الصرع وجودة الحياة',
+    status: 'owner-conditions',
+    statusLabel: 'شروط المالك — QOLIE Development Group',
+    whyReferenceOnly: 'خطاب الإذن الصادر عن QOLIE Development Group يثبت أن QOLIE-10 وترجماته محمية وAll rights reserved، ويشترط إثبات الحقوق وعدم تعديل الأداة دون إذن كتابي، مع اختلاف شروط الاستخدام بين الجهات الأكاديمية وغير الأكاديمية. لذلك لا نتعامل معها كمحتوى حر لإعادة الاستضافة.',
+    safeUseOnRawafid: 'نعرض الغرض وسياق الاستخدام وقيود النسخة واللغة ونوجه إلى مصدر الحقوق الرسمي؛ لا ننشر البنود أو scorer أو ترجمة عربية جديدة غير معتمدة.',
+    rightsSource: 'https://www.aan.com/siteassets/home-page/policy-and-guidelines/quality/quality-measures/epilepsy-and-seizures/qolie-10-permission-ltr.pdf',
     rightsVerifiedOn: '2026-09-06',
   },
 ];
