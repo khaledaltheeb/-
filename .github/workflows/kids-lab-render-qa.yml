@@ -31,7 +31,7 @@ jobs:
         run: npm run typecheck
 
       - name: Render and validate all 1000 Kids Lab items
-        run: node scripts/kids-lab-render-contract-v2.mjs
+        run: node scripts/kids-lab-render-contract-v3.mjs
 
       - name: Upload QA report and SVG samples
         if: always()
