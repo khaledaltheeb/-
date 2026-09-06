@@ -159,7 +159,19 @@ function auditRow(row) {
   if (!evidence) warnings.push('missing evidence classification');
   if (['مراجعة بحثية', 'دراسة بحثية'].includes(evidence)) warnings.push(`generic evidence classification: ${evidence}`);
 
-  if (!containsAny(text, ['ما السؤال', 'سؤال البحث', 'السؤال البحثي', 'ماذا بحثت', 'ماذا اختبرت', 'ما الذي اختبر', 'هدف الدراسة', 'هدف البحث', 'الغرض', 'هدفت', 'سعى'])) warnings.push('research question/aim not explicit');
+  const explicitAimText = [
+    text,
+    row?.schema_json?.research_question || '',
+    row?.schema_json?.study_question || '',
+    row?.schema_json?.objective || '',
+    row?.schema_json?.objectives || '',
+    row?.schema_json?.aim || '',
+  ].join(' ');
+  if (!containsAny(explicitAimText, [
+    'ما السؤال', 'سؤال البحث', 'السؤال البحثي', 'ماذا بحثت', 'ماذا اختبرت', 'ما الذي اختبر',
+    'هدف الدراسة', 'هدف البحث', 'الغرض', 'هدفت', 'تهدف', 'يهدف', 'استهدف', 'استهدفت', 'سعى', 'تسعى',
+    ' aim ', 'objective', 'objectives', 'purpose',
+  ])) warnings.push('research question/aim not explicit');
   if (!containsAny(text, ['المنهج', 'المنهجية', 'كيف بُنيت', 'كيف بنيت', 'كيف جُمعت', 'كيف جمعت', 'كيف أُجريت', 'كيف أجريت', 'طريقة البحث', 'تصميم الدراسة', 'تصميم التجربة', 'التصميم'])) warnings.push('methods/design not explicit');
   if (!containsAny(text, ['حدود', 'قيود', 'محدودية', 'limitations'])) warnings.push('limitations not explicit');
   if (!containsAny(text, ['ما الذي لا تثبت', 'ما الذي لا يثبت', 'لا تثبت', 'لا يثبت', 'لا تعني', 'لا يعني', 'لا تسمح', 'لا يمكن استنتاج', 'لا يمكن أن نستنتج'])) warnings.push('anti-overclaim section not explicit');
@@ -257,6 +269,7 @@ const md = [
   '',
   '- Depth is assessed from both structured block count and useful word count; a long, information-dense block is not treated as thin merely because block count is low.',
   '- Evidence-specific rules are derived from the explicit evidence classification, not incidental mentions in references or background text.',
+  '- Research aims may be expressed as a question, objective, purpose, or explicit aim; the audit does not require one fixed heading or wording.',
   '- A source-verified statement that a CI, heterogeneity statistic, certainty assessment, or search-scope detail is not reported/available satisfies the audit disclosure requirement; it never authorizes inference or fabrication.',
   '- This is a structural/provenance safety audit, not a substitute for reading the primary paper.',
   '- A page can score highly and still contain a scientific error; source-level verification remains mandatory.',
