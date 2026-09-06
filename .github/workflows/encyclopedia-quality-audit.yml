@@ -1,0 +1,60 @@
+name: Encyclopedia scientific quality audit
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '55 2 * * *'
+  pull_request:
+    paths:
+      - 'scripts/encyclopedia-quality-audit.mjs'
+      - '.encyclopedia-quality-standard.md'
+      - 'app/encyclopedia/**'
+      - 'lib/encyclopedia.ts'
+      - 'supabase/migrations/*encyclopedia*'
+      - '.github/workflows/encyclopedia-quality-audit.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/encyclopedia-quality-audit.mjs'
+      - '.encyclopedia-quality-standard.md'
+      - 'app/encyclopedia/**'
+      - 'lib/encyclopedia.ts'
+      - 'supabase/migrations/*encyclopedia*'
+      - '.github/workflows/encyclopedia-quality-audit.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: encyclopedia-quality-audit
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Audit published encyclopedia records
+        run: node scripts/encyclopedia-quality-audit.mjs --strict-critical
+
+      - name: Upload audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: encyclopedia-quality-audit
+          path: |
+            artifacts/encyclopedia-quality-audit.json
+            artifacts/encyclopedia-quality-audit.md
+          if-no-files-found: warn
+          retention-days: 30
