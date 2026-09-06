@@ -2,7 +2,7 @@ import Link from 'next/link';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import { buildSeoMetadata, breadcrumbJsonLd, SITE_URL } from '@/lib/seo';
-import { kidsLabCategories, kidsLabSeries, KIDS_LAB_LEVELS, KIDS_LAB_PLANNED_ITEMS, KIDS_LAB_TARGET_ITEMS } from '@/lib/capabilities/kids-lab-catalog';
+import { kidsLabCategories, kidsLabSeries, KIDS_LAB_LEVELS, KIDS_LAB_TARGET_ITEMS } from '@/lib/capabilities/kids-lab-catalog';
 import { attentionActivityCount } from '@/lib/capabilities/attention-lab';
 import { memoryActivityCount } from '@/lib/capabilities/memory-lab';
 import { executiveActivityCount } from '@/lib/capabilities/executive-functions-lab';
