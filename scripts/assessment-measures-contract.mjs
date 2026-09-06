@@ -154,11 +154,11 @@ const restrictedSlugs = [...rightsReviewBody.matchAll(/^\s{4}slug: '([^']+)',/gm
 assert(restrictedSlugs.length >= 11, `expected at least 11 restricted/reference-only instruments, found ${restrictedSlugs.length}`);
 assert(new Set(restrictedSlugs).size === restrictedSlugs.length, 'duplicate slug in restricted rights review queue');
 for (const restrictedSlug of restrictedSlugs) assert(!uniqueSlugs.has(restrictedSlug), `${restrictedSlug}: restricted instrument must not also appear in reusable catalog`);
-for (const status of ['granted-to-cdisc', 'author-permission-required', 'denied', 'no-response-received']) {
+for (const status of ['granted-to-cdisc', 'author-permission-required', 'owner-conditions', 'denied', 'no-response-received']) {
   assert(rightsReview.includes(`status: '${status}'`), `restricted rights review queue missing status class: ${status}`);
 }
 assert(!/http:\/\//.test(rightsReview), 'restricted rights review sources must use HTTPS');
-assert((rightsReview.match(/rightsVerifiedOn: '2026-09-05'/g) ?? []).length >= restrictedSlugs.length, 'every restricted item must carry a rights verification date');
+assert((rightsReview.match(/rightsVerifiedOn: '\d{4}-\d{2}-\d{2}'/g) ?? []).length >= restrictedSlugs.length, 'every restricted item must carry a rights verification date');
 assert((rightsReview.match(/whyReferenceOnly:/g) ?? []).length >= restrictedSlugs.length, 'every restricted item must explain why it is reference-only');
 assert((rightsReview.match(/safeUseOnRawafid:/g) ?? []).length >= restrictedSlugs.length, 'every restricted item must define safe Rawafid handling');
 
