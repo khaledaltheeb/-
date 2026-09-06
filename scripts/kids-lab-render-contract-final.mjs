@@ -19,9 +19,6 @@ const replacements = [
 ];
 for (const [from,to] of replacements) source = source.replaceAll(from,to);
 
-// Transformed visual stimuli (butterflies, fish, abstract shapes, etc.) use local child coordinates.
-// Fingerprint the whole transformed <g> block as one task unit; otherwise child colors/details may be
-// discarded by page-coordinate filtering even though they are visibly inside the worksheet task area.
 source = source.replace(
   "function taskTags(svg,c){const tags=svg.match(/<text\\b[^>]*>[\\s\\S]*?<\\/text>|<(?:rect|circle|ellipse|line|path|polygon|polyline)\\b[^>]*\\/?\\s*>/gi)??[];return tags.filter(t=>{const y=yOf(t);return y===null||(y>=c.y+c.height*.20&&y<=c.y+c.height*.90)})}",
   "function taskTags(svg,c){const tags=svg.match(/<g\\b[^>]*transform=[\"'][^\"']+[\"'][^>]*>[\\s\\S]*?<\\/g>|<text\\b[^>]*>[\\s\\S]*?<\\/text>|<(?:rect|circle|ellipse|line|path|polygon|polyline)\\b[^>]*\\/?\\s*>/gi)??[];return tags.filter(t=>{const y=yOf(t);return y===null||(y>=c.y+c.height*.20&&y<=c.y+c.height*.90)})}"
@@ -30,12 +27,13 @@ source = source.replace(
   "function yOf(t){for(const n of['y','cy','y1'])",
   "function yOf(t){const tr=t.match(/transform=[\"']translate\\([^,\\s]+[,\\s]+(-?\\d+(?:\\.\\d+)?)/i);if(tr)return+tr[1];for(const n of['y','cy','y1'])"
 );
-
-// The earlier contract only checked for an <svg> envelope. Add a lightweight XML stack validator
-// so malformed generated SVG (for example a stray </rect>) is a hard QA failure before publication.
 source = source.replace(
   "function inspect(svg,id){const f=[],w=[];",
   "function xmlBalance(svg){const stack=[];const re=/<\\/?([A-Za-z][\\w:.-]*)\\b[^>]*\\/?>/g;let m;while((m=re.exec(svg))){const raw=m[0],name=m[1];if(raw.startsWith('</')){const top=stack.pop();if(top!==name)return `closing ${name} does not match ${top??'none'}`;}else if(!raw.endsWith('/>'))stack.push(name);}return stack.length?`unclosed ${stack[stack.length-1]}`:null;}function inspect(svg,id){const f=[],w=[];const xb=xmlBalance(svg);if(xb)f.push(`${id}: malformed SVG XML (${xb})`);"
+);
+source = source.replace(
+  "if(rows.length!==1000)",
+  "for(const x of rows.filter(x=>x.number===19)){const ys=[...x.svg.matchAll(/<rect x=\"(?:68|423)\" y=\"([0-9.]+)\" width=\"315\" height=\"92\"/g)].map(m=>+m[1]);const hint=x.svg.match(/<rect x=\"68\" y=\"([0-9.]+)\" width=\"670\" height=\"80\"/);if(ys.length&&hint){const cardBottom=Math.max(...ys)+92,hintY=+hint[1];if(cardBottom+8>hintY)failures.push(`Series 19 ${x.activity}: cards overlap reflection box (${cardBottom} vs ${hintY})`);if(hintY+80>1005)failures.push(`Series 19 ${x.activity}: reflection box intrudes into footer`);}}if(rows.length!==1000)"
 );
 
 fs.writeFileSync(runtimePath, source);
