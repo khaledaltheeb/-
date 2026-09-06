@@ -1,0 +1,126 @@
+name: Jules connectivity test
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "GitHub Environment that contains JULES_API_KEY"
+        required: true
+        type: string
+      create_safe_session:
+        description: "Create a read-only Jules planning session after connectivity passes"
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  test-jules:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    timeout-minutes: 10
+
+    steps:
+      - name: Validate secret is available
+        shell: bash
+        env:
+          JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "${JULES_API_KEY:-}" ]; then
+            echo "JULES_API_KEY is not available in the selected GitHub Environment."
+            exit 1
+          fi
+          echo "JULES_API_KEY is available to this job."
+
+      - name: Test Jules API and discover connected sources
+        id: sources
+        shell: bash
+        env:
+          JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
+        run: |
+          set -euo pipefail
+          http_code=$(curl --silent --show-error \
+            --output /tmp/jules-sources.json \
+            --write-out "%{http_code}" \
+            -H "x-goog-api-key: ${JULES_API_KEY}" \
+            "https://jules.googleapis.com/v1alpha/sources?pageSize=100")
+
+          if [ "$http_code" != "200" ]; then
+            echo "Jules API connectivity failed with HTTP ${http_code}."
+            jq -r '.error.message // "No API error message returned"' /tmp/jules-sources.json 2>/dev/null || true
+            exit 1
+          fi
+
+          echo "Jules API connectivity: OK"
+          count=$(jq '.sources | length' /tmp/jules-sources.json)
+          echo "Connected Jules sources: ${count}"
+          jq -r '.sources[]? | "- " + (.githubRepo.owner // "?") + "/" + (.githubRepo.repo // "?") + " => " + .name' /tmp/jules-sources.json
+
+          source_name=$(jq -r '.sources[]? | select(.githubRepo.owner == "khaledaltheeb" and .githubRepo.repo == "-") | .name' /tmp/jules-sources.json | head -n 1)
+          if [ -n "$source_name" ]; then
+            echo "Target repository is connected to Jules: ${source_name}"
+            echo "source_name=${source_name}" >> "$GITHUB_OUTPUT"
+          else
+            echo "Target repository khaledaltheeb/- is NOT currently listed as a Jules source."
+            echo "Connect this repository in the Jules web interface, then rerun this workflow."
+          fi
+
+      - name: Test Jules sessions endpoint
+        shell: bash
+        env:
+          JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
+        run: |
+          set -euo pipefail
+          http_code=$(curl --silent --show-error \
+            --output /tmp/jules-sessions.json \
+            --write-out "%{http_code}" \
+            -H "x-goog-api-key: ${JULES_API_KEY}" \
+            "https://jules.googleapis.com/v1alpha/sessions?pageSize=1")
+          if [ "$http_code" != "200" ]; then
+            echo "Jules sessions endpoint failed with HTTP ${http_code}."
+            jq -r '.error.message // "No API error message returned"' /tmp/jules-sessions.json 2>/dev/null || true
+            exit 1
+          fi
+          echo "Jules sessions endpoint: OK"
+
+      - name: Create safe read-only planning session
+        if: ${{ inputs.create_safe_session && steps.sources.outputs.source_name != '' }}
+        shell: bash
+        env:
+          JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
+          SOURCE_NAME: ${{ steps.sources.outputs.source_name }}
+        run: |
+          set -euo pipefail
+          jq -n \
+            --arg source "$SOURCE_NAME" \
+            '{
+              prompt: "Inspect the repository and prepare a concise technical audit only. Do not modify files, do not create commits, branches, pull requests, deployments, or configuration changes. Identify the architecture and three low-risk improvement opportunities. Stop after producing the plan and wait for explicit approval.",
+              title: "Health Renewal safe Jules connectivity audit",
+              sourceContext: {
+                source: $source,
+                githubRepoContext: { startingBranch: "main" }
+              },
+              requirePlanApproval: true
+            }' > /tmp/jules-session-request.json
+
+          http_code=$(curl --silent --show-error \
+            --output /tmp/jules-session.json \
+            --write-out "%{http_code}" \
+            -X POST \
+            -H "Content-Type: application/json" \
+            -H "x-goog-api-key: ${JULES_API_KEY}" \
+            --data-binary @/tmp/jules-session-request.json \
+            "https://jules.googleapis.com/v1alpha/sessions")
+
+          if [ "$http_code" != "200" ] && [ "$http_code" != "201" ]; then
+            echo "Creating the safe Jules session failed with HTTP ${http_code}."
+            jq -r '.error.message // "No API error message returned"' /tmp/jules-session.json 2>/dev/null || true
+            exit 1
+          fi
+
+          echo "Safe Jules session created successfully."
+          jq -r '"Session: " + (.name // .id // "unknown") + "\nState: " + (.state // "unknown") + "\nURL: " + (.url // "not returned")' /tmp/jules-session.json
+          echo "No plan is approved automatically and no repository write permission is granted by this workflow."
