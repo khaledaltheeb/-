@@ -1,6 +1,7 @@
 import type { AssessmentMeasure } from '@/lib/assessment-measures';
 import {
   getOperationalMaterial as getBaseOperationalMaterial,
+  operationalMaterials as baseOperationalMaterials,
   type AssessmentOperationalMaterial,
   type OfficialDownload,
   type OperationalFieldType,
@@ -35,9 +36,11 @@ export type {
   OperationalSection,
 };
 
-// Rights-verified explicit materials always override the universal recording-sheet fallback.
-// Later waves may intentionally harden a previously introduced record; the later spread is authoritative.
+// Every explicitly authored material is authoritative over the universal documentation fallback.
+// The base registry contains the original rights-reviewed operational set; later waves extend or
+// intentionally harden those records. Later spreads are authoritative when the same slug appears again.
 export const explicitOperationalMaterials: Record<string, AssessmentOperationalMaterial> = {
+  ...baseOperationalMaterials,
   ...assessmentOperationalFullFormsWave1,
   ...assessmentOperationalFullFormsWave2,
   ...assessmentOperationalFullFormsWave3,
