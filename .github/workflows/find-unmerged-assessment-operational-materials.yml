@@ -1,0 +1,28 @@
+name: Find Unmerged Assessment Operational Materials
+
+on:
+  push:
+    branches:
+      - assessment-sectors-audit-20260906
+    paths:
+      - 'scripts/find-unmerged-assessment-operational-materials.sh'
+      - '.github/workflows/find-unmerged-assessment-operational-materials.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  find:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Fetch all remote branches
+        shell: bash
+        run: git fetch origin '+refs/heads/*:refs/remotes/origin/*' --prune
+      - name: Search branch history for the 23 unresolved slugs
+        shell: bash
+        run: bash scripts/find-unmerged-assessment-operational-materials.sh
