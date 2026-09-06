@@ -118,9 +118,10 @@ private fun PageTitle(title: String, subtitle: String) {
 @Composable
 private fun HomeScreen(onNavigate: (Destination) -> Unit) {
     val context = LocalContext.current
+    val repository = remember(context) { RawafidRepositories.local(context) }
     var waterVersion by remember { mutableIntStateOf(0) }
     var hint by remember { mutableStateOf("اختر ما تحتاجه الآن؛ ليس مطلوبًا أن تستخدم كل شيء.") }
-    val water = remember(waterVersion) { LocalStore.waterCountToday(context) }
+    val water = remember(waterVersion) { repository.waterCountToday() }
 
     LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         item {
@@ -140,7 +141,7 @@ private fun HomeScreen(onNavigate: (Destination) -> Unit) {
         }
         item {
             QuickCard("شربت ماء", "$water مرة اليوم", Icons.Default.WaterDrop) {
-                LocalStore.recordWater(context); waterVersion++; hint = "تم تسجيل الماء محليًا على هذا الهاتف."
+                repository.recordWater(); waterVersion++; hint = "تم تسجيل الماء محليًا على هذا الهاتف."
             }
         }
         item {
@@ -205,10 +206,11 @@ private fun QuickCard(title: String, subtitle: String, icon: ImageVector, onClic
 @Composable
 private fun CareScreen(requestNotifications: ((Boolean) -> Unit) -> Unit) {
     val context = LocalContext.current
+    val repository = remember(context) { RawafidRepositories.local(context) }
     var version by remember { mutableIntStateOf(0) }
     var treatmentTitle by rememberSaveable { mutableStateOf("موعد علاج") }
     var treatmentNote by rememberSaveable { mutableStateOf("") }
-    val treatments = remember(version) { LocalStore.treatments(context).filter { it.timeMillis > System.currentTimeMillis() } }
+    val treatments = remember(version) { repository.treatments().filter { it.timeMillis > System.currentTimeMillis() } }
 
     fun addTreatment() {
         val now = Calendar.getInstance()
@@ -220,7 +222,7 @@ private fun CareScreen(requestNotifications: ((Boolean) -> Unit) -> Unit) {
                 if (at > System.currentTimeMillis()) {
                     val id = (((at / 60000L) xor treatmentTitle.hashCode().toLong()).toInt() and Int.MAX_VALUE).coerceAtLeast(1)
                     val reminder = TreatmentReminder(id, at, treatmentTitle.trim().ifBlank { "موعد علاج" }, treatmentNote.trim())
-                    LocalStore.saveTreatment(context, reminder); TreatmentReminderScheduler.schedule(context, reminder); version++
+                    repository.saveTreatment(reminder); TreatmentReminderScheduler.schedule(context, reminder); version++
                 }
             }, now.get(Calendar.HOUR_OF_DAY), now.get(Calendar.MINUTE), false).show()
         }, now.get(Calendar.YEAR), now.get(Calendar.MONTH), now.get(Calendar.DAY_OF_MONTH)).show()
@@ -235,16 +237,16 @@ private fun CareScreen(requestNotifications: ((Boolean) -> Unit) -> Unit) {
         item {
             Card {
                 Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    val max = LocalStore.motivationMaxPerDay(context)
+                    val max = repository.motivationMaxPerDay()
                     Text("الحد اليومي للرسائل: $max", fontWeight = FontWeight.Bold)
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        OutlinedButton(onClick = { LocalStore.setMotivationMaxPerDay(context, max - 1); version++ }) { Text("−") }
-                        OutlinedButton(onClick = { LocalStore.setMotivationMaxPerDay(context, max + 1); version++ }) { Text("+") }
+                        OutlinedButton(onClick = { repository.setMotivationMaxPerDay(max - 1); version++ }) { Text("−") }
+                        OutlinedButton(onClick = { repository.setMotivationMaxPerDay(max + 1); version++ }) { Text("+") }
                     }
-                    Text("ساعات الصمت: ${LocalStore.quietStart(context)}:00 — ${LocalStore.quietEnd(context)}:00")
+                    Text("ساعات الصمت: ${repository.quietStart()}:00 — ${repository.quietEnd()}:00")
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        OutlinedButton(onClick = { LocalStore.setQuietStart(context, (LocalStore.quietStart(context) + 1) % 24); version++ }) { Text("تأخير البداية") }
-                        OutlinedButton(onClick = { LocalStore.setQuietEnd(context, (LocalStore.quietEnd(context) + 1) % 24); version++ }) { Text("تأخير النهاية") }
+                        OutlinedButton(onClick = { repository.setQuietStart((repository.quietStart() + 1) % 24); version++ }) { Text("تأخير البداية") }
+                        OutlinedButton(onClick = { repository.setQuietEnd((repository.quietEnd() + 1) % 24); version++ }) { Text("تأخير النهاية") }
                     }
                 }
             }
@@ -270,7 +272,7 @@ private fun CareScreen(requestNotifications: ((Boolean) -> Unit) -> Unit) {
                     Text(DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT).format(Date(reminder.timeMillis)))
                     if (reminder.note.isNotBlank()) Text(reminder.note)
                     TextButton(onClick = {
-                        TreatmentReminderScheduler.cancel(context, reminder); LocalStore.removeTreatment(context, reminder.id); version++
+                        TreatmentReminderScheduler.cancel(context, reminder); repository.removeTreatment(reminder.id); version++
                     }) { Text("حذف") }
                 }
             }
@@ -281,24 +283,25 @@ private fun CareScreen(requestNotifications: ((Boolean) -> Unit) -> Unit) {
 @Composable
 private fun ReminderConfig(type: ReminderType, title: String, intervals: List<Long>, version: Int, requestNotifications: ((Boolean) -> Unit) -> Unit, changed: () -> Unit) {
     val context = LocalContext.current
-    val enabled = remember(version) { LocalStore.reminderEnabled(context, type) }
-    val selected = remember(version) { LocalStore.reminderMinutes(context, type) }
+    val repository = remember(context) { RawafidRepositories.local(context) }
+    val enabled = remember(version) { repository.reminderEnabled(type) }
+    val selected = remember(version) { repository.reminderMinutes(type) }
     Card {
         Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text(title, fontWeight = FontWeight.Bold)
                 Switch(checked = enabled, onCheckedChange = { checked ->
                     if (!checked) {
-                        LocalStore.setReminderEnabled(context, type, false); ReminderScheduler.sync(context, type); changed()
+                        repository.setReminderEnabled(type, false); ReminderScheduler.sync(context, type); changed()
                     } else requestNotifications { granted ->
-                        if (granted) { LocalStore.setReminderEnabled(context, type, true); ReminderScheduler.sync(context, type); changed() }
+                        if (granted) { repository.setReminderEnabled(type, true); ReminderScheduler.sync(context, type); changed() }
                     }
                 })
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 intervals.forEach { minutes ->
                     FilterChip(selected = selected == minutes, onClick = {
-                        LocalStore.setReminderMinutes(context, type, minutes); ReminderScheduler.sync(context, type); changed()
+                        repository.setReminderMinutes(type, minutes); ReminderScheduler.sync(context, type); changed()
                     }, label = { Text(if (minutes < 60) "$minutes د" else "${minutes / 60} س") })
                 }
             }
@@ -309,6 +312,7 @@ private fun ReminderConfig(type: ReminderType, title: String, intervals: List<Lo
 @Composable
 private fun ToolsScreen() {
     val context = LocalContext.current
+    val repository = remember(context) { RawafidRepositories.local(context) }
     var text by rememberSaveable { mutableStateOf("") }
     var lettingGo by remember { mutableStateOf(false) }
     var waterVersion by remember { mutableIntStateOf(0) }
@@ -344,10 +348,10 @@ private fun ToolsScreen() {
         item {
             Card {
                 Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    val count = remember(waterVersion) { LocalStore.waterCountToday(context) }
+                    val count = remember(waterVersion) { repository.waterCountToday() }
                     Text("الماء اليوم", fontWeight = FontWeight.Bold)
                     Text("سجلت $count مرة. الرقم وصفي وليس هدفًا طبيًا.")
-                    OutlinedButton(onClick = { LocalStore.recordWater(context); waterVersion++ }) { Text("شربت ماء") }
+                    OutlinedButton(onClick = { repository.recordWater(); waterVersion++ }) { Text("شربت ماء") }
                 }
             }
         }
@@ -357,9 +361,10 @@ private fun ToolsScreen() {
 @Composable
 private fun SafetyScreen() {
     val context = LocalContext.current
-    var name by rememberSaveable { mutableStateOf(LocalStore.emergencyName(context)) }
-    var contact by rememberSaveable { mutableStateOf(LocalStore.emergencyContact(context)) }
-    var note by rememberSaveable { mutableStateOf(LocalStore.emergencyNote(context)) }
+    val repository = remember(context) { RawafidRepositories.local(context) }
+    var name by rememberSaveable { mutableStateOf(repository.emergencyName()) }
+    var contact by rememberSaveable { mutableStateOf(repository.emergencyContact()) }
+    var note by rememberSaveable { mutableStateOf(repository.emergencyNote()) }
 
     LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         item { PageTitle("الأمان", "بطاقة طوارئ محلية وأدوات تواصل باختيارك.") }
@@ -381,7 +386,7 @@ private fun SafetyScreen() {
                     OutlinedTextField(name, { name = it.take(80) }, label = { Text("الاسم") }, modifier = Modifier.fillMaxWidth())
                     OutlinedTextField(contact, { contact = it.take(80) }, label = { Text("جهة اتصال للطوارئ") }, modifier = Modifier.fillMaxWidth())
                     OutlinedTextField(note, { note = it.take(600) }, label = { Text("معلومة مهمة") }, minLines = 4, modifier = Modifier.fillMaxWidth())
-                    Button(onClick = { LocalStore.saveEmergencyCard(context, name, contact, note) }) { Text("حفظ محلي") }
+                    Button(onClick = { repository.saveEmergencyCard(name, contact, note) }) { Text("حفظ محلي") }
                     OutlinedButton(onClick = {
                         val shareText = "بطاقة روافد للطوارئ\nالاسم: $name\nجهة الاتصال: $contact\nمعلومة مهمة: $note"
                         context.startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).apply { type = "text/plain"; putExtra(Intent.EXTRA_TEXT, shareText) }, "مشاركة بطاقة الطوارئ"))
