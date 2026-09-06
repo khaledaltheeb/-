@@ -13,10 +13,13 @@ const assert = (condition, message) => {
 };
 
 const formPath = 'lib/assessment-measure-operational-full-forms-wave14.ts';
+const correctionPath = 'lib/assessment-measure-operational-full-forms-wave15.ts';
 const catalogPath = 'lib/assessment-measure-operational-catalog.ts';
-for (const file of [formPath, catalogPath]) assert(exists(file), `required file missing: ${file}`);
+for (const file of [formPath, correctionPath, catalogPath]) assert(exists(file), `required file missing: ${file}`);
 
 const form = read(formPath);
+const correction = read(correctionPath);
+const effectiveForm = `${form}\n${correction}`;
 const catalog = read(catalogPath);
 const slugs = [
   'simple-endoscopic-score-crohns-disease-v1',
@@ -28,9 +31,9 @@ const slugs = [
 
 for (const slug of slugs) assert(form.includes(`'${slug}': {`), `missing Wave 14 operational material: ${slug}`);
 assert(new Set([...form.matchAll(/^\s{2}'([^']+)': \{/gm)].map((match) => match[1])).size === slugs.length, 'Wave 14 must contain exactly five unique top-level measure records');
-assert(!/http:\/\//.test(form), 'Wave 14 sources must use HTTPS');
+assert(!/http:\/\//.test(effectiveForm), 'Wave 14/15 sources must use HTTPS');
 
-// SES-CD V1: the form is generated from five named segments and four variables per segment.
+// SES-CD V1: generated from five segments and four variables; Wave 15 hardens the stenosis arithmetic.
 assert(form.includes("completeness: 'exact-public-domain-form'"), 'Wave 14 must retain exact public-domain form classification where justified');
 for (const segment of ["['ILEUM', 'اللفائفي النهائي']", "['RIGHT', 'القولون الأيمن']", "['TRANSVERSE', 'القولون المستعرض']", "['LEFT', 'القولون الأيسر/السيني']", "['RECTUM', 'المستقيم']"]) {
   assert(form.includes(segment), `SES-CD segment definition missing: ${segment}`);
@@ -40,10 +43,14 @@ for (const variable of ['ULCER-SIZE', 'ULCERATED-SURFACE', 'AFFECTED-SURFACE', '
 }
 assert(form.includes("code: 'SES-CD-TOTAL'") && form.includes('max: 56'), 'SES-CD total 0-56 field missing');
 assert(form.includes('تضيق لا يمكن عبوره'), 'SES-CD impassable narrowing category missing');
-assert(form.includes('مجموع درجات التضيق') && form.includes('11'), 'SES-CD stenosis subtotal maximum 11 boundary missing');
-assert(form.includes('القطاعات غير القابلة للتقييم'), 'SES-CD unevaluated-segment safeguard missing');
+assert(correction.includes("assessmentOperationalFullFormsWave14['simple-endoscopic-score-crohns-disease-v1']"), 'SES-CD correction must inherit the Wave 14 canonical record');
+assert(correction.includes('مجموع درجات التضيق لا يتجاوز 11'), 'SES-CD stenosis subtotal maximum 11 boundary missing');
+assert(correction.includes('56 = 15 + 15 + 15 + 11') && correction.includes('وليس 60'), 'SES-CD total arithmetic correction missing');
+assert(correction.includes('إذا كان المجموع المحسوب يتجاوز 56'), 'SES-CD >56 error guardrail missing');
+assert(effectiveForm.includes('القطاعات غير القابلة للتقييم'), 'SES-CD unevaluated-segment safeguard missing');
 assert(form.includes('simple-endoscopic-score-crohns-disease-version-1'), 'SES-CD CDISC provenance missing');
 assert(form.includes('15472670'), 'SES-CD original validation source missing');
+assert(correction.includes('PMC5881717'), 'SES-CD 0-56 stenosis-bound corroborating source missing');
 
 // CDAI V1: classic eight-variable scoring architecture and safety boundaries.
 for (const code of [
@@ -109,11 +116,13 @@ assert(form.includes('rehabilitation-measures/mayo-portland-adaptability-invento
 
 // Rights safety: no known restricted/non-open instrument may be introduced by this open-operational wave.
 for (const restricted of ['hospital-anxiety-and-depression-scale', 'columbia-suicide-severity-rating-scale', 'mini-mental-state-examination', 'trail-making-test']) {
-  assert(!form.includes(`'${restricted}': {`), `restricted instrument must not be operationalized in Wave 14: ${restricted}`);
+  assert(!effectiveForm.includes(`'${restricted}': {`), `restricted instrument must not be operationalized in Wave 14/15: ${restricted}`);
 }
 
 assert(catalog.includes("assessmentOperationalFullFormsWave14 } from '@/lib/assessment-measure-operational-full-forms-wave14'"), 'operational catalog Wave 14 import missing');
 assert(catalog.includes('...assessmentOperationalFullFormsWave14'), 'operational catalog Wave 14 spread missing');
+assert(catalog.includes("assessmentOperationalFullFormsWave15 } from '@/lib/assessment-measure-operational-full-forms-wave15'"), 'operational catalog Wave 15 correction import missing');
+assert(catalog.indexOf('...assessmentOperationalFullFormsWave15') > catalog.indexOf('...assessmentOperationalFullFormsWave14'), 'Wave 15 correction must override Wave 14 in catalog order');
 
 if (!process.exitCode) {
   console.log('ASSESSMENT_OPERATIONAL_WAVE14_OK measures=5 ses_cd=5_segments_x4_variables_stenosis_max11_total56 cdai=8_variable_formula ipaq=long_form_scoring_companion vfq25=version2000_26base_25vision mpai4=29_scored_plus6_associated rights=public_domain_or_official_use_boundaries');
