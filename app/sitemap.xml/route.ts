@@ -120,6 +120,7 @@ export async function GET(request: Request) {
     '/sitemaps/social-work.xml',
     '/sitemaps/palliative-care.xml',
     '/sitemaps/rare-disease.xml',
+    '/sitemaps/als-mnd.xml',
     '/sitemaps/specialists.xml',
     '/sitemaps/centers.xml',
     '/sitemaps/community.xml',
