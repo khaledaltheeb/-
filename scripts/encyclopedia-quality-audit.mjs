@@ -92,6 +92,26 @@ function goldMarker(row) {
   return isObject(marker) ? marker : null;
 }
 
+function explicitGoldMode(row, marker) {
+  const declared = String(marker?.mode || '').trim();
+  if (['condition_reference', 'specialized_support', 'glossary'].includes(declared)) return declared;
+  return row.content_type === 'glossary_term' ? 'glossary' : 'condition_reference';
+}
+
+function inferLegacyMode(row) {
+  if (row.content_type === 'glossary_term') return 'glossary';
+
+  const canonical = String(row.canonical_url || '').toLowerCase();
+  const title = String(row.title || '').toLocaleLowerCase('ar');
+  const termEn = String(row?.schema_json?.term_en || '').toLowerCase();
+
+  const supportCanonical = /-(?:education|school-support|classroom|school-accommodations)(?:\/|$)/.test(canonical);
+  const supportEnglish = /\b(?:educational support|school support|classroom|school accommodations?)\b/.test(termEn);
+  const supportArabic = /دعم التعليم|دعم .* في المدرسة|في الصف|تكييفات .* المدرسة/.test(title);
+
+  return supportCanonical || supportEnglish || supportArabic ? 'specialized_support' : 'condition_reference';
+}
+
 function containsAny(text, patterns) {
   const haystack = String(text || '').toLocaleLowerCase('ar');
   return patterns.some((pattern) => haystack.includes(pattern.toLocaleLowerCase('ar')));
@@ -127,8 +147,33 @@ function authoritativeReferenceCount(refs) {
     const tier = String(ref.authority_tier || '').toLowerCase();
     const type = String(ref.source_type || '').toLowerCase();
     return tier === 'primary'
-      || /gene(reviews)?|ncbi|nih|nice|who|cdc|clingen|orphanet|cochrane|guideline|consensus/.test(`${publisher} ${type}`);
+      || /gene(reviews)?|ncbi|nih|nice|who|cdc|clingen|orphanet|cochrane|guideline|consensus|asha|aap|aao|unicef|cast/.test(`${publisher} ${type}`);
   }).length;
+}
+
+function contractFor(mode, evidenceLimited) {
+  if (mode === 'specialized_support') {
+    return {
+      wordFloor: evidenceLimited ? 450 : 650,
+      blockFloor: evidenceLimited ? 10 : 12,
+      refFloor: evidenceLimited ? 2 : 3,
+      claimFloor: 3,
+    };
+  }
+  if (mode === 'glossary') {
+    return {
+      wordFloor: evidenceLimited ? 220 : 350,
+      blockFloor: 8,
+      refFloor: 2,
+      claimFloor: 2,
+    };
+  }
+  return {
+    wordFloor: evidenceLimited ? 650 : 1200,
+    blockFloor: evidenceLimited ? 14 : 20,
+    refFloor: evidenceLimited ? 2 : 4,
+    claimFloor: 4,
+  };
 }
 
 function auditRow(row) {
@@ -140,6 +185,8 @@ function auditRow(row) {
   const gold = goldMarker(row);
   const strict = Boolean(gold && Number(gold.version || 0) >= 1);
   const evidenceLimited = Boolean(gold?.evidence_limited);
+  const mode = strict ? explicitGoldMode(row, gold) : inferLegacyMode(row);
+  const contract = contractFor(mode, evidenceLimited);
   const critical = [];
   const warnings = [];
 
@@ -160,9 +207,10 @@ function auditRow(row) {
   if (duplicates.length) warnings.push(`duplicate long blocks (${duplicates.length})`);
 
   if (!strict) {
-    if (row.content_type === 'condition' && words < 500) warnings.push(`legacy condition needs enrichment (${words} useful words)`);
-    if (row.content_type === 'glossary_term' && words < 250) warnings.push(`legacy glossary term is very concise (${words} useful words)`);
-    if (claims.length < 3) warnings.push(`claim-source mapping is sparse (${claims.length})`);
+    const legacyWarningFloor = mode === 'condition_reference' ? 500 : mode === 'specialized_support' ? 350 : 250;
+    if (words < legacyWarningFloor) warnings.push(`legacy ${mode} page needs enrichment (${words} useful words)`);
+    if (claims.length < 3 && mode !== 'glossary') warnings.push(`claim-source mapping is sparse (${claims.length})`);
+    if (claims.length < 2 && mode === 'glossary') warnings.push(`claim-source mapping is sparse (${claims.length})`);
     if (!row.last_reviewed_at) warnings.push('missing review timestamp');
     if (refs.some((ref) => !ref.publisher || !(ref.year || ref.publication_year) || !ref.source_type || !ref.authority_tier)) {
       warnings.push('reference metadata incomplete');
@@ -170,22 +218,15 @@ function auditRow(row) {
   }
 
   if (strict) {
-    const condition = row.content_type === 'condition';
-    const floor = condition ? (evidenceLimited ? 650 : 1200) : (evidenceLimited ? 220 : 350);
-    if (words < floor) critical.push(`gold-standard content below depth floor (${words}/${floor} useful words)`);
-    if (condition && blocks.length < (evidenceLimited ? 14 : 20)) critical.push(`gold-standard condition lacks structured depth (${blocks.length} blocks)`);
-    if (!condition && blocks.length < 8) warnings.push(`gold-standard glossary structure is sparse (${blocks.length} blocks)`);
-
-    const refFloor = evidenceLimited ? 2 : (condition ? 4 : 2);
-    if (refs.length < refFloor) critical.push(`gold-standard references below floor (${refs.length}/${refFloor})`);
+    if (words < contract.wordFloor) critical.push(`gold-standard ${mode} content below depth floor (${words}/${contract.wordFloor} useful words)`);
+    if (blocks.length < contract.blockFloor) critical.push(`gold-standard ${mode} lacks structured depth (${blocks.length}/${contract.blockFloor} blocks)`);
+    if (refs.length < contract.refFloor) critical.push(`gold-standard ${mode} references below floor (${refs.length}/${contract.refFloor})`);
+    if (claims.length < contract.claimFloor) critical.push(`gold-standard ${mode} claim-source map below floor (${claims.length}/${contract.claimFloor})`);
     if (authoritativeReferenceCount(refs) < 1) critical.push('gold-standard page lacks an authoritative source');
     if (recentReferenceCount(refs) < 1 && !gold?.recent_source_unavailable) warnings.push('no 2024+ source registered; verify whether a recent relevant source exists');
-
-    const claimFloor = condition ? 4 : 2;
-    if (claims.length < claimFloor) critical.push(`gold-standard claim-source map below floor (${claims.length}/${claimFloor})`);
     if (!row.last_reviewed_at) critical.push('gold-standard page has no review timestamp');
 
-    if (condition) {
+    if (mode === 'condition_reference') {
       if (!containsAny(text, ['التشخيص', 'اختبار جيني', 'الفحص الجيني', 'التحليل الجيني', 'التقييم التشخيصي'])) critical.push('diagnosis/testing boundary is not explicit');
       if (!containsAny(text, ['المتابعة', 'إعادة التقييم', 'المراقبة', 'surveillance'])) critical.push('surveillance/reassessment is not explicit');
       if (!containsAny(text, ['العلاج', 'التدبير', 'الدعم', 'الإدارة', 'التدخل'])) critical.push('management/support is not explicit');
@@ -193,14 +234,22 @@ function auditRow(row) {
       if (!containsAny(text, ['حدود الدليل', 'حدود المعرفة', 'الأدلة محدودة', 'المعرفة ما تزال', 'لا يمكن التنبؤ', 'لا توجد إرشادات خاصة'])) warnings.push('evidence-limit/anti-overclaim section is not explicit');
       if (!containsAny(text, ['التواصل', 'التعلم', 'المشاركة', 'الاستقلال', 'الوصول', 'المدرسة', 'التعليم'])) warnings.push('functional/participation interpretation is not explicit');
     }
+
+    if (mode === 'specialized_support') {
+      if (!containsAny(text, ['هذه الصفحة', 'النطاق', 'لا يغني', 'لا تستبدل', 'لا تحل محل', 'يركز هذا'])) warnings.push('specialized-support scope boundary is not explicit');
+      if (!containsAny(text, ['تكييف', 'الدعم', 'الوصول', 'المشاركة', 'استراتيجية', 'خطة'])) critical.push('specialized-support practical intervention layer is not explicit');
+      if (!containsAny(text, ['قياس', 'مراجعة', 'إعادة التقييم', 'متابعة', 'البيانات', 'أثر'])) critical.push('specialized-support measurement/reassessment layer is not explicit');
+      if (!containsAny(text, ['السلامة', 'الطوارئ', 'إحالة', 'تقييم طبي', 'اختصاصي', 'الفريق المعالج', 'لا يتطلب'])) warnings.push('specialized-support safety/escalation boundary is not explicit');
+      if (!gold?.primary_reference_canonical && !containsAny(text, ['/encyclopedia/'])) warnings.push('no primary/internal encyclopedia reference is registered; verify whether one exists');
+    }
   }
 
   const score = Math.max(0, 100 - critical.length * 18 - warnings.length * 4);
   const priority = critical.length * 1000
-    + Math.max(0, 1200 - words)
-    + Math.max(0, 4 - refs.length) * 80
-    + Math.max(0, 4 - claims.length) * 60
-    + (row.content_type === 'condition' ? 200 : 0);
+    + Math.max(0, contract.wordFloor - words)
+    + Math.max(0, contract.refFloor - refs.length) * 80
+    + Math.max(0, contract.claimFloor - claims.length) * 60
+    + (mode === 'condition_reference' ? 200 : mode === 'specialized_support' ? 100 : 0);
 
   return {
     id: row.id,
@@ -208,6 +257,8 @@ function auditRow(row) {
     canonical_url: row.canonical_url,
     title: row.title,
     content_type: row.content_type,
+    mode,
+    mode_source: strict && gold?.mode ? 'declared' : strict ? 'backward-compatible-default' : 'legacy-inference',
     gold_standard: strict,
     evidence_limited: evidenceLimited,
     useful_word_count: words,
@@ -233,6 +284,9 @@ const summary = {
   published_pages: audits.length,
   condition_pages: audits.filter((item) => item.content_type === 'condition').length,
   glossary_pages: audits.filter((item) => item.content_type === 'glossary_term').length,
+  inferred_or_declared_condition_reference_pages: audits.filter((item) => item.mode === 'condition_reference').length,
+  inferred_or_declared_specialized_support_pages: audits.filter((item) => item.mode === 'specialized_support').length,
+  inferred_or_declared_glossary_pages: audits.filter((item) => item.mode === 'glossary').length,
   gold_standard_pages: goldPages.length,
   backlog_pages: legacyPages.length,
   critical_pages: criticalPages.length,
@@ -251,8 +305,11 @@ const md = [
   `Generated: ${summary.generated_at}`,
   '',
   `- Published encyclopedia pages: **${summary.published_pages}**`,
-  `- Conditions: **${summary.condition_pages}**`,
-  `- Glossary terms: **${summary.glossary_pages}**`,
+  `- Stored condition records: **${summary.condition_pages}**`,
+  `- Stored glossary terms: **${summary.glossary_pages}**`,
+  `- Condition-reference purpose: **${summary.inferred_or_declared_condition_reference_pages}**`,
+  `- Specialized-support purpose: **${summary.inferred_or_declared_specialized_support_pages}**`,
+  `- Glossary purpose: **${summary.inferred_or_declared_glossary_pages}**`,
   `- Gold-standard pages: **${summary.gold_standard_pages}**`,
   `- Upgrade backlog: **${summary.backlog_pages}**`,
   `- Critical pages: **${summary.critical_pages}**`,
@@ -260,15 +317,17 @@ const md = [
   '',
   '## Highest-priority repair queue',
   '',
-  '| Priority | Score | Type | Words | Refs | Claims | Gold | Page | Critical | Warnings |',
+  '| Priority | Score | Mode | Words | Refs | Claims | Gold | Page | Critical | Warnings |',
   '| ---: | ---: | --- | ---: | ---: | ---: | --- | --- | ---: | ---: |',
-  ...audits.slice(0, 100).map((item) => `| ${item.priority} | ${item.score} | ${item.content_type} | ${item.useful_word_count} | ${item.reference_count} | ${item.claim_source_count} | ${item.gold_standard ? 'yes' : 'no'} | ${item.canonical_url} | ${item.critical.length} | ${item.warnings.length} |`),
+  ...audits.slice(0, 100).map((item) => `| ${item.priority} | ${item.score} | ${item.mode} | ${item.useful_word_count} | ${item.reference_count} | ${item.claim_source_count} | ${item.gold_standard ? 'yes' : 'no'} | ${item.canonical_url} | ${item.critical.length} | ${item.warnings.length} |`),
   '',
   '## Interpretation',
   '',
   '- Legacy pages remain published unless they contain a safety-critical defect; warnings form the repair queue.',
-  '- Gold-standard pages are held to the strict contract in `.encyclopedia-quality-standard.md`.',
+  '- Gold-standard pages are held to the page-purpose contract in `.encyclopedia-quality-standard.md`.',
+  '- Legacy purpose inference is conservative and is used only for backlog prioritization; it never grants gold status.',
   '- Useful word count uses the richer of `body_text` and all structured `body_json` text to avoid false thin-content flags.',
+  '- Specialized-support pages are intentionally prevented from becoming duplicate disease monographs merely to hit a word count.',
   '- A high score is a regression signal, not a substitute for scientific editorial review.',
   '',
 ].join('\n');
