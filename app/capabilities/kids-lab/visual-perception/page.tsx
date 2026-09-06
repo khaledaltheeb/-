@@ -76,7 +76,7 @@ export default function VisualPerceptionLabPage() {
         <div className={styles.infoCard} style={{ marginTop: '1rem' }}><h2>مراجع منهجية مختارة</h2><ul>
           <li><a href="https://pubmed.ncbi.nlm.nih.gov/37274562/" target="_blank" rel="noreferrer">Current directions in visual perceptual learning</a></li>
           <li><a href="https://pubmed.ncbi.nlm.nih.gov/32982829/" target="_blank" rel="noreferrer">Is Early Spatial Skills Training Effective? A Meta-Analysis</a></li>
-          <li><a href="https://pubmed.ncbi.nlm.nih.gov/40912872/" target="_blank" rel="noreferrer">Assessing children's spatial thinking: challenges and implications</a></li>
+          <li><a href="https://pubmed.ncbi.nlm.nih.gov/40912872/" target="_blank" rel="noreferrer">Assessing children&apos;s spatial thinking: challenges and implications</a></li>
         </ul></div>
       </section>
     </main>
