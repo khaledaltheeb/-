@@ -3,7 +3,7 @@ import { renderVisualMotorWorksheet as renderBase } from './visual-motor-svg';
 
 export function renderVisualMotorWorksheet(a: VisualMotorActivity) {
   const adjusted: VisualMotorActivity = a.kind === 'test' && a.taskType === 'dot-to-dot'
-    ? { ...a, seed: a.seed + 997 + a.level * 43, variant: a.variant + 1 + a.level }
+    ? { ...a, seed: a.seed + 1 }
     : a;
   let svg = renderBase(adjusted);
   if (a.kind === 'test' && a.taskType === 'shape-copying') {
