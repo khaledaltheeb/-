@@ -1,0 +1,36 @@
+name: Current Main Unresolved Assessment Inspector
+
+on:
+  push:
+    branches:
+      - assessment-sectors-audit-20260906
+    paths:
+      - 'scripts/current-main-unresolved-assessment-inspector.mjs'
+      - '.github/workflows/current-main-unresolved-assessment-inspector.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Preserve inspector and switch to current main
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp scripts/current-main-unresolved-assessment-inspector.mjs /tmp/current-main-unresolved-assessment-inspector.mjs
+          git fetch origin main
+          git checkout --detach origin/main
+          cp /tmp/current-main-unresolved-assessment-inspector.mjs scripts/current-main-unresolved-assessment-inspector.mjs
+          echo "MAIN_SHA=$(git rev-parse HEAD)"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Inspect unresolved catalog records
+        run: node scripts/current-main-unresolved-assessment-inspector.mjs
