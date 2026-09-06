@@ -1,0 +1,51 @@
+name: Homepage JS Chunk Map
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/homepage-js-chunk-map.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  map:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Map JavaScript loaded by production homepage
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://healthrenewal.org'
+          curl -fsS --compressed --max-time 30 "$base/" -o /tmp/home.html
+          mkdir -p /tmp/chunks
+          grep -Eo 'src="[^"]+\.js[^\"]*"' /tmp/home.html \
+            | sed -E 's/^src="//;s/"$//' \
+            | sed 's/&amp;/\&/g' \
+            | sort -u > /tmp/chunk-urls.txt
+
+          echo "HOMEPAGE_SCRIPT_COUNT=$(wc -l < /tmp/chunk-urls.txt | tr -d ' ')"
+          printf 'BYTES\tURL\tSIGNATURES\n'
+          while IFS= read -r path; do
+            [ -n "$path" ] || continue
+            case "$path" in
+              http://*|https://*) url="$path" ;;
+              *) url="${base}${path}" ;;
+            esac
+            name="$(printf '%s' "$path" | sed 's/[?&#]/_/g;s#[^A-Za-z0-9._-]#_#g')"
+            file="/tmp/chunks/${name}"
+            curl -fsS --compressed --max-time 30 "$url" -o "$file"
+            bytes="$(wc -c < "$file" | tr -d ' ')"
+            sig="$(grep -Eo 'react-dom|react|scheduler|hydrateRoot|createRoot|createContext|useState|useEffect|useReducer|useSyncExternalStore|app-router|layout-router|next/navigation|next/link|next/dist|supabase|lucide|web-vitals|performance' "$file" | sort -u | paste -sd, - || true)"
+            printf '%s\t%s\t%s\n' "$bytes" "$path" "${sig:-(none)}"
+          done < /tmp/chunk-urls.txt | sort -nr
+
+          echo '=== LARGEST CHUNK STRING HINTS ==='
+          find /tmp/chunks -type f -printf '%s %p\n' | sort -nr | head -n 8 | while read -r bytes file; do
+            echo "--- ${bytes} $(basename "$file")"
+            grep -Eo '[A-Za-z0-9_./@:-]{6,}' "$file" \
+              | grep -Ei 'react|scheduler|router|navigation|link|supabase|lucide|web-vitals|performance|hydration|client|server|segment|boundary' \
+              | sort | uniq -c | sort -nr | head -n 80 || true
+          done
