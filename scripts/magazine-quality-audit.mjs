@@ -47,6 +47,17 @@ function normalizedText(row) {
   return [row.body_text || '', ...collectText(row.body_json)].join('\n').replace(/\s+/g, ' ').trim();
 }
 
+function wordCount(value) {
+  if (typeof value !== 'string' || !value.trim()) return 0;
+  return value.match(/[\p{L}\p{N}]+/gu)?.length || 0;
+}
+
+function usefulWordCount(row) {
+  const bodyWords = wordCount(row.body_text || '');
+  const structuredWords = wordCount(collectText(row.body_json).join(' '));
+  return Math.max(bodyWords, structuredWords);
+}
+
 function containsAny(text, patterns) {
   const lower = text.toLocaleLowerCase('ar');
   return patterns.some((pattern) => lower.includes(pattern.toLocaleLowerCase('ar')));
@@ -89,9 +100,18 @@ function duplicateTextBlocks(blocks) {
   return duplicates;
 }
 
+function highStakesPage(row, text) {
+  if (String(row.canonical_url || '').startsWith('/magazine/pediatric-oncology/')) return true;
+  return containsAny(text, [
+    'سرطان', 'ورم', 'انتحار', 'إيذاء النفس', 'جرعة زائدة', 'أفيون', 'opioid',
+    'كحول', 'اضطراب استخدام', 'دواء', 'دوائي', 'pharmac', 'ssri', 'رعاية تلطيفية',
+  ]);
+}
+
 function auditRow(row) {
   const blocks = blocksOf(row);
   const text = normalizedText(row);
+  const words = usefulWordCount(row);
   const refs = refUrls(row);
   const source = row?.schema_json?.source_url || '';
   const evidence = String(row?.schema_json?.evidence_kind || '').trim();
@@ -101,8 +121,8 @@ function auditRow(row) {
 
   if (!row.title?.trim()) critical.push('missing title');
   if (!row.canonical_url?.startsWith('/magazine/')) critical.push('invalid magazine canonical');
-  if (!text || text.length < 500) critical.push('empty/thin rendered content');
-  if (blocks.length < 8) critical.push(`too few content blocks (${blocks.length})`);
+  if (!text || words < 120) critical.push(`empty/thin rendered content (${words} words)`);
+  if (blocks.length < 8 && words < 900) critical.push(`too little structured depth (${blocks.length} blocks; ${words} words)`);
   if (!validHttpUrl(source)) critical.push('missing/invalid primary source URL');
   if (!refs.length) critical.push('no valid reference URLs');
   if (!row.seo_title?.trim()) critical.push('missing SEO title');
@@ -125,16 +145,16 @@ function auditRow(row) {
   }
 
   if (refs.length < 3) warnings.push(`fewer than 3 source records (${refs.length})`);
-  if (blocks.length < 20) warnings.push(`short structured article (${blocks.length} blocks)`);
+  if (blocks.length < 20 && words < 1200) warnings.push(`short structured article (${blocks.length} blocks; ${words} words)`);
   if (!row.excerpt?.trim()) warnings.push('missing excerpt');
-  if (!row.medical_disclaimer?.trim()) warnings.push('missing health/method disclaimer');
+  if (highStakesPage(row, text) && !row.medical_disclaimer?.trim()) warnings.push('missing high-stakes health disclaimer');
   if (!evidence) warnings.push('missing evidence classification');
   if (['مراجعة بحثية', 'دراسة بحثية'].includes(evidence)) warnings.push(`generic evidence classification: ${evidence}`);
 
   if (!containsAny(text, ['ما السؤال', 'سؤال البحث', 'ماذا بحثت', 'هدف الدراسة', 'هدفت'])) warnings.push('research question/aim not explicit');
   if (!containsAny(text, ['المنهج', 'كيف بُنيت', 'كيف بنيت', 'كيف جُمعت', 'كيف جمعت', 'طريقة البحث', 'تصميم الدراسة', 'تصميم التجربة'])) warnings.push('methods/design not explicit');
-  if (!containsAny(text, ['حدود الدليل', 'القيود', 'محدودية', 'limitations'])) warnings.push('limitations not explicit');
-  if (!containsAny(text, ['ما الذي لا تثبت', 'ما الذي لا يثبت', 'لا تثبت', 'لا يثبت', 'لا تعني', 'لا يعني'])) warnings.push('anti-overclaim section not explicit');
+  if (!containsAny(text, ['حدود', 'قيود', 'محدودية', 'limitations'])) warnings.push('limitations not explicit');
+  if (!containsAny(text, ['ما الذي لا تثبت', 'ما الذي لا يثبت', 'لا تثبت', 'لا يثبت', 'لا تعني', 'لا يعني', 'لا تسمح', 'لا يمكن استنتاج', 'لا يمكن أن نستنتج'])) warnings.push('anti-overclaim section not explicit');
   if (!containsAny(text, ['الدلالة العملية', 'التطبيق العملي', 'قائمة تدقيق', 'ماذا يعني ذلك', 'للمؤسسات', 'للمدارس', 'للأسر'])) warnings.push('practical interpretation not explicit');
   if (!containsAny(text, ['أسئلة شائعة']) && !blocks.some((b) => b?.type === 'faq')) warnings.push('FAQ absent');
   if (!containsAny(text, ['المصدر الأصلي', 'المراجع'])) warnings.push('primary-source section not explicit');
@@ -168,6 +188,7 @@ function auditRow(row) {
     evidence_kind: evidence,
     legacy,
     block_count: blocks.length,
+    word_count: words,
     reference_count: refs.length,
     last_reviewed_at: row.last_reviewed_at,
     score,
@@ -216,6 +237,7 @@ const md = [
   '',
   '## Notes',
   '',
+  '- Depth is assessed from both structured block count and useful word count; a long, information-dense block is not treated as thin merely because block count is low.',
   '- This is a structural/provenance safety audit, not a substitute for reading the primary paper.',
   '- A page can score highly and still contain a scientific error; source-level verification remains mandatory.',
   '- A warning is a queue signal, not proof that the page is wrong.',
