@@ -4,8 +4,8 @@
   "shard_count": 7,
   "partition_contract": "sha256-first8-mod7-v1",
   "key_precedence": ["normalized_canonical_url", "normalized_doi", "pmid", "normalized_source_url", "immutable_record_id"],
-  "updated_at": "2026-09-06T22:01:17.932131Z",
-  "successful_published_verified": 25,
+  "updated_at": "2026-09-06T23:04:42.026211Z",
+  "successful_published_verified": 50,
   "verification_contract": {
     "origin": "https://healthrenewal.org",
     "page_http": 200,
@@ -15,13 +15,36 @@
     "scholarly_article_schema": true,
     "faq_schema": true,
     "references_rendered": true,
+    "sections_rendered": true,
+    "internal_links_rendered": true,
     "sitemap_present": true,
-    "feed_present": true,
+    "magazine_index_present": true,
+    "magazine_index_page_size": 24,
+    "feed_policy": "latest-30-only",
     "public_content_api_http": 200,
     "public_content_api_present": true,
-    "duplicate_check": "normalized DOI unique among published content",
-    "retraction_check": "no correction or retraction notice identified during primary-source/version-of-record editorial review",
-    "note": "Transient 503 responses from the production edge/API were retried; all 25 records subsequently returned the required successful checks."
+    "duplicate_check": "normalized DOI and normalized source URL unique among published content",
+    "correction_retraction_check": "DOI/Crossref and available version-of-record metadata reviewed; no unresolved correction or retraction identified for published records in this run",
+    "cloudflare_policy": "transient 503 is retried before classifying a record as failed"
+  },
+  "last_run": {
+    "completed_at": "2026-09-06T23:04:42.026211Z",
+    "successful_published_verified": 25,
+    "word_count_retries": 0,
+    "minimum_arabic_words": 2500,
+    "observed_new_page_words": "3095-3427",
+    "publisher": "private.publish_editorial_research_v6(jsonb)",
+    "discovery": {
+      "sitemap": "25/25 present in /sitemaps/content.xml?page=0",
+      "magazine_index": "25/25 present across contract pagination",
+      "feed": "20/20 records ranked in latest 30 present; 5 records ranked >30 correctly not required by feed contract",
+      "api": "25/25 HTTP 200 and content present"
+    },
+    "rejected_or_skipped": [
+      {"key":"10.12688/f1000research.172240.2","source":"https://doi.org/10.12688/f1000research.172240.2","status":"rejected","reason":"peer_review_not_approved_current_version"},
+      {"key":"10.3390/bs16091571","source":"https://doi.org/10.3390/bs16091571","status":"rejected","reason":"source_detail_insufficient_for_full_critical_page_in_current_run"},
+      {"key":"10.1186/s12883-026-05343-0","source":"https://doi.org/10.1186/s12883-026-05343-0","canonical":"/magazine/stroke-bci-neuromodulation-network-meta-analysis-2026.html","status":"skipped_already_published","reason":"already_published_source_url_match"}
+    ]
   },
   "records": [
     {"key":"10.3390/youth6030125","first8hex":"187228ea","catalog_id":"e21e4a10-d324-4e03-b19f-f077c55f77ef","content_id":"d698fc0e-c47f-448c-a06a-bff4049f9686","source":"https://doi.org/10.3390/youth6030125","canonical":"/magazine/indigenous-youth-wellbeing-canada-2026.html","status":"published_verified","reason":null,"verification":"passed"},
@@ -48,6 +71,32 @@
     {"key":"10.3390/healthcare14172743","first8hex":"d7eae958","catalog_id":"843027bf-ce3c-44d8-9aef-3b5ecfcd27a8","content_id":"aeb77212-2534-45aa-8b8e-f4207149e674","source":"https://doi.org/10.3390/healthcare14172743","canonical":"/magazine/saudi-autism-child-quality-life-caregivers-2026.html","status":"published_verified","reason":null,"verification":"passed"},
     {"key":"10.1177/15500594261480203","first8hex":"82e03a9e","catalog_id":"7402b1c3-5628-4f1c-8f4c-e42a98083e18","content_id":"e579145a-29f7-474d-8a46-138b14f97fe7","source":"https://doi.org/10.1177/15500594261480203","canonical":"/magazine/stroke-qeeg-cognitive-recovery-2026.html","status":"published_verified","reason":null,"verification":"passed"},
     {"key":"10.1002/aur.70313","first8hex":"689a761c","catalog_id":"7bc7b851-e377-4dbe-9812-7bc3e2fdc629","content_id":"7f0c4951-a735-451c-b285-89af82ebead3","source":"https://doi.org/10.1002/aur.70313","canonical":"/magazine/autism-cerebellum-sensory-habituation-fmri-2026.html","status":"published_verified","reason":null,"verification":"passed"},
-    {"key":"10.1002/aur.70350","first8hex":"d2a8f2b6","catalog_id":"d5485d7e-d916-477e-8dee-36222bc48b26","content_id":"f3203a8c-9d19-4c41-9a64-cf06967ece3d","source":"https://doi.org/10.1002/aur.70350","canonical":"/magazine/autism-self-injury-preschool-trajectories-2026.html","status":"published_verified","reason":null,"verification":"passed"}
+    {"key":"10.1002/aur.70350","first8hex":"d2a8f2b6","catalog_id":"d5485d7e-d916-477e-8dee-36222bc48b26","content_id":"f3203a8c-9d19-4c41-9a64-cf06967ece3d","source":"https://doi.org/10.1002/aur.70350","canonical":"/magazine/autism-self-injury-preschool-trajectories-2026.html","status":"published_verified","reason":null,"verification":"passed"},
+
+    {"key":"10.3390/children13091193","first8hex":"9bf5bc3d","catalog_id":"34bfab38-1c89-4ab6-9a60-a90c317f06f7","content_id":"cffecc06-631e-4261-af61-c7049877c833","source":"https://doi.org/10.3390/children13091193","canonical":"/magazine/parental-competencies-adolescent-substance-prevention-2026.html","status":"published_verified","reason":null,"verification":"passed","verified_at":"2026-09-06T23:04:42.026211Z"},
+    {"key":"10.2196/86789","first8hex":"02e46cd3","catalog_id":"15e52bcc-67ff-4ef1-8cb4-e028a1314895","content_id":"97563a48-f2f9-4205-a5dd-724ad2210cc0","source":"https://doi.org/10.2196/86789","canonical":"/magazine/deep-partial-burns-decision-aid-2026.html","status":"published_verified","reason":null,"verification":"passed","verified_at":"2026-09-06T23:04:42.026211Z"},
+    {"key":"10.1186/s40359-026-05511-4","first8hex":"af2546f3","catalog_id":"878b2bac-399a-4bd2-b4a8-e917e0e62610","content_id":"d182bf3d-b56c-462b-b223-f044259e12de","source":"https://doi.org/10.1186/s40359-026-05511-4","canonical":"/magazine/sensory-integration-parent-experiences-2026.html","status":"published_verified","reason":null,"verification":"passed","verified_at":"2026-09-06T23:04:42.026211Z"},
+    {"key":"10.3390/bs16091569","first8hex":"89b6d960","catalog_id":"388e6604-1ace-41a4-ae29-c485af34fcaf","content_id":"6e78ae62-d91b-443d-984e-714fb031b71a","source":"https://doi.org/10.3390/bs16091569","canonical":"/magazine/adolescent-epilepsy-autonomy-adherence-life-satisfaction-2026.html","status":"published_verified","reason":null,"verification":"passed","verified_at":"2026-09-06T23:04:42.026211Z"},
+    {"key":"10.3389/fpsyg.2026.1878362","first8hex":"e33fcb99","catalog_id":"05c74a78-f837-4684-8b12-085b2a6106d9","content_id":"5e3b3692-5eab-47c8-b50d-eb88adb8b85e","source":"https://doi.org/10.3389/fpsyg.2026.1878362","canonical":"/magazine/adolescent-just-world-resilience-teacher-relationship-2026.html","status":"published_verified","reason":null,"verification":"passed","verified_at":"2026-09-06T23:04:42.026211Z"},
+    {"key":"10.3390/sports14090390","first8hex":"a84db6bf","catalog_id":"90971c4b-6791-49b6-be7b-0ec79acd187a","content_id":"030b1c40-5047-4bce-81d9-345d2130c812","source":"https://doi.org/10.3390/sports14090390","canonical":"/magazine/womens-soccer-mental-health-scoping-review-2026.html","status":"published_verified","reason":null,"verification":"passed","verified_at":"2026-09-06T23:04:42.026211Z"},
+    {"key":"10.3389/frcha.2026.1890788","first8hex":"6b1d2bb7","catalog_id":"30017f67-388f-40f2-99de-14ff1c67464d","content_id":"aceae3a1-47ee-451a-acf2-db147719682f","source":"https://doi.org/10.3389/frcha.2026.1890788","canonical":"/magazine/ushirikiano-kenya-adolescent-mental-health-pilot-2026.html","status":"published_verified","reason":null,"verification":"passed","verified_at":"2026-09-06T23:04:42.026211Z"},
+    {"key":"10.3389/fresc.2026.1924405","first8hex":"66491005","catalog_id":"9d5b7316-4bdf-4010-b0a5-d87f0a0e55bb","content_id":"2d852e59-2eea-4064-afc7-b294184ccc2a","source":"https://doi.org/10.3389/fresc.2026.1924405","canonical":"/magazine/wheelchair-skills-youth-experiences-2026.html","status":"published_verified","reason":null,"verification":"passed","verified_at":"2026-09-06T23:04:42.026211Z"},
+    {"key":"10.1007/s00432-026-06600-y","first8hex":"0cdadd23","catalog_id":"69a60b30-f4b1-45c0-8f1e-52e27df662fb","content_id":"7f0ba0df-ac34-48ec-9392-a563c2b9229e","source":"https://doi.org/10.1007/s00432-026-06600-y","canonical":"/magazine/breast-cancer-return-work-psychosocial-review-2026.html","status":"published_verified","reason":null,"verification":"passed","verified_at":"2026-09-06T23:04:42.026211Z"},
+    {"key":"10.3390/jfmk11030350","first8hex":"e3905d12","catalog_id":"7a45a0fc-75f8-4fe8-9751-f77abbf71193","content_id":"367e464f-ae62-46ad-9a57-d8c38cd3002e","source":"https://doi.org/10.3390/jfmk11030350","canonical":"/magazine/running-biomechanics-reference-colombia-2026.html","status":"published_verified","reason":null,"verification":"passed","verified_at":"2026-09-06T23:04:42.026211Z"},
+    {"key":"10.3390/bs16091565","first8hex":"22407008","catalog_id":"8571e9e0-bb12-4477-98a2-91632ecb5185","content_id":"a25f8c9d-b3d2-42dc-a754-c78bc153f7cd","source":"https://doi.org/10.3390/bs16091565","canonical":"/magazine/parenting-academic-helplessness-suicidal-ideation-2026.html","status":"published_verified","reason":null,"verification":"passed","verified_at":"2026-09-06T23:04:42.026211Z"},
+    {"key":"10.3390/ejihpe16090134","first8hex":"8fb9d93f","catalog_id":"f18e94ba-a96c-4e1e-9a5a-8efc6bc9102e","content_id":"8a0e13e3-1982-41b7-9328-a604ff8df5a7","source":"https://doi.org/10.3390/ejihpe16090134","canonical":"/magazine/greek-adolescent-ippa-psychometrics-2026.html","status":"published_verified","reason":null,"verification":"passed","verified_at":"2026-09-06T23:04:42.026211Z"},
+    {"key":"10.1186/s13034-026-01162-w","first8hex":"236d7f82","catalog_id":"ff527b8d-c70d-4b21-af60-bc9e1ff60839","content_id":"6168268a-e377-4f8d-9daa-59997060f0b2","source":"https://doi.org/10.1186/s13034-026-01162-w","canonical":"/magazine/self-compassion-emotion-beliefs-youth-mental-health-2026.html","status":"published_verified","reason":null,"verification":"passed","verified_at":"2026-09-06T23:04:42.026211Z"},
+    {"key":"10.1186/s12889-026-28911-y","first8hex":"81ae2848","catalog_id":"a854bf54-d273-4aec-9774-9eb4ab6949f6","content_id":"59993d5f-9d1b-4733-81c1-3e47effb020b","source":"https://doi.org/10.1186/s12889-026-28911-y","canonical":"/magazine/mothers-hospitalized-children-cyberchondria-support-2026.html","status":"published_verified","reason":null,"verification":"passed","verified_at":"2026-09-06T23:04:42.026211Z"},
+    {"key":"10.1186/s12889-026-29212-0","first8hex":"4dc19da4","catalog_id":"d807edd6-6432-47bb-b93e-fc00d14d5990","content_id":"0f1f1109-8525-4eec-bc5e-759f319b976c","source":"https://doi.org/10.1186/s12889-026-29212-0","canonical":"/magazine/china-education-burden-health-behaviors-2026.html","status":"published_verified","reason":null,"verification":"passed","verified_at":"2026-09-06T23:04:42.026211Z"},
+    {"key":"10.3390/bs16091553","first8hex":"80c29a5f","catalog_id":"9332502f-b5ce-4a58-9e63-201c6da97c06","content_id":"aaed57b6-affe-409b-a331-d9c2d4a52b43","source":"https://doi.org/10.3390/bs16091553","canonical":"/magazine/autism-echolalia-ndbi-cascading-coaching-2026.html","status":"published_verified","reason":null,"verification":"passed","verified_at":"2026-09-06T23:04:42.026211Z"},
+    {"key":"10.3390/ejihpe16090132","first8hex":"33a9db3c","catalog_id":"b06ad8f0-3295-4e82-8abf-0a6f7c561d46","content_id":"b5dd5041-5f2e-478b-8409-76d84f3206d2","source":"https://doi.org/10.3390/ejihpe16090132","canonical":"/magazine/maternal-loneliness-technoference-early-childhood-2026.html","status":"published_verified","reason":null,"verification":"passed","verified_at":"2026-09-06T23:04:42.026211Z"},
+    {"key":"10.3389/fpubh.2026.1817617","first8hex":"13f4927a","catalog_id":"d6692639-92a1-4e67-bb75-bd843bc14475","content_id":"3ba44be1-5cb1-4ad4-81aa-02c429fe028a","source":"https://doi.org/10.3389/fpubh.2026.1817617","canonical":"/magazine/digital-therapeutics-mental-health-clinical-practice-2026.html","status":"published_verified","reason":null,"verification":"passed","verified_at":"2026-09-06T23:04:42.026211Z"},
+    {"key":"10.1007/s40617-026-01216-7","first8hex":"49911eb1","catalog_id":"55877fc9-521c-4873-a17f-47f32ebff140","content_id":"29e77a21-7d3e-42f9-bb05-3110a7fd0874","source":"https://doi.org/10.1007/s40617-026-01216-7","canonical":"/magazine/palms-aba-research-participation-implementation-2026.html","status":"published_verified","reason":null,"verification":"passed","verified_at":"2026-09-06T23:04:42.026211Z"},
+    {"key":"10.1002/epi.70473","first8hex":"7024f0c3","catalog_id":"68e8e852-8a20-413c-b6f1-f70da1e80a87","content_id":"9fc9cb63-cd5b-4b4b-b9df-13f6fe28aa29","source":"https://doi.org/10.1002/epi.70473","canonical":"/magazine/rnu2-2-developmental-epileptic-encephalopathy-2026.html","status":"published_verified","reason":null,"verification":"passed","verified_at":"2026-09-06T23:04:42.026211Z"},
+    {"key":"10.3390/educsci16091405","first8hex":"98e7ca39","catalog_id":"5c7a1d92-63cb-4200-b279-0083469e5da0","content_id":"b2ded8f4-4adb-46d3-8307-f6fb73868107","source":"https://doi.org/10.3390/educsci16091405","canonical":"/magazine/autism-self-determination-saudi-adolescents-2026.html","status":"published_verified","reason":null,"verification":"passed","verified_at":"2026-09-06T23:04:42.026211Z"},
+    {"key":"10.1186/s12889-026-29183-2","first8hex":"38058f47","catalog_id":"4547410f-b42b-4963-bc19-4b4c0f83158e","content_id":"9424af8c-3eac-4f78-891b-596fdd0eb74a","source":"https://doi.org/10.1186/s12889-026-29183-2","canonical":"/magazine/adverse-childhood-experiences-neet-young-women-2026.html","status":"published_verified","reason":null,"verification":"passed","verified_at":"2026-09-06T23:04:42.026211Z"},
+    {"key":"10.1186/s12938-026-01614-6","first8hex":"98fa31b7","catalog_id":"ec2dbd14-d374-48e0-992e-9a6078cfddf6","content_id":"af2129df-fa74-4f35-80cc-a00827514aac","source":"https://doi.org/10.1186/s12938-026-01614-6","canonical":"/magazine/robotic-glove-subacute-stroke-pilot-2026.html","status":"published_verified","reason":null,"verification":"passed","verified_at":"2026-09-06T23:04:42.026211Z"},
+    {"key":"10.3389/feduc.2026.1901716","first8hex":"77b6b7d7","catalog_id":"7dd362a5-6bcd-4081-ba31-707e72064a2a","content_id":"75ced5e7-5619-41e3-9344-5fba2acacf2e","source":"https://doi.org/10.3389/feduc.2026.1901716","canonical":"/magazine/hard-hearing-ai-functions-saudi-education-2026.html","status":"published_verified","reason":null,"verification":"passed","verified_at":"2026-09-06T23:04:42.026211Z"},
+    {"key":"10.3390/bs16091492","first8hex":"9a8d2a7e","catalog_id":"3747c4d1-3faa-445f-a78a-8ddbd90031be","content_id":"db2c111a-8ae5-40c2-8f27-37dbbb404657","source":"https://doi.org/10.3390/bs16091492","canonical":"/magazine/autism-conversation-skills-brief-assessment-2026.html","status":"published_verified","reason":null,"verification":"passed","verified_at":"2026-09-06T23:04:42.026211Z"}
   ]
 }
