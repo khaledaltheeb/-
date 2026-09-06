@@ -2,6 +2,7 @@ const BASE = 'https://healthrenewal.org';
 const tests = [
   { path: '/assessment-measures/', kind: 'index' },
   { path: '/assessment-measures/patient-health-questionnaire-9/', kind: 'explicit-control' },
+  { path: '/assessment-measures/patient-health-questionnaire-9/print/', kind: 'explicit-print' },
   { path: '/assessment-measures/chart-short-form/', kind: 'explicit-final' },
   { path: '/assessment-measures/combat-exposure-scale/', kind: 'explicit-final' },
   { path: '/assessment-measures/deployment-risk-resilience-inventory-2/', kind: 'explicit-final' },
@@ -22,14 +23,18 @@ async function fetchWithRetry(test) {
         redirect: 'follow',
         signal: controller.signal,
         headers: {
-          'User-Agent': 'Rawafid-Assessment-Measures-Live-Smoke/1.0',
+          'User-Agent': 'Rawafid-Assessment-Measures-Live-Smoke/1.1',
           'Cache-Control': 'no-cache',
         },
       });
       const body = await response.text();
-      const httpOk = response.status === 200 && !/Internal Server Error|server-side exception/i.test(body);
+      const httpOk = response.status === 200 && !/Internal Server Error|server-side exception|Application error/i.test(body);
       const semanticIssues = [];
-      if (test.kind !== 'index') {
+      if (test.kind === 'explicit-print') {
+        if (!body.includes('العودة إلى دليل المقياس')) semanticIssues.push('print back-link missing');
+        if (body.includes('ورقة توثيق عامة — ليست نموذج المقياس')) semanticIssues.push('explicit print route rendered as generic fallback');
+        if (body.includes('لم تُنشر مادة تشغيلية صريحة بعد')) semanticIssues.push('explicit print route reports no explicit material');
+      } else if (test.kind !== 'index') {
         if (!body.includes('فتح المادة التشغيلية')) semanticIssues.push('explicit operational CTA missing');
         if (!body.includes('المقياس / المادة التشغيلية')) semanticIssues.push('explicit operational heading missing');
         if (body.includes('ورقة توثيق عامة — ليست نموذج المقياس')) semanticIssues.push('explicit route rendered as generic fallback');
