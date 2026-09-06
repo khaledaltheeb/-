@@ -50,6 +50,10 @@ export const explicitOperationalMaterials: Record<string, AssessmentOperationalM
   ...assessmentOperationalFullFormsWave13,
 };
 
+export function hasExplicitOperationalMaterial(slug: string): boolean {
+  return Boolean(explicitOperationalMaterials[slug]);
+}
+
 export function getOperationalMaterial(measure: AssessmentMeasure): AssessmentOperationalMaterial {
   return explicitOperationalMaterials[measure.slug] ?? getBaseOperationalMaterial(measure);
 }
