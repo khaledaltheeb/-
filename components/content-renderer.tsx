@@ -12,6 +12,17 @@ function dimension(value: unknown, fallback: number) { const number=Number(value
 function sectionAnchor(index: number) { return `section-${index + 1}`; }
 function countWords(value: string) { return value.split(/\s+/).filter((token) => /[A-Za-z0-9\u0600-\u06ff]/.test(token)).length; }
 function normalizeComparable(value: string) { return value.toLocaleLowerCase('ar').replace(/\s+/g, ' ').trim(); }
+function splitEmbeddedHeading(value: string) {
+  const normalized = value.replace(/\\n/g, '\n').trim();
+  if (normalized.length <= 300) return null;
+  const firstBreak = normalized.indexOf('\n');
+  if (firstBreak <= 0) return null;
+  const heading = normalized.slice(0, firstBreak).trim();
+  const body = normalized.slice(firstBreak + 1).trim();
+  if (!heading || heading.length > 500 || !body) return null;
+  const paragraphs = body.split(/\n\s*\n/).map((paragraph) => paragraph.replace(/\n+/g, ' ').trim()).filter(Boolean);
+  return paragraphs.length ? { heading, paragraphs } : null;
+}
 
 function blockTextContent(blockValue: unknown) {
   const block = asRecord(blockValue); if (!block) return '';
@@ -64,8 +75,18 @@ function renderBlock(blockValue: unknown, index: number) {
   const type = text(block.type, 40).toLowerCase(); const key = `${type || 'block'}-${index}`;
   if (type === 'paragraph') { const value = text(block.text); return value ? <p key={key}>{value}</p> : null; }
   if (type === 'heading') {
-    const value = text(block.text, 500); const level = Number(block.level); const id = sectionAnchor(index);
-    if (!value) return null;
+    const rawValue = text(block.text, 20000); const level = Number(block.level); const id = sectionAnchor(index);
+    if (!rawValue) return null;
+    const expanded = splitEmbeddedHeading(rawValue);
+    if (expanded) {
+      const headingNode = level === 3
+        ? <h3 id={id}>{expanded.heading}</h3>
+        : level === 4
+          ? <h4 id={id}>{expanded.heading}</h4>
+          : <h2 id={id}>{expanded.heading}</h2>;
+      return <section key={key}>{headingNode}{expanded.paragraphs.map((paragraph, paragraphIndex) => <p key={`${key}-p-${paragraphIndex}`}>{paragraph}</p>)}</section>;
+    }
+    const value = rawValue.slice(0, 500);
     if (level === 3) return <h3 id={id} key={key}>{value}</h3>;
     if (level === 4) return <h4 id={id} key={key}>{value}</h4>;
     return <h2 id={id} key={key}>{value}</h2>;
