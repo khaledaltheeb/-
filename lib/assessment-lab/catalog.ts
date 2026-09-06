@@ -27,7 +27,7 @@ export type SourceInstrument = {
 
 export type AssessmentResponseKind = 'frequency' | 'degree' | 'yes-no';
 export type AssessmentSafetyLevel = 'urgent' | 'priority';
-export type AssessmentSafetyKind = 'personal-safety' | 'postpartum-urgent' | 'health-evaluation' | 'recovery-support';
+export type AssessmentSafetyKind = 'personal-safety' | 'postpartum-urgent' | 'health-evaluation' | 'recovery-support' | 'school-safeguarding';
 
 export type AssessmentSafetySignal = {
   triggerValues: string[];
@@ -57,6 +57,26 @@ const questionBanks = {
   ...(clarityWave6QuestionBankData as Record<string, AssessmentQuestion[]>),
   ...(clarityWave7QuestionBankData as Record<string, AssessmentQuestion[]>),
   ...(safetyHardenedQuestionBankData as Record<string, AssessmentQuestion[]>),
+};
+
+// Small editorial/safety corrections discovered during page-by-page audit are applied
+// centrally so they cannot be lost while the reviewed source banks remain traceable.
+const questionTextCorrections: Record<string, Record<string, string>> = {
+  'hearing-support-family': {
+    'كم مرة فات الطفل جزء من تواصل مهم؟': 'كم مرة فاته جزء من تواصل مهم؟',
+  },
+};
+
+const questionSafetyOverrides: Record<string, Record<string, AssessmentSafetySignal>> = {
+  'school-wellbeing': {
+    'هل تعرض الطالب لتنمر أو تهديد خلال الأسبوع الماضي؟': {
+      triggerValues: ['نعم'],
+      level: 'priority',
+      kind: 'school-safeguarding',
+      title: 'التنمر أو التهديد يحتاج إلى استجابة حماية، لا إلى الاكتفاء بالمتابعة',
+      message: 'إذا كان التنمر أو التهديد مستمرًا، أخبر شخصًا بالغًا موثوقًا ومسؤولًا في المدرسة والأسرة، ووثّق ما حدث بطريقة آمنة. إذا كان هناك خطر مباشر أو عنف جارٍ، فالأولوية للابتعاد عن الخطر وطلب مساعدة فورية من الجهة المحلية المناسبة بدل إكمال الأداة.',
+    },
+  },
 };
 
 export const assessmentSlugs = [...assessmentMonitors.map((row) => row.slug), ...sourceInstruments.map((row) => row.slug)];
@@ -92,7 +112,15 @@ export function buildMonitorQuestions(monitor: AssessmentMonitor): AssessmentQue
   if (!custom?.length) {
     throw new Error(`Missing tailored Assessment Lab question bank for ${monitor.slug}`);
   }
-  return custom;
+  const textCorrections = questionTextCorrections[monitor.slug] ?? {};
+  const safetyOverrides = questionSafetyOverrides[monitor.slug] ?? {};
+  return custom.map((question) => {
+    const correctedText = textCorrections[question.text] ?? question.text;
+    const safetySignal = safetyOverrides[question.text] ?? question.safetySignal;
+    return correctedText === question.text && safetySignal === question.safetySignal
+      ? question
+      : { ...question, text: correctedText, safetySignal };
+  });
 }
 
 export function getMonitorReadingTime(monitor: AssessmentMonitor) {
