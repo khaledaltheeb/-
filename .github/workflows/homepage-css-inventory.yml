@@ -47,7 +47,8 @@ jobs:
             };
             walk(root);
           }
-          const allSource = sourceFiles.map((file) => fs.readFileSync(file, 'utf8')).join('\n');
+          const sourceText = new Map(sourceFiles.map((file) => [file, fs.readFileSync(file, 'utf8')]));
+          const allSource = [...sourceText.values()].join('\n');
 
           const rows = imports.map((relative) => {
             const file = path.join('app', relative.replace(/^\.\//, ''));
@@ -59,7 +60,7 @@ jobs:
             return {
               file,
               bytes: Buffer.byteLength(css),
-              classes: classes.length,
+              classes,
               homepageHits,
               repoHits,
               homepageRatio: classes.length ? homepageHits / classes.length : 0,
@@ -78,11 +79,32 @@ jobs:
             console.log([
               row.file,
               row.bytes,
-              row.classes,
+              row.classes.length,
               row.homepageHits,
               row.homepageRatio.toFixed(3),
               row.repoHits,
               row.repoRatio.toFixed(3),
             ].join('\t'));
+          }
+
+          const targets = new Set([
+            'app/content-v3.css',
+            'app/structured-content.css',
+            'app/trust.css',
+            'app/public-modules-v3.css',
+            'app/system-states.css',
+            'app/public-enhancements.css',
+          ]);
+          console.log('\n=== SOURCE CONSUMERS FOR ROUTE-SCOPING CANDIDATES ===');
+          for (const row of rows.filter((row) => targets.has(row.file))) {
+            const consumers = [];
+            for (const [file, text] of sourceText) {
+              const matched = row.classes.filter((name) => text.includes(name));
+              if (matched.length) consumers.push({ file, matched });
+            }
+            console.log(`\n[${row.file}] bytes=${row.bytes} classes=${row.classes.length}`);
+            for (const consumer of consumers) {
+              console.log(`${consumer.file}\t${consumer.matched.join(',')}`);
+            }
           }
           NODE
