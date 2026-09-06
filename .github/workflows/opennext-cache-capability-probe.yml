@@ -1,0 +1,47 @@
+name: OpenNext Cache Capability Probe
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/opennext-cache-capability-probe.yml'
+      - '.github/open-next-production-cache.config.ts'
+      - 'wrangler.jsonc'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: 1910e1ad3c793fd568ba1caafe34f964
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+
+      - name: Verify deploy token is available
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${CLOUDFLARE_API_TOKEN:-}"
+
+      - name: Probe R2 read capability without mutations
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4.115.0 r2 bucket list --json >/tmp/r2-buckets.json
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const raw = JSON.parse(fs.readFileSync('/tmp/r2-buckets.json', 'utf8'));
+          const rows = Array.isArray(raw) ? raw : Array.isArray(raw?.buckets) ? raw.buckets : [];
+          const names = rows.map((row) => String(row?.name || row?.bucket_name || '')).filter(Boolean).sort();
+          console.log(`R2_READ_CAPABILITY_OK count=${names.length}`);
+          console.log(`R2_BUCKET_NAMES=${names.length ? names.join(',') : '(none)'}`);
+          console.log(`RAWAFID_CACHE_BUCKET_PRESENT=${names.some((name) => /rawafid|next.*cache|cache.*next/i.test(name))}`);
+          NODE
