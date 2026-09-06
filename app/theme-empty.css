@@ -66,7 +66,3 @@
 @media(max-width:620px){.rawafid-hero{padding-top:28px;gap:20px}.rawafid-hero h1{font-size:39px;letter-spacing:-.6px}.rawafid-hero-copy>p{font-size:15px}.rawafid-search{flex-direction:column}.rawafid-search button{width:100%}.rawafid-hero-visual{min-height:auto;padding:22px;border-radius:24px}.rawafid-hero-visual h2{font-size:24px}.rawafid-visual-grid,.rawafid-platform-grid,.rawafid-sector-grid,.rawafid-directory-panel,.rawafid-trust-bar{grid-template-columns:1fr}.rawafid-quick-links{gap:7px}.rawafid-section-head{align-items:flex-start;flex-direction:column}.rawafid-section{padding:48px 0}.rawafid-directory-band{padding:24px;border-radius:24px}.rawafid-platform-card,.rawafid-sector-card{min-height:auto}.rawafid-trust-item{padding:16px}.rawafid-home{padding-bottom:76px}}
 
 @media(prefers-reduced-motion:reduce){.rawafid-platform-card,.rawafid-sector-card{transition:none}.rawafid-platform-card:hover,.rawafid-sector-card:hover{transform:none}}
-
-/* Defer layout/paint work for below-the-fold homepage sections without removing content from the document or accessibility tree. */
-.rawafid-home>.rawafid-section{content-visibility:auto;contain-intrinsic-size:auto 760px}
-@media(max-width:620px){.rawafid-home>.rawafid-section{contain-intrinsic-size:auto 980px}}
