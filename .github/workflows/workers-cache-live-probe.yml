@@ -1,0 +1,110 @@
+name: Workers Cache Live Probe
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/workers-cache-live-probe.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Verify anonymous edge hits and protected bypasses
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://healthrenewal.org'
+
+          probe() {
+            local label="$1"
+            local url="$2"
+            local cookie="${3:-}"
+            local headers
+            headers="$(mktemp)"
+            if [[ -n "$cookie" ]]; then
+              curl -sS --compressed --max-time 30 \
+                -H 'Accept: text/html,application/json;q=0.9,*/*;q=0.8' \
+                -H "Cookie: $cookie" \
+                -D "$headers" -o /dev/null \
+                -w "$label status=%{http_code} ttfb=%{time_starttransfer} total=%{time_total}\n" \
+                "$url"
+            else
+              curl -sS --compressed --max-time 30 \
+                -H 'Accept: text/html,application/json;q=0.9,*/*;q=0.8' \
+                -D "$headers" -o /dev/null \
+                -w "$label status=%{http_code} ttfb=%{time_starttransfer} total=%{time_total}\n" \
+                "$url"
+            fi
+            tr -d '\r' < "$headers" | grep -Ei '^(HTTP/|cf-cache-status:|cache-control:|age:|set-cookie:|location:|vary:|x-nextjs-cache:|server:)' || true
+            local cache_status
+            cache_status="$(tr -d '\r' < "$headers" | awk -F': *' 'tolower($1)=="cf-cache-status" {print toupper($2)}' | tail -n1)"
+            rm -f "$headers"
+            printf '%s' "$cache_status"
+          }
+
+          echo '===== anonymous homepage warm/hit sequence ====='
+          home1="$(probe 'home-1' "$base/")"
+          sleep 1
+          home2="$(probe 'home-2' "$base/")"
+          sleep 1
+          home3="$(probe 'home-3' "$base/")"
+          printf '\nHOME_CACHE_SEQUENCE=%s,%s,%s\n' "$home1" "$home2" "$home3"
+
+          echo '===== anonymous static page warm/hit sequence ====='
+          about1="$(probe 'about-1' "$base/about")"
+          sleep 1
+          about2="$(probe 'about-2' "$base/about")"
+          printf '\nABOUT_CACHE_SEQUENCE=%s,%s\n' "$about1" "$about2"
+
+          echo '===== auth-cookie homepage must bypass public cache ====='
+          auth_home="$(probe 'home-auth-cookie' "$base/" 'sb-probe-auth-token=invalid-probe-value')"
+          printf '\nAUTH_HOME_CACHE_STATUS=%s\n' "$auth_home"
+
+          echo '===== login and API must remain uncached ====='
+          login_status="$(probe 'login' "$base/login")"
+          search_status="$(probe 'search-api' "$base/api/search/v3?q=autism")"
+          printf '\nLOGIN_CACHE_STATUS=%s\nSEARCH_CACHE_STATUS=%s\n' "$login_status" "$search_status"
+
+          echo '===== www must canonicalize before cached backend ====='
+          www_headers="$(mktemp)"
+          curl -sS --compressed --max-time 30 -D "$www_headers" -o /dev/null \
+            -w 'www status=%{http_code} ttfb=%{time_starttransfer} total=%{time_total}\n' \
+            'https://www.healthrenewal.org/'
+          tr -d '\r' < "$www_headers" | grep -Ei '^(HTTP/|location:|cf-cache-status:|cache-control:)' || true
+          www_code="$(head -n1 "$www_headers" | tr -d '\r' | awk '{print $2}')"
+          rm -f "$www_headers"
+
+          unsafe=0
+          if [[ "$auth_home" == 'HIT' ]]; then
+            echo 'UNSAFE: authenticated-cookie homepage request received a public cache HIT.' >&2
+            unsafe=1
+          fi
+          if [[ "$login_status" == 'HIT' ]]; then
+            echo 'UNSAFE: /login received a cache HIT.' >&2
+            unsafe=1
+          fi
+          if [[ "$search_status" == 'HIT' ]]; then
+            echo 'UNSAFE: /api/search/v3 received a cache HIT.' >&2
+            unsafe=1
+          fi
+          if [[ "$www_code" != '308' ]]; then
+            echo "UNSAFE/REGRESSION: www canonical response is $www_code, expected 308." >&2
+            unsafe=1
+          fi
+          if [[ "$unsafe" -ne 0 ]]; then
+            exit 1
+          fi
+
+          if [[ "$home2" != 'HIT' && "$home3" != 'HIT' ]]; then
+            echo 'EFFECTIVENESS_WARNING: anonymous homepage did not reach HIT during the probe.' >&2
+          fi
+          if [[ "$about2" != 'HIT' ]]; then
+            echo 'EFFECTIVENESS_WARNING: /about did not reach HIT during the probe.' >&2
+          fi
+
+          echo 'WORKERS_CACHE_LIVE_SAFETY_OK=true'
