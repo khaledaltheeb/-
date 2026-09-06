@@ -5,6 +5,10 @@ const root = process.cwd();
 const libDir = path.join(root, 'lib');
 const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
 const extractAllSlugs = (text) => [...text.matchAll(/\bslug:\s*'([^']+)'/g)].map((match) => match[1]);
+const extractOperationalRecordSlugs = (text) => [
+  ...extractAllSlugs(text),
+  ...[...text.matchAll(/^\s{2}'([^']+)':\s*/gm)].map((match) => match[1]),
+];
 const extractMeasureObjectSlugs = (text) => [...text.matchAll(/\{\s*slug:\s*'([^']+)',\s*nameAr:/g)].map((match) => match[1]);
 const unique = (values) => [...new Set(values)];
 const numericWaveSort = (prefix) => (a, b) => {
@@ -41,7 +45,9 @@ if (!measureWaveFiles.length || !operationalWaveFiles.length) {
 // Measure files also contain category/related slugs. Count only AssessmentMeasure object starts,
 // identified by the canonical `slug` followed by `nameAr` fields.
 const allMeasures = unique(measureFiles.flatMap((file) => extractMeasureObjectSlugs(read(file)))).sort();
-const explicitOperational = unique(operationalFiles.flatMap((file) => extractAllSlugs(read(file)))).sort();
+// Operational materials may be authored as literal `slug:` records or as generated records keyed by
+// the canonical top-level registry slug. Count both representations so DRY helpers cannot create false gaps.
+const explicitOperational = unique(operationalFiles.flatMap((file) => extractOperationalRecordSlugs(read(file)))).sort();
 const rightsRestricted = unique(extractAllSlugs(read(rightsReviewPath))).sort();
 
 const allSet = new Set(allMeasures);
@@ -91,8 +97,16 @@ if (orphanExplicit.length) {
   process.exitCode = 1;
 }
 
+// Final-state invariant: every public catalog measure must now be either explicitly operationalized
+// or deliberately classified as rights-restricted reference-only. A newly added measure must make
+// that classification in the same change; otherwise CI fails instead of silently restoring a gap.
+if (unresolved.length) {
+  console.error(`ASSESSMENT_OPERATIONAL_COVERAGE_FAIL: unresolved measures remain: ${unresolved.join(', ')}`);
+  process.exitCode = 1;
+}
+
 if (!process.exitCode) {
   console.log(
-    `ASSESSMENT_OPERATIONAL_COVERAGE_PASS: measures=${allMeasures.length} explicit=${explicitInCatalog.length} restricted=${rightsRestricted.length} unresolved=${unresolved.length} measure_waves=${measureWaveFiles.length} operational_waves=${operationalWaveFiles.length}; no explicit-form/rights-restricted collision and no orphan explicit material.`,
+    `ASSESSMENT_OPERATIONAL_COVERAGE_PASS: measures=${allMeasures.length} explicit=${explicitInCatalog.length} restricted=${rightsRestricted.length} unresolved=0 measure_waves=${measureWaveFiles.length} operational_waves=${operationalWaveFiles.length}; every catalog measure is explicitly operationalized or rights-classified, with no collision and no orphan explicit material.`,
   );
 }
