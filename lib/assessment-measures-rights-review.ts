@@ -1,6 +1,7 @@
 export type AssessmentMeasureRightsReviewStatus =
   | 'granted-to-cdisc'
   | 'author-permission-required'
+  | 'owner-conditions'
   | 'denied'
   | 'no-response-received'
   | 'exempt-from-copyright';
@@ -163,11 +164,38 @@ export const assessmentMeasuresRightsReview: AssessmentMeasureRightsReviewItem[]
     rightsSource: 'https://www.cdisc.org/standards/foundational/qrs/mini-international-neuropsychiatric-interview-mini',
     rightsVerifiedOn: '2026-09-05',
   },
+  {
+    slug: 'revised-childrens-anxiety-and-depression-scale',
+    nameAr: 'مقياس القلق والاكتئاب المنقح للأطفال',
+    nameEn: 'Revised Children’s Anxiety and Depression Scale',
+    acronym: 'RCADS',
+    domain: 'الصحة النفسية للأطفال واليافعين',
+    status: 'owner-conditions',
+    statusLabel: 'شروط المالك — التوزيع الرسمي عبر UCLA Child FIRST',
+    whyReferenceOnly: 'RCADS ومشتقاته وترجماته محمية بحقوق النشر لـChorpita وSpence. الإتاحة بلا رسوم للمستخدم لا تعني حق إعادة الاستضافة أو التوزيع، وUCLA تنص على أن صفحة Child FIRST هي قناة التوزيع الرسمية وأن المشتقات وأدوات scoring العامة تحتاج إذنًا.',
+    safeUseOnRawafid: 'عرض الغرض والمجالات وحدود الاستخدام والدليل العربي للنسخة RCADS-25 مع رابط UCLA الرسمي فقط؛ لا ننشر بنود RCADS الكامل أو الترجمة أو scorer عام.',
+    rightsSource: 'https://www.childfirst.ucla.edu/resources/',
+    rightsVerifiedOn: '2026-09-06',
+  },
+  {
+    slug: 'gross-motor-function-measure',
+    nameAr: 'مقياس الوظيفة الحركية الكبرى',
+    nameEn: 'Gross Motor Function Measure',
+    acronym: 'GMFM',
+    domain: 'التأهيل والشلل الدماغي',
+    status: 'owner-conditions',
+    statusLabel: 'شروط المالك — CanChild / McMaster University',
+    whyReferenceOnly: 'CanChild يتيح score sheets ضمن شروط استخدام محددة للاستخدام الشخصي غير التجاري، بينما مواد GMFM تحمل حقوقًا محفوظة. كذلك GMFM-66 وGMFM-88 إصداران مختلفان ولا يجوز تحويل الاسم العام GMFM إلى نموذج واحد دون حسم الإصدار.',
+    safeUseOnRawafid: 'شرح الفرق بين GMFM-66 وGMFM-88، الغرض وحدود الصلاحية، ثم الإحالة إلى CanChild الرسمي. لا نعيد توزيع score sheets أو manual أو scorer، ولا ننقل توفر GMFCS العربي إلى GMFM.',
+    rightsSource: 'https://canchild.ca/resources/44-gross-motor-function-measure-gmfm/',
+    rightsVerifiedOn: '2026-09-06',
+  },
 ];
 
 export const assessmentMeasureRightsReviewStatusLabels: Record<AssessmentMeasureRightsReviewStatus, string> = {
   'granted-to-cdisc': 'Granted to CDISC — إذن المالك ما يزال مطلوبًا',
   'author-permission-required': 'إذن المؤلف مطلوب',
+  'owner-conditions': 'شروط المالك تحكم الاستخدام وإعادة التوزيع',
   denied: 'رفض/Denied في سجل CDISC',
   'no-response-received': 'لم يصل رد من صاحب الحقوق',
   'exempt-from-copyright': 'معفى من حقوق النشر وفق شروط استخدام المالك',
