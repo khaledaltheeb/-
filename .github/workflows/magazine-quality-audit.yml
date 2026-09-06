@@ -1,0 +1,51 @@
+name: Magazine scientific quality audit
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '40 2 * * *'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/magazine-quality-audit.mjs'
+      - '.magazine-quality-standard.md'
+      - 'components/magazine-article.tsx'
+      - 'lib/magazine.ts'
+      - '.github/workflows/magazine-quality-audit.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: magazine-quality-audit
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://ghljwfwqsyfnthvlzxjy.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__GMG8aQnofuk_6RLm3UfUg_fIzuSzSs
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Audit published magazine records
+        run: node scripts/magazine-quality-audit.mjs --strict-critical
+
+      - name: Upload audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: magazine-quality-audit
+          path: |
+            artifacts/magazine-quality-audit.json
+            artifacts/magazine-quality-audit.md
+          if-no-files-found: warn
+          retention-days: 30
