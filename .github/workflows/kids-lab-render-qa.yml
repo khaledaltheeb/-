@@ -5,7 +5,7 @@ on:
     paths:
       - 'lib/capabilities/**'
       - 'app/capabilities/kids-lab/**'
-      - 'scripts/kids-lab-render-contract.mjs'
+      - 'scripts/kids-lab-render-contract*.mjs'
       - '.github/workflows/kids-lab-render-qa.yml'
       - 'package.json'
   workflow_dispatch:
@@ -31,7 +31,7 @@ jobs:
         run: npm run typecheck
 
       - name: Render and validate all 1000 Kids Lab items
-        run: node scripts/kids-lab-render-contract.mjs
+        run: node scripts/kids-lab-render-contract-v2.mjs
 
       - name: Upload QA report and SVG samples
         if: always()
