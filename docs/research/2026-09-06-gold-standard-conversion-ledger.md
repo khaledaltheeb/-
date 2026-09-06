@@ -25,12 +25,12 @@ The retained legacy source remains preserved in `private.legacy_migration_items`
 
 ## Current Outside-the-Box GOLD count
 
-**72 condition pages**.
+**77 condition pages**.
 
 Current verification state:
 
 - minimum direct references per GOLD page: **5**
-- average direct references per GOLD page: **7.3**
+- average direct references per GOLD page: **7.4**
 - GOLD pages containing PubMed search URLs: **0**
 - exact repeated scientific paragraph/list/table blocks across GOLD pages: **0**
 
@@ -110,8 +110,13 @@ Shared structural headings are allowed; copied condition science is not.
 70. `legacy-outside-box-charge-syndrome`
 71. `legacy-outside-box-hearing-loss-deafness`
 72. `legacy-outside-box-developmental-coordination-disorder`
+73. `legacy-outside-box-developmental-language-disorder`
+74. `legacy-outside-box-intellectual-developmental-disorder`
+75. `legacy-outside-box-deafblindness`
+76. `legacy-outside-box-cerebral-palsy`
+77. `legacy-outside-box-arthrogryposis-multiplex-congenita`
 
-The two additional pages at 71–72 were discovered during the acceptance recount after the 65→70 conversion wave. Both already carried the same Gold contract, direct references, and condition-specific bodies; they were therefore validated rather than re-counted blindly.
+Pages 71–72 were discovered during an acceptance recount and independently validated under the same Gold contract. Pages 73–77 were rebuilt condition-by-condition with direct evidence and then passed the corpus-wide anti-filler acceptance gate.
 
 ## Scientific design invariant
 
@@ -132,18 +137,18 @@ GOLD is not permanent. A page is reopened whenever newer direct evidence materia
 
 ## Anti-filler rule
 
-At 72 GOLD pages, exact structured-block comparison still finds **zero scientific paragraphs, lists or tables of 100+ characters duplicated exactly across two or more pages**. Repeated editorial headings such as `قواعد القرار` or `قوة الدليل وحدوده` are permitted because they provide predictable navigation; the science beneath them must remain condition-specific.
+At 77 GOLD pages, exact structured-block comparison finds **zero scientific paragraphs, lists or tables of 100+ characters duplicated exactly across two or more pages**. Repeated editorial headings such as `قواعد القرار` or `قوة الدليل وحدوده` are permitted because they provide predictable navigation; the science beneath them must remain condition-specific.
 
 ## Next DEEP conversion wave
 
 Continue the original audit order with:
 
-- `legacy-outside-box-developmental-language-disorder`
-- `legacy-outside-box-intellectual-developmental-disorder`
-- `legacy-outside-box-deafblindness`
-- `legacy-outside-box-cerebral-palsy`
-- `legacy-outside-box-arthrogryposis-multiplex-congenita`
-- then continue remaining DEEP items from the original page-specific audit
+- `legacy-outside-box-limb-difference-amputation`
+- `legacy-outside-box-specific-learning-disorder-mathematics`
+- `legacy-outside-box-selective-mutism`
+- `legacy-outside-box-school-avoidance-anxiety`
+- `legacy-outside-box-severe-behavior-self-injury`
+- then `trauma-related-learning-support`, `ocd-functional-support`, `adhd`, `vision-impairment-low-vision`, `specific-learning-disorder-written-expression`, `cerebral-visual-impairment`, and `autism`.
 
 After all Outside-the-Box DEEP pages:
 
