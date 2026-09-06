@@ -1,14 +1,15 @@
 name: Jules connectivity test
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/jules-connectivity-test.yml'
   workflow_dispatch:
     inputs:
-      environment:
-        description: "GitHub Environment that contains JULES_API_KEY"
-        required: true
-        type: string
       create_safe_session:
-        description: "Create a read-only Jules planning session after connectivity passes"
+        description: "Create a planning-only Jules session after connectivity passes"
         required: true
         default: false
         type: boolean
@@ -19,7 +20,7 @@ permissions:
 jobs:
   test-jules:
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment }}
+    environment: production
     timeout-minutes: 10
 
     steps:
@@ -30,7 +31,7 @@ jobs:
         run: |
           set -euo pipefail
           if [ -z "${JULES_API_KEY:-}" ]; then
-            echo "JULES_API_KEY is not available in the selected GitHub Environment."
+            echo "JULES_API_KEY is not available in the production GitHub Environment."
             exit 1
           fi
           echo "JULES_API_KEY is available to this job."
@@ -86,8 +87,8 @@ jobs:
           fi
           echo "Jules sessions endpoint: OK"
 
-      - name: Create safe read-only planning session
-        if: ${{ inputs.create_safe_session && steps.sources.outputs.source_name != '' }}
+      - name: Create safe planning-only Jules session
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.create_safe_session && steps.sources.outputs.source_name != '' }}
         shell: bash
         env:
           JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
@@ -123,4 +124,4 @@ jobs:
 
           echo "Safe Jules session created successfully."
           jq -r '"Session: " + (.name // .id // "unknown") + "\nState: " + (.state // "unknown") + "\nURL: " + (.url // "not returned")' /tmp/jules-session.json
-          echo "No plan is approved automatically and no repository write permission is granted by this workflow."
+          echo "No plan is approved automatically and this workflow has only read permission to repository contents."
