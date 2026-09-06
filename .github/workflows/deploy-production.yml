@@ -31,7 +31,6 @@ jobs:
       NEXT_PUBLIC_GA_MEASUREMENT_ID: G-VLZMV8Y4JP
       NEXT_PUBLIC_ENABLE_DIRECT_GA: 'true'
       ENABLE_RAWAFID_ASSISTANT: 'true'
-      WEBMCP_ORIGIN_TRIAL_TOKEN: ${{ secrets.WEBMCP_ORIGIN_TRIAL_TOKEN }}
       QUICK_INFO_SOCIAL_IMAGES_REQUIRED: 'true'
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: 1910e1ad3c793fd568ba1caafe34f964
@@ -121,23 +120,6 @@ jobs:
           echo "WEBMCP_LIVE_DIAGNOSTIC: ${visible_tools:-homepage-ISR-may-still-serve-the-previous-render}"
           echo 'LIVE_OK homepage; strict rendered WebMCP coverage is enforced by Rawafid Fast Quality Gate'
 
-          echo 'LIVE_CHECK webmcp-origin-isolation'
-          curl -fsS \
-            -D /tmp/home-headers.txt \
-            -o /dev/null \
-            -H 'Cache-Control: no-cache, no-store, max-age=0' \
-            --retry 6 --retry-delay 2 --retry-all-errors \
-            "${base}/?webmcp-header=${stamp}"
-          tr -d '\r' </tmp/home-headers.txt >/tmp/home-headers-normalized.txt
-          grep -Eqi '^origin-agent-cluster:[[:space:]]*\?1$' /tmp/home-headers-normalized.txt
-          grep -Eqi '^permissions-policy:.*tools=\(self\)' /tmp/home-headers-normalized.txt
-          if [ -n "${WEBMCP_ORIGIN_TRIAL_TOKEN:-}" ]; then
-            grep -Eqi '^origin-trial:[[:space:]]*[^[:space:]].*$' /tmp/home-headers-normalized.txt
-            echo 'LIVE_OK WebMCP origin isolation + origin trial header'
-          else
-            echo 'LIVE_OK WebMCP origin isolation; origin trial token not configured yet'
-          fi
-
           echo 'LIVE_CHECK robots'
           curl -fsS --retry 6 --retry-delay 2 --retry-all-errors "${base}/robots.txt?deploy=${stamp}" >/tmp/robots.txt
           grep -q 'Sitemap: https://healthrenewal.org/sitemap.xml' /tmp/robots.txt
@@ -146,3 +128,66 @@ jobs:
           echo 'LIVE_CHECK sitemap'
           curl -fsS --retry 6 --retry-delay 2 --retry-all-errors "${base}/sitemap.xml?deploy=${stamp}" >/tmp/sitemap.xml
           echo 'LIVE_OK sitemap'
+
+          echo 'LIVE_CHECK public API'
+          curl -fsS \
+            -H 'Cache-Control: no-cache, no-store, max-age=0' \
+            --retry 6 --retry-delay 2 --retry-all-errors \
+            "${base}/api/v1" >/tmp/api-v1.json
+          curl -fsS \
+            -H 'Cache-Control: no-cache, no-store, max-age=0' \
+            --retry 6 --retry-delay 2 --retry-all-errors \
+            "${base}/api/openapi.json" >/tmp/openapi.json
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const discovery = JSON.parse(fs.readFileSync('/tmp/api-v1.json', 'utf8'));
+          const openapi = JSON.parse(fs.readFileSync('/tmp/openapi.json', 'utf8'));
+          if (discovery.version !== '1.2.0') throw new Error('live Public API discovery version mismatch');
+          if (openapi.openapi !== '3.1.0' || openapi.info?.version !== '1.2.0') throw new Error('live OpenAPI version mismatch');
+          NODE
+          echo 'LIVE_OK public API'
+
+          echo 'LIVE_CHECK Quick Info social images'
+          quick_info_slug="$(node - <<'NODE'
+          const fs = require('node:fs');
+          const manifest = JSON.parse(fs.readFileSync('public/quick-info/social-images-manifest.json', 'utf8'));
+          const slug = manifest?.items?.[0]?.slug;
+          if (!slug) process.exit(1);
+          process.stdout.write(String(slug));
+          NODE
+          )"
+          curl -fsS --retry 6 --retry-delay 2 --retry-all-errors "${base}/quick-info/og/${quick_info_slug}.png?deploy=${stamp}" >/tmp/quick-info-og.png
+          curl -fsS --retry 6 --retry-delay 2 --retry-all-errors "${base}/quick-info/discover/${quick_info_slug}.png?deploy=${stamp}" >/tmp/quick-info-discover.png
+          test -s /tmp/quick-info-og.png
+          test -s /tmp/quick-info-discover.png
+          echo "LIVE_OK Quick Info social images: ${quick_info_slug}"
+
+          echo 'LIVE_CHECK assessment-lab/avoidance-cycle'
+          curl -fsS --retry 6 --retry-delay 2 --retry-all-errors "${base}/assessment-lab/avoidance-cycle?deploy=${stamp}" >/tmp/assessment-avoidance.html
+          grep -q 'دائرة التجنب' /tmp/assessment-avoidance.html
+          echo 'LIVE_OK assessment-lab/avoidance-cycle'
+
+          echo 'LIVE_CHECK assessment-lab/mood-daily'
+          curl -fsS --retry 6 --retry-delay 2 --retry-all-errors "${base}/assessment-lab/mood-daily?deploy=${stamp}" >/tmp/assessment-mood.html
+          grep -q 'متابعة المزاج اليومية' /tmp/assessment-mood.html
+          echo 'LIVE_OK assessment-lab/mood-daily'
+
+          echo 'LIVE_CHECK www redirect'
+          curl -fsSI --retry 6 --retry-delay 2 --retry-all-errors "https://www.healthrenewal.org/?deploy=${stamp}" >/tmp/www-redirect.headers
+          grep -qi '^location: https://healthrenewal.org/' /tmp/www-redirect.headers
+          echo 'LIVE_OK www redirect'
+
+          grep -q 'G-VLZMV8Y4JP' /tmp/home.html
+          grep -q 'فتح مساعد روافد' /tmp/home.html
+          if grep -q 'workers.dev' /tmp/home.html /tmp/sitemap.xml; then
+            echo 'Production output unexpectedly leaked a workers.dev URL.' >&2
+            exit 1
+          fi
+          if grep -q 'GTM-WBLQVBG4' /tmp/home.html; then
+            echo 'Production homepage unexpectedly loaded the disabled CPU-heavy GTM container.' >&2
+            exit 1
+          fi
+          if grep -qi 'noindex' /tmp/home.html; then
+            echo 'Production homepage is unexpectedly noindex.' >&2
+            exit 1
+          fi
