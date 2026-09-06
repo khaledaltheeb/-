@@ -1,0 +1,27 @@
+name: Three Labs Smoke Hardening Test
+
+on:
+  push:
+    branches: ['ops/three-labs-smoke-hardening-20260906']
+    paths:
+      - '.github/scripts/assessment-measures-live-smoke.mjs'
+      - '.github/scripts/assessment-cognitive-live-smoke.mjs'
+      - '.github/workflows/three-labs-smoke-hardening-test.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Assessment Measures hardened smoke
+        run: node .github/scripts/assessment-measures-live-smoke.mjs
+      - name: Assessment and Cognitive Labs hardened smoke
+        run: node .github/scripts/assessment-cognitive-live-smoke.mjs
