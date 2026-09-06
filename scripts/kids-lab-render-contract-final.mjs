@@ -17,12 +17,12 @@ const replacements = [
 ];
 for (const [from,to] of replacements) source = source.replaceAll(from,to);
 
-// A large share of the visual-perception stimuli use <g transform="translate(...) rotate(...) scale(...)">.
-// Include those group transforms in both content and geometry fingerprints; otherwise two visibly
-// different worksheets can look identical to a tag-only parser that inspects just child paths.
-source = source.replaceAll(
-  '(?:rect|circle|ellipse|line|path|polygon|polyline)',
-  '(?:g|rect|circle|ellipse|line|path|polygon|polyline)'
+// Transformed visual stimuli (butterflies, fish, abstract shapes, etc.) use local child coordinates.
+// Fingerprint the whole transformed <g> block as one task unit; otherwise child colors/details may be
+// discarded by page-coordinate filtering even though they are visibly inside the worksheet task area.
+source = source.replace(
+  "function taskTags(svg,c){const tags=svg.match(/<text\\b[^>]*>[\\s\\S]*?<\\/text>|<(?:rect|circle|ellipse|line|path|polygon|polyline)\\b[^>]*\\/?\\s*>/gi)??[];return tags.filter(t=>{const y=yOf(t);return y===null||(y>=c.y+c.height*.20&&y<=c.y+c.height*.90)})}",
+  "function taskTags(svg,c){const tags=svg.match(/<g\\b[^>]*transform=[\"'][^\"']+[\"'][^>]*>[\\s\\S]*?<\\/g>|<text\\b[^>]*>[\\s\\S]*?<\\/text>|<(?:rect|circle|ellipse|line|path|polygon|polyline)\\b[^>]*\\/?\\s*>/gi)??[];return tags.filter(t=>{const y=yOf(t);return y===null||(y>=c.y+c.height*.20&&y<=c.y+c.height*.90)})}"
 );
 source = source.replace(
   "function yOf(t){for(const n of['y','cy','y1'])",
