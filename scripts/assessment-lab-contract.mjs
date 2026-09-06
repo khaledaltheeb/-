@@ -19,6 +19,7 @@ const catalog = fs.readFileSync('lib/assessment-lab/catalog.ts', 'utf8');
 const runner = fs.readFileSync('components/assessment-monitor-runner.tsx', 'utf8');
 const hub = fs.readFileSync('app/assessment-lab/page.tsx', 'utf8');
 const detail = fs.readFileSync('app/assessment-lab/[slug]/page.tsx', 'utf8');
+const evidenceMapRuntime = fs.readFileSync('lib/assessment-lab/evidence-map.ts', 'utf8');
 const sitemap = fs.readFileSync('app/sitemaps/static.xml/route.ts', 'utf8');
 const fail = (message) => {
   console.error(`ASSESSMENT LAB CONTRACT FAILED: ${message}`);
@@ -77,11 +78,7 @@ for (const file of finalBankFiles) {
   const importName = file.split('/').pop();
   if (!catalog.includes(importName)) fail(`catalog must load final reviewed runtime bank: ${importName}`);
 }
-for (const forbiddenImport of [
-  'question-banks.v1.json',
-  'question-banks.core-',
-  'question-banks.originals-',
-]) {
+for (const forbiddenImport of ['question-banks.v1.json','question-banks.core-','question-banks.originals-']) {
   if (catalog.includes(forbiddenImport)) fail(`historical/base bank must not enter runtime: ${forbiddenImport}`);
 }
 if (catalog.includes('function questionsForAxis')) fail('generic fallback question generation must not exist');
@@ -95,10 +92,25 @@ for (const forbidden of ['localStorage', 'sessionStorage', 'fetch(']) {
 if (!runner.includes('لا تجمع الإجابات في نسبة واحدة') || !runner.includes('لا تحسب درجة تشخيصية')) fail('runner must explicitly prohibit invalid aggregate or diagnostic scoring');
 if (!runner.includes("const notApplicableOption = 'لا ينطبق / لم أجرّب'")) fail('runner must allow a non-applicable/not-tried response rather than force false ratings');
 if (!runner.includes('إذا كان البند يفترض موقفًا أو استراتيجية لم تحدث أو لم تجرّبها')) fail('runner must explain when the non-applicable response should be used');
+
 if (!catalog.includes("'school-safeguarding'")) fail('school safeguarding safety kind missing');
-if (!catalog.includes("'هل تعرض الطالب لتنمر أو تهديد خلال الأسبوع الماضي؟'")) fail('school bullying/Threat safety override missing');
-if (!catalog.includes("level: 'priority'")) fail('school safeguarding must trigger a visible priority response');
+if (!catalog.includes("'هل تعرض الطالب لتنمر أو تهديد خلال الأسبوع الماضي؟'")) fail('school bullying/threat safety override missing');
+if (!catalog.includes("title: 'التنمر أو التهديد يحتاج إلى استجابة حماية، لا إلى الاكتفاء بالمتابعة'")) fail('school safeguarding response missing');
+if (!catalog.includes("'هل أدى وضع الحد إلى تهديد أو ترهيب؟'")) fail('boundary-setting threat item missing');
+if (!catalog.includes("title: 'التهديد أو الترهيب يغيّر الأولوية من وضع الحدود إلى الأمان'")) fail('unsafe boundary escalation missing');
+if (!catalog.includes("'هل يوجد خطر فوري الآن يدفعك إلى العودة للسلوك الضار الذي تحاول التعافي منه؟'")) fail('recovery immediate-risk wording missing');
+if (!catalog.includes("title: 'الخطر الفوري يحتاج إلى مساعدة مباشرة الآن'")) fail('recovery immediate-risk escalation missing');
+if (!catalog.includes('إذا لم توجد علامة إنذار أو توصية طبية بالمتابعة')) fail('health-worry medical safety boundary missing');
+if (!catalog.includes('كم مرة فكرت في أكثر من بديل عملي قبل الاختيار؟')) fail('problem-solving response semantics correction missing');
 if (!catalog.includes("'كم مرة فاته جزء من تواصل مهم؟'")) fail('hearing-support Arabic clarity correction missing');
+
+if (!evidenceMapRuntime.includes("mappingLevel: 'domain-reviewed' | 'profile-derived'")) fail('evidence maps must disclose review level');
+if (!evidenceMapRuntime.includes('buildProfileDerivedEvidenceMap')) fail('all published monitors must have a transparent evidence-map fallback');
+if (!evidenceMapRuntime.includes("evidence_relation: 'conceptual'")) fail('profile-derived evidence must remain conceptual, not falsely direct');
+if (!evidenceMapRuntime.includes('لم تُنجز بعد مراجعة claim-to-evidence مستقلة')) fail('profile-derived evidence limitations must be explicit');
+if (!evidenceMapRuntime.includes("'scientific-reference': 'مرجع علمي للملف'")) fail('profile-derived reference type must be visibly distinguishable');
+if (!detail.includes('getAssessmentEvidenceMap(slug)')) fail('published monitor pages must render evidence maps');
+
 if (!catalog.includes('getSourceInstrumentStatusLabel') || !detail.includes('getSourceInstrumentStatusLabel(instrument!.status)')) fail('source/rights routes must present a readable Arabic status instead of internal status codes');
 if (!runner.includes('questions.length')) fail('runner must render the full question bank length');
 if (!hub.includes('<strong>60</strong> أداة متابعة محلية') || !hub.includes('<strong>10</strong> صفحات أدوات مصدرية وحقوق') || !hub.includes('<strong>70</strong> مسارًا منشورًا')) fail('hub counts missing');
@@ -110,5 +122,5 @@ if (!detail.includes('/specialists')) fail('professional escalation path missing
 if (!hub.includes('9789240120785')) fail('2026 WHO self-help framework source missing');
 
 if (!process.exitCode) {
-  console.log('Assessment lab contract passed: 60 manually reviewed Rawafid tools / 960 explicit-response items + 10 source-rights pages = 70 published routes; historical banks and generic fallback remain outside runtime, non-applicable answers are supported, school safeguarding is explicit, answers are not stored, and no fabricated diagnostic score is produced.');
+  console.log('Assessment lab contract passed: 60 manually reviewed Rawafid tools / 960 explicit-response items + 10 source-rights pages = 70 published routes; all monitor pages have transparent evidence mapping, safety escalations are locked, historical banks and generic fallback remain outside runtime, non-applicable answers are supported, answers are not stored, and no fabricated diagnostic score is produced.');
 }
