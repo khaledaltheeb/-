@@ -1,0 +1,38 @@
+name: Temporary lint diagnostic
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Capture lint output
+        shell: bash
+        run: npm run lint > /tmp/rawafid-lint.txt 2>&1 || true
+      - name: Post lint output to this PR
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          {
+            echo '### Temporary lint diagnostic'
+            echo
+            echo '```text'
+            tail -n 160 /tmp/rawafid-lint.txt
+            echo '```'
+          } > /tmp/rawafid-lint-comment.md
+          gh pr comment "${{ github.event.pull_request.number }}" --body-file /tmp/rawafid-lint-comment.md
