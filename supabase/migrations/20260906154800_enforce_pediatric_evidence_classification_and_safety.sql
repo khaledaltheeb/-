@@ -63,10 +63,10 @@ begin
     and new.schema_json->>'evidence_record_type' in ('study','thesis');
 
   if v_evidence then
-    if pg_catalog.nullif(pg_catalog.btrim(coalesce(new.schema_json->>'evidence_kind','')), '') is null then
+    if nullif(pg_catalog.btrim(coalesce(new.schema_json->>'evidence_kind','')), '') is null then
       raise exception 'pediatric oncology evidence release blocked: evidence_kind must be explicit before release' using errcode='23514';
     end if;
-    if pg_catalog.nullif(pg_catalog.btrim(coalesce(new.medical_disclaimer,'')), '') is null then
+    if nullif(pg_catalog.btrim(coalesce(new.medical_disclaimer,'')), '') is null then
       raise exception 'pediatric oncology evidence release blocked: medical_disclaimer must be explicit before release' using errcode='23514';
     end if;
     if new.content_type <> 'research' then
