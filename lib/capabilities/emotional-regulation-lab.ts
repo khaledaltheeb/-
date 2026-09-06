@@ -18,7 +18,7 @@ const instruction=(task:EmotionalRegulationTask,kind:EmotionalRegulationKind)=>{
 const mastery=(task:EmotionalRegulationTask)=>task==='emotion-recognition'?'يستخدم الطفل دليلًا من السياق أو الوجه/الجسم لتبرير تفسير معقول، ويقبل احتمالًا آخر عند الغموض.':task==='body-signals'?'يحدد إشارات جسمية شخصية دون إجبار على قالب ثابت، ويميز بين الإشارة الجسدية وتفسيرها.':task==='emotion-intensity'?'يستخدم المقياس بطريقة متسقة نسبيًا ويشرح سبب فرق الشدة، دون الحاجة لمطابقة «رقم صحيح» يحدده البالغ.':'يختار استراتيجية آمنة وملائمة نسبيًا للهدف والسياق ويذكر سببًا أو بديلًا، دون افتراض حل وحيد صحيح.';
 export const emotionalRegulationActivities:EmotionalRegulationActivity[]=emotionalRegulationSeriesPlans.flatMap(series=>Array.from({length:5},(_,i)=>i+1).flatMap(level=>labels.map((x,idx)=>({
  slug:`level-${level}-${x.kind}`,seriesSlug:series.slug,seriesNumber:series.number,seriesTitle:series.title,taskType:series.taskType,level,kind:x.kind,label:x.label,title:`${series.title} - المستوى ${level} - ${x.label}`,age:series.ages,duration:series.duration,purpose:series.purpose,instruction:instruction(series.taskType,x.kind),progression:series.progression[level-1],observation:series.observation,mastery:mastery(series.taskType),seed:series.number*100+level*10+idx
-})))));
+}))));
 export const emotionalRegulationActivityCount=emotionalRegulationActivities.length;
 export const emotionalRegulationTestCount=emotionalRegulationActivities.filter(a=>a.kind==='test').length;
 export const getEmotionalRegulationSeries=(slug:string)=>emotionalRegulationSeriesPlans.find(s=>s.slug===slug);
