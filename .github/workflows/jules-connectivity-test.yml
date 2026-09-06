@@ -7,15 +7,10 @@ on:
     paths:
       - '.github/workflows/jules-connectivity-test.yml'
   workflow_dispatch:
-    inputs:
-      create_safe_session:
-        description: "Create a planning-only Jules session after connectivity passes"
-        required: true
-        default: false
-        type: boolean
 
 permissions:
   contents: read
+  issues: write
 
 jobs:
   test-jules:
@@ -24,81 +19,87 @@ jobs:
     timeout-minutes: 10
 
     steps:
-      - name: Validate secret is available
+      - name: Test Jules and create a planning-only session
+        id: jules
         shell: bash
         env:
           JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
         run: |
-          set -euo pipefail
-          if [ -z "${JULES_API_KEY:-}" ]; then
-            echo "JULES_API_KEY is not available in the production GitHub Environment."
-            exit 1
-          fi
-          echo "JULES_API_KEY is available to this job."
+          set -u
+          REPORT=/tmp/jules-report.md
+          : > "$REPORT"
+          echo "# Jules connectivity test" >> "$REPORT"
+          echo >> "$REPORT"
+          echo "- Repository: \`${GITHUB_REPOSITORY}\`" >> "$REPORT"
+          echo "- Run: \`${GITHUB_RUN_ID}\`" >> "$REPORT"
+          echo "- Commit: \`${GITHUB_SHA}\`" >> "$REPORT"
+          echo >> "$REPORT"
 
-      - name: Test Jules API and discover connected sources
-        id: sources
-        shell: bash
-        env:
-          JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
-        run: |
-          set -euo pipefail
-          http_code=$(curl --silent --show-error \
+          if [ -z "${JULES_API_KEY:-}" ]; then
+            echo "## Result" >> "$REPORT"
+            echo "JULES_API_KEY is not available in the production GitHub Environment." >> "$REPORT"
+            echo "status=secret_missing" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "- Secret visibility: OK" >> "$REPORT"
+
+          sources_code=$(curl --silent --show-error \
             --output /tmp/jules-sources.json \
             --write-out "%{http_code}" \
             -H "x-goog-api-key: ${JULES_API_KEY}" \
-            "https://jules.googleapis.com/v1alpha/sources?pageSize=100")
+            "https://jules.googleapis.com/v1alpha/sources?pageSize=100" || true)
 
-          if [ "$http_code" != "200" ]; then
-            echo "Jules API connectivity failed with HTTP ${http_code}."
-            jq -r '.error.message // "No API error message returned"' /tmp/jules-sources.json 2>/dev/null || true
-            exit 1
+          echo "- Sources endpoint HTTP: ${sources_code}" >> "$REPORT"
+          if [ "$sources_code" != "200" ]; then
+            echo >> "$REPORT"
+            echo "## Result" >> "$REPORT"
+            echo "Jules API authentication or Sources access failed." >> "$REPORT"
+            error_message=$(jq -r '.error.message // empty' /tmp/jules-sources.json 2>/dev/null || true)
+            if [ -n "$error_message" ]; then
+              echo "- API message: ${error_message}" >> "$REPORT"
+            fi
+            echo "status=sources_failed" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
 
-          echo "Jules API connectivity: OK"
-          count=$(jq '.sources | length' /tmp/jules-sources.json)
-          echo "Connected Jules sources: ${count}"
-          jq -r '.sources[]? | "- " + (.githubRepo.owner // "?") + "/" + (.githubRepo.repo // "?") + " => " + .name' /tmp/jules-sources.json
+          source_count=$(jq '.sources | length' /tmp/jules-sources.json)
+          echo "- Connected Jules sources: ${source_count}" >> "$REPORT"
 
           source_name=$(jq -r '.sources[]? | select(.githubRepo.owner == "khaledaltheeb" and .githubRepo.repo == "-") | .name' /tmp/jules-sources.json | head -n 1)
-          if [ -n "$source_name" ]; then
-            echo "Target repository is connected to Jules: ${source_name}"
-            echo "source_name=${source_name}" >> "$GITHUB_OUTPUT"
-          else
-            echo "Target repository khaledaltheeb/- is NOT currently listed as a Jules source."
-            echo "Connect this repository in the Jules web interface, then rerun this workflow."
+          if [ -z "$source_name" ]; then
+            echo >> "$REPORT"
+            echo "## Result" >> "$REPORT"
+            echo "Jules API is reachable, but \`khaledaltheeb/-\` is not enrolled as a Jules Source." >> "$REPORT"
+            echo "The repository must be granted to the Google Labs Jules GitHub App once from Jules/GitHub." >> "$REPORT"
+            echo "status=source_missing" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
 
-      - name: Test Jules sessions endpoint
-        shell: bash
-        env:
-          JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
-        run: |
-          set -euo pipefail
-          http_code=$(curl --silent --show-error \
+          echo "- Target source: \`${source_name}\`" >> "$REPORT"
+
+          sessions_code=$(curl --silent --show-error \
             --output /tmp/jules-sessions.json \
             --write-out "%{http_code}" \
             -H "x-goog-api-key: ${JULES_API_KEY}" \
-            "https://jules.googleapis.com/v1alpha/sessions?pageSize=1")
-          if [ "$http_code" != "200" ]; then
-            echo "Jules sessions endpoint failed with HTTP ${http_code}."
-            jq -r '.error.message // "No API error message returned"' /tmp/jules-sessions.json 2>/dev/null || true
-            exit 1
-          fi
-          echo "Jules sessions endpoint: OK"
+            "https://jules.googleapis.com/v1alpha/sessions?pageSize=1" || true)
 
-      - name: Create safe planning-only Jules session
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.create_safe_session && steps.sources.outputs.source_name != '' }}
-        shell: bash
-        env:
-          JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
-          SOURCE_NAME: ${{ steps.sources.outputs.source_name }}
-        run: |
-          set -euo pipefail
+          echo "- Sessions endpoint HTTP: ${sessions_code}" >> "$REPORT"
+          if [ "$sessions_code" != "200" ]; then
+            echo >> "$REPORT"
+            echo "## Result" >> "$REPORT"
+            echo "The source is visible, but the Sessions endpoint test failed." >> "$REPORT"
+            error_message=$(jq -r '.error.message // empty' /tmp/jules-sessions.json 2>/dev/null || true)
+            if [ -n "$error_message" ]; then
+              echo "- API message: ${error_message}" >> "$REPORT"
+            fi
+            echo "status=sessions_failed" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
           jq -n \
-            --arg source "$SOURCE_NAME" \
+            --arg source "$source_name" \
             '{
-              prompt: "Inspect the repository and prepare a concise technical audit only. Do not modify files, do not create commits, branches, pull requests, deployments, or configuration changes. Identify the architecture and three low-risk improvement opportunities. Stop after producing the plan and wait for explicit approval.",
+              prompt: "Read AGENTS.md first. Inspect this repository and prepare a concise technical audit and a three-item low-risk improvement plan. This is a connectivity test only. Do not modify files, do not create commits, branches, pull requests, deployments, or configuration changes. Stop when the plan is ready and wait for explicit approval.",
               title: "Health Renewal safe Jules connectivity audit",
               sourceContext: {
                 source: $source,
@@ -107,21 +108,58 @@ jobs:
               requirePlanApproval: true
             }' > /tmp/jules-session-request.json
 
-          http_code=$(curl --silent --show-error \
+          create_code=$(curl --silent --show-error \
             --output /tmp/jules-session.json \
             --write-out "%{http_code}" \
             -X POST \
             -H "Content-Type: application/json" \
             -H "x-goog-api-key: ${JULES_API_KEY}" \
             --data-binary @/tmp/jules-session-request.json \
-            "https://jules.googleapis.com/v1alpha/sessions")
+            "https://jules.googleapis.com/v1alpha/sessions" || true)
 
-          if [ "$http_code" != "200" ] && [ "$http_code" != "201" ]; then
-            echo "Creating the safe Jules session failed with HTTP ${http_code}."
-            jq -r '.error.message // "No API error message returned"' /tmp/jules-session.json 2>/dev/null || true
-            exit 1
+          echo "- Create session HTTP: ${create_code}" >> "$REPORT"
+          if [ "$create_code" != "200" ] && [ "$create_code" != "201" ]; then
+            echo >> "$REPORT"
+            echo "## Result" >> "$REPORT"
+            echo "Connectivity passed, but creating the safe planning session failed." >> "$REPORT"
+            error_message=$(jq -r '.error.message // empty' /tmp/jules-session.json 2>/dev/null || true)
+            if [ -n "$error_message" ]; then
+              echo "- API message: ${error_message}" >> "$REPORT"
+            fi
+            echo "status=create_failed" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
 
-          echo "Safe Jules session created successfully."
-          jq -r '"Session: " + (.name // .id // "unknown") + "\nState: " + (.state // "unknown") + "\nURL: " + (.url // "not returned")' /tmp/jules-session.json
-          echo "No plan is approved automatically and this workflow has only read permission to repository contents."
+          session_name=$(jq -r '.name // empty' /tmp/jules-session.json)
+          session_state=$(jq -r '.state // "unknown"' /tmp/jules-session.json)
+          session_url=$(jq -r '.url // empty' /tmp/jules-session.json)
+
+          echo >> "$REPORT"
+          echo "## Result" >> "$REPORT"
+          echo "Jules API connectivity succeeded and a planning-only session was created." >> "$REPORT"
+          echo "- Session: \`${session_name}\`" >> "$REPORT"
+          echo "- State: \`${session_state}\`" >> "$REPORT"
+          if [ -n "$session_url" ]; then
+            echo "- Jules URL: ${session_url}" >> "$REPORT"
+          fi
+          echo "- Plan approval is required before Jules may execute changes." >> "$REPORT"
+          echo "status=success" >> "$GITHUB_OUTPUT"
+
+      - name: Publish test result as a GitHub issue
+        if: always()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if [ ! -s /tmp/jules-report.md ]; then
+            cat > /tmp/jules-report.md <<EOF
+          # Jules connectivity test
+
+          The test job ended before a report could be generated. Inspect the workflow logs.
+          EOF
+          fi
+          gh issue create \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "Jules connectivity test result - run ${GITHUB_RUN_ID}" \
+            --body-file /tmp/jules-report.md
