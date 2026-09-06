@@ -4,7 +4,7 @@ const RCADS_UCLA = 'https://www.childfirst.ucla.edu/resources/';
 const GMFM_CANCHILD = 'https://canchild.ca/resources/44-gross-motor-function-measure-gmfm/';
 
 const auditedOverridesWave6: Record<string, Partial<InstrumentCrosswalkRecord>> = {
-  rcads: {
+  'rcads': {
     rawafidStatus: 'reference-rights',
     rawafidStatusLabel: 'مرجعي — RCADS محمي وUCLA هي قناة التوزيع الرسمية',
     internalPath: '/assessment-measures/rights-review/#revised-childrens-anxiety-and-depression-scale',
@@ -19,7 +19,7 @@ const auditedOverridesWave6: Record<string, Partial<InstrumentCrosswalkRecord>> 
     catalogSync: 'rights-conflict',
     catalogSyncNote: 'Rights Audit Wave 6: شروط المالك تتقدم على أي تطابق مستقبلي في Catalog؛ وجود سجل أو ترجمة مختصرة لا يسمح بإعادة نشر RCADS الكامل أو scorer عام.',
   },
-  gmfm: {
+  'gmfm': {
     rawafidStatus: 'reference-rights',
     rawafidStatusLabel: 'مرجعي — GMFM محمي، والإصدار الدقيق GMFM-66/88 غير محسوم في سجل COS',
     internalPath: '/assessment-measures/rights-review/#gross-motor-function-measure',
