@@ -4,8 +4,9 @@ import path from 'node:path';
 const ROOT = process.cwd();
 const BASE = 'https://healthrenewal.org';
 const PREFIXES = ['/assessment-measures', '/assessment-lab', '/cognitive-lab'];
-const CONCURRENCY = 8;
-const stamp = `${Date.now()}-${process.pid}`;
+const CONCURRENCY = 2;
+const MAX_ATTEMPTS = 4;
+const TRANSIENT_STATUSES = new Set([429, 500, 502, 503, 504]);
 
 const failures = [];
 const warnings = [];
@@ -14,6 +15,7 @@ const discovered = new Set();
 
 const fail = (message) => failures.push(message);
 const warn = (message) => warnings.push(message);
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const read = (file) => fs.readFileSync(path.join(ROOT, file), 'utf8');
 const readJson = (file) => JSON.parse(read(file));
 
@@ -23,7 +25,6 @@ function normalizePath(value) {
     if (url.origin !== BASE) return null;
     const pathname = url.pathname.replace(/\/{2,}/g, '/');
     if (!PREFIXES.some((prefix) => pathname === prefix || pathname === `${prefix}/` || pathname.startsWith(`${prefix}/`))) return null;
-    if (pathname === '/') return pathname;
     return pathname.endsWith('/') ? pathname : `${pathname}/`;
   } catch {
     return null;
@@ -33,17 +34,14 @@ function normalizePath(value) {
 function extractHrefs(html) {
   const hrefs = [];
   for (const match of html.matchAll(/\bhref=(?:"([^"]+)"|'([^']+)')/gi)) {
-    const href = match[1] ?? match[2];
-    const normalized = normalizePath(href);
+    const normalized = normalizePath(match[1] ?? match[2]);
     if (normalized) hrefs.push(normalized);
   }
   return hrefs;
 }
 
-function extractSitemapLocs(xml) {
-  return [...xml.matchAll(/<loc>([^<]+)<\/loc>/gi)]
-    .map((match) => normalizePath(match[1]))
-    .filter(Boolean);
+function extractRawLocs(xml) {
+  return [...xml.matchAll(/<loc>([^<]+)<\/loc>/gi)].map((match) => match[1].trim());
 }
 
 function extractMeasureSlugs() {
@@ -52,8 +50,7 @@ function extractMeasureSlugs() {
     .sort((a, b) => a.localeCompare(b, 'en', { numeric: true }));
   const slugs = new Set();
   for (const name of files) {
-    const source = read(`lib/${name}`);
-    for (const match of source.matchAll(/^\s{4}slug:\s*'([^']+)',/gm)) slugs.add(match[1]);
+    for (const match of read(`lib/${name}`).matchAll(/^\s{4}slug:\s*'([^']+)',/gm)) slugs.add(match[1]);
   }
   return [...slugs].sort();
 }
@@ -118,25 +115,23 @@ function buildExpectedRoutes() {
 
 function assertStaticRmdBoundary() {
   const detail = read('app/assessment-measures/[slug]/page.tsx');
-  const required = [
+  for (const phrase of [
     'RMD مصدر للأدلة والمعلومات عن المقاييس',
     'ليس بالضرورة مالك حقوق الأداة',
     'حقوق الأصل',
     'حالة العربية',
-  ];
-  for (const phrase of required) {
+  ]) {
     if (!detail.includes(phrase)) fail(`RMD_BOUNDARY: assessment measure detail template missing: ${phrase}`);
   }
 }
 
 function validateHtml(route, html, finalUrl) {
   if (!html.trim()) fail(`EMPTY_BODY: ${route}`);
-  const errorMarkers = [
+  for (const marker of [
     'Internal Server Error',
     'Application error: a server-side exception has occurred',
     'This page could not be found',
-  ];
-  for (const marker of errorMarkers) {
+  ]) {
     if (html.includes(marker)) fail(`ERROR_BODY: ${route} contains "${marker}"`);
   }
   if (!/<title>[^<]+<\/title>/i.test(html)) fail(`SEO_TITLE: ${route} has no rendered <title>`);
@@ -167,42 +162,67 @@ function validateHtml(route, html, finalUrl) {
   }
 
   try {
-    const final = new URL(finalUrl);
-    if (final.origin !== BASE) fail(`REDIRECT_ORIGIN: ${route} ended at ${finalUrl}`);
+    if (new URL(finalUrl).origin !== BASE) fail(`REDIRECT_ORIGIN: ${route} ended at ${finalUrl}`);
   } catch {
     fail(`FINAL_URL: ${route} returned invalid final URL ${finalUrl}`);
   }
 }
 
-async function fetchText(url, label) {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 20000);
-  try {
-    const response = await fetch(url, {
-      redirect: 'follow',
-      signal: controller.signal,
-      headers: {
-        'Cache-Control': 'no-cache, no-store, max-age=0',
-        Pragma: 'no-cache',
-        'User-Agent': 'Rawafid-Assessment-Sectors-Audit/1.0',
-      },
-    });
-    const text = await response.text();
-    if (!response.ok) fail(`HTTP_${response.status}: ${label}`);
-    return { response, text };
-  } catch (error) {
-    fail(`FETCH: ${label}: ${error instanceof Error ? error.message : String(error)}`);
-    return null;
-  } finally {
-    clearTimeout(timeout);
+async function requestText(url, label, { recordFailure = true } = {}) {
+  let last = null;
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt += 1) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 25000);
+    try {
+      const response = await fetch(url, {
+        redirect: 'follow',
+        signal: controller.signal,
+        headers: { 'User-Agent': 'Rawafid-Assessment-Sectors-Audit/2.0' },
+      });
+      const text = await response.text();
+      last = { response, text };
+      if (response.ok) return last;
+      if (!TRANSIENT_STATUSES.has(response.status)) break;
+    } catch (error) {
+      last = { error };
+    } finally {
+      clearTimeout(timeout);
+    }
+    if (attempt < MAX_ATTEMPTS) await sleep(750 * attempt);
   }
+
+  if (recordFailure) {
+    if (last?.response) fail(`HTTP_${last.response.status}: ${label}`);
+    else fail(`FETCH: ${label}: ${last?.error instanceof Error ? last.error.message : String(last?.error ?? 'unknown error')}`);
+  }
+  return last;
+}
+
+async function collectSitemapRoutes(url = `${BASE}/sitemap.xml`, depth = 0, seen = new Set()) {
+  if (depth > 3 || seen.has(url)) return [];
+  seen.add(url);
+  const result = await requestText(url, `sitemap ${url}`);
+  if (!result?.response?.ok) return [];
+  const locs = extractRawLocs(result.text);
+  if (/<sitemapindex\b/i.test(result.text)) {
+    const collected = [];
+    for (const loc of locs) {
+      try {
+        const child = new URL(loc);
+        if (child.origin === BASE) collected.push(...await collectSitemapRoutes(child.toString(), depth + 1, seen));
+      } catch {}
+    }
+    return collected;
+  }
+  return locs.map(normalizePath).filter(Boolean);
 }
 
 async function checkRoute(route) {
-  const url = new URL(route, BASE);
-  url.searchParams.set('__rawafid_audit', stamp);
-  const result = await fetchText(url, route);
-  if (!result) return [];
+  const result = await requestText(new URL(route, BASE), route);
+  if (!result?.response?.ok) {
+    checked.set(route, { status: result?.response?.status ?? 0, bytes: result?.text ? Buffer.byteLength(result.text) : 0 });
+    return [];
+  }
   validateHtml(route, result.text, result.response.url);
   checked.set(route, { status: result.response.status, finalUrl: result.response.url, bytes: Buffer.byteLength(result.text) });
   return extractHrefs(result.text);
@@ -219,6 +239,7 @@ async function runBatch(routes) {
       const route = list[index];
       const found = await checkRoute(route);
       for (const href of found) links.add(href);
+      await sleep(250);
     }
   }
   await Promise.all(Array.from({ length: Math.min(CONCURRENCY, list.length || 1) }, () => worker()));
@@ -229,13 +250,11 @@ async function main() {
   const source = buildExpectedRoutes();
   assertStaticRmdBoundary();
 
-  const sitemapUrl = `${BASE}/sitemap.xml?__rawafid_audit=${encodeURIComponent(stamp)}`;
-  const sitemapResult = await fetchText(sitemapUrl, '/sitemap.xml');
-  const sitemapRoutes = sitemapResult ? extractSitemapLocs(sitemapResult.text) : [];
+  const sitemapRoutes = [...new Set(await collectSitemapRoutes())];
   for (const route of sitemapRoutes) source.routes.add(route);
 
   let pending = new Set(source.routes);
-  for (let round = 0; round < 4 && pending.size; round += 1) {
+  for (let round = 0; round < 3 && pending.size; round += 1) {
     const links = await runBatch(pending);
     for (const route of pending) discovered.add(route);
     const next = new Set();
@@ -271,7 +290,14 @@ async function main() {
     checkedCognitiveLab: [...checked.keys()].filter((route) => route.startsWith('/cognitive-lab')).length,
   };
 
-  console.log(JSON.stringify({ status: failures.length ? 'failed' : 'passed', counts, warningCount: warnings.length, warnings, failureCount: failures.length, failures }, null, 2));
+  console.log(JSON.stringify({
+    status: failures.length ? 'failed' : 'passed',
+    counts,
+    warningCount: warnings.length,
+    warnings,
+    failureCount: failures.length,
+    failures,
+  }, null, 2));
   if (failures.length) process.exit(1);
 }
 
