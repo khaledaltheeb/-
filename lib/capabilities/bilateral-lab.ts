@@ -17,7 +17,7 @@ const instruction=(task:BilateralLabTask,kind:BilateralLabKind)=>{
 };
 export const bilateralLabActivities:BilateralLabActivity[]=bilateralLabSeriesPlans.flatMap(series=>Array.from({length:5},(_,i)=>i+1).flatMap(level=>labels.map((x,idx)=>({
  slug:`level-${level}-${x.kind}`,seriesSlug:series.slug,seriesNumber:series.number,seriesTitle:series.title,taskType:series.taskType,level,kind:x.kind,label:x.label,title:`${series.title} - المستوى ${level} - ${x.label}`,age:series.ages,duration:series.duration,purpose:series.purpose,instruction:instruction(series.taskType,x.kind),progression:series.progression[level-1],observation:series.observation,mastery:'أداء مستقر في محاولتين متقاربتين مع تلميحات قليلة، وبقاء كل يد على المهمة دون تعويضات واضحة؛ هذا معيار إتقان تعليمي وليس درجة تشخيصية.',seed:series.number*100+level*10+idx
-})))));
+}))));
 export const bilateralLabActivityCount=bilateralLabActivities.length;
 export const bilateralLabTestCount=bilateralLabActivities.filter(a=>a.kind==='test').length;
 export const getBilateralLabSeries=(slug:string)=>bilateralLabSeriesPlans.find(s=>s.slug===slug);
