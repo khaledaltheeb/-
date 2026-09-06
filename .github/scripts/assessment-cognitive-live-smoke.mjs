@@ -5,8 +5,8 @@ const tests = [
   { path: '/assessment-lab/relationship-safety/', require: ['مؤشر الأمان في العلاقة', 'متابعة ذاتية · لا تشخيص'] },
   { path: '/assessment-lab/phq-9-plus/', require: ['PHQ-9 — استبيان صحة المريض', 'أداة مصدرية · توثيق قبل الاستخدام'] },
   { path: '/assessment-lab/mbi-source/', require: ['MBI — Maslach Burnout Inventory', 'أداة مصدرية · توثيق قبل الاستخدام'] },
-  { path: '/cognitive-lab/', require: ['100 نشاط معرفي واضح', 'تعلم ذاتي · خصوصية بالتصميم'] },
-  { path: '/cognitive-lab/choice-reaction/', require: ['سرعة الاستجابة الاختيارية', 'تعليمي غير تشخيصي'] },
+  { path: '/cognitive-lab/', require: ['100 نشاط معرفي واضح', 'تعلم ذاتي · خصوصية بالتصميم', 'الأساس العلمي وحدود الاستدلال'] },
+  { path: '/cognitive-lab/choice-reaction/', require: ['سرعة الاستجابة الاختيارية', 'تعليمي غير تشخيصي', 'اقرأ الأساس العلمي وحدود الاستدلال للمختبر'] },
   { path: '/cognitive-lab/stroop-basic/', require: ['مهمة ستروب الأساسية', 'تعليمي غير تشخيصي'] },
   { path: '/cognitive-lab/simon-conflict/', require: ['تعارض الموقع والاستجابة', 'تعليمي غير تشخيصي', 'توسعة بحثية 2026'] },
 ];
@@ -30,7 +30,7 @@ async function probe(test) {
         redirect: 'follow',
         signal: controller.signal,
         headers: {
-          'User-Agent': 'Rawafid-Assessment-Cognitive-Live-Smoke/1.0',
+          'User-Agent': 'Rawafid-Assessment-Cognitive-Live-Smoke/1.1',
           'Cache-Control': 'no-cache',
           Accept: 'text/html,application/xhtml+xml',
         },
