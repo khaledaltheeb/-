@@ -16,6 +16,7 @@ on:
       - 'components/site-header.tsx'
       - 'app/sitemaps/static.xml/route.ts'
       - 'scripts/assessment-measures-contract.mjs'
+      - '.github/scripts/assessment-measures-current-contract.mjs'
       - 'scripts/assessment-measures-operational-contract.mjs'
       - 'scripts/assessment-measures-explicit-registry-contract.mjs'
       - 'scripts/assessment-measures-operational-wave3-contract.mjs'
@@ -60,8 +61,10 @@ jobs:
           cache: npm
       - name: Install locked dependencies
         run: npm ci --no-audit --no-fund
-      - name: Validate assessment-measures contract
+      - name: Validate assessment-measures historical contract
         run: node scripts/assessment-measures-contract.mjs
+      - name: Validate current Assessment Measures catalog invariants
+        run: node .github/scripts/assessment-measures-current-contract.mjs
       - name: Validate operational assessment library
         run: node scripts/assessment-measures-operational-contract.mjs
       - name: Validate base explicit operational registry
