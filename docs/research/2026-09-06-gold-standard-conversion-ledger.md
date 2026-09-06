@@ -25,14 +25,16 @@ The retained legacy source remains preserved in `private.legacy_migration_items`
 
 ## Current Outside-the-Box GOLD count
 
-**77 condition pages**.
+**89 condition pages.**
 
-Current verification state:
+All **89 pages originally rated DEEP** in the page-specificity audit are now GOLD.
+
+Current corpus-wide acceptance state:
 
 - minimum direct references per GOLD page: **5**
 - average direct references per GOLD page: **7.4**
 - GOLD pages containing PubMed search URLs: **0**
-- exact repeated scientific paragraph/list/table blocks across GOLD pages: **0**
+- exact repeated scientific paragraph/list/table blocks of 100+ characters across GOLD pages: **0**
 
 Shared structural headings are allowed; copied condition science is not.
 
@@ -115,8 +117,18 @@ Shared structural headings are allowed; copied condition science is not.
 75. `legacy-outside-box-deafblindness`
 76. `legacy-outside-box-cerebral-palsy`
 77. `legacy-outside-box-arthrogryposis-multiplex-congenita`
-
-Pages 71–72 were discovered during an acceptance recount and independently validated under the same Gold contract. Pages 73–77 were rebuilt condition-by-condition with direct evidence and then passed the corpus-wide anti-filler acceptance gate.
+78. `legacy-outside-box-limb-difference-amputation`
+79. `legacy-outside-box-specific-learning-disorder-mathematics`
+80. `legacy-outside-box-selective-mutism`
+81. `legacy-outside-box-school-avoidance-anxiety`
+82. `legacy-outside-box-severe-behavior-self-injury`
+83. `legacy-outside-box-trauma-related-learning-support`
+84. `legacy-outside-box-ocd-functional-support`
+85. `legacy-outside-box-adhd`
+86. `legacy-outside-box-vision-impairment-low-vision`
+87. `legacy-outside-box-specific-learning-disorder-written-expression`
+88. `legacy-outside-box-cerebral-visual-impairment`
+89. `legacy-outside-box-autism`
 
 ## Scientific design invariant
 
@@ -137,25 +149,26 @@ GOLD is not permanent. A page is reopened whenever newer direct evidence materia
 
 ## Anti-filler rule
 
-At 77 GOLD pages, exact structured-block comparison finds **zero scientific paragraphs, lists or tables of 100+ characters duplicated exactly across two or more pages**. Repeated editorial headings such as `قواعد القرار` or `قوة الدليل وحدوده` are permitted because they provide predictable navigation; the science beneath them must remain condition-specific.
+At 89 GOLD pages, exact structured-block comparison finds **zero scientific paragraphs, lists or tables of 100+ characters duplicated exactly across two or more pages**. Repeated editorial headings such as `قواعد القرار` or `قوة الدليل وحدوده` are permitted because they provide predictable navigation; the science beneath them must remain condition-specific.
 
-## Next DEEP conversion wave
+## Next conversion wave
 
-Continue the original audit order with:
+The original DEEP backlog is closed. Continue with the six pages originally rated ENRICH:
 
-- `legacy-outside-box-limb-difference-amputation`
-- `legacy-outside-box-specific-learning-disorder-mathematics`
-- `legacy-outside-box-selective-mutism`
-- `legacy-outside-box-school-avoidance-anxiety`
-- `legacy-outside-box-severe-behavior-self-injury`
-- then `trauma-related-learning-support`, `ocd-functional-support`, `adhd`, `vision-impairment-low-vision`, `specific-learning-disorder-written-expression`, `cerebral-visual-impairment`, and `autism`.
+- `legacy-outside-box-oculocutaneous-albinism`
+- `legacy-outside-box-pediatric-feeding-swallowing-disorder`
+- `legacy-outside-box-retinitis-pigmentosa`
+- `legacy-outside-box-sensory-processing-differences`
+- `legacy-outside-box-specific-learning-disorder-reading`
+- `legacy-outside-box-usher-syndrome`
 
-After all Outside-the-Box DEEP pages:
+Then re-audit and upgrade the five pages originally rated STRONG so that all 100 public Outside-the-Box condition pages are held to the same current Gold contract.
 
-1. Outside-the-Box ENRICH pages.
-2. Capabilities DEEP pages.
-3. Capabilities ENRICH pages.
-4. Re-audit STRONG pages for evidence freshness, lifespan gaps and new 2025–2026 literature.
+After all 100 Outside-the-Box condition pages:
+
+1. Capabilities DEEP pages.
+2. Capabilities ENRICH pages.
+3. Re-audit Capabilities STRONG pages for evidence freshness, lifespan gaps and new 2025–2026 literature.
 
 ## Quality invariant
 
