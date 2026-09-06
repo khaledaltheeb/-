@@ -1,0 +1,34 @@
+name: Three Labs Internal Contracts
+
+on:
+  push:
+    branches: ['audit/three-labs-full-live-20260906']
+    paths:
+      - '.github/workflows/three-labs-internal-contracts.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Validate Assessment Lab all 70 published routes and 960 reviewed items
+        run: node scripts/assessment-lab-contract.mjs
+      - name: Validate Cognitive Lab all 100 tools and generated trials
+        run: node scripts/cognitive-lab-contract.mjs
+      - name: Validate current Assessment Measures 83-measure catalog
+        run: node .github/scripts/assessment-measures-current-contract.mjs
+      - name: Require zero unresolved Assessment Measures operational coverage
+        run: node scripts/assessment-measures-operational-coverage.mjs
+      - name: Type check whole application
+        run: npm run typecheck
