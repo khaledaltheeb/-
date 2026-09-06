@@ -91,8 +91,16 @@ if (orphanExplicit.length) {
   process.exitCode = 1;
 }
 
+// Final-state invariant: every public catalog measure must now be either explicitly operationalized
+// or deliberately classified as rights-restricted reference-only. A newly added measure must make
+// that classification in the same change; otherwise CI fails instead of silently restoring a gap.
+if (unresolved.length) {
+  console.error(`ASSESSMENT_OPERATIONAL_COVERAGE_FAIL: unresolved measures remain: ${unresolved.join(', ')}`);
+  process.exitCode = 1;
+}
+
 if (!process.exitCode) {
   console.log(
-    `ASSESSMENT_OPERATIONAL_COVERAGE_PASS: measures=${allMeasures.length} explicit=${explicitInCatalog.length} restricted=${rightsRestricted.length} unresolved=${unresolved.length} measure_waves=${measureWaveFiles.length} operational_waves=${operationalWaveFiles.length}; no explicit-form/rights-restricted collision and no orphan explicit material.`,
+    `ASSESSMENT_OPERATIONAL_COVERAGE_PASS: measures=${allMeasures.length} explicit=${explicitInCatalog.length} restricted=${rightsRestricted.length} unresolved=0 measure_waves=${measureWaveFiles.length} operational_waves=${operationalWaveFiles.length}; every catalog measure is explicitly operationalized or rights-classified, with no collision and no orphan explicit material.`,
   );
 }
