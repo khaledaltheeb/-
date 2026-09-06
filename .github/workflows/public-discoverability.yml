@@ -1,0 +1,41 @@
+name: Public Discoverability
+
+on:
+  pull_request:
+    paths:
+      - 'app/all-pages/**'
+      - 'app/specialists/page.tsx'
+      - 'app/centers/page.tsx'
+      - 'app/sitemaps/static.xml/route.ts'
+      - 'components/site-footer.tsx'
+      - 'scripts/public-discoverability-contract.mjs'
+      - '.github/workflows/public-discoverability.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'app/all-pages/**'
+      - 'app/specialists/page.tsx'
+      - 'app/centers/page.tsx'
+      - 'app/sitemaps/static.xml/route.ts'
+      - 'components/site-footer.tsx'
+      - 'scripts/public-discoverability-contract.mjs'
+      - '.github/workflows/public-discoverability.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Public discoverability contract
+        run: node scripts/public-discoverability-contract.mjs
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Type check
+        run: npm run typecheck

@@ -35,7 +35,7 @@ const groups = [
       { href: '/specialists', label: 'دليل المختصين' },
       { href: '/centers', label: 'دليل المراكز' },
       { href: '/search', label: 'البحث المتقدم' },
-      { href: '/community', label: 'المجتمع' },
+      { href: '/all-pages', label: 'فهرس المحتوى المنشور' },
       { href: '/join', label: 'الانضمام إلى روافد' },
     ],
   },
