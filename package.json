@@ -15,7 +15,7 @@
     "quick-info:cards": "node scripts/build-quick-info-cards.mjs",
     "quick-info-images:validate": "node scripts/quick-info-image-contract.mjs",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
-    "lint": "eslint . --max-warnings=0",
+    "lint": "eslint . --quiet",
     "typecheck": "tsc --noEmit",
     "addiction-atlas:validate": "node scripts/addiction-atlas-contract.mjs",
     "search-appearance:validate": "node scripts/search-appearance-contract.mjs",
