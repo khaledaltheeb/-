@@ -25,7 +25,7 @@ The retained legacy source remains preserved in `private.legacy_migration_items`
 
 ## Current Outside-the-Box GOLD count
 
-**70 condition pages**.
+**72 condition pages**.
 
 Current verification state:
 
@@ -108,6 +108,10 @@ Shared structural headings are allowed; copied condition science is not.
 68. `legacy-outside-box-central-auditory-processing-difficulties`
 69. `legacy-outside-box-auditory-neuropathy-spectrum`
 70. `legacy-outside-box-charge-syndrome`
+71. `legacy-outside-box-hearing-loss-deafness`
+72. `legacy-outside-box-developmental-coordination-disorder`
+
+The two additional pages at 71–72 were discovered during the acceptance recount after the 65→70 conversion wave. Both already carried the same Gold contract, direct references, and condition-specific bodies; they were therefore validated rather than re-counted blindly.
 
 ## Scientific design invariant
 
@@ -128,20 +132,18 @@ GOLD is not permanent. A page is reopened whenever newer direct evidence materia
 
 ## Anti-filler rule
 
-At 70 GOLD pages, exact structured-block comparison still finds **zero scientific paragraphs, lists or tables of 100+ characters duplicated exactly across two or more pages**. Repeated editorial headings such as `قواعد القرار` or `قوة الدليل وحدوده` are permitted because they provide predictable navigation; the science beneath them must remain condition-specific.
+At 72 GOLD pages, exact structured-block comparison still finds **zero scientific paragraphs, lists or tables of 100+ characters duplicated exactly across two or more pages**. Repeated editorial headings such as `قواعد القرار` or `قوة الدليل وحدوده` are permitted because they provide predictable navigation; the science beneath them must remain condition-specific.
 
 ## Next DEEP conversion wave
 
 Continue the original audit order with:
 
-- hearing loss / deafness
-- developmental coordination disorder
-- developmental language disorder
-- intellectual developmental disorder
-- deafblindness
+- `legacy-outside-box-developmental-language-disorder`
+- `legacy-outside-box-intellectual-developmental-disorder`
+- `legacy-outside-box-deafblindness`
+- `legacy-outside-box-cerebral-palsy`
+- `legacy-outside-box-arthrogryposis-multiplex-congenita`
 - then continue remaining DEEP items from the original page-specific audit
-
-For held/archived routes such as hearing loss/deafness, first inspect the publication hold and current route state. A full Gold rewrite may make the page publication-ready, but legacy content is never force-published without scientific repair and route verification.
 
 After all Outside-the-Box DEEP pages:
 
