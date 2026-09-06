@@ -1,0 +1,55 @@
+name: Globals Dead CSS Probe
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/globals-dead-css-probe.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Find globals.css class selectors with no source consumers
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const path = require('node:path');
+
+          const css = fs.readFileSync('app/globals.css', 'utf8');
+          const classes = [...new Set([...css.matchAll(/\.([A-Za-z_][A-Za-z0-9_-]*)/g)].map((m) => m[1]))].sort();
+          const sourceFiles = [];
+          const roots = ['app', 'components', 'lib'];
+          for (const root of roots) {
+            if (!fs.existsSync(root)) continue;
+            const walk = (dir) => {
+              for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+                const full = path.join(dir, entry.name);
+                if (entry.isDirectory()) walk(full);
+                else if (/\.(?:tsx?|jsx?|mjs|cjs)$/.test(entry.name)) sourceFiles.push(full);
+              }
+            };
+            walk(root);
+          }
+          const source = new Map(sourceFiles.map((file) => [file, fs.readFileSync(file, 'utf8')]));
+          const rows = classes.map((name) => {
+            const consumers = [...source].filter(([, text]) => text.includes(name)).map(([file]) => file);
+            return { name, count: consumers.length, consumers };
+          });
+
+          console.log(`GLOBALS_CLASS_COUNT=${rows.length}`);
+          console.log('\n=== ZERO SOURCE HITS ===');
+          for (const row of rows.filter((row) => row.count === 0)) console.log(row.name);
+          console.log('\n=== ONE SOURCE FILE ===');
+          for (const row of rows.filter((row) => row.count === 1)) console.log(`${row.name}\t${row.consumers[0]}`);
+          console.log('\n=== TWO SOURCE FILES ===');
+          for (const row of rows.filter((row) => row.count === 2)) console.log(`${row.name}\t${row.consumers.join(',')}`);
+          NODE
