@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import '@/app/structured-content-renderer.css';
 
 type UnknownRecord = Record<string, unknown>;
 type ContentRendererProps = { bodyJson: unknown; bodyText?: string | null; recordId: string };
