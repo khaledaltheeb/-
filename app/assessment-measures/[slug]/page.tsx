@@ -13,7 +13,7 @@ import {
   getCanonicalAssessmentMeasureSlug,
   rightsBadge,
 } from '@/lib/assessment-measures-catalog';
-import { getOperationalMaterial } from '@/lib/assessment-measure-operational-catalog';
+import { getOperationalMaterial, hasExplicitOperationalMaterial } from '@/lib/assessment-measure-operational-catalog';
 import styles from '@/components/assessment-measures.module.css';
 
 type PageProps = { params: Promise<{ slug: string }> };
@@ -26,16 +26,32 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { slug } = await params;
   const measure = getAssessmentMeasure(slug);
   if (!measure) return {};
+  const hasExplicitOperational = hasExplicitOperationalMaterial(measure.slug);
   return buildSeoMetadata({
-    title: `${measure.nameAr} (${measure.acronym}) — النموذج ودليل الاستخدام`,
-    description: `${measure.summary} النموذج/ورقة التطبيق، طريقة الاستخدام والتسجيل، حدود التفسير، النسخة العربية، الحقوق والمصادر الموثوقة.`,
+    title: hasExplicitOperational
+      ? `${measure.nameAr} (${measure.acronym}) — النموذج ودليل الاستخدام`
+      : `${measure.nameAr} (${measure.acronym}) — دليل الاستخدام والتوثيق`,
+    description: hasExplicitOperational
+      ? `${measure.summary} المادة التشغيلية الموثقة، طريقة الاستخدام والتسجيل، حدود التفسير، النسخة العربية، الحقوق والمصادر الموثوقة.`
+      : `${measure.summary} دليل الاستخدام والتسجيل والحدود العلمية والحقوق وحالة النسخة العربية، مع ورقة توثيق عامة لا تُعد نسخة من المقياس الأصلي.`,
     path: `/assessment-measures/${measure.slug}/`,
     index: true,
     follow: true,
     type: 'article',
-    keywords: [measure.nameAr, measure.nameEn, measure.acronym, measure.construct, 'نموذج قابل للطباعة', 'طريقة الاستخدام', 'تفسير الدرجة', 'حقوق الاستخدام'],
+    keywords: [
+      measure.nameAr,
+      measure.nameEn,
+      measure.acronym,
+      measure.construct,
+      hasExplicitOperational ? 'نموذج قابل للطباعة' : 'دليل تطبيق المقياس',
+      'طريقة الاستخدام',
+      'تفسير الدرجة',
+      'حقوق الاستخدام',
+    ],
     relatedTerms: measure.populations,
-    searchIntents: [`نموذج ${measure.acronym}`, `تحميل ${measure.acronym}`, `طريقة استخدام ${measure.acronym}`, `تفسير ${measure.acronym}`, `النسخة العربية من ${measure.acronym}`],
+    searchIntents: hasExplicitOperational
+      ? [`نموذج ${measure.acronym}`, `تحميل ${measure.acronym}`, `طريقة استخدام ${measure.acronym}`, `تفسير ${measure.acronym}`, `النسخة العربية من ${measure.acronym}`]
+      : [`طريقة استخدام ${measure.acronym}`, `تفسير ${measure.acronym}`, `حقوق ${measure.acronym}`, `النسخة العربية من ${measure.acronym}`],
   });
 }
 
@@ -47,6 +63,7 @@ export default async function AssessmentMeasureDetailPage({ params }: PageProps)
   const measure = getAssessmentMeasure(canonicalSlug);
   if (!measure) notFound();
   const operationalMaterial = getOperationalMaterial(measure);
+  const hasExplicitOperational = hasExplicitOperationalMaterial(measure.slug);
 
   const categoryRecords = measure.categories
     .map((categorySlug) => assessmentMeasureCategories.find((item) => item.slug === categorySlug))
@@ -96,8 +113,12 @@ export default async function AssessmentMeasureDetailPage({ params }: PageProps)
           <div className={styles.detailHeroMain}>
             <div className={styles.cardMeta}>
               <span className={styles.badge}>{rightsBadge(measure.rightsStatus)}</span>
-              <span className={operationalMaterial.completeness === 'exact-public-domain-form' ? styles.badgeSoft : styles.badgeWarn}>
-                {operationalMaterial.completeness === 'exact-public-domain-form' ? 'النموذج/السلم مدرج' : 'ورقة تطبيق وتسجيل'}
+              <span className={hasExplicitOperational && operationalMaterial.completeness === 'exact-public-domain-form' ? styles.badgeSoft : styles.badgeWarn}>
+                {!hasExplicitOperational
+                  ? 'مرجع موثق + ورقة توثيق عامة'
+                  : operationalMaterial.completeness === 'exact-public-domain-form'
+                    ? 'النموذج/السلم مدرج'
+                    : 'مادة تشغيلية موثقة'}
               </span>
               <span className={measure.fullArabicFormPublished ? styles.badgeSoft : styles.badgeWarn}>{arabicStatusBadge(measure.arabicStatus)}</span>
             </div>
@@ -105,8 +126,8 @@ export default async function AssessmentMeasureDetailPage({ params }: PageProps)
             <div className={styles.english} lang="en" dir="ltr">{measure.nameEn} · {measure.version}</div>
             <p className={styles.summary}>{measure.summary}</p>
             <div className={styles.heroActions}>
-              <a className={styles.primaryAction} href="#form">فتح المقياس / ورقة التطبيق</a>
-              <Link className={styles.secondaryAction} href={`/assessment-measures/${measure.slug}/print/`}>طباعة / حفظ PDF</Link>
+              <a className={styles.primaryAction} href="#form">{hasExplicitOperational ? 'فتح المادة التشغيلية' : 'فتح ورقة التوثيق العامة'}</a>
+              <Link className={styles.secondaryAction} href={`/assessment-measures/${measure.slug}/print/`}>{hasExplicitOperational ? 'طباعة / حفظ PDF' : 'طباعة ورقة التوثيق'}</Link>
               <a className={styles.secondaryAction} href="#usage">دليل الاستخدام</a>
               <Link className={styles.secondaryAction} href={`/assessment-measures/compare/?measure=${encodeURIComponent(measure.slug)}`}>أضف إلى المقارنة</Link>
             </div>
@@ -115,7 +136,15 @@ export default async function AssessmentMeasureDetailPage({ params }: PageProps)
           <aside className={styles.rightsPanel} aria-label="ملخص الحقوق والإتاحة">
             <h2>حالة الاستخدام</h2>
             <div className={styles.rightsRow}><span>الأصل</span><strong>{measure.rightsLabel}</strong></div>
-            <div className={styles.rightsRow}><span>المادة التشغيلية على روافد</span><strong>{operationalMaterial.completeness === 'exact-public-domain-form' ? 'النموذج/السلم نفسه متاح' : operationalMaterial.completeness === 'standardized-protocol-sheet' ? 'بروتوكول تطبيق وتسجيل متاح' : 'ورقة تسجيل وتشغيل متاحة'}</strong></div>
+            <div className={styles.rightsRow}><span>المادة التشغيلية على روافد</span><strong>
+              {!hasExplicitOperational
+                ? 'لم تُنشر مادة تشغيلية صريحة بعد — المتاح ورقة توثيق عامة فقط'
+                : operationalMaterial.completeness === 'exact-public-domain-form'
+                  ? 'النموذج/السلم نفسه متاح'
+                  : operationalMaterial.completeness === 'standardized-protocol-sheet'
+                    ? 'بروتوكول تطبيق وتسجيل موثق متاح'
+                    : 'ورقة تسجيل وتشغيل موثقة متاحة'}
+            </strong></div>
             <div className={styles.rightsRow}><span>النسخة العربية</span><strong>{measure.arabicLabel}</strong></div>
             <div className={styles.rightsRow}><span>آخر تحقق للحقوق</span><strong>{measure.rightsVerifiedOn}</strong></div>
           </aside>
@@ -138,10 +167,16 @@ export default async function AssessmentMeasureDetailPage({ params }: PageProps)
             <section id="form" aria-labelledby="form-title">
               <div className={styles.formIntro}>
                 <div>
-                  <h2 id="form-title">المقياس / ورقة التطبيق</h2>
-                  <p>هذه هي طبقة الاستخدام العملي: البنود أو المهام عندما تسمح الحقوق، وخانات التطبيق والتسجيل والحساب والسلامة والمصادر.</p>
+                  <h2 id="form-title">{hasExplicitOperational ? 'المقياس / المادة التشغيلية' : 'ورقة توثيق عامة — ليست نموذج المقياس'}</h2>
+                  <p>
+                    {hasExplicitOperational
+                      ? 'هذه هي طبقة الاستخدام العملي الموثقة: البنود أو المهام عندما تسمح الحقوق، وخانات التطبيق والتسجيل والحساب والسلامة والمصادر.'
+                      : 'هذه الورقة مخصصة لتوثيق سياق التطبيق والنسخة والنتائج والمصادر فقط. لا تمثل بنود المقياس الأصلي، ولا ترجمة عربية معتمدة، ولا خوارزمية تشغيلية مكتملة. استخدم المصدر الأصلي حتى تُراجع نسخة تشغيلية محددة وتُنشر هنا صراحة.'}
+                  </p>
                 </div>
-                <Link className={styles.primaryAction} href={`/assessment-measures/${measure.slug}/print/`}>نسخة A4 للطباعة</Link>
+                <Link className={styles.primaryAction} href={`/assessment-measures/${measure.slug}/print/`}>
+                  {hasExplicitOperational ? 'نسخة A4 للطباعة' : 'ورقة توثيق A4'}
+                </Link>
               </div>
               <AssessmentMeasureOperationalForm material={operationalMaterial} />
             </section>
@@ -181,8 +216,20 @@ export default async function AssessmentMeasureDetailPage({ params }: PageProps)
               <h3>حالة العربية</h3>
               <p>{measure.arabicNote}</p>
               <div className={styles.statusBox}>
-                <strong>{operationalMaterial.completeness === 'exact-public-domain-form' ? 'ما الذي نعرضه الآن؟' : 'لماذا قد لا نعرض نص البنود كاملًا؟'}</strong>
-                <p>{operationalMaterial.completeness === 'exact-public-domain-form' ? 'أدرجنا النموذج أو السلم نفسه عندما وجدنا أساسًا حقوقيًا ومصدرًا كافيًا، مع إبقاء حدود الترجمة منفصلة.' : measure.fullArabicFormNote}</p>
+                <strong>
+                  {!hasExplicitOperational
+                    ? 'ما الذي نعرضه الآن؟'
+                    : operationalMaterial.completeness === 'exact-public-domain-form'
+                      ? 'ما الذي نعرضه الآن؟'
+                      : 'لماذا قد لا نعرض نص البنود كاملًا؟'}
+                </strong>
+                <p>
+                  {!hasExplicitOperational
+                    ? 'لا توجد بعد مادة تشغيلية صريحة ومراجعة لهذه النسخة في سجل روافد. الورقة الظاهرة عامة للتوثيق فقط ولا يجوز معاملتها كنموذج رسمي أو ترجمة عربية للمقياس.'
+                    : operationalMaterial.completeness === 'exact-public-domain-form'
+                      ? 'أدرجنا النموذج أو السلم نفسه عندما وجدنا أساسًا حقوقيًا ومصدرًا كافيًا، مع إبقاء حدود الترجمة منفصلة.'
+                      : measure.fullArabicFormNote}
+                </p>
               </div>
             </section>
           </div>
