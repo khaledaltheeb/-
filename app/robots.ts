@@ -14,8 +14,8 @@ const PRIVATE_PATHS = [
   '/appointments/',
   '/notifications/',
   '/community/join',
-  '/search?',
-  '/ai-search?',
+  '/search',
+  '/ai-search',
   '/api/private/',
 ];
 
