@@ -65,6 +65,15 @@ const questionTextCorrections: Record<string, Record<string, string>> = {
   'hearing-support-family': {
     'كم مرة فات الطفل جزء من تواصل مهم؟': 'كم مرة فاته جزء من تواصل مهم؟',
   },
+  'decision-fatigue': {
+    'كم مرة جعل عدد الخيارات بدء القرار صعبًا عليك؟': 'كم مرة جعل عدد الخيارات البدء في اتخاذ القرار صعبًا عليك؟',
+  },
+  'work-boundaries': {
+    'هل كانت أوقات توفرّك خارج الدوام موضحة للآخرين؟': 'هل كانت أوقات توفرك خارج الدوام موضحة للآخرين؟',
+  },
+  'screen-sleep-interference': {
+    'إلى أي حد شعرت بالنعاس صباحًا بعد استخدام شاشة متأخر؟': 'إلى أي حد شعرت بالنعاس صباحًا بعد استخدام الشاشة في وقت متأخر؟',
+  },
 };
 
 const questionSafetyOverrides: Record<string, Record<string, AssessmentSafetySignal>> = {
