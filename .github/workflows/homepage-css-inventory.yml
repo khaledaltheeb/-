@@ -53,7 +53,7 @@ jobs:
             const file = path.join('app', relative.replace(/^\.\//, ''));
             if (!fs.existsSync(file)) return { file, missing: true };
             const css = fs.readFileSync(file, 'utf8');
-            const classes = [...new Set([...css.matchAll(/\.([A-Za-z_][A-Za-z0-9_-]*)/g)].map((m) => m[1))];
+            const classes = [...new Set([...css.matchAll(/\.([A-Za-z_][A-Za-z0-9_-]*)/g)].map((m) => m[1]))];
             const homepageHits = classes.filter((name) => homepageText.includes(name)).length;
             const repoHits = classes.filter((name) => allSource.includes(name)).length;
             return {
