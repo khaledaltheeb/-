@@ -12,6 +12,7 @@ on:
 permissions:
   contents: read
 
+# Keep each live sector bounded and independently diagnosable.
 jobs:
   assessment-measures:
     runs-on: ubuntu-latest
