@@ -172,7 +172,7 @@ function auditRow(row) {
   const isProtocol = /بروتوكول|protocol/i.test(evidence);
   const isMeta = !/دون\s+تحليل\s+تلوي|without\s+(a\s+)?meta[- ]?analysis/i.test(evidence) && /تلوي|meta/i.test(evidence);
   const isNetworkMeta = isMeta && /شبكي|network/i.test(evidence);
-  const isSystematic = /منهجي|systematic/i.test(evidence);
+  const isSystematic = /مراجعة\s+منهجي(?:ة|ه)?|systematic(?:\s+|-)review/i.test(evidence);
   const isScoping = /نطاقي|scoping/i.test(evidence);
   const isTrial = !isProtocol && !isSystematic && !isMeta && !isScoping && /عشوائي|random|trial/i.test(evidence);
   const isObservational = /أتراب|مقطعي|حالات وشواهد|رصد|سجلي|cohort|cross-sectional|case-control|observational|registry/i.test(evidence);
