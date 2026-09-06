@@ -25,9 +25,12 @@ const assessmentTests = [
       'متابعة ذاتية · لا تشخيص',
       '<strong>16</strong> بندًا',
       'الملف العلمي للأداة',
+      'خريطة الأدلة · Claim-to-evidence',
+      'حدود الاستدلال:',
       'تمت المراجعة من قبل فريق روافد',
       'لا تحفظ بياناتك',
       'لا تجمع الإجابات في نسبة واحدة',
+      'لا ينطبق / لم أجرّب',
     ],
     canonicalPath: `/assessment-lab/${row.slug}`,
     expectIndexable: true,
@@ -95,7 +98,7 @@ async function probe(test) {
         redirect: 'follow',
         signal: controller.signal,
         headers: {
-          'User-Agent': 'Rawafid-Assessment-Cognitive-Live-Smoke/2.0',
+          'User-Agent': 'Rawafid-Assessment-Cognitive-Live-Smoke/2.1',
           'Cache-Control': 'no-cache',
           Pragma: 'no-cache',
           Accept: 'text/html,application/xhtml+xml',
@@ -113,9 +116,7 @@ async function probe(test) {
       if (test.canonicalPath) {
         const actualCanonicalPath = normalizedUrlPath(canonical);
         const expectedCanonicalPath = test.canonicalPath.replace(/\/$/, '') || '/';
-        if (actualCanonicalPath !== expectedCanonicalPath) {
-          issues.push(`canonical mismatch: ${canonical ?? 'missing'} expected ${expectedCanonicalPath}`);
-        }
+        if (actualCanonicalPath !== expectedCanonicalPath) issues.push(`canonical mismatch: ${canonical ?? 'missing'} expected ${expectedCanonicalPath}`);
       }
       if (test.expectIndexable && hasNoindex(body)) issues.push('unexpected noindex');
 
@@ -137,15 +138,7 @@ async function probe(test) {
       console.log(`LABS_LIVE_PROBE ${JSON.stringify(row)}`);
       if (row.ok) return { ok: true, attempts, last: row };
     } catch (error) {
-      const row = {
-        path: test.path,
-        kind: test.kind,
-        attempt,
-        status: 0,
-        ok: false,
-        issues: [error instanceof Error ? error.message : String(error)],
-        elapsedMs: Date.now() - started,
-      };
+      const row = { path: test.path, kind: test.kind, attempt, status: 0, ok: false, issues: [error instanceof Error ? error.message : String(error)], elapsedMs: Date.now() - started };
       attempts.push(row);
       console.log(`LABS_LIVE_PROBE ${JSON.stringify(row)}`);
     } finally {
@@ -157,13 +150,80 @@ async function probe(test) {
   return { ok: false, attempts, last: attempts.at(-1) };
 }
 
+async function probeOfficialSource(instrument) {
+  const attempts = [];
+  const accessRestrictedStatuses = new Set([401, 403, 405, 429]);
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 25000);
+    const started = Date.now();
+    try {
+      const response = await fetch(instrument.sourceUrl, {
+        redirect: 'follow',
+        signal: controller.signal,
+        headers: {
+          'User-Agent': 'Rawafid-Assessment-Source-Health/1.0',
+          Accept: 'text/html,application/xhtml+xml,application/pdf;q=0.8,*/*;q=0.5',
+        },
+      });
+      // 401/403/405/429 means the authority is actively answering but restricts automated access;
+      // do not mislabel that as a dead citation. 404/410 are true broken-source signals.
+      const restricted = accessRestrictedStatuses.has(response.status);
+      const dead = response.status === 404 || response.status === 410;
+      const retryable = response.status === 0 || response.status === 408 || response.status >= 500;
+      const ok = !dead && (response.ok || (response.status >= 300 && response.status < 400) || restricted);
+      const row = {
+        slug: instrument.slug,
+        source: instrument.source,
+        url: instrument.sourceUrl,
+        attempt,
+        status: response.status,
+        ok,
+        restricted,
+        retryable,
+        elapsedMs: Date.now() - started,
+        finalUrl: response.url,
+      };
+      attempts.push(row);
+      console.log(`ASSESSMENT_SOURCE_PROBE ${JSON.stringify(row)}`);
+      if (ok || dead || !retryable) return { ok, attempts, last: row };
+    } catch (error) {
+      const row = {
+        slug: instrument.slug,
+        source: instrument.source,
+        url: instrument.sourceUrl,
+        attempt,
+        status: 0,
+        ok: false,
+        restricted: false,
+        retryable: true,
+        elapsedMs: Date.now() - started,
+        issue: error instanceof Error ? error.message : String(error),
+      };
+      attempts.push(row);
+      console.log(`ASSESSMENT_SOURCE_PROBE ${JSON.stringify(row)}`);
+    } finally {
+      clearTimeout(timeout);
+    }
+    await sleep(2000 * attempt);
+  }
+  return { ok: false, attempts, last: attempts.at(-1) };
+}
+
 const results = [];
 for (const test of tests) {
   results.push({ test, result: await probe(test) });
   await sleep(650);
 }
 
+const sourceResults = [];
+for (const instrument of instruments) {
+  sourceResults.push({ instrument, result: await probeOfficialSource(instrument) });
+  await sleep(500);
+}
+
 const failures = results.filter(({ result }) => !result.ok);
+const sourceFailures = sourceResults.filter(({ result }) => !result.ok);
 const assessmentResults = results.filter(({ test }) => test.kind?.startsWith('assessment') || test.kind === 'rawafid-monitor' || test.kind === 'source-rights');
 const assessmentFailures = assessmentResults.filter(({ result }) => !result.ok);
 const transientAttempts = results
@@ -179,11 +239,15 @@ const summary = {
     testedRoutesIncludingHub: assessmentResults.length,
     passed: assessmentResults.length - assessmentFailures.length,
     failed: assessmentFailures.length,
+    officialSourcesTested: sourceResults.length,
+    officialSourcesHealthyOrAccessRestricted: sourceResults.length - sourceFailures.length,
+    officialSourcesFailed: sourceFailures.length,
   },
   failedAttempts: results.flatMap(({ result }) => result.attempts).filter((row) => !row.ok).length,
   transientAttempts: transientAttempts.length,
   failures: failures.map(({ test, result }) => ({ path: test.path, kind: test.kind, last: result.last })),
+  sourceFailures: sourceFailures.map(({ instrument, result }) => ({ slug: instrument.slug, url: instrument.sourceUrl, last: result.last })),
 };
 console.log('ASSESSMENT_COGNITIVE_LIVE_SMOKE_SUMMARY');
 console.log(JSON.stringify(summary, null, 2));
-if (failures.length) process.exit(1);
+if (failures.length || sourceFailures.length) process.exit(1);
