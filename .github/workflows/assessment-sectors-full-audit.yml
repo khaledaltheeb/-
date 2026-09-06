@@ -1,0 +1,56 @@
+name: Assessment Sectors Full Audit
+
+on:
+  push:
+    branches:
+      - assessment-sectors-audit-20260906
+    paths:
+      - 'scripts/assessment-sectors-live-audit.mjs'
+      - '.github/workflows/assessment-sectors-full-audit.yml'
+      - 'docs/assessment-sectors-audit.trigger'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Validate Assessment Measures scientific and rights contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/assessment-measures-contract.mjs
+          node scripts/assessment-measures-operational-contract.mjs
+          for file in scripts/assessment-measures-operational-wave*-contract.mjs; do
+            echo "RUN ${file}"
+            node "${file}"
+          done
+          node scripts/assessment-measures-operational-coverage.mjs
+          node scripts/outcome-measurement-separation-contract.mjs
+
+      - name: Validate Assessment Lab full contract suite
+        run: npm run assessment-lab:validate
+
+      - name: Validate Cognitive Lab engine and all 100 tools
+        run: npm run cognitive-lab:validate
+
+      - name: Type check audit branch
+        run: npm run typecheck
+
+      - name: Lint audit branch
+        run: npm run lint
+
+      - name: Exhaustive live crawl of all three sectors
+        run: node scripts/assessment-sectors-live-audit.mjs
