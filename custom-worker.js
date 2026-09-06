@@ -1,8 +1,7 @@
 import { WorkerEntrypoint } from 'cloudflare:workers';
 
-// OpenNext generates this module during the production build.
-// The custom worker is the supported adapter pattern for reusing its fetch handler.
-// @ts-ignore generated at build time
+// OpenNext generates this module during the production build. The custom worker is
+// the supported adapter pattern for reusing its generated fetch handler.
 import handler from './.open-next/worker.js';
 
 const CANONICAL_HOST = 'healthrenewal.org';
@@ -64,7 +63,7 @@ export class OpenNextBackend extends WorkerEntrypoint {
   }
 }
 
-export default {
+const gateway = {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
 
@@ -95,3 +94,5 @@ export default {
     return backend.fetch(request);
   },
 };
+
+export default gateway;
