@@ -27,17 +27,18 @@ type EditorialContent = {
   body_json: unknown;
   body_text: string | null;
 };
-
 type Category = {
   id: string;
   name_ar: string;
   description: string | null;
   editorial_content_id: string | null;
 };
+type Track = { title: string; canonical_url: string };
 
 const SLUG = 'research-evidence-learning';
 const SECTION_PATH = `/sections/${SLUG}`;
 const DESCENDANT_PATTERN = `${SECTION_PATH}/%/`;
+const BASICS_PATTERN = `${SECTION_PATH}/%-basics/`;
 const PAGE_SIZE = 24;
 
 const one = (value: string | string[] | undefined) => Array.isArray(value) ? value[0] ?? '' : value ?? '';
@@ -53,6 +54,9 @@ const pageHref = (page: number, q: string) => {
   if (q) params.set('q', q);
   return `${SECTION_PATH}${params.size ? `?${params}` : ''}`;
 };
+function trackName(title: string) {
+  return title.includes(':') ? title.split(':').slice(1).join(':').trim() : title.replace(/^الأساسيات التي يجب فهمها\s*/u, '').trim();
+}
 
 export async function generateMetadata({ searchParams }: { searchParams: SearchParams }): Promise<Metadata> {
   const raw = await searchParams;
@@ -78,15 +82,14 @@ export default async function ResearchEvidenceLearningPage({ searchParams }: { s
   const supabase = await createClient();
   const now = new Date().toISOString();
 
-  const { data: categoryData, error: categoryError } = await supabase
-    .from('categories')
-    .select('id,name_ar,description,editorial_content_id')
-    .eq('slug', SLUG)
-    .eq('is_active', true)
-    .eq('visibility', 'public')
-    .maybeSingle();
+  const [{ data: categoryData, error: categoryError }, { data: trackData, error: trackError }] = await Promise.all([
+    supabase.from('categories').select('id,name_ar,description,editorial_content_id').eq('slug', SLUG).eq('is_active', true).eq('visibility', 'public').maybeSingle(),
+    supabase.from('content').select('title,canonical_url').like('canonical_url', BASICS_PATTERN).eq('status', 'published').eq('robots_index', true).eq('robots_follow', true).lte('published_at', now).order('title'),
+  ]);
   if (categoryError) throw new Error(`research evidence category query failed: ${categoryError.message}`);
+  if (trackError) throw new Error(`research evidence track query failed: ${trackError.message}`);
   const category = categoryData as Category | null;
+  const tracks = (trackData ?? []).flatMap((item) => item.canonical_url ? [{ title: item.title, canonical_url: item.canonical_url }] : []) as Track[];
 
   let editorialContent: EditorialContent | null = null;
   if (category?.editorial_content_id) {
@@ -167,7 +170,11 @@ export default async function ResearchEvidenceLearningPage({ searchParams }: { s
         <span className="eyebrow">أكاديمية البحث والدليل</span>
         <h1>{sectionName}</h1>
         <p>{sectionDescription}</p>
-        <div className="public-stat-strip"><span>{total.toLocaleString('ar')} دليلًا تعليميًا منشورًا وقابلًا للفهرسة</span></div>
+        <div className="public-stat-strip">
+          <span>{total.toLocaleString('ar')} دليلًا تعليميًا منشورًا وقابلًا للفهرسة</span>
+          <span>{tracks.length.toLocaleString('ar')} مسارًا علميًا</span>
+          <span>20 خطوة في كل مسار</span>
+        </div>
         <form className="sector-search" action={SECTION_PATH} method="get">
           <label className="sr-only" htmlFor="research-evidence-search">البحث داخل أكاديمية البحث والدليل</label>
           <input id="research-evidence-search" name="q" defaultValue={query} placeholder="ابحث عن تصميم دراسة، تحيز، إحصاء أو مراجعة منهجية" maxLength={100} />
@@ -177,6 +184,7 @@ export default async function ResearchEvidenceLearningPage({ searchParams }: { s
 
       <nav className="sector-quick-nav" aria-label="وصول سريع داخل أكاديمية البحث والدليل">
         <a href="#learning-guide">ابدأ من هنا</a>
+        {!query && safePage === 1 ? <a href="#learning-tracks">المسارات العلمية</a> : null}
         <a href="#section-content">كل الأدلة التعليمية</a>
         <Link href="/evidence-guides/">الأدلة العلمية</Link>
         <Link href="/assessment-lab">مختبر التقييم</Link>
@@ -190,6 +198,22 @@ export default async function ResearchEvidenceLearningPage({ searchParams }: { s
         </div>
         <div className="article-body"><ContentRenderer bodyJson={editorialContent.body_json} bodyText={editorialContent.body_text} recordId={editorialContent.id} /></div>
       </section>}
+
+      {!query && safePage === 1 && tracks.length > 0 ? <section className="section" id="learning-tracks" aria-labelledby="learning-tracks-title">
+        <div className="section-mini-heading">
+          <div><span className="eyebrow">28 مسارًا × 20 خطوة</span><h2 id="learning-tracks-title">اختر الموضوع ثم ابدأ من الأساسيات</h2></div>
+          <span>{tracks.length.toLocaleString('ar')} مسارًا</span>
+        </div>
+        <p>كل مسار ينتقل من الفهم الأساسي إلى قراءة الورقة، التصميم، التحيز، التقييم النقدي، التحليل، تفسير النتائج، يقين الدليل ثم التطبيق العملي. ابدأ بالأساسيات ثم استخدم شريط المسار داخل كل صفحة.</p>
+        <div className="category-public-grid">
+          {tracks.map((track) => <article className="public-category-card" key={track.canonical_url}>
+            <span className="content-type-pill">مسار تعلم</span>
+            <h3><Link href={track.canonical_url}>{trackName(track.title)}</Link></h3>
+            <p>20 خطوة مترابطة من الأساسيات إلى التقييم والتطبيق.</p>
+            <Link href={track.canonical_url}>ابدأ المسار ←</Link>
+          </article>)}
+        </div>
+      </section> : null}
 
       <section className="section related-content-section" id="section-content">
         <div className="section-heading">
