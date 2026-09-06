@@ -1,0 +1,12 @@
+{
+  "disqualifying-positive": {
+    "canonical_slug": "discounting-the-positive",
+    "destination": "/encyclopedia/discounting-the-positive/",
+    "reason": "Same DefinedTerm identity; production database page owns the canonical URL."
+  },
+  "inter-rater-reliability": {
+    "canonical_slug": "interrater-reliability",
+    "destination": "/encyclopedia/interrater-reliability/",
+    "reason": "Orthographic slug variant of the same psychometric reliability concept; production database page owns the canonical URL."
+  }
+}
