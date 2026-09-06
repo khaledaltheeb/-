@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { getMemoryActivity } from '@/lib/capabilities/memory-lab';
-import { renderMemoryWorksheet } from '@/lib/capabilities/memory-svg';
+import { renderMemoryWorksheet } from '@/lib/capabilities/memory-svg-final';
 
 type Params = Promise<{ series: string; activity: string }>;
 

@@ -8,10 +8,12 @@ const runtimePath = path.join(scriptsDir, '.kids-lab-render-contract-runtime.mjs
 let source = fs.readFileSync(sourcePath, 'utf8');
 
 const replacements = [
+  ['lib/capabilities/memory-svg.ts','lib/capabilities/memory-svg-final.ts'],
   ['lib/capabilities/executive-functions-svg.ts','lib/capabilities/executive-functions-svg-final.ts'],
   ['lib/capabilities/visual-perception-svg.ts','lib/capabilities/visual-perception-svg-final.ts'],
   ['lib/capabilities/visual-motor-svg.ts','lib/capabilities/visual-motor-svg-final.ts'],
   ['lib/capabilities/fine-motor-svg.ts','lib/capabilities/fine-motor-svg-final.ts'],
+  ['lib/capabilities/language-reading-svg.ts','lib/capabilities/language-reading-svg-final.ts'],
   ['lib/capabilities/math-logic-svg.ts','lib/capabilities/math-logic-svg-final.ts'],
   ['lib/capabilities/emotional-regulation-svg.ts','lib/capabilities/emotional-regulation-svg-final.ts'],
 ];
@@ -27,6 +29,13 @@ source = source.replace(
 source = source.replace(
   "function yOf(t){for(const n of['y','cy','y1'])",
   "function yOf(t){const tr=t.match(/transform=[\"']translate\\([^,\\s]+[,\\s]+(-?\\d+(?:\\.\\d+)?)/i);if(tr)return+tr[1];for(const n of['y','cy','y1'])"
+);
+
+// The earlier contract only checked for an <svg> envelope. Add a lightweight XML stack validator
+// so malformed generated SVG (for example a stray </rect>) is a hard QA failure before publication.
+source = source.replace(
+  "function inspect(svg,id){const f=[],w=[];",
+  "function xmlBalance(svg){const stack=[];const re=/<\\/?([A-Za-z][\\w:.-]*)\\b[^>]*\\/?>/g;let m;while((m=re.exec(svg))){const raw=m[0],name=m[1];if(raw.startsWith('</')){const top=stack.pop();if(top!==name)return `closing ${name} does not match ${top??'none'}`;}else if(!raw.endsWith('/>'))stack.push(name);}return stack.length?`unclosed ${stack[stack.length-1]}`:null;}function inspect(svg,id){const f=[],w=[];const xb=xmlBalance(svg);if(xb)f.push(`${id}: malformed SVG XML (${xb})`);"
 );
 
 fs.writeFileSync(runtimePath, source);
