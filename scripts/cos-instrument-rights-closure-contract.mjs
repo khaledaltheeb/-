@@ -23,6 +23,7 @@ const auditFiles = [
   'lib/core-outcome-sets/instrument-rights-audit-wave4.ts',
   'lib/core-outcome-sets/instrument-rights-audit-wave5.ts',
   'lib/core-outcome-sets/instrument-rights-audit-wave6.ts',
+  'lib/core-outcome-sets/instrument-rights-audit-closure.ts',
 ];
 const registryPath = 'lib/core-outcome-sets/instrument-crosswalk-registry.ts';
 const detailPath = 'app/core-outcome-sets/[slug]/page.tsx';
@@ -71,12 +72,26 @@ for (const record of knownNotReviewed) {
   );
 }
 
+const closureAudit = read('lib/core-outcome-sets/instrument-rights-audit-closure.ts');
+for (const id of ['cfql-2-autism', 'mcmaster-fad-autism', 'bisq-autism', 'phq-2-autism']) {
+  assert(closureAudit.includes(`'${id}': {`), `${id}: final closure override missing`);
+}
+assert(closureAudit.includes("'cfql-2-autism': {") && closureAudit.includes("rightsStatus: 'rawafid-provenance-verified'"), 'CFQL-2 free-use provenance must remain explicit');
+assert(closureAudit.includes('Free for all to use') && closureAudit.includes('Public Domain'), 'CFQL-2 must preserve free-use versus public-domain distinction');
+assert(closureAudit.includes("'mcmaster-fad-autism': {") && closureAudit.includes("rightsStatus: 'owner-conditions'"), 'McMaster FAD must remain conservative reference-rights');
+assert(closureAudit.includes('no copyright authority') && closureAudit.includes('Copyrighted: No'), 'McMaster FAD conflicting source provenance must remain explicit');
+assert(closureAudit.includes("'bisq-autism': {") && closureAudit.includes('publicly available and free for use'), 'BISQ original free-use provenance missing');
+assert(closureAudit.includes('BISQ-R'), 'BISQ/BISQ-R exact-version boundary must remain explicit');
+assert(closureAudit.includes("'phq-2-autism': {") && closureAudit.includes("internalPath: '/assessment-measures/patient-health-questionnaire-2/'"), 'autism PHQ-2 must point to the canonical Rawafid PHQ-2');
+assert(closureAudit.includes('Copyright: No') && closureAudit.includes('NIH'), 'PHQ-2 NIH rights provenance missing');
+
 const registry = read(registryPath);
 for (const importer of [
   "applyInstrumentRightsAudit } from '@/lib/core-outcome-sets/instrument-rights-audit'",
   "applyInstrumentRightsAuditWave4 } from '@/lib/core-outcome-sets/instrument-rights-audit-wave4'",
   "applyInstrumentRightsAuditWave5 } from '@/lib/core-outcome-sets/instrument-rights-audit-wave5'",
   "applyInstrumentRightsAuditWave6 } from '@/lib/core-outcome-sets/instrument-rights-audit-wave6'",
+  "applyInstrumentRightsAuditClosure } from '@/lib/core-outcome-sets/instrument-rights-audit-closure'",
 ]) {
   assert(registry.includes(importer), `aggregate registry missing audit import: ${importer}`);
 }
@@ -85,6 +100,7 @@ assert(registry.includes('rightsAuditedInstrumentCrosswalkWave3'), 'aggregate re
 assert(registry.includes('rightsAuditedInstrumentCrosswalkWave4'), 'aggregate registry must apply Wave 4');
 assert(registry.includes('rightsAuditedInstrumentCrosswalkWave5'), 'aggregate registry must apply Wave 5');
 assert(registry.includes('rightsAuditedInstrumentCrosswalkWave5.map(applyInstrumentRightsAuditWave6)'), 'aggregate registry must apply Wave 6 after Wave 5');
+assert(registry.includes('rightsAuditedInstrumentCrosswalkWave6.map(applyInstrumentRightsAuditClosure)'), 'aggregate registry must apply final closure audit after Wave 6');
 
 const extractLinkedSlugs = (source) => {
   const slugs = new Set();
@@ -113,12 +129,13 @@ if (detailUsesBase) {
 
 if (detailUsesRegistry) {
   assert(registry.includes('instrumentCrosswalkWave2Seed'), 'COS detail page uses aggregate registry, which must retain Wave 2 mappings');
+  assert(registry.includes('applyInstrumentRightsAuditClosure'), 'COS detail page aggregate registry must include final rights closure');
 }
 
 assert(detail.includes('getInstrumentCrosswalkForCos'), 'COS detail page must resolve linked instrument records');
 
 if (!process.exitCode) {
   console.log(
-    `COS_INSTRUMENT_RIGHTS_CLOSURE_OK seeds=${seedRecords.length} seed_not_reviewed=${knownNotReviewed.length} audited_overrides=${auditOverrideIds.size} unresolved=0 detail_source=${detailUsesRegistry ? 'aggregated-registry' : 'base-complete'}`,
+    `COS_INSTRUMENT_RIGHTS_CLOSURE_OK seeds=${seedRecords.length} seed_not_reviewed=${knownNotReviewed.length} audited_overrides=${auditOverrideIds.size} unresolved=0 final_autism_closures=4 detail_source=${detailUsesRegistry ? 'aggregated-registry' : 'base-complete'}`,
   );
 }
