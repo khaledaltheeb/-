@@ -59,7 +59,7 @@ function usefulWordCount(row) {
 }
 
 function containsAny(text, patterns) {
-  const lower = text.toLocaleLowerCase('ar');
+  const lower = String(text || '').toLocaleLowerCase('ar');
   return patterns.some((pattern) => lower.includes(pattern.toLocaleLowerCase('ar')));
 }
 
@@ -100,9 +100,10 @@ function duplicateTextBlocks(blocks) {
   return duplicates;
 }
 
-function highStakesPage(row, text) {
+function highStakesPage(row, evidence) {
   if (String(row.canonical_url || '').startsWith('/magazine/pediatric-oncology/')) return true;
-  return containsAny(text, [
+  const marker = [row.title || '', row.canonical_url || '', evidence || ''].join(' ');
+  return containsAny(marker, [
     'سرطان', 'ورم', 'انتحار', 'إيذاء النفس', 'جرعة زائدة', 'أفيون', 'opioid',
     'كحول', 'اضطراب استخدام', 'دواء', 'دوائي', 'pharmac', 'ssri', 'رعاية تلطيفية',
   ]);
@@ -147,30 +148,34 @@ function auditRow(row) {
   if (refs.length < 3) warnings.push(`fewer than 3 source records (${refs.length})`);
   if (blocks.length < 20 && words < 1200) warnings.push(`short structured article (${blocks.length} blocks; ${words} words)`);
   if (!row.excerpt?.trim()) warnings.push('missing excerpt');
-  if (highStakesPage(row, text) && !row.medical_disclaimer?.trim()) warnings.push('missing high-stakes health disclaimer');
+  if (highStakesPage(row, evidence) && !row.medical_disclaimer?.trim()) warnings.push('missing high-stakes health disclaimer');
   if (!evidence) warnings.push('missing evidence classification');
   if (['مراجعة بحثية', 'دراسة بحثية'].includes(evidence)) warnings.push(`generic evidence classification: ${evidence}`);
 
-  if (!containsAny(text, ['ما السؤال', 'سؤال البحث', 'ماذا بحثت', 'هدف الدراسة', 'هدفت'])) warnings.push('research question/aim not explicit');
-  if (!containsAny(text, ['المنهج', 'كيف بُنيت', 'كيف بنيت', 'كيف جُمعت', 'كيف جمعت', 'طريقة البحث', 'تصميم الدراسة', 'تصميم التجربة'])) warnings.push('methods/design not explicit');
+  if (!containsAny(text, ['ما السؤال', 'سؤال البحث', 'السؤال البحثي', 'ماذا بحثت', 'ماذا اختبرت', 'ما الذي اختبر', 'هدف الدراسة', 'هدف البحث', 'الغرض', 'هدفت', 'سعى'])) warnings.push('research question/aim not explicit');
+  if (!containsAny(text, ['المنهج', 'المنهجية', 'كيف بُنيت', 'كيف بنيت', 'كيف جُمعت', 'كيف جمعت', 'كيف أُجريت', 'كيف أجريت', 'طريقة البحث', 'تصميم الدراسة', 'تصميم التجربة', 'التصميم'])) warnings.push('methods/design not explicit');
   if (!containsAny(text, ['حدود', 'قيود', 'محدودية', 'limitations'])) warnings.push('limitations not explicit');
   if (!containsAny(text, ['ما الذي لا تثبت', 'ما الذي لا يثبت', 'لا تثبت', 'لا يثبت', 'لا تعني', 'لا يعني', 'لا تسمح', 'لا يمكن استنتاج', 'لا يمكن أن نستنتج'])) warnings.push('anti-overclaim section not explicit');
-  if (!containsAny(text, ['الدلالة العملية', 'التطبيق العملي', 'قائمة تدقيق', 'ماذا يعني ذلك', 'للمؤسسات', 'للمدارس', 'للأسر'])) warnings.push('practical interpretation not explicit');
+  if (!containsAny(text, ['الدلالة', 'التطبيق', 'عملي', 'قائمة تدقيق', 'ماذا يعني ذلك', 'ماذا تعني', 'للمؤسسات', 'للمدارس', 'للأسر', 'القرار', 'توصيات'])) warnings.push('practical interpretation not explicit');
   if (!containsAny(text, ['أسئلة شائعة']) && !blocks.some((b) => b?.type === 'faq')) warnings.push('FAQ absent');
-  if (!containsAny(text, ['المصدر الأصلي', 'المراجع'])) warnings.push('primary-source section not explicit');
+  if (!containsAny(text, ['المصدر الأصلي', 'المقال الأصلي', 'الورقة الأصلية', 'بيانات التوثيق', 'doi', 'pmid', 'المراجع'])) warnings.push('primary-source section not explicit');
 
-  const isMeta = /تلوي|meta/i.test(evidence) || /تحليل تلوي|meta-analysis/i.test(text);
-  const isSystematic = /منهجي|systematic/i.test(evidence) || /مراجعة منهجية|systematic review/i.test(text);
-  const isScoping = /نطاقي|scoping/i.test(evidence) || /مراجعة نطاقية|scoping review/i.test(text);
-  const isTrial = /عشوائي|random/i.test(evidence) || /تجربة عشوائية|randomized|randomised/i.test(text);
-  const isObservational = /أتراب|مقطعي|حالات وشواهد|رصد|cohort|cross-sectional|case-control|observational/i.test(evidence);
+  // Evidence-specific rules must be derived from the page classification, not from
+  // incidental mentions of other study types in background text or references.
+  const isProtocol = /بروتوكول|protocol/i.test(evidence);
+  const isMeta = /تلوي|meta/i.test(evidence);
+  const isNetworkMeta = isMeta && /شبكي|network/i.test(evidence);
+  const isSystematic = /منهجي|systematic/i.test(evidence);
+  const isScoping = /نطاقي|scoping/i.test(evidence);
+  const isTrial = !isProtocol && /عشوائي|random|trial/i.test(evidence);
+  const isObservational = /أتراب|مقطعي|حالات وشواهد|رصد|سجلي|cohort|cross-sectional|case-control|observational|registry/i.test(evidence);
 
-  if ((isSystematic || isMeta || isScoping) && !containsAny(text, ['قاعدة', 'قواعد', 'pubmed', 'medline', 'embase', 'cinahl', 'scopus', 'cochrane', 'بحثت', 'بُحثت'])) warnings.push('review search scope/databases not explicit');
-  if (isMeta && !containsAny(text, ['فاصل ثقة', '95%', 'ci '])) warnings.push('meta-analysis uncertainty/CI not explicit');
-  if (isMeta && !containsAny(text, ['i²', 'i2', 'عدم التجانس', 'التباين بين الدراسات', 'heterogeneity'])) warnings.push('meta-analysis heterogeneity not explicit');
-  if (isMeta && !containsAny(text, ['تحيز', 'risk of bias', 'grade', 'يقين', 'جودة الدليل'])) warnings.push('meta-analysis bias/certainty not explicit');
-  if (isTrial && !containsAny(text, ['مجموعة', 'ضابط', 'الرعاية المعتادة', 'مقارنة', 'control', 'comparator'])) warnings.push('trial comparator not explicit');
-  if (isTrial && !containsAny(text, ['متابعة', 'أسبوع', 'شهر', 'follow-up', 'follow up'])) warnings.push('trial follow-up/time point not explicit');
+  if ((isSystematic || isMeta || isScoping) && !containsAny(text, ['قاعدة', 'قواعد', 'pubmed', 'medline', 'embase', 'cinahl', 'scopus', 'cochrane', 'بحثت', 'بُحثت', 'البحث في', 'مصادر البحث'])) warnings.push('review search scope/databases not explicit');
+  if (isMeta && !containsAny(text, ['فاصل ثقة', 'فاصل مصداقية', '95%', 'ci ', 'cri '])) warnings.push('meta-analysis uncertainty interval not explicit');
+  if (isMeta && !containsAny(text, ['i²', 'i2', 'عدم التجانس', 'التباين بين الدراسات', 'heterogeneity', 'عدم الاتساق', 'inconsistency', 'transitivity', 'الاتساق الشبكي'])) warnings.push(isNetworkMeta ? 'network meta-analysis heterogeneity/inconsistency not explicit' : 'meta-analysis heterogeneity not explicit');
+  if (isMeta && !containsAny(text, ['تحيز', 'risk of bias', 'grade', 'يقين', 'جودة الدليل', 'certainty'])) warnings.push('meta-analysis bias/certainty not explicit');
+  if (isTrial && !containsAny(text, ['مجموعة', 'ضابط', 'الرعاية المعتادة', 'مقارنة', 'مقارن', 'control', 'comparator'])) warnings.push('trial comparator not explicit');
+  if (isTrial && !containsAny(text, ['متابعة', 'أسبوع', 'شهر', 'follow-up', 'follow up', 'نقطة زمنية'])) warnings.push('trial follow-up/time point not explicit');
   if (isObservational && !containsAny(text, ['لا تثبت السببية', 'لا يثبت السببية', 'لا تثبت أن', 'ارتباط', 'association', 'caus'])) warnings.push('observational causality boundary not explicit');
   if (isScoping && containsAny(text, ['الأفضل', 'الأكثر فعالية', 'يتفوق']) && !containsAny(text, ['لا تثبت', 'لا يعني', 'لا تعني', 'لا يمكن'])) warnings.push('scoping review may imply comparative effectiveness');
 
@@ -238,6 +243,7 @@ const md = [
   '## Notes',
   '',
   '- Depth is assessed from both structured block count and useful word count; a long, information-dense block is not treated as thin merely because block count is low.',
+  '- Evidence-specific rules are derived from the explicit evidence classification, not incidental mentions in references or background text.',
   '- This is a structural/provenance safety audit, not a substitute for reading the primary paper.',
   '- A page can score highly and still contain a scientific error; source-level verification remains mandatory.',
   '- A warning is a queue signal, not proof that the page is wrong.',
