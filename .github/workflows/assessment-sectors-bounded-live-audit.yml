@@ -1,0 +1,44 @@
+name: Assessment Sectors Bounded Live Audit
+
+on:
+  push:
+    branches:
+      - assessment-sectors-audit-20260906
+    paths:
+      - 'scripts/assessment-sector-bounded-live-audit.mjs'
+      - '.github/workflows/assessment-sectors-bounded-live-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  assessment-measures:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node scripts/assessment-sector-bounded-live-audit.mjs assessment-measures
+
+  assessment-lab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node scripts/assessment-sector-bounded-live-audit.mjs assessment-lab
+
+  cognitive-lab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node scripts/assessment-sector-bounded-live-audit.mjs cognitive-lab
