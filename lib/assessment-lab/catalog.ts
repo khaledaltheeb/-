@@ -64,6 +64,7 @@ export const assessmentCategories = [...new Set(assessmentMonitors.map((row) => 
 
 const sourceStatusLabels: Record<string, string> = {
   'official-arabic-no-copyright-listed': 'نسخة عربية مدرجة رسميًا، والمصدر الرسمي يسجل Copyright: No — المطابقة العلمية والتشغيلية مطلوبة قبل التفعيل',
+  'official-arabic-who-cc-license': 'نسخة عربية رسمية منشورة من منظمة الصحة العالمية بترخيص CC BY-NC-SA 3.0 IGO — تُراجع مطابقة النص والحساب والنسبة للترخيص قبل التفعيل التفاعلي',
   'who-cc-license-arabic-not-listed': 'ترخيص WHO يسمح بإعادة الاستخدام غير التجاري بشروطه، لكن العربية غير مدرجة حاليًا ضمن النسخ الرسمية المنشورة',
   'source-guided-only': 'مرجعي فقط — يُحال إلى المصدر الرسمي ولا تُعاد صياغة الأداة أو درجتها',
   'permission-and-arabic-version-review': 'مراجعة الإذن والنسخة العربية مطلوبة قبل أي نشر تفاعلي',
