@@ -7,18 +7,22 @@ on:
   pull_request:
     paths:
       - 'scripts/encyclopedia-quality-audit.mjs'
+      - 'scripts/encyclopedia-canonical-consolidation-contract.mjs'
       - '.encyclopedia-quality-standard.md'
       - 'app/encyclopedia/**'
       - 'lib/encyclopedia.ts'
+      - 'next.config.ts'
       - 'supabase/migrations/*encyclopedia*'
       - '.github/workflows/encyclopedia-quality-audit.yml'
   push:
     branches: [main]
     paths:
       - 'scripts/encyclopedia-quality-audit.mjs'
+      - 'scripts/encyclopedia-canonical-consolidation-contract.mjs'
       - '.encyclopedia-quality-standard.md'
       - 'app/encyclopedia/**'
       - 'lib/encyclopedia.ts'
+      - 'next.config.ts'
       - 'supabase/migrations/*encyclopedia*'
       - '.github/workflows/encyclopedia-quality-audit.yml'
 
@@ -44,6 +48,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+
+      - name: Lock known canonical consolidations
+        run: node scripts/encyclopedia-canonical-consolidation-contract.mjs
 
       - name: Audit published encyclopedia records
         run: node scripts/encyclopedia-quality-audit.mjs --strict-critical
