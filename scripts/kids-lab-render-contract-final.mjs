@@ -16,6 +16,19 @@ const replacements = [
   ['lib/capabilities/emotional-regulation-svg.ts','lib/capabilities/emotional-regulation-svg-final.ts'],
 ];
 for (const [from,to] of replacements) source = source.replaceAll(from,to);
+
+// A large share of the visual-perception stimuli use <g transform="translate(...) rotate(...) scale(...)">.
+// Include those group transforms in both content and geometry fingerprints; otherwise two visibly
+// different worksheets can look identical to a tag-only parser that inspects just child paths.
+source = source.replaceAll(
+  '(?:rect|circle|ellipse|line|path|polygon|polyline)',
+  '(?:g|rect|circle|ellipse|line|path|polygon|polyline)'
+);
+source = source.replace(
+  "function yOf(t){for(const n of['y','cy','y1'])",
+  "function yOf(t){const tr=t.match(/transform=[\"']translate\\([^,\\s]+[,\\s]+(-?\\d+(?:\\.\\d+)?)/i);if(tr)return+tr[1];for(const n of['y','cy','y1'])"
+);
+
 fs.writeFileSync(runtimePath, source);
 await import(`${pathToFileURL(runtimePath).href}?run=${Date.now()}`);
 try { fs.unlinkSync(runtimePath); } catch {}
