@@ -1,0 +1,91 @@
+name: Three Labs Mobile Lighthouse Audit
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Audit representative live pages
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/three-labs-lighthouse
+          routes=(
+            "assessment-measures"
+            "assessment-measures/patient-health-questionnaire-9"
+            "assessment-lab"
+            "assessment-lab/mood-daily"
+            "cognitive-lab"
+            "cognitive-lab/choice-reaction"
+          )
+          for route in "${routes[@]}"; do
+            name="$(printf '%s' "$route" | tr '/' '-')"
+            url="https://healthrenewal.org/${route}/"
+            echo "LIGHTHOUSE_START $url"
+            npx --yes lighthouse@13.4.1 "$url" \
+              --output=json \
+              --output-path="/tmp/three-labs-lighthouse/${name}.json" \
+              --only-categories=performance,accessibility,best-practices,seo \
+              --form-factor=mobile \
+              --screenEmulation.mobile=true \
+              --throttling-method=simulate \
+              --chrome-flags='--headless=new --no-sandbox --disable-dev-shm-usage' \
+              --quiet
+          done
+
+          node - <<'NODE'
+          const fs = require('fs');
+          const dir = '/tmp/three-labs-lighthouse';
+          const files = fs.readdirSync(dir).filter((name) => name.endsWith('.json')).sort();
+          const rows = [];
+          let failed = false;
+          for (const file of files) {
+            const report = JSON.parse(fs.readFileSync(`${dir}/${file}`, 'utf8'));
+            const c = report.categories;
+            const a = report.audits;
+            const row = {
+              page: file.replace(/\.json$/, ''),
+              finalUrl: report.finalUrl,
+              performance: Math.round(c.performance.score * 100),
+              accessibility: Math.round(c.accessibility.score * 100),
+              bestPractices: Math.round(c['best-practices'].score * 100),
+              seo: Math.round(c.seo.score * 100),
+              fcpMs: Math.round(a['first-contentful-paint'].numericValue),
+              lcpMs: Math.round(a['largest-contentful-paint'].numericValue),
+              tbtMs: Math.round(a['total-blocking-time'].numericValue),
+              cls: Number(a['cumulative-layout-shift'].numericValue.toFixed(4)),
+            };
+            rows.push(row);
+            if (row.accessibility < 90 || row.bestPractices < 90 || row.seo < 90) failed = true;
+            console.log('THREE_LABS_LIGHTHOUSE_RESULT=' + JSON.stringify(row));
+          }
+          const summary = {
+            pages: rows.length,
+            minimums: {
+              performance: Math.min(...rows.map((row) => row.performance)),
+              accessibility: Math.min(...rows.map((row) => row.accessibility)),
+              bestPractices: Math.min(...rows.map((row) => row.bestPractices)),
+              seo: Math.min(...rows.map((row) => row.seo)),
+            },
+            rows,
+          };
+          console.log('THREE_LABS_LIGHTHOUSE_SUMMARY');
+          console.log(JSON.stringify(summary, null, 2));
+          fs.writeFileSync(`${dir}/summary.json`, JSON.stringify(summary, null, 2));
+          if (failed) process.exit(1);
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: three-labs-lighthouse
+          path: /tmp/three-labs-lighthouse
+          retention-days: 2
