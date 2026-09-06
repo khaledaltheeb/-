@@ -15,6 +15,7 @@ const wrangler = read('wrangler.jsonc');
 const productionBuild = read('scripts/cloudflare-production-build.sh');
 const deployWorkflow = read('.github/workflows/deploy-production.yml');
 const qualityWorkflow = read('.github/workflows/quality.yml');
+const lighthouseWorkflow = read('.github/workflows/measure-production-lighthouse.yml');
 
 const failures = [];
 const requireText = (source, token, message) => {
@@ -82,17 +83,25 @@ requireText(siteFooter, 'required', 'the footer WebMCP search query must remain 
 
 forbidText(imperativeTools, "'use client'", 'the imperative WebMCP bootstrap must stay server-rendered and must not add a hydration bundle');
 requireText(imperativeTools, 'document.modelContext', 'the imperative WebMCP bootstrap must feature-detect the browser model context');
-requireText(imperativeTools, 'context.registerTool(tool)', 'the imperative WebMCP tool must be registered through the current document.modelContext API');
+requireText(imperativeTools, 'var lifecycle = new AbortController()', 'the imperative WebMCP tools must have one explicit registration lifecycle');
+requireText(imperativeTools, 'context.registerTool(tool, { signal: lifecycle.signal })', 'imperative WebMCP tools must register through document.modelContext with lifecycle cleanup');
 requireText(imperativeTools, "name: 'search_rawafid_evidence'", 'the stable imperative WebMCP search tool name must remain registered');
-requireText(imperativeTools, 'inputSchema:', 'the imperative WebMCP tool must expose an explicit JSON Schema');
-requireText(imperativeTools, "required: ['query']", 'the imperative WebMCP schema must require the search query');
-requireText(imperativeTools, 'additionalProperties: false', 'the imperative WebMCP schema must reject unknown properties');
-requireText(imperativeTools, 'readOnlyHint: true', 'the Rawafid search WebMCP tool must remain correctly marked read-only');
+requireText(imperativeTools, "name: 'ask_rawafid_assistant'", 'the task-completing imperative Rawafid assistant tool must remain registered');
+requireText(imperativeTools, 'inputSchema:', 'imperative WebMCP tools must expose explicit JSON Schemas');
+requireText(imperativeTools, "required: ['query']", 'the imperative evidence-search schema must require the search query');
+requireText(imperativeTools, "required: ['question']", 'the imperative assistant schema must require the user question');
+requireText(imperativeTools, 'additionalProperties: false', 'imperative WebMCP schemas must reject unknown properties');
+requireText(imperativeTools, 'readOnlyHint: true', 'Rawafid WebMCP read tools must remain correctly marked read-only');
 requireText(imperativeTools, 'untrustedContentHint: true', 'search result text returned to agents must remain marked as untrusted content');
-requireText(imperativeTools, "fetch('/api/search/v3?q='", 'the imperative WebMCP tool must execute against Rawafid\'s existing search API');
+requireText(imperativeTools, 'IMMEDIATE_RISK_PATTERN', 'the imperative assistant must preserve immediate-risk handling before informational search');
+requireText(imperativeTools, 'externalSignal.removeEventListener', 'imperative tool cancellation listeners must be cleaned up after execution');
+requireText(imperativeTools, "fetch('/api/search/v3?q='", 'imperative WebMCP tools must execute against Rawafid\'s existing search API');
 requireText(imperativeTools, "id=\"rawafid-webmcp-imperative\"", 'the imperative WebMCP bootstrap must retain a stable rendered script identifier');
 
 requireText(nextConfig, 'tools=(self)', 'the Permissions-Policy must explicitly allow same-origin WebMCP tools');
+requireText(nextConfig, "{ key: 'Origin-Agent-Cluster', value: '?1' }", 'WebMCP production documents must explicitly request origin isolation');
+requireText(nextConfig, 'WEBMCP_ORIGIN_TRIAL_TOKEN', 'the WebMCP origin-trial activation hook must remain available without hard-coding a token');
+requireText(nextConfig, "{ key: 'Origin-Trial', value: webMcpOriginTrialToken }", 'a configured WebMCP origin-trial token must be emitted as an Origin-Trial response header');
 requireText(wrangler, '"NEXT_PUBLIC_ENABLE_GTM": "false"', 'production must keep the CPU-heavy GTM container disabled');
 requireText(wrangler, '"NEXT_PUBLIC_ENABLE_DIRECT_GA": "true"', 'production must keep direct GA4 enabled');
 requireText(productionBuild, "NEXT_PUBLIC_ENABLE_GTM='false'", 'the direct production build must keep GTM disabled');
@@ -103,6 +112,7 @@ requireText(deployWorkflow, 'librsvg2-bin', 'production deployment must install 
 requireText(qualityWorkflow, 'for tool in searchRawafid searchRawafidHeader searchRawafidMobile searchRawafidFooter; do', 'fast quality runtime smoke must assert all server-rendered homepage WebMCP search tools before merge');
 requireText(qualityWorkflow, 'grep -q \'tooldescription="Search Rawafid\' /tmp/home.html', 'fast quality runtime smoke must assert a rendered WebMCP tool description');
 requireText(qualityWorkflow, 'grep -q \'toolparamdescription="The user\' /tmp/home.html', 'fast quality runtime smoke must assert rendered WebMCP parameter schema metadata');
+requireText(lighthouseWorkflow, "'ask_rawafid_assistant'", 'production Agentic Lighthouse must require the imperative Rawafid assistant tool');
 requireText(deployWorkflow, 'WEBMCP_LIVE_DIAGNOSTIC', 'production live verification must retain a non-blocking WebMCP diagnostic');
 forbidText(deployWorkflow, 'for attempt in $(seq 1 36); do', 'production deployment must not spend up to six minutes waiting for homepage ISR propagation');
 
@@ -111,4 +121,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log('PageSpeed performance contract passed: the homepage shell and assistant launcher stay server-only, the full assistant is browser-native lazy-loaded, the text LCP uses a zero-network system font, GA4 remains deferred but interaction-aware, heavy GTM is gated, WebMCP coverage remains intact, and production verification stays fast.');
+console.log('PageSpeed performance contract passed: the homepage shell and assistant launcher stay server-only, the full assistant is browser-native lazy-loaded, the text LCP uses a zero-network system font, GA4 remains deferred but interaction-aware, heavy GTM is gated, WebMCP declarative coverage remains intact, imperative search and assistant tools are lifecycle-safe, origin isolation is explicit, optional Origin Trial activation is wired, and production verification stays fast.');
