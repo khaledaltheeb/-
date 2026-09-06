@@ -1,0 +1,37 @@
+name: Homepage Response Header Probe
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/homepage-response-header-probe.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Inspect canonical homepage response
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://healthrenewal.org/'
+          curl -fsS --compressed --max-time 30 -D /tmp/headers.txt -o /tmp/home.html "$url"
+          tr -d '\r' </tmp/headers.txt >/tmp/headers-normalized.txt
+          echo '=== RESPONSE HEADERS ==='
+          grep -Ei '^(HTTP/|cache-control:|cf-cache-status:|age:|etag:|vary:|server:|content-type:|content-encoding:|content-length:)' /tmp/headers-normalized.txt || true
+          echo '=== EDGE INJECTION ==='
+          if grep -qi 'static.cloudflareinsights.com/beacon.min.js' /tmp/home.html; then
+            echo 'CLOUDFLARE_BEACON_INJECTED=true'
+          else
+            echo 'CLOUDFLARE_BEACON_INJECTED=false'
+          fi
+          if grep -qi 'cdn-cgi/speculation' /tmp/home.html; then
+            echo 'CLOUDFLARE_SPECULATION_INJECTED=true'
+          else
+            echo 'CLOUDFLARE_SPECULATION_INJECTED=false'
+          fi
+          printf 'HTML_BYTES=%s\n' "$(wc -c </tmp/home.html | tr -d ' ')"
