@@ -71,8 +71,9 @@ if (/rawafid-app\.svg\?v=|pwa-icon-(?:180|192)\?v=/.test(layout)) {
 }
 
 requireAll(robots, [
-  "SITE_HOSTNAME.endsWith('.workers.dev')",
   "sitemap: `${SITE_URL}/sitemap.xml`",
+  "allow: '/'",
+  "publicRule('*')",
   "'Googlebot'",
   "'Google-Extended'",
   "'Bingbot'",
@@ -87,10 +88,10 @@ requireAll(robots, [
   "'Bytespider'",
   "'CCBot'",
   "'meta-externalagent'",
-  "'/search'",
-  "'/ai-search'",
-  "'/api/private/'",
 ], 'robots discovery');
+if (/\bdisallow\s*:/i.test(robots)) {
+  throw new Error('robots discovery: no Disallow rule is permitted; crawler access must remain unrestricted');
+}
 requireAll(sitemapXml, ['INDEXING_ENABLED', 'SITE_URL'], 'sitemap indexability gate');
 
 requireAll(sitemapIndex, [
