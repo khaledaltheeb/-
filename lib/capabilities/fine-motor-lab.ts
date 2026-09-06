@@ -17,7 +17,7 @@ export const fineMotorActivities:FineMotorActivity[]=fineMotorSeriesPlans.flatMa
 slug:`level-${level}-${x.kind}`,seriesSlug:series.slug,seriesNumber:series.number,seriesTitle:series.title,taskType:series.taskType,level,kind:x.kind,label:x.label,title:`${series.title} - المستوى ${level} - ${x.label}`,age:series.ages,duration:series.duration,purpose:series.purpose,
 instruction:x.kind==='test'?'نفذ المهمة مرة واحدة باستقلال قدر الإمكان، دون نموذج إضافي أو تصحيح أثناء الأداء.':x.kind==='training-a'?'ابدأ ببطء واتبع نقطة البداية والاتجاه المحددين، وركز على الدقة قبل السرعة.':'كرر المهمة مع تقليل التلميحات وحاول الحفاظ على حركة هادئة ومستمرة.',
 progression:series.progression[level-1],observation:series.observation,mastery:'أداء مستقر ودقيق نسبيًا مع تلميحات قليلة وبلا تعويضات واضحة؛ يفضّل تأكيده بمحاولة أخرى قبل الانتقال.',seed:series.number*100+level*10+idx
-})))));
+}))));
 export const fineMotorActivityCount=fineMotorActivities.length;
 export const fineMotorTestCount=fineMotorActivities.filter((a)=>a.kind==='test').length;
 export const getFineMotorSeries=(slug:string)=>fineMotorSeriesPlans.find((s)=>s.slug===slug);
