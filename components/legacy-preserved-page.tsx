@@ -40,9 +40,30 @@ export default function LegacyPreservedPageView({ page, route }: Props) {
     isPartOf: { '@id': `${SITE_URL}/#website` },
     publisher: { '@id': `${SITE_URL}/#organization` },
   } : null;
+  const researchLearningSchema = current && canonical.startsWith('/sections/research-evidence-learning/') ? {
+    '@context': 'https://schema.org',
+    '@type': 'LearningResource',
+    '@id': `${canonicalUrl}#learning-resource`,
+    url: canonicalUrl,
+    name: title,
+    description: current.excerpt || page.meta_description || undefined,
+    inLanguage: 'ar',
+    isAccessibleForFree: true,
+    learningResourceType: 'Guide',
+    educationalUse: ['instruction', 'self study', 'professional development'],
+    teaches: title,
+    isPartOf: {
+      '@type': 'CollectionPage',
+      '@id': `${SITE_URL}/sections/research-evidence-learning/#collection`,
+      url: `${SITE_URL}/sections/research-evidence-learning/`,
+      name: 'البحث والأدلة والتعلم',
+    },
+    publisher: { '@id': `${SITE_URL}/#organization` },
+  } : null;
 
   return <><SiteHeader /><main className="article-shell">
     {sectorCollectionSchema ? <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(sectorCollectionSchema).replace(/</g, '\u003c') }} /> : null}
+    {researchLearningSchema ? <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(researchLearningSchema).replace(/</g, '\u003c') }} /> : null}
     <nav className="breadcrumbs" aria-label="مسار الصفحة">
       <Link href="/">الرئيسية</Link><span>/</span><span>{current ? 'محتوى روافد المراجع' : familyLabel(page.source_family)}</span><span>/</span><span aria-current="page">{title}</span>
     </nav>
