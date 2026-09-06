@@ -1,0 +1,88 @@
+name: Homepage CSS Inventory
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/homepage-css-inventory.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inventory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Report root CSS import sizes and homepage selector overlap
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const path = require('node:path');
+
+          const entry = fs.readFileSync('app/rawafid-theme.css', 'utf8');
+          const imports = [...entry.matchAll(/@import\s+['"]([^'"]+)['"]/g)].map((m) => m[1]);
+          const homepageFiles = [
+            'app/page.tsx',
+            'components/site-header.tsx',
+            'components/site-footer.tsx',
+            'components/rawafid-brand.tsx',
+            'components/static-link.tsx',
+            'components/platform-icon.tsx',
+            'components/rawafid-assistant-loader.tsx',
+          ].filter(fs.existsSync);
+          const homepageText = homepageFiles.map((file) => fs.readFileSync(file, 'utf8')).join('\n');
+          const sourceFiles = [];
+          for (const root of ['app', 'components']) {
+            const walk = (dir) => {
+              for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+                const full = path.join(dir, entry.name);
+                if (entry.isDirectory()) walk(full);
+                else if (/\.(?:tsx?|jsx?)$/.test(entry.name)) sourceFiles.push(full);
+              }
+            };
+            walk(root);
+          }
+          const allSource = sourceFiles.map((file) => fs.readFileSync(file, 'utf8')).join('\n');
+
+          const rows = imports.map((relative) => {
+            const file = path.join('app', relative.replace(/^\.\//, ''));
+            if (!fs.existsSync(file)) return { file, missing: true };
+            const css = fs.readFileSync(file, 'utf8');
+            const classes = [...new Set([...css.matchAll(/\.([A-Za-z_][A-Za-z0-9_-]*)/g)].map((m) => m[1))];
+            const homepageHits = classes.filter((name) => homepageText.includes(name)).length;
+            const repoHits = classes.filter((name) => allSource.includes(name)).length;
+            return {
+              file,
+              bytes: Buffer.byteLength(css),
+              classes: classes.length,
+              homepageHits,
+              repoHits,
+              homepageRatio: classes.length ? homepageHits / classes.length : 0,
+              repoRatio: classes.length ? repoHits / classes.length : 0,
+            };
+          });
+
+          rows.sort((a, b) => (b.bytes || 0) - (a.bytes || 0));
+          console.log('ROOT_CSS_SOURCE_TOTAL_BYTES=' + rows.reduce((sum, row) => sum + (row.bytes || 0), 0));
+          console.log('FILE\tBYTES\tCLASSES\tHOME_HITS\tHOME_RATIO\tREPO_HITS\tREPO_RATIO');
+          for (const row of rows) {
+            if (row.missing) {
+              console.log(`${row.file}\tMISSING`);
+              continue;
+            }
+            console.log([
+              row.file,
+              row.bytes,
+              row.classes,
+              row.homepageHits,
+              row.homepageRatio.toFixed(3),
+              row.repoHits,
+              row.repoRatio.toFixed(3),
+            ].join('\t'));
+          }
+          NODE
