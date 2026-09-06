@@ -22,7 +22,6 @@ const auditedClosureOverrides: Record<string, Partial<InstrumentCrosswalkRecord>
   'mcmaster-fad-autism': {
     rawafidStatus: 'reference-rights',
     rawafidStatusLabel: 'مرجعي — مصادر FAD العامة لا تمنح روافد أساسًا كافيًا لإعادة توزيع البنود',
-    internalPath: '/assessment-measures/rights-review/#mcmaster-family-assessment-device',
     rightsStatus: 'owner-conditions',
     rightsNote: 'المصادر الموثوقة ليست متطابقة: NCTSN يسجل FAD بأنه Free وCopyrighted: No، بينما University of Wisconsin–Madison تنص صراحةً أنها لا تملك سلطة حقوقية على المقياس ولا تستطيع منح الإذن وتطلب الرجوع إلى مؤلفي الاستبيان. لذلك تتخذ روافد المسار المحافظ: نشر وصف ومرجع فقط، وعدم إعادة نشر البنود أو scorer كامل حتى يثبت إذن مباشر أو مصدر مالك حاسم.',
     arabicEvidence: 'not-audited',
