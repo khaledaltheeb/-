@@ -11,6 +11,7 @@ on:
       - 'lib/cognitive-lab/**'
       - 'scripts/cognitive-lab-contract.mjs'
       - 'scripts/cognitive-lab-extension-audit-contract.mjs'
+      - 'scripts/cognitive-lab-methodology-contract.mjs'
       - '.github/workflows/cognitive-lab-100-validate.yml'
       - '.github/open-next-fast-ci.config.ts'
 
@@ -43,6 +44,8 @@ jobs:
         run: npm run cognitive-lab:validate
       - name: Audit extension semantics and balance
         run: node scripts/cognitive-lab-extension-audit-contract.mjs
+      - name: Validate methodology evidence and interpretation boundaries
+        run: node scripts/cognitive-lab-methodology-contract.mjs
       - name: Build Cloudflare Worker with fast OpenNext config
         run: npx opennextjs-cloudflare build --openNextConfigPath .github/open-next-fast-ci.config.ts
       - name: Validate Wrangler package
