@@ -1,6 +1,7 @@
 import type { AssessmentMeasure } from '@/lib/assessment-measures';
 import {
   getOperationalMaterial as getBaseOperationalMaterial,
+  operationalMaterials as baseOperationalMaterials,
   type AssessmentOperationalMaterial,
   type OfficialDownload,
   type OperationalFieldType,
@@ -22,6 +23,8 @@ import { assessmentOperationalFullFormsWave10 } from '@/lib/assessment-measure-o
 import { assessmentOperationalFullFormsWave11 } from '@/lib/assessment-measure-operational-full-forms-wave11';
 import { assessmentOperationalFullFormsWave12 } from '@/lib/assessment-measure-operational-full-forms-wave12';
 import { assessmentOperationalFullFormsWave13 } from '@/lib/assessment-measure-operational-full-forms-wave13';
+import { assessmentOperationalFullFormsWave14 } from '@/lib/assessment-measure-operational-full-forms-wave14';
+import { assessmentOperationalFullFormsWave15 } from '@/lib/assessment-measure-operational-full-forms-wave15';
 
 export type {
   AssessmentOperationalMaterial,
@@ -33,8 +36,11 @@ export type {
   OperationalSection,
 };
 
-// Rights-verified explicit materials always override the universal recording-sheet fallback.
+// Every explicitly authored material is authoritative over the universal documentation fallback.
+// The base registry contains the original rights-reviewed operational set; later waves extend or
+// intentionally harden those records. Later spreads are authoritative when the same slug appears again.
 export const explicitOperationalMaterials: Record<string, AssessmentOperationalMaterial> = {
+  ...baseOperationalMaterials,
   ...assessmentOperationalFullFormsWave1,
   ...assessmentOperationalFullFormsWave2,
   ...assessmentOperationalFullFormsWave3,
@@ -48,6 +54,8 @@ export const explicitOperationalMaterials: Record<string, AssessmentOperationalM
   ...assessmentOperationalFullFormsWave11,
   ...assessmentOperationalFullFormsWave12,
   ...assessmentOperationalFullFormsWave13,
+  ...assessmentOperationalFullFormsWave14,
+  ...assessmentOperationalFullFormsWave15,
 };
 
 export function hasExplicitOperationalMaterial(slug: string): boolean {
