@@ -17,6 +17,7 @@ on:
       - 'app/sitemaps/static.xml/route.ts'
       - 'scripts/assessment-measures-contract.mjs'
       - 'scripts/assessment-measures-operational-contract.mjs'
+      - 'scripts/assessment-measures-explicit-registry-contract.mjs'
       - 'scripts/assessment-measures-operational-wave3-contract.mjs'
       - 'scripts/assessment-measures-operational-wave4-contract.mjs'
       - 'scripts/assessment-measures-operational-wave5-contract.mjs'
@@ -60,6 +61,8 @@ jobs:
         run: node scripts/assessment-measures-contract.mjs
       - name: Validate operational assessment library
         run: node scripts/assessment-measures-operational-contract.mjs
+      - name: Validate base explicit operational registry
+        run: node scripts/assessment-measures-explicit-registry-contract.mjs
       - name: Validate operational assessment Wave 3
         run: node scripts/assessment-measures-operational-wave3-contract.mjs
       - name: Validate operational assessment Wave 4
