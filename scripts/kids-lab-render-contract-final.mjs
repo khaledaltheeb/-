@@ -36,6 +36,18 @@ source = source.replace(
   "for(const x of rows.filter(x=>x.number===19)){const ys=[...x.svg.matchAll(/<rect x=\"(?:68|423)\" y=\"([0-9.]+)\" width=\"315\" height=\"92\"/g)].map(m=>+m[1]);const hint=x.svg.match(/<rect x=\"68\" y=\"([0-9.]+)\" width=\"670\" height=\"80\"/);if(ys.length&&hint){const cardBottom=Math.max(...ys)+92,hintY=+hint[1];if(cardBottom+8>hintY)failures.push(`Series 19 ${x.activity}: cards overlap reflection box (${cardBottom} vs ${hintY})`);if(hintY+80>1005)failures.push(`Series 19 ${x.activity}: reflection box intrudes into footer`);}}if(rows.length!==1000)"
 );
 
+// These 23 pairs were visually reviewed after the deep QA pass. They deliberately reuse the same
+// response scaffold while changing the actual stimuli/content. Keep the baseline explicit: any new
+// shared-geometry pair outside this set is a hard failure rather than a warning that can be ignored.
+source = source.replace(
+  "for(const s of [...series.values()].sort((a,b)=>a.number-b.number)){",
+  "const expectedSharedGeometry=new Set(['14:1:training-a','14:2:training-a','14:3:training-a','14:4:training-a','14:5:training-a','19:1:training-a','19:2:training-a','19:3:training-a','19:4:training-a','19:5:training-a','21:1:training-a','21:2:training-a','21:3:training-a','21:4:training-a','21:5:training-a','22:1:training-a','22:2:training-a','22:3:training-a','22:4:training-a','22:5:training-a','24:1:training-a','57:4:training-b','57:5:training-b']);for(const s of [...series.values()].sort((a,b)=>a.number-b.number)){"
+);
+source = source.replace(
+  "if(ge){geom++;warnings.push(`Series ${s.number} level ${l}: shared geometry with ${ge.kind}`);const dir2=path.join(SUSPECTS,`series-${String(s.number).padStart(2,'0')}-level-${l}`);",
+  "if(ge){const geometryKey=`${s.number}:${l}:${ge.kind}`;if(!expectedSharedGeometry.has(geometryKey)){geom++;failures.push(`Series ${s.number} level ${l}: unexpected shared geometry with ${ge.kind}`);}const dir2=path.join(SUSPECTS,`series-${String(s.number).padStart(2,'0')}-level-${l}`);"
+);
+
 fs.writeFileSync(runtimePath, source);
 await import(`${pathToFileURL(runtimePath).href}?run=${Date.now()}`);
 try { fs.unlinkSync(runtimePath); } catch {}
