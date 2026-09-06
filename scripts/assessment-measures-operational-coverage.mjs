@@ -2,39 +2,47 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const root = process.cwd();
+const libDir = path.join(root, 'lib');
 const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
 const extractAllSlugs = (text) => [...text.matchAll(/\bslug:\s*'([^']+)'/g)].map((match) => match[1]);
 const extractMeasureObjectSlugs = (text) => [...text.matchAll(/\{\s*slug:\s*'([^']+)',\s*nameAr:/g)].map((match) => match[1]);
 const unique = (values) => [...new Set(values)];
+const numericWaveSort = (prefix) => (a, b) => {
+  const getWave = (file) => Number(file.match(new RegExp(`${prefix}(\\d+)\\.ts$`))?.[1] ?? 0);
+  return getWave(a) - getWave(b);
+};
 
-const measureFiles = [
-  'lib/assessment-measures.ts',
-  ...Array.from({ length: 10 }, (_, index) => `lib/assessment-measures-wave${index + 2}.ts`),
-];
+const libFiles = fs.readdirSync(libDir);
+const measureWaveFiles = libFiles
+  .filter((file) => /^assessment-measures-wave\d+\.ts$/.test(file))
+  .sort(numericWaveSort('assessment-measures-wave'))
+  .map((file) => `lib/${file}`);
+const operationalWaveFiles = libFiles
+  .filter((file) => /^assessment-measure-operational-full-forms-wave\d+\.ts$/.test(file))
+  .sort(numericWaveSort('assessment-measure-operational-full-forms-wave'))
+  .map((file) => `lib/${file}`);
 
-const operationalFiles = [
-  'lib/assessment-measure-operational.ts',
-  'lib/assessment-measure-operational-full-forms-wave1.ts',
-  'lib/assessment-measure-operational-full-forms-wave2.ts',
-  'lib/assessment-measure-operational-full-forms-wave3.ts',
-  'lib/assessment-measure-operational-full-forms-wave4.ts',
-  'lib/assessment-measure-operational-full-forms-wave5.ts',
-  'lib/assessment-measure-operational-full-forms-wave6.ts',
-  'lib/assessment-measure-operational-full-forms-wave7.ts',
-];
+const measureFiles = ['lib/assessment-measures.ts', ...measureWaveFiles];
+const operationalFiles = ['lib/assessment-measure-operational.ts', ...operationalWaveFiles];
+const rightsReviewPath = 'lib/assessment-measures-rights-review.ts';
 
-for (const file of [...measureFiles, ...operationalFiles, 'lib/assessment-measures-rights-review.ts']) {
+for (const file of [...measureFiles, ...operationalFiles, rightsReviewPath]) {
   if (!fs.existsSync(path.join(root, file))) {
     console.error(`ASSESSMENT_OPERATIONAL_COVERAGE_FAIL: required audit input missing: ${file}`);
     process.exit(1);
   }
 }
 
+if (!measureWaveFiles.length || !operationalWaveFiles.length) {
+  console.error('ASSESSMENT_OPERATIONAL_COVERAGE_FAIL: wave discovery returned no measure or operational wave files.');
+  process.exit(1);
+}
+
 // Measure files also contain category/related slugs. Count only AssessmentMeasure object starts,
 // identified by the canonical `slug` followed by `nameAr` fields.
 const allMeasures = unique(measureFiles.flatMap((file) => extractMeasureObjectSlugs(read(file)))).sort();
 const explicitOperational = unique(operationalFiles.flatMap((file) => extractAllSlugs(read(file)))).sort();
-const rightsRestricted = unique(extractAllSlugs(read('lib/assessment-measures-rights-review.ts'))).sort();
+const rightsRestricted = unique(extractAllSlugs(read(rightsReviewPath))).sort();
 
 const allSet = new Set(allMeasures);
 const explicitSet = new Set(explicitOperational);
@@ -48,6 +56,12 @@ const orphanExplicit = explicitOperational.filter((slug) => !allSet.has(slug));
 const rightsReferencesOutsidePublicMeasureCatalog = rightsRestricted.filter((slug) => !allSet.has(slug));
 
 const report = {
+  discoveredMeasureFiles: measureFiles.length,
+  discoveredMeasureWaves: measureWaveFiles.length,
+  discoveredOperationalFiles: operationalFiles.length,
+  discoveredOperationalWaves: operationalWaveFiles.length,
+  latestMeasureWave: measureWaveFiles.at(-1) ?? null,
+  latestOperationalWave: operationalWaveFiles.at(-1) ?? null,
   totalCatalogMeasures: allMeasures.length,
   explicitOperationalMeasures: explicitInCatalog.length,
   rightsRestrictedReferenceOnly: rightsRestricted.length,
@@ -72,6 +86,13 @@ if (explicitRestrictedCollision.length) {
   process.exitCode = 1;
 }
 
+if (orphanExplicit.length) {
+  console.error(`ASSESSMENT_OPERATIONAL_COVERAGE_FAIL: explicit operational materials have no catalog measure: ${orphanExplicit.join(', ')}`);
+  process.exitCode = 1;
+}
+
 if (!process.exitCode) {
-  console.log('ASSESSMENT_OPERATIONAL_COVERAGE_PASS: real measure objects counted; no explicit-form/rights-restricted collision. The unresolved array is the deterministic next-work queue.');
+  console.log(
+    `ASSESSMENT_OPERATIONAL_COVERAGE_PASS: measures=${allMeasures.length} explicit=${explicitInCatalog.length} restricted=${rightsRestricted.length} unresolved=${unresolved.length} measure_waves=${measureWaveFiles.length} operational_waves=${operationalWaveFiles.length}; no explicit-form/rights-restricted collision and no orphan explicit material.`,
+  );
 }
