@@ -3,15 +3,49 @@ const routes = [
   '/assessment-lab/',
   '/assessment-lab/avoidance-cycle/',
   '/assessment-lab/loneliness/',
-  '/assessment-lab/mood-daily/',
   '/cognitive-lab/',
   '/cognitive-lab/prospective-memory-cues/',
-  '/cognitive-lab/simple-reaction/',
   '/assessment-measures/',
   '/assessment-measures/patient-health-questionnaire-9/',
+  '/assessment-measures/framingham-cvd-10-year-risk/',
+  '/assessment-measures/framingham-cvd-10-year-risk/print/',
+  '/assessment-measures/atlas-cdi-score/',
+  '/assessment-measures/hamilton-depression-rating-scale-24/',
+  '/assessment-measures/apache-ii/',
+  '/assessment-measures/apache-ii/print/',
 ];
 
+const explicitOperationalRoutes = new Set([
+  '/assessment-measures/patient-health-questionnaire-9/',
+  '/assessment-measures/framingham-cvd-10-year-risk/',
+  '/assessment-measures/atlas-cdi-score/',
+  '/assessment-measures/hamilton-depression-rating-scale-24/',
+]);
+const explicitPrintRoutes = new Set([
+  '/assessment-measures/framingham-cvd-10-year-risk/print/',
+]);
+const fallbackRoutes = new Set([
+  '/assessment-measures/apache-ii/',
+  '/assessment-measures/apache-ii/print/',
+]);
+
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+function semanticFailures(route, body) {
+  const failures = [];
+  if (explicitOperationalRoutes.has(route)) {
+    if (!body.includes('فتح المادة التشغيلية')) failures.push('explicit operational CTA missing');
+    if (body.includes('ورقة توثيق عامة — ليست نموذج المقياس')) failures.push('explicit route incorrectly rendered as generic fallback');
+  }
+  if (explicitPrintRoutes.has(route)) {
+    if (body.includes('ورقة توثيق عامة — ليست نموذج المقياس')) failures.push('explicit print route incorrectly rendered as generic fallback');
+  }
+  if (fallbackRoutes.has(route)) {
+    if (!body.includes('ورقة توثيق عامة — ليست نموذج المقياس')) failures.push('fallback disclosure missing');
+    if (route.endsWith('/print/') && !body.includes('لا تتضمن بنود المقياس الأصلي')) failures.push('fallback print safety disclosure missing');
+  }
+  return failures;
+}
 
 async function probe(route, attempt) {
   const controller = new AbortController();
@@ -22,16 +56,19 @@ async function probe(route, attempt) {
       redirect: 'follow',
       signal: controller.signal,
       headers: {
-        'User-Agent': 'Rawafid-Isolated-503-Diagnostic/2.0',
+        'User-Agent': 'Rawafid-Isolated-Assessment-Production-Diagnostic/3.0',
         'Cache-Control': 'no-cache',
       },
     });
     const body = await response.text();
+    const semantic = response.ok ? semanticFailures(route, body) : [];
     const row = {
       route,
       attempt,
       status: response.status,
-      ok: response.ok,
+      ok: response.ok && semantic.length === 0,
+      httpOk: response.ok,
+      semantic,
       elapsedMs: Date.now() - started,
       bytes: Buffer.byteLength(body),
       finalUrl: response.url,
@@ -52,6 +89,8 @@ async function probe(route, attempt) {
       attempt,
       status: 0,
       ok: false,
+      httpOk: false,
+      semantic: [],
       elapsedMs: Date.now() - started,
       error: error instanceof Error ? error.message : String(error),
     };
