@@ -9,6 +9,7 @@ const REDIRECTED_LEGACY_SLUGS = ['fragile-x-syndrome-education'] as const;
 
 type RawItem = Record<string, unknown>;
 type SitemapItem = { slug: string; canonicalUrl: string; updatedAt: string | null };
+type IndexabilityRow = { slug: string; canonical_url: string | null };
 
 function normalizeItem(row: RawItem): SitemapItem | null {
   const slug = typeof row.slug === 'string' ? row.slug.trim().toLowerCase() : '';
@@ -35,10 +36,40 @@ export async function GET(request: Request) {
   const supabase = await createClient();
   const now = new Date().toISOString();
   const releaseRows = await getPsychEncyclopediaReleaseIndex();
-  const releaseItems = releaseRows.flatMap((row) => {
+  const normalizedReleaseItems = releaseRows.flatMap((row) => {
     const item = normalizeItem(row as unknown as RawItem);
     return item ? [item] : [];
   });
+  const normalizedReleaseSlugs = normalizedReleaseItems.map((item) => item.slug);
+
+  // The release index is an editorial allow-list, not an indexability authority.
+  // Reconfirm every release entry against the live published/indexable inventory and
+  // the encyclopedia canonical namespace before advertising it in a public sitemap.
+  const indexableReleaseSlugs = new Set<string>();
+  for (let start = 0; start < normalizedReleaseSlugs.length; start += DB_BATCH_SIZE) {
+    const slugBatch = normalizedReleaseSlugs.slice(start, start + DB_BATCH_SIZE);
+    if (slugBatch.length === 0) continue;
+    const { data, error } = await supabase
+      .from('content')
+      .select('slug,canonical_url')
+      .in('slug', slugBatch)
+      .eq('status', 'published')
+      .eq('robots_index', true)
+      .like('canonical_url', '/encyclopedia/%')
+      .lte('published_at', now);
+
+    if (error) {
+      throw new Error(`encyclopedia release indexability query failed at rows ${start}-${start + slugBatch.length - 1}: ${error.message}`);
+    }
+
+    for (const row of (data ?? []) as IndexabilityRow[]) {
+      const slug = typeof row.slug === 'string' ? row.slug.trim().toLowerCase() : '';
+      const canonicalUrl = typeof row.canonical_url === 'string' ? row.canonical_url.trim() : '';
+      if (slug && canonicalUrl === `/encyclopedia/${slug}/`) indexableReleaseSlugs.add(slug);
+    }
+  }
+
+  const releaseItems = normalizedReleaseItems.filter((item) => indexableReleaseSlugs.has(item.slug));
   const releaseSlugs = releaseItems.map((item) => item.slug);
   const releaseSlots = page === 0 ? releaseItems.length : 0;
   const databaseCapacity = Math.max(0, PAGE_SIZE - releaseSlots);
