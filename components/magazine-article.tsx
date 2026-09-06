@@ -82,7 +82,7 @@ export default function MagazineArticle({ record, related }: { record: MagazineR
             </header>
 
             <div className={styles.methodNote}><strong>طريقة القراءة:</strong> افصل بين نتيجة الدراسة ودلالتها العملية، واقرأ حدود الدليل قبل تعميم النتيجة. هذه الصفحة تحليل تثقيفي وليست توصية علاجية فردية.</div>
-            <div className={styles.articleBody}><ContentRenderer bodyJson={record.body_json} bodyText={record.body_text} recordId={record.id} /></div>
+            <div className={styles.articleBody}><ContentRenderer bodyJson={record.body_json} recordId={record.id} /></div>
 
             {record.medical_disclaimer && <aside className={styles.disclaimer}><strong>تنبيه صحي ومنهجي</strong><p>{record.medical_disclaimer}</p><Link href="/disclaimer">إخلاء المسؤولية الكامل</Link></aside>}
 
