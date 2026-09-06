@@ -4,7 +4,7 @@ on:
   push:
     branches: ['ops/assessment-measures-live-smoke-20260906']
     paths:
-      - 'scripts/assessment-measures-live-smoke.mjs'
+      - '.github/scripts/assessment-measures-live-smoke.mjs'
       - '.github/workflows/assessment-measures-live-smoke.yml'
   workflow_run:
     workflows: ['Deploy Production Fast']
@@ -29,4 +29,4 @@ jobs:
         with:
           node-version: 24
       - name: Probe Assessment Measures production sequentially
-        run: node scripts/assessment-measures-live-smoke.mjs
+        run: node .github/scripts/assessment-measures-live-smoke.mjs
