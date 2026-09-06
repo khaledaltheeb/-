@@ -180,8 +180,10 @@ function auditRow(row) {
   const uncertaintyUnavailable = explicitlyUnavailable(text, /(?:95\s*%|فاصل\s*(?:الثقة|المصداقية)|confidence\s+interval|credible\s+interval|uncertainty|\bci\b|\bcri\b)/i);
   const heterogeneityUnavailable = explicitlyUnavailable(text, /(?:i\s*²|\bi2\b|عدم\s+التجانس|التغاير|heterogeneity|inconsistency|عدم\s+الاتساق|transitivity)/i);
   const certaintyUnavailable = explicitlyUnavailable(text, /(?:grade|يقين|جودة\s+الدليل|risk\s+of\s+bias|خطر\s+التحيز|تحيز)/i);
+  const searchScopeUnavailable = explicitlyUnavailable(text, /(?:قواعد?\s+البيانات|database|search\s+(?:scope|strategy)|نطاق\s+البحث)/i)
+    || containsAny(text, ['لا يعرضان أسماء قواعد البيانات', 'لا يعرض أسماء قواعد البيانات', 'قواعد البيانات غير متاحة للتحقق']);
 
-  if ((isSystematic || isMeta || isScoping) && !containsAny(text, ['قاعدة', 'قواعد', 'pubmed', 'medline', 'embase', 'cinahl', 'scopus', 'cochrane', 'بحثت', 'بُحثت', 'البحث في', 'مصادر البحث'])) warnings.push('review search scope/databases not explicit');
+  if ((isSystematic || isMeta || isScoping) && !containsAny(text, ['قاعدة', 'قواعد', 'pubmed', 'medline', 'embase', 'cinahl', 'scopus', 'cochrane', 'بحثت', 'بُحثت', 'البحث في', 'مصادر البحث']) && !searchScopeUnavailable) warnings.push('review search scope/databases not explicit');
   if (isMeta && !containsAny(text, ['فاصل ثقة', 'فاصل مصداقية', '95%', 'ci ', 'cri ']) && !uncertaintyUnavailable) warnings.push('meta-analysis uncertainty interval not explicit');
   if (isMeta && !containsAny(text, ['i²', 'i2', 'عدم التجانس', 'التباين بين الدراسات', 'heterogeneity', 'عدم الاتساق', 'inconsistency', 'transitivity', 'الاتساق الشبكي']) && !heterogeneityUnavailable) warnings.push(isNetworkMeta ? 'network meta-analysis heterogeneity/inconsistency not explicit' : 'meta-analysis heterogeneity not explicit');
   if (isMeta && !containsAny(text, ['تحيز', 'risk of bias', 'grade', 'يقين', 'جودة الدليل', 'certainty']) && !certaintyUnavailable) warnings.push('meta-analysis bias/certainty not explicit');
@@ -255,7 +257,7 @@ const md = [
   '',
   '- Depth is assessed from both structured block count and useful word count; a long, information-dense block is not treated as thin merely because block count is low.',
   '- Evidence-specific rules are derived from the explicit evidence classification, not incidental mentions in references or background text.',
-  '- A source-verified statement that a CI, heterogeneity statistic, or certainty assessment is not reported/available satisfies the audit disclosure requirement; it never authorizes inference or fabrication.',
+  '- A source-verified statement that a CI, heterogeneity statistic, certainty assessment, or search-scope detail is not reported/available satisfies the audit disclosure requirement; it never authorizes inference or fabrication.',
   '- This is a structural/provenance safety audit, not a substitute for reading the primary paper.',
   '- A page can score highly and still contain a scientific error; source-level verification remains mandatory.',
   '- A warning is a queue signal, not proof that the page is wrong.',
