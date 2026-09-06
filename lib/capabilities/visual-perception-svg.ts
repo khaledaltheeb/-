@@ -53,7 +53,7 @@ function header(activity: VisualPerceptionActivity) {
   `;
 }
 
-function footer(activity: VisualPerceptionActivity) {
+function footer() {
   return `
   <rect x="28" y="1020" width="738" height="70" rx="20" fill="#F8FAFC" stroke="#CBD5E1"/>
   ${text(740,1048,'الاسم: __________________',16,600,'#334155','end')}
@@ -272,5 +272,5 @@ export function renderVisualPerceptionWorksheet(activity:VisualPerceptionActivit
   else if(activity.taskType==='form-constancy') body=formConstancy(activity,random);
   else if(activity.taskType==='mental-rotation') body=mentalRotation(activity,random);
   else body=partWhole(activity,random);
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(activity.seriesTitle)} - ${esc(activity.label)}">${header(activity)}${body}${footer(activity)}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(activity.seriesTitle)} - ${esc(activity.label)}">${header(activity)}${body}${footer()}</svg>`;
 }
