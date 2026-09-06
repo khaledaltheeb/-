@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import Link from 'next/link';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
+import '@/app/trust-page-scoped.css';
 
 type Section = { title: string; body: ReactNode };
 
