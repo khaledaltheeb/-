@@ -149,6 +149,46 @@ jobs:
           fi
           echo 'LIVE_OK sensory accessibility page'
 
+          echo 'LIVE_CHECK Kids Lab hub and repaired SVG routes'
+          curl -fsS \
+            -H 'Cache-Control: no-cache, no-store, max-age=0' \
+            -H 'Pragma: no-cache' \
+            --retry 6 --retry-delay 2 --retry-all-errors \
+            "${base}/capabilities/kids-lab/?deploy=${stamp}" >/tmp/kids-lab.html
+          grep -q 'مختبر الأنشطة والاختبارات للأطفال' /tmp/kids-lab.html
+          if grep -qi 'noindex' /tmp/kids-lab.html; then
+            echo 'Kids Lab hub is unexpectedly noindex.' >&2
+            exit 1
+          fi
+          curl -fsS --retry 6 --retry-delay 2 --retry-all-errors \
+            "${base}/capabilities/kids-lab/executive-functions/step-ordering/level-1-training-a/image?deploy=${stamp}" >/tmp/kids-series-19.svg
+          curl -fsS --retry 6 --retry-delay 2 --retry-all-errors \
+            "${base}/capabilities/kids-lab/language-reading/syllable-awareness/level-1-training-a/image?deploy=${stamp}" >/tmp/kids-series-50.svg
+          node - <<'NODE'
+          const fs = require('node:fs');
+          function assertBalanced(file) {
+            const svg = fs.readFileSync(file, 'utf8');
+            if (!svg.includes('<svg') || !svg.includes('</svg>')) throw new Error(`${file}: missing SVG envelope`);
+            const stack=[];
+            const re=/<\/?([A-Za-z][\w:.-]*)\b[^>]*\/?>/g;
+            let m;
+            while ((m=re.exec(svg))) {
+              const raw=m[0], name=m[1];
+              if (raw.startsWith('</')) {
+                const top=stack.pop();
+                if (top!==name) throw new Error(`${file}: closing ${name} does not match ${top ?? 'none'}`);
+              } else if (!raw.endsWith('/>')) stack.push(name);
+            }
+            if (stack.length) throw new Error(`${file}: unclosed ${stack.at(-1)}`);
+            return svg;
+          }
+          const s19 = assertBalanced('/tmp/kids-series-19.svg');
+          assertBalanced('/tmp/kids-series-50.svg');
+          const cardCount = [...s19.matchAll(/<rect x="(?:68|423)" y="[0-9.]+" width="315" height="92"/g)].length;
+          if (cardCount !== 4) throw new Error(`series 19 level-1 training-a expected 4 cards, got ${cardCount}`);
+          NODE
+          echo 'LIVE_OK Kids Lab hub, series 19 and series 50'
+
           echo 'LIVE_CHECK public API'
           curl -fsS \
             -H 'Cache-Control: no-cache, no-store, max-age=0' \
