@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import MagazineArticle from '@/components/magazine-article';
 import { getRelatedMagazine } from '@/lib/magazine';
 import { getPediatricOncologyEvidenceRecordForRequest } from '@/lib/pediatric-oncology-release-preview';
@@ -17,11 +17,23 @@ function releaseToken(searchParams: Query) {
   return IS_TEMPORARY_HOST ? first(searchParams.release_verify) : undefined;
 }
 
+function mergedRoute(record: Awaited<ReturnType<typeof getPediatricOncologyEvidenceRecordForRequest>>) {
+  const value = record?.schema_json?.merged_into;
+  return typeof value === 'string' && value.startsWith('/magazine/pediatric-oncology/theses/') ? value : null;
+}
+
 export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
   const [{ slug }, query] = await Promise.all([params, searchParams]);
   const token = releaseToken(query);
   const record = await getPediatricOncologyEvidenceRecordForRequest('theses', slug, token);
   if (!record) return {};
+  const mergedInto = mergedRoute(record);
+  if (mergedInto) {
+    return {
+      alternates: { canonical: mergedInto },
+      robots: { index: false, follow: true },
+    };
+  }
   const path = record.canonical_url || `/magazine/pediatric-oncology/theses/${slug}/`;
   const verifiedPreview = Boolean(token && record.schema_json?.release_token === token);
   const metadata = buildSeoMetadata({
@@ -63,6 +75,8 @@ export default async function PediatricOncologyThesisPage({ params, searchParams
   const token = releaseToken(query);
   const record = await getPediatricOncologyEvidenceRecordForRequest('theses', slug, token);
   if (!record) notFound();
+  const mergedInto = mergedRoute(record);
+  if (mergedInto) permanentRedirect(mergedInto);
   const related = await getRelatedMagazine(record, 4);
   const verifiedPreview = Boolean(token && record.schema_json?.release_token === token);
 
