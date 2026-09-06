@@ -85,6 +85,37 @@ const TOPIC_FOCUS: Record<string, string> = {
   'education-evidence': 'العناقيد المدرسية، التباين بين المدارس، جودة التنفيذ، الإنصاف، والمخرجات التعليمية والوظيفية.',
 };
 
+const RELATED_TOPICS: Record<string, string[]> = {
+  'randomized-trials': ['risk-of-bias', 'systematic-reviews', 'meta-analysis', 'grade-certainty'],
+  'systematic-reviews': ['meta-analysis', 'risk-of-bias', 'publication-bias', 'grade-certainty'],
+  'meta-analysis': ['systematic-reviews', 'effect-size', 'confidence-intervals', 'publication-bias'],
+  'risk-of-bias': ['randomized-trials', 'observational-studies', 'systematic-reviews', 'grade-certainty'],
+  'effect-size': ['confidence-intervals', 'statistical-significance', 'meta-analysis', 'power-sample-size'],
+  'confidence-intervals': ['effect-size', 'statistical-significance', 'power-sample-size', 'meta-analysis'],
+  'statistical-significance': ['effect-size', 'confidence-intervals', 'power-sample-size', 'preregistration'],
+  'power-sample-size': ['effect-size', 'confidence-intervals', 'statistical-significance', 'randomized-trials'],
+  'observational-studies': ['cohort-studies', 'case-control', 'cross-sectional', 'confounding', 'causal-inference'],
+  'cohort-studies': ['observational-studies', 'confounding', 'causal-inference', 'risk-of-bias'],
+  'case-control': ['observational-studies', 'confounding', 'causal-inference', 'risk-of-bias'],
+  'cross-sectional': ['observational-studies', 'validity', 'risk-of-bias', 'statistical-significance'],
+  'confounding': ['causal-inference', 'observational-studies', 'risk-of-bias', 'cohort-studies'],
+  'causal-inference': ['confounding', 'observational-studies', 'randomized-trials', 'risk-of-bias'],
+  'publication-bias': ['systematic-reviews', 'meta-analysis', 'preregistration', 'open-science'],
+  'grade-certainty': ['systematic-reviews', 'risk-of-bias', 'confidence-intervals', 'evidence-based-practice'],
+  'diagnostic-accuracy': ['validity', 'reliability', 'risk-of-bias', 'systematic-reviews'],
+  'reliability': ['validity', 'diagnostic-accuracy', 'effect-size', 'education-evidence'],
+  'validity': ['reliability', 'diagnostic-accuracy', 'critical-appraisal', 'education-evidence'],
+  'qualitative-research': ['mixed-methods', 'critical-appraisal', 'research-ethics', 'implementation-science'],
+  'mixed-methods': ['qualitative-research', 'critical-appraisal', 'implementation-science', 'education-evidence'],
+  'evidence-based-practice': ['grade-certainty', 'systematic-reviews', 'critical-appraisal', 'implementation-science'],
+  'critical-appraisal': ['risk-of-bias', 'evidence-based-practice', 'systematic-reviews', 'validity'],
+  'open-science': ['preregistration', 'publication-bias', 'research-ethics', 'critical-appraisal'],
+  'preregistration': ['open-science', 'publication-bias', 'research-ethics', 'randomized-trials'],
+  'research-ethics': ['open-science', 'preregistration', 'qualitative-research', 'randomized-trials'],
+  'implementation-science': ['evidence-based-practice', 'education-evidence', 'mixed-methods', 'systematic-reviews'],
+  'education-evidence': ['implementation-science', 'randomized-trials', 'systematic-reviews', 'validity'],
+};
+
 type Suffix = (typeof ORDER)[number];
 type Row = { title: string; canonical_url: string | null };
 
@@ -132,6 +163,25 @@ export default async function ResearchEvidenceLearningNav({ route }: { route: st
     if (suffix && !bySuffix.has(suffix)) bySuffix.set(suffix, row);
   }
 
+  const relatedTopics = RELATED_TOPICS[parsed.topic] || [];
+  const relatedPaths = relatedTopics.map((topic) => `${ROOT}${topic}-basics/`);
+  let relatedRows: Row[] = [];
+  if (relatedPaths.length) {
+    const { data: relatedData } = await supabase
+      .from('content')
+      .select('title,canonical_url')
+      .in('canonical_url', relatedPaths)
+      .eq('status', 'published')
+      .eq('robots_index', true)
+      .eq('robots_follow', true)
+      .lte('published_at', new Date().toISOString());
+    relatedRows = (relatedData ?? []) as Row[];
+  }
+  const relatedByPath = new Map(relatedRows.filter((row) => row.canonical_url).map((row) => [row.canonical_url as string, row]));
+  const orderedRelated = relatedTopics
+    .map((topic) => relatedByPath.get(`${ROOT}${topic}-basics/`))
+    .filter((row): row is Row => Boolean(row?.canonical_url));
+
   const currentIndex = ORDER.indexOf(parsed.suffix);
   const previous = currentIndex > 0 ? bySuffix.get(ORDER[currentIndex - 1]) : null;
   const next = currentIndex >= 0 && currentIndex < ORDER.length - 1 ? bySuffix.get(ORDER[currentIndex + 1]) : null;
@@ -177,6 +227,12 @@ export default async function ResearchEvidenceLearningNav({ route }: { route: st
         {previous?.canonical_url ? <li><Link href={previous.canonical_url}>السابق: {previous.title}</Link></li> : null}
         {next?.canonical_url ? <li><Link href={next.canonical_url}>التالي: {next.title}</Link></li> : null}
       </ul>
+    </div> : null}
+
+    {orderedRelated.length ? <div className="article-related">
+      <h3>مسارات مرتبطة لتوسيع الفهم</h3>
+      <p>بعد إتقان هذا الموضوع، انتقل إلى المسارات التالية بحسب العلاقة المنهجية بينها بدل اختيار موضوع جديد عشوائيًا.</p>
+      <ul>{orderedRelated.map((row) => <li key={row.canonical_url as string}><Link href={row.canonical_url as string}>{row.title}</Link></li>)}</ul>
     </div> : null}
   </section>;
 }
