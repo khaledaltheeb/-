@@ -1,0 +1,57 @@
+name: Workers Cache Header Probe
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/workers-cache-header-probe.yml'
+      - 'wrangler.jsonc'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Inspect live production response headers without mutations
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://healthrenewal.org'
+          paths=(
+            '/'
+            '/about'
+            '/assessment-lab'
+            '/magazine'
+            '/login'
+            '/account'
+            '/api/v1'
+            '/api/search/v3?q=autism'
+            '/robots.txt'
+          )
+
+          for path in "${paths[@]}"; do
+            echo "===== ${path} ====="
+            headers="$(mktemp)"
+            curl -sS --compressed --max-time 30 \
+              -X GET \
+              -H 'Accept: text/html,application/json;q=0.9,*/*;q=0.8' \
+              -D "$headers" \
+              -o /dev/null \
+              -w 'status=%{http_code} ttfb=%{time_starttransfer} total=%{time_total}\n' \
+              "${base}${path}"
+            tr -d '\r' < "$headers" | grep -Ei '^(HTTP/|cache-control:|cdn-cache-control:|cloudflare-cdn-cache-control:|set-cookie:|cf-cache-status:|age:|vary:|location:|content-type:|x-|server:)' || true
+            rm -f "$headers"
+            echo
+          done
+
+          echo '===== repeated canonical homepage ====='
+          for n in 1 2 3; do
+            curl -sS --compressed --max-time 30 \
+              -H 'Accept: text/html,application/xhtml+xml' \
+              -o /dev/null \
+              -w "request=${n} status=%{http_code} ttfb=%{time_starttransfer} total=%{time_total}\n" \
+              "${base}/"
+          done
