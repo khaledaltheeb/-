@@ -163,11 +163,11 @@ function auditRow(row) {
   // Evidence-specific rules must be derived from the page classification, not from
   // incidental mentions of other study types in background text or references.
   const isProtocol = /بروتوكول|protocol/i.test(evidence);
-  const isMeta = /تلوي|meta/i.test(evidence);
+  const isMeta = !/دون\s+تحليل\s+تلوي|without\s+(a\s+)?meta[- ]?analysis/i.test(evidence) && /تلوي|meta/i.test(evidence);
   const isNetworkMeta = isMeta && /شبكي|network/i.test(evidence);
   const isSystematic = /منهجي|systematic/i.test(evidence);
   const isScoping = /نطاقي|scoping/i.test(evidence);
-  const isTrial = !isProtocol && /عشوائي|random|trial/i.test(evidence);
+  const isTrial = !isProtocol && !isSystematic && !isMeta && !isScoping && /عشوائي|random|trial/i.test(evidence);
   const isObservational = /أتراب|مقطعي|حالات وشواهد|رصد|سجلي|cohort|cross-sectional|case-control|observational|registry/i.test(evidence);
 
   if ((isSystematic || isMeta || isScoping) && !containsAny(text, ['قاعدة', 'قواعد', 'pubmed', 'medline', 'embase', 'cinahl', 'scopus', 'cochrane', 'بحثت', 'بُحثت', 'البحث في', 'مصادر البحث'])) warnings.push('review search scope/databases not explicit');
