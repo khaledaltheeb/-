@@ -6,204 +6,228 @@
 
 ## Purpose
 
-This document is the completion addendum for the Outside-the-Box program and supersedes the **open-work status** in the earlier conversion ledger and page-specificity audit.
+This file is the final completion addendum for the Outside-the-Box program. It supersedes older **open-work status** in the conversion ledger and page-specificity audit while preserving those older files as baseline/provenance records.
 
-The earlier ledger recorded 89 condition pages as GOLD and left six ENRICH pages plus five STRONG pages for later work. Production verification and enrichment have now closed the entire published section under the stronger rendered-content contract described below.
+The final pass used a stronger contract than the original migration audit and corrected an important measurement issue: many legacy rows keep only a short synopsis in `body_text`, while the complete visible page content is stored in structured `body_json`. Final word-count QA therefore measures **rendered strings from `body_json`**, not the short synopsis field.
 
-## Final production corpus
+## Final section inventory
 
-The published `/outside-the-box/` corpus contains **105 records**:
+Production contains **109 records** under `/outside-the-box/`:
 
-- **100 condition / functional-support pages**;
-- **5 central scientific-methodology pages**.
+- **105 published, indexable records**;
+- **100 public condition / functional-support pages**;
+- **5 public central scientific-methodology/governance pages**;
+- **4 intentional internal `draft` + `noindex` records**;
+- **109 unique canonical URLs**.
 
-The five central pages are intentionally evaluated under a central-methodology contract rather than a condition-page contract:
+The four internal records are intentionally preserved as non-public operational/navigation records rather than being published merely to make every database row indexable.
 
-1. `/outside-the-box/evidence-standard/` — evidence and measurement standard;
-2. `/outside-the-box/instruments/` — institutional assessment-instrument registry;
-3. `/outside-the-box/methodology/` — section methodology;
-4. `/outside-the-box/monitoring-matrix/` — response monitoring and single-case methodology;
-5. `/outside-the-box/review-governance/` — scientific review and correction governance.
+## Condition-page contract — 100 / 100 passed
 
-## Final QA result
+All **100 public condition/support pages** passed the production contract on 2026-09-06:
 
-The final production query returned:
+- published;
+- indexable;
+- at least **1,500 rendered words**;
+- at least **20 structured content blocks**;
+- at least **3 direct references**;
+- reviewed on **2026-09-06**;
+- `outside_box_gold_standard = true`;
+- a non-empty condition-specific `condition_strategy`;
+- `gold_standard_external_endorsement = false`.
 
-`OUTSIDE_THE_BOX_105_OF_105_OK`
+Observed rendered-word range after final QA:
 
-Verified state:
+- **minimum: 1,507 words**;
+- **maximum: 2,924 words**.
 
-- **105 / 105** published;
-- **105 / 105** indexable;
-- **100 / 100** condition pages carry the unified Outside-the-Box Gold flag;
-- **5 / 5** central pages carry the Central Gold flag;
-- **105 / 105** contain at least **1,500 rendered words** under the common rendered-content counter;
-- minimum rendered words across the published corpus: **1,507**;
-- **105 / 105** contain at least **20 structured blocks**;
-- minimum structured blocks: **29**;
-- **105 / 105** contain at least **3 direct references**;
-- minimum direct references: **5**;
-- **100 / 100** condition pages have a non-empty condition-specific strategy;
-- **5 / 5** central pages have an explicit central methodological role;
-- **105 / 105** carry `evidence_search_through = 2026-09-06`;
-- **105 / 105** explicitly record `gold_standard_external_endorsement = false`.
+These numeric floors are rejection thresholds, not the definition of scientific quality. A page could not pass through length alone.
 
-The word/block/reference floors are **structural rejection thresholds, not the definition of scientific quality**. Pages were not allowed to advance through length alone.
+## Condition-page scientific contract
 
-## Unified metadata
+A Gold condition page is not a second diagnostic encyclopedia. It must convert evidence into a condition-specific capability strategy. Where relevant and supported, the page must:
 
-Historical work used more than one metadata key for Outside-the-Box Gold. The final verification preserved provenance but normalized the active condition-page state to:
+1. separate underlying capability from the channel required to express it;
+2. identify sensory, motor, speech, sleep, pain, respiratory, seizure-state, metabolic, psychiatric or other state confounders;
+3. establish safety/escalation boundaries before any functional experiment;
+4. use direct condition evidence and authoritative sources rather than generic disability filler;
+5. convert evidence into low-risk, reversible, single-variable hypotheses;
+6. state what result would actually change the plan;
+7. distinguish treatment effect, access effect, state effect, implementation fidelity and measurement artifact;
+8. use floor-resistant within-person outcomes when conventional standard scores lose information;
+9. include lifespan/transition issues where the condition's natural history makes them relevant;
+10. state explicitly what the page must not diagnose, prescribe or overclaim.
 
-- `outside_box_gold_standard = true` (legacy/institutional provenance retained);
+## Representative scientific upgrades
+
+The completed corpus now operationalizes, condition by condition, concepts such as:
+
+- ADHD — exact executive-stage failure, externalized time, initiation and prospective memory;
+- autism — sensory/social load, AAC resilience, ecological transfer and recovery cost;
+- cerebral palsy — motor/speech/vision confounding and explicit error-type attribution;
+- Rett syndrome — apraxia, latency, eye-gaze reliability, partner agreement and breathing-state validity;
+- SATB2-associated syndrome — oral/motor-speech bottleneck, AAC vocabulary availability and unfamiliar-partner communication;
+- Down syndrome — recognition versus recall, speech/hearing/sleep state and adult change from personal baseline;
+- Dravet and Lennox-Gastaut syndromes — net functional benefit beyond seizure count;
+- developmental language and learning disorders — language/transcription/decoding load separated from underlying knowledge;
+- deafblindness, CHARGE, CVI and ANSD — channel reliability and multimodal access rather than sensory diagnosis alone;
+- Prader-Willi syndrome — food-preoccupation load, sleep and supported independence;
+- severe self-injury — medical/pain-first safety and low-risk descriptive functional assessment;
+- limb difference/amputation — task-specific device value, choice, energy and participation rather than wear time;
+- kernicterus — auditory access, language comprehension and motor output treated as separate constructs.
+
+## Evidence freshness and reference correction
+
+Throughout the larger review program, condition pages were enriched from current authoritative sources and recent peer-reviewed evidence where it materially changed the decision model.
+
+During the final stage, external live-search services intermittently failed. The final checks therefore did **not** invent unverified freshness claims. They used the current direct references already stored in the reviewed production corpus and cross-verified metadata against sibling pages in the same corpus when needed.
+
+Examples of final corrections include:
+
+- Kernicterus gained 2025 ANSD systematic-review evidence instead of remaining anchored to 2023 auditory outcome literature.
+- Stuttering metadata for the clinical-guideline systematic review was corrected to 2022 using an already verified sibling record.
+- Limb-difference/amputation reference years were cross-verified against its Capabilities sibling, including 2026 JAMA user-perspective and 2026 pediatric upper-limb outcome-review records.
+- A mismatched pragmatic-communication reference was removed/replaced earlier in the pass rather than retained merely to increase reference count.
+- Arabic dyslexia content incorporated Arabic-specific and Jordan-relevant evidence rather than assuming an English orthographic model.
+
+## Canonical Gold metadata
+
+Historical work used several related metadata keys for Outside-the-Box Gold. The final audit established the canonical condition-page state as:
+
+- `outside_box_gold_standard = true`;
 - `outside_the_box_gold = true`;
 - `outside_the_box_gold_version = 2026-09-06-v2`;
-- `outside_box_gold_review_date = 2026-09-06`;
+- `outside_box_review_date = 2026-09-06`;
 - `condition_strategy = <condition-specific strategy>`;
 - `evidence_search_through = 2026-09-06`;
 - `gold_standard_external_endorsement = false`.
 
-Central pages use:
+The older keys remain as provenance where present, but the active institutional flag is `outside_box_gold_standard`.
 
-- `outside_the_box_central_gold = true`;
-- `outside_the_box_central_gold_version = 2026-09-06-v1`;
-- `central_review_date = 2026-09-06`;
-- `central_role = <explicit methodological role>`;
-- `evidence_search_through = 2026-09-06`;
-- `gold_standard_external_endorsement = false`.
+## Central public pages — 5 / 5 passed
 
-## Condition-page scientific contract
+Five public central pages use a separate methodology/governance contract rather than the condition template.
 
-A Gold condition page must do more than explain a diagnosis. It must, where evidence supports it:
+All five are published, indexable, reviewed on 2026-09-06, internally Gold-verified, contain at least 1,500 rendered words, at least 20 blocks and at least 3 references.
 
-1. identify capability that can be hidden by speech, motor, sensory, pain, fatigue, sleep, anxiety, seizure, metabolic or other state effects;
-2. establish condition-specific safety and escalation boundaries before any functional experiment;
-3. separate the target construct from the response channel required to show it;
-4. use direct condition evidence and current literature rather than generic disability material;
-5. convert evidence into low-risk, reversible hypotheses that can be tested in ordinary function;
-6. state what measurement result would change the plan;
-7. distinguish treatment effect, access effect, implementation fidelity, state validity and measurement artifact;
-8. use floor-resistant within-person outcomes when conventional standard scores lose information;
-9. include lifespan or transition issues when the condition's natural history makes them relevant;
-10. state explicitly what the page must not diagnose, prescribe or overclaim.
+Final central QA:
 
-## Major cross-cutting upgrades completed
+1. **Evidence Standard** — **2,069 rendered words**, 108 blocks, 13 references.  
+   Role: `evidence-validity-and-decision-standard`
+2. **Institutional Instrument Registry** — **2,307 rendered words**, 83 blocks, 10 references.  
+   Role: `institutional-measurement-instrument-registry`
+3. **Methodology — كيف بُني القسم؟** — **7,361 rendered words**, 69 blocks, 9 references.  
+   Role: `outside-the-box-methodology-and-evidence-architecture`
+4. **Response Monitoring Matrix** — **2,134 rendered words**, 76 blocks, 8 references.  
+   Role: `response-monitoring-and-stop-rule-matrix`
+5. **Scientific Review Governance** — **2,084 rendered words**, 60 blocks, 6 references.  
+   Role: `scientific-review-correction-and-provenance-governance`
 
-The final corpus now operationalizes, condition by condition, concepts including:
+### Central methodology upgrades
 
-- motor-free / speech-free cognition where response channels confound assessment;
-- AAC reliability, partner agreement and backup communication channels;
-- sensory-access validity before interpreting low performance;
-- seizure-state, sleep-state, metabolic-state and post-event validity;
-- pain, fatigue and energy cost as independent functional outcomes;
-- raw skills, growth values and meaningful inchstones when standard scores show floor effects;
-- participation as involvement and agency, not attendance alone;
-- treatment-era bias in conditions whose natural history changed after screening or disease-modifying therapy;
-- genotype / functional-class information as risk and research context, never an IQ ceiling or prescribing shortcut;
-- Arabic/MENA measurement limitations, including the rule that translation alone is not local standardization.
+The central system now explicitly covers:
 
-## Central methodology upgrade
+- construct and decision definition before instrument selection;
+- version, language, rights, reference population and user competency;
+- content/structural/construct/criterion validity distinctions;
+- reliability versus validity;
+- SEM, SDC, responsiveness and meaningful change;
+- floor and ceiling effects;
+- Arabic translation versus true cultural/measurement equivalence;
+- accommodations and their effect on normative interpretation;
+- missing-data and scoring rules;
+- instrument lifecycle and retirement;
+- multi-point baselines;
+- fidelity, carryover, generalization and maintenance;
+- predefined continue/modify/stop rules;
+- implementation burden and adverse outcomes;
+- claim-level provenance and stable claim IDs;
+- event/risk-based source freshness;
+- retraction/correction/expression-of-concern handling;
+- review-independence levels;
+- conflict-of-interest and correction records;
+- AI-use logging without treating AI as scientific authority.
 
-The central pages were strengthened after the condition corpus was closed so that the rules governing the section are at least as rigorous as the condition content.
+## Internal draft/noindex records — 4 / 4 intentionally preserved
 
-### Evidence and measurement standard
+The following records remain intentionally unpublished and non-indexable:
 
-The page now distinguishes:
+- `/outside-the-box/` internal landing record;
+- `/outside-the-box/all-pages/` internal route index;
+- `/outside-the-box/quality-audit/` internal quality-audit record;
+- `/outside-the-box/ten-plan-methodology/` internal ten-plan contract.
 
-- content validity from other measurement properties;
-- reliability, measurement error, validity and responsiveness as different properties;
-- score change from meaningful change;
-- translation from cross-cultural validity / measurement invariance;
-- evidence certainty from recommendation / decision strength;
-- descriptive before-after monitoring from causal single-case experimental design.
+They were reviewed on 2026-09-06 and assigned explicit internal roles with `intentional_noindex = true`. They were **not** forced into the 1,500-word condition contract because navigation and internal audit records have a different function.
 
-### Instrument registry
+The internal quality-audit record was updated to store the final production state and the rendered-content audit method.
 
-The registry now requires a decision dossier rather than a tool name. It records, where applicable:
+## Final comprehensive QA
 
-- construct and intended use;
-- population, age, language and version;
-- response-channel demands;
-- administration/scoring/training/licensing requirements;
-- normative sample applicability;
-- measurement-property evidence;
-- Arabic adaptation and measurement-invariance status;
-- accommodation versus construct modification;
-- floor/ceiling limitations;
-- responsiveness and measurement error;
-- stop/replace criteria and version history.
+The final section-level QA returned every check as `true`:
 
-### Monitoring matrix
+- `TOTAL_109`
+- `UNIQUE_CANONICAL_109`
+- `PUBLISHED_105`
+- `INDEXABLE_105`
+- `CONDITIONS_100`
+- `CONDITIONS_INDEXABLE_100`
+- `CONDITIONS_WORDS_100`
+- `CONDITIONS_BLOCKS_100`
+- `CONDITIONS_REFS_100`
+- `CONDITIONS_GOLD_100`
+- `CONDITIONS_STRATEGY_100`
+- `CONDITIONS_REVIEWED_100`
+- `CENTRAL_5`
+- `CENTRAL_PASS_5`
+- `INTERNAL_4`
+- `INTERNAL_DRAFT_NOINDEX_4`
+- `NO_EXTERNAL_ENDORSEMENT_109`
 
-The matrix now explicitly separates ordinary repeated monitoring, clinical N-of-1 work and causal SCED methodology. For causal interpretation it recognizes the WWC visual-analysis dimensions:
-
-- level;
-- trend;
-- variability;
-- immediacy;
-- overlap;
-- consistency across similar phases.
-
-The monitoring contract also tracks benefit, harm, burden, fidelity and context/state, and requires generalization/maintenance and predefined stop rules before declaring success.
-
-### Scientific review governance
-
-Governance now includes:
-
-- claim-level evidence provenance;
-- risk-tiered review;
-- evidence certainty separated from recommendation rationale;
-- correction, retraction and expression-of-concern handling;
-- source/version/access-date provenance;
-- event- and risk-based evidence-refresh windows;
-- adjudication of conflicting sources;
-- AI-specific citation-existence and citation-match checks;
-- random post-publication audits;
-- emergency claim hold while preserving version history;
-- explicit prevention of false external-endorsement claims.
-
-## Evidence standards used in the final methodological pass
-
-The central methodology was aligned with current authoritative frameworks including:
-
-- COSMIN Version 2.0 methodology for measurement properties and outcome-measure selection;
-- COSMIN content-validity principles: relevance, comprehensiveness and comprehensibility;
-- Standards for Educational and Psychological Testing;
-- International Test Commission adaptation guidance;
-- GRADE / Evidence-to-Decision separation of certainty from recommendation, including benefits/harms, values, resources, equity, acceptability and feasibility;
-- What Works Clearinghouse single-case design standards;
-- ICMJE, EQUATOR, COPE and Cochrane governance/methodological frameworks.
+No Outside-the-Box record remained in violation of its role-specific contract.
 
 ## Interpretation of Gold
 
-Gold Standard is an **internal Rawafid / Health Renewal scientific-editorial status**. It is not regulatory approval, medical certification, university accreditation, society endorsement or independent external clinical review.
+`outside_box_gold_standard = true` is an **internal Rawafid / Health Renewal scientific-editorial quality state**.
 
-Every final record explicitly preserves `gold_standard_external_endorsement = false` unless a future documented external review actually occurs.
+It is **not**:
 
-## Maintenance rule
+- regulatory approval;
+- medical accreditation;
+- university or professional-society endorsement;
+- independent external clinical review;
+- proof that every experimental hypothesis is clinically established;
+- permission to reproduce proprietary instruments.
 
-The section is now in **maintenance and evidence-surveillance mode**, not indiscriminate expansion mode.
+Across all 109 Outside-the-Box records, production QA confirmed `gold_standard_external_endorsement = false`.
+
+## Maintenance rule after closure
+
+Outside-the-Box is now in **targeted evidence-surveillance and correction mode**, not indiscriminate expansion mode.
 
 A page should reopen when new evidence materially changes one or more of:
 
-- safety or red flags;
-- natural history;
-- assessment validity;
-- communication/access interpretation;
-- treatment-era context;
-- functional outcomes;
+- safety or escalation boundaries;
+- assessment validity or measurement limitations;
+- natural history or treatment-era interpretation;
+- genotype/phenotype interpretation relevant to monitoring;
+- communication/access assumptions;
+- a functional outcome or participation strategy;
 - lifespan/transition planning;
-- measurement properties of an instrument used in the page;
-- what result should change a decision.
+- validity of an Arabic adaptation;
+- a major decision rule;
+- source correctness, retraction or guideline supersession.
 
-A newer publication year alone is not enough to displace a stronger authoritative source.
+A newer publication year alone is not enough to replace a stronger authoritative source, and routine maintenance should not add length merely to increase word count.
 
 ## Final conclusion
 
-As of 2026-09-06, the published Outside-the-Box section is closed under the current Gold Standard contract:
+As of 2026-09-06, the entire Outside-the-Box section is closed under its current role-specific Gold Standard contract:
 
 - **100 / 100 condition pages complete**;
-- **5 / 5 central methodology pages complete**;
-- **105 / 105 final production QA pass**;
-- **zero contract failures remaining**.
+- **5 / 5 central public pages complete**;
+- **4 / 4 internal draft/noindex records intentionally verified**;
+- **109 / 109 total records accounted for**;
+- **17 / 17 final comprehensive QA checks passed**;
+- **zero role-contract failures remaining**.
 
 Future work should be targeted scientific maintenance, not template expansion or length inflation.
