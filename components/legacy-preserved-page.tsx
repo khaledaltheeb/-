@@ -70,7 +70,6 @@ export default function LegacyPreservedPageView({ page, route }: Props) {
         <ContentRenderer bodyJson={bodyJson} bodyText={bodyText} recordId={current?.id || page.source_path} />
       </div>
       {current?.medical_disclaimer ? <aside className="medical-disclaimer" aria-label="حدود المحتوى الطبي"><strong>تنبيه</strong><p>{current.medical_disclaimer}</p></aside> : null}
-      {current ? <ResearchEvidenceLearningNav route={canonical} /> : null}
       {internalLinks.length ? <section className="article-related" aria-labelledby="legacy-related-title">
         <h2 id="legacy-related-title">روابط المسار الأصلي</h2>
         <ul>{internalLinks.map((item) => <li key={item.href}><Link href={item.href}>{item.title}</Link></li>)}</ul>
