@@ -1,15 +1,18 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "name": "Rawafid Assessment Scientific Completeness Standard",
   "status": "mandatory",
   "minimum_requirements": [
     "construct_definition",
     "intended_population",
     "intended_use",
+    "prohibited_uses",
     "reference_period",
     "response_scale_semantics",
+    "applicability_response",
     "domain_map",
     "item_rationale",
+    "evidence_mapping_level",
     "language_clarity_review",
     "content_validity_review",
     "privacy_statement",
@@ -27,7 +30,20 @@
     "cutoffs_without_criterion_study_forbidden": true,
     "generic_template_only_tools_are_complete": false,
     "mixed_response_semantics_forbidden": true,
-    "proprietary_item_copying_forbidden": true
+    "proprietary_item_copying_forbidden": true,
+    "forced_answer_when_item_not_applicable_forbidden": true,
+    "evidence_relation_must_disclose_mapping_level": true,
+    "profile_derived_evidence_cannot_be_labeled_direct": true,
+    "safety_signal_cannot_be_presented_as_clinical_risk_assessment": true
+  },
+  "evidence_mapping_levels": {
+    "domain-reviewed": "مراجعة claim-to-evidence مستقلة على مستوى كل محور، مع نوع الدليل وحدود الاستدلال.",
+    "profile-derived": "مواءمة مفاهيمية شفافة من الملف العلمي ومراجعه العامة؛ لا يجوز وصفها كدليل مباشر مستقل للمحور."
+  },
+  "applicability_response": {
+    "required_label": "لا ينطبق / لم أجرّب",
+    "purpose": "منع إجبار المستخدم على إعطاء درجة زائفة لبند يفترض موقفًا أو استراتيجية لم تحدث أو لم تُجرّب.",
+    "scoring_rule": "لا تدخل في أي مجموع أو نسبة أو استنتاج؛ الأداة أصلًا لا تنتج درجة تشخيصية أو معيارية."
   },
   "validation_stages": [
     "concept",
