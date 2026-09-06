@@ -23,6 +23,7 @@ import { assessmentOperationalFullFormsWave11 } from '@/lib/assessment-measure-o
 import { assessmentOperationalFullFormsWave12 } from '@/lib/assessment-measure-operational-full-forms-wave12';
 import { assessmentOperationalFullFormsWave13 } from '@/lib/assessment-measure-operational-full-forms-wave13';
 import { assessmentOperationalFullFormsWave14 } from '@/lib/assessment-measure-operational-full-forms-wave14';
+import { assessmentOperationalFullFormsWave15 } from '@/lib/assessment-measure-operational-full-forms-wave15';
 
 export type {
   AssessmentOperationalMaterial,
@@ -35,6 +36,7 @@ export type {
 };
 
 // Rights-verified explicit materials always override the universal recording-sheet fallback.
+// Later waves may intentionally harden a previously introduced record; the later spread is authoritative.
 export const explicitOperationalMaterials: Record<string, AssessmentOperationalMaterial> = {
   ...assessmentOperationalFullFormsWave1,
   ...assessmentOperationalFullFormsWave2,
@@ -50,6 +52,7 @@ export const explicitOperationalMaterials: Record<string, AssessmentOperationalM
   ...assessmentOperationalFullFormsWave12,
   ...assessmentOperationalFullFormsWave13,
   ...assessmentOperationalFullFormsWave14,
+  ...assessmentOperationalFullFormsWave15,
 };
 
 export function hasExplicitOperationalMaterial(slug: string): boolean {
