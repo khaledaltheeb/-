@@ -1,0 +1,32 @@
+name: Assessment Measures Live Smoke
+
+on:
+  push:
+    branches: ['ops/assessment-measures-live-smoke-20260906']
+    paths:
+      - 'scripts/assessment-measures-live-smoke.mjs'
+      - '.github/workflows/assessment-measures-live-smoke.yml'
+  workflow_run:
+    workflows: ['Deploy Production Fast']
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: assessment-measures-live-smoke
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Probe Assessment Measures production sequentially
+        run: node scripts/assessment-measures-live-smoke.mjs
