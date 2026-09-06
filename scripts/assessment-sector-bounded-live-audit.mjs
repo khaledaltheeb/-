@@ -113,14 +113,14 @@ async function probe(route) {
   let lastStatus = 0;
   let lastBody = '';
   let lastUrl = '';
-  for (let attempt = 1; attempt <= 4; attempt += 1) {
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 20000);
+    const timeout = setTimeout(() => controller.abort(), 25000);
     try {
       const response = await fetch(`${BASE}${route}`, {
         redirect: 'follow',
         signal: controller.signal,
-        headers: { 'User-Agent': `Rawafid-Bounded-${sector}-Audit/1.0` },
+        headers: { 'User-Agent': `Rawafid-Low-Load-${sector}-Audit/2.0` },
       });
       const body = await response.text();
       lastStatus = response.status;
@@ -133,7 +133,7 @@ async function probe(route) {
     } finally {
       clearTimeout(timeout);
     }
-    await sleep(attempt * 800);
+    await sleep(attempt * 1500);
   }
 
   results.push({ route, status: lastStatus, finalUrl: lastUrl, bytes: Buffer.byteLength(lastBody) });
@@ -145,16 +145,10 @@ async function probe(route) {
 }
 
 const routes = routesForSector();
-let cursor = 0;
-async function worker() {
-  while (true) {
-    const index = cursor++;
-    if (index >= routes.length) return;
-    await probe(routes[index]);
-    await sleep(200);
-  }
+for (const route of routes) {
+  await probe(route);
+  await sleep(800);
 }
-await Promise.all(Array.from({ length: 3 }, () => worker()));
 
 const statusCounts = results.reduce((acc, row) => {
   acc[row.status] = (acc[row.status] ?? 0) + 1;
