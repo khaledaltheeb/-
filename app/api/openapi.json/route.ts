@@ -30,7 +30,7 @@ export async function GET(request: Request) {
     servers: [{ url: `${SITE_URL}/api/v1`, description: 'Canonical production API' }],
     tags: [
       { name: 'Discovery' }, { name: 'Content' }, { name: 'Sources' }, { name: 'Search' }, { name: 'Evidence' },
-      { name: 'Taxonomy' }, { name: 'Synchronization' }, { name: 'Operations' },
+      { name: 'Taxonomy' }, { name: 'Synchronization' }, { name: 'Operations' }, { name: 'Integrations' },
     ],
     paths: {
       '/': { get: { tags: ['Discovery'], operationId: 'discoverApi', responses: { '200': { description: 'API discovery document' } } } },
@@ -65,6 +65,24 @@ export async function GET(request: Request) {
           { name: 'crossref_from_index_date', in: 'query', schema: { type: 'string', format: 'date-time' }, description: 'Crossref incremental index-date lower bound.' },
         ],
         responses: { '200': { description: 'Normalized evidence records with provider status, independent cursors and provenance' }, '400': { $ref: '#/components/responses/BadRequest' }, ...partnerResponses },
+      } },
+      '/integrations/crossref/works': { get: {
+        tags: ['Integrations','Evidence'],
+        operationId: 'resolveCrossrefWork',
+        security: partnerSecurity,
+        description: 'Resolve one DOI to governed Crossref bibliographic metadata. Original Crossref title is preserved separately from any local Arabic title; member/prefix stewardship, licenses, relations, updates and record timestamps are retained. This endpoint does not retrieve publisher full text.',
+        parameters: [
+          { name: 'doi', in: 'query', required: true, schema: { type: 'string', minLength: 7, maxLength: 300 }, description: 'DOI, doi: value, or https://doi.org URL.' },
+        ],
+        responses: {
+          '200': { description: 'Governed Crossref bibliographic metadata for one DOI' },
+          '400': { $ref: '#/components/responses/BadRequest' },
+          '404': { $ref: '#/components/responses/NotFound' },
+          '401': { $ref: '#/components/responses/Unauthorized' },
+          '403': { $ref: '#/components/responses/Forbidden' },
+          '429': { $ref: '#/components/responses/RateLimited' },
+          '503': { description: 'Crossref metadata temporarily unavailable', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
       } },
       '/changes': { get: { tags: ['Synchronization'], operationId: 'listChanges', security: partnerSecurity, parameters: [
         { name: 'since', in: 'query', required: true, schema: { type: 'string', format: 'date-time' } },

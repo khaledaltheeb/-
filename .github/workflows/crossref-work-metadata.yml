@@ -1,0 +1,36 @@
+name: Crossref Work Metadata
+
+on:
+  pull_request:
+    paths:
+      - 'lib/crossref-work-metadata.ts'
+      - 'app/api/v1/integrations/crossref/works/route.ts'
+      - 'app/api/v1/route.ts'
+      - 'app/api/openapi.json/route.ts'
+      - 'scripts/crossref-work-metadata-contract.mjs'
+      - '.github/workflows/crossref-work-metadata.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'lib/crossref-work-metadata.ts'
+      - 'app/api/v1/integrations/crossref/works/route.ts'
+      - 'app/api/v1/route.ts'
+      - 'app/api/openapi.json/route.ts'
+      - 'scripts/crossref-work-metadata-contract.mjs'
+      - '.github/workflows/crossref-work-metadata.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Verify Crossref DOI metadata governance and discovery
+        run: node scripts/crossref-work-metadata-contract.mjs

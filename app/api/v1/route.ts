@@ -16,6 +16,15 @@ export async function GET(request: Request) {
       lens_requires_server_configuration: true,
       provider_cursors_are_independent: true,
     },
+    integrations: {
+      crossref_work_metadata: {
+        href: '/api/v1/integrations/crossref/works?doi={doi}',
+        method: 'GET',
+        purpose: 'Resolve one DOI to governed Crossref bibliographic metadata while preserving source title, stewardship, relations, licenses and record timestamps.',
+        metadata_only: true,
+        optional_partner_scope: 'sources:read',
+      },
+    },
   }, { cacheControl: 'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400' });
 }
 
