@@ -4,6 +4,14 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '55 2 * * *'
+  pull_request:
+    paths:
+      - 'scripts/encyclopedia-quality-audit.mjs'
+      - '.encyclopedia-quality-standard.md'
+      - 'app/encyclopedia/**'
+      - 'lib/encyclopedia.ts'
+      - 'supabase/migrations/*encyclopedia*'
+      - '.github/workflows/encyclopedia-quality-audit.yml'
   push:
     branches: [main]
     paths:
@@ -11,6 +19,7 @@ on:
       - '.encyclopedia-quality-standard.md'
       - 'app/encyclopedia/**'
       - 'lib/encyclopedia.ts'
+      - 'supabase/migrations/*encyclopedia*'
       - '.github/workflows/encyclopedia-quality-audit.yml'
 
 permissions:
