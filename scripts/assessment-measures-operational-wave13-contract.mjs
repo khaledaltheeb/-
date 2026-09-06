@@ -46,9 +46,12 @@ assert(atlasHamd.includes('systemic antibiotics') && atlasHamd.includes('0 أو 
 assert(atlasHamd.includes('pmc.ncbi.nlm.nih.gov/articles/PMC3618004'), 'ATLAS derivation source missing');
 assert(atlasHamd.includes('age-treatment-systemic-antibiotics-leukocyte-count-serum-albumin-and'), 'ATLAS CDISC Public Domain source missing');
 
-// HAMD-24: 17-item base plus 18-24 extension, with structural-Arabic and suicide safety boundaries.
+// HAMD-24: items 1-17 are derived from the canonical HAMD-17 material, then items 18-24 are explicit.
 assert(atlasHamd.includes("'hamilton-depression-rating-scale-24': {"), 'HAMD-24 operational worksheet missing');
-for (let i = 1; i <= 24; i += 1) assert(atlasHamd.includes(`HAMD24-${i}`), `HAMD-24 item ${i} missing`);
+assert(atlasHamd.includes("assessmentOperationalFullFormsWave2['hamilton-depression-rating-scale-17']"), 'HAMD-24 must derive items 1-17 from canonical HAMD-17 material');
+assert(atlasHamd.includes('hamd17Base.sections[0].items.map'), 'HAMD-24 derived item mapping missing');
+assert(atlasHamd.includes('`HAMD24-${index + 1}`'), 'HAMD-24 derived item renumbering missing');
+for (let i = 18; i <= 24; i += 1) assert(atlasHamd.includes(`HAMD24-${i}`), `HAMD-24 explicit extension item ${i} missing`);
 assert(atlasHamd.includes('HAMD24-18-TIME'), 'HAMD-24 diurnal-variation descriptor missing');
 assert(atlasHamd.includes("code: 'HAMD24-TOTAL'") && atlasHamd.includes('max: 76'), 'HAMD-24 0-76 total field missing');
 assert(atlasHamd.includes('لا يدخل HAMD24-18-TIME'), 'HAMD-24 item 18 timing exclusion missing');
@@ -62,5 +65,5 @@ assert(catalog.includes('assessmentOperationalFullFormsWave12'), 'catalog must r
 assert(catalog.includes('assessmentOperationalFullFormsWave13'), 'catalog must retain Wave 13 import/spread');
 
 if (!process.exitCode) {
-  console.log('ASSESSMENT_OPERATIONAL_WAVE13_OK framingham=2008_general_cvd atlas=5_component_0-10 hamd24=24_item_0-76 rights_and_version_boundaries=verified');
+  console.log('ASSESSMENT_OPERATIONAL_WAVE13_OK framingham=2008_general_cvd atlas=5_component_0-10 hamd24=derived_17_plus_explicit_7_total_0-76 rights_and_version_boundaries=verified');
 }
