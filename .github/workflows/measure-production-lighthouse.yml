@@ -108,14 +108,15 @@ jobs:
           visit(registered.details);
           const uniqueTools = [...new Set(tools)].sort();
 
-          const expectedStaticTools = [
+          const expectedTools = [
             'searchRawafid',
             'searchRawafidHeader',
             'searchRawafidMobile',
             'searchRawafidFooter',
             'search_rawafid_evidence',
+            'ask_rawafid_assistant',
           ];
-          const missingTools = expectedStaticTools.filter((name) => !uniqueTools.includes(name));
+          const missingTools = expectedTools.filter((name) => !uniqueTools.includes(name));
           const formCoverageItems = Array.isArray(formCoverage?.details?.items) ? formCoverage.details.items : [];
 
           const out = {
@@ -143,7 +144,11 @@ jobs:
             console.error(`WEBMCP_LIGHTHOUSE_FAILED: schema validity score is ${schemaValidity.score}`);
             process.exit(1);
           }
-          console.log('WEBMCP_LIGHTHOUSE_OK: all static forms are covered, all five expected imperative + declarative tools are registered, and schemas are valid.');
+          if (category.score !== 1) {
+            console.error(`WEBMCP_LIGHTHOUSE_FAILED: Agentic Browsing category score is ${category.score}`);
+            process.exit(1);
+          }
+          console.log('WEBMCP_LIGHTHOUSE_OK: Agentic Browsing is 100, all static forms are covered, all six expected imperative + declarative tools are registered, and schemas are valid.');
           NODE
 
       - uses: actions/upload-artifact@v4
