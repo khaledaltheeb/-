@@ -13,6 +13,7 @@ const productionCacheConfig = {
     'node scripts/export-kids-lab-static-svg.mjs',
     'npx next build',
     'node scripts/materialize-kids-lab-static-html.mjs',
+    'node scripts/materialize-practical-resources-static-html.mjs',
   ].join(' && '),
 };
 
