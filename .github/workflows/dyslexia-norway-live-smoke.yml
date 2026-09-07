@@ -1,0 +1,58 @@
+name: Dyslexia Norway Resources Live Smoke
+
+on:
+  workflow_run:
+    workflows: ['Deploy Production Fast']
+    types: [completed]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Verify Dyslexia Norway toolkit and worksheets live
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://healthrenewal.org'
+          stamp="${{ github.event.workflow_run.head_sha }}"
+          check_page() {
+            local path="$1"
+            local expected="$2"
+            local out="$3"
+            echo "LIVE_CHECK ${path}"
+            code="$(curl -sS -L -o "${out}" -w '%{http_code}' \
+              -H 'Cache-Control: no-cache, no-store, max-age=0' \
+              -H 'Pragma: no-cache' \
+              --retry 8 --retry-delay 2 --retry-all-errors \
+              "${base}${path}?deploy=${stamp}")"
+            if [ "${code}" != '200' ]; then
+              echo "Expected HTTP 200 for ${path}, got ${code}" >&2
+              head -c 500 "${out}" >&2 || true
+              exit 1
+            fi
+            if ! grep -Fq "${expected}" "${out}"; then
+              echo "Expected content not found for ${path}: ${expected}" >&2
+              head -c 1000 "${out}" >&2 || true
+              exit 1
+            fi
+            if grep -Eqi 'Internal Server Error|Application error|This page could not be found' "${out}"; then
+              echo "Error page detected at ${path}" >&2
+              exit 1
+            fi
+            echo "LIVE_OK ${path}"
+          }
+
+          check_page '/evidence-guides/dyslexia-norway-school-observation-toolkit/' 'حزمة المدرسة لملاحظة صعوبات القراءة والرياضيات واللغة' /tmp/toolkit.html
+          check_page '/resources/worksheets/dyslexia-reading-observation' 'ورقة ملاحظة صعوبات القراءة قبل الإحالة' /tmp/dyslexia.html
+          check_page '/resources/worksheets/dyscalculia-math-observation' 'ورقة ملاحظة صعوبات الرياضيات قبل الإحالة' /tmp/dyscalculia.html
+          check_page '/resources/worksheets/dld-language-observation' 'ورقة ملاحظة اللغة والتواصل عند الاشتباه' /tmp/dld.html
+          check_page '/resources/worksheets/learning-support-four-week-log' 'سجل متابعة دعم التعلم لمدة أربعة أسابيع' /tmp/four-week.html
+          check_page '/resources/worksheets/learning-referral-evidence-pack' 'قائمة تجهيز حزمة الإحالة لصعوبات القراءة والرياضيات واللغة' /tmp/referral.html
+          check_page '/resources/worksheets/family-school-learning-communication' 'ورقة تنسيق الأسرة والمدرسة حول صعوبات التعلم واللغة' /tmp/family-school.html
+
+          echo 'All Dyslexia Norway production resources passed live verification.'
