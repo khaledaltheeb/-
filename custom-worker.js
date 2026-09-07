@@ -57,7 +57,16 @@ async function flatPracticalResponse(request,env,url,slug){
     const accept=(request.headers.get('accept')||'').toLowerCase();
     if(!accept.includes('text/html')&&!accept.includes('*/*')&&request.method!=='HEAD')return null;
   }
-  return assetFetch(request,env,`${PRACTICAL_FLAT_PREFIX}/${slug}.${rsc?'rsc':'html'}`);
+  // Use opaque internal asset extensions so Cloudflare cannot apply automatic
+  // HTML canonicalization/redirects. Reconstruct the public response here.
+  const source=await assetFetch(request,env,`${PRACTICAL_FLAT_PREFIX}/${slug}.${rsc?'rsc-data':'page-data'}`);
+  if(!source)return null;
+  const headers=new Headers(source.headers);
+  headers.set('Content-Type',rsc?'text/x-component; charset=utf-8':'text/html; charset=utf-8');
+  headers.set('Cache-Control','public, max-age=300, s-maxage=3600, stale-while-revalidate=86400');
+  headers.set('X-Content-Type-Options','nosniff');
+  headers.set('X-Rawafid-Static-Route','practical-resource');
+  return new Response(request.method==='HEAD'?null:source.body,{status:200,headers});
 }
 async function kidsLabStaticResponse(request,env,url){
   if(url.hostname.toLowerCase()!==CANONICAL_HOST||!CACHEABLE_METHODS.has(request.method)||!isPrefix(url.pathname,KIDS_LAB_PREFIX))return null;
