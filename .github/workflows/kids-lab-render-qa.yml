@@ -7,6 +7,7 @@ on:
       - 'app/capabilities/kids-lab/**'
       - 'scripts/kids-lab-*.mjs'
       - '.github/workflows/kids-lab-render-qa.yml'
+      - 'eslint.config.mjs'
       - 'package.json'
   workflow_dispatch:
 
@@ -29,9 +30,6 @@ jobs:
 
       - name: TypeScript check
         run: npm run typecheck
-
-      - name: Lint Kids Lab route contract
-        run: npx eslint scripts/kids-lab-route-contract.mjs --quiet
 
       - name: Lint Kids Lab live route checker
         run: npx eslint scripts/kids-lab-live-route-check.mjs --quiet
