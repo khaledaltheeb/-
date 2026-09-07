@@ -5,6 +5,8 @@ on:
     paths:
       - 'lib/research-integrations/**'
       - 'app/api/v1/evidence-discovery/**'
+      - 'app/api/v1/lens/**'
+      - 'app/api/v1/route.ts'
       - 'app/api/openapi.json/**'
       - 'app/developers/**'
       - 'examples/lens-scholarly-demo/**'
@@ -12,6 +14,7 @@ on:
       - 'docs/integrations/lens-labs.md'
       - 'scripts/research-integrations-contract.mjs'
       - 'scripts/lens-security-contract.mjs'
+      - 'scripts/lens-api-section-contract.mjs'
       - 'scripts/source-registry-v1-contract.mjs'
       - 'supabase/migrations/20260901190000_ror_source_registry_v1.sql'
       - 'supabase/migrations/20260901192000_ror_registry_explicit_deny.sql'
@@ -41,6 +44,8 @@ jobs:
         run: node scripts/research-integrations-contract.mjs
       - name: Lens database security contract
         run: node scripts/lens-security-contract.mjs
+      - name: Lens API section contract
+        run: node scripts/lens-api-section-contract.mjs
       - name: Source registry contract
         run: node scripts/source-registry-v1-contract.mjs
       - name: Repository quality coverage
