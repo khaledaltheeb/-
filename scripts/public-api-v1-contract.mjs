@@ -56,7 +56,11 @@ for (const marker of ["createHash('sha256')", "'x-api-key'", "'authorization'", 
 if (/service.role|SERVICE_ROLE|service_role_key/i.test(partner)) fail('partner API runtime must not embed a service-role secret');
 
 const openapi = fs.readFileSync('app/api/openapi.json/route.ts', 'utf8');
-for (const marker of ["openapi: '3.1.0'", "version: '1.2.0'", "'/content/{slug}/sources'", "'/sources/{id}'", "'/evidence-discovery'", "'/changes'", "'/search'", "'/stats'", 'PartnerApiKey', 'PartnerBearer', "'pages'", 'related_identifiers', 'crossref_cursor']) if (!openapi.includes(marker)) fail(`OpenAPI contract missing ${marker}`);
+for (const marker of ["openapi: '3.1.0'", "version: '1.2.0'", "'/content/{slug}/sources'", "'/sources/{id}'", "'/evidence-discovery'", "'/changes'", "'/search'", "'/stats'", 'PartnerApiKey', 'PartnerBearer', "'pages'", 'related_identifiers', 'crossref_cursor', 'EvidenceProviderStatus', 'EvidenceDiscoveryResponse']) if (!openapi.includes(marker)) fail(`OpenAPI contract missing ${marker}`);
+if (!openapi.includes("default: 'europe_pmc,crossref,datacite'")) fail('OpenAPI evidence provider default must exclude Lens');
+if (openapi.includes("default: 'europe_pmc,crossref,datacite,lens'")) fail('OpenAPI must never advertise Lens as a default provider');
+if (!openapi.includes('Lens is never included unless explicitly requested.')) fail('OpenAPI must describe Lens as explicit opt-in');
+if (!openapi.includes("enum: ['ok','not_configured','error']")) fail('OpenAPI provider status enum is incomplete');
 
 const migration = fs.readFileSync('supabase/migrations/20260901032000_public_api_v1_change_log.sql', 'utf8');
 for (const marker of ['enable row level security', 'api_change_log_public_read', 'api_public_stats', 'public_api_content_change_log']) if (!migration.includes(marker)) fail(`migration missing ${marker}`);
