@@ -50,8 +50,10 @@ const lensQuotaMigration = fs.readFileSync('supabase/migrations/20260907114800_l
 
 const lensRetractionGuard = lens.includes('function isRetracted') && lens.includes('update_nature') && lens.includes(".toLowerCase()") && lens.includes("nature === 'retraction'") && lens.includes('is_retracted: isRetracted(row.retraction_updates)');
 const lensAttributionContract = types.includes('EvidenceAttribution') && lens.includes("provider: 'The Lens'") && lens.includes('Data Sourced from The Lens') && lens.includes('https://about.lens.org/policies/#attribution') && route.includes('LENS_ATTRIBUTION');
-const lensOptInContract = route.includes("const DEFAULT_PROVIDERS: EvidenceProvider[] = ['europe_pmc', 'crossref', 'datacite']") && route.includes("providers.includes('lens')") && route.includes('requests_per_minute: 10') && route.includes('requests_per_month: 20000');
+const lensOptInContract = route.includes("const DEFAULT_PROVIDERS: EvidenceProvider[] = ['europe_pmc', 'crossref', 'datacite']") && route.includes("providers.includes('lens')") && route.includes('requests_per_minute: 10') && route.includes('requests_per_month: 20000') && openapi.includes("default: 'europe_pmc,crossref,datacite'") && !openapi.includes("default: 'europe_pmc,crossref,datacite,lens'");
 const lensQuotaContract = lens.includes('await acquireLensScholarlyQuota()') && lens.includes('attempts: 1') && lensQuota.includes("client.rpc('acquire_lens_scholarly_quota')") && lensQuota.includes('failed closed') && lensQuotaMigration.includes('private.lens_scholarly_usage_windows') && lensQuotaMigration.includes('pg_advisory_xact_lock') && lensQuotaMigration.includes("window_kind in ('minute','month')") && lensQuotaMigration.includes('v_minute_used >= 10') && lensQuotaMigration.includes('v_month_used >= 20000') && lensQuotaMigration.includes('grant execute on function public.acquire_lens_scholarly_quota() to service_role') && lensQuotaMigration.includes('revoke all on function public.acquire_lens_scholarly_quota() from public, anon, authenticated');
+const lensAuthorContract = lens.includes('collective_name') && lens.includes("text(row.display_name) || text(row.collective_name) || personalName || null");
+const lensOpenApiContract = openapi.includes('EvidenceProviderStatus') && openapi.includes('EvidenceDiscoveryResponse') && openapi.includes("enum: ['ok','not_configured','error']") && openapi.includes('Lens is never included unless explicitly requested.');
 const crossrefContract = crossref.includes('https://api.crossref.org/works') && crossref.includes("'query.bibliographic'") && crossref.includes('mailto') && crossref.includes("'User-Agent'") && crossref.includes("cursor: options.cursor?.trim() || '*'") && crossref.includes('from-update-date') && crossref.includes('from-index-date') && crossref.includes('relations(row');
 const dataCiteContract = datacite.includes('https://api.datacite.org/dois') && datacite.includes("'page[cursor]'" ) && datacite.includes("affiliation: 'true'") && datacite.includes("publisher: 'true'") && datacite.includes("detail: 'true'") && datacite.includes('nameIdentifierScheme') && datacite.includes('relatedIdentifiers') && datacite.includes('affiliationIdentifierScheme');
 const developerEvidenceContract = developers.includes('/api/v1/evidence-discovery') && developers.includes('europe_pmc') && developers.includes('crossref') && developers.includes('LENS_SCHOLARLY_API_TOKEN') && developers.includes('Lens Labs') && developers.includes('opt-in') && developers.includes('20,000') && developers.includes('The Lens attribution policy') && developers.includes('ROR') && developers.includes('ORCID') && developers.includes('related_identifiers') && developers.includes('rights_profiles') && developers.includes('translations') && developers.includes('503') && developers.includes('إعادة نشر');
@@ -64,8 +66,10 @@ const checks = [
   [lens.includes('Bearer ${token}'), 'Lens Bearer authorization missing'],
   [lensRetractionGuard, 'Lens retraction semantic guard missing'],
   [lensAttributionContract, 'Lens attribution contract missing'],
-  [lensOptInContract, 'Lens opt-in/rate-allocation contract missing'],
+  [lensOptInContract, 'Lens opt-in/rate-allocation/OpenAPI default contract missing'],
   [lensQuotaContract, 'Lens distributed quota/fail-closed/no-retry contract missing'],
+  [lensAuthorContract, 'Lens collective author preservation missing'],
+  [lensOpenApiContract, 'Lens typed OpenAPI provider contract missing'],
   [lensLabsDocumentationContract, 'Lens Labs implementation documentation missing'],
   [crossrefContract, 'Crossref polite-pool/cursor/incremental contract missing'],
   [dataCiteContract, 'DataCite REST/identifier/affiliation contract missing'],
