@@ -85,7 +85,11 @@ async function staticPageResponse(request, env, url, pathname) {
   if (isRscRequest(request, url)) return assetFetch(request, env, `${normalized}index.rsc`);
   const accept = (request.headers.get('accept') || '').toLowerCase();
   if (!accept.includes('text/html') && !accept.includes('*/*') && request.method !== 'HEAD') return null;
-  return assetFetch(request, env, `${normalized}index.html`);
+  // Ask Cloudflare Static Assets for the directory URL, not index.html directly.
+  // With automatic HTML handling an explicit /index.html can redirect back to the
+  // directory URL; serving the normalized route avoids a redirect loop and lets
+  // the asset binding resolve the materialized index.html itself.
+  return assetFetch(request, env, normalized);
 }
 
 async function kidsLabStaticResponse(request, env, url) {
