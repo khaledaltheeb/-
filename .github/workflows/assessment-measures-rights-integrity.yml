@@ -1,0 +1,38 @@
+name: Assessment Measures Rights Integrity
+
+on:
+  push:
+    branches: ['main']
+    paths:
+      - 'lib/assessment-measures.ts'
+      - 'lib/assessment-measures-wave*.ts'
+      - 'lib/assessment-measures-catalog.ts'
+      - 'lib/assessment-measures-rights-review.ts'
+      - 'app/assessment-measures/rights-register/page.tsx'
+      - 'scripts/assessment-measures-rights-integrity-contract.mjs'
+      - '.github/workflows/assessment-measures-rights-integrity.yml'
+  pull_request:
+    paths:
+      - 'lib/assessment-measures.ts'
+      - 'lib/assessment-measures-wave*.ts'
+      - 'lib/assessment-measures-catalog.ts'
+      - 'lib/assessment-measures-rights-review.ts'
+      - 'app/assessment-measures/rights-register/page.tsx'
+      - 'scripts/assessment-measures-rights-integrity-contract.mjs'
+      - '.github/workflows/assessment-measures-rights-integrity.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rights-integrity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Verify Assessment Measures rights integrity across Waves 1-12
+        run: node scripts/assessment-measures-rights-integrity-contract.mjs
