@@ -8,6 +8,28 @@ const CANONICAL_HOST = 'healthrenewal.org';
 const WWW_HOST = 'www.healthrenewal.org';
 const CACHEABLE_METHODS = new Set(['GET', 'HEAD']);
 
+// Production robots.txt is intentionally served directly by the Cloudflare gateway.
+// This keeps crawler discovery independent from Next.js middleware, Supabase session
+// refreshes, redirect lookups, ISR and origin dependencies. The wildcard rule is the
+// standards-based way to allow every current and future search/AI crawler that honors
+// robots.txt; no crawler-specific Disallow rule can accidentally override it.
+const ROBOTS_TXT = [
+  'User-agent: *',
+  'Allow: /',
+  '',
+  'Sitemap: https://healthrenewal.org/sitemap.xml',
+  'Host: healthrenewal.org',
+  '',
+].join('\n');
+
+const ROBOTS_HEADERS = {
+  'Content-Type': 'text/plain; charset=utf-8',
+  'Cache-Control': 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800',
+  'X-Content-Type-Options': 'nosniff',
+  'X-Robots-Tag': 'all',
+  'Access-Control-Allow-Origin': '*',
+};
+
 // These routes are intentionally kept on the uncached gateway path. This avoids a
 // cache lookup for authentication/session traffic and for endpoints whose responses
 // are explicitly dynamic/private. All other anonymous canonical GET/HEAD requests
@@ -57,6 +79,11 @@ function shouldBypassPublicCache(request, url) {
   return UNCACHED_PREFIXES.some((prefix) => isPrefix(url.pathname, prefix));
 }
 
+function robotsResponse(request) {
+  const body = request.method === 'HEAD' ? null : ROBOTS_TXT;
+  return new Response(body, { status: 200, headers: ROBOTS_HEADERS });
+}
+
 export class OpenNextBackend extends WorkerEntrypoint {
   async fetch(request) {
     return handler.fetch(request, this.env, this.ctx);
@@ -75,6 +102,16 @@ const gateway = {
       url.hostname = CANONICAL_HOST;
       url.port = '';
       return Response.redirect(url.toString(), 308);
+    }
+
+    // Search engines, AI crawlers and audit tools must never wait on application
+    // middleware or database/network dependencies just to discover crawl policy.
+    if (
+      url.hostname.toLowerCase() === CANONICAL_HOST
+      && url.pathname === '/robots.txt'
+      && CACHEABLE_METHODS.has(request.method)
+    ) {
+      return robotsResponse(request);
     }
 
     // Staging/preview hosts, authenticated traffic, mutation methods, auth pages and
