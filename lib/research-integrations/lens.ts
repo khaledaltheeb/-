@@ -1,8 +1,11 @@
 import { requestJson } from '@/lib/research-integrations/http';
+import { acquireLensScholarlyQuota } from '@/lib/research-integrations/lens-quota';
 import type { EvidenceAffiliation, EvidenceAuthor, EvidenceRecord, EvidenceSearchPage } from '@/lib/research-integrations/types';
 import { normalizeRorId } from '@/lib/research-integrations/ror';
 
 const LENS_SCHOLARLY_ENDPOINT = 'https://api.lens.org/scholarly/search';
+const LENS_ATTRIBUTION_URL = 'https://www.lens.org/';
+const LENS_TERMS_URL = 'https://about.lens.org/policies/#attribution';
 
 type JsonRecord = Record<string, unknown>;
 function record(value: unknown): JsonRecord | null { return value && typeof value === 'object' && !Array.isArray(value) ? value as JsonRecord : null; }
@@ -39,7 +42,8 @@ function authors(value: unknown): EvidenceAuthor[] {
   return asArray(value).flatMap((item) => {
     const row = record(item);
     if (!row) return [];
-    const display = text(row.display_name) || [text(row.first_name), text(row.last_name)].filter(Boolean).join(' ');
+    const personalName = [text(row.first_name), text(row.last_name)].filter(Boolean).join(' ');
+    const display = text(row.display_name) || text(row.collective_name) || personalName || null;
     if (!display) return [];
     const identifiers = ids(row.ids);
     return [{ display_name: display, orcid: identifiers.orcid || null, affiliations: affiliations(row.affiliations) }];
@@ -77,6 +81,12 @@ function normalizeLensResult(value: unknown, retrievedAt: string, queryDescripti
     is_open_access: typeof row.is_open_access === 'boolean' ? row.is_open_access : openAccess ? true : null,
     is_retracted: isRetracted(row.retraction_updates),
     url: `https://www.lens.org/lens/scholar/article/${encodeURIComponent(lensId)}`,
+    attribution: {
+      provider: 'The Lens',
+      label: 'Data Sourced from The Lens',
+      url: LENS_ATTRIBUTION_URL,
+      terms_url: LENS_TERMS_URL,
+    },
     provenance: { retrieved_at: retrievedAt, endpoint: LENS_SCHOLARLY_ENDPOINT, query: queryDescription },
   };
 }
@@ -103,9 +113,16 @@ export async function searchLensScholarly(options: LensSearchOptions): Promise<E
   ];
   const payload: JsonRecord = { query: options.query, size, from, include };
   if (options.sort?.length) payload.sort = options.sort;
+
+  // Reserve shared quota before contacting Lens. This is deliberately fail-closed
+  // and uses a single upstream attempt so one user request cannot amplify into
+  // multiple counted Lens requests during transient upstream failures.
+  await acquireLensScholarlyQuota();
   const response = await requestJson<JsonRecord>({
     provider: 'Lens Scholarly API',
     url: LENS_SCHOLARLY_ENDPOINT,
+    attempts: 1,
+    timeout_ms: 12_000,
     init: {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', Accept: 'application/json' },

@@ -28,6 +28,13 @@ export type EvidenceRelation = {
   source?: string | null;
 };
 
+export type EvidenceAttribution = {
+  provider: string;
+  label: string;
+  url: string;
+  terms_url?: string | null;
+};
+
 export type EvidenceRecord = {
   provider: EvidenceProvider;
   provider_id: string;
@@ -45,6 +52,7 @@ export type EvidenceRecord = {
   is_open_access: boolean | null;
   is_retracted: boolean | null;
   url: string | null;
+  attribution?: EvidenceAttribution | null;
   provenance: {
     retrieved_at: string;
     endpoint: string;
