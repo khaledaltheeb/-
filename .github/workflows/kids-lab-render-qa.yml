@@ -34,6 +34,9 @@ jobs:
       - name: Lint Kids Lab live route checker
         run: npx eslint scripts/kids-lab-live-route-check.mjs --quiet
 
+      - name: Require build-time static worksheet image routes
+        run: node scripts/kids-lab-static-image-contract.mjs
+
       - name: Validate all Kids Lab routes, levels and tests
         run: node scripts/kids-lab-route-contract.mjs
 
