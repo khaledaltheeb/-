@@ -52,10 +52,10 @@ export async function GET(request: Request) {
       ], responses: { '200': { description: 'Search results' }, '400': { $ref: '#/components/responses/BadRequest' }, ...partnerResponses } } },
       '/evidence-discovery': { get: {
         tags: ['Evidence'], operationId: 'discoverEvidence', security: partnerSecurity,
-        description: 'Search normalized scholarly metadata across Europe PMC, Crossref, DataCite and, when configured, Lens Scholarly API. DataCite creator/contributor identifiers, affiliations and related identifiers are normalized when supplied. Provider failures are isolated.',
+        description: 'Search normalized scholarly metadata across Europe PMC, Crossref and DataCite by default. Lens Scholarly API is explicit opt-in only. DataCite creator/contributor identifiers, affiliations and related identifiers are normalized when supplied. Provider failures are isolated and reported per provider.',
         parameters: [
           { name: 'q', in: 'query', required: true, schema: { type: 'string', minLength: 2, maxLength: 500 } },
-          { name: 'providers', in: 'query', schema: { type: 'string', default: 'europe_pmc,crossref,datacite,lens' }, description: 'Comma-separated values: europe_pmc,crossref,datacite,lens.' },
+          { name: 'providers', in: 'query', schema: { type: 'string', default: 'europe_pmc,crossref,datacite' }, description: 'Comma-separated values: europe_pmc,crossref,datacite,lens. Lens is never included unless explicitly requested.' },
           { name: 'limit', in: 'query', schema: { type: 'integer', minimum: 1, maximum: 100, default: 20 }, description: 'Anonymous maximum 50; partner maximum 100.' },
           { name: 'cursor', in: 'query', schema: { type: 'string' }, deprecated: true, description: 'Backward-compatible alias for europe_pmc_cursor.' },
           { name: 'europe_pmc_cursor', in: 'query', schema: { type: 'string' }, description: 'Europe PMC cursorMark.' },
@@ -64,7 +64,11 @@ export async function GET(request: Request) {
           { name: 'crossref_from_update_date', in: 'query', schema: { type: 'string', format: 'date-time' }, description: 'Crossref incremental update-date lower bound.' },
           { name: 'crossref_from_index_date', in: 'query', schema: { type: 'string', format: 'date-time' }, description: 'Crossref incremental index-date lower bound.' },
         ],
-        responses: { '200': { description: 'Normalized evidence records with provider status, independent cursors and provenance' }, '400': { $ref: '#/components/responses/BadRequest' }, ...partnerResponses },
+        responses: {
+          '200': { description: 'Normalized evidence records with typed provider status, independent cursors and provenance', content: { 'application/json': { schema: { $ref: '#/components/schemas/EvidenceDiscoveryResponse' } } } },
+          '400': { $ref: '#/components/responses/BadRequest' },
+          ...partnerResponses,
+        },
       } },
       '/changes': { get: { tags: ['Synchronization'], operationId: 'listChanges', security: partnerSecurity, parameters: [
         { name: 'since', in: 'query', required: true, schema: { type: 'string', format: 'date-time' } },
@@ -82,6 +86,24 @@ export async function GET(request: Request) {
         PartnerBearer: { type: 'http', scheme: 'bearer', bearerFormat: 'rawafid_live_*' },
       },
       schemas: {
+        EvidenceProviderStatus: { type: 'object', required: ['provider','status','returned','total','next_cursor'], properties: {
+          provider: { type: 'string', enum: ['europe_pmc','crossref','datacite','lens'] },
+          status: { type: 'string', enum: ['ok','not_configured','error'] },
+          returned: { type: 'integer', minimum: 0 },
+          total: { type: ['integer','null'], minimum: 0 },
+          next_cursor: { type: ['string','null'] },
+          error: { type: 'object', properties: { code: { type: 'string', enum: ['rate_limited','provider_unavailable'] }, retryable: { type: 'boolean' } } },
+        } },
+        EvidenceDiscoveryResponse: { type: 'object', required: ['data','providers','meta'], properties: {
+          data: { type: 'array', items: { type: 'object' } },
+          providers: { type: 'array', items: { $ref: '#/components/schemas/EvidenceProviderStatus' } },
+          meta: { type: 'object', required: ['api_version','generated_at','query','requested_providers','default_providers','lens'], properties: {
+            api_version: { type: 'string' }, generated_at: { type: 'string', format: 'date-time' }, query: { type: 'string' },
+            requested_providers: { type: 'array', items: { type: 'string', enum: ['europe_pmc','crossref','datacite','lens'] } },
+            default_providers: { type: 'array', items: { type: 'string', enum: ['europe_pmc','crossref','datacite'] } },
+            lens: { type: 'object' }, note: { type: 'string' },
+          } },
+        } },
         RelatedIdentifier: { type: 'object', properties: { identifier: { type: 'string' }, identifier_type: { type: 'string' }, relation_type: { type: 'string' }, relation_scheme: { type: 'string' }, related_metadata_scheme: { type: ['string','null'] }, scheme_uri: { type: ['string','null'] }, scheme_type: { type: ['string','null'] }, verified_at: { type: ['string','null'], format: 'date-time' } } },
         SourceContributor: { type: 'object', properties: { display_name: { type: 'string' }, contributor_type: { type: 'string' }, position: { type: ['integer','null'] }, orcid: { type: ['string','null'], format: 'uri' }, affiliations: { type: 'array', items: { type: 'object' } } } },
         SourceRightsProfile: { type: 'object', properties: { source_version_id: { type: ['string','null'], format: 'uuid' }, metadata: { type: 'object', properties: { access_status: { enum: ['unknown','public','restricted','embargoed'] }, reuse_status: { enum: ['unknown','allowed','conditional','prohibited'] }, license: { type: ['string','null'] }, terms_url: { type: ['string','null'], format: 'uri' } } }, content: { type: 'object', properties: { access_status: { enum: ['unknown','public','restricted','embargoed'] }, reuse_status: { enum: ['unknown','allowed','conditional','prohibited'] }, license: { type: ['string','null'] }, terms_url: { type: ['string','null'], format: 'uri' } } }, rights_basis: { enum: ['unknown','provider_terms','record_license','direct_permission','public_domain','other'] }, verified_at: { type: ['string','null'], format: 'date-time' } } },
