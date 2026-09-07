@@ -8,8 +8,8 @@ export async function GET() {
     { path: '/institutions/arabic-rtl-assurance', changeFrequency: 'monthly', priority: .68 },
     { path: '/institutions/terminology-qa', changeFrequency: 'monthly', priority: .68 },
     { path: '/institutions/open-source', changeFrequency: 'monthly', priority: .66 },
-    { path: '/media', changeFrequency: 'weekly', priority: .66 },
-    { path: '/external-review', changeFrequency: 'monthly', priority: .62 },
+    { path: '/media/', changeFrequency: 'weekly', priority: .66 },
+    { path: '/external-review/', changeFrequency: 'monthly', priority: .62 },
     { path: '/accessibility-statement', changeFrequency: 'monthly', priority: .64 },
   ]);
 }
