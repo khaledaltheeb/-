@@ -37,7 +37,7 @@ export default function GuidedAssessmentPage() {
             <nav className={styles.breadcrumbs} aria-label="مسار الصفحة"><Link href="/">الرئيسية</Link><span>/</span><span>الأسئلة الاسترشادية</span></nav>
             <span className={styles.eyebrow}>تحضير للمقابلة · لا تشخيص ذاتي</span>
             <h1>نظّم ما تريد مناقشته مع المختص بدل البحث عن «نتيجة» من قائمة أسئلة</h1>
-            <p className={styles.lead}>هذه الأداة تعيد تنظيم مئة صفحة قديمة متشابهة في بنك واحد واضح. اختر الموضوع والفئة العمرية، ثم استخدم الأسئلة لتجهيز أمثلة ومعلومات قد تساعد الحوار مع مقدم الرعاية. لا تمنح الأداة درجة، ولا تقرر وجود اضطراب، ولا تستبدل التقييم المهني.</p>
+            <p className={styles.lead}>هذه الأداة تعيد تنظيم مئة صفحة قديمة في بنك واحد واضح. لكل موضوع قائمة تحضير أساسية، ثم أسئلة تركيز خاصة به، وحدود تفسير تمنع التشخيص الذاتي، وإرشاد سلامة عند الحاجة، ومراجع سلطوية مرتبطة بالموضوع. اختر الموضوع والفئة العمرية وجهّز أمثلة ومعلومات تساعد الحوار مع مقدم الرعاية؛ لا توجد درجة تشخيصية ولا استنتاج آلي.</p>
             <div className={styles.heroFacts} role="list" aria-label="حدود الأداة">
               <span role="listitem"><strong>50</strong> موضوعًا</span>
               <span role="listitem"><strong>100</strong> رابط تاريخي محفوظ</span>
@@ -64,7 +64,7 @@ export default function GuidedAssessmentPage() {
           <div className={styles.sectionHeading}>
             <span className={styles.eyebrow}>بنك الموضوعات</span>
             <h2 id="guided-directory-title">اختر الموضوع ثم النسخة المناسبة للعمر</h2>
-            <p>تفتح الروابط التاريخية نفسها، لكنها الآن تستخدم محركًا موحدًا بدل مئة صفحة رقيقة متكررة.</p>
+            <p>الروابط التاريخية المئة ما زالت محفوظة، لكنها لم تعد مجرد نسخ متشابهة من الأسئلة العامة: كل موضوع يعرض الآن طبقة تركيز خاصة، وحدود تفسير، وسلامة عند الحاجة، ومراجع مناسبة للسياق.</p>
           </div>
           {guidedAssessmentGroups.map((group) => (
             <section key={group} className={styles.topicGroup} aria-labelledby={`group-${guidedAssessmentGroups.indexOf(group)}`}>
