@@ -1,0 +1,31 @@
+name: Cognitive Tests Live Smoke
+
+on:
+  workflow_run:
+    workflows: ["Deploy Production Fast"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cognitive-tests-live-smoke
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Validate historical compatibility contract
+        run: node scripts/historical-functional-parity-contract.mjs
+      - name: Probe Cognitive Tests hub and 8 preserved routes
+        run: node .github/scripts/cognitive-tests-live-smoke.mjs
