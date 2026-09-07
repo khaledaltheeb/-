@@ -11,6 +11,7 @@ const REQUIRED_WORKSHEET_SLUGS = [
   'family-school-learning-communication',
 ];
 const TOOLKIT_SLUG = 'dyslexia-norway-school-observation-toolkit';
+const FLAT_TARGET = path.join(ROOT, 'public', 'practical-static');
 
 function walk(dir, files = []) {
   if (!fs.existsSync(dir)) return files;
@@ -48,6 +49,9 @@ function firstExisting(candidates) {
   return candidates.find((candidate) => fs.existsSync(candidate)) || null;
 }
 
+fs.rmSync(FLAT_TARGET, { recursive: true, force: true });
+fs.mkdirSync(FLAT_TARGET, { recursive: true });
+
 const worksheetSource = path.join(ROOT, '.next', 'server', 'app', 'resources', 'worksheets');
 const worksheetTarget = path.join(ROOT, 'public', 'resources', 'worksheets');
 const worksheetCounts = materializeRouteTree(worksheetSource, worksheetTarget);
@@ -57,12 +61,11 @@ for (const slug of REQUIRED_WORKSHEET_SLUGS) {
   const rsc = path.join(worksheetTarget, slug, 'index.rsc');
   if (!fs.existsSync(html)) throw new Error(`Required worksheet HTML was not materialized: ${slug}`);
   if (!fs.existsSync(rsc)) throw new Error(`Required worksheet RSC was not materialized: ${slug}`);
+  fs.copyFileSync(html, path.join(FLAT_TARGET, `${slug}.html`));
+  fs.copyFileSync(rsc, path.join(FLAT_TARGET, `${slug}.rsc`));
 }
 
 const evidenceRoot = path.join(ROOT, '.next', 'server', 'app', 'evidence-guides');
-const toolkitTarget = path.join(ROOT, 'public', 'evidence-guides', TOOLKIT_SLUG);
-fs.mkdirSync(toolkitTarget, { recursive: true });
-
 const toolkitHtmlSource = firstExisting([
   path.join(evidenceRoot, `${TOOLKIT_SLUG}.html`),
   path.join(evidenceRoot, TOOLKIT_SLUG, 'page.html'),
@@ -73,13 +76,21 @@ const toolkitRscSource = firstExisting([
   path.join(evidenceRoot, TOOLKIT_SLUG, 'page.rsc'),
   path.join(evidenceRoot, TOOLKIT_SLUG, 'index.rsc'),
 ]);
-
 if (!toolkitHtmlSource) throw new Error(`Required Dyslexia Norway toolkit HTML source was not found: ${TOOLKIT_SLUG}`);
 if (!toolkitRscSource) throw new Error(`Required Dyslexia Norway toolkit RSC source was not found: ${TOOLKIT_SLUG}`);
 
-const toolkitHtml = path.join(toolkitTarget, 'index.html');
-const toolkitRsc = path.join(toolkitTarget, 'index.rsc');
-fs.copyFileSync(toolkitHtmlSource, toolkitHtml);
-fs.copyFileSync(toolkitRscSource, toolkitRsc);
+const toolkitTarget = path.join(ROOT, 'public', 'evidence-guides', TOOLKIT_SLUG);
+fs.mkdirSync(toolkitTarget, { recursive: true });
+fs.copyFileSync(toolkitHtmlSource, path.join(toolkitTarget, 'index.html'));
+fs.copyFileSync(toolkitRscSource, path.join(toolkitTarget, 'index.rsc'));
+fs.copyFileSync(toolkitHtmlSource, path.join(FLAT_TARGET, `${TOOLKIT_SLUG}.html`));
+fs.copyFileSync(toolkitRscSource, path.join(FLAT_TARGET, `${TOOLKIT_SLUG}.rsc`));
 
-console.log(`Practical resource public asset staging complete: worksheets ${worksheetCounts.htmlCount} HTML / ${worksheetCounts.rscCount} RSC; toolkit HTML/RSC copied from ${path.relative(ROOT, toolkitHtmlSource)} and ${path.relative(ROOT, toolkitRscSource)}.`);
+for (const slug of [...REQUIRED_WORKSHEET_SLUGS, TOOLKIT_SLUG]) {
+  for (const extension of ['html','rsc']) {
+    const file = path.join(FLAT_TARGET, `${slug}.${extension}`);
+    if (!fs.existsSync(file) || fs.statSync(file).size === 0) throw new Error(`Required flat practical asset missing: ${slug}.${extension}`);
+  }
+}
+
+console.log(`Practical resource public asset staging complete: worksheets ${worksheetCounts.htmlCount} HTML / ${worksheetCounts.rscCount} RSC; 14 flat Dyslexia Norway assets created under public/practical-static.`);
