@@ -10,6 +10,7 @@ const work=read('app/resources/worksheets/[slug]/page.tsx');
 const resource=read('app/resources/[slug]/page.tsx');
 const materializer=read('scripts/materialize-practical-resources-static-html.mjs');
 const toolkit=read('app/evidence-guides/dyslexia-norway-school-observation-toolkit/page.tsx');
+const productionOpenNext=read('.github/open-next-production-cache.config.ts');
 
 const legacySlugs=[
  'education-not-diagnosis','support-before-judgment','reliable-mental-health-page',
@@ -29,5 +30,6 @@ if(!info.includes('resourceSafetyNote')||!work.includes('resourceSafetyNote')) f
 for(const marker of ['canonicalPath','base.alternates?.canonical','/resources/${slug}/','if(canonical===resourcePath)return base','robots:{index:false']) if(!resource.includes(marker)) fail(`resource canonical/indexing guard missing: ${marker}`);
 for(const marker of ["dynamic='force-static'",'dyslexia-norway-school-observation-toolkit','ContentRenderer','NEXT_PUBLIC_SUPABASE_URL']) if(!toolkit.includes(marker)) fail(`static toolkit route missing: ${marker}`);
 for(const marker of ['.next','server','app','resources','worksheets','index.html','index.rsc']) if(!materializer.includes(marker)) fail(`materializer contract missing: ${marker}`);
+if(!productionOpenNext.includes('node scripts/materialize-practical-resources-static-html.mjs')) fail('production OpenNext build must run practical resource static staging after next build');
 if(bad) process.exit(1);
-console.log('Practical resources contract passed: Dyslexia Norway worksheets are present, printable, statically staged for Cloudflare, and the school toolkit has a dedicated static route.');
+console.log('Practical resources contract passed: Dyslexia Norway worksheets are present, printable, statically staged for Cloudflare, the production OpenNext build requires that staging, and the school toolkit has a dedicated static route.');
