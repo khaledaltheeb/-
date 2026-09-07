@@ -40,5 +40,5 @@ if(!taxonomy.includes("other: 'أداة قياس خارج التصنيف الح�
 if(!fs.existsSync('scripts/assessment-measures-taxonomy-inventory.mjs')) fail('taxonomy inventory report is missing');
 if(failed)process.exit(1);
 
-execFileSync(process.execPath,['scripts/assessment-measures-taxonomy-inventory.mjs'],{stdio:'inherit'});
-console.log('Assessment Measures taxonomy contract passed: FDA-aligned COA types are separated from administration format and intended use; every detail exposes the boundary and the inventory reports remaining non-explicit decisions.');
+execFileSync(process.execPath,['scripts/assessment-measures-taxonomy-inventory.mjs','--require-all-explicit'],{stdio:'inherit'});
+console.log('Assessment Measures taxonomy contract passed: all published measures have explicit reviewed object-type decisions; FDA-aligned COA types remain separated from administration format and intended use.');
