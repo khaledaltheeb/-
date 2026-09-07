@@ -1,0 +1,51 @@
+name: Kids Lab Live QA
+
+on:
+  workflow_run:
+    workflows: ['Deploy Production Fast']
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: kids-lab-live-qa
+  cancel-in-progress: true
+
+jobs:
+  exhaustive-live-qa:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout deployed revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || 'main' }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Build exhaustive Kids Lab route manifest
+        run: node scripts/kids-lab-route-contract.mjs
+
+      - name: Verify every live Kids Lab page and worksheet
+        run: node scripts/kids-lab-live-route-check.mjs https://healthrenewal.org "${{ github.event.workflow_run.head_sha || github.sha }}"
+
+      - name: Upload exhaustive live QA reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kids-lab-live-qa
+          path: |
+            artifacts/kids-lab-routes
+            artifacts/kids-lab-live
+          if-no-files-found: warn
+          retention-days: 14
