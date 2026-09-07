@@ -49,6 +49,16 @@ function firstExisting(candidates) {
   return candidates.find((candidate) => fs.existsSync(candidate)) || null;
 }
 
+function writeFlatPair(slug, htmlSource, rscSource) {
+  // Keep normal extensions for diagnostics and raw, non-HTML extensions for
+  // direct Worker delivery. The raw variants bypass Cloudflare automatic HTML
+  // canonicalization/redirect behavior entirely.
+  fs.copyFileSync(htmlSource, path.join(FLAT_TARGET, `${slug}.html`));
+  fs.copyFileSync(rscSource, path.join(FLAT_TARGET, `${slug}.rsc`));
+  fs.copyFileSync(htmlSource, path.join(FLAT_TARGET, `${slug}.page-data`));
+  fs.copyFileSync(rscSource, path.join(FLAT_TARGET, `${slug}.rsc-data`));
+}
+
 fs.rmSync(FLAT_TARGET, { recursive: true, force: true });
 fs.mkdirSync(FLAT_TARGET, { recursive: true });
 
@@ -61,8 +71,7 @@ for (const slug of REQUIRED_WORKSHEET_SLUGS) {
   const rsc = path.join(worksheetTarget, slug, 'index.rsc');
   if (!fs.existsSync(html)) throw new Error(`Required worksheet HTML was not materialized: ${slug}`);
   if (!fs.existsSync(rsc)) throw new Error(`Required worksheet RSC was not materialized: ${slug}`);
-  fs.copyFileSync(html, path.join(FLAT_TARGET, `${slug}.html`));
-  fs.copyFileSync(rsc, path.join(FLAT_TARGET, `${slug}.rsc`));
+  writeFlatPair(slug, html, rsc);
 }
 
 const evidenceRoot = path.join(ROOT, '.next', 'server', 'app', 'evidence-guides');
@@ -83,14 +92,13 @@ const toolkitTarget = path.join(ROOT, 'public', 'evidence-guides', TOOLKIT_SLUG)
 fs.mkdirSync(toolkitTarget, { recursive: true });
 fs.copyFileSync(toolkitHtmlSource, path.join(toolkitTarget, 'index.html'));
 fs.copyFileSync(toolkitRscSource, path.join(toolkitTarget, 'index.rsc'));
-fs.copyFileSync(toolkitHtmlSource, path.join(FLAT_TARGET, `${TOOLKIT_SLUG}.html`));
-fs.copyFileSync(toolkitRscSource, path.join(FLAT_TARGET, `${TOOLKIT_SLUG}.rsc`));
+writeFlatPair(TOOLKIT_SLUG, toolkitHtmlSource, toolkitRscSource);
 
 for (const slug of [...REQUIRED_WORKSHEET_SLUGS, TOOLKIT_SLUG]) {
-  for (const extension of ['html','rsc']) {
+  for (const extension of ['html', 'rsc', 'page-data', 'rsc-data']) {
     const file = path.join(FLAT_TARGET, `${slug}.${extension}`);
     if (!fs.existsSync(file) || fs.statSync(file).size === 0) throw new Error(`Required flat practical asset missing: ${slug}.${extension}`);
   }
 }
 
-console.log(`Practical resource public asset staging complete: worksheets ${worksheetCounts.htmlCount} HTML / ${worksheetCounts.rscCount} RSC; 14 flat Dyslexia Norway assets created under public/practical-static.`);
+console.log(`Practical resource public asset staging complete: worksheets ${worksheetCounts.htmlCount} HTML / ${worksheetCounts.rscCount} RSC; 28 flat Dyslexia Norway assets created under public/practical-static, including raw Worker-safe HTML/RSC pairs.`);
