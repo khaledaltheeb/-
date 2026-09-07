@@ -11,6 +11,7 @@ const resource=read('app/resources/[slug]/page.tsx');
 const materializer=read('scripts/materialize-practical-resources-static-html.mjs');
 const toolkit=read('app/evidence-guides/dyslexia-norway-school-observation-toolkit/page.tsx');
 const productionOpenNext=read('.github/open-next-production-cache.config.ts');
+const worker=read('custom-worker.js');
 
 const legacySlugs=[
  'education-not-diagnosis','support-before-judgment','reliable-mental-health-page',
@@ -29,7 +30,11 @@ if(!form.includes('window.print')&&!read('components/print-resource-button.tsx')
 if(!info.includes('resourceSafetyNote')||!work.includes('resourceSafetyNote')) fail('safety boundary missing');
 for(const marker of ['canonicalPath','base.alternates?.canonical','/resources/${slug}/','if(canonical===resourcePath)return base','robots:{index:false']) if(!resource.includes(marker)) fail(`resource canonical/indexing guard missing: ${marker}`);
 for(const marker of ["dynamic='force-static'",'dyslexia-norway-school-observation-toolkit','ContentRenderer','NEXT_PUBLIC_SUPABASE_URL']) if(!toolkit.includes(marker)) fail(`static toolkit route missing: ${marker}`);
-for(const marker of ['.next','server','app','resources','worksheets','index.html','index.rsc']) if(!materializer.includes(marker)) fail(`materializer contract missing: ${marker}`);
+for(const marker of ['.next','server','app','resources','worksheets','index.html','index.rsc','page-data','rsc-data']) if(!materializer.includes(marker)) fail(`materializer contract missing: ${marker}`);
 if(!productionOpenNext.includes('node scripts/materialize-practical-resources-static-html.mjs')) fail('production OpenNext build must run practical resource static staging after next build');
+for(const marker of ['PRACTICAL_FLAT_PREFIX','PRACTICAL_WORKSHEET_SLUGS','flatPracticalResponse','firstAssetFetch','X-Rawafid-Static-Route','practicalResourcesStaticResponse']) if(!worker.includes(marker)) fail(`Cloudflare practical-resource fast path missing: ${marker}`);
+for(const slug of dyslexiaSlugs) if(!worker.includes(slug)) fail(`Cloudflare practical-resource slug missing: ${slug}`);
+if(!worker.includes('dyslexia-norway-school-observation-toolkit')) fail('Cloudflare toolkit fast path missing');
+if(worker.indexOf('practicalResourcesStaticResponse(request,env,url)')>worker.indexOf('shouldBypassPublicCache(request,url)')) fail('practical-resource fast path must run before the dynamic/cache backend decision');
 if(bad) process.exit(1);
-console.log('Practical resources contract passed: Dyslexia Norway worksheets are present, printable, statically staged for Cloudflare, the production OpenNext build requires that staging, and the school toolkit has a dedicated static route.');
+console.log('Practical resources contract passed: Dyslexia Norway worksheets are present, printable, statically staged for Cloudflare, protected by a resilient raw-to-route asset fallback, and served by the Worker fast path before OpenNext; the school toolkit has the same static delivery protection.');
