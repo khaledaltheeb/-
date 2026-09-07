@@ -1,0 +1,39 @@
+name: Editorial Recovery Preservation
+
+on:
+  pull_request:
+    paths:
+      - 'app/media/**'
+      - 'app/external-review/**'
+      - 'lib/editorial-evidence-guides.ts'
+      - 'lib/external-review-program.ts'
+      - 'lib/evidence-guides.ts'
+      - 'components/site-footer.tsx'
+      - 'scripts/editorial-recovery-contract.mjs'
+      - '.github/workflows/editorial-recovery-preservation.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'app/media/**'
+      - 'app/external-review/**'
+      - 'lib/editorial-evidence-guides.ts'
+      - 'lib/external-review-program.ts'
+      - 'lib/evidence-guides.ts'
+      - 'components/site-footer.tsx'
+      - 'scripts/editorial-recovery-contract.mjs'
+      - '.github/workflows/editorial-recovery-preservation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  editorial-recovery-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify recovered editorial guides and transparency routes
+        run: node scripts/editorial-recovery-contract.mjs
