@@ -1,4 +1,5 @@
 import { requestJson } from '@/lib/research-integrations/http';
+import { acquireLensScholarlyQuota } from '@/lib/research-integrations/lens-quota';
 import type { EvidenceAffiliation, EvidenceAuthor, EvidenceRecord, EvidenceSearchPage } from '@/lib/research-integrations/types';
 import { normalizeRorId } from '@/lib/research-integrations/ror';
 
@@ -81,7 +82,7 @@ function normalizeLensResult(value: unknown, retrievedAt: string, queryDescripti
     url: `https://www.lens.org/lens/scholar/article/${encodeURIComponent(lensId)}`,
     attribution: {
       provider: 'The Lens',
-      label: 'Scholarly metadata provided by The Lens',
+      label: 'Data Sourced from The Lens',
       url: LENS_ATTRIBUTION_URL,
       terms_url: LENS_TERMS_URL,
     },
@@ -111,9 +112,16 @@ export async function searchLensScholarly(options: LensSearchOptions): Promise<E
   ];
   const payload: JsonRecord = { query: options.query, size, from, include };
   if (options.sort?.length) payload.sort = options.sort;
+
+  // Reserve shared quota before contacting Lens. This is deliberately fail-closed
+  // and uses a single upstream attempt so one user request cannot amplify into
+  // multiple counted Lens requests during transient upstream failures.
+  await acquireLensScholarlyQuota();
   const response = await requestJson<JsonRecord>({
     provider: 'Lens Scholarly API',
     url: LENS_SCHOLARLY_ENDPOINT,
+    attempts: 1,
+    timeout_ms: 12_000,
     init: {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', Accept: 'application/json' },
