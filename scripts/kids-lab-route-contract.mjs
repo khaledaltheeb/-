@@ -54,6 +54,8 @@ function loadTsModule(file) {
     if (resolved) return loadTsModule(resolved);
     return nativeRequire(specifier);
   };
+  // The QA harness executes transpiled local TypeScript modules without changing application runtime code.
+  // eslint-disable-next-line no-new-func
   const fn = new Function('require', 'module', 'exports', '__filename', '__dirname', compiled);
   fn(localRequire, record, record.exports, absolute, path.dirname(absolute));
   return record.exports;
