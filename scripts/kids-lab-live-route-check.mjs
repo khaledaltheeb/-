@@ -50,7 +50,10 @@ async function fetchWithRetry(route, kind) {
       return;
     } catch (error) {
       lastError = error;
-      if (attempt < 3) { stats.retries += 1; await sleep(attempt * 500); }
+      if (attempt < 3) {
+        stats.retries += 1;
+        await sleep(attempt * 500);
+      }
     }
   }
   failures.push(`${kind} ${route}: ${lastError instanceof Error ? lastError.message : String(lastError)}`);
@@ -59,7 +62,7 @@ async function fetchWithRetry(route, kind) {
 async function runPool(routes, kind, concurrency = 16) {
   let index = 0;
   async function worker() {
-    while (true) {
+    while (index < routes.length) {
       const current = index;
       index += 1;
       if (current >= routes.length) return;
