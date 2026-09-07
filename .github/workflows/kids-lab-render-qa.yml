@@ -5,7 +5,7 @@ on:
     paths:
       - 'lib/capabilities/**'
       - 'app/capabilities/kids-lab/**'
-      - 'scripts/kids-lab-render-contract*.mjs'
+      - 'scripts/kids-lab-*.mjs'
       - '.github/workflows/kids-lab-render-qa.yml'
       - 'package.json'
   workflow_dispatch:
@@ -30,14 +30,19 @@ jobs:
       - name: TypeScript check
         run: npm run typecheck
 
+      - name: Validate all Kids Lab routes, levels and tests
+        run: node scripts/kids-lab-route-contract.mjs
+
       - name: Render and validate all 1000 Kids Lab items
         run: node scripts/kids-lab-render-contract-final.mjs
 
-      - name: Upload QA report and SVG samples
+      - name: Upload Kids Lab QA reports and SVG samples
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: kids-lab-render-qa
-          path: artifacts/kids-lab-qa
+          name: kids-lab-qa
+          path: |
+            artifacts/kids-lab-routes
+            artifacts/kids-lab-qa
           if-no-files-found: warn
           retention-days: 14
