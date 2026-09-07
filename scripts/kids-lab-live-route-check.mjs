@@ -34,7 +34,7 @@ async function fetchWithRetry(route, kind) {
         redirect: 'follow',
         headers: {
           Accept: kind === 'html' ? 'text/html,application/xhtml+xml' : 'image/svg+xml,image/*;q=0.8,*/*;q=0.5',
-          'User-Agent': 'Rawafid-Kids-Lab-Safe-Live-QA/2.0',
+          'User-Agent': 'Rawafid-Kids-Lab-Safe-Live-QA/3.0',
         },
         signal: AbortSignal.timeout(15000),
       });
@@ -44,7 +44,7 @@ async function fetchWithRetry(route, kind) {
       if (kind === 'html') {
         if (!contentType.toLowerCase().includes('text/html')) throw new Error(`unexpected content-type ${contentType || '(empty)'}`);
         if (!body.includes('<html') && !body.includes('<!DOCTYPE html')) throw new Error('response is not HTML');
-        if (/\b404\b[^<]{0,80}(?:not found|غير موجود)/i.test(body)) throw new Error('page body appears to be a 404 document');
+        if (!body.includes('/capabilities/kids-lab/') && !body.includes('مختبر الأطفال')) throw new Error('Kids Lab page marker is missing');
         if (/error code:\s*1102|cloudflare[^<]{0,80}1102/i.test(body)) throw new Error('Cloudflare 1102 detected in page body');
         if (testRoutes.has(route)) stats.testPages += 1;
         stats.html += 1;
@@ -52,6 +52,7 @@ async function fetchWithRetry(route, kind) {
         if (!contentType.toLowerCase().includes('image/svg+xml')) throw new Error(`unexpected content-type ${contentType || '(empty)'}`);
         if (!body.includes('<svg') || !body.includes('</svg>')) throw new Error('SVG envelope is missing');
         if (/\b(?:NaN|Infinity|undefined)\b/.test(body)) throw new Error('SVG contains an invalid runtime token');
+        if (/error code:\s*1102|cloudflare[^<]{0,80}1102/i.test(body)) throw new Error('Cloudflare 1102 detected in SVG response');
         if (testImageRoutes.has(route)) stats.testImages += 1;
         stats.images += 1;
       }
@@ -99,7 +100,7 @@ const report = {
   base,
   runId,
   scope,
-  mode: 'cache-friendly-low-concurrency',
+  mode: 'cache-friendly-low-concurrency-static-worksheet-aware',
   checkedAt: new Date().toISOString(),
   requested: { html: htmlRoutes.length, images: imageRoutes.length },
   stats,
