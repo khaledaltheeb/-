@@ -64,10 +64,20 @@ export const explicitOperationalMaterials: Record<string, AssessmentOperationalM
   ...assessmentOperationalFullFormsWave18,
 };
 
+// Rights hardening is fail-closed. PhenX currently states that HSI is freely available and
+// permission is not required for use, but that statement does not itself establish a right to
+// publish a new Arabic translation. Keep the scientific guide and generic documentation route,
+// while suppressing the authored Arabic operational form until translation/republication rights
+// are independently documented.
+export const rightsHardenedReferenceOnlyOperationalSlugs = new Set<string>([
+  'heaviness-of-smoking-index',
+]);
+
 export function hasExplicitOperationalMaterial(slug: string): boolean {
-  return Boolean(explicitOperationalMaterials[slug]);
+  return !rightsHardenedReferenceOnlyOperationalSlugs.has(slug) && Boolean(explicitOperationalMaterials[slug]);
 }
 
 export function getOperationalMaterial(measure: AssessmentMeasure): AssessmentOperationalMaterial {
+  if (rightsHardenedReferenceOnlyOperationalSlugs.has(measure.slug)) return getBaseOperationalMaterial(measure);
   return explicitOperationalMaterials[measure.slug] ?? getBaseOperationalMaterial(measure);
 }
