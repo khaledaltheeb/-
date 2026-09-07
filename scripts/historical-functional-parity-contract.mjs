@@ -27,6 +27,7 @@ if (!bad) {
   const assessmentsHub = read('app/assessments/page.tsx');
   const assessmentAliases = read('app/assessments/[slug]/page.tsx');
   const cognitiveMappings = read('lib/historical-cognitive-tests.ts');
+  const cognitiveHub = read('app/cognitive-tests/page.tsx');
   const cognitivePage = read('app/cognitive-tests/[slug]/page.tsx');
 
   for (const marker of [
@@ -72,13 +73,27 @@ if (!bad) {
   for (const value of cognitiveRoutes) {
     if (!cognitiveMappings.includes(value)) fail(`cognitive mapping missing ${value}`);
   }
+
+  if (!cognitiveHub.includes("path:'/cognitive-lab'") || !cognitiveHub.includes('index:false') || !cognitiveHub.includes('follow:true')) {
+    fail('historical cognitive hub must be noindex/follow and canonicalize to /cognitive-lab');
+  }
+  if (!cognitiveHub.includes('مسارات تاريخية محفوظة') || !cognitiveHub.includes('/cognitive-lab')) {
+    fail('historical cognitive hub must clearly identify Cognitive Lab as the current reference');
+  }
+
   if (!cognitivePage.includes('CognitiveLabRunner') || !cognitivePage.includes('ContentRenderer')) {
-    fail('historical cognitive route must run the real task and preserve original text until its own consolidation is completed');
+    fail('historical cognitive route must run the real task and preserve original text');
+  }
+  if (!cognitivePage.includes("path:`/cognitive-lab/${mapped}`") || !cognitivePage.includes('index:false') || !cognitivePage.includes('follow:true')) {
+    fail('historical cognitive detail routes must canonicalize to their Cognitive Lab tool and remain noindex/follow');
+  }
+  if (!cognitivePage.includes('المرجع الحالي: Cognitive Lab')) {
+    fail('historical cognitive detail route must explain the current reference surface');
   }
   if (/permanentRedirect|\bredirect\s*\(/.test(cognitivePage)) {
-    fail('cognitive-test redirects are not allowed until Cognitive Tests consolidation is explicitly completed');
+    fail('historical cognitive routes must remain functional in place rather than redirecting');
   }
 }
 
 if (bad) process.exit(1);
-console.log('Historical functional parity contract passed: assessments use one canonical representation with 3 preserved redirects; 8 cognitive tasks remain functional in place pending their dedicated consolidation.');
+console.log('Historical functional parity contract passed: assessments use one canonical representation with 3 preserved redirects; 8 cognitive aliases remain functional, noindex/follow, and canonicalized to Cognitive Lab.');
