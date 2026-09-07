@@ -39,17 +39,17 @@ function load(file) {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, esModuleInterop: true, jsx: ts.JsxEmit.ReactJSX },
     fileName: absolute,
   }).outputText;
-  const module = { exports: {} };
-  cache.set(absolute, module);
+  const loaded = { exports: {} };
+  cache.set(absolute, loaded);
   new Function('require','module','exports','__filename','__dirname', js)(
     (specifier) => { const found = local(absolute, specifier); return found ? load(found) : nativeRequire(specifier); },
-    module, module.exports, absolute, path.dirname(absolute),
+    loaded, loaded.exports, absolute, path.dirname(absolute),
   );
-  return module.exports;
+  return loaded.exports;
 }
 
-function activityArray(module, label) {
-  const candidates = Object.values(module)
+function activityArray(exportsObject, label) {
+  const candidates = Object.values(exportsObject)
     .filter((value) => Array.isArray(value) && value.length && value.slice(0, 5).every((item) => item && typeof item === 'object' && typeof item.slug === 'string' && Number.isInteger(item.level) && typeof item.kind === 'string'))
     .sort((a, b) => b.length - a.length);
   if (!candidates.length) throw new Error(`No activity array found for ${label}`);
