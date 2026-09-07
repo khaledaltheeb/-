@@ -1,0 +1,40 @@
+name: Assessment Measures Taxonomy Gate
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'lib/assessment-measure-taxonomy.ts'
+      - 'lib/assessment-measures*.ts'
+      - 'app/assessment-measures/**'
+      - 'scripts/assessment-measures-taxonomy-contract.mjs'
+  pull_request:
+    paths:
+      - 'lib/assessment-measure-taxonomy.ts'
+      - 'lib/assessment-measures*.ts'
+      - 'app/assessment-measures/**'
+      - 'scripts/assessment-measures-taxonomy-contract.mjs'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: assessment-measures-taxonomy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  taxonomy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Validate taxonomy structure and scientific boundaries
+        run: node scripts/assessment-measures-taxonomy-contract.mjs
+      - name: Lint taxonomy and comparison integration
+        run: |
+          npm ci --no-audit --no-fund
+          npx eslint lib/assessment-measure-taxonomy.ts app/assessment-measures/compare/page.tsx
