@@ -6,6 +6,13 @@ import { decoratePartnerResponse, withOptionalPartnerAccess } from '@/lib/partne
 export const dynamic = 'force-dynamic';
 
 const ALLOWED = new Set<EvidenceProvider>(['europe_pmc', 'crossref', 'datacite', 'lens']);
+const DEFAULT_PROVIDERS: EvidenceProvider[] = ['europe_pmc', 'crossref', 'datacite'];
+const LENS_ATTRIBUTION = {
+  provider: 'The Lens',
+  label: 'Scholarly metadata provided by The Lens',
+  url: 'https://www.lens.org/',
+  terms_url: 'https://about.lens.org/policies/#attribution',
+};
 
 function bounded(value: string | null, fallback: number, max: number) {
   const parsed = Number(value ?? fallback);
@@ -14,7 +21,7 @@ function bounded(value: string | null, fallback: number, max: number) {
 }
 
 function parseProviders(value: string | null): EvidenceProvider[] | null {
-  if (!value) return ['europe_pmc', 'crossref', 'datacite', 'lens'];
+  if (!value) return DEFAULT_PROVIDERS;
   const list = [...new Set(value.split(',').map((item) => item.trim().toLowerCase()).filter(Boolean))];
   if (!list.length || list.some((item) => !ALLOWED.has(item as EvidenceProvider))) return null;
   return list as EvidenceProvider[];
@@ -59,6 +66,15 @@ export async function GET(request: Request) {
       generated_at: new Date().toISOString(),
       query: q,
       requested_providers: providers,
+      default_providers: DEFAULT_PROVIDERS,
+      lens: providers.includes('lens') ? {
+        opt_in: true,
+        attribution: LENS_ATTRIBUTION,
+        plan_limits: { requests_per_minute: 10, requests_per_month: 20000 },
+      } : {
+        opt_in: false,
+        note: 'Lens is intentionally opt-in. Add lens to providers to use the configured Lens Scholarly API integration.',
+      },
       note: 'Discovery metadata is normalized from upstream services. Reuse rights remain governed by each source and record license.',
     },
   }, { cacheControl: 'public, max-age=0, s-maxage=300, stale-while-revalidate=900' });
