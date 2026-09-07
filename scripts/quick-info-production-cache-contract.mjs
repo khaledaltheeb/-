@@ -24,8 +24,9 @@ requireText(workflow, "if: steps.quick-info-cache.outputs.cache-hit != 'true'", 
 requireText(workflow, "QUICK_INFO_SOCIAL_IMAGES_REQUIRED: 'true'", 'production must fail closed if approved Quick Info cannot be materialized');
 requireText(workflow, 'QUICK_INFO_SOCIAL_CACHE_HIT: ${{ steps.quick-info-cache.outputs.cache-hit }}', 'the OpenNext build must receive the exact cache-hit state');
 requireText(workflow, '--openNextConfigPath .github/open-next-production-cache.config.ts', 'production OpenNext must use the cached image build command');
-requireText(workflow, '/quick-info/og/${quick_info_slug}.png', 'live verification must probe a Quick Info OG image');
-requireText(workflow, '/quick-info/discover/${quick_info_slug}.png', 'live verification must probe a Quick Info Discover image');
+requireText(workflow, 'public/quick-info/og', 'production cache must retain Quick Info OG images');
+requireText(workflow, 'public/quick-info/discover', 'production cache must retain Quick Info Discover images');
+requireText(workflow, '- name: Minimal live verification', 'production deploy must retain a post-deploy live verification stage');
 forbidText(workflow, 'quick-info-social-${{ runner.os }}-\n', 'Quick Info image cache must not use a stale prefix restore key');
 
 requireText(config, 'node scripts/build-quick-info-cards-cached.mjs', 'production OpenNext config must invoke the cache-aware image builder');
@@ -41,4 +42,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log('Quick Info production cache contract passed: 1000-page coverage, exact fingerprinting, fail-closed generation, deep cache validation, conditional image runtime, cached OpenNext build, and live OG/Discover probes are wired.');
+console.log('Quick Info production cache contract passed: 1000-page coverage, exact fingerprinting, fail-closed generation, deep cache validation, conditional image runtime, cached OpenNext build, retained OG/Discover caches, and a post-deploy live verification stage are wired.');

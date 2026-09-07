@@ -116,7 +116,7 @@ requireText(lighthouseWorkflow, "'ask_rawafid_assistant'", 'production Agentic L
 requireText(lighthouseWorkflow, 'Prewarm canonical homepage cache', 'production Lighthouse must prewarm the canonical homepage before measuring it');
 requireText(lighthouseWorkflow, "url='https://healthrenewal.org/'", 'homepage prewarm must target the canonical root URL rather than a query-string diagnostic key');
 requireText(lighthouseWorkflow, 'HOMEPAGE_PREWARM_SECOND_TTFB=', 'homepage prewarm must emit its second-hit TTFB for diagnostics');
-requireText(deployWorkflow, 'WEBMCP_LIVE_DIAGNOSTIC', 'production live verification must retain a non-blocking WebMCP diagnostic');
+requireText(deployWorkflow, "echo 'LIVE_OK homepage Kids Lab card'", 'production live verification must retain a fast homepage/Kids Lab smoke check while strict rendered WebMCP coverage remains enforced by the fast quality gate');
 forbidText(deployWorkflow, 'for attempt in $(seq 1 36); do', 'production deployment must not spend up to six minutes waiting for homepage ISR propagation');
 
 if (failures.length) {
@@ -124,4 +124,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log('PageSpeed performance contract passed: the homepage shell and assistant launcher stay server-only, the full assistant is browser-native lazy-loaded, the text LCP uses a zero-network system font, GA4 remains deferred but interaction-aware, heavy GTM is gated, WebMCP declarative coverage remains intact, imperative search and assistant tools are lifecycle-safe, origin isolation is explicit, optional Origin Trial activation is wired, the canonical homepage is prewarmed before Lighthouse, and production verification stays fast.');
+console.log('PageSpeed performance contract passed: the homepage shell and assistant launcher stay server-only, the full assistant is browser-native lazy-loaded, the text LCP uses a zero-network system font, GA4 remains deferred but interaction-aware, heavy GTM is gated, WebMCP declarative coverage remains intact, imperative search and assistant tools are lifecycle-safe, origin isolation is explicit, optional Origin Trial activation is wired, the canonical homepage is prewarmed before Lighthouse, strict WebMCP rendering remains enforced by the fast quality gate, and production verification stays fast.');
