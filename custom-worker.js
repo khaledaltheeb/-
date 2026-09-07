@@ -6,7 +6,9 @@ const CANONICAL_HOST = 'healthrenewal.org';
 const WWW_HOST = 'www.healthrenewal.org';
 const CACHEABLE_METHODS = new Set(['GET', 'HEAD']);
 const KIDS_LAB_PREFIX = '/capabilities/kids-lab';
-// Kids Lab static assets are materialized by the exact production OpenNext build before this gateway serves them.
+const WORKSHEETS_PREFIX = '/resources/worksheets';
+const DYSLEXIA_TOOLKIT_PATH = '/evidence-guides/dyslexia-norway-school-observation-toolkit';
+// Kids Lab and selected practical resources are materialized by the exact production OpenNext build before this gateway serves them.
 
 const ROBOTS_TXT = [
   'User-agent: *',
@@ -77,21 +79,33 @@ async function assetFetch(request, env, pathname) {
   return response.status === 404 ? null : response;
 }
 
+async function staticPageResponse(request, env, url, pathname) {
+  if (url.hostname.toLowerCase() !== CANONICAL_HOST || !CACHEABLE_METHODS.has(request.method)) return null;
+  const normalized = pathname.endsWith('/') ? pathname : `${pathname}/`;
+  if (isRscRequest(request, url)) return assetFetch(request, env, `${normalized}index.rsc`);
+  const accept = request.headers.get('accept') || '';
+  if (!accept.toLowerCase().includes('text/html') && request.method !== 'HEAD') return null;
+  return assetFetch(request, env, `${normalized}index.html`);
+}
+
 async function kidsLabStaticResponse(request, env, url) {
   if (url.hostname.toLowerCase() !== CANONICAL_HOST || !CACHEABLE_METHODS.has(request.method)) return null;
   if (!isPrefix(url.pathname, KIDS_LAB_PREFIX)) return null;
 
   const worksheet = kidsLabWorksheetAssetPath(url.pathname);
   if (worksheet) return assetFetch(request, env, worksheet);
+  return staticPageResponse(request, env, url, url.pathname);
+}
 
-  const normalized = url.pathname.endsWith('/') ? url.pathname : `${url.pathname}/`;
-  if (isRscRequest(request, url)) {
-    return assetFetch(request, env, `${normalized}index.rsc`);
+async function practicalResourcesStaticResponse(request, env, url) {
+  if (isPrefix(url.pathname, WORKSHEETS_PREFIX)) {
+    return staticPageResponse(request, env, url, url.pathname);
   }
-
-  const accept = request.headers.get('accept') || '';
-  if (!accept.toLowerCase().includes('text/html') && request.method !== 'HEAD') return null;
-  return assetFetch(request, env, `${normalized}index.html`);
+  const normalizedPath = url.pathname.endsWith('/') && url.pathname !== '/' ? url.pathname.slice(0, -1) : url.pathname;
+  if (normalizedPath === DYSLEXIA_TOOLKIT_PATH) {
+    return staticPageResponse(request, env, url, DYSLEXIA_TOOLKIT_PATH);
+  }
+  return null;
 }
 
 export class OpenNextBackend extends WorkerEntrypoint {
@@ -117,6 +131,9 @@ const gateway = {
 
     const kidsLabStatic = await kidsLabStaticResponse(request, env, url);
     if (kidsLabStatic) return kidsLabStatic;
+
+    const practicalStatic = await practicalResourcesStaticResponse(request, env, url);
+    if (practicalStatic) return practicalStatic;
 
     if (shouldBypassPublicCache(request, url)) {
       return handler.fetch(request, env, ctx);
