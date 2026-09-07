@@ -9,18 +9,19 @@ import {
   getLegacyGuidedAssessment,
   getTopicGuidance,
   getTopicReferences,
-  guidedAssessmentLegacySlugs,
 } from '@/lib/guided-assessment/catalog';
 import { breadcrumbJsonLd, buildSeoMetadata } from '@/lib/seo';
 import styles from '../guided-assessment.module.css';
 
 type Params = Promise<{ slug: string }>;
 
-export const dynamicParams = false;
-
-export function generateStaticParams() {
-  return guidedAssessmentLegacySlugs.map((slug) => ({ slug }));
-}
+// These 100 preserved aliases are intentionally rendered from local versioned
+// data at request time. OpenNext/Cloudflare was returning 500s while serving the
+// prerendered SSG aliases even though all 100 pages built successfully. Dynamic
+// rendering removes that cache/SSG dependency without introducing a database or
+// session dependency; middleware keeps anonymous GET/HEAD requests local.
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params;
