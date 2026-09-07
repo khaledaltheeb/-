@@ -11,6 +11,7 @@ on:
       - 'scripts/cloudflare-production-build.sh'
       - 'custom-worker.js'
       - '.github/workflows/kids-lab-render-qa.yml'
+      - '.github/workflows/deploy-production.yml'
       - 'eslint.config.mjs'
       - 'package.json'
   workflow_dispatch:
@@ -31,6 +32,13 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Install production image runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends fontconfig fonts-noto-core librsvg2-bin
 
       - name: TypeScript check
         run: npm run typecheck
@@ -55,6 +63,7 @@ jobs:
         run: |
           test "$(find public/kids-lab-assets -type f -name '*.svg' | wc -l)" -eq 1000
           test "$(find .open-next/assets/capabilities/kids-lab -type f -name 'index.html' | wc -l)" -ge 1000
+          test "$(find .open-next/assets/capabilities/kids-lab -type f -name 'index.rsc' | wc -l)" -ge 1000
           echo "Kids Lab production static asset fast path is materialized."
 
       - name: Upload Kids Lab QA reports and SVG samples
