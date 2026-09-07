@@ -42,6 +42,13 @@ async function assetFetch(request,env,pathname){
   const response=await env.ASSETS.fetch(new Request(target.toString(),{method:request.method,headers:request.headers}));
   return response.status===404?null:response;
 }
+async function firstAssetFetch(request,env,paths){
+  for(const pathname of paths){
+    const response=await assetFetch(request,env,pathname);
+    if(response)return response;
+  }
+  return null;
+}
 async function staticPageResponse(request,env,url,pathname){
   if(url.hostname.toLowerCase()!==CANONICAL_HOST||!CACHEABLE_METHODS.has(request.method))return null;
   const normalized=pathname.endsWith('/')?pathname:`${pathname}/`;
@@ -50,16 +57,21 @@ async function staticPageResponse(request,env,url,pathname){
   if(!accept.includes('text/html')&&!accept.includes('*/*')&&request.method!=='HEAD')return null;
   return assetFetch(request,env,normalized);
 }
-async function flatPracticalResponse(request,env,url,slug){
+async function flatPracticalResponse(request,env,url,slug,publicPath){
   if(url.hostname.toLowerCase()!==CANONICAL_HOST||!CACHEABLE_METHODS.has(request.method))return null;
   const rsc=isRscRequest(request,url);
   if(!rsc){
     const accept=(request.headers.get('accept')||'').toLowerCase();
     if(!accept.includes('text/html')&&!accept.includes('*/*')&&request.method!=='HEAD')return null;
   }
-  // Use opaque internal asset extensions so Cloudflare cannot apply automatic
-  // HTML canonicalization/redirects. Reconstruct the public response here.
-  const source=await assetFetch(request,env,`${PRACTICAL_FLAT_PREFIX}/${slug}.${rsc?'rsc-data':'page-data'}`);
+  // Prefer opaque internal assets so Cloudflare cannot canonicalize the HTML.
+  // Fall back to the normal materialized route assets so a missing opaque file
+  // can never push these public resources back through the dynamic backend.
+  const normalizedPublic=publicPath.endsWith('/')?publicPath:`${publicPath}/`;
+  const candidates=rsc
+    ? [`${PRACTICAL_FLAT_PREFIX}/${slug}.rsc-data`,`${PRACTICAL_FLAT_PREFIX}/${slug}.rsc`,`${normalizedPublic}index.rsc`]
+    : [`${PRACTICAL_FLAT_PREFIX}/${slug}.page-data`,`${PRACTICAL_FLAT_PREFIX}/${slug}.html`,normalizedPublic];
+  const source=await firstAssetFetch(request,env,candidates);
   if(!source)return null;
   const headers=new Headers(source.headers);
   headers.set('Content-Type',rsc?'text/x-component; charset=utf-8':'text/html; charset=utf-8');
@@ -76,8 +88,8 @@ async function kidsLabStaticResponse(request,env,url){
 async function practicalResourcesStaticResponse(request,env,url){
   const normalizedPath=url.pathname.endsWith('/')&&url.pathname!=='/'?url.pathname.slice(0,-1):url.pathname;
   const worksheetMatch=normalizedPath.match(/^\/resources\/worksheets\/([^/]+)$/);
-  if(worksheetMatch&&PRACTICAL_WORKSHEET_SLUGS.has(worksheetMatch[1]))return flatPracticalResponse(request,env,url,worksheetMatch[1]);
-  if(normalizedPath===DYSLEXIA_TOOLKIT_PATH)return flatPracticalResponse(request,env,url,'dyslexia-norway-school-observation-toolkit');
+  if(worksheetMatch&&PRACTICAL_WORKSHEET_SLUGS.has(worksheetMatch[1]))return flatPracticalResponse(request,env,url,worksheetMatch[1],normalizedPath);
+  if(normalizedPath===DYSLEXIA_TOOLKIT_PATH)return flatPracticalResponse(request,env,url,'dyslexia-norway-school-observation-toolkit',normalizedPath);
   if(isPrefix(url.pathname,WORKSHEETS_PREFIX))return staticPageResponse(request,env,url,url.pathname);
   return null;
 }
