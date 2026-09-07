@@ -1,0 +1,49 @@
+name: Homepage Discovery Preservation
+
+on:
+  pull_request:
+    paths:
+      - 'app/page.tsx'
+      - 'app/assessments/**'
+      - 'app/assessment-lab/**'
+      - 'app/assessment-measures/**'
+      - 'app/core-outcome-sets/**'
+      - 'app/guided-assessment/**'
+      - 'app/cognitive-lab/**'
+      - 'app/cognitive-tests/**'
+      - 'app/capabilities/kids-lab/**'
+      - 'app/daily-tools/**'
+      - 'scripts/home-discovery-contract.mjs'
+      - 'scripts/sitemap-preservation-contract.mjs'
+      - '.github/workflows/home-discovery-preservation.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'app/page.tsx'
+      - 'app/assessments/**'
+      - 'app/assessment-lab/**'
+      - 'app/assessment-measures/**'
+      - 'app/core-outcome-sets/**'
+      - 'app/guided-assessment/**'
+      - 'app/cognitive-lab/**'
+      - 'app/cognitive-tests/**'
+      - 'app/capabilities/kids-lab/**'
+      - 'app/daily-tools/**'
+      - 'scripts/home-discovery-contract.mjs'
+      - 'scripts/sitemap-preservation-contract.mjs'
+      - '.github/workflows/home-discovery-preservation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  discovery-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify unified discovery and no-loss compatibility surfaces
+        run: node scripts/home-discovery-contract.mjs
