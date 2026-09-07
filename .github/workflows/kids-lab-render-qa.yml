@@ -6,7 +6,12 @@ on:
       - 'lib/capabilities/**'
       - 'app/capabilities/kids-lab/**'
       - 'scripts/kids-lab-*.mjs'
+      - 'scripts/export-kids-lab-static-svg.mjs'
+      - 'scripts/materialize-kids-lab-static-html.mjs'
+      - 'scripts/cloudflare-production-build.sh'
+      - 'custom-worker.js'
       - '.github/workflows/kids-lab-render-qa.yml'
+      - '.github/workflows/deploy-production.yml'
       - 'eslint.config.mjs'
       - 'package.json'
   workflow_dispatch:
@@ -28,11 +33,18 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Install production image runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends fontconfig fonts-noto-core librsvg2-bin
+
       - name: TypeScript check
         run: npm run typecheck
 
       - name: Lint Kids Lab live route checker
-        run: npx eslint scripts/kids-lab-live-route-check.mjs --quiet
+        run: npx eslint scripts/kids-lab-live-route-check.mjs scripts/export-kids-lab-static-svg.mjs scripts/materialize-kids-lab-static-html.mjs --quiet
 
       - name: Require build-time static worksheet image routes
         run: node scripts/kids-lab-static-image-contract.mjs
@@ -42,6 +54,17 @@ jobs:
 
       - name: Render and validate all 1000 Kids Lab items
         run: node scripts/kids-lab-render-contract-final.mjs
+
+      - name: Build production Worker and materialize Kids Lab assets
+        run: bash scripts/cloudflare-production-build.sh
+
+      - name: Verify materialized production asset counts
+        shell: bash
+        run: |
+          test "$(find public/kids-lab-assets -type f -name '*.svg' | wc -l)" -eq 1000
+          test "$(find .open-next/assets/capabilities/kids-lab -type f -name 'index.html' | wc -l)" -ge 1000
+          test "$(find .open-next/assets/capabilities/kids-lab -type f -name 'index.rsc' | wc -l)" -ge 1000
+          echo "Kids Lab production static asset fast path is materialized."
 
       - name: Upload Kids Lab QA reports and SVG samples
         if: always()

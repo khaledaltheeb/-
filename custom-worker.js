@@ -1,18 +1,12 @@
 import { WorkerEntrypoint } from 'cloudflare:workers';
 
-// OpenNext generates this module during the production build. The custom worker is
-// the supported adapter pattern for reusing its generated fetch handler.
 import handler from './.open-next/worker.js';
 
 const CANONICAL_HOST = 'healthrenewal.org';
 const WWW_HOST = 'www.healthrenewal.org';
 const CACHEABLE_METHODS = new Set(['GET', 'HEAD']);
+const KIDS_LAB_PREFIX = '/capabilities/kids-lab';
 
-// Production robots.txt is intentionally served directly by the Cloudflare gateway.
-// This keeps crawler discovery independent from Next.js middleware, Supabase session
-// refreshes, redirect lookups, ISR and origin dependencies. The wildcard rule is the
-// standards-based way to allow every current and future search/AI crawler that honors
-// robots.txt; no crawler-specific Disallow rule can accidentally override it.
 const ROBOTS_TXT = [
   'User-agent: *',
   'Allow: /',
@@ -30,31 +24,8 @@ const ROBOTS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
 };
 
-// These routes are intentionally kept on the uncached gateway path. This avoids a
-// cache lookup for authentication/session traffic and for endpoints whose responses
-// are explicitly dynamic/private. All other anonymous canonical GET/HEAD requests
-// are allowed to reach the cached OpenNext backend, where the response Cache-Control
-// header remains the final authority over whether Cloudflare stores the response.
 const UNCACHED_PREFIXES = [
-  '/account',
-  '/admin',
-  '/api',
-  '/appointments',
-  '/auth',
-  '/center',
-  '/dashboard',
-  '/forgot-password',
-  '/login',
-  '/magazine',
-  '/messages',
-  '/mfa',
-  '/notifications',
-  '/register',
-  '/reset-password',
-  '/specialist',
-  '/specialists-partners/account',
-  '/specialists-partners/admin',
-  '/specialists-partners/portal',
+  '/account','/admin','/api','/appointments','/auth','/center','/dashboard','/forgot-password','/login','/magazine','/messages','/mfa','/notifications','/register','/reset-password','/specialist','/specialists-partners/account','/specialists-partners/admin','/specialists-partners/portal',
 ];
 
 function isPrefix(pathname, prefix) {
@@ -64,7 +35,6 @@ function isPrefix(pathname, prefix) {
 function hasSupabaseAuthCookie(request) {
   const header = request.headers.get('cookie');
   if (!header) return false;
-
   return header.split(';').some((part) => {
     const separator = part.indexOf('=');
     const name = (separator === -1 ? part : part.slice(0, separator)).trim();
@@ -84,6 +54,45 @@ function robotsResponse(request) {
   return new Response(body, { status: 200, headers: ROBOTS_HEADERS });
 }
 
+function kidsLabWorksheetAssetPath(pathname) {
+  const flat = pathname.match(/^\/capabilities\/kids-lab\/bilateral-tracks\/([^/]+)\/image\/?$/);
+  if (flat) return `/kids-lab-assets/bilateral-tracks/${flat[1]}.svg`;
+  const nested = pathname.match(/^\/capabilities\/kids-lab\/([^/]+)\/([^/]+)\/([^/]+)\/image\/?$/);
+  if (!nested) return null;
+  return `/kids-lab-assets/${nested[1]}/${nested[2]}/${nested[3]}.svg`;
+}
+
+function isRscRequest(request, url) {
+  return request.headers.get('rsc') === '1' || url.searchParams.has('_rsc');
+}
+
+async function assetFetch(request, env, pathname) {
+  if (!env.ASSETS) return null;
+  const target = new URL(request.url);
+  target.pathname = pathname;
+  target.search = '';
+  const assetRequest = new Request(target.toString(), { method: request.method, headers: request.headers });
+  const response = await env.ASSETS.fetch(assetRequest);
+  return response.status === 404 ? null : response;
+}
+
+async function kidsLabStaticResponse(request, env, url) {
+  if (url.hostname.toLowerCase() !== CANONICAL_HOST || !CACHEABLE_METHODS.has(request.method)) return null;
+  if (!isPrefix(url.pathname, KIDS_LAB_PREFIX)) return null;
+
+  const worksheet = kidsLabWorksheetAssetPath(url.pathname);
+  if (worksheet) return assetFetch(request, env, worksheet);
+
+  const normalized = url.pathname.endsWith('/') ? url.pathname : `${url.pathname}/`;
+  if (isRscRequest(request, url)) {
+    return assetFetch(request, env, `${normalized}index.rsc`);
+  }
+
+  const accept = request.headers.get('accept') || '';
+  if (!accept.toLowerCase().includes('text/html') && request.method !== 'HEAD') return null;
+  return assetFetch(request, env, `${normalized}index.html`);
+}
+
 export class OpenNextBackend extends WorkerEntrypoint {
   async fetch(request) {
     return handler.fetch(request, this.env, this.ctx);
@@ -94,9 +103,6 @@ const gateway = {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
 
-    // Keep canonical-host consolidation outside the cached backend. Workers Cache
-    // does not include the hostname in its key, so this prevents www and apex traffic
-    // from ever sharing a cached representation.
     if (url.hostname.toLowerCase() === WWW_HOST) {
       url.protocol = 'https:';
       url.hostname = CANONICAL_HOST;
@@ -104,30 +110,18 @@ const gateway = {
       return Response.redirect(url.toString(), 308);
     }
 
-    // Search engines, AI crawlers and audit tools must never wait on application
-    // middleware or database/network dependencies just to discover crawl policy.
-    if (
-      url.hostname.toLowerCase() === CANONICAL_HOST
-      && url.pathname === '/robots.txt'
-      && CACHEABLE_METHODS.has(request.method)
-    ) {
+    if (url.hostname.toLowerCase() === CANONICAL_HOST && url.pathname === '/robots.txt' && CACHEABLE_METHODS.has(request.method)) {
       return robotsResponse(request);
     }
 
-    // Staging/preview hosts, authenticated traffic, mutation methods, auth pages and
-    // dynamic APIs execute OpenNext directly. The gateway itself is configured with
-    // cache disabled, so these requests can never be satisfied by a public cache hit.
+    const kidsLabStatic = await kidsLabStaticResponse(request, env, url);
+    if (kidsLabStatic) return kidsLabStatic;
+
     if (shouldBypassPublicCache(request, url)) {
       return handler.fetch(request, env, ctx);
     }
 
-    // ctx.props participates in the Workers Cache key. Keeping a stable anonymous
-    // audience marker makes the cache namespace explicit and prevents future internal
-    // callers with different authorization context from colliding with public HTML.
-    const backend = ctx.exports.OpenNextBackend({
-      props: { audience: 'anonymous-public' },
-    });
-
+    const backend = ctx.exports.OpenNextBackend({ props: { audience: 'anonymous-public' } });
     return backend.fetch(request);
   },
 };

@@ -19,5 +19,11 @@ export ENABLE_RAWAFID_ASSISTANT='true'
 node scripts/build_psych_encyclopedia_assets.mjs
 node scripts/build_expanded_encyclopedia_assets.mjs
 node scripts/materialize-legacy-static-assets.mjs
+# Worksheet SVGs are deterministic repository data. Export them into public assets
+# before Next/OpenNext builds so Cloudflare can serve them without executing the Worker.
+node scripts/export-kids-lab-static-svg.mjs
 
 npx opennextjs-cloudflare build --env production
+# Copy the already-prerendered Kids Lab documents into the deployed static-assets
+# directory. The production gateway serves document requests from these files first.
+node scripts/materialize-kids-lab-static-html.mjs
