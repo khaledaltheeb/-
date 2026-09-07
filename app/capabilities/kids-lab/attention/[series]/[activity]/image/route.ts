@@ -1,8 +1,12 @@
 import { notFound } from 'next/navigation';
-import { getAttentionActivity } from '@/lib/capabilities/attention-lab';
+import { attentionActivities, getAttentionActivity } from '@/lib/capabilities/attention-lab';
 import { renderAttentionWorksheet } from '@/lib/capabilities/attention-svg';
 
 type Params = Promise<{ series: string; activity: string }>;
+
+export function generateStaticParams() {
+  return attentionActivities.map((item) => ({ series: item.seriesSlug, activity: item.slug }));
+}
 
 function escapeXml(value: string) {
   return value.replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;' }[char] ?? char));
@@ -40,7 +44,7 @@ export async function GET(_: Request, { params }: { params: Params }) {
   return new Response(svg, {
     headers: {
       'Content-Type': 'image/svg+xml; charset=utf-8',
-      'Cache-Control': 'public, max-age=86400, s-maxage=604800, stale-while-revalidate=2592000',
+      'Cache-Control': 'public, max-age=31536000, immutable',
       'Content-Disposition': `inline; filename="${series}-${activity}.svg"`,
     },
   });
