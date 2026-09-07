@@ -7,6 +7,7 @@ const LOCAL_PUBLIC_PREFIXES = [
   '/assessment-measures',
   '/guided-assessment',
   '/cognitive-lab',
+  '/capabilities/kids-lab',
   '/core-outcome-sets',
 ] as const;
 
