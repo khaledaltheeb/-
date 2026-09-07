@@ -30,6 +30,7 @@ export async function GET(request: Request) {
     servers: [{ url: `${SITE_URL}/api/v1`, description: 'Canonical production API' }],
     tags: [
       { name: 'Discovery' }, { name: 'Content' }, { name: 'Sources' }, { name: 'Search' }, { name: 'Evidence' },
+      { name: 'Lens', description: 'Dedicated Lens Scholarly API integration manifest and usage contract.' },
       { name: 'Taxonomy' }, { name: 'Synchronization' }, { name: 'Operations' },
     ],
     paths: {
@@ -70,6 +71,15 @@ export async function GET(request: Request) {
           ...partnerResponses,
         },
       } },
+      '/lens': { get: {
+        tags: ['Lens'],
+        operationId: 'getLensIntegrationManifest',
+        summary: 'Lens Scholarly API integration manifest',
+        description: 'Machine-readable Rawafid Lens integration status and contract. This endpoint never exposes the Lens credential and does not itself consume Lens upstream quota.',
+        responses: {
+          '200': { description: 'Lens integration manifest', content: { 'application/json': { schema: { $ref: '#/components/schemas/LensIntegrationManifest' } } } },
+        },
+      } },
       '/changes': { get: { tags: ['Synchronization'], operationId: 'listChanges', security: partnerSecurity, parameters: [
         { name: 'since', in: 'query', required: true, schema: { type: 'string', format: 'date-time' } },
         { name: 'limit', in: 'query', schema: { type: 'integer', minimum: 1, maximum: 1000, default: 100 } },
@@ -103,6 +113,29 @@ export async function GET(request: Request) {
             default_providers: { type: 'array', items: { type: 'string', enum: ['europe_pmc','crossref','datacite'] } },
             lens: { type: 'object' }, note: { type: 'string' },
           } },
+        } },
+        LensIntegrationManifest: { type: 'object', required: ['name','api_version','status','mode','search','attribution','identifiers','quota','security','privacy','rights','failure_behavior','documentation','openapi'], properties: {
+          name: { type: 'string' },
+          api_version: { type: 'string' },
+          status: { type: 'string', enum: ['configured','awaiting_credential'] },
+          mode: { type: 'string', const: 'explicit_opt_in' },
+          search: { type: 'object', required: ['endpoint','required_provider_parameter','default_provider_set_excludes_lens'], properties: {
+            endpoint: { type: 'string', const: '/api/v1/evidence-discovery' },
+            required_provider_parameter: { type: 'string', const: 'providers=lens' },
+            example: { type: 'string' }, mixed_example: { type: 'string' }, default_provider_set_excludes_lens: { type: 'boolean', const: true },
+          } },
+          attribution: { type: 'object', required: ['provider','label','url','terms_url'], properties: {
+            provider: { type: 'string', const: 'The Lens' }, label: { type: 'string', const: 'Data Sourced from The Lens' }, url: { type: 'string', format: 'uri' }, terms_url: { type: 'string', format: 'uri' },
+          } },
+          identifiers: { type: 'object', properties: { lens_id_preserved: { type: 'boolean', const: true }, record_fields: { type: 'array', items: { type: 'string' } }, original_record_link_preserved: { type: 'boolean', const: true } } },
+          quota: { type: 'object', required: ['requests_per_minute','requests_per_month','enforcement','accounting_scope','retries_per_upstream_request'], properties: {
+            requests_per_minute: { type: 'integer', const: 10 }, requests_per_month: { type: 'integer', const: 20000 }, enforcement: { type: 'string', const: 'distributed_fail_closed' }, accounting_scope: { type: 'string', const: 'global_service_allocation' }, retries_per_upstream_request: { type: 'integer', const: 0 },
+          } },
+          security: { type: 'object', properties: { credential: { type: 'string', const: 'server_side_only' }, credential_name: { type: 'string', const: 'LENS_SCHOLARLY_API_TOKEN' }, exposed_to_client: { type: 'boolean', const: false }, database_guard: { type: 'string' }, rpc_execution_role: { type: 'string', const: 'service_role_only' } } },
+          privacy: { type: 'object', properties: { lens_specific_user_tracking: { type: 'boolean', const: false }, lens_specific_user_profiles: { type: 'boolean', const: false }, lens_specific_fingerprinting: { type: 'boolean', const: false }, quota_accounting_contains_user_identifiers: { type: 'boolean', const: false } } },
+          rights: { type: 'object', properties: { metadata_discovery_only: { type: 'boolean', const: true }, api_access_does_not_imply_full_text_reuse_rights: { type: 'boolean', const: true }, redistribution_requires_upstream_rights_and_terms: { type: 'boolean', const: true }, lens_id_and_attribution_must_be_retained_when_lens_data_is_displayed_or_redistributed: { type: 'boolean', const: true } } },
+          failure_behavior: { type: 'object', properties: { missing_credential: { type: 'string' }, quota_exhausted: { type: 'string' }, quota_guard_unavailable: { type: 'string' }, other_providers_remain_available: { type: 'boolean', const: true } } },
+          documentation: { type: 'string', const: '/developers/lens' }, openapi: { type: 'string', const: '/api/openapi.json' },
         } },
         RelatedIdentifier: { type: 'object', properties: { identifier: { type: 'string' }, identifier_type: { type: 'string' }, relation_type: { type: 'string' }, relation_scheme: { type: 'string' }, related_metadata_scheme: { type: ['string','null'] }, scheme_uri: { type: ['string','null'] }, scheme_type: { type: ['string','null'] }, verified_at: { type: ['string','null'], format: 'date-time' } } },
         SourceContributor: { type: 'object', properties: { display_name: { type: 'string' }, contributor_type: { type: 'string' }, position: { type: ['integer','null'] }, orcid: { type: ['string','null'], format: 'uri' }, affiliations: { type: 'array', items: { type: 'object' } } } },
