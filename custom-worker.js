@@ -83,8 +83,8 @@ async function staticPageResponse(request, env, url, pathname) {
   if (url.hostname.toLowerCase() !== CANONICAL_HOST || !CACHEABLE_METHODS.has(request.method)) return null;
   const normalized = pathname.endsWith('/') ? pathname : `${pathname}/`;
   if (isRscRequest(request, url)) return assetFetch(request, env, `${normalized}index.rsc`);
-  const accept = request.headers.get('accept') || '';
-  if (!accept.toLowerCase().includes('text/html') && request.method !== 'HEAD') return null;
+  const accept = (request.headers.get('accept') || '').toLowerCase();
+  if (!accept.includes('text/html') && !accept.includes('*/*') && request.method !== 'HEAD') return null;
   return assetFetch(request, env, `${normalized}index.html`);
 }
 
