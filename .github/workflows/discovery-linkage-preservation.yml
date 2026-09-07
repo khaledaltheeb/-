@@ -1,0 +1,35 @@
+name: Discovery Linkage Preservation
+
+on:
+  pull_request:
+    paths:
+      - 'components/site-header.tsx'
+      - 'app/sitemap.xml/route.ts'
+      - 'app/sitemaps/discovery.xml/**'
+      - 'public/llms.txt'
+      - 'scripts/discovery-linkage-contract.mjs'
+      - '.github/workflows/discovery-linkage-preservation.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'components/site-header.tsx'
+      - 'app/sitemap.xml/route.ts'
+      - 'app/sitemaps/discovery.xml/**'
+      - 'public/llms.txt'
+      - 'scripts/discovery-linkage-contract.mjs'
+      - '.github/workflows/discovery-linkage-preservation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  discovery-linkage-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify header, sitemap, llms and historical route preservation
+        run: node scripts/discovery-linkage-contract.mjs
