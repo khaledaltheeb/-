@@ -50,13 +50,15 @@ function firstExisting(candidates) {
 }
 
 function writeFlatPair(slug, htmlSource, rscSource) {
-  // Keep normal extensions for diagnostics and raw, non-HTML extensions for
-  // direct Worker delivery. The raw variants bypass Cloudflare automatic HTML
-  // canonicalization/redirect behavior entirely.
+  // Keep normal extensions for diagnostics, opaque legacy fallbacks, and
+  // text-safe payloads. The .txt variants are intentionally simple static
+  // objects so Cloudflare Assets cannot apply HTML canonicalization rules.
   fs.copyFileSync(htmlSource, path.join(FLAT_TARGET, `${slug}.html`));
   fs.copyFileSync(rscSource, path.join(FLAT_TARGET, `${slug}.rsc`));
   fs.copyFileSync(htmlSource, path.join(FLAT_TARGET, `${slug}.page-data`));
   fs.copyFileSync(rscSource, path.join(FLAT_TARGET, `${slug}.rsc-data`));
+  fs.copyFileSync(htmlSource, path.join(FLAT_TARGET, `${slug}.html.txt`));
+  fs.copyFileSync(rscSource, path.join(FLAT_TARGET, `${slug}.rsc.txt`));
 }
 
 fs.rmSync(FLAT_TARGET, { recursive: true, force: true });
@@ -95,10 +97,10 @@ fs.copyFileSync(toolkitRscSource, path.join(toolkitTarget, 'index.rsc'));
 writeFlatPair(TOOLKIT_SLUG, toolkitHtmlSource, toolkitRscSource);
 
 for (const slug of [...REQUIRED_WORKSHEET_SLUGS, TOOLKIT_SLUG]) {
-  for (const extension of ['html', 'rsc', 'page-data', 'rsc-data']) {
+  for (const extension of ['html', 'rsc', 'page-data', 'rsc-data', 'html.txt', 'rsc.txt']) {
     const file = path.join(FLAT_TARGET, `${slug}.${extension}`);
     if (!fs.existsSync(file) || fs.statSync(file).size === 0) throw new Error(`Required flat practical asset missing: ${slug}.${extension}`);
   }
 }
 
-console.log(`Practical resource public asset staging complete: worksheets ${worksheetCounts.htmlCount} HTML / ${worksheetCounts.rscCount} RSC; 28 flat Dyslexia Norway assets created under public/practical-static, including raw Worker-safe HTML/RSC pairs.`);
+console.log(`Practical resource public asset staging complete: worksheets ${worksheetCounts.htmlCount} HTML / ${worksheetCounts.rscCount} RSC; 42 flat Dyslexia Norway assets created under public/practical-static, including text-safe Worker payloads.`);
