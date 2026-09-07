@@ -9,6 +9,7 @@ on:
       - 'app/developers/**'
       - 'examples/lens-scholarly-demo/**'
       - 'docs/integrations/research-evidence.md'
+      - 'docs/integrations/lens-labs.md'
       - 'scripts/research-integrations-contract.mjs'
       - 'scripts/source-registry-v1-contract.mjs'
       - 'supabase/migrations/20260901190000_ror_source_registry_v1.sql'
@@ -17,6 +18,7 @@ on:
       - 'supabase/migrations/20260901215918_source_governance_provenance_v1.sql'
       - 'supabase/migrations/20260901221854_source_governance_provenance_indexes_v1.sql'
       - 'supabase/migrations/20260901223500_datacite_content_relations_v1.sql'
+      - 'supabase/migrations/20260907114800_lens_scholarly_quota_guard.sql'
       - '.github/workflows/research-integrations.yml'
   workflow_dispatch:
 
@@ -28,8 +30,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
