@@ -3,6 +3,13 @@
 -- 10 requests per UTC minute and 20,000 requests per UTC month.
 -- The counter is consumed before the upstream request so retries, failures and
 -- concurrent app instances cannot silently exceed the allocation.
+--
+-- Security boundary:
+-- - privileged implementation lives in the non-exposed private schema;
+-- - public RPC is SECURITY INVOKER only and carries no elevated privileges;
+-- - both layers are executable by service_role only.
+
+create schema if not exists private;
 
 create table if not exists private.lens_scholarly_usage_windows (
   window_kind text not null check (window_kind in ('minute','month')),
@@ -12,12 +19,12 @@ create table if not exists private.lens_scholarly_usage_windows (
   primary key (window_kind, window_start)
 );
 
-revoke all on table private.lens_scholarly_usage_windows from public;
+revoke all on table private.lens_scholarly_usage_windows from public, anon, authenticated;
 
 create index if not exists lens_scholarly_usage_window_start_idx
   on private.lens_scholarly_usage_windows(window_start);
 
-create or replace function public.acquire_lens_scholarly_quota()
+create or replace function private.acquire_lens_scholarly_quota_internal()
 returns jsonb
 language plpgsql
 security definer
@@ -87,6 +94,21 @@ begin
     'month', jsonb_build_object('limit',20000,'remaining',greatest(20000-v_month_after,0),'reset_at',v_month_start+interval '1 month')
   );
 end;
+$$;
+
+revoke all on function private.acquire_lens_scholarly_quota_internal() from public, anon, authenticated;
+grant usage on schema private to service_role;
+grant execute on function private.acquire_lens_scholarly_quota_internal() to service_role;
+
+-- Data API callable surface. This wrapper intentionally has no elevated
+-- privileges; it succeeds only for roles that can execute the private helper.
+create or replace function public.acquire_lens_scholarly_quota()
+returns jsonb
+language sql
+security invoker
+set search_path=''
+as $$
+  select private.acquire_lens_scholarly_quota_internal();
 $$;
 
 revoke all on function public.acquire_lens_scholarly_quota() from public, anon, authenticated;
