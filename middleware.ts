@@ -5,6 +5,7 @@ import { updateSession } from '@/lib/supabase/proxy';
 const LOCAL_PUBLIC_PREFIXES = [
   '/assessment-lab',
   '/assessment-measures',
+  '/guided-assessment',
   '/cognitive-lab',
   '/core-outcome-sets',
 ] as const;
