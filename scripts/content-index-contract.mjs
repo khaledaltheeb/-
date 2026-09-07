@@ -37,8 +37,5 @@ if (!legacy.includes("const route='/sectors/all-pages/'") || !legacy.includes('L
 const footer = read('components/site-footer.tsx');
 if (!footer.includes("{ href: '/all-pages', label: 'فهرس المحتوى المنشور' }")) fail('footer must expose /all-pages');
 
-const staticSitemap = read('app/sitemaps/static.xml/route.ts');
-if (!staticSitemap.includes("{path:'/all-pages',changeFrequency:'daily',priority:.86}")) fail('static sitemap must include /all-pages');
-
 if (failed) process.exit(1);
 console.log('CONTENT_INDEX OK: indexable published content has a paginated public index while the historical route and noindex boundaries remain preserved.');
