@@ -1,0 +1,31 @@
+name: Guided Assessment Live Smoke
+
+on:
+  workflow_run:
+    workflows: ["Deploy Production Fast"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: guided-assessment-live-smoke
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Validate Guided Assessment source contracts
+        run: node scripts/guided-assessment-contract.mjs
+      - name: Probe Guided Assessment hub and all 100 preserved aliases
+        run: node .github/scripts/guided-assessment-live-smoke.mjs
