@@ -8,12 +8,14 @@ on:
       - 'lib/assessment-measures*.ts'
       - 'app/assessment-measures/**'
       - 'scripts/assessment-measures-taxonomy-contract.mjs'
+      - 'scripts/assessment-measures-taxonomy-inventory.mjs'
   pull_request:
     paths:
       - 'lib/assessment-measure-taxonomy.ts'
       - 'lib/assessment-measures*.ts'
       - 'app/assessment-measures/**'
       - 'scripts/assessment-measures-taxonomy-contract.mjs'
+      - 'scripts/assessment-measures-taxonomy-inventory.mjs'
   workflow_dispatch:
 
 permissions:
@@ -34,7 +36,7 @@ jobs:
           node-version: 24
       - name: Validate taxonomy structure and scientific boundaries
         run: node scripts/assessment-measures-taxonomy-contract.mjs
-      - name: Lint taxonomy and comparison integration
+      - name: Lint taxonomy and page integrations
         run: |
           npm ci --no-audit --no-fund
-          npx eslint lib/assessment-measure-taxonomy.ts app/assessment-measures/compare/page.tsx
+          npx eslint lib/assessment-measure-taxonomy.ts app/assessment-measures/compare/page.tsx 'app/assessment-measures/[slug]/page.tsx'
