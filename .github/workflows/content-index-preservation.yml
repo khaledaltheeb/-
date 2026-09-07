@@ -1,0 +1,35 @@
+name: Content Index Preservation
+
+on:
+  pull_request:
+    paths:
+      - 'app/all-pages/**'
+      - 'app/sectors/all-pages/**'
+      - 'components/site-footer.tsx'
+      - 'app/sitemaps/static.xml/route.ts'
+      - 'scripts/content-index-contract.mjs'
+      - '.github/workflows/content-index-preservation.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'app/all-pages/**'
+      - 'app/sectors/all-pages/**'
+      - 'components/site-footer.tsx'
+      - 'app/sitemaps/static.xml/route.ts'
+      - 'scripts/content-index-contract.mjs'
+      - '.github/workflows/content-index-preservation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  content-index-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify public index and preserved legacy route
+        run: node scripts/content-index-contract.mjs
