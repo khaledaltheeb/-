@@ -52,6 +52,7 @@ These limits are not documentation-only. Production reservations are enforced at
 - a transaction-scoped advisory lock serializes reservations;
 - minute and UTC-month windows are enforced independently;
 - Lens fails closed if the quota guard cannot be reached or returns an invalid state;
+- the quota guard is deliberately designed to **fail closed** rather than permit unmetered Lens traffic;
 - a denied reservation produces a provider-level rate-limit failure without calling Lens;
 - the Lens HTTP client uses one upstream attempt (`attempts: 1`) so a single user action cannot silently multiply Lens consumption through automatic retries;
 - Lens remains opt-in so generic evidence searches do not consume the allocation;
