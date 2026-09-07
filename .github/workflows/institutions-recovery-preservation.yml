@@ -1,0 +1,35 @@
+name: Institutions Recovery Preservation
+
+on:
+  pull_request:
+    paths:
+      - 'app/institutions/**'
+      - 'app/en/institutions/**'
+      - 'components/institutional-assurance-page.module.css'
+      - 'components/site-footer.tsx'
+      - 'scripts/institutions-recovery-contract.mjs'
+      - '.github/workflows/institutions-recovery-preservation.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'app/institutions/**'
+      - 'app/en/institutions/**'
+      - 'components/institutional-assurance-page.module.css'
+      - 'components/site-footer.tsx'
+      - 'scripts/institutions-recovery-contract.mjs'
+      - '.github/workflows/institutions-recovery-preservation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  institutions-recovery-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify recovered institutional routes and claims boundaries
+        run: node scripts/institutions-recovery-contract.mjs
