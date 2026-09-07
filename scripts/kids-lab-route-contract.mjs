@@ -37,25 +37,14 @@ function loadTs(file) {
   if (moduleCache.has(absolute)) return moduleCache.get(absolute).exports;
   const source = fs.readFileSync(absolute, 'utf8');
   const output = ts.transpileModule(source, {
-    compilerOptions: {
-      module: ts.ModuleKind.CommonJS,
-      target: ts.ScriptTarget.ES2022,
-      esModuleInterop: true,
-      jsx: ts.JsxEmit.ReactJSX,
-    },
+    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, esModuleInterop: true, jsx: ts.JsxEmit.ReactJSX },
     fileName: absolute,
   }).outputText;
   const record = { exports: {} };
   moduleCache.set(absolute, record);
   new Function('require', 'module', 'exports', '__filename', '__dirname', output)(
-    (specifier) => {
-      const local = localModule(absolute, specifier);
-      return local ? loadTs(local) : nativeRequire(specifier);
-    },
-    record,
-    record.exports,
-    absolute,
-    path.dirname(absolute),
+    (specifier) => { const local = localModule(absolute, specifier); return local ? loadTs(local) : nativeRequire(specifier); },
+    record, record.exports, absolute, path.dirname(absolute),
   );
   return record.exports;
 }
@@ -63,8 +52,7 @@ function loadTs(file) {
 function findActivities(module, key) {
   const arrays = Object.values(module)
     .filter((value) => Array.isArray(value) && value.length)
-    .filter((value) => value.slice(0, Math.min(5, value.length)).every((item) =>
-      item && typeof item === 'object' && typeof item.slug === 'string' && Number.isInteger(item.level) && typeof item.kind === 'string'))
+    .filter((value) => value.slice(0, Math.min(5, value.length)).every((item) => item && typeof item === 'object' && typeof item.slug === 'string' && Number.isInteger(item.level) && typeof item.kind === 'string'))
     .sort((a, b) => b.length - a.length);
   if (!arrays.length) throw new Error(`No activity array detected for ${key}`);
   return arrays[0];
@@ -75,42 +63,27 @@ function requiredFile(relative, failures, label) {
   if (!fs.existsSync(absolute)) failures.push(`${label}: missing ${relative}`);
   return fs.existsSync(absolute) ? fs.readFileSync(absolute, 'utf8') : '';
 }
+const normalizedRoute = (value) => value.endsWith('/') ? value : `${value}/`;
 
-function normalizedRoute(value) {
-  return value.endsWith('/') ? value : `${value}/`;
-}
-
-const failures = [];
-const warnings = [];
-const activityRecords = [];
-const seriesMap = new Map();
-const domainStats = [];
+const failures = [], warnings = [], activityRecords = [], seriesMap = new Map(), domainStats = [];
 const rootSource = requiredFile('app/capabilities/kids-lab/page.tsx', failures, 'Kids Lab hub');
 
 for (const domain of domains) {
   const module = loadTs(domain.data);
   const activities = findActivities(module, domain.key);
   let tests = 0;
-
-  const hubFile = `app/capabilities/kids-lab/${domain.route}/page.tsx`;
-  if (domain.mode === 'nested' || domain.route === 'bilateral-tracks') {
-    requiredFile(hubFile, failures, `${domain.key} hub`);
-  }
-
-  let seriesTemplate = '';
-  let activityTemplate = '';
-  let imageTemplate = '';
+  requiredFile(`app/capabilities/kids-lab/${domain.route}/page.tsx`, failures, `${domain.key} hub`);
+  let seriesTemplate = '', activityTemplate = '', imageTemplate = '';
   if (domain.mode === 'nested') {
     seriesTemplate = requiredFile(`app/capabilities/kids-lab/${domain.route}/[series]/page.tsx`, failures, `${domain.key} series template`);
     activityTemplate = requiredFile(`app/capabilities/kids-lab/${domain.route}/[series]/[activity]/page.tsx`, failures, `${domain.key} activity template`);
     imageTemplate = requiredFile(`app/capabilities/kids-lab/${domain.route}/[series]/[activity]/image/route.ts`, failures, `${domain.key} image route`);
     if (seriesTemplate && !seriesTemplate.includes('generateStaticParams')) failures.push(`${domain.key}: series page lacks generateStaticParams`);
-    if (activityTemplate && !activityTemplate.includes('generateStaticParams')) failures.push(`${domain.key}: activity page lacks generateStaticParams`);
   } else {
     activityTemplate = requiredFile(`app/capabilities/kids-lab/${domain.route}/[activity]/page.tsx`, failures, `${domain.key} activity template`);
     imageTemplate = requiredFile(`app/capabilities/kids-lab/${domain.route}/[activity]/image/route.ts`, failures, `${domain.key} image route`);
-    if (activityTemplate && !activityTemplate.includes('generateStaticParams')) failures.push(`${domain.key}: activity page lacks generateStaticParams`);
   }
+  if (activityTemplate && !activityTemplate.includes('generateStaticParams')) failures.push(`${domain.key}: activity page lacks generateStaticParams`);
   if (activityTemplate && !activityTemplate.includes('notFound')) failures.push(`${domain.key}: activity page lacks invalid-route notFound guard`);
   if (activityTemplate && !activityTemplate.includes('/image')) failures.push(`${domain.key}: activity page does not expose its worksheet image route`);
   if (imageTemplate && !/export\s+async\s+function\s+GET|export\s+function\s+GET/.test(imageTemplate)) failures.push(`${domain.key}: image route lacks GET handler`);
@@ -118,48 +91,27 @@ for (const domain of domains) {
   for (const activity of activities) {
     const seriesNumber = Number.isInteger(activity.seriesNumber) ? activity.seriesNumber : domain.fixedSeriesNumber;
     const seriesSlug = activity.seriesSlug ?? domain.fixedSeriesSlug;
-    if (!Number.isInteger(seriesNumber)) {
-      failures.push(`${domain.key}/${activity.slug}: missing series number`);
-      continue;
-    }
-    if (!seriesSlug) {
-      failures.push(`${domain.key}/${activity.slug}: missing series slug`);
-      continue;
-    }
+    if (!Number.isInteger(seriesNumber)) { failures.push(`${domain.key}/${activity.slug}: missing series number`); continue; }
+    if (!seriesSlug) { failures.push(`${domain.key}/${activity.slug}: missing series slug`); continue; }
     if (!Number.isInteger(activity.level) || activity.level < 1 || activity.level > 5) failures.push(`${domain.key}/${activity.slug}: invalid level ${activity.level}`);
     if (activity.kind === 'test') tests += 1;
-
-    const base = domain.mode === 'flat'
-      ? `/capabilities/kids-lab/${domain.route}/${activity.slug}`
-      : `/capabilities/kids-lab/${domain.route}/${seriesSlug}/${activity.slug}`;
-    const pageRoute = normalizedRoute(base);
-    const imageRoute = normalizedRoute(`${base}/image`);
-    activityRecords.push({
+    const base = domain.mode === 'flat' ? `/capabilities/kids-lab/${domain.route}/${activity.slug}` : `/capabilities/kids-lab/${domain.route}/${seriesSlug}/${activity.slug}`;
+    const record = {
       domain: domain.key,
       categorySlug: domain.categorySlug ?? domain.route,
       routeRoot: domain.route,
-      seriesNumber,
-      seriesSlug,
+      seriesNumber, seriesSlug,
       activitySlug: activity.slug,
       level: activity.level,
       kind: activity.kind,
-      pageRoute,
-      imageRoute,
-    });
-
-    if (!seriesMap.has(seriesNumber)) {
-      seriesMap.set(seriesNumber, {
-        number: seriesNumber,
-        slug: seriesSlug,
-        categorySlug: domain.categorySlug ?? domain.route,
-        routeRoot: domain.route,
-        mode: domain.mode,
-        items: [],
-      });
-    }
+      pageRoute: normalizedRoute(base),
+      imageRoute: normalizedRoute(`${base}/image`),
+    };
+    activityRecords.push(record);
+    if (!seriesMap.has(seriesNumber)) seriesMap.set(seriesNumber, { number: seriesNumber, slug: seriesSlug, categorySlug: record.categorySlug, routeRoot: domain.route, mode: domain.mode, items: [] });
     const series = seriesMap.get(seriesNumber);
     if (series.slug !== seriesSlug) failures.push(`Series ${seriesNumber}: conflicting slugs ${series.slug} / ${seriesSlug}`);
-    series.items.push(activityRecords.at(-1));
+    series.items.push(record);
   }
   domainStats.push({ domain: domain.key, items: activities.length, tests });
 }
@@ -168,109 +120,64 @@ const catalog = loadTs('lib/capabilities/kids-lab-catalog.ts');
 const catalogSeries = catalog.kidsLabSeries;
 if (!Array.isArray(catalogSeries)) failures.push('kidsLabSeries export is missing from catalog');
 const catalogByNumber = new Map((catalogSeries ?? []).map((item) => [item.number, item]));
-
 if (activityRecords.length !== 1000) failures.push(`Expected 1000 activity/test pages; got ${activityRecords.length}`);
 if (seriesMap.size !== 67) failures.push(`Expected 67 series; got ${seriesMap.size}`);
 const testCount = activityRecords.filter((item) => item.kind === 'test').length;
 if (testCount !== 335) failures.push(`Expected 335 level tests; got ${testCount}`);
 if ((catalogSeries ?? []).length !== 67) failures.push(`Catalog expected 67 series; got ${(catalogSeries ?? []).length}`);
 
-const pageRoutes = activityRecords.map((item) => item.pageRoute);
-const imageRoutes = activityRecords.map((item) => item.imageRoute);
+const pageRoutes = activityRecords.map((item) => item.pageRoute), imageRoutes = activityRecords.map((item) => item.imageRoute);
 for (const [label, routes] of [['activity page', pageRoutes], ['image', imageRoutes]]) {
   const seen = new Set();
-  for (const route of routes) {
-    if (seen.has(route)) failures.push(`Duplicate ${label} route: ${route}`);
-    seen.add(route);
-  }
+  for (const route of routes) { if (seen.has(route)) failures.push(`Duplicate ${label} route: ${route}`); seen.add(route); }
 }
 
 const seriesRoutes = [];
 for (const series of [...seriesMap.values()].sort((a, b) => a.number - b.number)) {
   const levels = new Map();
-  for (const item of series.items) {
-    if (!levels.has(item.level)) levels.set(item.level, []);
-    levels.get(item.level).push(item);
-  }
+  for (const item of series.items) { if (!levels.has(item.level)) levels.set(item.level, []); levels.get(item.level).push(item); }
   const levelKeys = [...levels.keys()].sort((a, b) => a - b);
   if (levelKeys.join(',') !== '1,2,3,4,5') failures.push(`Series ${series.number}: missing levels; found ${levelKeys.join(',')}`);
   for (let level = 1; level <= 5; level += 1) {
-    const items = levels.get(level) ?? [];
-    const tests = items.filter((item) => item.kind === 'test');
+    const items = levels.get(level) ?? [], tests = items.filter((item) => item.kind === 'test');
     if (tests.length !== 1) failures.push(`Series ${series.number} level ${level}: expected exactly one test; got ${tests.length}`);
     if (items.length < 2 || items.length > 3) failures.push(`Series ${series.number} level ${level}: expected 2-3 final items; got ${items.length}`);
   }
-
   const catalogItem = catalogByNumber.get(series.number);
   if (!catalogItem) failures.push(`Series ${series.number}: absent from kids-lab catalog`);
   else {
     if (catalogItem.slug !== series.slug) failures.push(`Series ${series.number}: catalog slug ${catalogItem.slug} does not match data slug ${series.slug}`);
     if (catalogItem.categorySlug !== series.categorySlug) failures.push(`Series ${series.number}: catalog category ${catalogItem.categorySlug} does not match route category ${series.categorySlug}`);
   }
-
-  const route = series.mode === 'flat'
-    ? normalizedRoute(`/capabilities/kids-lab/${series.routeRoot}`)
-    : normalizedRoute(`/capabilities/kids-lab/${series.routeRoot}/${series.slug}`);
-  seriesRoutes.push(route);
-  if (!rootSource.includes(series.slug)) failures.push(`Series ${series.number}: Kids Lab hub does not reference slug ${series.slug}`);
+  seriesRoutes.push(series.mode === 'flat' ? normalizedRoute(`/capabilities/kids-lab/${series.routeRoot}`) : normalizedRoute(`/capabilities/kids-lab/${series.routeRoot}/${series.slug}`));
 }
 
-const hubRoutes = [
-  '/capabilities/kids-lab/',
-  ...[...new Set(domains.filter((d) => d.mode === 'nested').map((d) => `/capabilities/kids-lab/${d.route}/`))],
-];
-for (const hub of hubRoutes.slice(1)) {
-  if (!rootSource.includes(hub)) failures.push(`Kids Lab hub does not link category route ${hub}`);
-}
+const hubRoutes = ['/capabilities/kids-lab/', ...[...new Set(domains.filter((d) => d.mode === 'nested').map((d) => `/capabilities/kids-lab/${d.route}/`))]];
+for (const hub of hubRoutes.slice(1)) if (!rootSource.includes(hub)) failures.push(`Kids Lab hub does not link category route ${hub}`);
+if (!rootSource.includes("slug==='bilateral-tracks'")) failures.push('Kids Lab hub lacks the series-43 bilateral-tracks special route mapping');
+if (!rootSource.includes('kidsLabCategories.map')) failures.push('Kids Lab hub is not generating series links from the catalog');
 
 const clickedRoutes = [...new Set([...hubRoutes, ...seriesRoutes, ...pageRoutes])];
 if (clickedRoutes.length !== 1080) failures.push(`Expected 1080 unique click routes (13 hubs + 67 series + 1000 items); got ${clickedRoutes.length}`);
 if (imageRoutes.length !== 1000) failures.push(`Expected 1000 worksheet image routes; got ${imageRoutes.length}`);
+const testRecords = activityRecords.filter((item) => item.kind === 'test');
 
 fs.rmSync(OUT, { recursive: true, force: true });
 fs.mkdirSync(OUT, { recursive: true });
 const manifest = {
-  schemaVersion: 1,
+  schemaVersion: 2,
   generatedAt: new Date().toISOString(),
-  summary: {
-    hubs: hubRoutes.length,
-    series: seriesMap.size,
-    items: activityRecords.length,
-    tests: testCount,
-    clickRoutes: clickedRoutes.length,
-    imageRoutes: imageRoutes.length,
-    failures: failures.length,
-    warnings: warnings.length,
-  },
-  hubRoutes,
-  seriesRoutes,
-  activityRoutes: pageRoutes,
-  imageRoutes,
-  clickedRoutes,
-  domains: domainStats,
-  failures,
-  warnings,
+  summary: { hubs: hubRoutes.length, series: seriesMap.size, items: activityRecords.length, tests: testCount, clickRoutes: clickedRoutes.length, imageRoutes: imageRoutes.length, failures: failures.length, warnings: warnings.length },
+  hubRoutes, seriesRoutes, activityRoutes: pageRoutes, imageRoutes, clickedRoutes,
+  testRoutes: testRecords.map((item) => item.pageRoute),
+  testImageRoutes: testRecords.map((item) => item.imageRoute),
+  activities: activityRecords,
+  domains: domainStats, failures, warnings,
 };
 fs.writeFileSync(path.join(OUT, 'manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`);
 fs.writeFileSync(path.join(OUT, 'click-routes.txt'), `${clickedRoutes.join('\n')}\n`);
 fs.writeFileSync(path.join(OUT, 'image-routes.txt'), `${imageRoutes.join('\n')}\n`);
-fs.writeFileSync(path.join(OUT, 'report.md'), [
-  '# Kids Lab exhaustive route contract',
-  '',
-  `- Hubs: **${hubRoutes.length}**`,
-  `- Series: **${seriesMap.size}**`,
-  `- Final activities/tests: **${activityRecords.length}**`,
-  `- Level tests: **${testCount}**`,
-  `- Clickable HTML routes: **${clickedRoutes.length}**`,
-  `- Worksheet image routes: **${imageRoutes.length}**`,
-  `- Failures: **${failures.length}**`,
-  '',
-  '## Failures',
-  ...(failures.length ? failures.map((item) => `- ${item}`) : ['- None']),
-].join('\n'));
-
+fs.writeFileSync(path.join(OUT, 'test-routes.txt'), `${manifest.testRoutes.join('\n')}\n`);
+fs.writeFileSync(path.join(OUT, 'report.md'), ['# Kids Lab exhaustive route contract','',`- Hubs: **${hubRoutes.length}**`,`- Series: **${seriesMap.size}**`,`- Final activities/tests: **${activityRecords.length}**`,`- Level tests: **${testCount}**`,`- Clickable HTML routes: **${clickedRoutes.length}**`,`- Worksheet image routes: **${imageRoutes.length}**`,`- Failures: **${failures.length}**`,'','## Failures',...(failures.length ? failures.map((item) => `- ${item}`) : ['- None'])].join('\n'));
 console.log(`Kids Lab routes: ${hubRoutes.length} hubs, ${seriesMap.size} series, ${activityRecords.length} items, ${testCount} tests, ${clickedRoutes.length} click routes, ${imageRoutes.length} image routes, ${failures.length} failures.`);
-if (failures.length) {
-  console.error(failures.slice(0, 200).join('\n'));
-  process.exit(1);
-}
+if (failures.length) { console.error(failures.slice(0, 200).join('\n')); process.exit(1); }
