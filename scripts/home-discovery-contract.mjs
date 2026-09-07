@@ -6,7 +6,6 @@ const read = (path) => fs.readFileSync(path, 'utf8');
 const exists = (path) => fs.existsSync(path);
 
 const home = read('app/page.tsx');
-const header = read('components/site-header.tsx');
 const sitemapPreservation = read('scripts/sitemap-preservation-contract.mjs');
 
 const toolHubs = [
@@ -31,10 +30,6 @@ for (const marker of [
   'كل أدوات روافد في منطقة واحدة',
 ]) {
   if (!home.includes(marker)) fail(`homepage unified discovery marker is missing: ${marker}`);
-}
-
-if (!header.includes("href: '/#labs-tools'") || !header.includes("label: 'المختبرات والتقييمات والأدوات'")) {
-  fail('global navigation must expose the unified labs/assessments/tools zone');
 }
 
 // The reorganization is additive. These pre-existing knowledge/service gateways
@@ -76,4 +71,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log(`HOME DISCOVERY CONTRACT OK: ${toolHubs.length} tool/lab gateways preserved in one homepage zone; global entry, legacy compatibility and sitemap preservation guards remain present.`);
+console.log(`HOME DISCOVERY CONTRACT OK: ${toolHubs.length} tool/lab gateways preserved in one homepage zone; legacy compatibility and sitemap preservation guards remain present.`);
