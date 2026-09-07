@@ -1,0 +1,33 @@
+name: Directory Pagination Preservation
+
+on:
+  pull_request:
+    paths:
+      - 'app/specialists/page.tsx'
+      - 'app/centers/page.tsx'
+      - 'components/public-pagination.tsx'
+      - 'scripts/directory-pagination-contract.mjs'
+      - '.github/workflows/directory-pagination-preservation.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'app/specialists/page.tsx'
+      - 'app/centers/page.tsx'
+      - 'components/public-pagination.tsx'
+      - 'scripts/directory-pagination-contract.mjs'
+      - '.github/workflows/directory-pagination-preservation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pagination-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify directory pagination and no truncation
+        run: node scripts/directory-pagination-contract.mjs
