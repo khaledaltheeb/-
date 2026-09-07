@@ -66,13 +66,12 @@ async function flatPracticalResponse(request,env,url,slug,publicPath){
     const accept=(request.headers.get('accept')||'').toLowerCase();
     if(!accept.includes('text/html')&&!accept.includes('*/*')&&request.method!=='HEAD')return null;
   }
-  // Prefer opaque internal assets so Cloudflare cannot canonicalize the HTML.
-  // Fall back to the normal materialized route assets so a missing opaque file
-  // can never push these public resources back through the dynamic backend.
+  // Prefer text-safe static objects first. They avoid Cloudflare HTML routing
+  // semantics completely while preserving the exact prerendered payload.
   const normalizedPublic=publicPath.endsWith('/')?publicPath:`${publicPath}/`;
   const candidates=rsc
-    ? [`${PRACTICAL_FLAT_PREFIX}/${slug}.rsc-data`,`${PRACTICAL_FLAT_PREFIX}/${slug}.rsc`,`${normalizedPublic}index.rsc`]
-    : [`${PRACTICAL_FLAT_PREFIX}/${slug}.page-data`,`${PRACTICAL_FLAT_PREFIX}/${slug}.html`,normalizedPublic];
+    ? [`${PRACTICAL_FLAT_PREFIX}/${slug}.rsc.txt`,`${PRACTICAL_FLAT_PREFIX}/${slug}.rsc-data`,`${PRACTICAL_FLAT_PREFIX}/${slug}.rsc`,`${normalizedPublic}index.rsc`]
+    : [`${PRACTICAL_FLAT_PREFIX}/${slug}.html.txt`,`${PRACTICAL_FLAT_PREFIX}/${slug}.page-data`,`${PRACTICAL_FLAT_PREFIX}/${slug}.html`,normalizedPublic];
   const source=await firstAssetFetch(request,env,candidates);
   if(!source)return null;
   const headers=new Headers(source.headers);
