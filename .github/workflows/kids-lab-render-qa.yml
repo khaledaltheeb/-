@@ -30,6 +30,12 @@ jobs:
       - name: TypeScript check
         run: npm run typecheck
 
+      - name: Lint Kids Lab route contract
+        run: npx eslint scripts/kids-lab-route-contract.mjs --quiet
+
+      - name: Lint Kids Lab live route checker
+        run: npx eslint scripts/kids-lab-live-route-check.mjs --quiet
+
       - name: Validate all Kids Lab routes, levels and tests
         run: node scripts/kids-lab-route-contract.mjs
 
