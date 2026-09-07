@@ -44,8 +44,10 @@ async function assetFetch(request,env,pathname){
 }
 async function firstAssetFetch(request,env,paths){
   for(const pathname of paths){
-    const response=await assetFetch(request,env,pathname);
-    if(response)return response;
+    try{
+      const response=await assetFetch(request,env,pathname);
+      if(response?.ok)return response;
+    }catch{}
   }
   return null;
 }
