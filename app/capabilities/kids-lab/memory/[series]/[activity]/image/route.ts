@@ -1,8 +1,12 @@
 import { notFound } from 'next/navigation';
-import { getMemoryActivity } from '@/lib/capabilities/memory-lab';
+import { getMemoryActivity, memoryActivities } from '@/lib/capabilities/memory-lab';
 import { renderMemoryWorksheet } from '@/lib/capabilities/memory-svg-final';
 
 type Params = Promise<{ series: string; activity: string }>;
+
+export function generateStaticParams() {
+  return memoryActivities.map((item) => ({ series: item.seriesSlug, activity: item.slug }));
+}
 
 export async function GET(_: Request, { params }: { params: Params }) {
   const { series, activity } = await params;
@@ -12,7 +16,7 @@ export async function GET(_: Request, { params }: { params: Params }) {
   return new Response(renderMemoryWorksheet(item), {
     headers: {
       'Content-Type': 'image/svg+xml; charset=utf-8',
-      'Cache-Control': 'public, max-age=86400, s-maxage=604800, stale-while-revalidate=2592000',
+      'Cache-Control': 'public, max-age=31536000, immutable',
       'Content-Disposition': `inline; filename="memory-${series}-${activity}.svg"`,
     },
   });
