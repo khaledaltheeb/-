@@ -5,6 +5,7 @@ const required = [
   'app/developers/lens/page.tsx',
   'app/api/v1/route.ts',
   'app/api/v1/evidence-discovery/route.ts',
+  'app/api/openapi.json/route.ts',
   'lib/research-integrations/lens.ts',
   'lib/research-integrations/lens-quota.ts',
   'supabase/migrations/20260907114800_lens_scholarly_quota_guard.sql',
@@ -15,6 +16,7 @@ const manifest = fs.readFileSync('app/api/v1/lens/route.ts', 'utf8');
 const docs = fs.readFileSync('app/developers/lens/page.tsx', 'utf8');
 const discovery = fs.readFileSync('app/api/v1/route.ts', 'utf8');
 const evidence = fs.readFileSync('app/api/v1/evidence-discovery/route.ts', 'utf8');
+const openapi = fs.readFileSync('app/api/openapi.json/route.ts', 'utf8');
 const lens = fs.readFileSync('lib/research-integrations/lens.ts', 'utf8');
 const quota = fs.readFileSync('lib/research-integrations/lens-quota.ts', 'utf8');
 const migration = fs.readFileSync('supabase/migrations/20260907114800_lens_scholarly_quota_guard.sql', 'utf8');
@@ -70,6 +72,24 @@ mustContain(evidence, [
   "enforcement: 'distributed_fail_closed'",
 ], 'Evidence route');
 
+mustContain(openapi, [
+  "{ name: 'Lens', description: 'Dedicated Lens Scholarly API integration manifest and usage contract.' }",
+  "'/lens': { get:",
+  "operationId: 'getLensIntegrationManifest'",
+  "#/components/schemas/LensIntegrationManifest",
+  'LensIntegrationManifest:',
+  "const: 'explicit_opt_in'",
+  "const: 'providers=lens'",
+  "const: 'Data Sourced from The Lens'",
+  'requests_per_minute: { type: \'integer\', const: 10 }',
+  'requests_per_month: { type: \'integer\', const: 20000 }',
+  "const: 'distributed_fail_closed'",
+  "const: 'server_side_only'",
+  'exposed_to_client: { type: \'boolean\', const: false }',
+  'lens_specific_user_tracking: { type: \'boolean\', const: false }',
+  'api_access_does_not_imply_full_text_reuse_rights: { type: \'boolean\', const: true }',
+], 'OpenAPI Lens contract');
+
 mustContain(lens, [
   "provider: 'The Lens'",
   'Data Sourced from The Lens',
@@ -89,7 +109,7 @@ mustContain(migration, [
   'grant execute on function public.acquire_lens_scholarly_quota() to service_role',
 ], 'Lens quota migration');
 
-const combined = [manifest, docs, discovery, evidence, lens, quota].join('\n');
+const combined = [manifest, docs, discovery, evidence, openapi, lens, quota].join('\n');
 for (const pattern of [/LENS_SCHOLARLY_API_TOKEN\s*=\s*['\"][^'\"]+/, /Bearer\s+[A-Za-z0-9_-]{24,}/]) {
   if (pattern.test(combined)) throw new Error('Possible Lens credential disclosure detected.');
 }
