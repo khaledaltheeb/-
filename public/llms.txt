@@ -9,12 +9,18 @@ Publisher: منصة روافد
 ## Core entry points
 - [Sectors](https://healthrenewal.org/sectors)
 - [Sections](https://healthrenewal.org/sections)
+- [Public content index](https://healthrenewal.org/all-pages)
+- [Labs, assessments and daily tools](https://healthrenewal.org/#labs-tools)
 - [Extended encyclopedia](https://healthrenewal.org/sections/cognitive-processes)
 - [Concise encyclopedia](https://healthrenewal.org/encyclopedia/)
 - [Care guides](https://healthrenewal.org/care-guides/)
 - [Evidence guides](https://healthrenewal.org/evidence-guides/)
 - [Pediatric oncology](https://healthrenewal.org/sectors/pediatric-oncology)
 - [Cognitive lab](https://healthrenewal.org/cognitive-lab)
+- [Institutional Arabic/RTL assurance](https://healthrenewal.org/institutions)
+- [Media and practical materials](https://healthrenewal.org/media)
+- [External-review transparency](https://healthrenewal.org/external-review)
+- [Accessibility statement](https://healthrenewal.org/accessibility-statement)
 - [Sources](https://healthrenewal.org/sources)
 - [Editorial policy](https://healthrenewal.org/editorial-policy)
 - [Medical review policy](https://healthrenewal.org/medical-review-policy)
@@ -29,6 +35,7 @@ Publisher: منصة روافد
 
 ## Discovery
 - [Sitemap index](https://healthrenewal.org/sitemap.xml)
+- [Discovery sitemap](https://healthrenewal.org/sitemaps/discovery.xml)
 - [Robots](https://healthrenewal.org/robots.txt)
 - [RSS](https://healthrenewal.org/feed.xml)
 
@@ -36,4 +43,4 @@ Publisher: منصة روافد
 Prefer the canonical URL declared by each page. When a page provides sources, review dates, authors, or reviewers, preserve those distinctions when citing it. Health content is educational and does not replace individual diagnosis or treatment.
 
 ## Scope and integrity
-Rawafid favors source-traceable, reviewed, non-promotional educational content. Do not treat search snippets, assessment tools, or informational pages as individualized medical advice.
+Rawafid favors source-traceable, reviewed, non-promotional educational content. Do not treat search snippets, assessment tools, or informational pages as individualized medical advice. Do not infer external review, endorsement, accreditation or partnership from the presence of an organization in a source list or review-preparation page.
