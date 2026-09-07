@@ -61,6 +61,9 @@ export default function AssessmentMeasureRightsRegisterPage() {
               <thead><tr><th>المقياس</th><th>الأداة الأصلية</th><th>وثيقة المصدر</th><th>النسخة/الدليل العربي</th><th>إعادة نشر النص العربي</th><th>آخر تحقق</th><th>مصدر حقوق الأصل</th></tr></thead>
               <tbody>{assessmentMeasures.map((measure) => {
                 const dimensions = getAssessmentMeasureRightsDimensions(measure);
+                const authoritativeRightsSource = measure.sources.find((source) => source.role === 'rights');
+                const rightsSourceUrl = dimensions.originalInstrument.sourceUrl || authoritativeRightsSource?.url;
+                const rightsSourceLabel = dimensions.originalInstrument.sourceLabel || authoritativeRightsSource?.label || 'مصدر الحقوق الرسمي';
                 return <tr key={measure.slug}>
                   <td><Link href={`/assessment-measures/${measure.slug}/`}><strong>{measure.nameAr}</strong><br /><span lang="en" dir="ltr">{measure.acronym}</span></Link></td>
                   <td>{rightsBadge(dimensions.originalInstrument.status)}<br /><small>{dimensions.originalInstrument.note}</small></td>
@@ -68,7 +71,7 @@ export default function AssessmentMeasureRightsRegisterPage() {
                   <td><strong>{dimensions.arabicVersion.label}</strong><br /><small>{dimensions.arabicVersion.note}</small>{dimensions.arabicVersion.evidenceUrl ? <><br /><a href={dimensions.arabicVersion.evidenceUrl} target="_blank" rel="noreferrer">{dimensions.arabicVersion.evidenceLabel} ↗</a></> : null}</td>
                   <td><strong>{dimensions.arabicRepublication.label}</strong><br /><small>{dimensions.arabicRepublication.note}</small></td>
                   <td>{measure.rightsVerifiedOn}</td>
-                  <td>{dimensions.originalInstrument.sourceUrl ? <a href={dimensions.originalInstrument.sourceUrl} target="_blank" rel="noreferrer">{dimensions.originalInstrument.sourceLabel} ↗</a> : 'غير متاح'}</td>
+                  <td>{rightsSourceUrl ? <a href={rightsSourceUrl} target="_blank" rel="noreferrer">{rightsSourceLabel} ↗</a> : 'غير متاح'}</td>
                 </tr>;
               })}</tbody>
             </table>
