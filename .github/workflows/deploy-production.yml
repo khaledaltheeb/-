@@ -137,12 +137,25 @@ jobs:
           )
           for route in "${dyslexia_urls[@]}"; do
             safe_name="$(printf '%s' "$route" | tr '/-' '__' | tr -cd '[:alnum:]_')"
-            curl -fsS -H 'Cache-Control: no-cache, no-store, max-age=0' -H 'Pragma: no-cache' --retry 6 --retry-delay 2 --retry-all-errors "${base}${route}?deploy=${stamp}" >"/tmp/${safe_name}.html"
-            if grep -qiE 'internal server error|application error|500 internal' "/tmp/${safe_name}.html"; then
-              echo "Dyslexia resource returned an application error body: ${route}" >&2
+            out="/tmp/${safe_name}.html"
+            status="$(curl -sS -L -H 'Cache-Control: no-cache, no-store, max-age=0' -H 'Pragma: no-cache' --retry 3 --retry-delay 2 --retry-all-errors --max-time 45 -o "$out" -w '%{http_code}' "${base}${route}?deploy=${stamp}" || true)"
+            echo "LIVE_HTTP ${route} ${status:-curl-error}"
+            if ! [[ "$status" =~ ^2[0-9][0-9]$ ]]; then
+              echo "Dyslexia resource HTTP failure: ${route} status=${status:-curl-error}" >&2
+              head -c 1200 "$out" 2>/dev/null || true
+              echo
+              for asset in '/practical-static/dyslexia-reading-observation.html.txt' '/practical-static/dyslexia-reading-observation.page-data' '/practical-static/dyslexia-reading-observation.html'; do
+                asset_status="$(curl -sS -L --max-time 20 -o /tmp/practical-asset-check -w '%{http_code}' "${base}${asset}?deploy=${stamp}" || true)"
+                echo "LIVE_ASSET_HTTP ${asset} ${asset_status:-curl-error} bytes=$(wc -c </tmp/practical-asset-check 2>/dev/null || echo 0)"
+              done
               exit 1
             fi
-            test -s "/tmp/${safe_name}.html"
+            if grep -qiE 'internal server error|application error|500 internal' "$out"; then
+              echo "Dyslexia resource returned an application error body: ${route}" >&2
+              head -c 1200 "$out" || true
+              exit 1
+            fi
+            test -s "$out"
             echo "LIVE_OK ${route}"
           done
           grep -q 'ورقة ملاحظة صعوبات القراءة قبل الإحالة' /tmp/_resources_worksheets_dyslexia_reading_observation.html
