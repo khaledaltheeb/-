@@ -5,6 +5,7 @@ const required = [
   'lib/partner-api-v1.ts',
   'lib/feed-http.ts',
   'app/api/v1/route.ts',
+  'app/api/v1/lens/route.ts',
   'app/api/v1/content/route.ts',
   'app/api/v1/content/[slug]/route.ts',
   'app/api/v1/content/[slug]/sources/route.ts',
@@ -17,6 +18,7 @@ const required = [
   'app/feed.json/route.ts',
   'app/magazine/feed.xml/route.ts',
   'app/developers/page.tsx',
+  'app/developers/lens/page.tsx',
   'supabase/migrations/20260901032000_public_api_v1_change_log.sql',
   'supabase/migrations/20260901035000_partner_api_core_v1.sql',
   'supabase/migrations/20260901212203_source_connection_metadata_v1.sql',
@@ -55,6 +57,30 @@ const partner = fs.readFileSync('lib/partner-api-v1.ts', 'utf8');
 for (const marker of ["createHash('sha256')", "'x-api-key'", "'authorization'", 'api_partner_authorize', "'rate_limited'", 'decoratePartnerResponse']) if (!partner.includes(marker)) fail(`partner API helper missing ${marker}`);
 if (/service.role|SERVICE_ROLE|service_role_key/i.test(partner)) fail('partner API runtime must not embed a service-role secret');
 
+const apiRoot = fs.readFileSync('app/api/v1/route.ts', 'utf8');
+for (const marker of ["'lens'", "href: '/api/v1/lens'", "documentation: '/developers/lens'", "default_providers: ['europe_pmc','crossref','datacite']", "lens_is_opt_in: true", "attribution: 'Data Sourced from The Lens'", 'lens_id_retention_required: true']) if (!apiRoot.includes(marker)) fail(`API discovery Lens section missing ${marker}`);
+if (apiRoot.includes("default_providers: ['europe_pmc','crossref','datacite','lens']")) fail('API discovery must never advertise Lens as a default provider');
+
+const lensManifest = fs.readFileSync('app/api/v1/lens/route.ts', 'utf8');
+for (const marker of [
+  "mode: 'explicit_opt_in'",
+  "required_provider_parameter: 'providers=lens'",
+  "label: 'Data Sourced from The Lens'",
+  'lens_id_preserved: true',
+  'requests_per_minute: 10',
+  'requests_per_month: 20000',
+  "enforcement: 'distributed_fail_closed'",
+  "credential: 'server_side_only'",
+  'exposed_to_client: false',
+  'lens_specific_user_tracking: false',
+  'quota_accounting_contains_user_identifiers: false',
+  'api_access_does_not_imply_full_text_reuse_rights: true',
+  'lens_id_and_attribution_must_be_retained_when_lens_data_is_displayed_or_redistributed: true',
+  "documentation: '/developers/lens'",
+  "openapi: '/api/openapi.json'",
+]) if (!lensManifest.includes(marker)) fail(`Lens manifest missing ${marker}`);
+if (/token\s*:\s*process\.env\.LENS_SCHOLARLY_API_TOKEN|LENS_SCHOLARLY_API_TOKEN\?\.trim\(\)\s*[,}]/.test(lensManifest)) fail('Lens manifest must never serialize the Lens credential');
+
 const openapi = fs.readFileSync('app/api/openapi.json/route.ts', 'utf8');
 for (const marker of ["openapi: '3.1.0'", "version: '1.2.0'", "'/content/{slug}/sources'", "'/sources/{id}'", "'/evidence-discovery'", "'/changes'", "'/search'", "'/stats'", 'PartnerApiKey', 'PartnerBearer', "'pages'", 'related_identifiers', 'crossref_cursor', 'EvidenceProviderStatus', 'EvidenceDiscoveryResponse']) if (!openapi.includes(marker)) fail(`OpenAPI contract missing ${marker}`);
 if (!openapi.includes("default: 'europe_pmc,crossref,datacite'")) fail('OpenAPI evidence provider default must exclude Lens');
@@ -77,6 +103,8 @@ for (const marker of ['application/rss+xml', 'application/feed+json']) if (!layo
 
 const docs = fs.readFileSync('app/developers/page.tsx', 'utf8');
 for (const marker of ['/api/v1','/api/openapi.json','/feed.xml','/feed.json','link_and_citation_only','crossref','related_identifiers']) if (!docs.includes(marker)) fail(`developer docs missing ${marker}`);
+const lensDocs = fs.readFileSync('app/developers/lens/page.tsx', 'utf8');
+for (const marker of ['/api/v1/lens','providers=lens','Data Sourced from The Lens','Lens ID','20,000','service_role','not_configured','provider_unavailable','private, no-store']) if (!lensDocs.includes(marker)) fail(`Lens developer docs missing ${marker}`);
 
 if (failed) process.exit(1);
-console.log('PUBLIC API V1.2 + PARTNER API + FEEDS CONTRACT OK');
+console.log('PUBLIC API V1.2 + PARTNER API + LENS + FEEDS CONTRACT OK');
