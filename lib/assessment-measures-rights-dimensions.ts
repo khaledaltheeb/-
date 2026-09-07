@@ -36,6 +36,10 @@ export type AssessmentMeasureRightsDimensions = {
   };
 };
 
+const failClosedArabicRepublication = new Set<string>([
+  'heaviness-of-smoking-index',
+]);
+
 /**
  * Rights are deliberately modelled as independent dimensions.
  * Public-domain/open-reuse status of an instrument never propagates to a
@@ -44,6 +48,7 @@ export type AssessmentMeasureRightsDimensions = {
 export function getAssessmentMeasureRightsDimensions(measure: AssessmentMeasure): AssessmentMeasureRightsDimensions {
   const rightsSource = measure.sources.find((source) => source.role === 'rights') ?? null;
   const translationSource = measure.sources.find((source) => source.role === 'translation') ?? null;
+  const arabicRepublicationAllowed = measure.fullArabicFormPublished && !failClosedArabicRepublication.has(measure.slug);
 
   return {
     originalInstrument: {
@@ -73,16 +78,20 @@ export function getAssessmentMeasureRightsDimensions(measure: AssessmentMeasure)
           evidenceUrl: null,
           evidenceLabel: null,
         },
-    arabicRepublication: measure.fullArabicFormPublished
+    arabicRepublication: arabicRepublicationAllowed
       ? {
           status: 'arabic-republication-verified-protocol',
-          label: 'منشور فقط ضمن قائمة البروتوكولات الإجرائية المتحقق منها',
+          label: 'النشر العربي مسموح وفق دليل الحقوق المحدد لهذه الأداة',
           note: measure.fullArabicFormNote,
         }
       : {
           status: 'arabic-republication-withheld',
-          label: 'النص العربي الكامل غير منشور',
-          note: measure.fullArabicFormNote,
+          label: failClosedArabicRepublication.has(measure.slug)
+            ? 'موقوف تحفظيًا — حق الترجمة/إعادة النشر يحتاج دليلًا مستقلًا'
+            : 'النص العربي الكامل غير منشور',
+          note: failClosedArabicRepublication.has(measure.slug)
+            ? 'أبقينا الدليل العلمي للمقياس، لكننا أوقفنا النموذج العربي التشغيلي لأن إتاحة الاستخدام لا تُفسر تلقائيًا كترخيص لنشر ترجمة عربية جديدة.'
+            : measure.fullArabicFormNote,
         },
   };
 }
