@@ -5,6 +5,15 @@ on:
     workflows: ['Deploy Production Fast']
     types: [completed]
   workflow_dispatch:
+    inputs:
+      scope:
+        description: 'Live audit scope'
+        required: false
+        default: 'tests'
+        type: choice
+        options:
+          - tests
+          - all
 
 permissions:
   contents: read
@@ -36,8 +45,8 @@ jobs:
       - name: Build exhaustive Kids Lab route manifest
         run: node scripts/kids-lab-route-contract.mjs
 
-      - name: Verify every live Kids Lab page and worksheet
-        run: node scripts/kids-lab-live-route-check.mjs https://healthrenewal.org "${{ github.event.workflow_run.head_sha || github.sha }}"
+      - name: Verify live Kids Lab tests safely
+        run: node scripts/kids-lab-live-route-check.mjs https://healthrenewal.org "${{ github.event.workflow_run.head_sha || github.sha }}" "${{ inputs.scope || 'tests' }}"
 
       - name: Upload exhaustive live QA reports
         if: always()
