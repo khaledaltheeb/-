@@ -84,6 +84,9 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Guided Assessment quality contract
+        run: npm run guided-assessment:validate
+
       - name: Assessment Lab quality contracts
         run: npm run assessment-lab:validate
 
@@ -221,6 +224,13 @@ jobs:
           test -s /tmp/quick-info-og.png
           test -s /tmp/quick-info-discover.png
           echo "LIVE_OK Quick Info social images: ${quick_info_slug}"
+
+          echo 'LIVE_CHECK guided-assessment/questions-001'
+          curl -fsS --retry 6 --retry-delay 2 --retry-all-errors "${base}/guided-assessment/questions-001?deploy=${stamp}" >/tmp/guided-assessment.html
+          grep -q 'تركيز خاص بالموضوع' /tmp/guided-assessment.html
+          grep -q 'حدود التفسير' /tmp/guided-assessment.html
+          grep -q 'المراجع المرتبطة بهذا الموضوع والمنهج' /tmp/guided-assessment.html
+          echo 'LIVE_OK guided-assessment/questions-001'
 
           echo 'LIVE_CHECK assessment-lab/avoidance-cycle'
           curl -fsS --retry 6 --retry-delay 2 --retry-all-errors "${base}/assessment-lab/avoidance-cycle?deploy=${stamp}" >/tmp/assessment-avoidance.html
