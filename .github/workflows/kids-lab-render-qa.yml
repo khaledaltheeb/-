@@ -10,6 +10,7 @@ on:
       - 'scripts/materialize-kids-lab-static-html.mjs'
       - 'scripts/cloudflare-production-build.sh'
       - 'custom-worker.js'
+      - '.github/open-next-production-cache.config.ts'
       - '.github/workflows/kids-lab-render-qa.yml'
       - '.github/workflows/deploy-production.yml'
       - 'eslint.config.mjs'
@@ -27,7 +28,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
 
       - name: Install dependencies
@@ -55,16 +56,28 @@ jobs:
       - name: Render and validate all 1000 Kids Lab items
         run: node scripts/kids-lab-render-contract-final.mjs
 
-      - name: Build production Worker and materialize Kids Lab assets
-        run: bash scripts/cloudflare-production-build.sh
-
-      - name: Verify materialized production asset counts
+      - name: Build exact production Worker and materialize Kids Lab assets
         shell: bash
         run: |
+          set -euo pipefail
+          while IFS= read -r export_line; do
+            eval "$export_line"
+          done < <(grep '^export ' scripts/cloudflare-production-build.sh)
+          export CI='false'
+          export QUICK_INFO_SOCIAL_CACHE_HIT='false'
+          export QUICK_INFO_SOCIAL_IMAGES_REQUIRED='true'
+          npx opennextjs-cloudflare build --env production --openNextConfigPath .github/open-next-production-cache.config.ts
+
+      - name: Verify deployed production asset counts
+        shell: bash
+        run: |
+          set -euo pipefail
           test "$(find public/kids-lab-assets -type f -name '*.svg' | wc -l)" -eq 1000
+          test "$(find .open-next/assets/kids-lab-assets -type f -name '*.svg' | wc -l)" -eq 1000
           test "$(find .open-next/assets/capabilities/kids-lab -type f -name 'index.html' | wc -l)" -ge 1000
           test "$(find .open-next/assets/capabilities/kids-lab -type f -name 'index.rsc' | wc -l)" -ge 1000
-          echo "Kids Lab production static asset fast path is materialized."
+          echo "Kids Lab exact production static asset fast path is materialized."
+          echo "OpenNext asset files: $(find .open-next/assets -type f | wc -l)"
 
       - name: Upload Kids Lab QA reports and SVG samples
         if: always()
