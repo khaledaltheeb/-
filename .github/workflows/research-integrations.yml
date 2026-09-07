@@ -11,6 +11,7 @@ on:
       - 'docs/integrations/research-evidence.md'
       - 'docs/integrations/lens-labs.md'
       - 'scripts/research-integrations-contract.mjs'
+      - 'scripts/lens-security-contract.mjs'
       - 'scripts/source-registry-v1-contract.mjs'
       - 'supabase/migrations/20260901190000_ror_source_registry_v1.sql'
       - 'supabase/migrations/20260901192000_ror_registry_explicit_deny.sql'
@@ -38,6 +39,8 @@ jobs:
       - run: npm ci --ignore-scripts
       - name: Research integration contract
         run: node scripts/research-integrations-contract.mjs
+      - name: Lens database security contract
+        run: node scripts/lens-security-contract.mjs
       - name: Source registry contract
         run: node scripts/source-registry-v1-contract.mjs
       - name: Repository quality coverage
