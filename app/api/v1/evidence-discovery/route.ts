@@ -9,7 +9,7 @@ const ALLOWED = new Set<EvidenceProvider>(['europe_pmc', 'crossref', 'datacite',
 const DEFAULT_PROVIDERS: EvidenceProvider[] = ['europe_pmc', 'crossref', 'datacite'];
 const LENS_ATTRIBUTION = {
   provider: 'The Lens',
-  label: 'Scholarly metadata provided by The Lens',
+  label: 'Data Sourced from The Lens',
   url: 'https://www.lens.org/',
   terms_url: 'https://about.lens.org/policies/#attribution',
 };
@@ -70,7 +70,12 @@ export async function GET(request: Request) {
       lens: providers.includes('lens') ? {
         opt_in: true,
         attribution: LENS_ATTRIBUTION,
-        plan_limits: { requests_per_minute: 10, requests_per_month: 20000 },
+        quota_policy: {
+          enforcement: 'distributed_fail_closed',
+          requests_per_minute: 10,
+          requests_per_month: 20000,
+          retry_amplification: false,
+        },
       } : {
         opt_in: false,
         note: 'Lens is intentionally opt-in. Add lens to providers to use the configured Lens Scholarly API integration.',
