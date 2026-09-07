@@ -44,6 +44,10 @@ function materializeRouteTree(sourceRoot, assetRoot) {
   return { htmlCount, rscCount };
 }
 
+function firstExisting(candidates) {
+  return candidates.find((candidate) => fs.existsSync(candidate)) || null;
+}
+
 const worksheetSource = path.join(ROOT, '.next', 'server', 'app', 'resources', 'worksheets');
 const worksheetTarget = path.join(ROOT, 'public', 'resources', 'worksheets');
 const worksheetCounts = materializeRouteTree(worksheetSource, worksheetTarget);
@@ -55,12 +59,27 @@ for (const slug of REQUIRED_WORKSHEET_SLUGS) {
   if (!fs.existsSync(rsc)) throw new Error(`Required worksheet RSC was not materialized: ${slug}`);
 }
 
-const toolkitSource = path.join(ROOT, '.next', 'server', 'app', 'evidence-guides', TOOLKIT_SLUG);
+const evidenceRoot = path.join(ROOT, '.next', 'server', 'app', 'evidence-guides');
 const toolkitTarget = path.join(ROOT, 'public', 'evidence-guides', TOOLKIT_SLUG);
-const toolkitCounts = materializeRouteTree(toolkitSource, toolkitTarget);
+fs.mkdirSync(toolkitTarget, { recursive: true });
+
+const toolkitHtmlSource = firstExisting([
+  path.join(evidenceRoot, `${TOOLKIT_SLUG}.html`),
+  path.join(evidenceRoot, TOOLKIT_SLUG, 'page.html'),
+  path.join(evidenceRoot, TOOLKIT_SLUG, 'index.html'),
+]);
+const toolkitRscSource = firstExisting([
+  path.join(evidenceRoot, `${TOOLKIT_SLUG}.rsc`),
+  path.join(evidenceRoot, TOOLKIT_SLUG, 'page.rsc'),
+  path.join(evidenceRoot, TOOLKIT_SLUG, 'index.rsc'),
+]);
+
+if (!toolkitHtmlSource) throw new Error(`Required Dyslexia Norway toolkit HTML source was not found: ${TOOLKIT_SLUG}`);
+if (!toolkitRscSource) throw new Error(`Required Dyslexia Norway toolkit RSC source was not found: ${TOOLKIT_SLUG}`);
+
 const toolkitHtml = path.join(toolkitTarget, 'index.html');
 const toolkitRsc = path.join(toolkitTarget, 'index.rsc');
-if (!fs.existsSync(toolkitHtml)) throw new Error(`Required Dyslexia Norway toolkit HTML was not materialized: ${TOOLKIT_SLUG}`);
-if (!fs.existsSync(toolkitRsc)) throw new Error(`Required Dyslexia Norway toolkit RSC was not materialized: ${TOOLKIT_SLUG}`);
+fs.copyFileSync(toolkitHtmlSource, toolkitHtml);
+fs.copyFileSync(toolkitRscSource, toolkitRsc);
 
-console.log(`Practical resource public asset staging complete: worksheets ${worksheetCounts.htmlCount} HTML / ${worksheetCounts.rscCount} RSC; toolkit ${toolkitCounts.htmlCount} HTML / ${toolkitCounts.rscCount} RSC.`);
+console.log(`Practical resource public asset staging complete: worksheets ${worksheetCounts.htmlCount} HTML / ${worksheetCounts.rscCount} RSC; toolkit HTML/RSC copied from ${path.relative(ROOT, toolkitHtmlSource)} and ${path.relative(ROOT, toolkitRscSource)}.`);
