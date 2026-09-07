@@ -1,0 +1,3 @@
+Kids Lab homepage card production verification marker
+Created: 2026-09-07
+Purpose: trigger a production deployment after adding the mandatory live homepage assertion for "مختبر الأنشطة والاختبارات للأطفال" and /capabilities/kids-lab/.
