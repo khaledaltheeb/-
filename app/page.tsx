@@ -152,16 +152,30 @@ export default async function HomePage() {
           )}
         </section>
 
+        <section className="rawafid-section rawafid-pathways" id="labs-tools" aria-labelledby="labs-tools-title">
+          <div className="rawafid-section-head">
+            <div className="rawafid-section-title"><span>المختبرات والتقييمات والأدوات</span><h2 id="labs-tools-title">كل أدوات روافد في منطقة واحدة</h2><p>اختر المسار بحسب الغرض: متابعة ذاتية، مقياس موثق، تحديد ما ينبغي قياسه، تحضير لموعد، نشاط معرفي، أنشطة أطفال، أو أداة يومية. جمعنا نقاط الدخول هنا من دون دمج وظائفها العلمية أو تغيير أي رابط قائم.</p></div>
+            <Link prefetch={false} className="section-text-link" href="/assessments">كيف أختار المسار المناسب؟ ←</Link>
+          </div>
+          <div className="rawafid-platform-grid">
+            <Link prefetch={false} className="rawafid-platform-card" href="/assessments"><div className="icon-shell"><PlatformIcon name="review" /></div><h3>بوابة التقييم والقياس</h3><p>دليل منهجي يوضح الفرق بين الفحص والمتابعة والمقياس والتشخيص وCore Outcome Sets قبل اختيار الأداة.</p><span>ابدأ من خريطة التقييم ←</span></Link>
+            <Link prefetch={false} className="rawafid-platform-card" href="/assessment-lab"><div className="icon-shell"><PlatformIcon name="tools" /></div><h3>اختبر نفسك والمتابعة الذاتية</h3><p>60 أداة متابعة عربية و10 صفحات مصدرية موثقة، دون حفظ الإجابات أو إنتاج تشخيص أو درجة كلية مختلقة.</p><span>فتح Assessment Lab ←</span></Link>
+            <Link prefetch={false} className="rawafid-platform-card" href="/assessment-measures/"><div className="icon-shell"><PlatformIcon name="review" /></div><h3>المقاييس وأدوات التقييم العالمية</h3><p>مكتبة موثقة للغرض وطريقة التطبيق والخصائص القياسية والنسخ العربية والحقوق وحدود التفسير.</p><span>فتح مكتبة المقاييس ←</span></Link>
+            <Link prefetch={false} className="rawafid-platform-card" href="/core-outcome-sets/"><div className="icon-shell"><PlatformIcon name="knowledge" /></div><h3>Core Outcome Sets</h3><p>مسار مستقل يجيب عن سؤال «ماذا ينبغي أن نقيس؟» قبل الانتقال إلى اختيار أداة القياس المناسبة.</p><span>فتح سجل النتائج الأساسية ←</span></Link>
+            <Link prefetch={false} className="rawafid-platform-card" href="/guided-assessment"><div className="icon-shell"><PlatformIcon name="community" /></div><h3>التحضير لموعد التقييم</h3><p>50 موضوعًا منظمًا مع 100 رابط تاريخي محفوظ لمساعدة البالغين والأسر على تجهيز الملاحظات والأسئلة دون تشخيص ذاتي.</p><span>فتح الأسئلة الاسترشادية ←</span></Link>
+            <Link prefetch={false} className="rawafid-platform-card" href="/cognitive-lab"><div className="icon-shell"><PlatformIcon name="knowledge" /></div><h3>مختبر القدرات والأنشطة المعرفية</h3><p>100 نشاط عربي للانتباه والذاكرة والتعلم والاستدلال واللغة وسرعة المعالجة، بنتائج وصفية دون تشخيص أو مقارنة معيارية.</p><span>فتح المختبر المعرفي ←</span></Link>
+            <Link prefetch={false} className="rawafid-platform-card" href="/capabilities/kids-lab/"><div className="icon-shell"><PlatformIcon name="tools" /></div><h3>مختبر الأنشطة والاختبارات للأطفال</h3><p>1000 نشاط وورقة عمل واختبار إتقان قابل للطباعة، موزعة على 67 سلسلة مهارية وخمسة مستويات متدرجة.</p><span>فتح مختبر الأطفال ←</span></Link>
+            <Link prefetch={false} className="rawafid-platform-card" href="/daily-tools/"><div className="icon-shell"><PlatformIcon name="tools" /></div><h3>الأدوات اليومية</h3><p>150 أداة عملية غير تشخيصية للاستخدام اليومي، مع نقطة دخول موحدة بدل بقائها بعيدة عن الصفحة الرئيسية.</p><span>فتح الأدوات اليومية ←</span></Link>
+          </div>
+        </section>
+
         <section className="rawafid-section rawafid-pathways" aria-labelledby="pathways-title">
           <div className="rawafid-section-head">
-            <div className="rawafid-section-title"><span>مسارات مباشرة</span><h2 id="pathways-title">ابدأ من نوع المحتوى الذي تحتاجه</h2><p>روابط واضحة إلى أكثر المسارات استخدامًا بدل الاعتماد على البحث فقط.</p></div>
+            <div className="rawafid-section-title"><span>المعرفة والرعاية</span><h2 id="pathways-title">مسارات المحتوى والخدمة</h2><p>افصل بين الأدوات التي تستخدمها وبين المحتوى الذي تقرؤه: أدلة عملية، أدلة علمية، ومسارات تخصصية متكاملة.</p></div>
           </div>
           <div className="rawafid-platform-grid">
             <Link prefetch={false} className="rawafid-platform-card" href="/care-guides/"><div className="icon-shell"><PlatformIcon name="knowledge" /></div><h3>أدلة التعامل والرعاية</h3><p>أدلة عملية للأسرة والمريض ومقدم الرعاية، منظمة حسب الحاجة والموقف.</p><span>استكشف الأدلة ←</span></Link>
             <Link prefetch={false} className="rawafid-platform-card" href="/evidence-guides/"><div className="icon-shell"><PlatformIcon name="review" /></div><h3>الأدلة العلمية</h3><p>صفحات تلخص الأدلة والدراسات والمصادر مع سياق منهجي واضح.</p><span>استكشف الأدلة العلمية ←</span></Link>
-            <Link prefetch={false} className="rawafid-platform-card" href="/assessment-lab"><div className="icon-shell"><PlatformIcon name="tools" /></div><h3>مختبر روافد للمتابعة والفهم</h3><p>60 أداة متابعة عربية تعمل داخل المتصفح و10 صفحات مصدرية موثقة، دون حفظ الإجابات أو إنتاج تشخيص.</p><span>فتح المختبر ←</span></Link>
-            <Link prefetch={false} className="rawafid-platform-card" href="/cognitive-lab"><div className="icon-shell"><PlatformIcon name="knowledge" /></div><h3>مختبر القدرات والأنشطة المعرفية</h3><p>100 نشاط عربي للانتباه والذاكرة والتعلم والاستدلال واللغة وسرعة المعالجة، بنتائج وصفية دون تشخيص أو مقارنة معيارية.</p><span>فتح المختبر المعرفي ←</span></Link>
-            <Link prefetch={false} className="rawafid-platform-card" href="/capabilities/kids-lab/"><div className="icon-shell"><PlatformIcon name="tools" /></div><h3>مختبر الأنشطة والاختبارات للأطفال</h3><p>1000 نشاط وورقة عمل واختبار إتقان قابل للطباعة، موزعة على 67 سلسلة مهارية وخمسة مستويات متدرجة، مع مهام تدريبية واختبارات إتقان غير تشخيصية.</p><span>فتح مختبر الأطفال ←</span></Link>
             <Link prefetch={false} className="rawafid-platform-card" href="/sectors/pediatric-oncology"><div className="icon-shell"><PlatformIcon name="community" /></div><h3>مركز سرطان الأطفال</h3><p>مسار موحد للتشخيص والعلاج والدعم النفسي والأسري والنجاة والمتابعة.</p><span>فتح المركز ←</span></Link>
           </div>
         </section>
