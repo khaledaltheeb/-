@@ -23,6 +23,7 @@ if (guidanceFile.schema_version !== 1) fail(`unexpected topic-guidance schema ve
 if (!Array.isArray(guidanceFile.profiles) || guidanceFile.profiles.length !== 50) fail(`expected 50 topic guidance profiles; found ${guidanceFile.profiles?.length ?? 0}`);
 const guidanceKeys = new Set(guidanceFile.profiles.map((profile) => profile.key));
 if (guidanceKeys.size !== guidanceFile.profiles.length) fail('topic guidance keys must be unique');
+const guidanceByKey = new Map(guidanceFile.profiles.map((profile) => [profile.key, profile]));
 for (const topic of topics) {
   if (!guidanceKeys.has(topic.key)) fail(`missing topic guidance for ${topic.key}`);
 }
@@ -33,6 +34,31 @@ for (const profile of guidanceFile.profiles) {
   if (typeof profile.boundary !== 'string' || profile.boundary.trim().length < 35) fail(`${profile.key} must include a substantive interpretation boundary`);
   if (!Array.isArray(profile.referenceIds) || profile.referenceIds.length < 1) fail(`${profile.key} must cite at least one reference id`);
   if (profile.safety != null && (typeof profile.safety !== 'string' || profile.safety.trim().length < 35)) fail(`${profile.key} safety guidance is too short`);
+}
+
+const safetyCriticalTopics = [
+  'anxiety',
+  'depression',
+  'panic-attacks',
+  'psychological-trauma',
+  'ptsd',
+  'grief-loss',
+  'anger',
+  'harmful-relationships',
+  'psychological-boundaries',
+  'memory',
+  'sleep',
+  'emotional-eating',
+  'body-image',
+  'addiction',
+  'bullying',
+  'family-violence',
+  'positive-parenting',
+  'family-therapy',
+];
+for (const key of safetyCriticalTopics) {
+  const profile = guidanceByKey.get(key);
+  if (!profile?.safety || profile.safety.trim().length < 35) fail(`${key} must include a topic-specific safety branch`);
 }
 
 const usedReferenceIds = new Set(guidanceFile.profiles.flatMap((profile) => profile.referenceIds));
@@ -62,4 +88,4 @@ if (!detail.includes('المراجع المرتبطة بهذا الموضوع و
 if (!detail.includes('هذه الصفحة ليست خدمة طوارئ')) fail('detail route must preserve an emergency boundary fallback');
 if (!detail.includes('topicGuidance?.safety')) fail('detail routes must render topic-specific safety guidance when present');
 
-if (!process.exitCode) console.log('Guided assessment gold-standard contract passed: 50 topics, 100 preserved aliases, topic-specific focus/boundaries/references, no scoring or answer persistence.');
+if (!process.exitCode) console.log('Guided assessment gold-standard contract passed: 50 topics, 100 preserved aliases, mandatory safety branches for critical topics, topic-specific focus/boundaries/references, no scoring or answer persistence.');
