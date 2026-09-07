@@ -2,7 +2,7 @@ name: Assessment Measures Live Smoke
 
 on:
   push:
-    branches: ['ops/assessment-measures-live-smoke-20260906']
+    branches: ['main', 'ops/assessment-measures-live-smoke-20260906']
     paths:
       - '.github/scripts/assessment-measures-live-smoke.mjs'
       - '.github/workflows/assessment-measures-live-smoke.yml'
