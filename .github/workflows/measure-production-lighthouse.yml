@@ -73,6 +73,59 @@ jobs:
           fs.writeFileSync('/tmp/lighthouse-summary.json', JSON.stringify(out, null, 2));
           NODE
 
+      - name: Prewarm Kids Lab cache
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://healthrenewal.org/capabilities/kids-lab/'
+          curl -fsS --compressed --max-time 30 \
+            -H 'Accept: text/html,application/xhtml+xml' \
+            "$url" >/dev/null
+          sleep 1
+          curl -fsS --compressed --max-time 30 \
+            -H 'Accept: text/html,application/xhtml+xml' \
+            -o /dev/null \
+            -w 'KIDS_LAB_PREWARM_SECOND_TTFB=%{time_starttransfer}\n' \
+            "$url"
+
+      - name: Run mobile Lighthouse against Kids Lab
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes lighthouse@13.4.1 https://healthrenewal.org/capabilities/kids-lab/ \
+            --output=json \
+            --output-path=/tmp/lighthouse-kids-lab.json \
+            --only-categories=performance,accessibility,best-practices,seo \
+            --form-factor=mobile \
+            --screenEmulation.mobile=true \
+            --throttling-method=simulate \
+            --chrome-flags='--headless=new --no-sandbox --disable-dev-shm-usage' \
+            --quiet
+          node - <<'NODE'
+          const fs = require('fs');
+          const r = JSON.parse(fs.readFileSync('/tmp/lighthouse-kids-lab.json','utf8'));
+          const a = r.audits;
+          const c = r.categories;
+          const out = {
+            performance: Math.round(c.performance.score * 100),
+            accessibility: Math.round(c.accessibility.score * 100),
+            bestPractices: Math.round(c['best-practices'].score * 100),
+            seo: Math.round(c.seo.score * 100),
+            fcpMs: Math.round(a['first-contentful-paint'].numericValue),
+            lcpMs: Math.round(a['largest-contentful-paint'].numericValue),
+            tbtMs: Math.round(a['total-blocking-time'].numericValue),
+            cls: Number(a['cumulative-layout-shift'].numericValue.toFixed(4)),
+            speedIndexMs: Math.round(a['speed-index'].numericValue),
+            serverResponseTimeMs: Math.round(a['server-response-time']?.numericValue || 0),
+            totalByteWeight: Math.round(a['total-byte-weight']?.numericValue || 0),
+            domSize: Math.round(a['dom-size']?.numericValue || 0),
+            unusedJsBytes: Math.round(a['unused-javascript']?.details?.overallSavingsBytes || 0),
+            unusedCssBytes: Math.round(a['unused-css-rules']?.details?.overallSavingsBytes || 0),
+          };
+          console.log('KIDS_LAB_LIGHTHOUSE_RESULT=' + JSON.stringify(out));
+          fs.writeFileSync('/tmp/lighthouse-kids-lab-summary.json', JSON.stringify(out, null, 2));
+          NODE
+
       - name: Run Agentic Browsing WebMCP Lighthouse audit
         shell: bash
         run: |
@@ -173,6 +226,8 @@ jobs:
           path: |
             /tmp/lighthouse.json
             /tmp/lighthouse-summary.json
+            /tmp/lighthouse-kids-lab.json
+            /tmp/lighthouse-kids-lab-summary.json
             /tmp/lighthouse-agentic.json
             /tmp/lighthouse-webmcp-summary.json
           retention-days: 2
