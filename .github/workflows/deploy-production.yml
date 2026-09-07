@@ -122,6 +122,9 @@ jobs:
             --retry 6 --retry-delay 2 --retry-all-errors \
             "${base}/?deploy=${stamp}" >/tmp/home.html
           grep -q 'healthrenewal.org' /tmp/home.html
+          grep -q 'مختبر الأنشطة والاختبارات للأطفال' /tmp/home.html
+          grep -q '/capabilities/kids-lab/' /tmp/home.html
+          echo 'LIVE_OK homepage Kids Lab card'
           visible_tools="$(grep -o 'toolname="[^"]*"' /tmp/home.html | sort -u | tr '\n' ' ' || true)"
           echo "WEBMCP_LIVE_DIAGNOSTIC: ${visible_tools:-homepage-ISR-may-still-serve-the-previous-render}"
           echo 'LIVE_OK homepage; strict rendered WebMCP coverage is enforced by Rawafid Fast Quality Gate'
