@@ -28,7 +28,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
 
       - name: Install dependencies
@@ -57,7 +57,16 @@ jobs:
         run: node scripts/kids-lab-render-contract-final.mjs
 
       - name: Build exact production Worker and materialize Kids Lab assets
-        run: npx opennextjs-cloudflare build --env production --openNextConfigPath .github/open-next-production-cache.config.ts
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r export_line; do
+            eval "$export_line"
+          done < <(grep '^export ' scripts/cloudflare-production-build.sh)
+          export CI='false'
+          export QUICK_INFO_SOCIAL_CACHE_HIT='false'
+          export QUICK_INFO_SOCIAL_IMAGES_REQUIRED='true'
+          npx opennextjs-cloudflare build --env production --openNextConfigPath .github/open-next-production-cache.config.ts
 
       - name: Verify deployed production asset counts
         shell: bash
