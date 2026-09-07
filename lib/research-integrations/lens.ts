@@ -42,7 +42,8 @@ function authors(value: unknown): EvidenceAuthor[] {
   return asArray(value).flatMap((item) => {
     const row = record(item);
     if (!row) return [];
-    const display = text(row.display_name) || [text(row.first_name), text(row.last_name)].filter(Boolean).join(' ');
+    const personalName = [text(row.first_name), text(row.last_name)].filter(Boolean).join(' ');
+    const display = text(row.display_name) || text(row.collective_name) || personalName || null;
     if (!display) return [];
     const identifiers = ids(row.ids);
     return [{ display_name: display, orcid: identifiers.orcid || null, affiliations: affiliations(row.affiliations) }];
