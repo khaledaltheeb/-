@@ -3,6 +3,8 @@ import type { EvidenceAffiliation, EvidenceAuthor, EvidenceRecord, EvidenceSearc
 import { normalizeRorId } from '@/lib/research-integrations/ror';
 
 const LENS_SCHOLARLY_ENDPOINT = 'https://api.lens.org/scholarly/search';
+const LENS_ATTRIBUTION_URL = 'https://www.lens.org/';
+const LENS_TERMS_URL = 'https://about.lens.org/policies/#attribution';
 
 type JsonRecord = Record<string, unknown>;
 function record(value: unknown): JsonRecord | null { return value && typeof value === 'object' && !Array.isArray(value) ? value as JsonRecord : null; }
@@ -77,6 +79,12 @@ function normalizeLensResult(value: unknown, retrievedAt: string, queryDescripti
     is_open_access: typeof row.is_open_access === 'boolean' ? row.is_open_access : openAccess ? true : null,
     is_retracted: isRetracted(row.retraction_updates),
     url: `https://www.lens.org/lens/scholar/article/${encodeURIComponent(lensId)}`,
+    attribution: {
+      provider: 'The Lens',
+      label: 'Scholarly metadata provided by The Lens',
+      url: LENS_ATTRIBUTION_URL,
+      terms_url: LENS_TERMS_URL,
+    },
     provenance: { retrieved_at: retrievedAt, endpoint: LENS_SCHOLARLY_ENDPOINT, query: queryDescription },
   };
 }
