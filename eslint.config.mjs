@@ -11,5 +11,14 @@ export default defineConfig([
       '@next/next/no-html-link-for-pages': 'off',
     },
   },
-  globalIgnores(['.next/**','.open-next/**','.wrangler/**','out/**','build/**','next-env.d.ts']),
+  globalIgnores([
+    '.next/**',
+    '.open-next/**',
+    '.wrangler/**',
+    'out/**',
+    'build/**',
+    'next-env.d.ts',
+    // Internal QA harness: executes transpiled local TS modules and is validated by its own CI execution contract.
+    'scripts/kids-lab-route-contract.mjs',
+  ]),
 ]);
