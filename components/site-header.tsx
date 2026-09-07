@@ -23,7 +23,6 @@ const intentLinks = [
 ];
 
 const serviceLinks = [
-  { href: '/#labs-tools', label: 'المختبرات والتقييمات والأدوات', icon: 'tools' as const },
   { href: '/daily-tools/', label: 'الأدوات اليومية', icon: 'tools' as const },
   { href: '/assessment-measures/', label: 'مكتبة المقاييس العالمية', icon: 'review' as const },
   { href: '/specialists', label: 'العثور على مختص', icon: 'specialist' as const },
