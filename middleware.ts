@@ -9,6 +9,8 @@ const LOCAL_PUBLIC_PREFIXES = [
   '/cognitive-lab',
   '/capabilities/kids-lab',
   '/core-outcome-sets',
+  '/resources',
+  '/evidence-guides',
 ] as const;
 
 export async function middleware(request: NextRequest) {
@@ -25,12 +27,12 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(canonical, 308);
   }
 
-  // These public knowledge/tool sectors are rendered entirely from versioned
-  // repository data. Anonymous GET/HEAD requests do not require a Supabase auth
-  // refresh or a database-backed legacy redirect lookup. Keeping them on the
-  // local Worker path removes an unnecessary network dependency and reduces
-  // the blast radius of transient database/session failures without changing
-  // authenticated or mutating requests elsewhere on the site.
+  // These public knowledge/tool sectors are intended for anonymous reading and
+  // are either repository-rendered or perform their own read-only public data
+  // access. Anonymous GET/HEAD requests do not need a Supabase auth refresh or
+  // a database-backed legacy redirect lookup before the route can render.
+  // Keeping them on the direct public path prevents transient auth/session
+  // failures from turning otherwise valid public pages into HTTP 500 responses.
   const pathname = request.nextUrl.pathname;
   const isLocalPublicRoute = LOCAL_PUBLIC_PREFIXES.some(
     (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
