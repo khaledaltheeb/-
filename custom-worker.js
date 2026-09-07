@@ -1,7 +1,5 @@
 import { WorkerEntrypoint } from 'cloudflare:workers';
 
-// OpenNext generates this module during the production build. The custom worker is
-// the supported adapter pattern for reusing its generated fetch handler.
 import handler from './.open-next/worker.js';
 
 const CANONICAL_HOST = 'healthrenewal.org';
@@ -73,10 +71,7 @@ async function assetFetch(request, env, pathname) {
   const target = new URL(request.url);
   target.pathname = pathname;
   target.search = '';
-  const assetRequest = new Request(target.toString(), {
-    method: request.method,
-    headers: request.headers,
-  });
+  const assetRequest = new Request(target.toString(), { method: request.method, headers: request.headers });
   const response = await env.ASSETS.fetch(assetRequest);
   return response.status === 404 ? null : response;
 }
@@ -85,18 +80,16 @@ async function kidsLabStaticResponse(request, env, url) {
   if (url.hostname.toLowerCase() !== CANONICAL_HOST || !CACHEABLE_METHODS.has(request.method)) return null;
   if (!isPrefix(url.pathname, KIDS_LAB_PREFIX)) return null;
 
-  // Worksheet URLs keep their public canonical shape while resolving to immutable
-  // SVG files. This path never invokes Next/OpenNext rendering.
   const worksheet = kidsLabWorksheetAssetPath(url.pathname);
   if (worksheet) return assetFetch(request, env, worksheet);
 
-  // Full-document Kids Lab navigation is served from prerendered HTML copied into
-  // Cloudflare Static Assets after the OpenNext build. RSC requests fall back to
-  // OpenNext so existing Next client navigation remains semantically correct.
-  if (isRscRequest(request, url)) return null;
+  const normalized = url.pathname.endsWith('/') ? url.pathname : `${url.pathname}/`;
+  if (isRscRequest(request, url)) {
+    return assetFetch(request, env, `${normalized}index.rsc`);
+  }
+
   const accept = request.headers.get('accept') || '';
   if (!accept.toLowerCase().includes('text/html') && request.method !== 'HEAD') return null;
-  const normalized = url.pathname.endsWith('/') ? url.pathname : `${url.pathname}/`;
   return assetFetch(request, env, `${normalized}index.html`);
 }
 
