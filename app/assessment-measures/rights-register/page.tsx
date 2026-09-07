@@ -3,13 +3,14 @@ import Link from 'next/link';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import { buildSeoMetadata, SITE_URL } from '@/lib/seo';
-import { arabicStatusBadge, assessmentMeasures, rightsBadge } from '@/lib/assessment-measures-catalog';
+import { assessmentMeasures, rightsBadge } from '@/lib/assessment-measures-catalog';
 import { assessmentMeasuresRightsReview } from '@/lib/assessment-measures-rights-review';
+import { getAssessmentMeasureRightsDimensions } from '@/lib/assessment-measures-rights-dimensions';
 import styles from '@/components/assessment-measures.module.css';
 
 export const metadata: Metadata = buildSeoMetadata({
   title: 'سجل حقوق المقاييس وأدوات التقييم',
-  description: 'سجل شفاف لحالة حقوق الأصل والنسخة العربية وإعادة النشر وتاريخ التحقق لكل مقياس في مكتبة روافد.',
+  description: 'سجل شفاف يفصل حقوق الأداة الأصلية عن حقوق وثيقة المصدر والترجمة العربية وحق إعادة نشر النموذج لكل مقياس في روافد.',
   path: '/assessment-measures/rights-register/',
   index: true,
   follow: true,
@@ -39,7 +40,7 @@ export default function AssessmentMeasureRightsRegisterPage() {
         <section className={styles.hero}>
           <span className={styles.eyebrow}>شفافية حقوقية قابلة للتدقيق</span>
           <h1>سجل حقوق المقاييس</h1>
-          <p>يعرض هذا السجل ما تحققنا منه لكل أداة منشورة في المكتبة. حقوق الأداة الأصلية لا تعمم على ترجمتها العربية، وعبارة «مجاني» وحدها لا تكفي لإعادة نشر نموذج كامل.</p>
+          <p>نعامل الحقوق كأربع مسائل مستقلة: الأداة الأصلية، وثيقة المصدر، النسخة أو الدراسة العربية، وحق إعادة نشر النص العربي. حقوق الأداة الأصلية لا تعمم على ترجمتها العربية، وعبارة «مجاني» وحدها لا تكفي لإعادة نشر نموذج كامل.</p>
           <div className={styles.heroActions}>
             <Link className={styles.primaryAction} href="/assessment-measures/">المكتبة</Link>
             <Link className={styles.secondaryAction} href="/assessment-measures/rights-review/">{assessmentMeasuresRightsReview.length} أداة مهمة قيد مراجعة الحقوق</Link>
@@ -47,20 +48,27 @@ export default function AssessmentMeasureRightsRegisterPage() {
           </div>
         </section>
 
+        <section className={styles.section}>
+          <div className={styles.callout}>
+            <strong>قاعدة الفصل الحقوقي:</strong> Public Domain أو Open Reuse للأداة لا يعني أن ملف PDF أو صفحة الناشر أو الرسوم أو ترجمة طرف ثالث تحمل الترخيص نفسه. كما أن دراسة تحقق عربية تثبت وجود نسخة أو خصائص قياس، لكنها لا تمنح تلقائيًا إذن إعادة استضافة نص الترجمة.
+          </div>
+        </section>
+
         <section className={styles.section} aria-labelledby="register-title">
-          <div className={styles.sectionHead}><div><h2 id="register-title">الإصدار الحالي: {assessmentMeasures.length} مقياسًا قابلًا للنشر المرجعي وفق سجل الحقوق</h2><p>تاريخ التحقق يخص سجل الحقوق في روافد، ولا يعني أن شروط صاحب الحق لن تتغير مستقبلًا.</p></div></div>
+          <div className={styles.sectionHead}><div><h2 id="register-title">الإصدار الحالي: {assessmentMeasures.length} مقياسًا قابلًا للنشر المرجعي وفق سجل الحقوق</h2><p>تاريخ التحقق يخص سجل الحقوق في روافد، ولا يعني أن شروط صاحب الحق أو ناشر وثيقة بعينها لن تتغير مستقبلًا.</p></div></div>
           <div className={styles.tableWrap}>
             <table className={styles.table}>
-              <thead><tr><th>المقياس</th><th>حقوق الأصل</th><th>حالة العربية</th><th>النشر العربي الكامل</th><th>آخر تحقق</th><th>مصدر الحقوق</th></tr></thead>
+              <thead><tr><th>المقياس</th><th>الأداة الأصلية</th><th>وثيقة المصدر</th><th>النسخة/الدليل العربي</th><th>إعادة نشر النص العربي</th><th>آخر تحقق</th><th>مصدر حقوق الأصل</th></tr></thead>
               <tbody>{assessmentMeasures.map((measure) => {
-                const rightsSource = measure.sources.find((source) => source.role === 'rights');
+                const dimensions = getAssessmentMeasureRightsDimensions(measure);
                 return <tr key={measure.slug}>
                   <td><Link href={`/assessment-measures/${measure.slug}/`}><strong>{measure.nameAr}</strong><br /><span lang="en" dir="ltr">{measure.acronym}</span></Link></td>
-                  <td>{rightsBadge(measure.rightsStatus)}</td>
-                  <td>{arabicStatusBadge(measure.arabicStatus)}</td>
-                  <td>{measure.fullArabicFormPublished ? 'نعم — بروتوكول/إجراء موثق فقط' : 'لا — ينتظر تحقق النسخة العربية'}</td>
+                  <td>{rightsBadge(dimensions.originalInstrument.status)}<br /><small>{dimensions.originalInstrument.note}</small></td>
+                  <td><strong>{dimensions.sourceDocument.label}</strong><br /><small>{dimensions.sourceDocument.note}</small></td>
+                  <td><strong>{dimensions.arabicVersion.label}</strong><br /><small>{dimensions.arabicVersion.note}</small>{dimensions.arabicVersion.evidenceUrl ? <><br /><a href={dimensions.arabicVersion.evidenceUrl} target="_blank" rel="noreferrer">{dimensions.arabicVersion.evidenceLabel} ↗</a></> : null}</td>
+                  <td><strong>{dimensions.arabicRepublication.label}</strong><br /><small>{dimensions.arabicRepublication.note}</small></td>
                   <td>{measure.rightsVerifiedOn}</td>
-                  <td>{rightsSource ? <a href={rightsSource.url} target="_blank" rel="noreferrer">{rightsSource.label} ↗</a> : 'غير متاح'}</td>
+                  <td>{dimensions.originalInstrument.sourceUrl ? <a href={dimensions.originalInstrument.sourceUrl} target="_blank" rel="noreferrer">{dimensions.originalInstrument.sourceLabel} ↗</a> : 'غير متاح'}</td>
                 </tr>;
               })}</tbody>
             </table>
