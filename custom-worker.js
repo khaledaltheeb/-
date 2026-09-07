@@ -6,6 +6,7 @@ const CANONICAL_HOST = 'healthrenewal.org';
 const WWW_HOST = 'www.healthrenewal.org';
 const CACHEABLE_METHODS = new Set(['GET', 'HEAD']);
 const KIDS_LAB_PREFIX = '/capabilities/kids-lab';
+// Kids Lab static assets are materialized by the exact production OpenNext build before this gateway serves them.
 
 const ROBOTS_TXT = [
   'User-agent: *',
