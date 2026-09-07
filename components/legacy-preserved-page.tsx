@@ -1,8 +1,8 @@
+import type { ReactNode } from 'react';
 import Link from 'next/link';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import ContentRenderer from '@/components/content-renderer';
-import ResearchEvidenceLearningNav from '@/components/research-evidence-learning-nav';
 import { SITE_URL } from '@/lib/seo';
 import {
   legacyCanonicalPath,
@@ -11,14 +11,14 @@ import {
   type LegacyPreservedPage,
 } from '@/lib/legacy-preserved-page';
 
-type Props = { page: LegacyPreservedPage; route: string };
+type Props = { page: LegacyPreservedPage; route: string; lead?: ReactNode };
 
 function familyLabel(value: string | null): string {
   if (!value) return 'المحتوى التاريخي';
   return value.replace(/[-_]+/g, ' ').trim() || 'المحتوى التاريخي';
 }
 
-export default function LegacyPreservedPageView({ page, route }: Props) {
+export default function LegacyPreservedPageView({ page, route, lead }: Props) {
   const current = page.current_content;
   const canonical = current?.canonical_url || legacyCanonicalPath(route);
   const title = current?.title || page.h1 || page.title || 'محتوى محفوظ';
@@ -40,37 +40,18 @@ export default function LegacyPreservedPageView({ page, route }: Props) {
     isPartOf: { '@id': `${SITE_URL}/#website` },
     publisher: { '@id': `${SITE_URL}/#organization` },
   } : null;
-  const researchLearningSchema = current && canonical.startsWith('/sections/research-evidence-learning/') ? {
-    '@context': 'https://schema.org',
-    '@type': 'LearningResource',
-    '@id': `${canonicalUrl}#learning-resource`,
-    url: canonicalUrl,
-    name: title,
-    description: current.excerpt || page.meta_description || undefined,
-    inLanguage: 'ar',
-    isAccessibleForFree: true,
-    learningResourceType: 'Guide',
-    educationalUse: ['instruction', 'self study', 'professional development'],
-    teaches: title,
-    isPartOf: {
-      '@type': 'CollectionPage',
-      '@id': `${SITE_URL}/sections/research-evidence-learning/#collection`,
-      url: `${SITE_URL}/sections/research-evidence-learning/`,
-      name: 'البحث والأدلة والتعلم',
-    },
-    publisher: { '@id': `${SITE_URL}/#organization` },
-  } : null;
+  const HistoricalHeading = lead ? 'h2' : 'h1';
 
   return <><SiteHeader /><main className="article-shell">
     {sectorCollectionSchema ? <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(sectorCollectionSchema).replace(/</g, '\u003c') }} /> : null}
-    {researchLearningSchema ? <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(researchLearningSchema).replace(/</g, '\u003c') }} /> : null}
     <nav className="breadcrumbs" aria-label="مسار الصفحة">
       <Link href="/">الرئيسية</Link><span>/</span><span>{current ? 'محتوى روافد المراجع' : familyLabel(page.source_family)}</span><span>/</span><span aria-current="page">{title}</span>
     </nav>
+    {lead}
     <article>
       <header className="article-hero">
-        <span className="eyebrow">{current ? 'محتوى منشور ومراجع' : 'نسخة إنتاجية محفوظة'}</span>
-        <h1>{title}</h1>
+        <span className="eyebrow">{current ? 'محتوى منشور ومراجع' : lead ? 'السجل التاريخي المحفوظ' : 'نسخة إنتاجية محفوظة'}</span>
+        <HistoricalHeading>{title}</HistoricalHeading>
         {(current?.excerpt || page.meta_description) ? <p>{current?.excerpt || page.meta_description}</p> : null}
         <div className="article-meta">
           <span>{current ? `المسار المعتمد: ${canonical}` : `المسار الأصلي محفوظ: ${canonical}`}</span>
@@ -86,7 +67,6 @@ export default function LegacyPreservedPageView({ page, route }: Props) {
         <strong>حالة هذه النسخة</strong>
         <p>هذا هو المحتوى الذي كان منشورًا على المسار التاريخي نفسه. لم تُمنح هذه النسخة اعتماد دورة المراجعة العلمية الحالية بعد، لذلك تبقى غير مفهرسة إلى أن تكتمل مراجعتها.</p>
       </aside>}
-      {current ? <ResearchEvidenceLearningNav route={canonical} /> : null}
       <div className="article-body">
         <ContentRenderer bodyJson={bodyJson} bodyText={bodyText} recordId={current?.id || page.source_path} />
       </div>

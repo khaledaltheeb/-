@@ -2,7 +2,6 @@ import type { ReactNode } from 'react';
 import Link from 'next/link';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
-import '@/app/trust-page-scoped.css';
 
 type Section = { title: string; body: ReactNode };
 
@@ -12,6 +11,7 @@ const trustLinks = [
   { href: '/developers', label: 'واجهة المطورين' },
   { href: '/medical-review-policy', label: 'المراجعة العلمية' },
   { href: '/editorial-policy', label: 'السياسة التحريرية' },
+  { href: '/accessibility-statement', label: 'الإتاحة الرقمية' },
   { href: '/privacy', label: 'الخصوصية' },
   { href: '/terms', label: 'شروط الاستخدام' },
   { href: '/disclaimer', label: 'إخلاء المسؤولية' },

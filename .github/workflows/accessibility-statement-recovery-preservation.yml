@@ -1,0 +1,35 @@
+name: Accessibility Statement Recovery Preservation
+
+on:
+  pull_request:
+    paths:
+      - 'app/accessibility-statement/**'
+      - 'components/legacy-preserved-page.tsx'
+      - 'components/legacy-preserved-route.tsx'
+      - 'components/trust-page.tsx'
+      - 'scripts/accessibility-statement-recovery-contract.mjs'
+      - '.github/workflows/accessibility-statement-recovery-preservation.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'app/accessibility-statement/**'
+      - 'components/legacy-preserved-page.tsx'
+      - 'components/legacy-preserved-route.tsx'
+      - 'components/trust-page.tsx'
+      - 'scripts/accessibility-statement-recovery-contract.mjs'
+      - '.github/workflows/accessibility-statement-recovery-preservation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  accessibility-statement-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify current statement over preserved historical content
+        run: node scripts/accessibility-statement-recovery-contract.mjs
