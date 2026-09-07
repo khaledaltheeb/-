@@ -10,6 +10,7 @@ const REQUIRED_WORKSHEET_SLUGS = [
   'learning-referral-evidence-pack',
   'family-school-learning-communication',
 ];
+const TOOLKIT_SLUG = 'dyslexia-norway-school-observation-toolkit';
 
 function walk(dir, files = []) {
   if (!fs.existsSync(dir)) return files;
@@ -21,33 +22,45 @@ function walk(dir, files = []) {
   return files;
 }
 
-const sourceRoot = path.join(ROOT, '.next', 'server', 'app', 'resources', 'worksheets');
-const assetRoot = path.join(ROOT, 'public', 'resources', 'worksheets');
-if (!fs.existsSync(sourceRoot)) throw new Error(`Worksheet Next output is missing: ${sourceRoot}`);
-
-let htmlCount = 0;
-let rscCount = 0;
-for (const source of walk(sourceRoot)) {
-  const extension = path.extname(source);
-  if (extension !== '.html' && extension !== '.rsc') continue;
-  const relative = path.relative(sourceRoot, source);
-  const withoutExtension = relative.slice(0, -extension.length);
-  const parts = withoutExtension.split(path.sep).filter(Boolean);
-  if (parts.at(-1) === 'page') parts.pop();
-  if (!parts.length) continue;
-  const destinationDir = path.join(assetRoot, ...parts);
-  fs.mkdirSync(destinationDir, { recursive: true });
-  const destination = path.join(destinationDir, extension === '.html' ? 'index.html' : 'index.rsc');
-  fs.copyFileSync(source, destination);
-  if (extension === '.html') htmlCount += 1;
-  else rscCount += 1;
+function materializeRouteTree(sourceRoot, assetRoot) {
+  if (!fs.existsSync(sourceRoot)) throw new Error(`Next output is missing: ${sourceRoot}`);
+  let htmlCount = 0;
+  let rscCount = 0;
+  for (const source of walk(sourceRoot)) {
+    const extension = path.extname(source);
+    if (extension !== '.html' && extension !== '.rsc') continue;
+    const relative = path.relative(sourceRoot, source);
+    const withoutExtension = relative.slice(0, -extension.length);
+    const parts = withoutExtension.split(path.sep).filter(Boolean);
+    if (parts.at(-1) === 'page') parts.pop();
+    if (!parts.length) continue;
+    const destinationDir = path.join(assetRoot, ...parts);
+    fs.mkdirSync(destinationDir, { recursive: true });
+    const destination = path.join(destinationDir, extension === '.html' ? 'index.html' : 'index.rsc');
+    fs.copyFileSync(source, destination);
+    if (extension === '.html') htmlCount += 1;
+    else rscCount += 1;
+  }
+  return { htmlCount, rscCount };
 }
 
+const worksheetSource = path.join(ROOT, '.next', 'server', 'app', 'resources', 'worksheets');
+const worksheetTarget = path.join(ROOT, 'public', 'resources', 'worksheets');
+const worksheetCounts = materializeRouteTree(worksheetSource, worksheetTarget);
+
 for (const slug of REQUIRED_WORKSHEET_SLUGS) {
-  const html = path.join(assetRoot, slug, 'index.html');
-  const rsc = path.join(assetRoot, slug, 'index.rsc');
+  const html = path.join(worksheetTarget, slug, 'index.html');
+  const rsc = path.join(worksheetTarget, slug, 'index.rsc');
   if (!fs.existsSync(html)) throw new Error(`Required worksheet HTML was not materialized: ${slug}`);
   if (!fs.existsSync(rsc)) throw new Error(`Required worksheet RSC was not materialized: ${slug}`);
 }
 
-console.log(`Worksheet public asset staging complete: ${htmlCount} HTML and ${rscCount} RSC assets.`);
+const toolkitSource = path.join(ROOT, '.next', 'server', 'app', 'evidence-guides', TOOLKIT_SLUG);
+const toolkitTarget = path.join(ROOT, 'public', 'evidence-guides', TOOLKIT_SLUG);
+const toolkitCounts = materializeRouteTree(toolkitSource, toolkitTarget);
+const toolkitHtml = path.join(toolkitTarget, 'index.html');
+const toolkitRsc = path.join(toolkitTarget, 'index.rsc');
+if (!fs.existsSync(toolkitHtml)) throw new Error(`Required Dyslexia Norway toolkit HTML was not materialized: ${TOOLKIT_SLUG}`);
+if (!fs.existsSync(toolkitRsc)) throw new Error(`Required Dyslexia Norway toolkit RSC was not materialized: ${TOOLKIT_SLUG}`);
+
+console.log(`Practical resource public asset staging complete: worksheets ${worksheetCounts.htmlCount} HTML / ${worksheetCounts.rscCount} RSC; toolkit ${toolkitCounts.htmlCount} HTML / ${toolkitCounts.rscCount} RSC.`);
