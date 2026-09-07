@@ -4,11 +4,12 @@ import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import { buildSeoMetadata } from '@/lib/seo';
 import { arabicStatusBadge, assessmentMeasures, rightsBadge } from '@/lib/assessment-measures-catalog';
+import { classifyAssessmentMeasure } from '@/lib/assessment-measure-taxonomy';
 import styles from '@/components/assessment-measures.module.css';
 
 export const metadata: Metadata = buildSeoMetadata({
   title: 'مقارنة المقاييس وأدوات التقييم',
-  description: 'قارن بين المقاييس المستخدمة عالميًا حسب ما تقيسه، الفئات، طريقة التطبيق، الوقت، التسجيل، النسخة العربية وحقوق الاستخدام.',
+  description: 'قارن بين المقاييس المستخدمة عالميًا حسب نوع أداة القياس، ما تقيسه، الفئات، طريقة التطبيق، الوقت، التسجيل، النسخة العربية وحقوق الاستخدام.',
   path: '/assessment-measures/compare/',
   index: true,
   follow: true,
@@ -34,16 +35,20 @@ export default async function AssessmentMeasuresComparePage({ searchParams }: Pa
         <section className={styles.hero}>
           <span className={styles.eyebrow}>أداة اختيار عملية</span>
           <h1>قارن المقاييس قبل أن تختار</h1>
-          <p>المقارنة تساعدك على رؤية اختلاف البنية، الفئة، وقت التطبيق والتسجيل والحقوق. لا تعني أن أحد المقاييس «أفضل» مطلقًا؛ الأفضل هو الأنسب لسؤال القياس والمجتمع والبروتوكول.</p>
+          <p>المقارنة تفصل بين نوع أداة القياس وبين الغرض الذي قد تُستخدم من أجله، ثم تعرض البنية، الفئة، وقت التطبيق والتسجيل والحقوق. PROM أو PerfO أو ClinRO ليس «أفضل» بذاته؛ الاختيار يتبع سؤال القياس والمجتمع والبروتوكول.</p>
         </section>
 
         <section className={styles.section}>
           <div className={styles.sectionHead}><div><h2>اختر حتى 4 مقاييس</h2><p>إذا اخترت أكثر من أربعة سنعرض أول أربعة فقط للحفاظ على قابلية القراءة.</p></div></div>
           <form className={styles.panel} action="/assessment-measures/compare/" method="get">
-            <div className={styles.methodGrid}>{assessmentMeasures.map((measure) => <label key={measure.slug} className={styles.statusBox}>
-              <span><input type="checkbox" name="measure" value={measure.slug} defaultChecked={selected.some((item) => item.slug === measure.slug)} /> <strong>{measure.nameAr} — {measure.acronym}</strong></span>
-              <p>{measure.construct}</p>
-            </label>)}</div>
+            <div className={styles.methodGrid}>{assessmentMeasures.map((measure) => {
+              const taxonomy = classifyAssessmentMeasure(measure);
+              return <label key={measure.slug} className={styles.statusBox}>
+                <span><input type="checkbox" name="measure" value={measure.slug} defaultChecked={selected.some((item) => item.slug === measure.slug)} /> <strong>{measure.nameAr} — {measure.acronym}</strong></span>
+                <p>{taxonomy.kindLabel}</p>
+                <p>{measure.construct}</p>
+              </label>;
+            })}</div>
             <div className={styles.heroActions}><button className={styles.primaryAction} type="submit">تحديث المقارنة</button><Link className={styles.secondaryAction} href="/assessment-measures/compare/">الافتراضي</Link></div>
           </form>
         </section>
@@ -53,6 +58,8 @@ export default async function AssessmentMeasuresComparePage({ searchParams }: Pa
           <div className={styles.tableWrap}><table className={styles.table}>
             <thead><tr><th>البعد</th>{selected.map((measure) => <th key={measure.slug}><Link href={`/assessment-measures/${measure.slug}/`}>{measure.acronym}</Link><br /><small>{measure.nameAr}</small></th>)}</tr></thead>
             <tbody>
+              <tr><td><strong>نوع أداة القياس</strong></td>{selected.map((measure) => <td key={measure.slug}>{classifyAssessmentMeasure(measure).kindLabel}</td>)}</tr>
+              <tr><td><strong>استخدامات القياس</strong></td>{selected.map((measure) => <td key={measure.slug}>{classifyAssessmentMeasure(measure).useLabels.join(' · ')}</td>)}</tr>
               <tr><td><strong>ما الذي يقيسه؟</strong></td>{selected.map((measure) => <td key={measure.slug}>{measure.construct}</td>)}</tr>
               <tr><td><strong>الغرض</strong></td>{selected.map((measure) => <td key={measure.slug}>{measure.purpose}</td>)}</tr>
               <tr><td><strong>الفئات الشائعة</strong></td>{selected.map((measure) => <td key={measure.slug}>{measure.populations.join(' · ')}</td>)}</tr>
@@ -65,7 +72,7 @@ export default async function AssessmentMeasuresComparePage({ searchParams }: Pa
           </table></div>
         </section>
 
-        <section className={styles.section}><div className={styles.callout}><strong>قبل اتخاذ القرار:</strong> قارن بعد ذلك الخصائص القياسية في المجتمع المستهدف، التدريب المطلوب، حساسية التغير، السقف/الأرضية، ونسخة اللغة. الجدول هنا نقطة بداية للاختيار وليس بديلًا عن مراجعة الأدلة.</div></section>
+        <section className={styles.section}><div className={styles.callout}><strong>قاعدة منهجية:</strong> «نوع الأداة» ليس هو «الاستخدام». قد يكون PROM مستخدمًا للفحص أو المتابعة، وقد يكون PerfO مخرجًا تأهيليًا. قارن بعد ذلك الخصائص القياسية في المجتمع المستهدف، التدريب المطلوب، حساسية التغير، السقف/الأرضية، ونسخة اللغة.</div></section>
       </main>
       <SiteFooter />
     </>
