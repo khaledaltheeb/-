@@ -11,7 +11,28 @@ const LOCAL_PUBLIC_PREFIXES = [
   '/core-outcome-sets',
   '/resources',
   '/evidence-guides',
+  '/sitemaps',
 ] as const;
+
+const LOCAL_PUBLIC_EXACT = new Set([
+  '/all-pages',
+  '/institutions',
+  '/en/institutions',
+  '/institutions/arabic-rtl-assurance',
+  '/institutions/terminology-qa',
+  '/institutions/open-source',
+  '/media',
+  '/external-review',
+  '/accessibility-statement',
+  '/tools/rare-phenotype-navigator',
+  '/sitemap.xml',
+  '/robots.txt',
+  '/llms.txt',
+]);
+
+function normalizedPublicPath(pathname: string) {
+  return pathname.length > 1 && pathname.endsWith('/') ? pathname.slice(0, -1) : pathname;
+}
 
 export async function middleware(request: NextRequest) {
   const hostname = (request.headers.get('x-forwarded-host') || request.headers.get('host') || '')
@@ -27,16 +48,19 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(canonical, 308);
   }
 
-  // These public knowledge/tool sectors are intended for anonymous reading and
-  // are either repository-rendered or perform their own read-only public data
-  // access. Anonymous GET/HEAD requests do not need a Supabase auth refresh or
-  // a database-backed legacy redirect lookup before the route can render.
-  // Keeping them on the direct public path prevents transient auth/session
-  // failures from turning otherwise valid public pages into HTTP 500 responses.
+  // First-class public knowledge, institutional, tool and crawler surfaces must
+  // remain readable even when Supabase auth/redirect lookups are degraded. These
+  // routes are either repository-rendered or perform their own read-only public
+  // data access, so anonymous GET/HEAD requests do not need session refresh or a
+  // database-backed legacy redirect lookup before the route can render.
+  // Exact matching protects historical redirect behavior for unrelated subpaths;
+  // only namespaces that are entirely first-class public surfaces use prefixes.
   const pathname = request.nextUrl.pathname;
-  const isLocalPublicRoute = LOCAL_PUBLIC_PREFIXES.some(
-    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
-  );
+  const normalizedPathname = normalizedPublicPath(pathname);
+  const isLocalPublicRoute = LOCAL_PUBLIC_EXACT.has(normalizedPathname)
+    || LOCAL_PUBLIC_PREFIXES.some(
+      (prefix) => normalizedPathname === prefix || normalizedPathname.startsWith(`${prefix}/`),
+    );
 
   if (isLocalPublicRoute && ['GET', 'HEAD'].includes(request.method)) {
     return NextResponse.next();
