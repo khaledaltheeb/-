@@ -1,0 +1,26 @@
+name: Rare Phenotype Live Smoke
+
+on:
+  workflow_run:
+    workflows: ['Deploy Production Fast']
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-live-rare-phenotype:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify Rare Phenotype Navigator live runtime
+        env:
+          DEPLOY_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+        run: node scripts/rare-phenotype-live-smoke.mjs

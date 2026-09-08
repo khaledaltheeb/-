@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 const PAVS_PHENOTYPE_ENDPOINT = 'https://pavs.phenomebrowser.net/api/search/phenotype';
+const PAVS_SOURCE_URL = 'https://pavs.phenomebrowser.net/';
 const HPO_ID = /^HP:\d{7}$/;
 
-export const runtime = 'edge';
+export const dynamic = 'force-dynamic';
 
 type RequestBody = {
   hpoIds?: unknown;
@@ -32,9 +33,11 @@ export async function POST(request: NextRequest) {
     hpo_ids: hpoIds,
     method,
     limit,
+    include_disease_phenotypes: false,
     include_saudi: body.includeSaudi !== false,
     include_ddd: body.includeDDD === true,
     include_literature: body.includeLiterature !== false,
+    include_clinvar: false,
     only_diagnosed: body.onlyDiagnosed === true,
   };
 
@@ -52,7 +55,12 @@ export async function POST(request: NextRequest) {
       signal: controller.signal,
       cache: 'no-store',
     });
-    if (!upstream.ok) return NextResponse.json({ error: 'pavs_source_unavailable' }, { status: 502 });
+    if (!upstream.ok) {
+      return NextResponse.json(
+        { error: 'pavs_source_unavailable', upstream_status: upstream.status, source_url: PAVS_SOURCE_URL },
+        { status: 502, headers: { 'Cache-Control': 'no-store' } },
+      );
+    }
     const raw = await upstream.json() as unknown;
     const rows = Array.isArray(raw) ? raw : [];
     const items = rows.slice(0, limit).map((row) => {
@@ -67,10 +75,16 @@ export async function POST(request: NextRequest) {
         isSaudi: Boolean(record.is_saudi),
       };
     });
-    return NextResponse.json({ items, source: 'PAVS', query: upstreamBody });
+    return NextResponse.json(
+      { items, source: 'PAVS', source_url: PAVS_SOURCE_URL, query: upstreamBody },
+      { headers: { 'Cache-Control': 'no-store' } },
+    );
   } catch (error) {
     const aborted = error instanceof Error && error.name === 'AbortError';
-    return NextResponse.json({ error: aborted ? 'pavs_source_timeout' : 'pavs_source_error' }, { status: 502 });
+    return NextResponse.json(
+      { error: aborted ? 'pavs_source_timeout' : 'pavs_source_error', source_url: PAVS_SOURCE_URL },
+      { status: 502, headers: { 'Cache-Control': 'no-store' } },
+    );
   } finally {
     clearTimeout(timer);
   }
