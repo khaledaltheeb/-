@@ -66,6 +66,7 @@ export default async function SectionsIndex() {
 
       <nav className="sector-quick-nav" aria-label="مسارات مباشرة من دليل الأقسام">
         <Link href="/sectors">كل القطاعات</Link>
+        <Link href="/sections/mental-health-first-aid/">دليل MHFA الرسمي</Link>
         <Link href="/sectors/pediatric-oncology">سرطان الأطفال</Link>
         <Link href="/care-guides/">أدلة التعامل والرعاية</Link>
         <Link href="/evidence-guides/">الأدلة العلمية</Link>
