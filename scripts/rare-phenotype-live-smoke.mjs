@@ -4,6 +4,7 @@ const attempts = Number(process.env.LIVE_SMOKE_ATTEMPTS || 5);
 const timeoutMs = Number(process.env.LIVE_SMOKE_TIMEOUT_MS || 30000);
 const routePath = '/tools/rare-phenotype-navigator';
 const routeUrl = `${base}${routePath}`;
+const pavsSourceUrl = 'https://pavs.phenomebrowser.net/';
 const errorBody = /internal server error|application error|500 internal|worker exceeded resource limits/i;
 
 function sleep(ms) { return new Promise((resolve) => setTimeout(resolve, ms)); }
@@ -14,24 +15,32 @@ function targetUrl(path, cacheBust = true) {
   return url.toString();
 }
 
+async function fetchAttempt(path, options = {}, cacheBust = true) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(targetUrl(path, cacheBust), {
+      redirect: 'manual', cache: 'no-store', ...options, signal: controller.signal,
+      headers: {
+        'cache-control': 'no-cache, no-store, max-age=0', pragma: 'no-cache',
+        'user-agent': 'Rawafid-Rare-Phenotype-Live-Smoke/1.0', ...(options.headers || {}),
+      },
+    });
+    const text = await response.text();
+    return { response, text };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function request(path, options = {}, cacheBust = true) {
   let lastError;
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), timeoutMs);
     try {
-      const response = await fetch(targetUrl(path, cacheBust), {
-        redirect: 'manual', cache: 'no-store', ...options, signal: controller.signal,
-        headers: {
-          'cache-control': 'no-cache, no-store, max-age=0', pragma: 'no-cache',
-          'user-agent': 'Rawafid-Rare-Phenotype-Live-Smoke/1.0', ...(options.headers || {}),
-        },
-      });
-      const text = await response.text();
-      if (response.status >= 200 && response.status < 300) return { response, text };
-      lastError = new Error(`${path} returned HTTP ${response.status}: ${text.slice(0, 300)}`);
+      const result = await fetchAttempt(path, options, cacheBust);
+      if (result.response.status >= 200 && result.response.status < 300) return result;
+      lastError = new Error(`${path} returned HTTP ${result.response.status}: ${result.text.slice(0, 300)}`);
     } catch (error) { lastError = error; }
-    finally { clearTimeout(timer); }
     await sleep(attempt * 1200);
   }
   throw lastError || new Error(`${path} failed without a response`);
@@ -40,6 +49,11 @@ async function request(path, options = {}, cacheBust = true) {
 function assertHealthyBody(path, text, minimum = 200) {
   if (text.length < minimum) throw new Error(`${path} returned an unexpectedly small body (${text.length} bytes)`);
   if (errorBody.test(text)) throw new Error(`${path} returned an application/server error body`);
+}
+
+function parseJson(path, text) {
+  try { return JSON.parse(text); }
+  catch { throw new Error(`${path} returned non-JSON response: ${text.slice(0, 300)}`); }
 }
 
 function assertRobotsNoindexFollow(html) {
@@ -83,7 +97,7 @@ async function verifySitemapExclusion() {
 
 async function verifyTerms() {
   const { text } = await request('/api/rare-phenotype/terms?q=HP%3A0001250');
-  const data = JSON.parse(text);
+  const data = parseJson('/api/rare-phenotype/terms', text);
   if (data.source !== 'PAVS Arabic HPO') throw new Error('terms API lost PAVS Arabic HPO provenance');
   if (!Array.isArray(data.results)) throw new Error('terms API results is not an array');
   if (!data.results.some((item) => item && item.id === 'HP:0001250')) throw new Error('terms API did not resolve test HPO identifier HP:0001250');
@@ -92,7 +106,7 @@ async function verifyTerms() {
 
 async function postJson(path, body) {
   const { text } = await request(path, { method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json' }, body: JSON.stringify(body) });
-  try { return JSON.parse(text); } catch { throw new Error(`${path} returned non-JSON response: ${text.slice(0, 300)}`); }
+  return parseJson(path, text);
 }
 
 async function verifyMonarchRank() {
@@ -104,11 +118,40 @@ async function verifyMonarchRank() {
 }
 
 async function verifyPavs() {
-  const data = await postJson('/api/rare-phenotype/pavs', { hpoIds: ['HP:0001250'], method: 'lin', limit: 10, includeSaudi: true, includeDDD: false, includeLiterature: true, onlyDiagnosed: false });
-  if (data.source !== 'PAVS') throw new Error('PAVS API lost source provenance');
-  if (!Array.isArray(data.items)) throw new Error('PAVS API items is not an array');
-  if (!data.query || !Array.isArray(data.query.hpo_ids) || !data.query.hpo_ids.includes('HP:0001250')) throw new Error('PAVS API did not preserve the HPO-only test query');
-  console.log(`RARE_PHENOTYPE_LIVE_OK PAVS similar-case search items=${data.items.length}`);
+  const path = '/api/rare-phenotype/pavs';
+  const options = {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', accept: 'application/json' },
+    body: JSON.stringify({ hpoIds: ['HP:0001250'], method: 'lin', limit: 10, includeSaudi: true, includeDDD: false, includeLiterature: true, onlyDiagnosed: false }),
+  };
+  let last;
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try { last = await fetchAttempt(path, options, true); }
+    catch (error) {
+      if (attempt === attempts) throw error;
+      await sleep(attempt * 1200);
+      continue;
+    }
+    if (last.response.status >= 200 && last.response.status < 300) {
+      const data = parseJson(path, last.text);
+      if (data.source !== 'PAVS') throw new Error('PAVS API lost source provenance');
+      if (!Array.isArray(data.items)) throw new Error('PAVS API items is not an array');
+      if (!data.query || !Array.isArray(data.query.hpo_ids) || !data.query.hpo_ids.includes('HP:0001250')) throw new Error('PAVS API did not preserve the HPO-only test query');
+      console.log(`RARE_PHENOTYPE_LIVE_OK PAVS similar-case search items=${data.items.length}`);
+      return;
+    }
+    if (last.response.status === 502) {
+      const data = parseJson(path, last.text);
+      const knownUpstreamFailure = ['pavs_source_unavailable', 'pavs_source_timeout', 'pavs_source_error'].includes(data.error)
+        && data.source_url === pavsSourceUrl;
+      if (knownUpstreamFailure) {
+        console.warn(`RARE_PHENOTYPE_LIVE_DEGRADED PAVS upstream unavailable error=${data.error} upstream_status=${data.upstream_status ?? 'n/a'} source=${data.source_url}`);
+        return;
+      }
+    }
+    if (attempt < attempts) await sleep(attempt * 1200);
+  }
+  throw new Error(`${path} returned unexpected HTTP ${last?.response.status}: ${last?.text?.slice(0, 300) || 'no response'}`);
 }
 
 try {
