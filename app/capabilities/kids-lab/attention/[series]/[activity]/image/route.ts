@@ -24,15 +24,42 @@ function wrapInstruction(value: string, max = 64) {
     } else line = next;
   }
   if (line) lines.push(line);
-  return lines.slice(0, 2);
+  return lines;
+}
+
+function rebalance(lines: string[], maxLines = 3) {
+  if (lines.length <= maxLines) return lines;
+  const words = lines.join(' ').split(/\s+/).filter(Boolean);
+  const result: string[] = [];
+  let start = 0;
+  for (let remaining = maxLines; remaining > 0 && start < words.length; remaining -= 1) {
+    const left = words.length - start;
+    const take = remaining === 1 ? left : Math.ceil(left / remaining);
+    result.push(words.slice(start, start + take).join(' '));
+    start += take;
+  }
+  return result;
 }
 
 function normalizeAttentionHeader(svg: string, instruction: string) {
-  const lines = wrapInstruction(instruction);
+  const lines = rebalance(wrapInstruction(instruction), 3);
+  const longest = Math.max(...lines.map((line) => line.length));
+  const size = longest <= 46 ? 15 : longest <= 58 ? 13.5 : 12.5;
+  const ys = lines.length === 1 ? [161] : lines.length === 2 ? [151, 171] : [143, 160, 177];
   const replacement = lines
-    .map((line, index) => `<text x="397" y="${lines.length === 1 ? 163 : 154 + index * 21}" text-anchor="middle" font-family="Tahoma,Arial,sans-serif" font-size="${lines.length === 1 ? 15 : 13.5}" fill="#334155" direction="rtl" unicode-bidi="plaintext">${escapeXml(line)}</text>`)
+    .map((line, index) => `<text x="397" y="${ys[index]}" text-anchor="middle" font-family="Tahoma,Arial,sans-serif" font-size="${size}" fill="#334155" direction="rtl" unicode-bidi="plaintext">${escapeXml(line)}</text>`)
     .join('');
   return svg.replace(/<text x="397" y="161"[^>]*>.*?<\/text>/, replacement);
+}
+
+function normalizeAttentionFooter(svg: string) {
+  const line = (x1:number,y:number,x2:number) => `<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}" stroke="#94A3B8" stroke-width="1.5"/>`;
+  const label = (x:number,y:number,s:string) => `<text x="${x}" y="${y}" text-anchor="end" font-family="Tahoma,Arial,sans-serif" font-size="14" font-weight="700" fill="#334155" direction="rtl" unicode-bidi="plaintext">${escapeXml(s)}</text>`;
+  let out = svg;
+  out = out.replace(/<text x="710" y="1038"[^>]*>الاسم: \.{28}<\/text>/, `${label(710,1036,'الاسم')}${line(505,1046,650)}`);
+  out = out.replace(/<text x="465" y="1038"[^>]*>التاريخ: \.{12}<\/text>/, `${label(465,1036,'التاريخ')}${line(315,1046,405)}`);
+  out = out.replace(/<text x="255" y="1038"[^>]*>الأخطاء: \.{12}<\/text>/, `${label(255,1036,'الأخطاء')}${line(105,1046,195)}`);
+  return out;
 }
 
 export async function GET(_: Request, { params }: { params: Params }) {
@@ -40,7 +67,8 @@ export async function GET(_: Request, { params }: { params: Params }) {
   const item = getAttentionActivity(series, activity);
   if (!item) notFound();
 
-  const svg = normalizeAttentionHeader(renderAttentionWorksheet(item), item.instruction);
+  let svg = normalizeAttentionHeader(renderAttentionWorksheet(item), item.instruction);
+  svg = normalizeAttentionFooter(svg);
   return new Response(svg, {
     headers: {
       'Content-Type': 'image/svg+xml; charset=utf-8',
