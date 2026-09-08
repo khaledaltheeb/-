@@ -44,14 +44,17 @@ jobs:
       - name: TypeScript check
         run: npm run typecheck
 
-      - name: Lint Kids Lab live route checker
-        run: npx eslint scripts/kids-lab-live-route-check.mjs scripts/export-kids-lab-static-svg.mjs scripts/materialize-kids-lab-static-html.mjs --quiet
+      - name: Lint Kids Lab QA scripts
+        run: npx eslint scripts/kids-lab-live-route-check.mjs scripts/kids-lab-visual-regression-contract.mjs scripts/export-kids-lab-static-svg.mjs scripts/materialize-kids-lab-static-html.mjs --quiet
 
       - name: Require build-time static worksheet image routes
         run: node scripts/kids-lab-static-image-contract.mjs
 
       - name: Validate all Kids Lab routes, levels and tests
         run: node scripts/kids-lab-route-contract.mjs
+
+      - name: Validate mobile RTL and emotional visual layout
+        run: node scripts/kids-lab-visual-regression-contract.mjs
 
       - name: Render and validate all 1000 Kids Lab items
         run: node scripts/kids-lab-render-contract-final.mjs
@@ -87,5 +90,6 @@ jobs:
           path: |
             artifacts/kids-lab-routes
             artifacts/kids-lab-qa
+            artifacts/kids-lab-visual-regression
           if-no-files-found: warn
           retention-days: 14
