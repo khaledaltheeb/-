@@ -15,6 +15,7 @@ Publisher: منصة روافد
 - [Concise encyclopedia](https://healthrenewal.org/encyclopedia/)
 - [Care guides](https://healthrenewal.org/care-guides/)
 - [Evidence guides](https://healthrenewal.org/evidence-guides/)
+- [Mental Health First Aid official-access guide](https://healthrenewal.org/sections/mental-health-first-aid/)
 - [Pediatric oncology](https://healthrenewal.org/sectors/pediatric-oncology)
 - [Cognitive lab](https://healthrenewal.org/cognitive-lab)
 - [Institutional Arabic/RTL assurance](https://healthrenewal.org/institutions)
