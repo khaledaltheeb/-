@@ -1,0 +1,37 @@
+name: Practical Resources Recovery
+
+on:
+  pull_request:
+    paths:
+      - 'lib/practical-resources.ts'
+      - 'app/resources/infographics/**'
+      - 'app/resources/worksheets/**'
+      - 'app/media/**'
+      - 'app/sitemaps/static.xml/**'
+      - 'scripts/practical-resources-recovery-contract.mjs'
+      - '.github/workflows/practical-resources-recovery.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'lib/practical-resources.ts'
+      - 'app/resources/infographics/**'
+      - 'app/resources/worksheets/**'
+      - 'app/media/**'
+      - 'app/sitemaps/static.xml/**'
+      - 'scripts/practical-resources-recovery-contract.mjs'
+      - '.github/workflows/practical-resources-recovery.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  practical-resources-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify recovered practical resources and route ownership
+        run: node scripts/practical-resources-recovery-contract.mjs
