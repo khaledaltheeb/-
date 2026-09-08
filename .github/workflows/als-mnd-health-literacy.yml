@@ -1,0 +1,33 @@
+name: ALS MND Health Literacy
+
+on:
+  pull_request:
+    paths:
+      - 'app/evidence-guides/als-mnd/**'
+      - 'app/sitemaps/als-mnd.xml/**'
+      - 'app/sitemap.xml/route.ts'
+      - 'scripts/als-mnd-health-literacy-contract.mjs'
+      - '.github/workflows/als-mnd-health-literacy.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'app/evidence-guides/als-mnd/**'
+      - 'app/sitemaps/als-mnd.xml/**'
+      - 'app/sitemap.xml/route.ts'
+      - 'scripts/als-mnd-health-literacy-contract.mjs'
+      - '.github/workflows/als-mnd-health-literacy.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  als-mnd-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify ALS MND health-literacy path and sitemap ownership
+        run: node scripts/als-mnd-health-literacy-contract.mjs
