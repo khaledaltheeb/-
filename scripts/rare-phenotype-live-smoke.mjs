@@ -14,7 +14,7 @@ function targetUrl(path, cacheBust = true) {
   return url.toString();
 }
 
-async function request(path, options = {}, cacheBust = true) {
+async function request(path, options = {}, cacheBust = true, allowedStatuses = []) {
   let lastError;
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
     const controller = new AbortController();
@@ -28,7 +28,7 @@ async function request(path, options = {}, cacheBust = true) {
         },
       });
       const text = await response.text();
-      if (response.status >= 200 && response.status < 300) return { response, text };
+      if ((response.status >= 200 && response.status < 300) || allowedStatuses.includes(response.status)) return { response, text };
       lastError = new Error(`${path} returned HTTP ${response.status}: ${text.slice(0, 300)}`);
     } catch (error) { lastError = error; }
     finally { clearTimeout(timer); }
@@ -104,16 +104,41 @@ async function verifyMonarchRank() {
 }
 
 async function verifyPavs() {
-  const data = await postJson('/api/rare-phenotype/pavs', { hpoIds: ['HP:0001250'], method: 'lin', limit: 10, includeSaudi: true, includeDDD: false, includeLiterature: true, onlyDiagnosed: false });
+  const body = { hpoIds: ['HP:0001250'], method: 'lin', limit: 10, includeSaudi: true, includeDDD: false, includeLiterature: true, onlyDiagnosed: false };
+  const { response, text } = await request(
+    '/api/rare-phenotype/pavs',
+    { method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json' }, body: JSON.stringify(body) },
+    true,
+    [502],
+  );
+
+  let data;
+  try { data = JSON.parse(text); }
+  catch { throw new Error(`/api/rare-phenotype/pavs returned non-JSON response: ${text.slice(0, 300)}`); }
+
+  if (response.status === 502) {
+    const recognized = new Set(['pavs_source_unavailable', 'pavs_source_timeout', 'pavs_source_error']);
+    if (!recognized.has(data.error)) throw new Error(`PAVS proxy returned unrecognized degraded response: ${text.slice(0, 300)}`);
+    if (data.source_url !== 'https://pavs.phenomebrowser.net/') throw new Error('PAVS degraded response lost source provenance');
+    const upstream = Number.isFinite(Number(data.upstream_status)) ? ` upstream=${Number(data.upstream_status)}` : '';
+    console.log(`RARE_PHENOTYPE_LIVE_DEGRADED PAVS external source unavailable; Rawafid proxy returned controlled HTTP 502 error=${data.error}${upstream}`);
+    return { degraded: true };
+  }
+
   if (data.source !== 'PAVS') throw new Error('PAVS API lost source provenance');
   if (!Array.isArray(data.items)) throw new Error('PAVS API items is not an array');
   if (!data.query || !Array.isArray(data.query.hpo_ids) || !data.query.hpo_ids.includes('HP:0001250')) throw new Error('PAVS API did not preserve the HPO-only test query');
   console.log(`RARE_PHENOTYPE_LIVE_OK PAVS similar-case search items=${data.items.length}`);
+  return { degraded: false };
 }
 
 try {
-  await verifyPage(); await verifySitemapExclusion(); await verifyTerms(); await verifyMonarchRank(); await verifyPavs();
-  console.log(`RARE_PHENOTYPE_LIVE_COMPLETE ${routeUrl} verified without PII using HP:0001250 only`);
+  await verifyPage();
+  await verifySitemapExclusion();
+  await verifyTerms();
+  await verifyMonarchRank();
+  const pavs = await verifyPavs();
+  console.log(`RARE_PHENOTYPE_LIVE_COMPLETE ${routeUrl} verified without PII using HP:0001250 only; PAVS=${pavs.degraded ? 'degraded-upstream' : 'available'}`);
 } catch (error) {
   console.error(`RARE_PHENOTYPE_LIVE_FAIL ${error instanceof Error ? error.message : String(error)}`); process.exit(1);
 }
