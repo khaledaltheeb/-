@@ -28,7 +28,10 @@ function posture(x:number,y:number,e:Emotion){
 function emotionRecognition(a:EmotionalRegulationActivity){
  const contexts=['انكسرت لعبة طفل كان يحبها','دُعي طفل للعب مع أصدقاء جدد','سمع طفل صوتًا قويًا مفاجئًا','أنهى طفل مشروعًا كان يتدرب عليه','انتظر طفل دوره وقتًا طويلًا'];
  const ctx=contexts[a.seed%contexts.length],count=a.level<=2?3:a.level<=4?4:5;
- let out=`${rtl(730,188,`الموقف: ${ctx}`,20,800,P.ink,'start')}${rtl(730,224,a.level<=2?'انظر إلى الموقف والوجه. اختر شعورًا محتملًا ثم اذكر دليلك.':'انظر إلى الموقف والوجه والجسم. اختر احتمالًا واذكر دليلك، ولا تفترض أن هناك إجابة واحدة مؤكدة.',16,500,P.muted,'start')}`;
+ const guidance=a.level<=2
+  ? rtl(730,224,'انظر إلى الموقف والوجه. اختر شعورًا محتملًا ثم اذكر دليلك.',16,500,P.muted,'start')
+  : `${rtl(730,220,'انظر إلى الموقف والوجه والجسم. اختر احتمالًا واذكر دليلك.',15,500,P.muted,'start')}${rtl(730,244,'لا تفترض أن هناك إجابة واحدة مؤكدة.',15,500,P.muted,'start')}`;
+ let out=`${rtl(730,188,`الموقف: ${ctx}`,20,800,P.ink,'start')}${guidance}`;
  for(let i=0;i<count;i++){
   const x=72+(i%3)*224,y=278+Math.floor(i/3)*220,e=emotions[i];
   const answer=a.kind==='test'?`${rtl(x+164,y+174,'اكتب',12,700,P.muted,'start')}${line(x+24,y+176,x+116)}`:rtl(x+95,y+174,e,15,700,P.ink,'middle');
