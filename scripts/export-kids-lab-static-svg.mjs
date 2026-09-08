@@ -9,7 +9,7 @@ const nativeRequire = createRequire(import.meta.url);
 const cache = new Map();
 
 const domains = [
-  ['attention','lib/capabilities/attention-lab.ts','lib/capabilities/attention-svg.ts','renderAttentionWorksheet'],
+  ['attention','lib/capabilities/attention-lab.ts','lib/capabilities/attention-svg-final.ts','renderAttentionWorksheet'],
   ['memory','lib/capabilities/memory-lab.ts','lib/capabilities/memory-svg-final.ts','renderMemoryWorksheet'],
   ['executive-functions','lib/capabilities/executive-functions-lab.ts','lib/capabilities/executive-functions-svg-final.ts','renderExecutiveWorksheet'],
   ['visual-perception','lib/capabilities/visual-perception-lab.ts','lib/capabilities/visual-perception-svg-final.ts','renderVisualPerceptionWorksheet'],
