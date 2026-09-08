@@ -9,6 +9,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: production-heavy-live-verification
+  cancel-in-progress: false
+
 jobs:
   verify-live-rare-phenotype:
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
