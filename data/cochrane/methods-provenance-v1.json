@@ -1,0 +1,85 @@
+{
+  "schema_version": "rawafid-cochrane-methods-provenance-v1",
+  "reviewed_on": "2026-09-04",
+  "purpose_ar": "سجل تدقيق مستقل يميز بين نسخة المرجع الأساسية، تحديثاته اللاحقة، وحالة الأدوات المنهجية حتى لا توصف المسودات أو النسخ القديمة بأنها نهائية أو حديثة دون تحقق.",
+  "records": [
+    {
+      "id": "cochrane-handbook-current",
+      "url": "https://www.cochrane.org/authors/handbooks-and-manuals/handbook/current",
+      "status": "current-reference-with-incremental-updates",
+      "version_label": "Version 6.5, 2024; Cochrane records subsequent 6.5.1 updates in 2025 and 2026",
+      "verified_on": "2026-09-04",
+      "note_ar": "صفحة الدليل الحالية تعرض Version 6.5 (2024)، بينما سجل التغييرات الرسمي يوثق تحديثات تحت 6.5.1 في 2025 و2026. لا نفترض أن جميع الفصول تغيرت؛ نتحقق من تاريخ كل فصل عند الحاجة.",
+      "source_of_status": "https://www.cochrane.org/authors/handbooks-and-manuals/handbook/versions-and-changes-handbook",
+      "rights_profile": "cochrane-handbook-cite-summarize"
+    },
+    {
+      "id": "rob-2-current",
+      "url": "https://www.riskofbias.info/welcome/rob-2-0-tool/current-version-of-rob-2",
+      "status": "current",
+      "version_label": "22 August 2019",
+      "verified_on": "2026-09-04",
+      "note_ar": "النسخة الحالية المعلنة من RoB 2 للتجارب العشوائية هي نسخة 22 أغسطس 2019، مع نسخ مخصصة للتجارب العنقودية والتبادلية. قدم الأداة لا يعني تلقائياً أنها مستبدلة؛ نعتمد صفحة current version الرسمية.",
+      "source_of_status": "https://www.riskofbias.info/welcome/rob-2-0-tool/current-version-of-rob-2",
+      "rights_profile": "risk-tools-by-nc-nd"
+    },
+    {
+      "id": "robins-i-v2",
+      "url": "https://www.riskofbias.info/welcome/robins-i-v2",
+      "status": "draft-subject-to-change",
+      "version_label": "ROBINS-I V2 draft, November 2025",
+      "verified_on": "2026-09-04",
+      "note_ar": "الموقع الرسمي يصف ROBINS-I V2 المنشور في نوفمبر 2025 بأنه draft وقابلاً للتغيير. يجب أن تظهر هذه الصفة في روافد وألا يُقدَّم بوصفه إصداراً نهائياً مستقراً.",
+      "source_of_status": "https://www.riskofbias.info/welcome/robins-i-v2",
+      "rights_profile": "risk-tools-by-nc-nd"
+    },
+    {
+      "id": "rob-me-current",
+      "url": "https://www.riskofbias.info/welcome/rob-me-tool",
+      "status": "current",
+      "version_label": "1 October 2023",
+      "verified_on": "2026-09-04",
+      "note_ar": "النسخة الحالية المعلنة من ROB-ME هي 1 أكتوبر 2023؛ الورقة المنهجية منشورة في BMJ عام 2023. نستخدم الأداة لتقييم خطر التحيز بسبب الأدلة المفقودة في synthesis ولا نختزلها في funnel plot.",
+      "source_of_status": "https://www.riskofbias.info/welcome/rob-me-tool",
+      "rights_profile": "risk-tools-by-nc-nd"
+    },
+    {
+      "id": "grade-chapter-14",
+      "url": "https://www.cochrane.org/authors/handbooks-and-manuals/handbook/current/chapter-14",
+      "status": "current-chapter-reference",
+      "version_label": "Cochrane Handbook Chapter 14; version 6.5 framework with subsequent recorded correction",
+      "verified_on": "2026-09-04",
+      "note_ar": "يعرض الفصل جداول Summary of Findings ويقيّم اليقين لكل outcome عبر GRADE. سجل التغييرات يوثق تصحيحاً في Figure 14.1.a خلال 2025؛ لا ننقل الشكل أو نفترض أن التصحيح غيّر المنهج كاملاً.",
+      "source_of_status": "https://www.cochrane.org/authors/handbooks-and-manuals/handbook/versions-and-changes-handbook",
+      "rights_profile": "cochrane-handbook-cite-summarize"
+    },
+    {
+      "id": "prisma-2020",
+      "url": "https://www.prisma-statement.org/prisma-2020",
+      "status": "current-reporting-guideline",
+      "version_label": "PRISMA 2020",
+      "verified_on": "2026-09-04",
+      "note_ar": "PRISMA 2020 معيار للإبلاغ عن المراجعات المنهجية وليس أداة لتقييم جودة الدراسة أو خطر التحيز. المواد المصرح بها تحت CC BY 4.0 تتطلب النسب الصحيح عند إعادة الاستخدام أو التكييف.",
+      "source_of_status": "https://www.prisma-statement.org/prisma-2020-checklist",
+      "rights_profile": "prisma-cc-by-4"
+    }
+  ],
+  "rights_profiles": {
+    "cochrane-handbook-cite-summarize": {
+      "reuse_ar": "يجوز الاستشهاد بالدليل واستخدام اقتباسات قصيرة مع النسب في الاستخدام الأكاديمي/غير التجاري؛ إعادة إنتاج لقطات الشاشة أو الأشكال أو الجداول الدقيقة أو الاقتباسات الطويلة التي تتجاوز خمسة أسطر تحتاج طلب إذن من Cochrane.",
+      "policy_url": "https://www.cochrane.org/authors/handbooks-and-manuals/handbook",
+      "rawafid_rule": "link-and-original-synthesis-no-protected-figure-table-copy"
+    },
+    "risk-tools-by-nc-nd": {
+      "reuse_ar": "صفحات الأدوات تعلن ترخيص CC BY-NC-ND 4.0. نربط إلى الأداة ونشرح منهجها بصياغة روافد الأصلية، ولا نعيد نشر أو نعدّل ملفات الأداة أو القوالب بما يوحي بأنها نسخة مشتقة مصرح بها.",
+      "policy_url": "https://www.riskofbias.info/welcome/rob-2-0-tool/current-version-of-rob-2",
+      "rawafid_rule": "link-and-explain-no-derivative-tool-republication"
+    },
+    "prisma-cc-by-4": {
+      "reuse_ar": "PRISMA 2020 والـchecklists موزعة تحت CC BY 4.0، ما يسمح بالتوزيع والتكييف وإعادة الاستخدام مع النسب الصحيح للمصدر. تبقى روافد ملزمة بتمييز PRISMA كمعيار إبلاغ لا كأداة risk-of-bias.",
+      "policy_url": "https://www.prisma-statement.org/prisma-2020-checklist",
+      "rawafid_rule": "reuse-or-adapt-with-attribution-and-license-notice"
+    }
+  },
+  "rights_note_ar": "تُستخدم هذه الصفحات كمراجع وروابط. لا يعيد سجل روافد نشر أدوات Risk of Bias أو جداول/أشكال Cochrane المحمية، ولا يحول الترخيص أو الإتاحة إلى إذن بإعادة إنتاج مواد لم يُتحقق من حق استخدامها."
+}
