@@ -10,7 +10,6 @@ export async function GET() {
     { path: '/institutions/open-source', changeFrequency: 'monthly', priority: .66 },
     { path: '/media/', changeFrequency: 'weekly', priority: .66 },
     { path: '/external-review/', changeFrequency: 'monthly', priority: .62 },
-    { path: '/sections/mental-health-first-aid/', changeFrequency: 'monthly', priority: .78 },
     { path: '/accessibility-statement', changeFrequency: 'monthly', priority: .64 },
   ]);
 }
