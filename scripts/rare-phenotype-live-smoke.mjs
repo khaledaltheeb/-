@@ -6,42 +6,32 @@ const routePath = '/tools/rare-phenotype-navigator';
 const routeUrl = `${base}${routePath}`;
 const errorBody = /internal server error|application error|500 internal|worker exceeded resource limits/i;
 
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
+function sleep(ms) { return new Promise((resolve) => setTimeout(resolve, ms)); }
 
-function stampedUrl(path) {
+function targetUrl(path, cacheBust = true) {
   const url = new URL(path, `${base}/`);
-  url.searchParams.set('deploy', stamp);
+  if (cacheBust) url.searchParams.set('deploy', stamp);
   return url.toString();
 }
 
-async function request(path, options = {}) {
+async function request(path, options = {}, cacheBust = true) {
   let lastError;
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
     try {
-      const response = await fetch(stampedUrl(path), {
-        redirect: 'manual',
-        cache: 'no-store',
-        ...options,
-        signal: controller.signal,
+      const response = await fetch(targetUrl(path, cacheBust), {
+        redirect: 'manual', cache: 'no-store', ...options, signal: controller.signal,
         headers: {
-          'cache-control': 'no-cache, no-store, max-age=0',
-          pragma: 'no-cache',
-          'user-agent': 'Rawafid-Rare-Phenotype-Live-Smoke/1.0',
-          ...(options.headers || {}),
+          'cache-control': 'no-cache, no-store, max-age=0', pragma: 'no-cache',
+          'user-agent': 'Rawafid-Rare-Phenotype-Live-Smoke/1.0', ...(options.headers || {}),
         },
       });
       const text = await response.text();
       if (response.status >= 200 && response.status < 300) return { response, text };
       lastError = new Error(`${path} returned HTTP ${response.status}: ${text.slice(0, 300)}`);
-    } catch (error) {
-      lastError = error;
-    } finally {
-      clearTimeout(timer);
-    }
+    } catch (error) { lastError = error; }
+    finally { clearTimeout(timer); }
     await sleep(attempt * 1200);
   }
   throw lastError || new Error(`${path} failed without a response`);
@@ -70,38 +60,25 @@ function assertCanonical(html) {
 async function verifyPage() {
   const { response, text } = await request(routePath);
   assertHealthyBody(routePath, text, 500);
-  for (const marker of [
-    'حوّل الوصف السريري إلى ملف HPO قابل للتحليل وإعادة الاستخدام',
-    'ليست أداة تشخيص ذاتي',
-    'Triangulation بدل درجة واحدة',
-  ]) {
+  for (const marker of ['حوّل الوصف السريري إلى ملف HPO قابل للتحليل وإعادة الاستخدام', 'ليست أداة تشخيص ذاتي', 'Triangulation بدل درجة واحدة']) {
     if (!text.includes(marker)) throw new Error(`${routePath} is missing expected marker: ${marker}`);
   }
-  assertRobotsNoindexFollow(text);
-  assertCanonical(text);
+  assertRobotsNoindexFollow(text); assertCanonical(text);
   console.log(`RARE_PHENOTYPE_LIVE_OK page ${routePath} HTTP ${response.status} noindex/follow canonical`);
 }
 
 async function verifySitemapExclusion() {
-  const sitemapIndex = await request('/sitemap.xml');
+  const sitemapIndex = await request('/sitemap.xml', {}, false);
   assertHealthyBody('/sitemap.xml', sitemapIndex.text, 50);
-  if (sitemapIndex.text.includes(routeUrl) || sitemapIndex.text.includes(routePath)) {
-    throw new Error(`${routePath} appeared directly in sitemap index during pre-release QA`);
-  }
-
-  const childSitemaps = [...sitemapIndex.text.matchAll(/<loc>([^<]+)<\/loc>/g)]
-    .map((match) => match[1].trim())
-    .filter((url) => url.startsWith(base));
-
+  if (sitemapIndex.text.includes(routeUrl) || sitemapIndex.text.includes(routePath)) throw new Error(`${routePath} appeared directly in sitemap index during pre-release QA`);
+  const childSitemaps = [...sitemapIndex.text.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1].trim()).filter((url) => url.startsWith(base));
   for (const sitemapUrl of childSitemaps) {
     const url = new URL(sitemapUrl);
-    const { text } = await request(`${url.pathname}${url.search}`);
+    const { text } = await request(`${url.pathname}${url.search}`, {}, false);
     assertHealthyBody(url.pathname, text, 20);
-    if (text.includes(routeUrl) || text.includes(`<loc>${routeUrl}/</loc>`)) {
-      throw new Error(`${routePath} appeared in live sitemap ${url.pathname} before release approval`);
-    }
+    if (text.includes(routeUrl) || text.includes(`<loc>${routeUrl}/</loc>`)) throw new Error(`${routePath} appeared in live sitemap ${url.pathname} before release approval`);
   }
-  console.log(`RARE_PHENOTYPE_LIVE_OK sitemap exclusion checked across ${childSitemaps.length} child sitemap(s)`);
+  console.log(`RARE_PHENOTYPE_LIVE_OK sitemap exclusion checked across ${childSitemaps.length} canonical child sitemap(s)`);
 }
 
 async function verifyTerms() {
@@ -109,67 +86,34 @@ async function verifyTerms() {
   const data = JSON.parse(text);
   if (data.source !== 'PAVS Arabic HPO') throw new Error('terms API lost PAVS Arabic HPO provenance');
   if (!Array.isArray(data.results)) throw new Error('terms API results is not an array');
-  if (!data.results.some((item) => item && item.id === 'HP:0001250')) {
-    throw new Error('terms API did not resolve test HPO identifier HP:0001250');
-  }
+  if (!data.results.some((item) => item && item.id === 'HP:0001250')) throw new Error('terms API did not resolve test HPO identifier HP:0001250');
   console.log(`RARE_PHENOTYPE_LIVE_OK terms HP:0001250 results=${data.results.length}`);
 }
 
 async function postJson(path, body) {
-  const { text } = await request(path, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json', accept: 'application/json' },
-    body: JSON.stringify(body),
-  });
-  try {
-    return JSON.parse(text);
-  } catch {
-    throw new Error(`${path} returned non-JSON response: ${text.slice(0, 300)}`);
-  }
+  const { text } = await request(path, { method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json' }, body: JSON.stringify(body) });
+  try { return JSON.parse(text); } catch { throw new Error(`${path} returned non-JSON response: ${text.slice(0, 300)}`); }
 }
 
 async function verifyMonarchRank() {
-  const data = await postJson('/api/rare-phenotype/rank', {
-    phenotypes: ['HP:0001250'],
-    group: 'Human Diseases',
-    limit: 3,
-  });
-  if (!Array.isArray(data.phenotypes) || !data.phenotypes.includes('HP:0001250')) {
-    throw new Error('rank API did not preserve the HPO-only test profile');
-  }
-  if (data.source !== 'Monarch Initiative v3 semantic similarity') {
-    throw new Error('rank API lost Monarch v3 provenance');
-  }
+  const data = await postJson('/api/rare-phenotype/rank', { phenotypes: ['HP:0001250'], group: 'Human Diseases', limit: 3 });
+  if (!Array.isArray(data.phenotypes) || !data.phenotypes.includes('HP:0001250')) throw new Error('rank API did not preserve the HPO-only test profile');
+  if (data.source !== 'Monarch Initiative v3 semantic similarity') throw new Error('rank API lost Monarch v3 provenance');
   if (!Object.prototype.hasOwnProperty.call(data, 'results')) throw new Error('rank API response is missing results');
   console.log('RARE_PHENOTYPE_LIVE_OK Monarch semantic ranking');
 }
 
 async function verifyPavs() {
-  const data = await postJson('/api/rare-phenotype/pavs', {
-    hpoIds: ['HP:0001250'],
-    method: 'lin',
-    limit: 10,
-    includeSaudi: true,
-    includeDDD: false,
-    includeLiterature: true,
-    onlyDiagnosed: false,
-  });
+  const data = await postJson('/api/rare-phenotype/pavs', { hpoIds: ['HP:0001250'], method: 'lin', limit: 10, includeSaudi: true, includeDDD: false, includeLiterature: true, onlyDiagnosed: false });
   if (data.source !== 'PAVS') throw new Error('PAVS API lost source provenance');
   if (!Array.isArray(data.items)) throw new Error('PAVS API items is not an array');
-  if (!data.query || !Array.isArray(data.query.hpo_ids) || !data.query.hpo_ids.includes('HP:0001250')) {
-    throw new Error('PAVS API did not preserve the HPO-only test query');
-  }
+  if (!data.query || !Array.isArray(data.query.hpo_ids) || !data.query.hpo_ids.includes('HP:0001250')) throw new Error('PAVS API did not preserve the HPO-only test query');
   console.log(`RARE_PHENOTYPE_LIVE_OK PAVS similar-case search items=${data.items.length}`);
 }
 
 try {
-  await verifyPage();
-  await verifySitemapExclusion();
-  await verifyTerms();
-  await verifyMonarchRank();
-  await verifyPavs();
+  await verifyPage(); await verifySitemapExclusion(); await verifyTerms(); await verifyMonarchRank(); await verifyPavs();
   console.log(`RARE_PHENOTYPE_LIVE_COMPLETE ${routeUrl} verified without PII using HP:0001250 only`);
 } catch (error) {
-  console.error(`RARE_PHENOTYPE_LIVE_FAIL ${error instanceof Error ? error.message : String(error)}`);
-  process.exit(1);
+  console.error(`RARE_PHENOTYPE_LIVE_FAIL ${error instanceof Error ? error.message : String(error)}`); process.exit(1);
 }
