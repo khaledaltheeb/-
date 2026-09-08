@@ -1,0 +1,30 @@
+name: Rare Phenotype Recovery
+
+on:
+  pull_request:
+    paths:
+      - 'app/tools/rare-phenotype-navigator/**'
+      - 'components/rare-phenotype-navigator-v2.tsx'
+      - 'lib/rare-phenotype.ts'
+      - 'app/api/rare-phenotype/**'
+      - 'scripts/rare-phenotype-recovery-contract.mjs'
+      - '.github/workflows/rare-phenotype-recovery.yml'
+      - 'app/sitemap.xml/route.ts'
+      - 'app/sitemaps/static.xml/route.ts'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  recovery-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Verify rare phenotype recovery
+        run: node scripts/rare-phenotype-recovery-contract.mjs
