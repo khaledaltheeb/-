@@ -41,8 +41,11 @@ function emotionRecognition(a:EmotionalRegulationActivity){
  return out;
 }
 function bodySignals(a:EmotionalRegulationActivity){
- const labels=['دقات القلب','التنفس','اليد/العضلات','الوجه/الحرارة','المعدة','يختلف عندي/لا أعرف'],n=a.level<=2?4:6;
- let out=`${rtl(730,188,'خريطة إشارات جسمي',20,800,P.ink,'start')}${rtl(730,224,a.level<=2?'لاحظ جسمك الآن. ضع علامة على الوصف الأقرب لك؛ يمكنك اختيار «لا أعرف».':'قارن الإشارات بين موقفين أو شدتين. الإشارة نفسها لا تعني الشعور نفسه دائمًا.',16,500,P.muted,'start')}`;
+ const baseLabels=['دقات القلب','التنفس','اليد/العضلات','الوجه/الحرارة','المعدة','يختلف عندي/لا أعرف'];
+ const labels=a.kind==='test'?[...baseLabels.slice(1),baseLabels[0]]:baseLabels;
+ const n=a.level<=2?4:6;
+ const testCue=a.kind==='test'?rtl(730,250,'اختبار الإتقان: اختر الوصف الأقرب دون اقتراح إجابة من المرافق.',14,600,P.muted,'start'):'';
+ let out=`${rtl(730,188,'خريطة إشارات جسمي',20,800,P.ink,'start')}${rtl(730,224,a.level<=2?'لاحظ جسمك الآن. ضع علامة على الوصف الأقرب لك؛ يمكنك اختيار «لا أعرف».':'قارن الإشارات بين موقفين أو شدتين. الإشارة نفسها لا تعني الشعور نفسه دائمًا.',16,500,P.muted,'start')}${testCue}`;
  for(let i=0;i<n;i++){
   const x=72+(i%2)*340,y=274+Math.floor(i/2)*178;
   out+=`<rect x="${x}" y="${y}" width="312" height="140" rx="20" fill="#fff" stroke="${P.line}"/>${rtl(x+282,y+40,labels[i],17,700,P.ink,'start')}`;
@@ -55,7 +58,8 @@ function bodySignals(a:EmotionalRegulationActivity){
 }
 function intensity(a:EmotionalRegulationActivity){
  const n=a.level<2?3:5,labels=n===3?['خفيف','متوسط','قوي']:['1','2','3','4','5'];
- let out=`${rtl(730,188,'كم شدة الشعور الآن؟',20,800,P.ink,'start')}${rtl(730,224,'اختر الدرجة التي تعبّر عنك أنت. لا يحدد شخص آخر الدرجة بدلًا منك.',16,500,P.muted,'start')}`;
+ const masteryCue=a.kind==='test'?`${rtl(685,276,'الشعور الذي تقيس شدته الآن',14,700,P.ink,'start')}${line(120,286,430)}`:'';
+ let out=`${rtl(730,188,'كم شدة الشعور الآن؟',20,800,P.ink,'start')}${rtl(730,224,'اختر الدرجة التي تعبّر عنك أنت. لا يحدد شخص آخر الدرجة بدلًا منك.',16,500,P.muted,'start')}${masteryCue}`;
  labels.forEach((l,i)=>{const w=n===3?180:112,x=n===3?105+i*220:78+i*136,h=220,y=330,fill=['#DBEAFE','#CFFAFE','#FEF3C7','#FED7AA','#FECACA'][Math.min(i+(5-n),4)];out+=`<rect x="${x}" y="${y+(n===5?(4-i)*20:0)}" width="${w}" height="${h-(n===5?(4-i)*20:0)}" rx="22" fill="${fill}" stroke="${P.line}"/>${rtl(x+w/2,y+105,l,n===3?22:30,800,P.navy,'middle')}<circle cx="${x+w/2}" cy="${y+165}" r="22" fill="#fff" stroke="${P.navy}" stroke-width="2"/>`});
  out+=`<rect x="85" y="665" width="624" height="250" rx="20" fill="#fff" stroke="${P.line}"/>${rtl(685,710,'لماذا اخترت هذه الدرجة؟',17,800,P.ink,'start')}${line(120,750,675)}${line(120,795,675)}${a.level>=3?`${rtl(685,842,'قبل',14,600,P.ink,'start')}${line(560,850,620)}${rtl(520,842,'بعد دقيقة',14,600,P.ink,'start')}${line(390,850,480)}${rtl(350,842,'بعد خطوة تنظيم',14,600,P.ink,'start')}${line(155,850,300)}`:''}`;
  return out;
@@ -63,6 +67,10 @@ function intensity(a:EmotionalRegulationActivity){
 function strategies(a:EmotionalRegulationActivity){
  const scenarios=['اختلفت مع صديق وأنت غاضب','شعرت بتوتر قبل مهمة جديدة','المكان صاخب جدًا وأصبح التركيز صعبًا','فشلت المحاولة الأولى في نشاط مهم','شعرت بحزن وتريد بعض الوقت'],sc=scenarios[a.seed%scenarios.length],opts=['تنفس ببطء أو خفف سرعة الجسم','اطلب استراحة أو مكانًا أهدأ','اطلب مساعدة من شخص موثوق','قسّم المشكلة إلى خطوة صغيرة','اختر خيارًا آخر يناسبك'];
  let out=`${rtl(730,188,`الموقف: ${sc}`,20,800,P.ink,'start')}${rtl(730,224,a.level<=2?'اختر خطوة مناسبة الآن. قد توجد أكثر من إجابة جيدة.':'حدد هدفك أولًا، ثم اختر خطة مناسبة للسياق واذكر لماذا.',16,500,P.muted,'start')}`;
+ if(a.kind==='test'){
+  out+=`<rect x="80" y="285" width="634" height="610" rx="22" fill="#fff" stroke="${P.line}" stroke-width="2"/>${rtl(680,332,'الهدف الذي تريد الوصول إليه',16,800,P.navy,'start')}${line(135,350,565)}${rtl(680,420,'الخطة التي ستجربها أولًا',16,800,P.navy,'start')}${line(135,438,565)}${rtl(680,510,'لماذا تناسب هذا الموقف؟',16,800,P.navy,'start')}${line(135,528,565)}${a.level>=3?`${rtl(680,600,'خطة بديلة إذا لم تساعد الأولى',16,800,P.navy,'start')}${line(135,618,565)}`:''}${a.level>=4?`${rtl(680,690,'متى ستغيّر الخطة أو تطلب دعمًا؟',15,700,P.ink,'start')}${line(135,708,565)}`:''}${a.level===5?`${rtl(680,780,'كيف ستعرف أن الخطة ساعدت؟',15,700,P.ink,'start')}${line(135,798,565)}`:''}`;
+  return out;
+ }
  const shown=a.level<=2?opts.slice(0,3):opts;shown.forEach((o,i)=>{const y=275+i*(a.level<=2?150:118);out+=`<rect x="80" y="${y}" width="634" height="${a.level<=2?118:92}" rx="18" fill="${i%2?'#F8FAFC':'#fff'}" stroke="${P.line}"/><circle cx="118" cy="${y+(a.level<=2?59:46)}" r="16" fill="#fff" stroke="${[P.blue,P.cyan,P.green,P.amber,P.violet][i]}" stroke-width="3"/>${rtl(680,y+38,o,16,700,P.ink,'start')}${a.level>=3?rtl(680,y+67,['تهدئة الجسم','تعديل البيئة','طلب الدعم','حل المشكلة','خطة شخصية'][i],13,500,P.muted,'start'):''}`});
  const baseY=a.level<=2?770:880;out+=`<rect x="80" y="${baseY}" width="634" height="${a.level>=4?95:65}" rx="14" fill="#FEFCE8" stroke="#FDE68A"/>${rtl(680,baseY+34,'الخطة الأولى',15,700,P.ink,'start')}${line(170,baseY+43,545)}${a.level>=4?`${rtl(680,baseY+68,'متى أغيّرها؟ وما البديل؟',14,600,P.muted,'start')}${line(170,baseY+78,475)}`:''}`;
  return out;
