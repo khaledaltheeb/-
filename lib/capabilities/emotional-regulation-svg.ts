@@ -21,9 +21,9 @@ function expression(x:number,y:number,e:Emotion){
  return `<g>${base}<path d="M ${x-14} ${y+18} L ${x+14} ${y+18}" stroke="#92400E" stroke-width="3"/></g>`;
 }
 function posture(x:number,y:number,e:Emotion){
- const shoulder=e==='حزن/قلق'?14:e==='غضب'?-8:0;
- const arm=e==='غضب'?38:e==='حزن/قلق'?18:30;
- return `<g stroke="#1D4ED8" stroke-width="5" stroke-linecap="round" fill="none"><path d="M ${x} ${y} L ${x} ${y+48}"/><path d="M ${x} ${y+10+shoulder} L ${x-arm} ${y+30} M ${x} ${y+10+shoulder} L ${x+arm} ${y+30}"/><path d="M ${x} ${y+48} L ${x-22} ${y+76} M ${x} ${y+48} L ${x+22} ${y+76}"/></g>`;
+ const shoulder=e==='حزن/قلق'?9:e==='غضب'?-5:0;
+ const arm=e==='غضب'?34:e==='حزن/قلق'?18:27;
+ return `<g stroke="#1D4ED8" stroke-width="5" stroke-linecap="round" fill="none"><path d="M ${x} ${y} L ${x} ${y+34}"/><path d="M ${x} ${y+9+shoulder} L ${x-arm} ${y+25} M ${x} ${y+9+shoulder} L ${x+arm} ${y+25}"/><path d="M ${x} ${y+34} L ${x-19} ${y+54} M ${x} ${y+34} L ${x+19} ${y+54}"/></g>`;
 }
 function emotionRecognition(a:EmotionalRegulationActivity){
  const contexts=['انكسرت لعبة طفل كان يحبها','دُعي طفل للعب مع أصدقاء جدد','سمع طفل صوتًا قويًا مفاجئًا','أنهى طفل مشروعًا كان يتدرب عليه','انتظر طفل دوره وقتًا طويلًا'];
@@ -31,7 +31,8 @@ function emotionRecognition(a:EmotionalRegulationActivity){
  let out=`${rtl(730,188,`الموقف: ${ctx}`,20,800,P.ink,'start')}${rtl(730,224,a.level<=2?'انظر إلى الموقف والوجه. اختر شعورًا محتملًا ثم اذكر دليلك.':'انظر إلى الموقف والوجه والجسم. اختر احتمالًا واذكر دليلك، ولا تفترض أن هناك إجابة واحدة مؤكدة.',16,500,P.muted,'start')}`;
  for(let i=0;i<count;i++){
   const x=72+(i%3)*224,y=278+Math.floor(i/3)*220,e=emotions[i];
-  out+=`<rect x="${x}" y="${y}" width="190" height="190" rx="22" fill="#fff" stroke="${P.line}" stroke-width="2"/>${expression(x+95,y+58,e)}${a.level>=3?posture(x+95,y+100,e):''}<rect x="${x+16}" y="${y+148}" width="158" height="30" rx="10" fill="#F8FAFC"/>${rtl(x+95,y+169,a.kind==='test'?'اكتب الاحتمال':e,15,700,P.ink,'middle')}`;
+  const answer=a.kind==='test'?`${rtl(x+164,y+174,'اكتب',12,700,P.muted,'start')}${line(x+24,y+176,x+116)}`:rtl(x+95,y+174,e,15,700,P.ink,'middle');
+  out+=`<rect x="${x}" y="${y}" width="190" height="190" rx="22" fill="#fff" stroke="${P.line}" stroke-width="2"/>${expression(x+95,y+58,e)}${a.level>=3?posture(x+95,y+92,e):''}<rect x="${x+16}" y="${y+154}" width="158" height="28" rx="10" fill="#F8FAFC"/>${answer}`;
  }
  out+=`<rect x="70" y="760" width="654" height="205" rx="18" fill="#F8FAFC" stroke="${P.line}"/>${rtl(700,802,'ما الدليل الذي استخدمته؟',17,800,P.navy,'start')}${check(565,820,'ما حدث',125)}${check(425,820,'الوجه',125)}${check(285,820,'الجسم',125)}${check(145,820,'الكلمات/الصوت',125)}${rtl(700,895,'احتمال آخر',15,700,P.ink,'start')}${line(120,906,570)}${a.level>=4?`${rtl(700,940,'ما المعلومة التي تحتاجها قبل أن تكون أكثر تأكدًا؟',14,600,P.muted,'start')}${line(120,952,570)}`:''}`;
  return out;
@@ -43,7 +44,8 @@ function bodySignals(a:EmotionalRegulationActivity){
   const x=72+(i%2)*340,y=274+Math.floor(i/2)*178;
   out+=`<rect x="${x}" y="${y}" width="312" height="140" rx="20" fill="#fff" stroke="${P.line}"/>${rtl(x+282,y+40,labels[i],17,700,P.ink,'start')}`;
   const opts=a.level>=3?['لا ألاحظ','خفيف','واضح','قوي']:['لا','قليل','واضح'];
-  opts.forEach((o,j)=>{const w=a.level>=3?67:82;out+=check(x+18+j*(w+7),y+68,o,w)});
+  if(a.level>=3)opts.forEach((o,j)=>{out+=check(x+18+(j%2)*142,y+60+Math.floor(j/2)*38,o,128)});
+  else opts.forEach((o,j)=>{out+=check(x+18+j*92,y+76,o,84)});
  }
  out+=`${rtl(700,858,'إشارة أخرى عندي',15,700,P.ink,'start')}${line(100,870,555)}${a.level===5?`${rtl(700,918,'ما السياق الذي ظهرت فيه الإشارة؟',15,700,P.ink,'start')}${line(100,930,555)}`:''}`;
  return out;
