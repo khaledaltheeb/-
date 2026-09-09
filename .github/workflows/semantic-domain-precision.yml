@@ -1,0 +1,30 @@
+name: Semantic Domain Precision
+
+on:
+  pull_request:
+    paths:
+      - 'lib/semantic-seo.ts'
+      - 'scripts/semantic-domain-precision-contract.mjs'
+      - '.github/workflows/semantic-domain-precision.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'lib/semantic-seo.ts'
+      - 'scripts/semantic-domain-precision-contract.mjs'
+      - '.github/workflows/semantic-domain-precision.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Verify semantic domain inference precision
+        run: node scripts/semantic-domain-precision-contract.mjs
