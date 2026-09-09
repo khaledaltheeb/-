@@ -79,6 +79,19 @@ const nextConfig: NextConfig = {
         destination: '/encyclopedia/childhood-apraxia-speech/',
         permanent: true,
       },
+      // The indexed AAC assessment used to live under a development/demo family.
+      // Consolidate it into the production AAC care-guide cluster without losing
+      // historical inbound links or search-engine signals.
+      {
+        source: '/provider-assessment-demo/conditions/aac',
+        destination: '/care-guides/aac/assessment-access-feature-matching/',
+        permanent: true,
+      },
+      {
+        source: '/provider-assessment-demo/conditions/aac/',
+        destination: '/care-guides/aac/assessment-access-feature-matching/',
+        permanent: true,
+      },
     ];
   },
   async rewrites() {
