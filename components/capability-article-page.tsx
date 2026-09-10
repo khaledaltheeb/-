@@ -90,6 +90,9 @@ export default function CapabilityArticlePage({ record, routeSlug, registryItems
   const audiences = Array.isArray(record.audience) ? record.audience.map(String) : [];
   const registry = role === 'registry' ? registryItems : [];
   const disclaimer = sanitizeCapabilityText(record.medical_disclaimer || DEFAULT_DISCLAIMER);
+  const schemaImage = record.featured_image_url
+    ? (record.featured_image_url.startsWith('https://') ? record.featured_image_url : `${SITE_URL}${record.featured_image_url}`)
+    : `${SITE_URL}/seo-card?title=${encodeURIComponent(record.title)}&context=${encodeURIComponent('لنرتقي بقدراتهم · دليل قدرات موثق')}`;
 
   const breadcrumbs = breadcrumbJsonLd([
     { name: 'الرئيسية', path: '/' },
@@ -112,9 +115,7 @@ export default function CapabilityArticlePage({ record, routeSlug, registryItems
     lastReviewed: review.lastReviewedAt || undefined,
     publisher: { '@id': `${SITE_URL}/#organization` },
     isPartOf: { '@id': `${SITE_URL}/#website` },
-    image: record.featured_image_url
-      ? (record.featured_image_url.startsWith('https://') ? record.featured_image_url : `${SITE_URL}${record.featured_image_url}`)
-      : undefined,
+    image: schemaImage,
   };
 
   const steps = role === 'protocol' ? protocolSteps(bodyJson) : [];
