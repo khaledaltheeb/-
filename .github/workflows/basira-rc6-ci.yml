@@ -24,12 +24,12 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Install Android 36 SDK
+      - name: Install Android SDK
         shell: bash
         run: |
           set -euo pipefail
           yes | sdkmanager --licenses >/dev/null || true
-          sdkmanager "platforms;android-36" "build-tools;36.0.0"
+          sdkmanager "platforms;android-37" "build-tools;36.0.0"
 
       - name: Set up Gradle 9.6.0
         uses: gradle/actions/setup-gradle@v4
@@ -56,7 +56,7 @@ jobs:
           test -f basira-rc6/build.gradle.kts
           test -f basira-rc6/app/build.gradle.kts
 
-      - name: Apply RC6 compile and voice fixes
+      - name: Apply RC6 verified fixes
         shell: bash
         run: |
           set -euo pipefail
@@ -83,6 +83,43 @@ jobs:
           if old not in s:
               raise SystemExit('Expected remaining command list not found')
           p.write_text(s.replace(old, new, 1))
+
+          p = Path('basira-rc6/app/build.gradle.kts')
+          s = p.read_text()
+          replacements = {
+              'compileSdk = 36': 'compileSdk = 37',
+              'targetSdk = 36': 'targetSdk = 37',
+              'androidx.compose:compose-bom:2026.06.01': 'androidx.compose:compose-bom:2026.09.00',
+              'androidx.lifecycle:lifecycle-runtime-ktx:2.10.0': 'androidx.lifecycle:lifecycle-runtime-ktx:2.11.0',
+              'androidx.lifecycle:lifecycle-runtime-compose:2.10.0': 'androidx.lifecycle:lifecycle-runtime-compose:2.11.0',
+              '        baseline = file("lint-baseline.xml")\n': ''
+          }
+          for old, new in replacements.items():
+              if old not in s:
+                  raise SystemExit(f'Expected build setting not found: {old}')
+              s = s.replace(old, new)
+          p.write_text(s)
+
+          icon = Path('basira-rc6/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml')
+          s = icon.read_text()
+          old = '    <foreground android:drawable="@drawable/ic_launcher_foreground" />\n'
+          new = '    <foreground android:drawable="@drawable/ic_launcher_foreground" />\n    <monochrome android:drawable="@drawable/ic_launcher_monochrome" />\n'
+          if old not in s:
+              raise SystemExit('Expected adaptive icon foreground not found')
+          icon.write_text(s.replace(old, new, 1))
+
+          mono = Path('basira-rc6/app/src/main/res/drawable/ic_launcher_monochrome.xml')
+          mono.write_text('''<?xml version="1.0" encoding="utf-8"?>
+          <vector xmlns:android="http://schemas.android.com/apk/res/android"
+              android:width="108dp"
+              android:height="108dp"
+              android:viewportWidth="108"
+              android:viewportHeight="108">
+              <path android:fillColor="#000000" android:pathData="M54,20C34,20 19,34 12,54C19,74 34,88 54,88C74,88 89,74 96,54C89,34 74,20 54,20ZM54,30C68,30 80,39 86,54C80,69 68,78 54,78C40,78 28,69 22,54C28,39 40,30 54,30Z" />
+              <path android:fillColor="#000000" android:pathData="M54,38A16,16 0,1 0,54 70A16,16 0,1 0,54 38" />
+              <path android:fillColor="#000000" android:pathData="M54,44L61,58L54,55L47,58Z" />
+          </vector>
+          ''')
           PY
 
       - name: Fetch verified EfficientDet Lite0 model
