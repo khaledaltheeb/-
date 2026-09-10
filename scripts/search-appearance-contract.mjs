@@ -16,6 +16,7 @@ const layout = read('app/layout.tsx');
 const robots = read('app/robots.ts');
 const sitemapXml = read('lib/sitemap-xml.ts');
 const staticSitemap = read('app/sitemaps/static.xml/route.ts');
+const publicHubsSitemap = read('app/sitemaps/public-hubs.xml/route.ts');
 const quickInfoSitemap = read('app/sitemaps/quick-info.xml/route.ts');
 const encyclopediaSitemap = read('app/sitemaps/encyclopedia.xml/route.ts');
 const cognitiveSitemap = read('app/sitemaps/cognitive-lab.xml/route.ts');
@@ -53,6 +54,7 @@ requireAll(seo, [
   "process.env.NEXT_PUBLIC_ALLOW_INDEXING === 'true' && !IS_TEMPORARY_HOST",
   "const HOME_TITLE = 'منصة روافد | الصحة النفسية والتربية الخاصة وسرطان الأطفال'",
   "export const DEFAULT_DESCRIPTION = 'منصة روافد هي منصة عربية",
+  "const trailingBrandSuffixes = [` | ${BRAND_NAME}`, ` | ${BRAND_SHORT}`, ' | Rawafid'];",
 ], 'structured identity and domain safety');
 
 if (seo.includes("'@type': 'SearchAction'")) {
@@ -103,6 +105,7 @@ requireAll(sitemapXml, ['INDEXING_ENABLED', 'SITE_URL'], 'sitemap indexability g
 
 requireAll(sitemapIndex, [
   "'/sitemaps/static.xml'",
+  "'/sitemaps/public-hubs.xml'",
   "'/sitemaps/daily-tools.xml'",
   "'/sitemaps/taxonomy.xml'",
   "'/sitemaps/cognitive-lab.xml'",
@@ -121,6 +124,13 @@ requireAll(staticSitemap, [
   "path:'/magazine/'",
   "path:'/addiction'",
 ], 'static-owned primary search hubs');
+requireAll(publicHubsSitemap, [
+  "path: '/guides/'",
+  "path: '/media-kit'",
+  "path: '/team-and-partners'",
+  "path: '/stats'",
+  "path: '/institutions'",
+], 'institutional public hubs discovery');
 requireAll(quickInfoSitemap, ["path: '/quick-info/'"], 'Quick Info sitemap hub ownership');
 requireAll(encyclopediaSitemap, ["path: '/encyclopedia/'"], 'encyclopedia sitemap hub ownership');
 requireAll(cognitiveSitemap, ["path: '/cognitive-lab'"], 'cognitive sitemap hub ownership');
