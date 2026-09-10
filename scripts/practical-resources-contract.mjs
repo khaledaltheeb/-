@@ -28,7 +28,10 @@ for(const prompt of ['ما أكثر شيء يزعجني الآن؟','ما الا
 if(form.includes('localStorage')||form.includes('fetch(')) fail('worksheet answers must not persist or transmit automatically');
 if(!form.includes('window.print')&&!read('components/print-resource-button.tsx').includes('window.print')) fail('print workflow missing');
 if(!info.includes('resourceSafetyNote')||!work.includes('resourceSafetyNote')) fail('safety boundary missing');
-for(const marker of ['canonicalPath','base.alternates?.canonical','/resources/${slug}/','if(canonical===resourcePath)return base','robots:{index:false']) if(!resource.includes(marker)) fail(`resource canonical/indexing guard missing: ${marker}`);
+for(const marker of ['contentMetadata','PublishedContentPage','return contentMetadata','return PublishedContentPage']) if(!resource.includes(marker)) fail(`resource published-content routing guard missing: ${marker}`);
+if(resource.includes('index:false')||resource.includes('index: false')) fail('public historical resource pages must not receive a noindex override');
+if(!work.includes('index:true')&&!work.includes('index: true')) fail('public worksheets must remain indexable');
+if(!work.includes('follow:true')&&!work.includes('follow: true')) fail('public worksheets must remain followable');
 for(const marker of ["dynamic='force-static'",'dyslexia-norway-school-observation-toolkit','ContentRenderer','NEXT_PUBLIC_SUPABASE_URL']) if(!toolkit.includes(marker)) fail(`static toolkit route missing: ${marker}`);
 for(const marker of ['.next','server','app','resources','worksheets','index.html','index.rsc','page-data','rsc-data','html.txt','rsc.txt']) if(!materializer.includes(marker)) fail(`materializer contract missing: ${marker}`);
 if(!productionOpenNext.includes('node scripts/materialize-practical-resources-static-html.mjs')) fail('production OpenNext build must run practical resource static staging after next build');
@@ -37,4 +40,4 @@ for(const slug of dyslexiaSlugs) if(!worker.includes(slug)) fail(`Cloudflare pra
 if(!worker.includes('dyslexia-norway-school-observation-toolkit')) fail('Cloudflare toolkit fast path missing');
 if(worker.indexOf('practicalResourcesStaticResponse(request,env,url)')>worker.indexOf('shouldBypassPublicCache(request,url)')) fail('practical-resource fast path must run before the dynamic/cache backend decision');
 if(bad) process.exit(1);
-console.log('Practical resources contract passed: Dyslexia Norway worksheets are present, printable, statically staged for Cloudflare with text-safe HTML/RSC payloads, and served by the Worker fast path before OpenNext; the school toolkit has the same static delivery protection.');
+console.log('Practical resources contract passed: public historical resources and worksheets are index/follow, Dyslexia Norway worksheets remain printable and statically staged, and the school toolkit retains static delivery protection.');
