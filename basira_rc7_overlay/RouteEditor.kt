@@ -28,6 +28,7 @@ private data class RouteViewport(
     val scale: Float,
     val left: Float,
     val top: Float,
+    val width: Float,
     val height: Float
 ) {
     fun toScreen(position: Vec3): Offset = Offset(
@@ -35,17 +36,65 @@ private data class RouteViewport(
         y = top + height - (position.z - minZ) * scale
     )
 
-    fun toWorld(offset: Offset, y: Float): Vec3 = Vec3(
-        x = minX + (offset.x - left) / scale,
-        y = y,
-        z = minZ + (top + height - offset.y) / scale
+    fun toWorld(offset: Offset, y: Float): Vec3 {
+        val bounded = Offset(
+            x = offset.x.coerceIn(left, left + width),
+            y = offset.y.coerceIn(top, top + height)
+        )
+        return Vec3(
+            x = minX + (bounded.x - left) / scale,
+            y = y,
+            z = minZ + (top + height - bounded.y) / scale
+        )
+    }
+}
+
+private fun routeViewport(
+    route: List<PoseSample>,
+    landmarks: List<Landmark>,
+    size: IntSize
+): RouteViewport? {
+    if (route.isEmpty() || size.width <= 0 || size.height <= 0) return null
+    val xs = route.map { it.position.x } + landmarks.map { it.position.x }
+    val zs = route.map { it.position.z } + landmarks.map { it.position.z }
+    val rawMinX = xs.minOrNull() ?: 0f
+    val rawMaxX = xs.maxOrNull() ?: rawMinX + 1f
+    val rawMinZ = zs.minOrNull() ?: 0f
+    val rawMaxZ = zs.maxOrNull() ?: rawMinZ + 1f
+    val spanX = max(rawMaxX - rawMinX, 0.8f)
+    val spanZ = max(rawMaxZ - rawMinZ, 0.8f)
+    val marginPx = 32f
+    val usableW = max(size.width.toFloat() - marginPx * 2f, 1f)
+    val usableH = max(size.height.toFloat() - marginPx * 2f, 1f)
+    val scale = min(usableW / spanX, usableH / spanZ).coerceAtLeast(1f)
+    val drawnW = spanX * scale
+    val drawnH = spanZ * scale
+    return RouteViewport(
+        minX = rawMinX - (spanX - (rawMaxX - rawMinX)) / 2f,
+        minZ = rawMinZ - (spanZ - (rawMaxZ - rawMinZ)) / 2f,
+        scale = scale,
+        left = (size.width - drawnW) / 2f,
+        top = (size.height - drawnH) / 2f,
+        width = drawnW,
+        height = drawnH
     )
 }
 
+private fun nearestRoutePoint(offset: Offset, viewport: RouteViewport, route: List<PoseSample>): Int =
+    route.indices.minByOrNull { index ->
+        val p = viewport.toScreen(route[index].position)
+        val dx = p.x - offset.x
+        val dy = p.y - offset.y
+        dx * dx + dy * dy
+    } ?: -1
+
 /**
  * Sighted-helper top-down route editor.
- * Every recorded sample remains individually selectable and draggable.
- * Y/elevation is intentionally preserved; the editor changes only the floor-plane X/Z position.
+ *
+ * The viewport is frozen for the lifetime of each drag gesture. This matters:
+ * recomputing fit-to-screen after every point movement would move the coordinate
+ * frame under the user's finger and make precise correction impossible.
+ * Elevation (Y) is preserved; editing changes only floor-plane X/Z.
  */
 @Composable
 internal fun EditableRoutePreview(
@@ -57,82 +106,61 @@ internal fun EditableRoutePreview(
 ) {
     var selectedIndex by remember(route.size) { mutableIntStateOf(if (route.isEmpty()) -1 else 0) }
     var canvasSize by remember { mutableStateOf(IntSize.Zero) }
+    var dragViewport by remember { mutableStateOf<RouteViewport?>(null) }
     val routeSnapshot = route.toList()
+    val landmarksSnapshot = landmarks.toList()
+    val latestRoute by rememberUpdatedState(routeSnapshot)
+    val latestLandmarks by rememberUpdatedState(landmarksSnapshot)
+
     val primary = MaterialTheme.colorScheme.primary
     val selectedColor = MaterialTheme.colorScheme.error
     val pointColor = MaterialTheme.colorScheme.onSurface
     val landmarkColor = MaterialTheme.colorScheme.tertiary
     val surface = MaterialTheme.colorScheme.surfaceVariant
 
-    fun viewport(size: IntSize): RouteViewport? {
-        if (routeSnapshot.isEmpty() || size.width <= 0 || size.height <= 0) return null
-        val xs = routeSnapshot.map { it.position.x } + landmarks.map { it.position.x }
-        val zs = routeSnapshot.map { it.position.z } + landmarks.map { it.position.z }
-        val rawMinX = xs.minOrNull() ?: 0f
-        val rawMaxX = xs.maxOrNull() ?: rawMinX + 1f
-        val rawMinZ = zs.minOrNull() ?: 0f
-        val rawMaxZ = zs.maxOrNull() ?: rawMinZ + 1f
-        val spanX = max(rawMaxX - rawMinX, 0.8f)
-        val spanZ = max(rawMaxZ - rawMinZ, 0.8f)
-        val marginPx = 28f
-        val usableW = max(size.width.toFloat() - marginPx * 2f, 1f)
-        val usableH = max(size.height.toFloat() - marginPx * 2f, 1f)
-        val scale = min(usableW / spanX, usableH / spanZ).coerceAtLeast(1f)
-        val drawnW = spanX * scale
-        val drawnH = spanZ * scale
-        return RouteViewport(
-            minX = rawMinX - (spanX - (rawMaxX - rawMinX)) / 2f,
-            minZ = rawMinZ - (spanZ - (rawMaxZ - rawMinZ)) / 2f,
-            scale = scale,
-            left = (size.width - drawnW) / 2f,
-            top = (size.height - drawnH) / 2f,
-            height = drawnH
-        )
-    }
-
-    fun nearestIndex(offset: Offset): Int {
-        val vp = viewport(canvasSize) ?: return -1
-        return routeSnapshot.indices.minByOrNull { index ->
-            val p = vp.toScreen(routeSnapshot[index].position)
-            val dx = p.x - offset.x
-            val dy = p.y - offset.y
-            dx * dx + dy * dy
-        } ?: -1
-    }
-
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text("معاينة المسار وتحريره", fontWeight = FontWeight.Bold)
             Text(
-                "هذه خريطة علوية للمسار بعد إنهاء التسجيل. اضغط أي نقطة لاختيارها ثم اسحبها إلى الموضع الصحيح. التعديل هنا أفقي فقط ولا يغيّر الارتفاع المسجل.",
+                "هذه خريطة علوية للمسار بعد إنهاء التسجيل. اضغط أي نقطة لاختيارها ثم اسحبها، أو استخدم أزرار 10 سم للتصحيح الدقيق. الارتفاع المسجل لا يتغير.",
                 style = MaterialTheme.typography.bodySmall
             )
             Canvas(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(300.dp)
+                    .height(320.dp)
                     .background(surface)
                     .onSizeChanged { canvasSize = it }
-                    .pointerInput(routeSnapshot, canvasSize) {
+                    .pointerInput(canvasSize) {
                         detectTapGestures { offset ->
-                            selectedIndex = nearestIndex(offset)
+                            val currentRoute = latestRoute
+                            val vp = routeViewport(currentRoute, latestLandmarks, canvasSize)
+                            if (vp != null) selectedIndex = nearestRoutePoint(offset, vp, currentRoute)
                         }
                     }
-                    .pointerInput(routeSnapshot, canvasSize, selectedIndex) {
+                    .pointerInput(canvasSize) {
                         detectDragGestures(
-                            onDragStart = { offset -> selectedIndex = nearestIndex(offset) },
+                            onDragStart = { offset ->
+                                val currentRoute = latestRoute
+                                val vp = routeViewport(currentRoute, latestLandmarks, canvasSize)
+                                dragViewport = vp
+                                if (vp != null) selectedIndex = nearestRoutePoint(offset, vp, currentRoute)
+                            },
+                            onDragEnd = { dragViewport = null },
+                            onDragCancel = { dragViewport = null },
                             onDrag = { change, _ ->
+                                val currentRoute = latestRoute
                                 val index = selectedIndex
-                                val vp = viewport(canvasSize)
-                                if (index !in routeSnapshot.indices || vp == null) return@detectDragGestures
-                                val current = routeSnapshot[index]
+                                val vp = dragViewport ?: return@detectDragGestures
+                                if (index !in currentRoute.indices) return@detectDragGestures
+                                val current = currentRoute[index]
                                 onMovePoint(index, vp.toWorld(change.position, current.position.y))
                                 change.consume()
                             }
                         )
                     }
             ) {
-                val vp = viewport(IntSize(size.width.toInt(), size.height.toInt())) ?: return@Canvas
+                val vp = routeViewport(routeSnapshot, landmarksSnapshot, IntSize(size.width.toInt(), size.height.toInt())) ?: return@Canvas
                 for (i in 0 until routeSnapshot.lastIndex) {
                     drawLine(
                         color = primary,
@@ -142,17 +170,19 @@ internal fun EditableRoutePreview(
                         cap = StrokeCap.Round
                     )
                 }
-                landmarks.forEach { landmark ->
+                landmarksSnapshot.forEach { landmark ->
                     drawCircle(landmarkColor, radius = 8f, center = vp.toScreen(landmark.position))
                 }
                 routeSnapshot.forEachIndexed { index, sample ->
                     drawCircle(
                         color = if (index == selectedIndex) selectedColor else pointColor,
-                        radius = if (index == selectedIndex) 10f else 5f,
+                        radius = if (index == selectedIndex) 11f else 5f,
                         center = vp.toScreen(sample.position)
                     )
                 }
-                routeSnapshot.firstOrNull()?.let { drawCircle(Color.White, radius = 4f, center = vp.toScreen(it.position)) }
+                routeSnapshot.firstOrNull()?.let {
+                    drawCircle(Color.White, radius = 4f, center = vp.toScreen(it.position))
+                }
             }
 
             if (selectedIndex in routeSnapshot.indices) {
@@ -162,17 +192,36 @@ internal fun EditableRoutePreview(
                     fontWeight = FontWeight.SemiBold
                 )
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    OutlinedButton(onClick = { onMovePoint(selectedIndex, selected.position.copy(x = selected.position.x - 0.10f)) }, modifier = Modifier.weight(1f)) { Text("يسار 10سم") }
-                    OutlinedButton(onClick = { onMovePoint(selectedIndex, selected.position.copy(x = selected.position.x + 0.10f)) }, modifier = Modifier.weight(1f)) { Text("يمين 10سم") }
+                    OutlinedButton(
+                        onClick = { onMovePoint(selectedIndex, selected.position.copy(x = selected.position.x - 0.10f)) },
+                        modifier = Modifier.weight(1f)
+                    ) { Text("يسار 10سم") }
+                    OutlinedButton(
+                        onClick = { onMovePoint(selectedIndex, selected.position.copy(x = selected.position.x + 0.10f)) },
+                        modifier = Modifier.weight(1f)
+                    ) { Text("يمين 10سم") }
                 }
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    OutlinedButton(onClick = { onMovePoint(selectedIndex, selected.position.copy(z = selected.position.z + 0.10f)) }, modifier = Modifier.weight(1f)) { Text("أمام 10سم") }
-                    OutlinedButton(onClick = { onMovePoint(selectedIndex, selected.position.copy(z = selected.position.z - 0.10f)) }, modifier = Modifier.weight(1f)) { Text("خلف 10سم") }
+                    OutlinedButton(
+                        onClick = { onMovePoint(selectedIndex, selected.position.copy(z = selected.position.z + 0.10f)) },
+                        modifier = Modifier.weight(1f)
+                    ) { Text("أمام 10سم") }
+                    OutlinedButton(
+                        onClick = { onMovePoint(selectedIndex, selected.position.copy(z = selected.position.z - 0.10f)) },
+                        modifier = Modifier.weight(1f)
+                    ) { Text("خلف 10سم") }
                 }
-                TextButton(onClick = { onResetPoint(selectedIndex) }, modifier = Modifier.fillMaxWidth()) { Text("إرجاع هذه النقطة كما سُجلت") }
+                TextButton(onClick = { onResetPoint(selectedIndex) }, modifier = Modifier.fillMaxWidth()) {
+                    Text("إرجاع هذه النقطة كما سُجلت")
+                }
             }
-            TextButton(onClick = onResetAll, modifier = Modifier.fillMaxWidth()) { Text("إلغاء جميع تعديلات المسار") }
-            Text("الخط = مسار الحركة • النقاط = عينات المسار • الدوائر الأخرى = العلامات/الوجهات", style = MaterialTheme.typography.bodySmall)
+            TextButton(onClick = onResetAll, modifier = Modifier.fillMaxWidth()) {
+                Text("إلغاء جميع تعديلات المسار")
+            }
+            Text(
+                "الخط = مسار الحركة • النقاط = عينات المسار • الدوائر الأخرى = العلامات/الوجهات",
+                style = MaterialTheme.typography.bodySmall
+            )
         }
     }
 }
