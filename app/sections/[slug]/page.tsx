@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { cache } from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import ContentRenderer from '@/components/content-renderer';
@@ -16,7 +17,8 @@ import { publicContentHref, publicContentTypeLabel } from '@/lib/public-content-
 export const dynamic = 'force-dynamic';
 type Params = Promise<{ slug: string }>;
 type SearchParams = Promise<{ page?: string | string[]; q?: string | string[] }>;
-type Category = { id: string; sector_id: string | null; parent_id: string | null; slug: string; name_ar: string; description: string | null; seo_title: string | null; seo_description: string | null; editorial_content_id: string | null };
+type CategoryMetadata = { seo_keywords?: unknown; search_intents?: unknown };
+type Category = { id: string; sector_id: string | null; parent_id: string | null; slug: string; name_ar: string; description: string | null; seo_title: string | null; seo_description: string | null; metadata: CategoryMetadata | null; editorial_content_id: string | null };
 type Item = { id: string; slug: string; title: string; excerpt: string | null; content_type: string; published_at: string | null; canonical_url: string | null };
 type EditorialContent = { id: string; title: string; excerpt: string | null; body_json: unknown; body_text: string | null };
 const PAGE_SIZE = 24;
@@ -28,19 +30,35 @@ const pageHref = (slug: string, page: number, q: string) => { const params = new
 const legacyRoute = (slug: string) => `/sections/${slug}/`;
 const retryDelay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+function cleanManualTerms(value: unknown, maxItems = 20): string[] {
+  if (!Array.isArray(value)) return [];
+  const seen = new Set<string>();
+  const result: string[] = [];
+  for (const item of value) {
+    if (typeof item !== 'string') continue;
+    const text = item.trim().replace(/\s+/g, ' ').slice(0, 180);
+    const key = text.toLocaleLowerCase('ar');
+    if (!text || seen.has(key)) continue;
+    seen.add(key);
+    result.push(text);
+    if (result.length >= maxItems) break;
+  }
+  return result;
+}
+
 async function dbCategory(slug: string) {
   const supabase = await createClient();
-  const { data } = await supabase.from('categories').select('id,sector_id,parent_id,slug,name_ar,description,seo_title,seo_description,editorial_content_id').eq('slug', slug).eq('is_active', true).eq('visibility', 'public').maybeSingle();
+  const { data } = await supabase.from('categories').select('id,sector_id,parent_id,slug,name_ar,description,seo_title,seo_description,metadata,editorial_content_id').eq('slug', slug).eq('is_active', true).eq('visibility', 'public').maybeSingle();
   return data as Category | null;
 }
 
 function virtualCategory(slug: string): Category | null {
   const cognitive = getCognitiveCategory(slug);
-  if (cognitive) return { id: `virtual:${slug}`, sector_id: 'f9af56ce-734c-4867-9999-957db0933414', parent_id: '369841c2-d33b-43a5-ad04-8dff6f40747e', slug, name_ar: cognitive.name, description: cognitive.description, seo_title: null, seo_description: null, editorial_content_id: null };
+  if (cognitive) return { id: `virtual:${slug}`, sector_id: 'f9af56ce-734c-4867-9999-957db0933414', parent_id: '369841c2-d33b-43a5-ad04-8dff6f40747e', slug, name_ar: cognitive.name, description: cognitive.description, seo_title: null, seo_description: null, metadata: null, editorial_content_id: null };
   const expanded = getExpandedEncyclopediaCategory(slug);
-  return expanded ? { id: `virtual-expanded:${slug}`, sector_id: 'f9af56ce-734c-4867-9999-957db0933414', parent_id: '369841c2-d33b-43a5-ad04-8dff6f40747e', slug, name_ar: expanded.name, description: expanded.description, seo_title: null, seo_description: null, editorial_content_id: null } : null;
+  return expanded ? { id: `virtual-expanded:${slug}`, sector_id: 'f9af56ce-734c-4867-9999-957db0933414', parent_id: '369841c2-d33b-43a5-ad04-8dff6f40747e', slug, name_ar: expanded.name, description: expanded.description, seo_title: null, seo_description: null, metadata: null, editorial_content_id: null } : null;
 }
-async function resolvedCategory(slug: string) { return await dbCategory(slug) ?? virtualCategory(slug); }
+const resolvedCategory = cache(async (slug: string) => await dbCategory(slug) ?? virtualCategory(slug));
 
 export async function generateMetadata({ params, searchParams }: { params: Params; searchParams: SearchParams }): Promise<Metadata> {
   const [{ slug }, raw] = await Promise.all([params, searchParams]);
@@ -53,13 +71,15 @@ export async function generateMetadata({ params, searchParams }: { params: Param
   const query = qSafe(one(raw.q));
   const baseTitle = category.seo_title || category.name_ar;
   const baseDescription = category.seo_description || category.description || `${category.name_ar} في منصة روافد: محتوى عربي موثوق ومترابط.`;
+  const manualKeywords = cleanManualTerms(category.metadata?.seo_keywords, 24);
+  const manualIntents = cleanManualTerms(category.metadata?.search_intents, 12);
   return buildSeoMetadata({
     title: query ? `نتائج البحث داخل ${category.name_ar}` : page > 1 ? `${baseTitle} - الصفحة ${page}` : baseTitle,
     description: query ? `نتائج البحث الداخلي داخل قسم ${category.name_ar}. استخدم صفحة القسم الرئيسية للوصول إلى المحتوى المعتمد والمنظم.` : page > 1 ? `${baseDescription} صفحة ${page} من محتوى القسم.` : baseDescription,
     path: query ? `/sections/${slug}` : indexPagePath(slug, page),
     index: !query,
     follow: true,
-    keywords: [category.name_ar, 'منصة روافد', 'دليل موضوعي'],
+    keywords: [category.name_ar, ...manualKeywords, ...manualIntents, 'منصة روافد'],
   });
 }
 
