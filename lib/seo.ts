@@ -192,6 +192,13 @@ export function organizationJsonLd() {
         alternateName: [BRAND_SHORT, 'Rawafid'],
         url: `${SITE_URL}/`,
         description: DEFAULT_DESCRIPTION,
+        email: 'contact@healthrenewal.org',
+        contactPoint: {
+          '@type': 'ContactPoint',
+          email: 'contact@healthrenewal.org',
+          contactType: 'general inquiries',
+          availableLanguage: ['ar', 'en'],
+        },
         logo: {
           '@type': 'ImageObject',
           '@id': `${SITE_URL}/#logo`,
