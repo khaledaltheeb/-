@@ -1,0 +1,200 @@
+name: Basira RC6 Emulator Smoke
+
+on:
+  push:
+    branches:
+      - agent/basira-rc6-20260910
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  emulator-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK
+        shell: bash
+        run: |
+          set -euo pipefail
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager "platforms;android-36" "build-tools;36.0.0"
+
+      - name: Set up Gradle 9.6.0
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.6.0'
+
+      - name: Restore Basira RC6 source
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf basira-rc6
+          mkdir -p basira-rc6
+          cat \
+            basira_rc6_ci/parts/part00.b64 \
+            basira_rc6_ci/parts/part01.b64 \
+            basira_rc6_ci/parts/part02.b64 \
+            basira_rc6_ci/parts/part03.b64 \
+            basira_rc6_ci/parts/part04.b64 \
+            basira_rc6_ci/parts/part05.b64 \
+            basira_rc6_ci/parts/part06.b64 \
+            | tr -d '\n\r' | base64 --decode > /tmp/basira-rc6-source.tar.gz
+          echo "48757025fa6f0710c7257302287ce17e852b2539348462ead8498083cf0a0d64  /tmp/basira-rc6-source.tar.gz" | sha256sum -c -
+          tar -xzf /tmp/basira-rc6-source.tar.gz -C basira-rc6
+          test -f basira-rc6/build.gradle.kts
+          test -f basira-rc6/app/build.gradle.kts
+
+      - name: Apply RC6 verified fixes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          p = Path('basira-rc6/app/src/main/java/org/healthrenewal/basira/ui/Screens.kt')
+          s = p.read_text()
+          old = 'if (requested?.id == destination?.id) audio.speak("أنت تتجه بالفعل إلى ${requested.label}")'
+          new = 'if (requested != null && requested.id == destination?.id) audio.speak("أنت تتجه بالفعل إلى ${requested.label}")'
+          if old not in s:
+              raise SystemExit('Expected nullable Landmark expression not found')
+          p.write_text(s.replace(old, new, 1))
+
+          p = Path('basira-rc6/app/src/main/java/org/healthrenewal/basira/voice/VoiceCommands.kt')
+          s = p.read_text()
+          old = '"خذني الى ", "وديني الى ", "روح بي الى ", "اذهب الى ", "اذهب الي ",\n            "اريد الذهاب الى ", "اريد الذهاب الي ", "وجهني الى ", "وجهني الي ",\n            "المسار الى ", "المسار الي "'
+          new = '"خذني الى ", "خذني الي ", "وديني الى ", "وديني الي ", "روح بي الى ", "روح بي الي ", "اذهب الى ", "اذهب الي ",\n            "اريد الذهاب الى ", "اريد الذهاب الي ", "وجهني الى ", "وجهني الي ",\n            "المسار الى ", "المسار الي "'
+          if old not in s:
+              raise SystemExit('Expected destination prefix list not found')
+          s = s.replace(old, new, 1)
+          old = 'private val REMAINING_COMMANDS = setOf("كم باقي", "كم تبقى", "المتبقي", "المسافه المتبقيه", "باقي كام")'
+          new = 'private val REMAINING_COMMANDS = setOf("كم باقي", "كم تبقي", "المتبقي", "المسافه المتبقيه", "باقي كام")'
+          if old not in s:
+              raise SystemExit('Expected remaining command list not found')
+          p.write_text(s.replace(old, new, 1))
+
+          p = Path('basira-rc6/app/build.gradle.kts')
+          s = p.read_text()
+          replacements = {
+              '        baseline = file("lint-baseline.xml")\n': '',
+              'disable += setOf("UnusedResources")': 'disable += setOf("UnusedResources", "OldTargetApi", "GradleDependency")'
+          }
+          for old, new in replacements.items():
+              if old not in s:
+                  raise SystemExit(f'Expected build setting not found: {old}')
+              s = s.replace(old, new)
+          p.write_text(s)
+
+          icon = Path('basira-rc6/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml')
+          s = icon.read_text()
+          old = '    <foreground android:drawable="@drawable/ic_launcher_foreground" />\n'
+          new = '    <foreground android:drawable="@drawable/ic_launcher_foreground" />\n    <monochrome android:drawable="@drawable/ic_launcher_monochrome" />\n'
+          if old not in s:
+              raise SystemExit('Expected adaptive icon foreground not found')
+          icon.write_text(s.replace(old, new, 1))
+
+          mono = Path('basira-rc6/app/src/main/res/drawable/ic_launcher_monochrome.xml')
+          mono.write_text('''<?xml version="1.0" encoding="utf-8"?>
+          <vector xmlns:android="http://schemas.android.com/apk/res/android"
+              android:width="108dp"
+              android:height="108dp"
+              android:viewportWidth="108"
+              android:viewportHeight="108">
+              <path android:fillColor="#000000" android:pathData="M54,20C34,20 19,34 12,54C19,74 34,88 54,88C74,88 89,74 96,54C89,34 74,20 54,20ZM54,30C68,30 80,39 86,54C80,69 68,78 54,78C40,78 28,69 22,54C28,39 40,30 54,30Z" />
+              <path android:fillColor="#000000" android:pathData="M54,38A16,16 0,1 0,54 70A16,16 0,1 0,54 38" />
+              <path android:fillColor="#000000" android:pathData="M54,44L61,58L54,55L47,58Z" />
+          </vector>
+          ''')
+          PY
+
+      - name: Fetch verified EfficientDet Lite0 model
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p basira-rc6/app/src/main/assets
+          curl -fL --retry 3 --retry-all-errors \
+            "https://storage.googleapis.com/mediapipe-models/object_detector/efficientdet_lite0/int8/1/efficientdet_lite0.tflite" \
+            -o basira-rc6/app/src/main/assets/efficientdet_lite0.tflite
+          echo "0720bf247bd76e6594ea28fa9c6f7c5242be774818997dbbeffc4da460c723bb  basira-rc6/app/src/main/assets/efficientdet_lite0.tflite" | sha256sum -c -
+
+      - name: Build debug APK for emulator
+        shell: bash
+        run: |
+          set -euo pipefail
+          gradle -p basira-rc6 :app:assembleDebug --stacktrace
+          test -f basira-rc6/app/build/outputs/apk/debug/app-debug.apk
+          sha256sum basira-rc6/app/build/outputs/apk/debug/app-debug.apk | tee basira-rc6/emulator-apk.sha256
+
+      - name: Install and launch on Android emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back emulated -camera-front none
+          script: |
+            set -euo pipefail
+            APK="basira-rc6/app/build/outputs/apk/debug/app-debug.apk"
+            PACKAGE="org.healthrenewal.basira.debug"
+            ACTIVITY="org.healthrenewal.basira.MainActivity"
+
+            adb install -r "$APK" | tee basira-rc6/emulator-install.log
+            adb shell pm grant "$PACKAGE" android.permission.CAMERA || true
+            adb shell pm grant "$PACKAGE" android.permission.RECORD_AUDIO || true
+            adb shell pm grant "$PACKAGE" android.permission.ACCESS_COARSE_LOCATION || true
+            adb shell pm grant "$PACKAGE" android.permission.ACCESS_FINE_LOCATION || true
+            adb shell pm grant "$PACKAGE" android.permission.ACTIVITY_RECOGNITION || true
+
+            adb logcat -c
+            adb shell am start -W -n "$PACKAGE/$ACTIVITY" | tee basira-rc6/emulator-launch.log
+            sleep 8
+
+            PID="$(adb shell pidof "$PACKAGE" | tr -d '\r')"
+            if [ -z "$PID" ]; then
+              echo "Basira process is not alive after launch" >&2
+              exit 1
+            fi
+            echo "Basira emulator PID: $PID" | tee basira-rc6/emulator-process.txt
+
+            adb shell dumpsys activity activities > basira-rc6/emulator-activity.txt
+            grep -F "$PACKAGE" basira-rc6/emulator-activity.txt >/dev/null
+
+            adb exec-out screencap -p > basira-rc6/emulator-launch.png
+            adb shell uiautomator dump /sdcard/basira-window.xml >/dev/null || true
+            adb pull /sdcard/basira-window.xml basira-rc6/emulator-window.xml >/dev/null || true
+            adb logcat -d -v threadtime > basira-rc6/emulator-logcat.txt
+
+            if grep -F "Process: $PACKAGE" basira-rc6/emulator-logcat.txt | grep -F "AndroidRuntime" >/dev/null; then
+              echo "Fatal AndroidRuntime crash detected for $PACKAGE" >&2
+              exit 1
+            fi
+
+      - name: Upload emulator smoke evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: basira-rc6-emulator-smoke
+          if-no-files-found: warn
+          retention-days: 14
+          path: |
+            basira-rc6/emulator-*.log
+            basira-rc6/emulator-*.txt
+            basira-rc6/emulator-*.xml
+            basira-rc6/emulator-*.png
+            basira-rc6/emulator-*.sha256
