@@ -158,8 +158,8 @@ for (const sample of samples) {
 requireAll(preservation, [
   'publicSectors: 13',
   'publicCategories: 237',
-  'publishedContent: 8725',
-  'indexablePublishedContent: 8718',
+  'publishedContent: 8732',
+  'indexablePublishedContent: 8725',
   'published content decreased',
   'indexable published content decreased',
   'public sectors decreased',
@@ -176,10 +176,10 @@ if (publicSectorFloor < 13) {
 if (publicCategoryFloor < 237) {
   throw new Error(`public no-loss protection: category baseline regressed to ${publicCategoryFloor}`);
 }
-if (publishedFloor < 8725) {
+if (publishedFloor < 8732) {
   throw new Error(`public no-loss protection: published baseline regressed to ${publishedFloor}`);
 }
-if (indexableFloor < 8718) {
+if (indexableFloor < 8725) {
   throw new Error(`public no-loss protection: indexable published baseline regressed to ${indexableFloor}`);
 }
 
