@@ -8,22 +8,26 @@ if (!url || !key) {
   process.exit(1);
 }
 
-// Monotonic no-loss baseline captured after the 2026-08-24 visibility-preservation guard.
+// Monotonic no-loss baseline refreshed after the 2026-09-10 SEO/indexability audit.
 // These are minimums only: new publishing may increase them, but existing public inventory must not fall below them.
 const baseline = {
-  publicSectors: 9,
-  publicCategories: 126,
-  publishedContent: 3752,
-  indexablePublishedContent: 3519,
+  publicSectors: 13,
+  publicCategories: 237,
+  publishedContent: 8725,
+  indexablePublishedContent: 8718,
 };
 
 const requiredSectorSlugs = [
   'knowledge',
   'pediatric-oncology',
+  'palliative-care',
+  'epilepsy',
   'special-needs-inclusion',
   'mental-health',
   'capabilities',
+  'rehabilitation-functioning',
   'child-family-education',
+  'rare-diseases',
   'trainees-volunteers',
   'short-encyclopedia',
   'addiction-recovery',
