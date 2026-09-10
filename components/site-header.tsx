@@ -5,12 +5,11 @@ import { getPublicSectors } from '@/lib/public-taxonomy';
 
 const primaryLinks = [
   { href: '/sectors', label: 'القطاعات', secondary: false },
-  { href: '/sections', label: 'الأقسام', secondary: false },
-  { href: '/assessment-measures/', label: 'المقاييس وأدوات التقييم', secondary: false },
+  { href: '/sectors/mental-health', label: 'الصحة النفسية', secondary: false },
+  { href: '/sectors/special-needs-inclusion', label: 'التربية الخاصة والدمج', secondary: false },
   { href: '/sectors/pediatric-oncology', label: 'سرطان الأطفال', secondary: false },
-  { href: '/care-guides/', label: 'أدلة التعامل والرعاية', secondary: true },
   { href: '/evidence-guides/', label: 'الأدلة العلمية', secondary: true },
-  { href: '/about', label: 'من نحن', secondary: true },
+  { href: '/about', label: 'عن روافد', secondary: true },
 ];
 
 const intentLinks = [
