@@ -1,0 +1,43 @@
+name: Verify Open Books Live
+
+on:
+  workflow_run:
+    workflows: ["Deploy Production Fast"]
+    types: [completed]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Verify open books discovery resource on production
+        shell: bash
+        run: |
+          set -euo pipefail
+          url="https://healthrenewal.org/resources/open-books-discovery/"
+          out="/tmp/open-books-discovery.html"
+          headers="/tmp/open-books-discovery.headers"
+          status="$(curl -sS -L -D "$headers" -H 'Cache-Control: no-cache, no-store, max-age=0' -H 'Pragma: no-cache' --retry 8 --retry-delay 2 --retry-all-errors --max-time 60 -o "$out" -w '%{http_code}' "${url}?verify=${{ github.event.workflow_run.head_sha }}")"
+          echo "LIVE_HTTP ${url} ${status}"
+          if ! [[ "$status" =~ ^2[0-9][0-9]$ ]]; then
+            echo "Open books resource HTTP failure: status=${status}" >&2
+            head -c 1600 "$out" 2>/dev/null || true
+            exit 1
+          fi
+          test -s "$out"
+          grep -q 'الكتب المفتوحة' "$out"
+          grep -q 'Thoth' "$out"
+          grep -q 'https://healthrenewal.org/resources/open-books-discovery/' "$out"
+          if grep -qiE '<meta[^>]+name=["'"']robots["'"'][^>]+content=["'"'][^"'"']*noindex|<meta[^>]+content=["'"'][^"'"']*noindex[^>]+name=["'"']robots["'"']' "$out"; then
+            echo 'Open books resource is unexpectedly noindex.' >&2
+            exit 1
+          fi
+          if grep -qiE 'internal server error|application error|500 internal' "$out"; then
+            echo 'Open books resource returned an application error body.' >&2
+            exit 1
+          fi
+          echo 'LIVE_OK open-books-discovery 2xx, expected content, canonical, indexable'
