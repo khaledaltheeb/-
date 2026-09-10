@@ -30,50 +30,48 @@ object ArabicVoiceCommandInterpreter {
     fun interpret(raw: String): VoiceCommand {
         val text = normalize(raw)
         if (text.isBlank()) return VoiceCommand.Unknown
-        val withoutWake = removeWakeWord(text)
+        val commandText = removeWakeWord(text)
 
-        // STOP is intentionally exact/short. Spoken app warnings often contain
-        // the word "توقف"; matching any substring would make TTS stop itself.
-        if (withoutWake in STOP_COMMANDS) return VoiceCommand.Stop
-        if (withoutWake in START_LIVE_COMMANDS) return VoiceCommand.StartLive
-        if (withoutWake in DESCRIBE_COMMANDS) return VoiceCommand.DescribeAhead
-        if (withoutWake in REPEAT_COMMANDS) return VoiceCommand.RepeatGuidance
-        if (withoutWake in REMAINING_COMMANDS) return VoiceCommand.Remaining
-        if (withoutWake in YES_COMMANDS) return VoiceCommand.Yes
-        if (withoutWake in NO_COMMANDS) return VoiceCommand.No
-
-        extractDestination(withoutWake)?.let { return VoiceCommand.NavigateTo(it) }
+        if (commandText in STOP_COMMANDS) return VoiceCommand.Stop
+        if (commandText in START_LIVE_COMMANDS) return VoiceCommand.StartLive
+        if (commandText in DESCRIBE_COMMANDS) return VoiceCommand.DescribeAhead
+        if (commandText in REPEAT_COMMANDS) return VoiceCommand.RepeatGuidance
+        if (commandText in REMAINING_COMMANDS) return VoiceCommand.Remaining
+        if (commandText in YES_COMMANDS) return VoiceCommand.Yes
+        if (commandText in NO_COMMANDS) return VoiceCommand.No
+        extractDestination(commandText)?.let { return VoiceCommand.NavigateTo(it) }
         return VoiceCommand.Unknown
     }
 
     private fun extractDestination(text: String): String? {
         KNOWN_DESTINATION_ALIASES[text]?.let { return it }
 
-        val actionPrefixes = listOf(
+        val prefixes = listOf(
             "خذني ", "وديني ", "وصلني ", "وجهني ", "روح بي ", "روح ",
             "اذهب ", "اريد الذهاب ", "اريد اروح ", "المسار "
         )
-        val rawRemainder = actionPrefixes.firstNotNullOfOrNull { prefix ->
+        val rawDestination = prefixes.firstNotNullOfOrNull { prefix ->
             text.takeIf { it.startsWith(prefix) }?.removePrefix(prefix)?.trim()
         } ?: return null
 
-        val remainder = stripDestinationConnector(rawRemainder)
-        if (remainder.length !in 2..50) return null
-        return KNOWN_DESTINATION_ALIASES[remainder] ?: remainder
+        val destination = stripDestinationConnector(rawDestination)
+        if (destination.length !in 2..50) return null
+        return KNOWN_DESTINATION_ALIASES[destination] ?: destination
     }
 
     private fun stripDestinationConnector(value: String): String {
         var text = value.trim()
-        val connectors = listOf("الى ", "الي ", "على ", "علي ", "نحو ")
-        connectors.firstOrNull { text.startsWith(it) }?.let { text = text.removePrefix(it).trim() }
+        listOf("الى ", "الي ", "على ", "علي ", "نحو ").firstOrNull { text.startsWith(it) }?.let {
+            text = text.removePrefix(it).trim()
+        }
         if (text.startsWith("لل") && text.length > 2) text = "ال" + text.drop(2)
         else if (text.startsWith("ل") && text.length > 2) text = text.drop(1)
         return text.trim()
     }
 
     private fun removeWakeWord(text: String): String {
-        val wakePrefixes = listOf("بصيره ", "يا بصيره ", "بصيره، ")
-        return wakePrefixes.firstNotNullOfOrNull { prefix ->
+        val prefixes = listOf("يا بصيره ", "بصيره ", "بصيره، ")
+        return prefixes.firstNotNullOfOrNull { prefix ->
             text.takeIf { it.startsWith(prefix) }?.removePrefix(prefix)?.trim()
         } ?: text
     }
@@ -91,11 +89,13 @@ object ArabicVoiceCommandInterpreter {
         "اوقف الوضع الحي", "اوقف الملاحة", "انهاء الوضع الحي", "انهي الملاحة",
         "سكر الوضع الحي", "وقف الملاحة"
     )
+
     private val START_LIVE_COMMANDS = setOf(
         "فعل الوضع الحي", "شغل الوضع الحي", "شغلي الوضع الحي", "ابدأ الوضع الحي", "ابدا الوضع الحي",
         "ابدئي الوضع الحي", "الوضع الحي", "شغل الكاميرا", "شغلي الكاميرا", "ابدأ الكاميرا",
         "الوضع المباشر", "شغل الوضع المباشر"
     )
+
     private val DESCRIBE_COMMANDS = setOf(
         "صف امامي", "صف ما امامي", "ماذا امامي", "ما امامي", "اوصف امامي", "شو امامي", "ماذا يوجد امامي"
     )
@@ -103,6 +103,7 @@ object ArabicVoiceCommandInterpreter {
     private val REMAINING_COMMANDS = setOf("كم باقي", "كم تبقي", "المتبقي", "المسافه المتبقيه", "باقي كام", "قديش باقي")
     private val YES_COMMANDS = setOf("نعم", "ايوه", "اجل", "موافق", "نعم استخدم", "نعم استعمل", "استخدم النسخه", "استعمل النسخه")
     private val NO_COMMANDS = setOf("لا", "الغاء", "لا اريد", "ليس الان", "لا ليس الان")
+
     private val KNOWN_DESTINATION_ALIASES = mapOf(
         "الحمام" to "الحمام", "حمام" to "الحمام", "دوره المياه" to "الحمام", "دورة المياه" to "الحمام", "التواليت" to "الحمام",
         "المطبخ" to "المطبخ", "مطبخ" to "المطبخ",
@@ -113,14 +114,22 @@ object ArabicVoiceCommandInterpreter {
     ).mapKeys { normalize(it.key) }
 }
 
+// These error codes were added as named SpeechRecognizer constants in API 31.
+// Using their stable documented integer values keeps the same behavior on API 24-30
+// without referencing API-31-only fields at runtime or suppressing lint.
+private const val ERROR_TOO_MANY_REQUESTS_COMPAT = 10
+private const val ERROR_SERVER_DISCONNECTED_COMPAT = 11
+private const val ERROR_LANGUAGE_NOT_SUPPORTED_COMPAT = 12
+private const val ERROR_LANGUAGE_UNAVAILABLE_COMPAT = 13
+
 /**
- * Resilient command recognition controller.
+ * Resilient session-based Arabic command recognizer.
  *
- * Android SpeechRecognizer is session-oriented rather than a true always-on
- * streaming recognizer. This controller therefore treats every recognition
- * window as disposable, applies provider-aware backoff, and exposes an explicit
- * restart path. On-device recognition is preferred when available; otherwise
- * the installed system recognition service is used as a compatibility fallback.
+ * SpeechRecognizer is not a true always-on streaming API, so every recognition
+ * window is treated as disposable. The controller backs off when the provider
+ * becomes busy, retries after normal no-match/timeouts, prefers on-device speech
+ * recognition when available, and falls back to the installed system recognizer
+ * when the local Arabic model is unavailable or repeatedly fails.
  */
 class OnDeviceVoiceCommands(
     context: Context,
@@ -142,8 +151,9 @@ class OnDeviceVoiceCommands(
     val available: Boolean
         get() {
             if (ContextCompat.checkSelfPermission(appContext, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) return false
-            val local = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && SpeechRecognizer.isOnDeviceRecognitionAvailable(appContext)
-            return local || SpeechRecognizer.isRecognitionAvailable(appContext)
+            val localAvailable = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+                SpeechRecognizer.isOnDeviceRecognitionAvailable(appContext)
+            return localAvailable || SpeechRecognizer.isRecognitionAvailable(appContext)
         }
 
     fun start() {
@@ -155,7 +165,6 @@ class OnDeviceVoiceCommands(
         restartListening()
     }
 
-    /** User-visible recovery path when a vendor speech service becomes stuck. */
     fun restartListening() {
         if (!available) {
             active = false
@@ -167,9 +176,10 @@ class OnDeviceVoiceCommands(
         listening = false
         main.removeCallbacksAndMessages(null)
         runCatching { recognizer?.cancel() }
+
         if (!ensureRecognizer()) {
             active = false
-            onStatus("تعذر إنشاء خدمة التعرف الصوتي. تحقق من وجود Google Speech Services أو خدمة تعرف صوتي مفعلة.")
+            onStatus("تعذر إنشاء خدمة التعرف الصوتي. تحقق من وجود خدمة تعرف صوتي مفعلة في الهاتف.")
             return
         }
         onStatus("تشغيل الاستماع الصوتي…")
@@ -179,8 +189,9 @@ class OnDeviceVoiceCommands(
     private fun ensureRecognizer(): Boolean {
         if (recognizer != null) return true
         return runCatching {
-            val onDeviceAvailable = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && SpeechRecognizer.isOnDeviceRecognitionAvailable(appContext)
-            usingOnDevice = !forceSystemRecognizer && onDeviceAvailable
+            val localAvailable = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+                SpeechRecognizer.isOnDeviceRecognitionAvailable(appContext)
+            usingOnDevice = !forceSystemRecognizer && localAvailable
             recognizer = if (usingOnDevice && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 SpeechRecognizer.createOnDeviceSpeechRecognizer(appContext)
             } else {
@@ -202,11 +213,6 @@ class OnDeviceVoiceCommands(
         ensureRecognizer()
     }
 
-    /**
-     * Retained for UI actions that deliberately want a short half-duplex pause.
-     * Automatic TTS no longer calls this, so the emergency word "توقف" can be
-     * heard while guidance is speaking.
-     */
     fun suspendForSpeech(durationMs: Long = 450L) {
         if (!active) return
         restartScheduled = true
@@ -239,6 +245,7 @@ class OnDeviceVoiceCommands(
             scheduleRestart(1_000L)
             return
         }
+
         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
             putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
             putExtra(RecognizerIntent.EXTRA_LANGUAGE, languageTag)
@@ -249,6 +256,7 @@ class OnDeviceVoiceCommands(
             putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 500L)
             putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 300L)
         }
+
         runCatching {
             recognizer?.startListening(intent)
             listening = true
@@ -269,7 +277,9 @@ class OnDeviceVoiceCommands(
     }
 
     private fun emitIfEmergency(texts: List<String>): Boolean {
-        val selected = texts.firstOrNull { ArabicVoiceCommandInterpreter.interpret(it) is VoiceCommand.Stop } ?: return false
+        val selected = texts.firstOrNull {
+            ArabicVoiceCommandInterpreter.interpret(it) is VoiceCommand.Stop
+        } ?: return false
         val now = SystemClock.elapsedRealtime()
         if (lastEmergencyAt != Long.MIN_VALUE && now - lastEmergencyAt < 1_200L) return true
         lastEmergencyAt = now
@@ -286,17 +296,20 @@ class OnDeviceVoiceCommands(
         SpeechRecognizer.ERROR_NO_MATCH -> "لم أفهم العبارة"
         SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> "محرك الصوت مشغول"
         SpeechRecognizer.ERROR_SERVER -> "خدمة التعرف الصوتي غير جاهزة"
-        SpeechRecognizer.ERROR_SERVER_DISCONNECTED -> "انقطع الاتصال بمحرك التعرف الصوتي"
-        SpeechRecognizer.ERROR_TOO_MANY_REQUESTS -> "محرك الصوت طلب تهدئة إعادة الاستماع"
+        ERROR_SERVER_DISCONNECTED_COMPAT -> "انقطع الاتصال بمحرك التعرف الصوتي"
+        ERROR_TOO_MANY_REQUESTS_COMPAT -> "محرك الصوت طلب تهدئة إعادة الاستماع"
         SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "لم أسمع كلامًا"
-        SpeechRecognizer.ERROR_LANGUAGE_NOT_SUPPORTED -> "اللغة العربية غير مدعومة في محرك الاستماع الحالي"
-        SpeechRecognizer.ERROR_LANGUAGE_UNAVAILABLE -> "حزمة اللغة العربية غير متاحة في محرك الاستماع الحالي"
+        ERROR_LANGUAGE_NOT_SUPPORTED_COMPAT -> "اللغة العربية غير مدعومة في محرك الاستماع الحالي"
+        ERROR_LANGUAGE_UNAVAILABLE_COMPAT -> "حزمة اللغة العربية غير متاحة في محرك الاستماع الحالي"
         else -> "خطأ تعرف صوتي رقم $error"
     }
 
     override fun onReadyForSpeech(params: Bundle?) {
         listening = true
-        onStatus(if (usingOnDevice) "أستمع الآن • التعرف المحلي" else "أستمع الآن • خدمة التعرف الصوتي في الهاتف")
+        onStatus(
+            if (usingOnDevice) "أستمع الآن • التعرف المحلي"
+            else "أستمع الآن • خدمة التعرف الصوتي في الهاتف"
+        )
     }
 
     override fun onBeginningOfSpeech() {
@@ -321,8 +334,10 @@ class OnDeviceVoiceCommands(
             return
         }
 
-        val languageUnavailable = error == SpeechRecognizer.ERROR_LANGUAGE_NOT_SUPPORTED || error == SpeechRecognizer.ERROR_LANGUAGE_UNAVAILABLE
+        val languageUnavailable = error == ERROR_LANGUAGE_NOT_SUPPORTED_COMPAT ||
+            error == ERROR_LANGUAGE_UNAVAILABLE_COMPAT
         val localRepeatedFailure = usingOnDevice && consecutiveErrors >= 3
+
         if (usingOnDevice && (languageUnavailable || localRepeatedFailure)) {
             languageTag = "ar"
             recreateRecognizer(useSystem = true)
@@ -331,7 +346,11 @@ class OnDeviceVoiceCommands(
             return
         }
 
-        if (error == SpeechRecognizer.ERROR_RECOGNIZER_BUSY || error == SpeechRecognizer.ERROR_CLIENT || error == SpeechRecognizer.ERROR_SERVER_DISCONNECTED) {
+        if (
+            error == SpeechRecognizer.ERROR_RECOGNIZER_BUSY ||
+            error == SpeechRecognizer.ERROR_CLIENT ||
+            error == ERROR_SERVER_DISCONNECTED_COMPAT
+        ) {
             recreateRecognizer(useSystem = forceSystemRecognizer)
         }
 
@@ -339,8 +358,8 @@ class OnDeviceVoiceCommands(
             SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> 900L
             SpeechRecognizer.ERROR_NO_MATCH, SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> 250L
             SpeechRecognizer.ERROR_NETWORK, SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> 1_200L
-            SpeechRecognizer.ERROR_TOO_MANY_REQUESTS -> 4_000L
-            SpeechRecognizer.ERROR_SERVER_DISCONNECTED -> 1_500L
+            ERROR_TOO_MANY_REQUESTS_COMPAT -> 4_000L
+            ERROR_SERVER_DISCONNECTED_COMPAT -> 1_500L
             else -> 550L
         }
         scheduleRestart(delay)
@@ -351,11 +370,16 @@ class OnDeviceVoiceCommands(
         consecutiveErrors = 0
         val texts = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION).orEmpty()
         if (!emitIfEmergency(texts)) {
-            val selected = texts.firstOrNull { ArabicVoiceCommandInterpreter.interpret(it) !is VoiceCommand.Unknown }
-                ?: texts.firstOrNull()
+            val selected = texts.firstOrNull {
+                ArabicVoiceCommandInterpreter.interpret(it) !is VoiceCommand.Unknown
+            } ?: texts.firstOrNull()
+
             if (selected != null) {
                 val command = ArabicVoiceCommandInterpreter.interpret(selected)
-                onStatus(if (command is VoiceCommand.Unknown) "سمعت: $selected • لم أتعرف على الأمر" else "سمعت: $selected")
+                onStatus(
+                    if (command is VoiceCommand.Unknown) "سمعت: $selected • لم أتعرف على الأمر"
+                    else "سمعت: $selected"
+                )
                 onCommand(command, selected)
             } else {
                 onStatus("لم يصل نص من محرك التعرف؛ تتم إعادة الاستماع.")
