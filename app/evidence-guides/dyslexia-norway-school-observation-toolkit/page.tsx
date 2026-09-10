@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import ContentRenderer from '@/components/content-renderer';
+import { buildSeoMetadata } from '@/lib/seo';
 import styles from '@/components/evidence-guides.module.css';
 
 const CANONICAL='/evidence-guides/dyslexia-norway-school-observation-toolkit/';
@@ -42,12 +43,15 @@ async function getToolkit():Promise<RecordRow|null>{
 
 export async function generateMetadata():Promise<Metadata>{
  const record=await getToolkit();
- return {
+ return buildSeoMetadata({
   title:record?.seo_title||record?.title||FALLBACK_TITLE,
   description:record?.seo_description||record?.excerpt||FALLBACK_DESCRIPTION,
-  alternates:{canonical:CANONICAL},
-  robots:{index:true,follow:true},
- };
+  path:record?.canonical_url||CANONICAL,
+  index:true,
+  follow:true,
+  type:'article',
+  keywords:['عسر القراءة','الديسلكسيا','عسر الحساب','اضطراب اللغة النمائي','ملاحظة صعوبات التعلم','الإحالة المدرسية','دعم التعلم المدرسي'],
+ });
 }
 
 export default async function SchoolObservationToolkitPage(){
