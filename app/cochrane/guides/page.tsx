@@ -25,7 +25,7 @@ export const metadata: Metadata = buildSeoMetadata({
   title: 'أدلة منهجية لقراءة وبناء المراجعات المنهجية',
   description: 'مسار عربي أصلي من روافد يغطي تصميم المراجعة والبحث واختيار الدراسات واستخراج البيانات وخطر التحيز ومقاييس الأثر والتركيب وGRADE ونقل الدليل إلى القرار.',
   path: '/cochrane/guides/',
-  index: false,
+  index: true,
   follow: true,
   type: 'website',
   keywords: ['المراجعات المنهجية', 'Cochrane Handbook', 'RoB 2', 'ROBINS-I', 'ROB-ME', 'GRADE', 'meta-analysis'],
@@ -74,15 +74,15 @@ export default function CochraneGuidesIndex() {
       </nav>
 
       <section className="public-index-hero" aria-labelledby="cochrane-guides-title">
-        <span className="eyebrow">بناء بالمعيار الذهبي · <span lang="en">50-guide pre-release corpus</span></span>
+        <span className="eyebrow">بناء بالمعيار الذهبي · <span lang="en">50-guide quality-governed corpus</span></span>
         <h1 id="cochrane-guides-title">الأدلة المنهجية لقراءة وبناء المراجعات المنهجية</h1>
         <p>خمسون دليلاً عربياً أصلياً في مسار واحد يبدأ من السؤال والبروتوكول، يمر بالبحث والاختيار واستخراج البيانات وخطر التحيز، ثم مقاييس الأثر والتركيب وGRADE، وينتهي بقابلية التطبيق والقرار وتطبيقات واقعية وحوكمة الترجمة العلمية. كل صفحة لها سؤال مستقل ومصادر أولية وروابط إلى الصفحات التي تكمل منطقها.</p>
-        <div className="public-stat-strip"><span>{guideCount} صفحة مكتوبة</span><span>5 طبقات مترابطة</span><span>لا فهرسة قبل بوابة الجودة النهائية</span></div>
+        <div className="public-stat-strip"><span>{guideCount} صفحة مكتوبة</span><span>5 طبقات مترابطة</span><span>فهرسة عامة مع استمرار بوابة الجودة</span></div>
       </section>
 
       <aside className="rawafid-empty" aria-label="سياسة الإصدار">
-        <h2>قاعدة الإصدار</h2>
-        <p>اكتمال العدد لا يعني الجاهزية للنشر. تبقى هذه الحزمة غير مفهرسة حتى تمر على التدقيق العلمي، سلامة المصادر والروابط، التكرار، الحقوق والنسب، العربية وRTL، SEO والبيانات المنظمة، الوصولية والموبايل، ثم المراجعة التحريرية النهائية.</p>
+        <h2>قاعدة الجودة والإصدار المستمر</h2>
+        <p>تم فتح الفهرسة العامة لهذه الحزمة مع الإبقاء على بوابة الجودة المستمرة. اكتمال العدد لا يعني توقف التدقيق: تستمر مراجعة الدقة العلمية، سلامة المصادر والروابط، التكرار، الحقوق والنسب، العربية وRTL، SEO والبيانات المنظمة، الوصولية والموبايل، ثم المراجعة التحريرية الدورية، من دون حذف المحتوى المنشور أو تقليصه.</p>
       </aside>
 
       {batches.map((batch, batchIndex) => <section key={batch.id} aria-labelledby={`cochrane-batch-${batch.id}`}>
