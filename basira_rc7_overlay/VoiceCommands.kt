@@ -114,14 +114,13 @@ object ArabicVoiceCommandInterpreter {
 }
 
 /**
- * Resilient continuous voice command controller.
+ * Resilient command recognition controller.
  *
- * Strategy:
- * - prefer the Android on-device recognizer when it is actually usable;
- * - automatically fall back to the system recognizer if the local recognizer
- *   repeatedly fails or reports an unavailable Arabic language pack;
- * - expose an explicit retry action for devices that suspend the recognizer;
- * - keep STOP available from partial results for safety-critical pre-emption.
+ * Android SpeechRecognizer is session-oriented rather than a true always-on
+ * streaming recognizer. This controller therefore treats every recognition
+ * window as disposable, applies provider-aware backoff, and exposes an explicit
+ * restart path. On-device recognition is preferred when available; otherwise
+ * the installed system recognition service is used as a compatibility fallback.
  */
 class OnDeviceVoiceCommands(
     context: Context,
@@ -243,8 +242,6 @@ class OnDeviceVoiceCommands(
         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
             putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
             putExtra(RecognizerIntent.EXTRA_LANGUAGE, languageTag)
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, languageTag)
-            putExtra(RecognizerIntent.EXTRA_ONLY_RETURN_LANGUAGE_PREFERENCE, false)
             putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 6)
             putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
             putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, usingOnDevice)
@@ -289,9 +286,11 @@ class OnDeviceVoiceCommands(
         SpeechRecognizer.ERROR_NO_MATCH -> "لم أفهم العبارة"
         SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> "محرك الصوت مشغول"
         SpeechRecognizer.ERROR_SERVER -> "خدمة التعرف الصوتي غير جاهزة"
+        SpeechRecognizer.ERROR_SERVER_DISCONNECTED -> "انقطع الاتصال بمحرك التعرف الصوتي"
+        SpeechRecognizer.ERROR_TOO_MANY_REQUESTS -> "محرك الصوت طلب تهدئة إعادة الاستماع"
         SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "لم أسمع كلامًا"
-        12 -> "اللغة العربية غير مدعومة في محرك الاستماع الحالي"
-        13 -> "حزمة اللغة العربية غير متاحة في محرك الاستماع الحالي"
+        SpeechRecognizer.ERROR_LANGUAGE_NOT_SUPPORTED -> "اللغة العربية غير مدعومة في محرك الاستماع الحالي"
+        SpeechRecognizer.ERROR_LANGUAGE_UNAVAILABLE -> "حزمة اللغة العربية غير متاحة في محرك الاستماع الحالي"
         else -> "خطأ تعرف صوتي رقم $error"
     }
 
@@ -322,7 +321,7 @@ class OnDeviceVoiceCommands(
             return
         }
 
-        val languageUnavailable = error == 12 || error == 13
+        val languageUnavailable = error == SpeechRecognizer.ERROR_LANGUAGE_NOT_SUPPORTED || error == SpeechRecognizer.ERROR_LANGUAGE_UNAVAILABLE
         val localRepeatedFailure = usingOnDevice && consecutiveErrors >= 3
         if (usingOnDevice && (languageUnavailable || localRepeatedFailure)) {
             languageTag = "ar"
@@ -332,7 +331,7 @@ class OnDeviceVoiceCommands(
             return
         }
 
-        if (error == SpeechRecognizer.ERROR_RECOGNIZER_BUSY || error == SpeechRecognizer.ERROR_CLIENT) {
+        if (error == SpeechRecognizer.ERROR_RECOGNIZER_BUSY || error == SpeechRecognizer.ERROR_CLIENT || error == SpeechRecognizer.ERROR_SERVER_DISCONNECTED) {
             recreateRecognizer(useSystem = forceSystemRecognizer)
         }
 
@@ -340,6 +339,8 @@ class OnDeviceVoiceCommands(
             SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> 900L
             SpeechRecognizer.ERROR_NO_MATCH, SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> 250L
             SpeechRecognizer.ERROR_NETWORK, SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> 1_200L
+            SpeechRecognizer.ERROR_TOO_MANY_REQUESTS -> 4_000L
+            SpeechRecognizer.ERROR_SERVER_DISCONNECTED -> 1_500L
             else -> 550L
         }
         scheduleRestart(delay)
