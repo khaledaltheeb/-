@@ -1,11 +1,19 @@
 import fs from 'node:fs';
+import path from 'node:path';
 
 let failed = false;
-const read = (path) => fs.readFileSync(path, 'utf8');
+const read = (file) => fs.readFileSync(file, 'utf8');
 const fail = (message) => { console.error(`PUBLIC INDEXABILITY CONTRACT FAILED: ${message}`); failed = true; };
 const hasIndexTrue = (text) => /index\s*:\s*true/.test(text);
 const hasFollowTrue = (text) => /follow\s*:\s*true/.test(text);
 const hasNoindex = (text) => /index\s*:\s*false/.test(text);
+const normalized = (file) => file.split(path.sep).join('/');
+function walk(dir) {
+  return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+    const target = path.join(dir, entry.name);
+    return entry.isDirectory() ? walk(target) : [target];
+  });
+}
 
 const explicitPublicPages = [
   'app/resources/worksheets/[slug]/page.tsx',
@@ -99,6 +107,8 @@ const privateTechnicalPages = [
   'app/specialists-partners/admin/page.tsx',
   'app/specialists-partners/account/page.tsx',
   'app/specialists-partners/portal/page.tsx',
+  'app/specialists-partners/recover/page.tsx',
+  'app/specialists-partners/password-reset/page.tsx',
   'app/community/join/page.tsx',
   'app/theme-preview/page.tsx',
   'app/offline/page.tsx',
@@ -107,7 +117,7 @@ const privateTechnicalPages = [
 
 for (const file of privateTechnicalPages) {
   if (!fs.existsSync(file)) { fail(`private/technical route missing: ${file}`); continue; }
-  if (!hasNoindex(read(file))) fail(`${file} must remain noindex because it is private, account-bound, administrative, preview, offline, or technical`);
+  if (!hasNoindex(read(file))) fail(`${file} must remain noindex because it is private, account-bound, administrative, recovery, preview, offline, or technical`);
 }
 
 const internalSearchPages = ['app/search/page.tsx', 'app/ai-search/page.tsx'];
@@ -116,5 +126,30 @@ for (const file of internalSearchPages) {
   if (!hasNoindex(read(file))) fail(`${file} must remain noindex to prevent indexing internal search-result surfaces`);
 }
 
+const intentionalNoindexPages = new Set([
+  ...privateTechnicalPages,
+  ...internalSearchPages,
+  'app/all-pages/page.tsx',
+  'app/tools/favorites/page.tsx',
+  'app/assessment-measures/[slug]/print/page.tsx',
+]);
+
+// Audit every App Router page, not only a hand-picked list. Static noindex is allowed only
+// on explicitly classified private/technical/search/print surfaces. Dynamic record routes
+// may carry a noindex branch only when the same page has a notFound/permanentRedirect exit;
+// this covers missing/merged aliases rather than a published canonical page.
+const allPageFiles = walk('app')
+  .filter((file) => /[/\\]page\.(tsx|ts)$/.test(file))
+  .map(normalized);
+let explicitNoindexPageCount = 0;
+for (const file of allPageFiles) {
+  const source = read(file);
+  if (!hasNoindex(source)) continue;
+  explicitNoindexPageCount += 1;
+  if (intentionalNoindexPages.has(file)) continue;
+  if (source.includes('notFound(') || source.includes('permanentRedirect(')) continue;
+  fail(`${file} contains an unclassified explicit noindex; classify it as private/technical or remove noindex from the public page`);
+}
+
 if (failed) process.exit(1);
-console.log('PUBLIC INDEXABILITY CONTRACT PASSED: public published surfaces are index/follow through centralized metadata, public aliases avoid X-Robots noindex, and PostgreSQL forbids published content from becoming noindex/nofollow; private and technical surfaces retain intentional boundaries.');
+console.log(`PUBLIC INDEXABILITY CONTRACT PASSED: audited ${allPageFiles.length} App Router pages; ${explicitNoindexPageCount} explicit noindex pages are classified private/technical/search/print or conditional missing/redirect branches. Public published surfaces remain index/follow through centralized metadata; public aliases avoid X-Robots noindex; PostgreSQL forbids published content from becoming noindex/nofollow.`);
