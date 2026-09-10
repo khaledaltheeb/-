@@ -2,10 +2,10 @@ import TrustPage from '@/components/trust-page';
 import { buildSeoMetadata } from '@/lib/seo';
 
 export const metadata = buildSeoMetadata({
-  title: 'شروط الاستخدام',
+  title: 'شروط استخدام منصة روافد وحقوق المستخدم',
   description: 'شروط استخدام منصة روافد: قواعد الحسابات والمحتوى والخدمات والملفات المهنية والتواصل، وحدود الاستخدام المقبول وحماية المنصة والمستخدمين.',
   path: '/terms', index: true,
-  keywords: ['شروط الاستخدام', 'روافد', 'استخدام المنصة'],
+  keywords: ['شروط الاستخدام', 'شروط استخدام منصة روافد', 'حقوق المستخدم', 'سياسة الاستخدام', 'استخدام المنصة', 'منصة روافد'],
 });
 
 export default function TermsPage() {
