@@ -9,6 +9,7 @@ const KIDS_LAB_PREFIX = '/capabilities/kids-lab';
 const WORKSHEETS_PREFIX = '/resources/worksheets';
 const DYSLEXIA_TOOLKIT_PATH = '/evidence-guides/dyslexia-norway-school-observation-toolkit';
 const PRACTICAL_FLAT_PREFIX = '/practical-static';
+const SECTION_CACHE_CONTROL = 'public, max-age=60, stale-while-revalidate=300, stale-if-error=86400';
 const PRACTICAL_WORKSHEET_SLUGS = new Set([
   'dyslexia-reading-observation',
   'dyscalculia-math-observation',
@@ -35,6 +36,13 @@ function shouldBypassPublicCache(request,url){if(url.hostname!==CANONICAL_HOST)r
 function robotsResponse(request){return new Response(request.method==='HEAD'?null:ROBOTS_TXT,{status:200,headers:ROBOTS_HEADERS})}
 function kidsLabWorksheetAssetPath(pathname){const flat=pathname.match(/^\/capabilities\/kids-lab\/bilateral-tracks\/([^/]+)\/image\/?$/);if(flat)return `/kids-lab-assets/bilateral-tracks/${flat[1]}.svg`;const nested=pathname.match(/^\/capabilities\/kids-lab\/([^/]+)\/([^/]+)\/([^/]+)\/image\/?$/);return nested?`/kids-lab-assets/${nested[1]}/${nested[2]}/${nested[3]}.svg`:null}
 function isRscRequest(request,url){return request.headers.get('rsc')==='1'||url.searchParams.has('_rsc')}
+function sectionCacheInit(request,url){
+  if(request.method!=='GET'&&request.method!=='HEAD')return null;
+  if(!isPrefix(url.pathname,'/sections'))return null;
+  if(isRscRequest(request,url)||url.searchParams.has('q'))return null;
+  for(const key of url.searchParams.keys())if(key!=='page')return null;
+  return {cf:{cacheControl:SECTION_CACHE_CONTROL}};
+}
 
 async function assetFetch(request,env,pathname){
   if(!env.ASSETS)return null;
@@ -103,6 +111,8 @@ const gateway={async fetch(request,env,ctx){
   const kidsLabStatic=await kidsLabStaticResponse(request,env,url);if(kidsLabStatic)return kidsLabStatic;
   const practicalStatic=await practicalResourcesStaticResponse(request,env,url);if(practicalStatic)return practicalStatic;
   if(shouldBypassPublicCache(request,url))return handler.fetch(request,env,ctx);
-  const backend=ctx.exports.OpenNextBackend({props:{audience:'anonymous-public'}});return backend.fetch(request);
+  const backend=ctx.exports.OpenNextBackend({props:{audience:'anonymous-public'}});
+  const cacheInit=sectionCacheInit(request,url);
+  return cacheInit?backend.fetch(request,cacheInit):backend.fetch(request);
 }};
 export default gateway;
