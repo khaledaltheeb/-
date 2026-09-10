@@ -19,6 +19,8 @@ export type PublishedCanonicalContent = {
   robots_follow: boolean;
   published_at: string | null;
   updated_at: string | null;
+  primary_keyword: string | null;
+  secondary_keywords: string[];
   reviewer_display_name: string | null;
   last_reviewed_at: string | null;
   references_json: unknown;
@@ -49,6 +51,21 @@ function asRecord(value: unknown): UnknownRecord | null {
 
 function cleanText(value: unknown, max = 20000): string {
   return typeof value === 'string' ? value.trim().slice(0, max) : '';
+}
+
+function cleanTextArray(value: unknown, maxItems = 40, maxLength = 250): string[] {
+  if (!Array.isArray(value)) return [];
+  const seen = new Set<string>();
+  const result: string[] = [];
+  for (const item of value) {
+    const text = cleanText(item, maxLength);
+    const key = text.toLocaleLowerCase('ar');
+    if (!text || seen.has(key)) continue;
+    seen.add(key);
+    result.push(text);
+    if (result.length >= maxItems) break;
+  }
+  return result;
 }
 
 function decodedRoute(value: string) {
@@ -98,6 +115,8 @@ function normalizeCurrentContent(value: unknown): PublishedCanonicalContent | nu
     robots_follow: row.robots_follow !== false,
     published_at: cleanText(row.published_at, 100) || null,
     updated_at: cleanText(row.updated_at, 100) || null,
+    primary_keyword: cleanText(row.primary_keyword, 250) || null,
+    secondary_keywords: cleanTextArray(row.secondary_keywords),
     reviewer_display_name: cleanText(row.reviewer_display_name, 500) || null,
     last_reviewed_at: cleanText(row.last_reviewed_at, 100) || null,
     references_json: row.references_json ?? [],
@@ -200,7 +219,7 @@ async function getPublishedCanonicalContent(route: string): Promise<PublishedCan
   const supabase = await createClient();
   const { data, error } = await supabase
     .from('content')
-    .select('id,slug,title,excerpt,body_text,body_json,content_type,seo_title,seo_description,canonical_url,robots_index,robots_follow,published_at,updated_at,reviewer_display_name,last_reviewed_at,references_json,medical_disclaimer')
+    .select('id,slug,title,excerpt,body_text,body_json,content_type,seo_title,seo_description,canonical_url,robots_index,robots_follow,published_at,updated_at,primary_keyword,secondary_keywords,reviewer_display_name,last_reviewed_at,references_json,medical_disclaimer')
     .in('canonical_url', canonicalVariants(route))
     .eq('status', 'published')
     .eq('robots_index', true)
@@ -236,6 +255,7 @@ export function legacyPreservedMetadata(page: LegacyPreservedPage | null, route:
       path: current.canonical_url || legacyCanonicalPath(route),
       index: current.robots_index,
       follow: current.robots_follow,
+      keywords: [current.primary_keyword, ...current.secondary_keywords].filter((value): value is string => Boolean(value)),
       type: ['article', 'guide', 'research', 'news', 'condition', 'protocol', 'intervention', 'assessment'].includes(current.content_type) ? 'article' : 'website',
       publishedTime: current.published_at,
       modifiedTime: current.updated_at,
