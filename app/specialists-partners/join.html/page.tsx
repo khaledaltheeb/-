@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
   title: 'الانضمام إلى شبكة المختصين والشراكات المهنية',
   alternates: { canonical: '/specialists-partners/join/' },
-  robots: { index: false, follow: true, noarchive: true },
+  robots: { index: true, follow: true },
 };
 
 export default SpecialistJoinPage;
