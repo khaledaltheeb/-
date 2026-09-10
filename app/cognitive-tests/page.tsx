@@ -14,7 +14,7 @@ export const metadata=buildSeoMetadata({
   title:'الاختبارات المعرفية — المسارات التاريخية المحفوظة',
   description:'بوابة توافق تحفظ المسارات التاريخية لثماني مهام معرفية وتربط كل مسار بالتمثيل الحالي داخل Cognitive Lab دون تشخيص أو درجة ذكاء.',
   path:'/cognitive-lab',
-  index:false,
+  index:true,
   follow:true,
 });
 
