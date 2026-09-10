@@ -74,8 +74,8 @@ if (!bad) {
     if (!cognitiveMappings.includes(value)) fail(`cognitive mapping missing ${value}`);
   }
 
-  if (!cognitiveHub.includes("path:'/cognitive-lab'") || !cognitiveHub.includes('index:false') || !cognitiveHub.includes('follow:true')) {
-    fail('historical cognitive hub must be noindex/follow and canonicalize to /cognitive-lab');
+  if (!cognitiveHub.includes("path:'/cognitive-lab'") || !cognitiveHub.includes('index:true') || !cognitiveHub.includes('follow:true')) {
+    fail('historical cognitive hub must be index/follow and canonicalize to /cognitive-lab');
   }
   if (!cognitiveHub.includes('مسارات تاريخية محفوظة') || !cognitiveHub.includes('/cognitive-lab')) {
     fail('historical cognitive hub must clearly identify Cognitive Lab as the current reference');
@@ -84,8 +84,8 @@ if (!bad) {
   if (!cognitivePage.includes('CognitiveLabRunner') || !cognitivePage.includes('ContentRenderer')) {
     fail('historical cognitive route must run the real task and preserve original text');
   }
-  if (!cognitivePage.includes("path:`/cognitive-lab/${mapped}`") || !cognitivePage.includes('index:false') || !cognitivePage.includes('follow:true')) {
-    fail('historical cognitive detail routes must canonicalize to their Cognitive Lab tool and remain noindex/follow');
+  if (!cognitivePage.includes("path:`/cognitive-lab/${mapped}`") || !cognitivePage.includes('index:true') || !cognitivePage.includes('follow:true')) {
+    fail('historical cognitive detail routes must canonicalize to their Cognitive Lab tool and remain index/follow');
   }
   if (!cognitivePage.includes('المرجع الحالي: Cognitive Lab')) {
     fail('historical cognitive detail route must explain the current reference surface');
@@ -96,4 +96,4 @@ if (!bad) {
 }
 
 if (bad) process.exit(1);
-console.log('Historical functional parity contract passed: assessments use one canonical representation with 3 preserved redirects; 8 cognitive aliases remain functional, noindex/follow, and canonicalized to Cognitive Lab.');
+console.log('Historical functional parity contract passed: assessments use one canonical representation with 3 preserved redirects; 8 cognitive aliases remain functional, index/follow, and canonicalized to Cognitive Lab.');
