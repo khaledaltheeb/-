@@ -49,6 +49,19 @@ function clampDescription(value?: string | null) {
   return clean.length > 160 ? `${clean.slice(0, 159).trimEnd()}…` : clean;
 }
 
+function curatedKeywords(values?: string[]) {
+  const out: string[] = [];
+  const seen = new Set<string>();
+  for (const value of values || []) {
+    const clean = value.replace(/\s+/g, ' ').trim();
+    const key = clean.toLocaleLowerCase('ar');
+    if (!clean || clean.length < 2 || seen.has(key)) continue;
+    seen.add(key);
+    out.push(clean);
+  }
+  return out.slice(0, 40);
+}
+
 function fallbackSocialImagePath(title: string, type?: SeoMetadataInput['type']) {
   const context = type === 'article'
     ? 'مقال موثق · مصادر قابلة للتتبع · قراءة عربية واضحة'
@@ -94,9 +107,11 @@ export function buildSeoMetadata(input: SeoMetadataInput): Metadata {
     ? Object.fromEntries(Object.entries(input.hreflang).map(([key, value]) => [key, absoluteSiteUrl(value)]))
     : undefined;
 
+  // Semantic analysis may still support internal diagnostics, but search-facing keyword
+  // metadata is deliberately sourced only from human-curated page keywords.
   const semanticProfile = buildSemanticSeoProfile(input);
-  const keywords = semanticProfile.topicKeywords.slice(0, 12);
-  void keywords;
+  void semanticProfile;
+  const manualKeywords = curatedKeywords(input.keywords);
   const openGraphImages = [{
     url: image,
     ...(imageWidth ? { width: imageWidth } : {}),
@@ -107,6 +122,7 @@ export function buildSeoMetadata(input: SeoMetadataInput): Metadata {
   return {
     title: { absolute: title },
     description,
+    ...(manualKeywords.length ? { keywords: manualKeywords } : {}),
     creator: BRAND_NAME,
     publisher: BRAND_NAME,
     alternates: { canonical, languages },
@@ -192,7 +208,7 @@ export function organizationJsonLd() {
         '@type': 'WebSite',
         '@id': `${SITE_URL}/#website`,
         name: BRAND_NAME,
-        alternateName: [BRAND_SHORT, 'Rawafid', SITE_HOSTNAME],
+        alternateName: [BRAND_SHORT, 'Rawafid'],
         url: `${SITE_URL}/`,
         description: DEFAULT_DESCRIPTION,
         inLanguage: 'ar',
