@@ -34,10 +34,29 @@ export async function GET(request: Request) {
   const page = Number.isInteger(raw) && raw >= 0 && raw < 1000 ? raw : 0;
   const supabase = await createClient();
   const now = new Date().toISOString();
+
+  // A redirect source is not a canonical URL and must never be advertised in a sitemap.
+  // Resolve this dynamically so every active dedup/legacy redirect is covered rather than
+  // relying on an ever-growing hard-coded slug list.
+  const { data: redirectRows, error: redirectError } = await supabase
+    .from('redirects')
+    .select('source_path')
+    .eq('is_active', true)
+    .like('source_path', '/encyclopedia/%')
+    .range(0, 4999);
+  if (redirectError) {
+    throw new Error(`encyclopedia sitemap redirect query failed: ${redirectError.message}`);
+  }
+  const redirectedPaths = new Set(
+    (Array.isArray(redirectRows) ? redirectRows : [])
+      .map((row) => (typeof row.source_path === 'string' ? row.source_path.trim() : ''))
+      .filter(Boolean),
+  );
+
   const releaseRows = await getPsychEncyclopediaReleaseIndex();
   const releaseItems = releaseRows.flatMap((row) => {
     const item = normalizeItem(row as unknown as RawItem);
-    return item ? [item] : [];
+    return item && !redirectedPaths.has(item.canonicalUrl) ? [item] : [];
   });
   const releaseSlugs = releaseItems.map((item) => item.slug);
   const releaseSlots = page === 0 ? releaseItems.length : 0;
@@ -80,7 +99,7 @@ export async function GET(request: Request) {
 
   const databaseItems = databaseRows.flatMap((row) => {
     const item = normalizeItem(row);
-    return item ? [item] : [];
+    return item && !redirectedPaths.has(item.canonicalUrl) ? [item] : [];
   });
   const pageItems = page === 0 ? [...releaseItems, ...databaseItems] : databaseItems;
   const rows = pageItems.map((item) => ({
