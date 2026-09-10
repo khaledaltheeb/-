@@ -56,18 +56,32 @@ jobs:
           test -f basira-rc6/build.gradle.kts
           test -f basira-rc6/app/build.gradle.kts
 
-      - name: Apply RC6 compile fixes
+      - name: Apply RC6 compile and voice fixes
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
+
           p = Path('basira-rc6/app/src/main/java/org/healthrenewal/basira/ui/Screens.kt')
           s = p.read_text()
           old = 'if (requested?.id == destination?.id) audio.speak("أنت تتجه بالفعل إلى ${requested.label}")'
           new = 'if (requested != null && requested.id == destination?.id) audio.speak("أنت تتجه بالفعل إلى ${requested.label}")'
           if old not in s:
               raise SystemExit('Expected nullable Landmark expression not found')
+          p.write_text(s.replace(old, new, 1))
+
+          p = Path('basira-rc6/app/src/main/java/org/healthrenewal/basira/voice/VoiceCommands.kt')
+          s = p.read_text()
+          old = '"خذني الى ", "وديني الى ", "روح بي الى ", "اذهب الى ", "اذهب الي ",\n            "اريد الذهاب الى ", "اريد الذهاب الي ", "وجهني الى ", "وجهني الي ",\n            "المسار الى ", "المسار الي "'
+          new = '"خذني الى ", "خذني الي ", "وديني الى ", "وديني الي ", "روح بي الى ", "روح بي الي ", "اذهب الى ", "اذهب الي ",\n            "اريد الذهاب الى ", "اريد الذهاب الي ", "وجهني الى ", "وجهني الي ",\n            "المسار الى ", "المسار الي "'
+          if old not in s:
+              raise SystemExit('Expected destination prefix list not found')
+          s = s.replace(old, new, 1)
+          old = 'private val REMAINING_COMMANDS = setOf("كم باقي", "كم تبقى", "المتبقي", "المسافه المتبقيه", "باقي كام")'
+          new = 'private val REMAINING_COMMANDS = setOf("كم باقي", "كم تبقي", "المتبقي", "المسافه المتبقيه", "باقي كام")'
+          if old not in s:
+              raise SystemExit('Expected remaining command list not found')
           p.write_text(s.replace(old, new, 1))
           PY
 
