@@ -50,10 +50,10 @@ for(const fn of ['get_legacy_preserved_page','legacy_preserved_route_exists']){
 }
 
 for(const forbidden of ['service_role','secret_key']) if(helper.toLowerCase().includes(forbidden)||view.toLowerCase().includes(forbidden)||proxy.toLowerCase().includes(forbidden)) fail(`forbidden preservation secret pattern: ${forbidden}`);
-for(const marker of ['get_legacy_preserved_page','legacyPreservedMetadata','buildSeoMetadata','index: false','follow: true','healthrenewal.org','decodeURIComponent',"normalize('NFC')"]) if(!helper.includes(marker)) fail(`helper marker missing: ${marker}`);
-// The preserved helper now delegates robots directives to the centralized SEO generator.
-// Keep the historical noarchive behavior without duplicating a second metadata implementation.
-for(const marker of ['const canIndex = INDEXING_ENABLED && input.index !== false','noarchive: !canIndex','nosnippet: !canIndex']) if(!seo.includes(marker)) fail(`central SEO noindex preservation marker missing: ${marker}`);
+for(const marker of ['get_legacy_preserved_page','legacyPreservedMetadata','buildSeoMetadata','index: true','follow: true','healthrenewal.org','decodeURIComponent',"normalize('NFC')"]) if(!helper.includes(marker)) fail(`helper marker missing: ${marker}`);
+// Public preserved pages are now indexable. The centralized SEO generator still retains
+// the ability to noindex genuinely private, technical, or non-public surfaces.
+for(const marker of ['const canIndex = INDEXING_ENABLED && input.index !== false','noarchive: !canIndex','nosnippet: !canIndex']) if(!seo.includes(marker)) fail(`central SEO robots safety marker missing: ${marker}`);
 for(const marker of ['نسخة إنتاجية محفوظة','لم تُمنح هذه النسخة اعتماد دورة المراجعة العلمية الحالية','ContentRenderer','legacyInternalLinks','legacyReferences']) if(!view.includes(marker)) fail(`preserved view marker missing: ${marker}`);
 for(const marker of ['NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY',"rpc('legacy_preserved_route_exists'",'isLegacyProductionRoute']) if(!proxy.includes(marker)) fail(`proxy must document its public preservation RPC dependency: ${marker}`);
 for(const path of routes){
@@ -70,6 +70,7 @@ for(const marker of [
   'const upgradedRoutes=[',
   "['/quick-info/accountability-vs-self-blame/','تحمل مسؤولية أم جلد ذات']",
   'stale fallback preservation banner rendered after reviewed migration',
+  'public preserved route unexpectedly emitted noindex',
   'reviewed published route unexpectedly remained noindex',
   "requiresPreservedBanner&&!body.includes('نسخة إنتاجية محفوظة')"
 ]) if(!preservationSmoke.includes(marker)) fail(`modern/fallback preservation smoke marker missing: ${marker}`);
@@ -86,4 +87,4 @@ for(const path of [
 ]) if(!fs.existsSync(path)) fail(`deployed migration history not mirrored: ${path}`);
 
 if(failed)process.exit(1);
-console.log('Legacy preservation contract passed: production HTML remains available through a Unicode-safe public read-only noindex boundary, reviewed modern takeovers keep priority over fallback rendering, and centralized SEO preserves the historical noarchive/nosnippet behavior without duplicating metadata logic.');
+console.log('Legacy preservation contract passed: production HTML remains available through a Unicode-safe public read-only indexable boundary, reviewed modern takeovers keep priority over fallback rendering, and centralized SEO retains noindex only for genuine technical/private surfaces.');
