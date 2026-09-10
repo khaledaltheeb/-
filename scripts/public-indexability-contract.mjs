@@ -34,6 +34,9 @@ for (const file of explicitPublicPages) {
   if (!hasIndexTrue(text)) fail(`${file} must explicitly permit indexing`);
   if (!hasFollowTrue(text)) fail(`${file} must explicitly permit following links`);
   if (hasNoindex(text)) fail(`${file} contains an explicit noindex marker`);
+  if (!text.includes('buildSeoMetadata(') && !text.includes('contentMetadata(') && !text.includes('legacyPreservedMetadata(')) {
+    fail(`${file} must use the centralized SEO metadata path`);
+  }
 }
 
 const resourceAlias = read('app/resources/[slug]/page.tsx');
@@ -44,6 +47,27 @@ for (const marker of ['contentMetadata', 'PublishedContentPage', 'return content
 
 const legacyPreservation = read('lib/legacy-preserved-page.ts');
 if (!legacyPreservation.includes('index: true') || !legacyPreservation.includes('follow: true')) fail('legacy public preservation fallback must remain index/follow');
+
+const proxy = read('lib/supabase/proxy.ts');
+for (const marker of ['preservedContentAliasCanonical', 'applyPreservedAliasSeoHeaders', 'rel="canonical"']) {
+  if (!proxy.includes(marker)) fail(`public alias canonical guard missing: ${marker}`);
+}
+if (/X-Robots-Tag[^\n]{0,120}noindex/i.test(proxy)) fail('public proxy aliases must not inject X-Robots-Tag noindex');
+
+const dbMigrationPath = 'supabase/migrations/20260910224000_enforce_published_content_indexability.sql';
+if (!fs.existsSync(dbMigrationPath)) fail('published-content indexability database migration is missing');
+else {
+  const dbMigration = read(dbMigrationPath);
+  for (const marker of [
+    'content_published_must_be_indexable',
+    "status::text <> 'published'",
+    'robots_index is true',
+    'robots_follow is true',
+    'validate constraint content_published_must_be_indexable',
+  ]) {
+    if (!dbMigration.includes(marker)) fail(`database indexability invariant missing: ${marker}`);
+  }
+}
 
 const rootSitemap = read('app/sitemap.xml/route.ts');
 for (const sitemap of ['/sitemaps/cochrane-guides.xml', '/sitemaps/rare-phenotype.xml', '/sitemaps/practical-worksheets.xml']) {
@@ -93,4 +117,4 @@ for (const file of internalSearchPages) {
 }
 
 if (failed) process.exit(1);
-console.log('PUBLIC INDEXABILITY CONTRACT PASSED: public published surfaces are index/follow; private, account-bound, administrative and internal-search surfaces retain intentional noindex boundaries.');
+console.log('PUBLIC INDEXABILITY CONTRACT PASSED: public published surfaces are index/follow through centralized metadata, public aliases avoid X-Robots noindex, and PostgreSQL forbids published content from becoming noindex/nofollow; private and technical surfaces retain intentional boundaries.');
