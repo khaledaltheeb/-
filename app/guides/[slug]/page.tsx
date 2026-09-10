@@ -79,7 +79,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
       title: guide.title,
       description: `${guide.definition} نسخة منقولة ومطورة من الدليل التاريخي في روافد، مع أسئلة عملية ومصدر رسمي وحدود واضحة للتثقيف العام.`,
       path: `/guides/${guide.slug}`,
-      index: false,
+      index: true,
       follow: true,
     });
   }
