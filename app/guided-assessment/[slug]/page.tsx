@@ -31,8 +31,8 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     title: item.legacyTitle,
     description: `أسئلة منظمة للتحضير لمناقشة ${item.topic.label} ${item.audienceLabel} مع مقدم رعاية، من دون تشخيص ذاتي أو مجموع نقاط أو تخزين للإجابات.`,
     path: '/guided-assessment',
-    index: false,
-    follow: false,
+    index: true,
+    follow: true,
   });
 }
 
@@ -60,7 +60,7 @@ export default async function LegacyGuidedAssessmentPage({ params }: { params: P
             <span className={styles.eyebrow}>رابط تاريخي محفوظ · {item.audienceLabel}</span>
             <h1>{item.legacyTitle}</h1>
             <p className={styles.lead}>استخدم هذه القائمة لتجهيز أمثلة وأسئلة لموعد مهني. الاسم التاريخي للصفحة لا يثبت تشخيصًا، وبعض الأسماء القديمة مثل «إدمان الإنترنت» أو «النرجسية» تحتاج تقييمًا مهنيًا وسياقًا أدق قبل استخدامها كتشخيص.</p>
-            <div className={styles.aliasNotice}>هذه الصفحة واحدة من 100 رابط قديم جرى دمجها في محرك موحد لتقليل التكرار. المرجع الأساسي والقابل للفهرسة هو <Link href="/guided-assessment">بنك الأسئلة الاسترشادية</Link>.</div>
+            <div className={styles.aliasNotice}>هذه الصفحة واحدة من 100 رابط قديم جرى دمجها في محرك موحد لتقليل التكرار. المرجع الأساسي المعتمد كعنوان canonical هو <Link href="/guided-assessment">بنك الأسئلة الاسترشادية</Link>.</div>
           </div>
         </section>
 
