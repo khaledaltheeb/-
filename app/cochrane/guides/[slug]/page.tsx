@@ -59,7 +59,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     title: guide.title_ar,
     description: guide.description_ar,
     path: `/cochrane/guides/${guide.slug}/`,
-    index: false,
+    index: true,
     follow: true,
     type: 'article',
     modifiedTime: guideBatch(guide)?.updated_on,
@@ -118,13 +118,13 @@ export default async function CochraneGuidePage({ params }: { params: Params }) 
       </nav>
 
       <section className="public-index-hero" aria-labelledby="cochrane-guide-title">
-        <span className="eyebrow">دليل منهجي أصلي من روافد · مراجعة ما قبل النشر</span>
+        <span className="eyebrow">دليل منهجي أصلي من روافد · مراجعة علمية وتحريرية مستمرة</span>
         <h1 id="cochrane-guide-title">{guide.title_ar}</h1>
         <p>{guide.description_ar}</p>
         <div className="public-stat-strip">
           <span>محتوى عربي أصلي</span>
           <span>مصادر أولية قابلة للتتبع</span>
-          <span>غير مفهرس حتى اكتمال التدقيق</span>
+          <span>قابل للفهرسة مع مراجعة مستمرة</span>
         </div>
       </section>
 
