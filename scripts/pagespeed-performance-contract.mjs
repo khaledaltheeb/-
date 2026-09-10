@@ -12,6 +12,7 @@ const loader = read('components/rawafid-assistant-loader.tsx');
 const brand = read('components/rawafid-brand.tsx');
 const nextConfig = read('next.config.ts');
 const wrangler = read('wrangler.jsonc');
+const gateway = read('custom-worker.js');
 const productionBuild = read('scripts/cloudflare-production-build.sh');
 const deployWorkflow = read('.github/workflows/deploy-production.yml');
 const qualityWorkflow = read('.github/workflows/quality.yml');
@@ -68,7 +69,7 @@ requireText(homepage, 'toolname="searchRawafid"', 'the homepage search form must
 requireText(homepage, 'tooldescription="Search Rawafid', 'the homepage WebMCP tool must retain a meaningful tool description');
 requireText(homepage, 'toolautosubmit=""', 'the safe homepage search WebMCP tool must remain directly invokable by agents');
 requireText(homepage, 'toolparamdescription="The user\'s Arabic or English search query', 'the homepage WebMCP search input must retain an explicit parameter description');
-requireText(homepage, 'required', 'the homepage WebMCP search query must remain required so its generated JSON Schema is explicit');
+requireText(homepage, 'required', 'the homepage WebMP search query must remain required so its generated JSON Schema is explicit');
 
 requireText(siteHeader, 'toolname="searchRawafidHeader"', 'the desktop header search form must remain covered by WebMCP');
 requireText(siteHeader, 'toolname="searchRawafidMobile"', 'the mobile navigation search form must remain covered by WebMCP');
@@ -76,7 +77,7 @@ requireText(siteHeader, 'toolparamdescription="The user\'s Arabic or English sea
 requireText(siteHeader, 'toolparamdescription="The user\'s Arabic or English search query from the mobile navigation."', 'the mobile WebMCP search parameter must remain described');
 
 requireText(siteFooter, 'toolname="searchRawafidFooter"', 'the site footer search form must remain covered by WebMCP');
-requireText(siteFooter, 'tooldescription="Search Rawafid from the site footer', 'the footer WebMCP tool must retain a meaningful description');
+requireText(siteFooter, 'tooldescription="Search Rawafid from the site footer', 'the footer WebMCP tool must retain a meaningful tool description');
 requireText(siteFooter, 'toolautosubmit=""', 'the safe footer search WebMCP tool must remain directly invokable by agents');
 requireText(siteFooter, 'toolparamdescription="The user\'s Arabic or English footer search query', 'the footer WebMCP search parameter must remain described');
 requireText(siteFooter, 'required', 'the footer WebMCP search query must remain required so its generated JSON Schema is explicit');
@@ -108,6 +109,13 @@ requireText(productionBuild, "NEXT_PUBLIC_ENABLE_GTM='false'", 'the direct produ
 requireText(productionBuild, "NEXT_PUBLIC_ENABLE_DIRECT_GA='true'", 'the direct production build must keep direct GA4 enabled');
 requireText(productionBuild, "ENABLE_RAWAFID_ASSISTANT='true'", 'the static production build must keep the assistant enabled');
 
+requireText(gateway, "const SECTION_CACHE_CONTROL = 'public, max-age=60, stale-while-revalidate=300, stale-if-error=86400'", 'anonymous section HTML must retain the conservative Workers Cache freshness policy');
+requireText(gateway, "if(!isPrefix(url.pathname,'/sections'))return null;", 'the explicit edge-cache override must stay limited to section routes');
+requireText(gateway, "if(isRscRequest(request,url)||url.searchParams.has('q'))return null;", 'RSC and internal section search requests must not enter the section HTML cache');
+requireText(gateway, "for(const key of url.searchParams.keys())if(key!=='page')return null;", 'only canonical section pagination may vary the section HTML cache key');
+requireText(gateway, 'hasSupabaseAuthCookie(request)', 'authenticated Supabase traffic must bypass the anonymous public cache before loopback');
+requireText(gateway, "cacheInit?backend.fetch(request,cacheInit):backend.fetch(request)", 'the gateway must apply the explicit section cache directive only to eligible backend calls');
+
 requireText(deployWorkflow, 'librsvg2-bin', 'production deployment must install rsvg-convert because the production build renders Quick Info SVG cards');
 requireText(qualityWorkflow, 'for tool in searchRawafid searchRawafidHeader searchRawafidMobile searchRawafidFooter; do', 'fast quality runtime smoke must assert all server-rendered homepage WebMCP search tools before merge');
 requireText(qualityWorkflow, 'grep -q \'tooldescription="Search Rawafid\' /tmp/home.html', 'fast quality runtime smoke must assert a rendered WebMCP tool description');
@@ -126,4 +134,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log('PageSpeed performance contract passed: the homepage shell and assistant launcher stay server-only, the full assistant is browser-native lazy-loaded, the text LCP uses a zero-network system font, GA4 remains deferred but interaction-aware, heavy GTM is gated, WebMCP declarative coverage remains intact, imperative search and assistant tools are lifecycle-safe, origin isolation is explicit, optional Origin Trial activation is wired, the canonical homepage is prewarmed before Lighthouse, strict WebMCP rendering remains enforced by the fast quality gate, and production verification stays fast.');
+console.log('PageSpeed performance contract passed: the homepage shell and assistant launcher stay server-only, the full assistant is browser-native lazy-loaded, the text LCP uses a zero-network system font, GA4 remains deferred but interaction-aware, heavy GTM is gated, WebMCP declarative coverage remains intact, imperative search and assistant tools are lifecycle-safe, origin isolation is explicit, optional Origin Trial activation is wired, anonymous section HTML uses a conservative protected Workers Cache policy, the canonical homepage is prewarmed before Lighthouse, strict WebMCP rendering remains enforced by the fast quality gate, and production verification stays fast.');
