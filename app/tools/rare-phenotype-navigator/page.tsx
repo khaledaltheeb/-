@@ -11,7 +11,7 @@ export const metadata: Metadata = buildSeoMetadata({
   title: 'مستكشف النمط الظاهري للأمراض النادرة',
   description: 'أداة عربية لبناء ملف HPO ومقارنة الأمراض والجينات والحالات المشابهة دلاليًا، واقتراح phenotyping تالٍ وتصدير GA4GH Phenopacket.',
   path: '/tools/rare-phenotype-navigator',
-  index: false,
+  index: true,
   follow: true,
   keywords: ['HPO', 'الأمراض النادرة', 'phenotyping', 'Phenopacket', 'Monarch Initiative', 'PAVS', 'التشخيص الجيني', 'النمط الظاهري'],
 });
