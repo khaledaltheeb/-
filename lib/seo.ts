@@ -23,7 +23,7 @@ export const INDEXING_ENABLED = process.env.NEXT_PUBLIC_ALLOW_INDEXING === 'true
 export const BRAND_NAME = RAWAFID_BRAND_NAME;
 export const BRAND_SHORT = RAWAFID_BRAND_SHORT;
 export const DEFAULT_LOCALE = 'ar_AR';
-export const DEFAULT_DESCRIPTION = 'روافد منصة عربية للمعرفة الموثوقة في الصحة النفسية والتربية الخاصة والتوحد وصعوبات التعلم وسرطان الأطفال والتعافي، مع أدلة عملية ومختصين ومراكز.';
+export const DEFAULT_DESCRIPTION = 'منصة روافد هي منصة عربية للمعرفة الموثوقة في الصحة النفسية والتربية الخاصة والتوحد وصعوبات التعلم وسرطان الأطفال والتعافي، مع أدلة عملية ومختصين ومراكز.';
 
 const HOME_TITLE = 'منصة روافد | الصحة النفسية والتربية الخاصة وسرطان الأطفال';
 const HOME_DESCRIPTION = DEFAULT_DESCRIPTION;
