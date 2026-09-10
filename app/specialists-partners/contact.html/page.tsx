@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
   title: 'تواصل مع مختص | محادثة خاصة داخل المنصة',
   alternates: { canonical: '/specialists-partners/contact/' },
-  robots: { index: false, follow: true, noarchive: true },
+  robots: { index: true, follow: true },
 };
 
 export default SpecialistContactPage;
