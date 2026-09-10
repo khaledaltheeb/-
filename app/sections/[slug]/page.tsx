@@ -7,7 +7,7 @@ import LegacyPreservedPageView from '@/components/legacy-preserved-page';
 import PublicPagination from '@/components/public-pagination';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
-import { createClient } from '@/lib/supabase/server';
+import { createPublicClient } from '@/lib/supabase/public-server';
 import { buildSeoMetadata, breadcrumbJsonLd, SITE_URL } from '@/lib/seo';
 import { getLegacyPreservedPage, legacyPreservedMetadata } from '@/lib/legacy-preserved-page';
 import { COGNITIVE_ROOT_SLUG, getCognitiveCategories, getCognitiveCategory, getCognitivePageIndex } from '@/lib/cognitive-program';
@@ -55,7 +55,7 @@ function cleanManualTerms(value: unknown, maxItems = 20): string[] {
 }
 
 async function dbCategory(slug: string) {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data } = await supabase.from('categories').select('id,sector_id,parent_id,slug,name_ar,description,seo_title,seo_description,metadata,editorial_content_id').eq('slug', slug).eq('is_active', true).eq('visibility', 'public').maybeSingle();
   return data as Category | null;
 }
@@ -102,7 +102,7 @@ export default async function SectionPage({ params, searchParams }: { params: Pa
   }
   const page = pageNo(one(raw.page));
   const query = qSafe(one(raw.q));
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const now = new Date().toISOString();
   const isRoot = slug === COGNITIVE_ROOT_SLUG;
   const cognitiveVirtual = Boolean(getCognitiveCategory(slug));
