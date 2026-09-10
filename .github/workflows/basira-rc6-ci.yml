@@ -63,13 +63,22 @@ jobs:
           bash tools/run-core-smoke.sh
 
       - name: Android unit tests
-        run: gradle -p basira-rc6 :app:testDebugUnitTest --stacktrace
+        shell: bash
+        run: |
+          set -o pipefail
+          gradle -p basira-rc6 :app:testDebugUnitTest --stacktrace 2>&1 | tee basira-rc6/unit-test.log
 
       - name: Android lint
-        run: gradle -p basira-rc6 :app:lintDebug :app:lintRelease --stacktrace
+        shell: bash
+        run: |
+          set -o pipefail
+          gradle -p basira-rc6 :app:lintDebug :app:lintRelease --stacktrace 2>&1 | tee basira-rc6/lint.log
 
       - name: Build debug and release APKs
-        run: gradle -p basira-rc6 :app:assembleDebug :app:assembleRelease --stacktrace
+        shell: bash
+        run: |
+          set -o pipefail
+          gradle -p basira-rc6 :app:assembleDebug :app:assembleRelease --stacktrace 2>&1 | tee basira-rc6/build.log
 
       - name: Verify debug APK
         shell: bash
@@ -78,7 +87,7 @@ jobs:
           APK="$(find basira-rc6/app/build/outputs/apk/debug -name '*.apk' -print -quit)"
           test -n "$APK"
           "$ANDROID_HOME/build-tools/36.0.0/zipalign" -c -P 16 -v 4 "$APK"
-          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose "$APK"
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose --print-certs "$APK"
           sha256sum "$APK" | tee basira-rc6/debug-apk.sha256
 
       - name: Upload Basira RC6 build artifacts
@@ -87,8 +96,12 @@ jobs:
         with:
           name: basira-rc6-build
           if-no-files-found: warn
+          retention-days: 14
           path: |
             basira-rc6/app/build/outputs/apk/**/*.apk
             basira-rc6/app/build/reports/**
             basira-rc6/app/build/test-results/**
+            basira-rc6/unit-test.log
+            basira-rc6/lint.log
+            basira-rc6/build.log
             basira-rc6/debug-apk.sha256
