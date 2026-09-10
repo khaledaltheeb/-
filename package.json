@@ -18,7 +18,7 @@
     "lint": "eslint . --quiet",
     "typecheck": "tsc --noEmit",
     "addiction-atlas:validate": "node scripts/addiction-atlas-contract.mjs",
-    "search-appearance:validate": "node scripts/search-appearance-contract.mjs",
+    "search-appearance:validate": "node scripts/search-appearance-contract.mjs && node scripts/public-indexability-contract.mjs",
     "semantic-seo:validate": "node scripts/semantic-seo-contract.mjs",
     "llms:validate": "node scripts/llms-discovery-contract.mjs",
     "seo-readiness": "node scripts/seo-readiness-report.mjs",
