@@ -265,7 +265,7 @@ export function legacyPreservedMetadata(page: LegacyPreservedPage | null, route:
     title: page.title || page.h1 || 'محتوى محفوظ',
     description: page.meta_description || page.body_text?.slice(0, 220) || 'صفحة محفوظة من مكتبة روافد قيد المراجعة والترقية التحريرية.',
     path: legacyCanonicalPath(route),
-    index: false,
+    index: true,
     follow: true,
     type: 'website',
   });
