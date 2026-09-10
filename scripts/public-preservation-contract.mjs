@@ -13,8 +13,8 @@ if (!url || !key) {
 const baseline = {
   publicSectors: 13,
   publicCategories: 237,
-  publishedContent: 8725,
-  indexablePublishedContent: 8718,
+  publishedContent: 8732,
+  indexablePublishedContent: 8725,
 };
 
 const requiredSectorSlugs = [
