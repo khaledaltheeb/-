@@ -42,12 +42,13 @@ function assertHealthyBody(path, text, minimum = 200) {
   if (errorBody.test(text)) throw new Error(`${path} returned an application/server error body`);
 }
 
-function assertRobotsNoindexFollow(html) {
+function assertRobotsIndexFollow(html) {
   const tags = [...html.matchAll(/<meta[^>]+name=["']robots["'][^>]*>/gi)].map((match) => match[0]);
   if (!tags.length) throw new Error(`${routePath} is missing a robots meta tag`);
   const content = tags.join(' ').toLowerCase();
-  if (!content.includes('noindex')) throw new Error(`${routePath} must remain noindex during pre-release QA`);
-  if (!content.includes('follow')) throw new Error(`${routePath} must remain follow during pre-release QA`);
+  if (content.includes('noindex')) throw new Error(`${routePath} unexpectedly emitted noindex after public release`);
+  if (!content.includes('index')) throw new Error(`${routePath} must explicitly permit indexing after public release`);
+  if (!content.includes('follow')) throw new Error(`${routePath} must remain follow after public release`);
 }
 
 function assertCanonical(html) {
@@ -63,22 +64,21 @@ async function verifyPage() {
   for (const marker of ['حوّل الوصف السريري إلى ملف HPO قابل للتحليل وإعادة الاستخدام', 'ليست أداة تشخيص ذاتي', 'Triangulation بدل درجة واحدة']) {
     if (!text.includes(marker)) throw new Error(`${routePath} is missing expected marker: ${marker}`);
   }
-  assertRobotsNoindexFollow(text); assertCanonical(text);
-  console.log(`RARE_PHENOTYPE_LIVE_OK page ${routePath} HTTP ${response.status} noindex/follow canonical`);
+  assertRobotsIndexFollow(text); assertCanonical(text);
+  console.log(`RARE_PHENOTYPE_LIVE_OK page ${routePath} HTTP ${response.status} index/follow canonical`);
 }
 
-async function verifySitemapExclusion() {
+async function verifySitemapInclusion() {
   const sitemapIndex = await request('/sitemap.xml', {}, false);
   assertHealthyBody('/sitemap.xml', sitemapIndex.text, 50);
-  if (sitemapIndex.text.includes(routeUrl) || sitemapIndex.text.includes(routePath)) throw new Error(`${routePath} appeared directly in sitemap index during pre-release QA`);
-  const childSitemaps = [...sitemapIndex.text.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1].trim()).filter((url) => url.startsWith(base));
-  for (const sitemapUrl of childSitemaps) {
-    const url = new URL(sitemapUrl);
-    const { text } = await request(`${url.pathname}${url.search}`, {}, false);
-    assertHealthyBody(url.pathname, text, 20);
-    if (text.includes(routeUrl) || text.includes(`<loc>${routeUrl}/</loc>`)) throw new Error(`${routePath} appeared in live sitemap ${url.pathname} before release approval`);
+  if (!sitemapIndex.text.includes('/sitemaps/rare-phenotype.xml')) throw new Error('root sitemap index is missing the rare phenotype sitemap');
+
+  const dedicated = await request('/sitemaps/rare-phenotype.xml', {}, false);
+  assertHealthyBody('/sitemaps/rare-phenotype.xml', dedicated.text, 50);
+  if (!dedicated.text.includes(`<loc>${routeUrl}</loc>`) && !dedicated.text.includes(`<loc>${routeUrl}/</loc>`)) {
+    throw new Error(`${routePath} is missing from its dedicated live sitemap`);
   }
-  console.log(`RARE_PHENOTYPE_LIVE_OK sitemap exclusion checked across ${childSitemaps.length} canonical child sitemap(s)`);
+  console.log('RARE_PHENOTYPE_LIVE_OK sitemap inclusion verified');
 }
 
 async function verifyTerms() {
@@ -134,11 +134,11 @@ async function verifyPavs() {
 
 try {
   await verifyPage();
-  await verifySitemapExclusion();
+  await verifySitemapInclusion();
   await verifyTerms();
   await verifyMonarchRank();
   const pavs = await verifyPavs();
-  console.log(`RARE_PHENOTYPE_LIVE_COMPLETE ${routeUrl} verified without PII using HP:0001250 only; PAVS=${pavs.degraded ? 'degraded-upstream' : 'available'}`);
+  console.log(`RARE_PHENOTYPE_LIVE_COMPLETE ${routeUrl} verified indexable without PII using HP:0001250 only; PAVS=${pavs.degraded ? 'degraded-upstream' : 'available'}`);
 } catch (error) {
   console.error(`RARE_PHENOTYPE_LIVE_FAIL ${error instanceof Error ? error.message : String(error)}`); process.exit(1);
 }
