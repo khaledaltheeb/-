@@ -17,6 +17,18 @@ const ATLAS_OWNED_CANONICALS = [
   '/addiction/methodology/',
 ] as const;
 
+// These routes are permanent redirect sources in next.config.ts. A redirect source
+// may stay published/indexable in the preservation database, but it is not a
+// canonical URL and must never be advertised by any DB-driven content sitemap.
+const NEXT_CONFIG_REDIRECT_SOURCE_CANONICALS = [
+  '/encyclopedia/fragile-x-syndrome-education',
+  '/encyclopedia/cluttering-communication-disorder',
+  '/content/cluttering-fluency-disorder',
+  '/content/special-ed-encyclopedia-childhood-apraxia-of-speech',
+  '/special-needs/communication/childhood-apraxia-of-speech',
+  '/provider-assessment-demo/conditions/aac',
+] as const;
+
 type SitemapRow = {
   path: string;
   lastModified: string | null;
@@ -54,6 +66,14 @@ function applyDedicatedSitemapExclusions<T extends {
 function normalizeCanonicalPath(path: string) {
   if (path === '/') return path;
   return path.replace(/\/+$/, '');
+}
+
+const nextConfigRedirectSources = new Set<string>(
+  NEXT_CONFIG_REDIRECT_SOURCE_CANONICALS.map((path) => normalizeCanonicalPath(path)),
+);
+
+function isRedirectSource(path: string) {
+  return nextConfigRedirectSources.has(normalizeCanonicalPath(path));
 }
 
 export async function GET(request: Request) {
@@ -127,7 +147,8 @@ export async function GET(request: Request) {
   const databaseRows: SitemapRow[] = data
     .filter((item) => {
       const path = item.canonical_url || `/content/${item.slug}`;
-      return !taxonomyOwnedCanonicals.has(normalizeCanonicalPath(path));
+      const normalizedPath = normalizeCanonicalPath(path);
+      return !taxonomyOwnedCanonicals.has(normalizedPath) && !isRedirectSource(normalizedPath);
     })
     .map((item) => ({
       path: item.canonical_url || `/content/${item.slug}`,
@@ -157,7 +178,10 @@ export async function GET(request: Request) {
           changeFrequency: 'monthly',
           priority: .74,
         })),
-    ].filter((item) => !taxonomyOwnedCanonicals.has(normalizeCanonicalPath(item.path)));
+    ].filter((item) => {
+      const normalizedPath = normalizeCanonicalPath(item.path);
+      return !taxonomyOwnedCanonicals.has(normalizedPath) && !isRedirectSource(normalizedPath);
+    });
   }
 
   const unique = new Map<string, SitemapRow>();
