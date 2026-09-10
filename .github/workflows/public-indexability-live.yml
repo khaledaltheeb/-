@@ -1,0 +1,36 @@
+name: Public Indexability Live Audit
+
+on:
+  workflow_run:
+    workflows: ["Deploy Production Fast"]
+    types: [completed]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: public-indexability-live-${{ github.event.workflow_run.head_branch }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Crawl production sitemap population for indexability
+        env:
+          PRODUCTION_ORIGIN: https://healthrenewal.org
+          INDEXABILITY_CONCURRENCY: '4'
+          INDEXABILITY_PACING_MS: '100'
+          INDEXABILITY_TIMEOUT_MS: '30000'
+          INDEXABILITY_ATTEMPTS: '5'
+        run: node scripts/live-production-indexability-contract.mjs
