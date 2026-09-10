@@ -52,8 +52,7 @@ jobs:
             basira_rc6_ci/parts/part06.b64 \
             | tr -d '\n\r' | base64 --decode > /tmp/basira-rc6-source.tar.gz
           echo "48757025fa6f0710c7257302287ce17e852b2539348462ead8498083cf0a0d64  /tmp/basira-rc6-source.tar.gz" | sha256sum -c -
-          tar -tzf /tmp/basira-rc6-source.tar.gz | head -20
-          tar -xzf /tmp/basira-rc6-source.tar.gz -C basira-rc6 --strip-components=1
+          tar -xzf /tmp/basira-rc6-source.tar.gz -C basira-rc6
           test -f basira-rc6/build.gradle.kts
           test -f basira-rc6/app/build.gradle.kts
 
