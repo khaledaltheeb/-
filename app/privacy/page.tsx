@@ -2,10 +2,10 @@ import TrustPage from '@/components/trust-page';
 import { buildSeoMetadata } from '@/lib/seo';
 
 export const metadata = buildSeoMetadata({
-  title: 'سياسة الخصوصية',
+  title: 'سياسة الخصوصية وحماية بيانات المستخدم في منصة روافد',
   description: 'سياسة الخصوصية في منصة روافد: مبادئ تقليل البيانات، التحكم في ظهور معلومات المختصين والمراكز، حماية الحسابات وسجلات التدقيق والبيانات الخاصة.',
   path: '/privacy', index: true,
-  keywords: ['سياسة الخصوصية', 'حماية البيانات', 'روافد'],
+  keywords: ['سياسة الخصوصية', 'سياسة خصوصية منصة روافد', 'حماية البيانات', 'حماية بيانات المستخدم', 'خصوصية المستخدم', 'منصة روافد'],
 });
 
 export default function PrivacyPage() {
