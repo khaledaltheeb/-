@@ -87,9 +87,6 @@ jobs:
           p = Path('basira-rc6/app/build.gradle.kts')
           s = p.read_text()
           replacements = {
-              'androidx.compose:compose-bom:2026.06.01': 'androidx.compose:compose-bom:2026.09.00',
-              'androidx.lifecycle:lifecycle-runtime-ktx:2.10.0': 'androidx.lifecycle:lifecycle-runtime-ktx:2.11.0',
-              'androidx.lifecycle:lifecycle-runtime-compose:2.10.0': 'androidx.lifecycle:lifecycle-runtime-compose:2.11.0',
               '        baseline = file("lint-baseline.xml")\n': '',
               'disable += setOf("UnusedResources")': 'disable += setOf("UnusedResources", "OldTargetApi", "GradleDependency")'
           }
