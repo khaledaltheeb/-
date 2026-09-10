@@ -56,6 +56,21 @@ jobs:
           test -f basira-rc6/build.gradle.kts
           test -f basira-rc6/app/build.gradle.kts
 
+      - name: Apply RC6 compile fixes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('basira-rc6/app/src/main/java/org/healthrenewal/basira/ui/Screens.kt')
+          s = p.read_text()
+          old = 'if (requested?.id == destination?.id) audio.speak("أنت تتجه بالفعل إلى ${requested.label}")'
+          new = 'if (requested != null && requested.id == destination?.id) audio.speak("أنت تتجه بالفعل إلى ${requested.label}")'
+          if old not in s:
+              raise SystemExit('Expected nullable Landmark expression not found')
+          p.write_text(s.replace(old, new, 1))
+          PY
+
       - name: Fetch verified EfficientDet Lite0 model
         shell: bash
         run: |
