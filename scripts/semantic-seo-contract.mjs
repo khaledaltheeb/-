@@ -158,8 +158,8 @@ for (const sample of samples) {
 requireAll(preservation, [
   'publicSectors: 13',
   'publicCategories: 237',
-  'publishedContent: 8732',
-  'indexablePublishedContent: 8725',
+  'publishedContent: 8734',
+  'indexablePublishedContent: 8734',
   'published content decreased',
   'indexable published content decreased',
   'public sectors decreased',
@@ -176,11 +176,14 @@ if (publicSectorFloor < 13) {
 if (publicCategoryFloor < 237) {
   throw new Error(`public no-loss protection: category baseline regressed to ${publicCategoryFloor}`);
 }
-if (publishedFloor < 8732) {
+if (publishedFloor < 8734) {
   throw new Error(`public no-loss protection: published baseline regressed to ${publishedFloor}`);
 }
-if (indexableFloor < 8725) {
+if (indexableFloor < 8734) {
   throw new Error(`public no-loss protection: indexable published baseline regressed to ${indexableFloor}`);
+}
+if (indexableFloor < publishedFloor) {
+  throw new Error(`public no-loss protection: indexable floor ${indexableFloor} cannot be lower than published floor ${publishedFloor}`);
 }
 
 console.log(`Semantic SEO contract: OK — curated page keywords and real search-intent phrases are preserved without automatic quota expansion or hidden filler.`);
