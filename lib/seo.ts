@@ -38,9 +38,21 @@ function clampTitle(value: string) {
   const clean = value.replace(/\s+/g, ' ').trim();
   const suffix = ` | ${BRAND_SHORT}`;
   if (clean === BRAND_SHORT || clean === BRAND_NAME) return clean.slice(0, 60).trim();
-  if (clean.endsWith(suffix)) return clean.slice(0, 60).trim();
+
+  // Page titles may arrive from older records already suffixed with either the long
+  // institutional name or the short brand. Normalize both to one short suffix so
+  // Google sees a clean page title while WebSite.siteName remains "منصة روافد".
+  const trailingBrandSuffixes = [` | ${BRAND_NAME}`, ` | ${BRAND_SHORT}`, ' | Rawafid'];
+  let baseClean = clean;
+  for (const brandSuffix of trailingBrandSuffixes) {
+    if (baseClean.endsWith(brandSuffix)) {
+      baseClean = baseClean.slice(0, -brandSuffix.length).trim();
+      break;
+    }
+  }
+  if (!baseClean) return BRAND_NAME.slice(0, 60).trim();
   const available = Math.max(20, 60 - suffix.length);
-  const base = clean.length > available ? `${clean.slice(0, available - 1).trim()}…` : clean;
+  const base = baseClean.length > available ? `${baseClean.slice(0, available - 1).trim()}…` : baseClean;
   return `${base}${suffix}`;
 }
 
