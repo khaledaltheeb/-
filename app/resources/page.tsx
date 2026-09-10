@@ -61,15 +61,27 @@ export default async function ResourcesPage() {
       <section className="public-index-hero" aria-labelledby="resources-title">
         <span className="eyebrow">مكتبة عملية متجددة</span>
         <h1 id="resources-title">الموارد العملية</h1>
-        <p>هذه الصفحة تستبدل الفهرس التاريخي القصير بفهرس حي يعتمد على الموارد المنشورة فعليًا في قاعدة روافد. لا تُعرض مسودات الهجرة ولا المواد غير المعتمدة، ويقود كل رابط إلى الـcanonical الحالي للمورد.</p>
-        <div className="public-stat-strip"><span>{resources.length.toLocaleString('ar')} موردًا منشورًا</span><span>{printable.length.toLocaleString('ar')} موردًا عمليًا/قابلًا للطباعة</span><span>لا درجات تشخيصية ضمن الفهرس</span></div>
+        <p>هذه الصفحة تستبدل الفهرس التاريخي القصير بفهرس حي يعتمد على الموارد المنشورة فعليًا في قاعدة روافد، مع إبراز أدلة معرفية ثابتة ذات مسارات canonical مستقلة. لا تُعرض مسودات الهجرة ولا المواد غير المعتمدة.</p>
+        <div className="public-stat-strip"><span>{resources.length.toLocaleString('ar')} موردًا منشورًا من قاعدة المحتوى</span><span>{printable.length.toLocaleString('ar')} موردًا عمليًا/قابلًا للطباعة</span><span>لا درجات تشخيصية ضمن الفهرس</span></div>
+      </section>
+
+      <section aria-labelledby="featured-knowledge-title">
+        <div className="section-mini-heading"><div><span className="eyebrow">مورد معرفي مميز</span><h2 id="featured-knowledge-title">اكتشاف الكتب المفتوحة والتحقق منها</h2></div><span>Metadata · حقوق · جودة علمية</span></div>
+        <div className="institutional-sector-grid">
+          <Link className="institutional-sector-card" href="/resources/open-books-discovery/">
+            <span className="eyebrow">دليل محدث · سبتمبر 2026</span>
+            <h3>الكتب المفتوحة: من الاكتشاف إلى التحقق من الرخصة والبيانات الوصفية</h3>
+            <p>دليل عربي متقدم للاستفادة المسؤولة من Thoth والناشرين، مع مسار تحقق من هوية الكتاب وISBN وDOI وONIX والرخصة وجودة المحتوى قبل الاستخدام.</p>
+            <span className="sector-open">فتح دليل الكتب المفتوحة ←</span>
+          </Link>
+        </div>
       </section>
 
       {printable.length ? <section aria-labelledby="printable-title"><div className="section-mini-heading"><div><span className="eyebrow">للاستخدام اليومي</span><h2 id="printable-title">أوراق وسجلات عملية</h2></div><span>للملاحظة والتنظيم والتحضير، لا للتشخيص الذاتي.</span></div><div className="institutional-sector-grid">{renderCards(printable)}</div></section> : null}
 
       {methodology.length ? <section aria-labelledby="method-title"><div className="section-mini-heading"><div><span className="eyebrow">لفهم القياس والدليل</span><h2 id="method-title">موارد منهجية ومعرفية</h2></div><span>تصاميم بحث، قياس، تفسير نتائج، وشفافية المصادر.</span></div><div className="institutional-sector-grid">{renderCards(methodology)}</div></section> : null}
 
-      {!resources.length ? <div className="rawafid-empty"><h2>لا توجد موارد عامة متاحة حاليًا.</h2><p>ستظهر الموارد هنا بعد اعتمادها للنشر العام.</p></div> : null}
+      {!resources.length ? <div className="rawafid-empty"><h2>لا توجد موارد ديناميكية عامة متاحة حاليًا.</h2><p>ستظهر الموارد هنا بعد اعتمادها للنشر العام، بينما تظل الأدلة الثابتة الموثقة متاحة أعلاه.</p></div> : null}
     </main>
     <SiteFooter />
   </>;
