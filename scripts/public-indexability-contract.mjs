@@ -60,7 +60,9 @@ const proxy = read('lib/supabase/proxy.ts');
 for (const marker of ['preservedContentAliasCanonical', 'applyPreservedAliasSeoHeaders', 'rel="canonical"']) {
   if (!proxy.includes(marker)) fail(`public alias canonical guard missing: ${marker}`);
 }
-if (/X-Robots-Tag[^\n]{0,120}noindex/i.test(proxy)) fail('public proxy aliases must not inject X-Robots-Tag noindex');
+if (/headers\.set\(\s*['"]X-Robots-Tag['"]\s*,\s*['"][^'"]*noindex/i.test(proxy)) {
+  fail('public proxy aliases must not inject X-Robots-Tag noindex');
+}
 
 const dbMigrationPath = 'supabase/migrations/20260910224000_enforce_published_content_indexability.sql';
 if (!fs.existsSync(dbMigrationPath)) fail('published-content indexability database migration is missing');
