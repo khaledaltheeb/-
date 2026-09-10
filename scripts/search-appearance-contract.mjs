@@ -167,15 +167,19 @@ requireAll(middleware, [
   'NextResponse.redirect(canonical, 308)',
 ], 'www canonical redirect');
 requireAll(productionWorkflow, [
+  'push:',
+  'branches: [main]',
   'workflow_dispatch:',
+  'concurrency:',
+  'cancel-in-progress: true',
   'NEXT_PUBLIC_SITE_URL: https://healthrenewal.org',
   "NEXT_PUBLIC_ALLOW_INDEXING: 'true'",
+  'npm run search-appearance:validate',
+  'npm run semantic-seo:validate',
+  'npm run public-preservation:validate',
   'www.healthrenewal.org',
   "grep -q 'workers.dev'",
-], 'production domain migration');
-if (/^\s*push\s*:/m.test(productionWorkflow)) {
-  throw new Error('production cutover guard: deploy-production must remain manual until launch day');
-}
+], 'guarded production deployment');
 
 requireAll(cutoverWorkflow, [
   'workflow_dispatch:',
