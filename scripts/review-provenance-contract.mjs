@@ -6,13 +6,13 @@ const helperPath = 'lib/review-provenance.ts';
 const helper = fs.readFileSync(path.join(root, helperPath), 'utf8');
 
 const requiredHelperFragments = [
+  "import { SITE_URL } from '@/lib/seo';",
   "const RAWAFID_REVIEW_TEAM = 'فريق روافد';",
   'const hasRecordedReview = Boolean(recordedReviewDate);',
   'const lastReviewedAt = hasRecordedReview ? recordedReviewDate : null;',
   'const reviewerName = hasRecordedReview ? explicitReviewer || RAWAFID_REVIEW_TEAM : null;',
   "const reviewerType = hasRecordedReview ? (explicitReviewer ? 'Person' : 'Organization') : null;",
-  "'@type': 'Organization'",
-  'name: RAWAFID_REVIEW_TEAM',
+  "'@id': `${SITE_URL}/#organization`",
   'reviewedBySchema',
 ];
 
@@ -26,6 +26,7 @@ const forbiddenHelperFragments = [
   'const hasAttributableReview = Boolean(recordedReviewDate && explicitReviewer);',
   'const reviewerName = hasAttributableReview ? explicitReviewer : null;',
   'reject inferred team review attribution',
+  "'@type': 'Organization',\n          name: RAWAFID_REVIEW_TEAM",
 ];
 
 for (const fragment of forbiddenHelperFragments) {
@@ -62,4 +63,4 @@ for (const file of surfaces) {
   }
 }
 
-console.log(`Review provenance contract passed: ${surfaces.length} public surfaces preserve lastReviewed as a real Rawafid review date, using a named reviewer when recorded and فريق روافد as the organization fallback.`);
+console.log(`Review provenance contract passed: ${surfaces.length} public surfaces preserve lastReviewed as a real Rawafid review date, using a named reviewer when recorded and فريق روافد as the visible organization fallback while structured data references the canonical Rawafid Organization.`);
