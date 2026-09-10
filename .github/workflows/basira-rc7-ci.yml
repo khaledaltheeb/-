@@ -192,8 +192,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          rm -rf basira-rc7/app/build
-          (cd basira-rc7 && zip -qr ../Basira-v1.0.0-rc7-source.zip .)
+          (cd basira-rc7 && zip -qr ../Basira-v1.0.0-rc7-source.zip . -x 'app/build/*')
           sha256sum Basira-v1.0.0-rc7-source.zip > Basira-v1.0.0-rc7-source.zip.sha256
 
       - name: Upload Basira RC7 artifacts
