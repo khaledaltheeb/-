@@ -13,7 +13,7 @@ export const metadata: Metadata = buildSeoMetadata({
   title: 'شاركنا تجربتك | مجتمع روافد المعرفي',
   description: 'مساحة عربية لتبادل تجارب الأهل ومقدمي الخدمة والأسئلة والنصائح والاحتياطات في التربية الدامجة والدعم والخدمات.',
   path: '/experiences/',
-  index: false,
+  index: true,
   follow: true,
   type: 'website',
   keywords: ['تجارب الأهل', 'التربية الدامجة', 'ذوي الإعاقة', 'مقدمو الخدمة', 'مجتمع روافد'],
