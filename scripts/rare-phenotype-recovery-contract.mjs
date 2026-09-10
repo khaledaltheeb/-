@@ -15,7 +15,7 @@ const required = [
   'app/api/rare-phenotype/rank/route.ts',
   'app/api/rare-phenotype/pavs/route.ts',
   'app/sitemap.xml/route.ts',
-  'app/sitemaps/static.xml/route.ts',
+  'app/sitemaps/rare-phenotype.xml/route.ts',
 ];
 for (const path of required) if (!fs.existsSync(path)) fail(`missing ${path}`);
 if (process.exitCode) process.exit(process.exitCode);
@@ -27,9 +27,9 @@ const terms = read(required[5]);
 const rank = read(required[6]);
 const pavs = read(required[7]);
 const rootSitemap = read(required[8]);
-const staticSitemap = read(required[9]);
+const toolSitemap = read(required[9]);
 
-if (!page.includes('index: false') || !page.includes('follow: true')) fail('page must remain noindex/follow during recovery QA');
+if (!page.includes('index: true') || !page.includes('follow: true')) fail('public navigator must remain index/follow');
 if (!page.includes('ليست أداة تشخيص ذاتي') || !page.includes('لا تنتج الأداة تشخيصًا نهائيًا أو قرارًا علاجيًا')) fail('non-diagnostic boundary missing');
 if (!page.includes('ليست النسخة العربية الرسمية الكاملة لـHPO')) fail('PAVS Arabic independence disclosure missing');
 if (!page.includes('إشارة للمراجعة، لا كنسبة تشخيص')) fail('cross-source convergence must not be represented as diagnostic probability');
@@ -54,8 +54,7 @@ if (!terms.includes('bio-ontology-research-group/hpo-arabic')) fail('Arabic HPO 
 if (!rank.includes('api-v3.monarchinitiative.org')) fail('Monarch v3 source missing');
 if (!pavs.includes('pavs.phenomebrowser.net')) fail('PAVS source missing');
 
-for (const text of [rootSitemap, staticSitemap]) {
-  if (text.includes('/tools/rare-phenotype-navigator')) fail('pre-release navigator must not enter sitemap before final QA');
-}
+if (!rootSitemap.includes('/sitemaps/rare-phenotype.xml')) fail('root sitemap must register rare phenotype sitemap');
+if (!toolSitemap.includes("path: '/tools/rare-phenotype-navigator'")) fail('rare phenotype sitemap must contain the public navigator route');
 
-console.log('RARE PHENOTYPE RECOVERY CONTRACT PASSED');
+console.log('RARE PHENOTYPE PUBLIC RELEASE CONTRACT PASSED: indexable=true, dedicated_sitemap=true');
