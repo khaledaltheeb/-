@@ -100,9 +100,25 @@ function referencesOf(row) {
     : [];
 }
 
+function validClaimReference(value) {
+  if (typeof value === 'string') return Boolean(value.trim());
+  return typeof value === 'number' && Number.isFinite(value) && value >= 0;
+}
+
+function claimReferencesOf(item) {
+  if (!isObject(item)) return [];
+  const referenceIds = Array.isArray(item.reference_ids)
+    ? item.reference_ids.filter(validClaimReference)
+    : [];
+  if (referenceIds.length) return referenceIds;
+  return Array.isArray(item.sources)
+    ? item.sources.filter(validClaimReference)
+    : [];
+}
+
 function claimMapOf(row) {
   return Array.isArray(row?.schema_json?.claim_source_map)
-    ? row.schema_json.claim_source_map.filter((item) => isObject(item) && typeof item.claim === 'string' && Array.isArray(item.reference_ids) && item.reference_ids.length)
+    ? row.schema_json.claim_source_map.filter((item) => isObject(item) && typeof item.claim === 'string' && item.claim.trim() && claimReferencesOf(item).length)
     : [];
 }
 
@@ -346,6 +362,7 @@ const md = [
   '- Gold-standard pages are held to the page-purpose contract in `.encyclopedia-quality-standard.md`.',
   '- Legacy purpose inference is conservative and is used only for backlog prioritization; it never grants gold status.',
   '- Useful word count uses the richer of `body_text` and all structured `body_json` text to avoid false thin-content flags.',
+  '- Claim-source mappings accept both current `reference_ids` and preserved legacy `sources` arrays; either representation must contain non-empty references.',
   '- Specialized-support pages are intentionally prevented from becoming duplicate disease monographs merely to hit a word count.',
   '- A high score is a regression signal, not a substitute for scientific editorial review.',
   '',
