@@ -44,6 +44,9 @@ if (!ai.includes('PlatformSearchExperience') || !search.includes('اكتب سؤ�
 if (!contact.includes('ابدأ رسالة مهنية دون كشف بريد المختص') || !contact.includes('ليست قناة طوارئ')) {
   fail('specialist contact privacy/safety content missing');
 }
+if (!contact.includes('index:true') && !contact.includes('index: true')) {
+  fail('public specialist contact guidance must remain indexable');
+}
 
 const account = fs.readFileSync('app/specialists-partners/account/page.tsx', 'utf8');
 const admin = fs.readFileSync('app/specialists-partners/admin/page.tsx', 'utf8');
@@ -86,7 +89,7 @@ if (!proxy.includes('const protectedPrefixes') || !proxy.includes('const redirec
   fail('request-boundary protection arrays are missing from Supabase proxy');
 }
 
-const indexableConditionAliases = [
+const canonicalConditionAliases = [
   'alcohol-use-disorder',
   'autism',
   'cannabis-use-disorder',
@@ -100,21 +103,23 @@ const indexableConditionAliases = [
   'sedative-benzodiazepine-use-disorder',
   'stimulant-use-disorder',
 ];
-for (const slug of indexableConditionAliases) {
-  if (!proxy.includes(`'${slug}'`)) fail(`published condition alias is missing from noindex canonical map: ${slug}`);
+for (const slug of canonicalConditionAliases) {
+  if (!proxy.includes(`'${slug}'`)) fail(`published condition alias is missing from canonical map: ${slug}`);
 }
 for (const required of [
   'preservedContentAliasCanonical',
   'applyPreservedAliasSeoHeaders',
-  "response.headers.set('X-Robots-Tag', 'noindex, follow')",
   'rel="canonical"',
   "slug.startsWith('capabilities-')",
   "slug.startsWith('comparisons-')",
 ]) {
-  if (!proxy.includes(required)) fail(`preserved alias SEO guard missing: ${required}`);
+  if (!proxy.includes(required)) fail(`preserved alias canonical guard missing: ${required}`);
+}
+if (proxy.includes("response.headers.set('X-Robots-Tag', 'noindex, follow')")) {
+  fail('public preserved aliases must not be blocked by X-Robots-Tag noindex; canonical consolidation is sufficient');
 }
 
 if (!pkg.scripts?.['legacy-interactive-routes:validate']) fail('package validation script missing');
 if (!process.exitCode) {
-  console.log('Legacy interactive route contract passed: historical routes remain real; private specialist routes are protected; duplicate content aliases are noindex with explicit canonical targets.');
+  console.log('Legacy interactive route contract passed: historical routes remain real; private specialist routes are protected; public duplicate content aliases remain crawlable and use explicit canonical targets without X-Robots-Tag noindex.');
 }
