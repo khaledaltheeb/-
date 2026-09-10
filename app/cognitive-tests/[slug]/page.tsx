@@ -24,7 +24,7 @@ export async function generateMetadata({params}:{params:Params}):Promise<Metadat
     title:`${tool.title} — المسار التاريخي`,
     description:`مسار تاريخي محفوظ يشغّل نفس نشاط ${tool.title} الموجود في Cognitive Lab. النشاط تعليمي وصفي، وليس اختبار ذكاء أو أداة تشخيصية.`,
     path:`/cognitive-lab/${mapped}`,
-    index:false,
+    index:true,
     follow:true,
     type:'article',
   });
