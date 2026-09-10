@@ -10,17 +10,22 @@ if (!SUPABASE_URL || !SUPABASE_KEY) {
   process.exit(2);
 }
 
-const PAGE_SIZE = 1000;
+// Encyclopedia rows carry body_text, body_json, references and schema payloads.
+// Keep each PostgREST statement deliberately small and use UUID keyset pagination
+// so the strict audit covers the full corpus without OFFSET scans or statement timeouts.
+const PAGE_SIZE = 250;
+const MAX_PAGES = 40;
 const rows = [];
-for (let offset = 0; offset < 6000; offset += PAGE_SIZE) {
+let afterId = '';
+for (let pageIndex = 0; pageIndex < MAX_PAGES; pageIndex += 1) {
   const params = new URLSearchParams();
   params.set('select', 'id,slug,title,excerpt,body_text,body_json,references_json,schema_json,seo_title,seo_description,medical_disclaimer,last_reviewed_at,reviewer_display_name,status,content_type,canonical_url');
   params.set('canonical_url', 'like./encyclopedia/*');
   params.set('status', 'eq.published');
   params.set('robots_index', 'eq.true');
-  params.set('order', 'canonical_url.asc');
+  params.set('order', 'id.asc');
   params.set('limit', String(PAGE_SIZE));
-  params.set('offset', String(offset));
+  if (afterId) params.set('id', `gt.${afterId}`);
 
   const response = await fetch(`${SUPABASE_URL}/rest/v1/content?${params}`, {
     headers: {
@@ -35,8 +40,22 @@ for (let offset = 0; offset < 6000; offset += PAGE_SIZE) {
     process.exit(2);
   }
   const page = await response.json();
+  if (!Array.isArray(page)) {
+    console.error('Encyclopedia audit query returned a non-array payload.');
+    process.exit(2);
+  }
   rows.push(...page);
   if (page.length < PAGE_SIZE) break;
+  const lastId = page.at(-1)?.id;
+  if (typeof lastId !== 'string' || !lastId) {
+    console.error('Encyclopedia audit keyset pagination lost the final row id.');
+    process.exit(2);
+  }
+  afterId = lastId;
+  if (pageIndex === MAX_PAGES - 1) {
+    console.error(`Encyclopedia audit exceeded the ${MAX_PAGES * PAGE_SIZE} row safety ceiling.`);
+    process.exit(2);
+  }
 }
 
 function isObject(value) {
