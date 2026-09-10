@@ -21,6 +21,14 @@ type CategoryMetadata = { seo_keywords?: unknown; search_intents?: unknown };
 type Category = { id: string; sector_id: string | null; parent_id: string | null; slug: string; name_ar: string; description: string | null; seo_title: string | null; seo_description: string | null; metadata: CategoryMetadata | null; editorial_content_id: string | null };
 type Item = { id: string; slug: string; title: string; excerpt: string | null; content_type: string; published_at: string | null; canonical_url: string | null };
 type EditorialContent = { id: string; title: string; excerpt: string | null; body_json: unknown; body_text: string | null };
+type SectionBundle = {
+  sector: { slug: string; name_ar: string } | null;
+  parent: { slug: string; name_ar: string } | null;
+  children: Array<{ slug: string; name_ar: string; description: string | null }>;
+  editorial: EditorialContent | null;
+  items: Item[];
+  total: number;
+};
 const PAGE_SIZE = 24;
 const one = (value: string | string[] | undefined) => Array.isArray(value) ? value[0] ?? '' : value ?? '';
 const pageNo = (value: string) => { const n = Number(value); return Number.isInteger(n) && n > 0 && n < 10000 ? n : 1; };
@@ -108,7 +116,7 @@ export default async function SectionPage({ params, searchParams }: { params: Pa
   let parent: { slug: string; name_ar: string } | null = null;
   let editorialContent: EditorialContent | null = null;
 
-  if (!virtual && category.editorial_content_id) {
+  if (isRoot && category.editorial_content_id) {
     const { data } = await supabase.from('content').select('id,title,excerpt,body_json,body_text').eq('id', category.editorial_content_id).eq('status', 'published').lte('published_at', now).maybeSingle();
     editorialContent = data as EditorialContent | null;
   }
@@ -151,40 +159,30 @@ export default async function SectionPage({ params, searchParams }: { params: Pa
     total = all.length;
     rows = all.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
   } else {
-    const [{ data: sec }, { data: par }, { data: children }] = await Promise.all([
-      category.sector_id ? supabase.from('sectors').select('slug,name_ar').eq('id', category.sector_id).maybeSingle() : Promise.resolve({ data: null }),
-      category.parent_id ? supabase.from('categories').select('slug,name_ar').eq('id', category.parent_id).maybeSingle() : Promise.resolve({ data: null }),
-      supabase.from('categories').select('slug,name_ar,description').eq('parent_id', category.id).eq('is_active', true).eq('visibility', 'public').order('sort_order'),
-    ]);
-    sector = sec as typeof sector;
-    parent = par as typeof parent;
-    childCards = (children ?? []) as typeof childCards;
-
-    const loadContentPage = async () => {
-      let contentQuery = supabase
-        .from('content')
-        .select('id,slug,title,excerpt,content_type,published_at,canonical_url,content_categories!inner(category_id)', { count: 'exact' })
-        .eq('content_categories.category_id', category.id)
-        .eq('status', 'published')
-        .lte('published_at', now)
-        .eq('robots_index', true)
-        .order('published_at', { ascending: false })
-        .order('title');
-      if (query) contentQuery = contentQuery.ilike('title', `%${query}%`);
-      return contentQuery.range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
-    };
-    let result = await loadContentPage();
+    const loadBundle = () => supabase.rpc('get_public_section_bundle', {
+      p_category_id: category.id,
+      p_page: page,
+      p_page_size: PAGE_SIZE,
+      p_query: query || null,
+    });
+    let result = await loadBundle();
     if (result.error) {
       await retryDelay(150);
-      result = await loadContentPage();
+      result = await loadBundle();
     }
     if (result.error) {
       await retryDelay(350);
-      result = await loadContentPage();
+      result = await loadBundle();
     }
-    if (result.error) throw new Error(`section content query failed after retries: ${result.error.message}`);
-    rows = (result.data ?? []) as unknown as Item[];
-    total = result.count ?? 0;
+    if (result.error) throw new Error(`section bundle query failed after retries: ${result.error.message}`);
+    const bundle = result.data as SectionBundle | null;
+    if (!bundle) throw new Error('section bundle query returned no data');
+    sector = bundle.sector ?? null;
+    parent = bundle.parent ?? null;
+    childCards = Array.isArray(bundle.children) ? bundle.children : [];
+    editorialContent = bundle.editorial ?? null;
+    rows = Array.isArray(bundle.items) ? bundle.items : [];
+    total = Number.isFinite(Number(bundle.total)) ? Number(bundle.total) : 0;
   }
 
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
