@@ -103,7 +103,8 @@ function preservedContentAliasCanonical(pathname: string) {
 function applyPreservedAliasSeoHeaders(response: NextResponse, pathname: string) {
   const canonical = preservedContentAliasCanonical(pathname);
   if (!canonical) return response;
-  response.headers.set('X-Robots-Tag', 'noindex, follow');
+  // Public preserved aliases remain crawlable/indexable. Canonical consolidation is
+  // expressed only through rel=canonical; no X-Robots-Tag noindex is applied.
   response.headers.append('Link', `<${canonical}>; rel="canonical"`);
   return response;
 }
