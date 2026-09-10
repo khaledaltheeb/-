@@ -19,8 +19,8 @@ for(const [route,marker,requiresPreservedBanner] of preservedRoutes){
     if(response.status!==200||location){console.error(`LEGACY_PRESERVED ${route}: expected real 200 without Location, got ${response.status} ${location}`);failed=true;continue;}
     if(!body.includes(marker)){console.error(`LEGACY_PRESERVED ${route}: original production marker missing`);failed=true;continue;}
     if(requiresPreservedBanner&&!body.includes('نسخة إنتاجية محفوظة')){console.error(`LEGACY_PRESERVED ${route}: fallback preservation status missing`);failed=true;continue;}
-    if(!/noindex/i.test(body)){console.error(`LEGACY_PRESERVED ${route}: migrated route must remain noindex until its current review permits indexing`);failed=true;continue;}
-    console.log(`LEGACY_PRESERVED ${route}: real content 200 + noindex verified`);
+    if(/noindex/i.test(body)){console.error(`LEGACY_PRESERVED ${route}: public preserved route unexpectedly emitted noindex`);failed=true;continue;}
+    console.log(`LEGACY_PRESERVED ${route}: real content 200 + indexable verified`);
   }catch(error){console.error(`LEGACY_PRESERVED ${route}:`,error);failed=true;}
 }
 for(const [route,marker] of upgradedRoutes){
@@ -45,4 +45,4 @@ for(const unknownPath of ['/__legacy_preservation_route_that_never_existed__','/
   }catch(error){console.error(`LEGACY_PRESERVED_UNKNOWN ${unknownPath}:`,error);failed=true;}
 }
 if(failed)process.exit(1);
-console.log('Legacy preservation runtime smoke passed: reviewed canonical takeovers are indexable, unreviewed fallbacks stay noindex, and invented routes return true 404 responses.');
+console.log('Legacy preservation runtime smoke passed: reviewed canonical takeovers and preserved public fallbacks are indexable, while invented routes return true 404 responses.');
