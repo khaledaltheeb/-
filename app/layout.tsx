@@ -33,11 +33,11 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: [
-      { url: '/icons/rawafid-app.svg', type: 'image/svg+xml', sizes: 'any' },
-      { url: '/pwa-icon-192', type: 'image/png', sizes: '192x192' },
-    ],
-    shortcut: [{ url: '/icons/rawafid-app.svg', type: 'image/svg+xml' }],
+    // Google Search currently supports raster favicon formats, not SVG. Keep the
+    // stable 192x192 PNG as the primary site favicon so the SERP brand mark is
+    // unambiguous across Google surfaces; SVG remains available as an app asset.
+    icon: [{ url: '/pwa-icon-192', type: 'image/png', sizes: '192x192' }],
+    shortcut: [{ url: '/pwa-icon-192', type: 'image/png', sizes: '192x192' }],
     apple: [{ url: '/pwa-icon-180', type: 'image/png', sizes: '180x180' }],
   },
   appleWebApp: {
