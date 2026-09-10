@@ -1,6 +1,6 @@
 const ORIGIN = (process.env.PRODUCTION_ORIGIN || 'https://healthrenewal.org').replace(/\/$/, '');
 const EXPECTED_HOST = new URL(ORIGIN).hostname;
-const EXPECTED_HOME_TITLE = 'روافد | الصحة النفسية والتربية الخاصة وسرطان الأطفال';
+const EXPECTED_HOME_TITLE = 'منصة روافد | الصحة النفسية والتربية الخاصة وسرطان الأطفال';
 const MIN_URLS = Number(process.env.MIN_LIVE_INDEXABLE_URLS || '3806');
 const CONCURRENCY = Math.max(1, Number(process.env.INDEXABILITY_CONCURRENCY || '4'));
 const TIMEOUT_MS = Math.max(3000, Number(process.env.INDEXABILITY_TIMEOUT_MS || '30000'));
