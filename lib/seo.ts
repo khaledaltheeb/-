@@ -208,7 +208,7 @@ export function organizationJsonLd() {
         '@type': 'WebSite',
         '@id': `${SITE_URL}/#website`,
         name: BRAND_NAME,
-        alternateName: [BRAND_SHORT, 'Rawafid'],
+        alternateName: [BRAND_SHORT, 'Rawafid', SITE_HOSTNAME],
         url: `${SITE_URL}/`,
         description: DEFAULT_DESCRIPTION,
         inLanguage: 'ar',
