@@ -35,7 +35,15 @@ function localeFor(path: string): Locale {
 }
 
 function domainFor(input: SemanticSeoInput): Domain {
+  const path = input.path.toLowerCase();
   const haystack = `${input.path} ${input.title} ${input.description || ''} ${(input.keywords || []).join(' ')}`.toLowerCase();
+
+  // Explicit route families express the page's functional role more reliably than
+  // topical words in a title. A mental-health specialist directory is still a directory,
+  // and a mental-health assessment page is still a tool surface.
+  if (/(?:^|\/)(?:specialists|centers|directory|providers?)(?:\/|$)/.test(path)) return 'directory';
+  if (/(?:^|\/)(?:tools|assessment(?:-lab|-measures)?|cognitive-lab)(?:\/|$)/.test(path)) return 'tools';
+
   if (/privacy|terms|legal|policy|حقوق|خصوصي|شروط/.test(haystack)) return 'legal';
   if (/pediatric-oncology|oncology|cancer|سرطان|أورام|ابيضاض|لوكيميا/.test(haystack)) return 'oncology';
   if (/mental-health|psych|نفسي|اكتئاب|قلق|صدم/.test(haystack)) return 'mental-health';
