@@ -13,8 +13,8 @@ if (!url || !key) {
 const baseline = {
   publicSectors: 13,
   publicCategories: 237,
-  publishedContent: 8732,
-  indexablePublishedContent: 8725,
+  publishedContent: 8734,
+  indexablePublishedContent: 8734,
 };
 
 const requiredSectorSlugs = [
@@ -133,9 +133,6 @@ try {
     'published content',
     'content',
     baseline.publishedContent,
-    // These columns match content_published_at_published_idx. Explicit ordering lets
-    // PostgREST/Postgres prove the baseline through the partial covering index instead
-    // of choosing an expensive unordered high-offset scan under public RLS.
     (query) => query
       .eq('status', 'published')
       .lte('published_at', now)
@@ -146,11 +143,11 @@ try {
     'indexable published content',
     'content',
     baseline.indexablePublishedContent,
-    // These columns match content_published_at_indexable_idx.
     (query) => query
       .eq('status', 'published')
       .lte('published_at', now)
       .eq('robots_index', true)
+      .eq('robots_follow', true)
       .order('published_at', { ascending: true })
       .order('id', { ascending: true }),
   );
@@ -177,9 +174,6 @@ try {
     { query: 'الإدمان والتعافي', expectedType: 'sector', expectedDestination: '/sectors/addiction-recovery' },
     { query: 'ذوو الاحتياجات الخاصة', expectedType: 'sector', expectedDestination: '/sectors/special-needs-inclusion' },
     { query: 'القلق الاجتماعي', expectedType: 'content', expectedDestination: '/psychology/social-anxiety/' },
-    // Search Console has already exposed demand for these exact term intents. Keep the
-    // reviewed term pages as the first internal-search owner so future publishing cannot
-    // silently cannibalize the query with a broader article or an unreleased legacy page.
     { query: 'معنى موتفيشن', expectedType: 'content', expectedDestination: '/terms/motivation/' },
     { query: 'extraversion معنى', expectedType: 'content', expectedDestination: '/terms/extraversion/' },
     { query: 'تعريف الحزن', expectedType: 'content', expectedDestination: '/terms/sadness/' },
@@ -207,7 +201,7 @@ try {
   }
 
   console.log(
-    `Public preservation contract passed: >=${baseline.publicSectors} sectors, >=${baseline.publicCategories} categories, >=${baseline.publishedContent} published pages, >=${baseline.indexablePublishedContent} indexable published pages; required sectors and critical searches preserved.`,
+    `Public preservation contract passed: >=${baseline.publicSectors} sectors, >=${baseline.publicCategories} categories, >=${baseline.publishedContent} published pages, >=${baseline.indexablePublishedContent} published pages with index/follow; required sectors and critical searches preserved.`,
   );
 } catch (error) {
   console.error(`PUBLIC PRESERVATION CONTRACT FAILED: ${describeError(error)}`);
