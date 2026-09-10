@@ -119,6 +119,7 @@ export async function GET(request: Request) {
     '/sitemaps/daily-tools.xml',
     '/sitemaps/taxonomy.xml',
     '/sitemaps/cognitive-lab.xml',
+    '/sitemaps/cochrane-guides.xml',
     '/sitemaps/addiction-atlas.xml',
     '/sitemaps/social-work.xml',
     '/sitemaps/palliative-care.xml',
