@@ -72,7 +72,8 @@ if (!catalog.includes('getTopicReferences')) fail('catalog must expose topic-spe
 if (!catalog.includes('guidedAssessmentTopics.length * 2')) fail('catalog must derive the 100 legacy aliases from the 50-topic source');
 if (!catalog.includes("legacyNumber % 2 === 1 ? 'adult' : 'child'")) fail('legacy odd/even audience parity mapping is missing');
 
-if (!detail.includes('index: false')) fail('historical detail aliases must remain noindex');
+if (!detail.includes('index: true')) fail('historical detail aliases must remain indexable');
+if (!detail.includes('follow: true')) fail('historical detail aliases must remain followable');
 if (!detail.includes("path: '/guided-assessment'")) fail('historical aliases must canonicalize to the consolidated hub');
 if (!hub.includes('index: true')) fail('consolidated hub must be the indexable canonical surface');
 if (!hub.includes('100</strong> رابط تاريخي محفوظ')) fail('hub must disclose the 100-route consolidation');
@@ -88,4 +89,4 @@ if (!detail.includes('المراجع المرتبطة بهذا الموضوع و
 if (!detail.includes('هذه الصفحة ليست خدمة طوارئ')) fail('detail route must preserve an emergency boundary fallback');
 if (!detail.includes('topicGuidance?.safety')) fail('detail routes must render topic-specific safety guidance when present');
 
-if (!process.exitCode) console.log('Guided assessment gold-standard contract passed: 50 topics, 100 preserved aliases, mandatory safety branches for critical topics, topic-specific focus/boundaries/references, no scoring or answer persistence.');
+if (!process.exitCode) console.log('Guided assessment gold-standard contract passed: 50 topics, 100 preserved indexable aliases, mandatory safety branches for critical topics, topic-specific focus/boundaries/references, no scoring or answer persistence.');
