@@ -23,6 +23,8 @@ import org.healthrenewal.basira.perception.ArFrameState
 import java.util.UUID
 
 private const val RC7_ANCHOR_LIMIT = 12
+private const val RC7_ROUTE_SAMPLE_METERS = 0.07f
+private const val RC7_ROUTE_MIN_TRACKING = 0.80f
 
 @Composable
 fun ScanScreen(store: JsonStore, onSaved: (PlaceMap) -> Unit, onBack: () -> Unit) {
@@ -34,6 +36,7 @@ fun ScanScreen(store: JsonStore, onSaved: (PlaceMap) -> Unit, onBack: () -> Unit
     LaunchedEffect(Unit) {
         locator.currentLocation { fix -> geoSignature = fix; locationResolved = true }
     }
+
     val mapId = remember { UUID.randomUUID().toString() }
     val mapCreatedAt = remember { System.currentTimeMillis() }
     val pendingAnchorFiles = remember { mutableStateListOf<String>() }
@@ -54,6 +57,7 @@ fun ScanScreen(store: JsonStore, onSaved: (PlaceMap) -> Unit, onBack: () -> Unit
     val mappingMonitor = remember { MappingQualityMonitor() }
     var liveMappingQuality by remember { mutableStateOf<MappingLiveQuality?>(null) }
     var editorBaseline by remember { mutableStateOf<List<PoseSample>>(emptyList()) }
+    var editorLandmarksBaseline by remember { mutableStateOf<List<Landmark>>(emptyList()) }
     var draftMessage by remember { mutableStateOf<String?>(null) }
     var workingCopyDirty by remember { mutableStateOf(false) }
 
@@ -83,7 +87,9 @@ fun ScanScreen(store: JsonStore, onSaved: (PlaceMap) -> Unit, onBack: () -> Unit
         if (route.size < 2) return null
         val normalized = normalizedWorkingMap()
         val report = MapQualityValidator.validate(normalized)
-        store.saveMap(normalized) // Draft persistence is unconditional; navigation readiness remains strict.
+        // Draft persistence is unconditional once there is an actual segment.
+        // Navigation readiness remains governed by the stricter validator.
+        store.saveMap(normalized)
         pendingAnchorFiles.clear()
         qualityReport = report
         if (adoptNormalized) adoptNormalizedWorkingCopy(normalized)
@@ -94,6 +100,33 @@ fun ScanScreen(store: JsonStore, onSaved: (PlaceMap) -> Unit, onBack: () -> Unit
             "تم حفظ التسجيل كمسودة محلية. لن يصدر بصيرة أوامر حركة منها حتى تستوفي متطلبات السلامة والجودة."
         }
         return normalized
+    }
+
+    fun moveRoutePoint(index: Int, newPosition: Vec3) {
+        if (index !in route.indices) return
+        val oldPosition = route[index].position
+        val dx = newPosition.x - oldPosition.x
+        val dz = newPosition.z - oldPosition.z
+        route[index] = route[index].copy(position = newPosition)
+
+        // Keep a destination/hazard that was effectively attached to this sample
+        // attached to it after a manual correction. Do not move visual anchors:
+        // those represent independently observed physical reference poses.
+        for (landmarkIndex in landmarks.indices) {
+            val landmark = landmarks[landmarkIndex]
+            if (RoutePlanner.horizontalDistance(landmark.position, oldPosition) <= 0.18f) {
+                landmarks[landmarkIndex] = landmark.copy(
+                    position = landmark.position.copy(
+                        x = landmark.position.x + dx,
+                        z = landmark.position.z + dz
+                    )
+                )
+            }
+        }
+        mapperSafetyReviewed = false
+        workingCopyDirty = true
+        qualityReport = null
+        draftMessage = "تم تعديل النقطة ${index + 1}. أُلغيت علامة المراجعة السابقة لأن هندسة المسار تغيرت؛ راجع المسار ثم احفظ التعديل."
     }
 
     DisposableEffect(Unit) {
@@ -110,9 +143,12 @@ fun ScanScreen(store: JsonStore, onSaved: (PlaceMap) -> Unit, onBack: () -> Unit
                 if (recording) {
                     val liveQuality = mappingMonitor.observe(p)
                     liveMappingQuality = liveQuality
-                    if (p.trackingConfidence >= 0.70f && liveQuality.samplingAllowed) {
+                    if (p.trackingConfidence >= RC7_ROUTE_MIN_TRACKING && liveQuality.samplingAllowed) {
                         val last = route.lastOrNull()
-                        if (last == null || RoutePlanner.horizontalDistance(last.position, p.position) >= 0.10f || p.t - last.t >= 650L) {
+                        // Do not create time-based points while standing still; they
+                        // mainly encode hand jitter. Add a sample only after genuine
+                        // floor-plane movement from the last accepted point.
+                        if (last == null || RoutePlanner.horizontalDistance(last.position, p.position) >= RC7_ROUTE_SAMPLE_METERS) {
                             route += p
                         }
                     }
@@ -128,13 +164,18 @@ fun ScanScreen(store: JsonStore, onSaved: (PlaceMap) -> Unit, onBack: () -> Unit
             Text(status, color = Color.White, fontSize = 13.sp)
             Text(scanInstruction(route.size, recording), color = Color.White)
             if (recording) liveMappingQuality?.let { live ->
-                Text(live.message, color = if (live.samplingAllowed) Color.White else MaterialTheme.colorScheme.errorContainer, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                Text(
+                    live.message,
+                    color = if (live.samplingAllowed) Color.White else MaterialTheme.colorScheme.errorContainer,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
             }
         }
 
         Card(Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(10.dp)) {
             Column(
-                Modifier.padding(14.dp).heightIn(max = 410.dp).verticalScroll(rememberScrollState()),
+                Modifier.padding(14.dp).heightIn(max = 430.dp).verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(9.dp)
             ) {
                 OutlinedTextField(
@@ -144,6 +185,40 @@ fun ScanScreen(store: JsonStore, onSaved: (PlaceMap) -> Unit, onBack: () -> Unit
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
+
+                draftMessage?.let {
+                    Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)) {
+                        Text(it, Modifier.padding(10.dp), fontSize = 13.sp)
+                    }
+                }
+
+                // Put the route drawing at the top of the review flow so it is
+                // immediately visible after the mapper presses Finish.
+                if (!recording && route.size >= 2 && editorBaseline.isNotEmpty()) {
+                    EditableRoutePreview(
+                        route = route,
+                        landmarks = landmarks,
+                        onMovePoint = { index, newPosition -> moveRoutePoint(index, newPosition) },
+                        onResetPoint = { index ->
+                            if (index in route.indices && index in editorBaseline.indices) {
+                                moveRoutePoint(index, editorBaseline[index].position)
+                            }
+                        },
+                        onResetAll = {
+                            route.clear(); route.addAll(editorBaseline)
+                            landmarks.clear(); landmarks.addAll(editorLandmarksBaseline)
+                            mapperSafetyReviewed = false
+                            workingCopyDirty = true
+                            qualityReport = null
+                            draftMessage = "عادت هندسة المسار إلى التسجيل الأصلي. راجعها وأعد تأكيد السلامة قبل الاعتماد."
+                        }
+                    )
+                    OutlinedButton(
+                        onClick = { persistDraft(adoptNormalized = true) },
+                        modifier = Modifier.fillMaxWidth()
+                    ) { Text(if (workingCopyDirty) "احفظ تعديلات المسار كمسودة" else "احفظ المسودة مرة أخرى") }
+                }
+
                 Text("نطاق الخريطة", fontWeight = FontWeight.SemiBold)
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     FilterChip(
@@ -171,13 +246,20 @@ fun ScanScreen(store: JsonStore, onSaved: (PlaceMap) -> Unit, onBack: () -> Unit
                     fontSize = 12.sp
                 )
                 Text("نقاط المسار: ${route.size} • العلامات: ${landmarks.size} • المراسي: ${visualAnchors.size}/$RC7_ANCHOR_LIMIT")
-                Text(if (!locationResolved) "تحديد موقع المكان…" else if (geoSignature != null) "تم ربط المكان بموقع تقريبي للعثور عليه لاحقًا" else "الموقع غير متاح؛ يمكن حفظ الخريطة لكن لن تُقترح تلقائيًا عند العودة", fontSize = 12.sp)
+                Text(
+                    if (!locationResolved) "تحديد موقع المكان…"
+                    else if (geoSignature != null) "تم ربط المكان بموقع تقريبي للعثور عليه لاحقًا"
+                    else "الموقع غير متاح؛ يمكن حفظ الخريطة لكن لن تُقترح تلقائيًا عند العودة",
+                    fontSize = 12.sp
+                )
+
                 if (!recording) {
                     Button(
                         onClick = {
                             qualityReport = null
                             draftMessage = null
                             editorBaseline = emptyList()
+                            editorLandmarksBaseline = emptyList()
                             workingCopyDirty = false
                             route.clear()
                             landmarks.clear()
@@ -189,7 +271,7 @@ fun ScanScreen(store: JsonStore, onSaved: (PlaceMap) -> Unit, onBack: () -> Unit
                             liveMappingQuality = null
                             recording = true
                         },
-                        enabled = latest?.pose?.trackingConfidence ?: 0f >= .7f,
+                        enabled = latest?.pose?.trackingConfidence ?: 0f >= RC7_ROUTE_MIN_TRACKING,
                         modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)
                     ) { Text("ابدأ تسجيل المسار") }
                 } else {
@@ -199,7 +281,8 @@ fun ScanScreen(store: JsonStore, onSaved: (PlaceMap) -> Unit, onBack: () -> Unit
                             val saved = persistDraft(adoptNormalized = true)
                             if (saved != null) {
                                 editorBaseline = saved.route.toList()
-                                draftMessage = "تم إنهاء التسجيل وحفظ مسودة تلقائيًا. راجع الرسم أدناه واسحب أي نقطة تحتاج تصحيحًا، ثم احفظ التعديلات."
+                                editorLandmarksBaseline = saved.landmarks.toList()
+                                draftMessage = "تم إنهاء التسجيل وحفظ مسودة تلقائيًا. ظهر المسار أعلاه؛ اختر أو اسحب أي نقطة تحتاج تصحيحًا، ثم احفظ التعديلات."
                             } else {
                                 draftMessage = "لم تُحفظ مسودة بعد لأن التسجيل لا يحتوي نقطتين موثوقتين على الأقل."
                             }
@@ -208,46 +291,7 @@ fun ScanScreen(store: JsonStore, onSaved: (PlaceMap) -> Unit, onBack: () -> Unit
                     ) { Text("أنهِ التسجيل واعرض المسار") }
                 }
 
-                if (!recording && route.size >= 2 && editorBaseline.isNotEmpty()) {
-                    EditableRoutePreview(
-                        route = route,
-                        landmarks = landmarks,
-                        onMovePoint = { index, newPosition ->
-                            if (index in route.indices) {
-                                route[index] = route[index].copy(position = newPosition)
-                                workingCopyDirty = true
-                                qualityReport = null
-                                draftMessage = "تم تعديل النقطة ${index + 1}. التعديل الحالي لم يُحفظ بعد."
-                            }
-                        },
-                        onResetPoint = { index ->
-                            if (index in route.indices && index in editorBaseline.indices) {
-                                route[index] = editorBaseline[index]
-                                workingCopyDirty = true
-                                qualityReport = null
-                                draftMessage = "أُعيدت النقطة ${index + 1} إلى موضعها الأصلي. احفظ المسودة لتثبيت التغيير."
-                            }
-                        },
-                        onResetAll = {
-                            route.clear(); route.addAll(editorBaseline)
-                            workingCopyDirty = true
-                            qualityReport = null
-                            draftMessage = "أُلغيت تعديلات المسار وعاد الرسم إلى التسجيل الأصلي. احفظ المسودة لتثبيت ذلك."
-                        }
-                    )
-                    OutlinedButton(
-                        onClick = { persistDraft(adoptNormalized = true) },
-                        modifier = Modifier.fillMaxWidth()
-                    ) { Text(if (workingCopyDirty) "احفظ تعديلات المسار كمسودة" else "احفظ المسودة مرة أخرى") }
-                }
-
-                draftMessage?.let {
-                    Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)) {
-                        Text(it, Modifier.padding(10.dp), fontSize = 13.sp)
-                    }
-                }
-
-                latest?.pose?.takeIf { recording && it.trackingConfidence >= .7f }?.let { pose ->
+                latest?.pose?.takeIf { recording && it.trackingConfidence >= RC7_ROUTE_MIN_TRACKING }?.let { pose ->
                     OutlinedTextField(
                         value = landmarkLabel,
                         onValueChange = { landmarkLabel = it.take(50) },
@@ -302,14 +346,21 @@ fun ScanScreen(store: JsonStore, onSaved: (PlaceMap) -> Unit, onBack: () -> Unit
                         enabled = latest?.pose?.trackingConfidence ?: 0f >= .9f,
                         modifier = Modifier.fillMaxWidth()
                     ) { Text("التقط مرساة بصرية ثابتة") }
-                    Text("اختر لوحة أو علامة ثابتة على سطح رأسي غني بالتفاصيل، وصوّرها من الأمام بعد أن يتعرف ARCore على السطح. لا تستخدم شخصًا أو شاشة متغيرة أو سطحًا أفقيًا.", fontSize = 12.sp)
+                    Text(
+                        "اختر لوحة أو علامة ثابتة على سطح رأسي غني بالتفاصيل، وصوّرها من الأمام بعد أن يتعرف ARCore على السطح. لا تستخدم شخصًا أو شاشة متغيرة أو سطحًا أفقيًا.",
+                        fontSize = 12.sp
+                    )
                     anchorMessage?.let { Text(it, fontSize = 13.sp) }
                 }
 
                 Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)) {
                     Row(Modifier.fillMaxWidth().padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
                         Checkbox(checked = mapperSafetyReviewed, onCheckedChange = { mapperSafetyReviewed = it })
-                        Text("أنا الشخص المبصر الذي صوّر المكان، وقد راجعت الدرج والحواف والعوائق الثابتة ومناطق الخطر وأضفت العلامات اللازمة.", Modifier.weight(1f), fontSize = 13.sp)
+                        Text(
+                            "أنا الشخص المبصر الذي صوّر المكان، وقد راجعت الرسم بعد أي تعديل وراجعت الدرج والحواف والعوائق الثابتة ومناطق الخطر وأضفت العلامات اللازمة.",
+                            Modifier.weight(1f),
+                            fontSize = 13.sp
+                        )
                     }
                 }
 
