@@ -1,0 +1,99 @@
+name: Basira RC6 Android CI
+
+on:
+  push:
+    branches:
+      - agent/basira-rc6-20260910
+    paths:
+      - 'basira_rc6_ci/**'
+      - '.github/workflows/basira-rc6-build.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android 36 SDK
+        shell: bash
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager 'platforms;android-36' 'build-tools;36.0.0' 'platform-tools'
+
+      - name: Set up Gradle 9.6
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.6.0'
+
+      - name: Reconstruct Basira RC6 source
+        shell: bash
+        run: |
+          cat basira_rc6_ci/parts/part*.b64 | base64 --decode > /tmp/basira-rc6-source.tar.gz
+          echo '48757025fa6f0710c7257302287ce17e852b2539348462ead8498083cf0a0d64  /tmp/basira-rc6-source.tar.gz' | sha256sum -c -
+          mkdir -p basira_rc6
+          tar -xzf /tmp/basira-rc6-source.tar.gz -C basira_rc6 --strip-components=1
+          test -f basira_rc6/build.gradle.kts
+          test -f basira_rc6/app/build.gradle.kts
+
+      - name: Fetch verified EfficientDet Lite0 model
+        shell: bash
+        run: |
+          mkdir -p basira_rc6/app/src/main/assets
+          curl -fL --retry 3 --retry-delay 2 \
+            -o basira_rc6/app/src/main/assets/efficientdet_lite0.tflite \
+            'https://storage.googleapis.com/mediapipe-models/object_detector/efficientdet_lite0/int8/1/efficientdet_lite0.tflite'
+          echo '0720bf247bd76e6594ea28fa9c6f7c5242be774818997dbbeffc4da460c723bb  basira_rc6/app/src/main/assets/efficientdet_lite0.tflite' | sha256sum -c -
+
+      - name: Core smoke tests
+        shell: bash
+        run: cd basira_rc6 && bash tools/run-core-smoke.sh
+
+      - name: Unit tests lint and APK builds
+        shell: bash
+        run: |
+          gradle -p basira_rc6 \
+            :app:testDebugUnitTest \
+            :app:lintDebug \
+            :app:lintRelease \
+            :app:assembleDebug \
+            :app:assembleRelease \
+            --stacktrace
+
+      - name: Verify debug APK
+        shell: bash
+        run: |
+          APK='basira_rc6/app/build/outputs/apk/debug/app-debug.apk'
+          test -f "$APK"
+          "$ANDROID_HOME/build-tools/36.0.0/zipalign" -c -P 16 -v 4 "$APK"
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose --print-certs "$APK"
+          sha256sum "$APK" | tee basira_rc6/app-debug.apk.sha256
+
+      - name: Upload RC6 build evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: basira-rc6-build
+          if-no-files-found: warn
+          retention-days: 14
+          path: |
+            basira_rc6/app/build/outputs/apk/debug/app-debug.apk
+            basira_rc6/app/build/outputs/apk/release/app-release-unsigned.apk
+            basira_rc6/app/build/reports/lint-results-*.html
+            basira_rc6/app/build/reports/tests/**
+            basira_rc6/app/build/test-results/**
+            basira_rc6/app-debug.apk.sha256
