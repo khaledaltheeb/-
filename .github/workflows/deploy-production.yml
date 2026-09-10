@@ -99,6 +99,12 @@ jobs:
           node scripts/source-registry-v1-contract.mjs
           node scripts/research-integrations-contract.mjs
 
+      - name: SEO identity and public preservation contracts
+        run: |
+          npm run search-appearance:validate
+          npm run semantic-seo:validate
+          npm run public-preservation:validate
+
       - name: Build Cloudflare production Worker
         env:
           CI: 'false'
@@ -118,12 +124,40 @@ jobs:
           echo 'LIVE_CHECK homepage'
           curl -fsS -H 'Cache-Control: no-cache, no-store, max-age=0' -H 'Pragma: no-cache' --retry 6 --retry-delay 2 --retry-all-errors "${base}/?deploy=${stamp}" >/tmp/home.html
           grep -q 'healthrenewal.org' /tmp/home.html
+          grep -q 'منصة روافد' /tmp/home.html
+          grep -q '/pwa-icon-192' /tmp/home.html
           grep -q 'مختبر الأنشطة والاختبارات للأطفال' /tmp/home.html
           grep -q '/capabilities/kids-lab/' /tmp/home.html
-          echo 'LIVE_OK homepage Kids Lab card'
+          echo 'LIVE_OK homepage institutional identity and Kids Lab card'
           visible_tools="$(grep -o 'toolname="[^"]*"' /tmp/home.html | sort -u | tr '\n' ' ' || true)"
           echo "WEBMCP_LIVE_DIAGNOSTIC: ${visible_tools:-homepage-ISR-may-still-serve-the-previous-render}"
           echo 'LIVE_OK homepage; strict rendered WebMCP coverage is enforced by Rawafid Fast Quality Gate'
+
+          echo 'LIVE_CHECK institutional public pages'
+          declare -a institutional_urls=(
+            '/guides/'
+            '/media-kit'
+            '/team-and-partners'
+            '/stats'
+            '/privacy'
+            '/terms'
+            '/editorial-policy'
+          )
+          for route in "${institutional_urls[@]}"; do
+            safe_name="$(printf '%s' "$route" | tr '/-' '__' | tr -cd '[:alnum:]_')"
+            out="/tmp/institutional${safe_name}.html"
+            status="$(curl -sS -L -H 'Cache-Control: no-cache, no-store, max-age=0' -H 'Pragma: no-cache' --retry 4 --retry-delay 2 --retry-all-errors --max-time 45 -o "$out" -w '%{http_code}' "${base}${route}?deploy=${stamp}" || true)"
+            if ! [[ "$status" =~ ^2[0-9][0-9]$ ]]; then
+              echo "Institutional page HTTP failure: ${route} status=${status:-curl-error}" >&2
+              exit 1
+            fi
+            if grep -qi 'noindex' "$out"; then
+              echo "Institutional public page is unexpectedly noindex: ${route}" >&2
+              exit 1
+            fi
+            grep -q 'canonical' "$out"
+            echo "LIVE_OK institutional ${route}"
+          done
 
           echo 'LIVE_CHECK Dyslexia Norway resources'
           declare -a dyslexia_urls=(
