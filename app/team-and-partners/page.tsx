@@ -6,11 +6,12 @@ import { buildSeoMetadata } from '@/lib/seo';
 import styles from './team-and-partners.module.css';
 
 export const metadata: Metadata = buildSeoMetadata({
-  title: 'فريق العمل والشركاء | دليل موثّق',
-  description: 'صفحة الفريق والشراكات العلمية بعد نقل محتواها التاريخي إلى روافد الجديدة: التحقق، الموافقة، الخصوصية، حالة الملفات ومسارات الانضمام.',
+  title: 'فريق روافد والشراكات العلمية | الحوكمة والتحقق',
+  description: 'تعرف إلى منهج روافد في ملفات المختصين والمراكز والشراكات العلمية: التحقق والموافقة والخصوصية وحالة الملفات ومسارات الانضمام والتعاون.',
   path: '/team-and-partners',
-  index: false,
+  index: true,
   follow: true,
+  keywords: ['فريق روافد', 'شراكات روافد', 'الشراكات العلمية', 'المختصون', 'المراكز', 'حوكمة الشراكات', 'منصة روافد'],
 });
 
 const rules = [
