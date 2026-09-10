@@ -163,8 +163,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          rm -rf basira-rc9/.gradle basira-rc9/app/build
-          (cd basira-rc9 && zip -qr ../Basira-v1.0.0-rc9-source.zip .)
+          rm -rf /tmp/basira-rc9-source
+          cp -a basira-rc9 /tmp/basira-rc9-source
+          rm -rf /tmp/basira-rc9-source/.gradle /tmp/basira-rc9-source/app/build
+          (cd /tmp/basira-rc9-source && zip -qr "$GITHUB_WORKSPACE/Basira-v1.0.0-rc9-source.zip" .)
           sha256sum Basira-v1.0.0-rc9-source.zip > Basira-v1.0.0-rc9-source.zip.sha256
 
       - name: Upload Basira RC9 artifacts
