@@ -2,10 +2,10 @@ import TrustPage from '@/components/trust-page';
 import { buildSeoMetadata } from '@/lib/seo';
 
 export const metadata = buildSeoMetadata({
-  title: 'السياسة التحريرية',
+  title: 'السياسة التحريرية ومعايير النشر والمراجعة في روافد',
   description: 'السياسة التحريرية لمنصة روافد: الدقة، وضوح الصفة المهنية، الفصل بين المحتوى والإعلان، أسلوب اللغة، الاستشهاد بالمصادر والتصحيح المنهجي.',
   path: '/editorial-policy', index: true,
-  keywords: ['السياسة التحريرية', 'معايير المحتوى', 'روافد', 'المحتوى الصحي العربي'],
+  keywords: ['السياسة التحريرية', 'معايير النشر', 'معايير المحتوى', 'مراجعة المحتوى', 'المحتوى الصحي العربي', 'منصة روافد'],
 });
 
 export default function EditorialPolicyPage() {
