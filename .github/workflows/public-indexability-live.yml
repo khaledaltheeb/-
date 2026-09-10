@@ -39,8 +39,8 @@ jobs:
       - name: Crawl production sitemap population for indexability
         env:
           PRODUCTION_ORIGIN: https://healthrenewal.org
-          INDEXABILITY_CONCURRENCY: '4'
-          INDEXABILITY_PACING_MS: '100'
+          INDEXABILITY_CONCURRENCY: '10'
+          INDEXABILITY_PACING_MS: '50'
           INDEXABILITY_TIMEOUT_MS: '30000'
           INDEXABILITY_ATTEMPTS: '5'
         run: node scripts/live-production-indexability-contract.mjs
