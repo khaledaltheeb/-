@@ -177,6 +177,12 @@ try {
     { query: 'الإدمان والتعافي', expectedType: 'sector', expectedDestination: '/sectors/addiction-recovery' },
     { query: 'ذوو الاحتياجات الخاصة', expectedType: 'sector', expectedDestination: '/sectors/special-needs-inclusion' },
     { query: 'القلق الاجتماعي', expectedType: 'content', expectedDestination: '/psychology/social-anxiety/' },
+    // Search Console has already exposed demand for these exact term intents. Keep the
+    // reviewed term pages as the first internal-search owner so future publishing cannot
+    // silently cannibalize the query with a broader article or an unreleased legacy page.
+    { query: 'معنى موتفيشن', expectedType: 'content', expectedDestination: '/terms/motivation/' },
+    { query: 'extraversion معنى', expectedType: 'content', expectedDestination: '/terms/extraversion/' },
+    { query: 'تعريف الحزن', expectedType: 'content', expectedDestination: '/terms/sadness/' },
   ];
 
   for (const test of criticalSearches) {
