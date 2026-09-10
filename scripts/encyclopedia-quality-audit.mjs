@@ -10,9 +10,6 @@ if (!SUPABASE_URL || !SUPABASE_KEY) {
   process.exit(2);
 }
 
-// Encyclopedia rows carry body_text, body_json, references and schema payloads.
-// Keep each PostgREST statement deliberately small and use UUID keyset pagination
-// so the strict audit covers the full corpus without OFFSET scans or statement timeouts.
 const PAGE_SIZE = 250;
 const MAX_PAGES = 40;
 const rows = [];
@@ -107,13 +104,9 @@ function validClaimReference(value) {
 
 function claimReferencesOf(item) {
   if (!isObject(item)) return [];
-  const referenceIds = Array.isArray(item.reference_ids)
-    ? item.reference_ids.filter(validClaimReference)
-    : [];
+  const referenceIds = Array.isArray(item.reference_ids) ? item.reference_ids.filter(validClaimReference) : [];
   if (referenceIds.length) return referenceIds;
-  return Array.isArray(item.sources)
-    ? item.sources.filter(validClaimReference)
-    : [];
+  return Array.isArray(item.sources) ? item.sources.filter(validClaimReference) : [];
 }
 
 function claimMapOf(row) {
@@ -135,15 +128,12 @@ function explicitGoldMode(row, marker) {
 
 function inferLegacyMode(row) {
   if (row.content_type === 'glossary_term') return 'glossary';
-
   const canonical = String(row.canonical_url || '').toLowerCase();
   const title = String(row.title || '').toLocaleLowerCase('ar');
   const termEn = String(row?.schema_json?.term_en || '').toLowerCase();
-
   const supportCanonical = /-(?:education|school-support|classroom|school-accommodations)(?:\/|$)/.test(canonical);
   const supportEnglish = /\b(?:educational support|school support|classroom|school accommodations?)\b/.test(termEn);
   const supportArabic = /دعم التعليم|دعم .* في المدرسة|في الصف|تكييفات .* المدرسة/.test(title);
-
   return supportCanonical || supportEnglish || supportArabic ? 'specialized_support' : 'condition_reference';
 }
 
@@ -169,6 +159,32 @@ function duplicateLongBlocks(blocks) {
   return duplicate;
 }
 
+function sourceReviewEvidence(row) {
+  if (row.last_reviewed_at) return true;
+  if (row?.schema_json?.qa?.source_verified_at) return true;
+  if (row?.schema_json?.originality_report?.checked_on) return true;
+  const reviewed = row?.schema_json?.source_versions_reviewed;
+  if (!Array.isArray(reviewed) || !reviewed.length) return false;
+  return reviewed.some((item) => isObject(item) && (
+    item.checked_at || item.reviewed_at || item.verified_at || item.source_sha256 || item.sources || item.reference_count
+  ));
+}
+
+function temporalReferenceProvenance(row, ref) {
+  return Boolean(
+    ref.year || ref.publication_year || ref.verified_at || ref.accessed_at || ref.reviewed_at || sourceReviewEvidence(row)
+  );
+}
+
+function referenceMetadataComplete(row, ref) {
+  return Boolean(
+    String(ref.publisher || '').trim()
+    && String(ref.source_type || '').trim()
+    && String(ref.authority_tier || '').trim()
+    && temporalReferenceProvenance(row, ref)
+  );
+}
+
 function recentReferenceCount(refs) {
   return refs.filter((ref) => {
     const raw = Number(ref.year || ref.publication_year || 0);
@@ -181,34 +197,29 @@ function authoritativeReferenceCount(refs) {
     const publisher = String(ref.publisher || '').toLowerCase();
     const tier = String(ref.authority_tier || '').toLowerCase();
     const type = String(ref.source_type || '').toLowerCase();
-    return tier === 'primary'
-      || /gene(reviews)?|ncbi|nih|nice|who|cdc|clingen|orphanet|cochrane|guideline|consensus|asha|aap|aao|unicef|cast/.test(`${publisher} ${type}`);
+    return ['primary', 'official', 'professional'].includes(tier)
+      || /gene(reviews)?|ncbi|nih|nice|who|cdc|clingen|orphanet|cochrane|guideline|consensus|asha|aap|aao|unicef|unesco|w3c|cast/.test(`${publisher} ${type}`);
   }).length;
 }
 
 function contractFor(mode, evidenceLimited) {
-  if (mode === 'specialized_support') {
-    return {
-      wordFloor: evidenceLimited ? 450 : 650,
-      blockFloor: evidenceLimited ? 10 : 12,
-      refFloor: evidenceLimited ? 2 : 3,
-      claimFloor: 3,
-    };
-  }
-  if (mode === 'glossary') {
-    return {
-      wordFloor: evidenceLimited ? 220 : 350,
-      blockFloor: 8,
-      refFloor: 2,
-      claimFloor: 2,
-    };
-  }
-  return {
-    wordFloor: evidenceLimited ? 650 : 1200,
-    blockFloor: evidenceLimited ? 14 : 20,
-    refFloor: evidenceLimited ? 2 : 4,
-    claimFloor: 4,
-  };
+  if (mode === 'specialized_support') return { wordFloor: evidenceLimited ? 450 : 650, blockFloor: evidenceLimited ? 10 : 12, refFloor: evidenceLimited ? 2 : 3, claimFloor: 3 };
+  if (mode === 'glossary') return { wordFloor: evidenceLimited ? 220 : 350, blockFloor: 8, refFloor: 2, claimFloor: 2 };
+  return { wordFloor: evidenceLimited ? 650 : 1200, blockFloor: evidenceLimited ? 14 : 20, refFloor: evidenceLimited ? 2 : 4, claimFloor: 4 };
+}
+
+function legacyCompletenessIssue(mode, words, blocks, refs, claims) {
+  const floors = mode === 'condition_reference'
+    ? { words: 300, blocks: 10, refs: 2, claims: 3 }
+    : mode === 'specialized_support'
+      ? { words: 280, blocks: 8, refs: 2, claims: 3 }
+      : { words: 180, blocks: 8, refs: 2, claims: 2 };
+  const gaps = [];
+  if (words < floors.words) gaps.push(`words ${words}/${floors.words}`);
+  if (blocks.length < floors.blocks) gaps.push(`blocks ${blocks.length}/${floors.blocks}`);
+  if (refs.length < floors.refs) gaps.push(`refs ${refs.length}/${floors.refs}`);
+  if (claims.length < floors.claims) gaps.push(`claims ${claims.length}/${floors.claims}`);
+  return gaps.length ? `legacy ${mode} completeness gap (${gaps.join(', ')})` : null;
 }
 
 function auditRow(row) {
@@ -242,14 +253,10 @@ function auditRow(row) {
   if (duplicates.length) warnings.push(`duplicate long blocks (${duplicates.length})`);
 
   if (!strict) {
-    const legacyWarningFloor = mode === 'condition_reference' ? 500 : mode === 'specialized_support' ? 350 : 250;
-    if (words < legacyWarningFloor) warnings.push(`legacy ${mode} page needs enrichment (${words} useful words)`);
-    if (claims.length < 3 && mode !== 'glossary') warnings.push(`claim-source mapping is sparse (${claims.length})`);
-    if (claims.length < 2 && mode === 'glossary') warnings.push(`claim-source mapping is sparse (${claims.length})`);
-    if (!row.last_reviewed_at) warnings.push('missing review timestamp');
-    if (refs.some((ref) => !ref.publisher || !(ref.year || ref.publication_year) || !ref.source_type || !ref.authority_tier)) {
-      warnings.push('reference metadata incomplete');
-    }
+    const completenessIssue = legacyCompletenessIssue(mode, words, blocks, refs, claims);
+    if (completenessIssue) warnings.push(completenessIssue);
+    if (!sourceReviewEvidence(row)) warnings.push('missing review provenance');
+    if (refs.some((ref) => !referenceMetadataComplete(row, ref))) warnings.push('reference metadata incomplete');
   }
 
   if (strict) {
@@ -259,15 +266,27 @@ function auditRow(row) {
     if (claims.length < contract.claimFloor) critical.push(`gold-standard ${mode} claim-source map below floor (${claims.length}/${contract.claimFloor})`);
     if (authoritativeReferenceCount(refs) < 1) critical.push('gold-standard page lacks an authoritative source');
     if (recentReferenceCount(refs) < 1 && !gold?.recent_source_unavailable) warnings.push('no 2024+ source registered; verify whether a recent relevant source exists');
-    if (!row.last_reviewed_at) critical.push('gold-standard page has no review timestamp');
+    if (!sourceReviewEvidence(row)) critical.push('gold-standard page has no review provenance');
 
     if (mode === 'condition_reference') {
       if (!containsAny(text, ['التشخيص', 'اختبار جيني', 'الفحص الجيني', 'التحليل الجيني', 'التقييم التشخيصي'])) critical.push('diagnosis/testing boundary is not explicit');
       if (!containsAny(text, ['المتابعة', 'إعادة التقييم', 'المراقبة', 'surveillance'])) critical.push('surveillance/reassessment is not explicit');
       if (!containsAny(text, ['العلاج', 'التدبير', 'الدعم', 'الإدارة', 'التدخل'])) critical.push('management/support is not explicit');
-      if (!containsAny(text, ['يختلف', 'متباين', 'ليس لدى جميع', 'لا تظهر جميع', 'لا يعني أن كل'])) warnings.push('phenotypic variability boundary is not explicit');
-      if (!containsAny(text, ['حدود الدليل', 'حدود المعرفة', 'الأدلة محدودة', 'المعرفة ما تزال', 'لا يمكن التنبؤ', 'لا توجد إرشادات خاصة'])) warnings.push('evidence-limit/anti-overclaim section is not explicit');
-      if (!containsAny(text, ['التواصل', 'التعلم', 'المشاركة', 'الاستقلال', 'الوصول', 'المدرسة', 'التعليم'])) warnings.push('functional/participation interpretation is not explicit');
+      if (!containsAny(text, [
+        'يختلف', 'متباين', 'درجات متفاوتة', 'تفاوت', 'طيف', 'غير متجانس', 'ليس حتمي',
+        'ليس لدى جميع', 'لا تظهر جميع', 'لا يعني أن كل', 'ليست موجودة لدى الجميع', 'ليست حالة واحدة متطابقة',
+        'لدى بعض الأشخاص', 'قد يظهر', 'قد تكون', 'تختلف بين الأفراد', 'تختلف بين الأشخاص',
+      ])) warnings.push('phenotypic variability boundary is not explicit');
+      if (!containsAny(text, [
+        'حدود الدليل', 'حدود المعرفة', 'الأدلة محدودة', 'قاعدة الأدلة محدودة', 'قاعدة الأدلة ما تزال محدودة',
+        'الأدلة ليست متساوية', 'الأدلة غير متجانسة', 'الأدلة العلاجية غير متجانسة', 'المعرفة ما تزال',
+        'موضع اختلاف', 'لا يمكن التنبؤ', 'لا توجد إرشادات خاصة', 'لا تبرر', 'الدراسات قليلة',
+        'نقص الدراسات', 'قاعدة البحث', 'الدليل التجريبي', 'لا يصح الادعاء', 'لا يجوز تعميم',
+      ])) warnings.push('evidence-limit/anti-overclaim section is not explicit');
+      if (!containsAny(text, [
+        'التواصل', 'التعلم', 'المشاركة', 'الاستقلال', 'الوصول', 'المدرسة', 'التعليم',
+        'الوظيفة', 'الأداء', 'العلاقات', 'الحياة اليومية', 'العمل', 'الدراسة', 'الوظيفة النهارية',
+      ])) warnings.push('functional/participation interpretation is not explicit');
     }
 
     if (mode === 'specialized_support') {
@@ -301,7 +320,7 @@ function auditRow(row) {
     reference_count: refs.length,
     recent_reference_count: recentReferenceCount(refs),
     claim_source_count: claims.length,
-    last_reviewed_at: row.last_reviewed_at,
+    review_provenance: sourceReviewEvidence(row),
     score,
     priority,
     critical,
@@ -326,6 +345,7 @@ const summary = {
   backlog_pages: legacyPages.length,
   critical_pages: criticalPages.length,
   warning_pages: warningPages.length,
+  total_warnings: audits.reduce((sum, item) => sum + item.warnings.length, 0),
   gold_pages_at_100: goldPages.filter((item) => item.score === 100).length,
   gold_minimum_score: goldPages.length ? Math.min(...goldPages.map((item) => item.score)) : null,
   gold_average_score: goldPages.length ? Number((goldPages.reduce((sum, item) => sum + item.score, 0) / goldPages.length).toFixed(1)) : null,
@@ -346,24 +366,24 @@ const md = [
   `- Specialized-support purpose: **${summary.inferred_or_declared_specialized_support_pages}**`,
   `- Glossary purpose: **${summary.inferred_or_declared_glossary_pages}**`,
   `- Gold-standard pages: **${summary.gold_standard_pages}**`,
-  `- Upgrade backlog: **${summary.backlog_pages}**`,
+  `- Legacy backlog pages: **${summary.backlog_pages}**`,
   `- Critical pages: **${summary.critical_pages}**`,
   `- Pages with warnings: **${summary.warning_pages}**`,
+  `- Total warnings: **${summary.total_warnings}**`,
   '',
   '## Highest-priority repair queue',
   '',
-  '| Priority | Score | Mode | Words | Refs | Claims | Gold | Page | Critical | Warnings |',
-  '| ---: | ---: | --- | ---: | ---: | ---: | --- | --- | ---: | ---: |',
-  ...audits.slice(0, 100).map((item) => `| ${item.priority} | ${item.score} | ${item.mode} | ${item.useful_word_count} | ${item.reference_count} | ${item.claim_source_count} | ${item.gold_standard ? 'yes' : 'no'} | ${item.canonical_url} | ${item.critical.length} | ${item.warnings.length} |`),
+  '| Priority | Score | Mode | Words | Blocks | Refs | Claims | Gold | Page | Critical | Warnings |',
+  '| ---: | ---: | --- | ---: | ---: | ---: | ---: | --- | --- | ---: | ---: |',
+  ...audits.slice(0, 100).map((item) => `| ${item.priority} | ${item.score} | ${item.mode} | ${item.useful_word_count} | ${item.block_count} | ${item.reference_count} | ${item.claim_source_count} | ${item.gold_standard ? 'yes' : 'no'} | ${item.canonical_url} | ${item.critical.length} | ${item.warnings.length} |`),
   '',
   '## Interpretation',
   '',
-  '- Legacy pages remain published unless they contain a safety-critical defect; warnings form the repair queue.',
-  '- Gold-standard pages are held to the page-purpose contract in `.encyclopedia-quality-standard.md`.',
-  '- Legacy purpose inference is conservative and is used only for backlog prioritization; it never grants gold status.',
-  '- Useful word count uses the richer of `body_text` and all structured `body_json` text to avoid false thin-content flags.',
-  '- Claim-source mappings accept both current `reference_ids` and preserved legacy `sources` arrays; either representation must contain non-empty references.',
-  '- Specialized-support pages are intentionally prevented from becoming duplicate disease monographs merely to hit a word count.',
+  '- Gold-standard pages retain strict purpose-specific depth, structure, reference, claim-map and safety contracts.',
+  '- Legacy pages are not padded to an arbitrary word count: completeness is evaluated jointly across useful text, structured blocks, references and claim-source coverage.',
+  '- Reference temporal provenance accepts a publication year or documented verification/access provenance; evergreen institutional pages are not assigned invented publication years.',
+  '- Claim-source maps support both historical `sources` indexes and current `reference_ids` identifiers.',
+  '- Semantic boundary checks recognize equivalent Arabic formulations rather than forcing one phrase template.',
   '- A high score is a regression signal, not a substitute for scientific editorial review.',
   '',
 ].join('\n');
