@@ -5,6 +5,7 @@ import { getPublicSectors } from '@/lib/public-taxonomy';
 
 const primaryLinks = [
   { href: '/sectors', label: 'القطاعات', secondary: false },
+  { href: '/sections', label: 'الأقسام', secondary: true },
   { href: '/sectors/mental-health', label: 'الصحة النفسية', secondary: false },
   { href: '/sectors/special-needs-inclusion', label: 'التربية الخاصة والدمج', secondary: false },
   { href: '/sectors/pediatric-oncology', label: 'سرطان الأطفال', secondary: false },
