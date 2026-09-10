@@ -4,8 +4,11 @@ import { BRAND_NAME, buildSeoMetadata } from '@/lib/seo';
 
 export const metadata = buildSeoMetadata({
   title: 'الملف الإعلامي لمنصة روافد',
-  description: 'تعريف مختصر بمنصة روافد ورسالتها ومجالاتها وقواعد استخدام اسمها ومحتواها في التغطية والتعاون الإعلامي.',
-  path: '/media-kit', index: false, follow: true,
+  description: 'تعريف بمنصة روافد ورسالتها ومجالاتها ومنهجها التحريري وقواعد استخدام الاسم والمحتوى في التغطية والتعاون الإعلامي.',
+  path: '/media-kit',
+  index: true,
+  follow: true,
+  keywords: ['منصة روافد', 'روافد', 'الملف الإعلامي روافد', 'الصحة النفسية', 'التربية الخاصة', 'التربية الدامجة', 'المحتوى العربي الصحي'],
 });
 
 export default function MediaKitPage() {
