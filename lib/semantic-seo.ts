@@ -76,11 +76,11 @@ export function buildSemanticSeoProfile(input: SemanticSeoInput): SemanticSeoPro
   const locale = localeFor(input.path);
   const topicKeywords = unique([...(input.keywords || []), ...(input.relatedTerms || [])], locale);
   const searchIntents = unique(input.searchIntents, locale);
-  const primaryTopic = primaryTopic(input, topicKeywords);
+  const resolvedPrimaryTopic = primaryTopic(input, topicKeywords);
   return {
     locale,
     domain: domainFor(input),
-    primaryTopic,
+    primaryTopic: resolvedPrimaryTopic,
     topicKeywords,
     searchIntents,
     keywords: unique([...topicKeywords, ...searchIntents], locale, 80),
