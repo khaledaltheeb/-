@@ -156,22 +156,30 @@ for (const sample of samples) {
 // Preserve the hard no-loss gate for published/public content. The baseline may move upward
 // as publishing continues, but it must never fall below the last verified floor.
 requireAll(preservation, [
-  'publicSectors: 9',
-  'publicCategories: 126',
-  'publishedContent:',
-  'indexablePublishedContent:',
+  'publicSectors: 13',
+  'publicCategories: 237',
+  'publishedContent: 8725',
+  'indexablePublishedContent: 8718',
   'published content decreased',
   'indexable published content decreased',
   'public sectors decreased',
   'public categories decreased',
 ], 'public no-loss protection');
 
+const publicSectorFloor = Number(preservation.match(/publicSectors:\s*(\d+)/)?.[1] ?? 0);
+const publicCategoryFloor = Number(preservation.match(/publicCategories:\s*(\d+)/)?.[1] ?? 0);
 const publishedFloor = Number(preservation.match(/publishedContent:\s*(\d+)/)?.[1] ?? 0);
 const indexableFloor = Number(preservation.match(/indexablePublishedContent:\s*(\d+)/)?.[1] ?? 0);
-if (publishedFloor < 3752) {
+if (publicSectorFloor < 13) {
+  throw new Error(`public no-loss protection: sector baseline regressed to ${publicSectorFloor}`);
+}
+if (publicCategoryFloor < 237) {
+  throw new Error(`public no-loss protection: category baseline regressed to ${publicCategoryFloor}`);
+}
+if (publishedFloor < 8725) {
   throw new Error(`public no-loss protection: published baseline regressed to ${publishedFloor}`);
 }
-if (indexableFloor < 3519) {
+if (indexableFloor < 8718) {
   throw new Error(`public no-loss protection: indexable published baseline regressed to ${indexableFloor}`);
 }
 
