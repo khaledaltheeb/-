@@ -116,7 +116,9 @@ requireText(lighthouseWorkflow, "'ask_rawafid_assistant'", 'production Agentic L
 requireText(lighthouseWorkflow, 'Prewarm canonical homepage cache', 'production Lighthouse must prewarm the canonical homepage before measuring it');
 requireText(lighthouseWorkflow, "url='https://healthrenewal.org/'", 'homepage prewarm must target the canonical root URL rather than a query-string diagnostic key');
 requireText(lighthouseWorkflow, 'HOMEPAGE_PREWARM_SECOND_TTFB=', 'homepage prewarm must emit its second-hit TTFB for diagnostics');
-requireText(deployWorkflow, "echo 'LIVE_OK homepage Kids Lab card'", 'production live verification must retain a fast homepage/Kids Lab smoke check while strict rendered WebMCP coverage remains enforced by the fast quality gate');
+requireText(deployWorkflow, "grep -q 'منصة روافد' /tmp/home.html", 'production live verification must assert the institutional Rawafid identity on the homepage');
+requireText(deployWorkflow, "grep -q '/pwa-icon-192' /tmp/home.html", 'production live verification must assert the stable raster SERP favicon');
+requireText(deployWorkflow, "grep -q '/capabilities/kids-lab/' /tmp/home.html", 'production live verification must retain the fast homepage/Kids Lab smoke check');
 forbidText(deployWorkflow, 'for attempt in $(seq 1 36); do', 'production deployment must not spend up to six minutes waiting for homepage ISR propagation');
 
 if (failures.length) {
