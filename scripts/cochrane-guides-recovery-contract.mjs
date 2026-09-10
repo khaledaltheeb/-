@@ -20,6 +20,7 @@ const requiredFiles = [
   'data/cochrane/methods-provenance-v1.json',
   'app/cochrane/guides/page.tsx',
   'app/cochrane/guides/[slug]/page.tsx',
+  'app/sitemaps/cochrane-guides.xml/route.ts',
   'app/sitemap.xml/route.ts',
 ];
 for (const path of requiredFiles) if (!fs.existsSync(path)) fail(`missing required file: ${path}`);
@@ -29,6 +30,7 @@ const batches = guideFiles.map((path) => JSON.parse(read(path)));
 const guides = batches.flatMap((batch) => batch.guides || []);
 const indexPage = read('app/cochrane/guides/page.tsx');
 const detailPage = read('app/cochrane/guides/[slug]/page.tsx');
+const guideSitemap = read('app/sitemaps/cochrane-guides.xml/route.ts');
 const sitemap = read('app/sitemap.xml/route.ts');
 const provenance = JSON.parse(read('data/cochrane/methods-provenance-v1.json'));
 
@@ -59,10 +61,12 @@ for (const guide of guides) {
   }
 }
 
-if (!indexPage.includes('index: false')) fail('guide index must remain noindex during recovery QA');
-if (!detailPage.includes('index: false')) fail('guide details must remain noindex during recovery QA');
-if (!indexPage.includes('50-guide pre-release corpus')) fail('pre-release status marker missing');
-if (sitemap.includes('/cochrane/guides/')) fail('pre-release guide routes must not be registered in root sitemap');
+if (!indexPage.includes('index: true')) fail('guide index must remain indexable after public release');
+if (!detailPage.includes('index: true')) fail('guide details must remain indexable after public release');
+if (!indexPage.includes('50-guide quality-governed corpus')) fail('public quality-governed release marker missing');
+if (!sitemap.includes('/sitemaps/cochrane-guides.xml')) fail('root sitemap must register Cochrane guide sitemap');
+if (!guideSitemap.includes("path: '/cochrane/guides/'")) fail('Cochrane guide sitemap must include the hub');
+if (!guideSitemap.includes('`/cochrane/guides/${guide.slug}/`')) fail('Cochrane guide sitemap must include all guide details');
 if (!detailPage.includes('methods-provenance-v1.json')) fail('detail renderer must consume provenance registry');
 if (!detailPage.includes('ROBINS-I V2 ما يزال مسودة')) fail('ROBINS-I V2 draft warning missing');
 if (!detailPage.includes('سجل حداثة المصادر')) fail('source freshness section missing');
@@ -84,4 +88,4 @@ for (const id of ['arabic-translation-back-translation', 'arabic-rtl-terminology
   if (!allSlugs.has(id)) fail(`missing Arabic governance guide: ${id}`);
 }
 
-if (!process.exitCode) console.log(`COCHRANE GUIDES RECOVERY CONTRACT PASSED: guides=${guides.length}`);
+if (!process.exitCode) console.log(`COCHRANE GUIDES PUBLIC RELEASE CONTRACT PASSED: guides=${guides.length}, indexable=true, dedicated_sitemap=true`);
