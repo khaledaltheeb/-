@@ -7,11 +7,12 @@ import { buildSeoMetadata } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = buildSeoMetadata({
-  title: 'إحصاءات المحتوى في روافد',
-  description: 'إحصاءات حية عن المحتوى والقطاعات العامة في منصة روافد، محسوبة من قاعدة النشر الحالية بدل الأرقام التاريخية القديمة.',
+  title: 'إحصاءات محتوى منصة روافد | الصفحات والقطاعات والأقسام',
+  description: 'إحصاءات حية عن حجم المحتوى المنشور والقطاعات والأقسام العامة في منصة روافد، محسوبة من قاعدة النشر الحالية دون احتساب المسودات.',
   path: '/stats',
-  index: false,
+  index: true,
   follow: true,
+  keywords: ['إحصاءات روافد', 'عدد صفحات روافد', 'محتوى منصة روافد', 'قطاعات روافد', 'أقسام روافد', 'منصة روافد'],
 });
 
 const typeLabels: Record<string, string> = {
