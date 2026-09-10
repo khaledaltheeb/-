@@ -208,15 +208,22 @@ function contractFor(mode, evidenceLimited) {
   return { wordFloor: evidenceLimited ? 650 : 1200, blockFloor: evidenceLimited ? 14 : 20, refFloor: evidenceLimited ? 2 : 4, claimFloor: 4 };
 }
 
-function legacyCompletenessIssue(mode, words, blocks, refs, claims) {
+function renderedBodyUnitCount(row) {
+  const body = String(row.body_text || '').replace(/\r\n?/g, '\n').trim();
+  if (!body) return 0;
+  return body.split(/\n\s*\n+/u).map((part) => part.trim()).filter(Boolean).length;
+}
+
+function legacyCompletenessIssue(mode, words, blocks, renderedUnits, refs, claims) {
   const floors = mode === 'condition_reference'
-    ? { words: 300, blocks: 10, refs: 2, claims: 3 }
+    ? { words: 300, structure: 10, refs: 2, claims: 3 }
     : mode === 'specialized_support'
-      ? { words: 280, blocks: 8, refs: 2, claims: 3 }
-      : { words: 180, blocks: 8, refs: 2, claims: 2 };
+      ? { words: 280, structure: 8, refs: 2, claims: 3 }
+      : { words: 180, structure: 6, refs: 2, claims: 2 };
+  const effectiveStructure = Math.max(blocks.length, renderedUnits);
   const gaps = [];
   if (words < floors.words) gaps.push(`words ${words}/${floors.words}`);
-  if (blocks.length < floors.blocks) gaps.push(`blocks ${blocks.length}/${floors.blocks}`);
+  if (effectiveStructure < floors.structure) gaps.push(`rendered structure ${effectiveStructure}/${floors.structure}`);
   if (refs.length < floors.refs) gaps.push(`refs ${refs.length}/${floors.refs}`);
   if (claims.length < floors.claims) gaps.push(`claims ${claims.length}/${floors.claims}`);
   return gaps.length ? `legacy ${mode} completeness gap (${gaps.join(', ')})` : null;
@@ -228,6 +235,7 @@ function auditRow(row) {
   const words = usefulWordCount(row);
   const refs = referencesOf(row);
   const claims = claimMapOf(row);
+  const renderedUnits = renderedBodyUnitCount(row);
   const gold = goldMarker(row);
   const strict = Boolean(gold && Number(gold.version || 0) >= 1);
   const evidenceLimited = Boolean(gold?.evidence_limited);
@@ -253,7 +261,7 @@ function auditRow(row) {
   if (duplicates.length) warnings.push(`duplicate long blocks (${duplicates.length})`);
 
   if (!strict) {
-    const completenessIssue = legacyCompletenessIssue(mode, words, blocks, refs, claims);
+    const completenessIssue = legacyCompletenessIssue(mode, words, blocks, renderedUnits, refs, claims);
     if (completenessIssue) warnings.push(completenessIssue);
     if (!sourceReviewEvidence(row)) warnings.push('missing review provenance');
     if (refs.some((ref) => !referenceMetadataComplete(row, ref))) warnings.push('reference metadata incomplete');
@@ -282,6 +290,7 @@ function auditRow(row) {
         'الأدلة ليست متساوية', 'الأدلة غير متجانسة', 'الأدلة العلاجية غير متجانسة', 'المعرفة ما تزال',
         'موضع اختلاف', 'لا يمكن التنبؤ', 'لا توجد إرشادات خاصة', 'لا تبرر', 'الدراسات قليلة',
         'نقص الدراسات', 'قاعدة البحث', 'الدليل التجريبي', 'لا يصح الادعاء', 'لا يجوز تعميم',
+        'لا ينبغي القول', 'لا توجد نسبة واحدة', 'لا يمكن تعميم نسبة', 'لا ينبغي تعميم',
       ])) warnings.push('evidence-limit/anti-overclaim section is not explicit');
       if (!containsAny(text, [
         'التواصل', 'التعلم', 'المشاركة', 'الاستقلال', 'الوصول', 'المدرسة', 'التعليم',
@@ -317,6 +326,7 @@ function auditRow(row) {
     evidence_limited: evidenceLimited,
     useful_word_count: words,
     block_count: blocks.length,
+    rendered_structure_count: Math.max(blocks.length, renderedUnits),
     reference_count: refs.length,
     recent_reference_count: recentReferenceCount(refs),
     claim_source_count: claims.length,
@@ -373,16 +383,17 @@ const md = [
   '',
   '## Highest-priority repair queue',
   '',
-  '| Priority | Score | Mode | Words | Blocks | Refs | Claims | Gold | Page | Critical | Warnings |',
-  '| ---: | ---: | --- | ---: | ---: | ---: | ---: | --- | --- | ---: | ---: |',
-  ...audits.slice(0, 100).map((item) => `| ${item.priority} | ${item.score} | ${item.mode} | ${item.useful_word_count} | ${item.block_count} | ${item.reference_count} | ${item.claim_source_count} | ${item.gold_standard ? 'yes' : 'no'} | ${item.canonical_url} | ${item.critical.length} | ${item.warnings.length} |`),
+  '| Priority | Score | Mode | Words | Stored blocks | Rendered structure | Refs | Claims | Gold | Page | Critical | Warnings |',
+  '| ---: | ---: | --- | ---: | ---: | ---: | ---: | ---: | --- | --- | ---: | ---: |',
+  ...audits.slice(0, 100).map((item) => `| ${item.priority} | ${item.score} | ${item.mode} | ${item.useful_word_count} | ${item.block_count} | ${item.rendered_structure_count} | ${item.reference_count} | ${item.claim_source_count} | ${item.gold_standard ? 'yes' : 'no'} | ${item.canonical_url} | ${item.critical.length} | ${item.warnings.length} |`),
   '',
   '## Interpretation',
   '',
   '- Gold-standard pages retain strict purpose-specific depth, structure, reference, claim-map and safety contracts.',
-  '- Legacy pages are not padded to an arbitrary word count: completeness is evaluated jointly across useful text, structured blocks, references and claim-source coverage.',
+  '- Legacy pages are not padded to an arbitrary word count: completeness is evaluated jointly across useful text, rendered paragraph structure, references and claim-source coverage.',
   '- Reference temporal provenance accepts a publication year or documented verification/access provenance; evergreen institutional pages are not assigned invented publication years.',
   '- Claim-source maps support both historical `sources` indexes and current `reference_ids` identifiers.',
+  '- Legacy glossary structure counts the richer of stored blocks and the paragraph units rendered from body_text; Gold pages still require their explicit stored-block contract.',
   '- Semantic boundary checks recognize equivalent Arabic formulations rather than forcing one phrase template.',
   '- A high score is a regression signal, not a substitute for scientific editorial review.',
   '',
