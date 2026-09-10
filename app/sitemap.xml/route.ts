@@ -121,6 +121,7 @@ export async function GET(request: Request) {
     '/sitemaps/cognitive-lab.xml',
     '/sitemaps/cochrane-guides.xml',
     '/sitemaps/rare-phenotype.xml',
+    '/sitemaps/practical-worksheets.xml',
     '/sitemaps/addiction-atlas.xml',
     '/sitemaps/social-work.xml',
     '/sitemaps/palliative-care.xml',
