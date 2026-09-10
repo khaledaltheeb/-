@@ -113,6 +113,7 @@ export async function GET(request: Request) {
   const encyclopediaPages = Math.max(1, Math.ceil(encyclopediaTotal / ENCYCLOPEDIA_PAGE_SIZE));
   const paths = [
     '/sitemaps/static.xml',
+    '/sitemaps/public-hubs.xml',
     '/sitemaps/discovery.xml',
     '/sitemaps/accessibility.xml',
     '/sitemaps/daily-tools.xml',
