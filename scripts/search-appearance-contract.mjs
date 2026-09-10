@@ -44,11 +44,15 @@ requireAll(seo, [
   "alternateName: [BRAND_SHORT, 'Rawafid', SITE_HOSTNAME]",
   "name: BRAND_NAME",
   "'@type': 'ImageObject'",
+  "email: 'contact@healthrenewal.org'",
+  "'@type': 'ContactPoint'",
   "publisher: { '@id': `${SITE_URL}/#organization` }",
   "PRODUCTION_SITE_URL = 'https://healthrenewal.org'",
   "STAGING_SITE_URL = 'https://rawafid-platform-staging.khaledaltheeb.workers.dev'",
   "SITE_HOSTNAME.endsWith('.workers.dev')",
   "process.env.NEXT_PUBLIC_ALLOW_INDEXING === 'true' && !IS_TEMPORARY_HOST",
+  "const HOME_TITLE = 'منصة روافد | الصحة النفسية والتربية الخاصة وسرطان الأطفال'",
+  "export const DEFAULT_DESCRIPTION = 'منصة روافد هي منصة عربية",
 ], 'structured identity and domain safety');
 
 if (seo.includes("'@type': 'SearchAction'")) {
@@ -59,8 +63,8 @@ if (seo.includes("'@type': 'AggregateRating'")) {
 }
 
 requireAll(layout, [
-  "url: '/icons/rawafid-app.svg'",
   "url: '/pwa-icon-192'",
+  "type: 'image/png'",
   "url: '/pwa-icon-180'",
   'applicationName: BRAND_NAME',
   'INDEXING_ENABLED',
@@ -68,6 +72,9 @@ requireAll(layout, [
 ], 'root metadata');
 if (/rawafid-app\.svg\?v=|pwa-icon-(?:180|192)\?v=/.test(layout)) {
   throw new Error('root metadata: search-facing icon URLs must remain stable');
+}
+if (/shortcut:\s*\[\{\s*url:\s*'\/icons\/rawafid-app\.svg'/m.test(layout)) {
+  throw new Error('root metadata: Search favicon shortcut must use the supported stable PNG asset');
 }
 
 requireAll(robots, [
@@ -130,6 +137,7 @@ requireAll(header, [
   "href: '/sectors/addiction-recovery'",
   "href: '/care-guides/'",
   "href: '/evidence-guides/'",
+  "href: '/about'",
 ], 'header authority links');
 
 requireAll(footer, [
