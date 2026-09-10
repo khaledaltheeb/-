@@ -5,7 +5,12 @@ import { sitemapResponse } from '@/lib/sitemap-xml';
 export const dynamic = 'force-dynamic';
 const PAGE_SIZE = 5000;
 const DB_BATCH_SIZE = 1000;
-const REDIRECTED_LEGACY_SLUGS = ['fragile-x-syndrome-education'] as const;
+// Permanent encyclopedia redirect sources declared in next.config.ts. DB redirects
+// are also resolved dynamically below; this list covers config-owned redirects.
+const REDIRECTED_LEGACY_SLUGS = [
+  'fragile-x-syndrome-education',
+  'cluttering-communication-disorder',
+] as const;
 
 type RawItem = Record<string, unknown>;
 type SitemapItem = { slug: string; canonicalUrl: string; updatedAt: string | null };
@@ -36,8 +41,8 @@ export async function GET(request: Request) {
   const now = new Date().toISOString();
 
   // A redirect source is not a canonical URL and must never be advertised in a sitemap.
-  // Resolve this dynamically so every active dedup/legacy redirect is covered rather than
-  // relying on an ever-growing hard-coded slug list.
+  // Resolve DB-owned redirects dynamically; config-owned encyclopedia redirects are
+  // excluded by REDIRECTED_LEGACY_SLUGS above.
   const { data: redirectRows, error: redirectError } = await supabase
     .from('redirects')
     .select('source_path')
