@@ -1,3 +1,5 @@
+import { SITE_URL } from '@/lib/seo';
+
 type ReviewRecord = {
   last_reviewed_at?: string | null;
   reviewer_display_name?: string | null;
@@ -18,8 +20,8 @@ export function contentReviewProvenance(record: ReviewRecord) {
 
   // Never manufacture review provenance. A reviewer is attributed only when the content
   // record contains a real review timestamp. If a named reviewer was recorded, preserve
-  // that person and their recorded credentials; otherwise use Rawafid's institutional
-  // review team as the organization fallback for that recorded review.
+  // that person and their recorded credentials; otherwise keep the visible Rawafid-team
+  // attribution while linking structured data to the platform's one canonical Organization.
   const lastReviewedAt = hasRecordedReview ? recordedReviewDate : null;
   const reviewerName = hasRecordedReview ? explicitReviewer || RAWAFID_REVIEW_TEAM : null;
   const reviewerCredentials = hasRecordedReview && explicitReviewer ? explicitCredentials : null;
@@ -33,8 +35,7 @@ export function contentReviewProvenance(record: ReviewRecord) {
           ...(explicitCredentials ? { description: explicitCredentials } : {}),
         } as const
       : {
-          '@type': 'Organization',
-          name: RAWAFID_REVIEW_TEAM,
+          '@id': `${SITE_URL}/#organization`,
         } as const;
 
   return {
