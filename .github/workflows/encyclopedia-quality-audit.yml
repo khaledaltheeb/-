@@ -55,7 +55,7 @@ jobs:
         run: node scripts/encyclopedia-canonical-consolidation-contract.mjs
 
       - name: Audit published encyclopedia records
-        run: node scripts/encyclopedia-quality-audit.mjs --strict-critical
+        run: node scripts/encyclopedia-quality-audit.mjs --strict-all
 
       - name: Upload audit report
         if: always()
