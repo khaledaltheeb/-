@@ -20,6 +20,7 @@ const pages = [
   { path: '/media/', canonical: `${base}/media/`, marker: 'مركز الوسائط والمواد العملية' },
   { path: '/external-review/', canonical: `${base}/external-review/`, marker: 'برنامج المراجعة الخارجية' },
   { path: '/external-review/addiction-safety/', canonical: `${base}/external-review/addiction-safety/`, marker: 'حزمة المراجعة الخارجية لسلامة محتوى الإدمان' },
+  { path: '/external-review/reviewer-governance/', canonical: `${base}/external-review/reviewer-governance/`, marker: 'ما الذي يجب أن يعرفه المراجع الخارجي قبل قبول أي حزمة من روافد' },
   { path: '/accessibility-statement', canonical: `${base}/accessibility-statement`, marker: 'بيان الإتاحة والوصول الرقمي' },
 ];
 
@@ -58,7 +59,7 @@ async function fetchText(path) {
         headers: {
           'cache-control': 'no-cache, no-store, max-age=0',
           pragma: 'no-cache',
-          'user-agent': 'Rawafid-Live-No-Loss-Smoke/1.1',
+          'user-agent': 'Rawafid-Live-No-Loss-Smoke/1.2',
         },
       });
       const text = await response.text();
