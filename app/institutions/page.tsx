@@ -7,11 +7,11 @@ import styles from '@/components/institutional-assurance-page.module.css';
 
 export const metadata: Metadata = buildSeoMetadata({
   title: 'بوابة المؤسسات | العربية وRTL والوصولية والتقييم التقني',
-  description: 'بوابة روافد للمؤسسات والمشروعات الدولية: تدقيق العربية وRTL، الوصولية، ضمان الترجمة والمصطلحات، تقييم التقنيات الصحية والمساندة، وأدوات مفتوحة المصدر قابلة للدمج في CI.',
+  description: 'بوابة روافد للمؤسسات والمشروعات الدولية: تدقيق العربية وRTL، الوصولية، ضمان الترجمة والمصطلحات، تقييم التقنيات الصحية والمساندة، المشاركة الصحية، وأدوات مفتوحة المصدر قابلة للدمج في CI.',
   path: '/institutions',
   index: true,
   follow: true,
-  keywords: ['تدقيق العربية', 'RTL', 'الوصولية', 'ضمان الترجمة', 'المصطلحات العربية', 'تقييم التقنيات المساندة', 'Arabic localization QA'],
+  keywords: ['تدقيق العربية', 'RTL', 'الوصولية', 'ضمان الترجمة', 'المصطلحات العربية', 'تقييم التقنيات المساندة', 'المشاركة الصحية', 'Arabic localization QA'],
   hreflang: { ar: '/institutions', en: '/en/institutions', 'x-default': '/institutions' },
 });
 
@@ -32,6 +32,11 @@ const services = [
     description: 'تقييم غير ترويجي للتقنيات الصحية والتأهيلية والتعليمية المساندة عبر الغرض المقصود والدليل والسلامة وسير العمل والعربية وRTL والوصولية والخصوصية والقياس والتنفيذ قبل أي pilot.',
   },
   {
+    href: '/institutions/patient-participation',
+    title: 'Patient Participation',
+    description: 'إطار عربي للاستعداد للموعد والمتابعة واحتياجات التواصل، مبني على وظائف مستقلة في تطبيق روافد مع حدود غير تشخيصية ونموذج قياس وحوكمة للـpilot.',
+  },
+  {
     href: '/institutions/open-source',
     title: 'Open-source engineering toolkit',
     description: 'نواة TypeScript عامة ومفتوحة المصدر للعربية وRTL وi18n والوصولية، منفصلة عن المحتوى العلمي والتحريري لروافد.',
@@ -44,7 +49,7 @@ export default function InstitutionsPage() {
     '@type': 'WebPage',
     name: 'Rawafid Institutional Arabic, RTL and Technology Evaluation',
     url: absoluteSiteUrl('/institutions'),
-    description: 'Institutional gateway for Arabic, RTL, accessibility, localization, terminology quality assurance, and independent technology evaluation.',
+    description: 'Institutional gateway for Arabic, RTL, accessibility, localization, terminology quality assurance, patient participation and independent technology evaluation.',
     inLanguage: ['ar', 'en'],
     isPartOf: { '@id': `${absoluteSiteUrl('/')}#website` },
   };
@@ -57,7 +62,7 @@ export default function InstitutionsPage() {
           <div>
             <span className={styles.eyebrow}>For institutions · للجهات والمؤسسات</span>
             <h1 className={styles.title}>العربية ليست طبقة ترجمة أخيرة، والتقنية لا تصبح مناسبة لأنها تعمل في عرض توضيحي.</h1>
-            <p className={styles.lead}>تعمل روافد على سد الفجوة بين الترجمة العربية، هندسة RTL، الوصولية، ضبط المصطلحات، والتقييم المنهجي للتقنيات الصحية والتأهيلية والمساندة. نساعد الفرق على تحويل المشكلات والادعاءات إلى أدلة واختبارات وحدود قابلة للمراجعة بدل الاعتماد على الانطباع أو الفحص اليدوي المتأخر فقط.</p>
+            <p className={styles.lead}>تعمل روافد على سد الفجوة بين الترجمة العربية، هندسة RTL، الوصولية، ضبط المصطلحات، المشاركة الصحية، والتقييم المنهجي للتقنيات الصحية والتأهيلية والمساندة. نساعد الفرق على تحويل المشكلات والادعاءات إلى أدلة واختبارات وحدود قابلة للمراجعة بدل الاعتماد على الانطباع أو الفحص اليدوي المتأخر فقط.</p>
             <div className={styles.actions}>
               <a className={styles.primary} href="mailto:contact@healthrenewal.org?subject=Institutional%20Arabic%20%26%20RTL%20Assurance">تواصل مؤسسي</a>
               <a className={styles.secondary} href="https://github.com/khaledaltheeb/rawafid-arabic-rtl-a11y-toolkit" target="_blank" rel="noreferrer">استعراض المستودع المفتوح</a>
@@ -68,6 +73,7 @@ export default function InstitutionsPage() {
             <ul>
               <li>مواقع ومنصات عامة باللغة العربية.</li>
               <li>تقنيات صحية وتأهيلية وتعليمية مساندة قبل الـpilot.</li>
+              <li>مسارات مشاركة صحية واستعداد للموعد ومتابعة.</li>
               <li>نماذج الإبلاغ والخدمات الإلكترونية.</li>
               <li>ملفات ومفاتيح الترجمة وواجهات i18n.</li>
               <li>مصطلحات مؤسسية متعددة اللغات.</li>
@@ -81,8 +87,8 @@ export default function InstitutionsPage() {
       <section className={`${styles.shell} ${styles.section}`}>
         <div className={styles.sectionHeader}>
           <p className={styles.kicker}>Capabilities</p>
-          <h2>أربع طبقات، دون خلط بين التقييم والمراجعة والتأييد</h2>
-          <p>نحافظ على النواة الهندسية العامة مفتوحة المصدر، بينما تبقى القواميس أو قواعد المصطلحات الخاصة بكل مؤسسة منفصلة بحسب الترخيص والخصوصية والحوكمة. وعند تقييم منتج، نسجل ما يثبت وما يبقى فرضية قبل أي تجربة أوسع.</p>
+          <h2>خمس طبقات، دون خلط بين التقييم والمراجعة والتأييد</h2>
+          <p>نحافظ على النواة الهندسية العامة مفتوحة المصدر، بينما تبقى القواميس أو قواعد المصطلحات الخاصة بكل مؤسسة منفصلة بحسب الترخيص والخصوصية والحوكمة. وعند تقييم منتج أو مسار مشاركة، نسجل ما يثبت وما يبقى فرضية قبل أي تجربة أوسع.</p>
         </div>
         <div className={styles.grid}>
           {services.map((service) => <article className={styles.card} key={service.href}>
