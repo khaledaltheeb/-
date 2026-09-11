@@ -19,6 +19,7 @@ export default function AddictionArticlePage({ record, items = [] }: Props) {
   const review = contentReviewProvenance(record);
   const canonical = record.canonical_url || '/addiction/';
   const showAtlasHub = role === 'hub' || canonical === '/addiction/' || canonical === '/addiction' || canonical === `${SITE_URL}/addiction/` || canonical === `${SITE_URL}/addiction`;
+  const isCollectionPage = role === 'hub' || role === 'addiction-professional-education-index';
   const url = canonical.startsWith('https://') ? canonical : `${SITE_URL}${canonical}`;
   const breadcrumbs = breadcrumbJsonLd([
     { name: 'الرئيسية', path: '/' },
@@ -32,8 +33,14 @@ export default function AddictionArticlePage({ record, items = [] }: Props) {
     publisher: { '@id': `${SITE_URL}/#organization` }, isPartOf: { '@id': `${SITE_URL}/#website` },
     image: record.featured_image_url ? (record.featured_image_url.startsWith('https://') ? record.featured_image_url : `${SITE_URL}${record.featured_image_url}`) : undefined,
   };
-  const contentSchema: Record<string, unknown> = role === 'hub'
-    ? { ...common, '@type': 'CollectionPage', mainEntity: { '@type': 'ItemList', numberOfItems: items.length, itemListElement: items.map((item) => ({ '@type': 'ListItem', position: item.rank, name: item.title, url: `${SITE_URL}${item.href}` })) } }
+  const contentSchema: Record<string, unknown> = isCollectionPage
+    ? {
+        ...common,
+        '@type': 'CollectionPage',
+        ...(role === 'hub'
+          ? { mainEntity: { '@type': 'ItemList', numberOfItems: items.length, itemListElement: items.map((item) => ({ '@type': 'ListItem', position: item.rank, name: item.title, url: `${SITE_URL}${item.href}` })) } }
+          : {}),
+      }
     : { ...common, '@type': 'Article', author: record.author_display_name ? { '@type': 'Organization', name: record.author_display_name } : { '@id': `${SITE_URL}/#organization` }, reviewedBy: review.reviewedBySchema, citation: references.flatMap((reference) => reference.url ? [reference.url] : []) };
   const faqSchema = faq.length ? { '@context': 'https://schema.org', '@type': 'FAQPage', '@id': `${url}#faq`, mainEntity: faq.map((item) => ({ '@type': 'Question', name: item.question, acceptedAnswer: { '@type': 'Answer', text: item.answer } })) } : null;
   const schemas = [breadcrumbs, contentSchema, ...(faqSchema ? [faqSchema] : [])];
