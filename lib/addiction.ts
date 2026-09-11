@@ -25,10 +25,24 @@ export function addictionContentSlug(segments: string[] = []) {
 
 export async function getAddictionRecord(segments: string[] = []): Promise<AddictionRecord | null> {
   const supabase = await createClient();
+  const publishedThrough = new Date().toISOString();
+  const detailFields = 'id,slug,title,excerpt,body_json,body_text,content_type,audience,seo_title,seo_description,canonical_url,robots_index,robots_follow,published_at,updated_at,featured_image_url,featured_image_alt,primary_keyword,secondary_keywords,semantic_terms,author_display_name,reviewer_display_name,reviewer_credentials,last_reviewed_at,references_json,medical_disclaimer,schema_json';
   const { data } = await supabase.from('content')
-    .select('id,slug,title,excerpt,body_json,body_text,content_type,audience,seo_title,seo_description,canonical_url,robots_index,robots_follow,published_at,updated_at,featured_image_url,featured_image_alt,primary_keyword,secondary_keywords,semantic_terms,author_display_name,reviewer_display_name,reviewer_credentials,last_reviewed_at,references_json,medical_disclaimer,schema_json')
-    .eq('slug', addictionContentSlug(segments)).eq('status', 'published').lte('published_at', new Date().toISOString()).maybeSingle();
-  return (data as AddictionRecord | null) ?? null;
+    .select(detailFields)
+    .eq('slug', addictionContentSlug(segments)).eq('status', 'published').lte('published_at', publishedThrough).maybeSingle();
+  if (data) return data as AddictionRecord;
+  if (!segments.length) return null;
+
+  const canonical = `/addiction/${segments.filter(Boolean).join('/')}/`;
+  const canonicalWithoutTrailingSlash = canonical.replace(/\/$/, '');
+  const { data: canonicalData } = await supabase.from('content')
+    .select(detailFields)
+    .in('canonical_url', [canonical, canonicalWithoutTrailingSlash])
+    .eq('status', 'published')
+    .lte('published_at', publishedThrough)
+    .limit(1)
+    .maybeSingle();
+  return (canonicalData as AddictionRecord | null) ?? null;
 }
 
 export async function getMigratedAddictionCondition(legacySlug: string): Promise<Pick<AddictionRecord, 'slug' | 'canonical_url'> | null> {
