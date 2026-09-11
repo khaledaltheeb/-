@@ -5,7 +5,7 @@ const fail=(message)=>{console.error(`EDITORIAL_RECOVERY: ${message}`);failed=tr
 const read=(path)=>fs.readFileSync(path,'utf8');
 const exists=(path)=>fs.existsSync(path);
 
-for(const path of ['app/media/page.tsx','app/external-review/page.tsx','app/external-review/addiction-safety/page.tsx','lib/editorial-evidence-guides.ts','lib/external-review-program.ts','lib/evidence-guides.ts']){
+for(const path of ['app/media/page.tsx','app/external-review/page.tsx','app/external-review/addiction-safety/page.tsx','app/external-review/reviewer-governance/page.tsx','lib/editorial-evidence-guides.ts','lib/external-review-program.ts','lib/evidence-guides.ts']){
  if(!exists(path)) fail(`missing recovered file: ${path}`);
 }
 
@@ -31,7 +31,7 @@ const trackCount=(program.match(/\n \{\n  id:'/g)||[]).length;
 if(trackCount!==5) fail(`expected 5 external-review tracks, found ${trackCount}`);
 for(const marker of [
  'لا تُعرض أي جهة بوصفها شريكًا أو مراجعًا أو معتمدًا قبل وجود مراجعة أو اتفاق موثق.',
- 'لا توجد دعوى بأن ISAM راجعت أو اعتمدت المحتوى حتى الآن.',
+ 'حزمة روافد جاهزة لطلب مراجعة فردية مستقلة أو إحالة إلى مراجع مناسب. لا توجد دعوى بأن أي جمعية أو مؤسسة راجعت أو اعتمدت المحتوى حتى الآن.',
  'RDI مذكورة كشبكة مرجعية وهدف استشارة خارجية محتملة، لا كشريك أو مراجع حالي.',
  'ENAT مصدر ومجتمع خبرة مناسب للمراجعة؛ لا توجد دعوى اعتماد أو شراكة.',
  'هذا مسار اختبار مستخدمين مخطط، ولا يوصف بأنه مكتمل قبل جلسة موثقة مع الجمهور المستهدف.'
@@ -43,6 +43,13 @@ const review=read('app/external-review/page.tsx');
 if(!review.includes("path:'/external-review/'")||!review.includes('اسم جهة مرجعية في هذه الصفحة لا يعني شراكة أو اعتمادًا')) fail('/external-review route lost its transparency boundary');
 const addictionReview=read('app/external-review/addiction-safety/page.tsx');
 if(!addictionReview.includes("path: '/external-review/addiction-safety'")||!addictionReview.includes('وجود اسم مراجع أو مؤسسة في مراسلة أو دعوة لا يعني اعتمادًا أو شراكة أو تأييدًا')) fail('addiction review package lost its scope/claims boundary');
+const governanceBrief=read('app/external-review/reviewer-governance/page.tsx');
+for(const marker of [
+  "path: '/external-review/reviewer-governance'",
+  'لا نعرض روافد حاليًا بوصفها جهة حكومية، جامعة، جمعية خيرية مسجلة، مزودًا صحيًا مرخصًا، أو جهة مانحة للاعتماد.',
+  'لا توجد ميزانية مضمونة لتعويض المراجع',
+  'ذكر انتماء فرد إلى مؤسسة لا يعني أن المؤسسة نفسها راجعت أو اعتمدت المحتوى.'
+]) if(!governanceBrief.includes(marker)) fail(`reviewer governance boundary lost: ${marker}`);
 
 const footer=read('components/site-footer.tsx');
 for(const marker of [
@@ -53,4 +60,4 @@ for(const marker of [
 ]) if(!footer.includes(marker)) fail(`footer discovery lost marker: ${marker}`);
 
 if(failed) process.exit(1);
-console.log('EDITORIAL_RECOVERY OK: 13 repository guides, 5 transparent review tracks, scoped addiction review package, media/review routes and remote-first fallback semantics are preserved.');
+console.log('EDITORIAL_RECOVERY OK: 13 repository guides, 5 transparent review tracks, scoped addiction review package, reviewer governance brief, media/review routes and remote-first fallback semantics are preserved.');
