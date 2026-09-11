@@ -6,6 +6,7 @@ import { getExpandedEncyclopediaCategories } from '@/lib/expanded-encyclopedia';
 export const dynamic = 'force-dynamic';
 const RELEASE = '2026-08-14T00:00:00.000Z';
 const EXPANDED_RELEASE = '2026-08-22T19:30:00.000Z';
+const TAXONOMY_ALIASES = new Set(['addiction-professional-education']);
 
 type SitemapRow = {
   path: string;
@@ -41,7 +42,7 @@ export async function GET() {
   }
 
   const sectors = sectorResult.data ?? [];
-  const categories = categoryResult.data ?? [];
+  const categories = (categoryResult.data ?? []).filter((item) => !TAXONOMY_ALIASES.has(item.slug));
   const rows: SitemapRow[] = [
     ...sectors.map((item) => ({
       path: `/sectors/${item.slug}`,
