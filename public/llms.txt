@@ -30,6 +30,22 @@ Publisher: منصة روافد
 - [Medical review policy](https://healthrenewal.org/medical-review-policy)
 - [About](https://healthrenewal.org/about)
 
+## Pediatric oncology knowledge center
+- [Pediatric oncology hub](https://healthrenewal.org/sectors/pediatric-oncology)
+- [Cancer types and diagnosis](https://healthrenewal.org/sections/pediatric-cancer-types-diagnosis)
+- [Treatment and clinical care](https://healthrenewal.org/sections/pediatric-cancer-treatment-care)
+- [Research and current evidence](https://healthrenewal.org/sections/pediatric-cancer-research-evidence)
+- [Theses and dissertations](https://healthrenewal.org/sections/pediatric-cancer-theses-dissertations)
+- [Psychosocial and family support](https://healthrenewal.org/sections/pediatric-cancer-psychosocial-family)
+- [Supportive care and rehabilitation](https://healthrenewal.org/sections/pediatric-cancer-supportive-rehab)
+- [Daily life, school and community](https://healthrenewal.org/sections/pediatric-cancer-daily-life-school)
+- [Survivorship and late effects](https://healthrenewal.org/sections/pediatric-cancer-survivorship-late-effects)
+- [Palliative care and bereavement](https://healthrenewal.org/sections/pediatric-cancer-palliative-bereavement)
+- [Molecular testing and precision medicine guide](https://healthrenewal.org/care-guides/pediatric-cancer-molecular-testing-precision-medicine-guide/)
+- [Targeted therapy, immunotherapy and CAR-T guide](https://healthrenewal.org/care-guides/pediatric-cancer-targeted-immunotherapy-car-t-guide/)
+- [Pediatric oncology surgery guide](https://healthrenewal.org/care-guides/pediatric-oncology-surgery-biopsy-resection-guide/)
+- [Family and sibling bereavement support guide](https://healthrenewal.org/care-guides/pediatric-cancer-bereavement-family-siblings-guide/)
+
 ## Open-source engineering
 - [Official toolkit page](https://healthrenewal.org/open-source/arabic-rtl-a11y-toolkit)
 - [Public source repository](https://github.com/khaledaltheeb/rawafid-arabic-rtl-a11y-toolkit)
