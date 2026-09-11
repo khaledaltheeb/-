@@ -9,6 +9,7 @@ export async function GET() {
     { path: '/institutions/terminology-qa', changeFrequency: 'monthly', priority: .68 },
     { path: '/institutions/open-source', changeFrequency: 'monthly', priority: .66 },
     { path: '/institutions/technology-evaluation', changeFrequency: 'monthly', priority: .66 },
+    { path: '/institutions/patient-participation', changeFrequency: 'monthly', priority: .66 },
     { path: '/media/', changeFrequency: 'weekly', priority: .66 },
     { path: '/external-review/', changeFrequency: 'monthly', priority: .62 },
     { path: '/external-review/addiction-safety/', changeFrequency: 'monthly', priority: .62 },
