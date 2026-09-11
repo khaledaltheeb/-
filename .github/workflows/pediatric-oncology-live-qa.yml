@@ -1,0 +1,132 @@
+name: Pediatric Oncology Live QA
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Deploy Production Fast"]
+    types: [completed]
+
+concurrency:
+  group: pediatric-oncology-live-qa
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Verify pediatric oncology center, sections and cornerstone guides
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="https://healthrenewal.org"
+          stamp="${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+
+          fetch_html() {
+            local route="$1"
+            local output="$2"
+            local separator='?'
+            [[ "$route" == *'?'* ]] && separator='&'
+            local status
+            status="$(curl -sS -L \
+              -H 'Cache-Control: no-cache, no-store, max-age=0' \
+              -H 'Pragma: no-cache' \
+              --retry 5 --retry-delay 2 --retry-all-errors --max-time 60 \
+              -o "$output" -w '%{http_code}' \
+              "${base}${route}${separator}pediatricOncologyQa=${stamp}" || true)"
+            if ! [[ "$status" =~ ^2[0-9][0-9]$ ]]; then
+              echo "HTTP failure: ${route} status=${status:-curl-error}" >&2
+              head -c 1200 "$output" 2>/dev/null || true
+              exit 1
+            fi
+            test -s "$output"
+            if grep -qiE 'internal server error|application error|500 internal' "$output"; then
+              echo "Application error body: ${route}" >&2
+              head -c 1200 "$output" || true
+              exit 1
+            fi
+          }
+
+          assert_public_indexable() {
+            local route="$1"
+            local file="$2"
+            if grep -qi 'noindex' "$file"; then
+              echo "Unexpected noindex: ${route}" >&2
+              exit 1
+            fi
+            if grep -qi 'nofollow' "$file"; then
+              echo "Unexpected nofollow: ${route}" >&2
+              exit 1
+            fi
+            if ! grep -qi 'rel="canonical"' "$file"; then
+              echo "Missing canonical: ${route}" >&2
+              exit 1
+            fi
+          }
+
+          echo 'LIVE_CHECK pediatric oncology center'
+          fetch_html '/sectors/pediatric-oncology' /tmp/pediatric-oncology-center.html
+          assert_public_indexable '/sectors/pediatric-oncology' /tmp/pediatric-oncology-center.html
+          grep -q 'سرطان الأطفال' /tmp/pediatric-oncology-center.html
+          grep -q 'الأقسام الرئيسية' /tmp/pediatric-oncology-center.html
+          grep -q 'كل المحتوى المنشور' /tmp/pediatric-oncology-center.html
+
+          mapfile -t section_routes < <(
+            grep -oE 'href="/sections/[a-z0-9-]+"' /tmp/pediatric-oncology-center.html \
+              | sed -E 's/^href="([^"]+)"$/\1/' \
+              | sort -u
+          )
+          if (( ${#section_routes[@]} < 35 )); then
+            echo "Pediatric oncology category discovery regression: found ${#section_routes[@]}, expected at least 35." >&2
+            printf '%s\n' "${section_routes[@]}" >&2
+            exit 1
+          fi
+          echo "LIVE_OK pediatric oncology center discovered ${#section_routes[@]} section routes"
+
+          echo 'LIVE_CHECK every pediatric oncology section'
+          checked=0
+          for route in "${section_routes[@]}"; do
+            safe_name="$(printf '%s' "$route" | tr '/-' '__' | tr -cd '[:alnum:]_')"
+            out="/tmp/po_${safe_name}.html"
+            fetch_html "$route" "$out"
+            assert_public_indexable "$route" "$out"
+            grep -q 'قسم معرفي' "$out"
+            grep -q 'صفحة منشورة' "$out"
+            if grep -qE '>(0|٠)[[:space:]]*صفحة منشورة<' "$out"; then
+              echo "Zero-content pediatric oncology section: ${route}" >&2
+              exit 1
+            fi
+            checked=$((checked + 1))
+          done
+          echo "LIVE_OK all ${checked} discovered pediatric oncology sections are non-empty and indexable"
+
+          echo 'LIVE_CHECK pediatric oncology cornerstone guides'
+          while IFS='|' read -r route needle; do
+            [[ -n "$route" ]] || continue
+            safe_name="$(printf '%s' "$route" | tr '/-' '__' | tr -cd '[:alnum:]_')"
+            out="/tmp/po_guide_${safe_name}.html"
+            fetch_html "$route" "$out"
+            assert_public_indexable "$route" "$out"
+            grep -q "$needle" "$out"
+            echo "LIVE_OK ${route}"
+          done <<'GUIDES'
+          /care-guides/pediatric-cancer-molecular-testing-precision-medicine-guide/|الفحوص الجزيئية والطب الدقيق
+          /care-guides/pediatric-cancer-targeted-immunotherapy-car-t-guide/|العلاج الموجّه والمناعي
+          /care-guides/pediatric-oncology-surgery-biopsy-resection-guide/|جراحة أورام الأطفال
+          /care-guides/pediatric-cancer-bereavement-family-siblings-guide/|دعم الأسرة بعد وفاة طفل
+          GUIDES
+
+          echo 'LIVE_CHECK robots and discoverability entry points'
+          curl -fsS --retry 5 --retry-delay 2 --retry-all-errors "${base}/robots.txt?poQa=${stamp}" >/tmp/robots.txt
+          grep -q 'Sitemap: https://healthrenewal.org/sitemap.xml' /tmp/robots.txt
+          if grep -qiE '^Disallow:[[:space:]]*/(sectors|sections|care-guides)(/|$)' /tmp/robots.txt; then
+            echo 'robots.txt blocks a pediatric oncology public route family.' >&2
+            exit 1
+          fi
+          curl -fsS --retry 5 --retry-delay 2 --retry-all-errors "${base}/llms.txt?poQa=${stamp}" >/tmp/llms.txt
+          grep -q 'https://healthrenewal.org/sectors/pediatric-oncology' /tmp/llms.txt
+          echo 'LIVE_OK pediatric oncology discovery guards'
