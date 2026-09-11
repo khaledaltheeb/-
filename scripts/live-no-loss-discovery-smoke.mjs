@@ -15,8 +15,11 @@ const pages = [
   { path: '/institutions/arabic-rtl-assurance', canonical: `${base}/institutions/arabic-rtl-assurance`, marker: 'اختبار العربية كما يستخدمها الناس' },
   { path: '/institutions/terminology-qa', canonical: `${base}/institutions/terminology-qa`, marker: 'حوّل دليل المصطلحات' },
   { path: '/institutions/open-source', canonical: `${base}/institutions/open-source`, marker: 'نواة عامة يمكن لأي مشروع استخدامها' },
+  { path: '/institutions/technology-evaluation', canonical: `${base}/institutions/technology-evaluation`, marker: 'نقيّم التقنية قبل أن نحولها إلى توصية أو pilot' },
+  { path: '/institutions/patient-participation', canonical: `${base}/institutions/patient-participation`, marker: 'من «لدي موعد» إلى مسار يمكن للمستخدم متابعته بنفسه' },
   { path: '/media/', canonical: `${base}/media/`, marker: 'مركز الوسائط والمواد العملية' },
   { path: '/external-review/', canonical: `${base}/external-review/`, marker: 'برنامج المراجعة الخارجية' },
+  { path: '/external-review/addiction-safety/', canonical: `${base}/external-review/addiction-safety/`, marker: 'حزمة المراجعة الخارجية لسلامة محتوى الإدمان' },
   { path: '/accessibility-statement', canonical: `${base}/accessibility-statement`, marker: 'بيان الإتاحة والوصول الرقمي' },
 ];
 
@@ -55,7 +58,7 @@ async function fetchText(path) {
         headers: {
           'cache-control': 'no-cache, no-store, max-age=0',
           pragma: 'no-cache',
-          'user-agent': 'Rawafid-Live-No-Loss-Smoke/1.0',
+          'user-agent': 'Rawafid-Live-No-Loss-Smoke/1.1',
         },
       });
       const text = await response.text();
@@ -101,14 +104,15 @@ async function verifySitemaps() {
 
   const discovery = await fetchText('/sitemaps/discovery.xml');
   if (errorBody.test(discovery.text)) throw new Error('discovery sitemap returned an error body');
-  for (const entry of pages.filter((item) => item.path !== '/')) {
+  const reviewed = pages.filter((item) => item.path !== '/');
+  for (const entry of reviewed) {
     if (!discovery.text.includes(`<loc>${entry.canonical}</loc>`)) {
       throw new Error(`discovery sitemap is missing ${entry.canonical}`);
     }
   }
   const urlCount = (discovery.text.match(/<url>/g) || []).length;
-  if (urlCount !== 9) throw new Error(`discovery sitemap must expose exactly 9 reviewed routes; found ${urlCount}`);
-  console.log('LIVE_NO_LOSS_OK sitemap index + 9-route discovery sitemap');
+  if (urlCount !== reviewed.length) throw new Error(`discovery sitemap must expose exactly ${reviewed.length} reviewed routes; found ${urlCount}`);
+  console.log(`LIVE_NO_LOSS_OK sitemap index + ${reviewed.length}-route discovery sitemap`);
 }
 
 try {
