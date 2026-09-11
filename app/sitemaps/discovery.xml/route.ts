@@ -13,6 +13,7 @@ export async function GET() {
     { path: '/media/', changeFrequency: 'weekly', priority: .66 },
     { path: '/external-review/', changeFrequency: 'monthly', priority: .62 },
     { path: '/external-review/addiction-safety/', changeFrequency: 'monthly', priority: .62 },
+    { path: '/external-review/reviewer-governance/', changeFrequency: 'monthly', priority: .60 },
     { path: '/accessibility-statement', changeFrequency: 'monthly', priority: .64 },
   ]);
 }

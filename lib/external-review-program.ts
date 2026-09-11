@@ -13,11 +13,11 @@ export const externalReviewPrinciples=[
 
 export const externalReviewTracks:ExternalReviewTrack[]=[
  {
-  id:'isam-addiction',title:'سلامة محتوى الإدمان والانسحاب والترافقات',target:'International Society of Addiction Medicine (ISAM) / مراجع مستقل في طب الإدمان',
+  id:'isam-addiction',title:'سلامة محتوى الإدمان والانسحاب والترافقات',target:'مراجع مستقل مؤهل في طب الإدمان أو تمريض الإدمان / جهة مهنية قادرة على إحالة مراجع مناسب',
   scope:'ثلاث صفحات عالية الأثر في الجولة الأساسية: سلامة الانسحاب، الفرز والتصعيد بما يشمل التعرف العام إلى الجرعة الزائدة، والتفريق بين الأعراض النفسية واضطرابات استخدام المواد؛ مع صفحتي تمريض وصحة نفسية اختياريتين حسب اختصاص المراجع.',status:'package-ready',
   questions:['هل توجد صياغة قد تؤخر طلب رعاية عاجلة؟','هل قوة الادعاء متناسبة مع الدليل؟','هل توجد فجوة مهمة في التشخيص التفريقي أو الترافقات؟','هل الخطوات العملية آمنة من دون أن تتحول إلى وصفة فردية؟','ما التغيير المانع للنشر إن لم يُصحح؟'],
-  evidencePaths:['/external-review/addiction-safety/','/evidence-guides/addiction-external-review-safety-framework/','/sectors/addiction-recovery'],
-  publicNote:'حزمة روافد جاهزة للتواصل الخارجي. لا توجد دعوى بأن ISAM راجعت أو اعتمدت المحتوى حتى الآن.'
+  evidencePaths:['/external-review/addiction-safety/','/external-review/reviewer-governance/','/evidence-guides/addiction-external-review-safety-framework/','/sectors/addiction-recovery'],
+  publicNote:'حزمة روافد جاهزة لطلب مراجعة فردية مستقلة أو إحالة إلى مراجع مناسب. لا توجد دعوى بأن أي جمعية أو مؤسسة راجعت أو اعتمدت المحتوى حتى الآن.'
  },
  {
   id:'ifapa-arabic-apa',title:'النشاط البدني المكيّف بالعربية: المنهج والمصطلحات ونطاق الـPilot',target:'International Federation of Adapted Physical Activity (IFAPA) / مراجع علمي مناسب في APA',

@@ -24,6 +24,7 @@ Publisher: منصة روافد
 - [Media and practical materials](https://healthrenewal.org/media/)
 - [External-review transparency](https://healthrenewal.org/external-review/)
 - [Addiction-safety external review pack](https://healthrenewal.org/external-review/addiction-safety/)
+- [External reviewer governance brief](https://healthrenewal.org/external-review/reviewer-governance/)
 - [Accessibility statement](https://healthrenewal.org/accessibility-statement)
 - [Sources](https://healthrenewal.org/sources)
 - [Editorial policy](https://healthrenewal.org/editorial-policy)
