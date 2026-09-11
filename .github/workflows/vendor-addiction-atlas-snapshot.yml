@@ -1,14 +1,10 @@
 name: Vendor Addiction Atlas Snapshot
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/vendor-addiction-atlas-snapshot.yml'
-      - 'scripts/vendor-addiction-atlas.mjs'
+  workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: rawafid-addiction-atlas-vendor
@@ -28,16 +24,27 @@ jobs:
           node-version: 24
       - name: Vendor immutable reviewed atlas snapshot
         run: node scripts/vendor-addiction-atlas.mjs
-      - name: Commit exact verified snapshot
+      - name: Prepare review artifact
+        id: review
         shell: bash
         run: |
           set -euo pipefail
           if [ -z "$(git status --porcelain -- data/addiction-atlas)" ]; then
             echo 'Verified addiction atlas snapshot is already current.'
+            echo 'changed=false' >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add data/addiction-atlas
-          git commit -m 'data(addiction-atlas): vendor reviewed immutable snapshot'
-          git push origin HEAD:main
+          echo 'changed=true' >> "$GITHUB_OUTPUT"
+          mkdir -p /tmp/addiction-atlas-review
+          git diff --binary -- data/addiction-atlas > /tmp/addiction-atlas-review/addiction-atlas-snapshot.patch
+          git status --short -- data/addiction-atlas > /tmp/addiction-atlas-review/status.txt
+          cp docs/.addiction-atlas-continuity.md /tmp/addiction-atlas-review/continuity.md 2>/dev/null || true
+          echo 'Scientific snapshot changes prepared for review only; nothing was pushed to main.'
+      - name: Upload snapshot review artifact
+        if: steps.review.outputs.changed == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: addiction-atlas-snapshot-review-${{ github.run_id }}
+          path: /tmp/addiction-atlas-review/
+          if-no-files-found: error
+          retention-days: 14
