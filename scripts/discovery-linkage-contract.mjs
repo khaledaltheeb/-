@@ -12,8 +12,10 @@ const routes = [
   ['/institutions/arabic-rtl-assurance', 'app/institutions/arabic-rtl-assurance/page.tsx'],
   ['/institutions/terminology-qa', 'app/institutions/terminology-qa/page.tsx'],
   ['/institutions/open-source', 'app/institutions/open-source/page.tsx'],
+  ['/institutions/technology-evaluation', 'app/institutions/technology-evaluation/page.tsx'],
   ['/media/', 'app/media/page.tsx'],
   ['/external-review/', 'app/external-review/page.tsx'],
+  ['/external-review/addiction-safety/', 'app/external-review/addiction-safety/page.tsx'],
   ['/accessibility-statement', 'app/accessibility-statement/page.tsx'],
 ];
 
@@ -59,8 +61,10 @@ for (const url of [
   'https://healthrenewal.org/all-pages',
   'https://healthrenewal.org/#labs-tools',
   'https://healthrenewal.org/institutions',
+  'https://healthrenewal.org/institutions/technology-evaluation',
   'https://healthrenewal.org/media/',
   'https://healthrenewal.org/external-review/',
+  'https://healthrenewal.org/external-review/addiction-safety/',
   'https://healthrenewal.org/accessibility-statement',
   'https://healthrenewal.org/sitemaps/discovery.xml',
 ]) {
