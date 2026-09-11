@@ -11,6 +11,7 @@ const LOCAL_PUBLIC_PREFIXES = [
   '/core-outcome-sets',
   '/resources',
   '/evidence-guides',
+  '/external-review',
   '/sitemaps',
 ] as const;
 
@@ -21,8 +22,8 @@ const LOCAL_PUBLIC_EXACT = new Set([
   '/institutions/arabic-rtl-assurance',
   '/institutions/terminology-qa',
   '/institutions/open-source',
+  '/institutions/technology-evaluation',
   '/media',
-  '/external-review',
   '/accessibility-statement',
   '/tools/rare-phenotype-navigator',
   '/sitemap.xml',
