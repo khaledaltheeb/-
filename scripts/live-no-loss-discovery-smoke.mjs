@@ -19,8 +19,8 @@ const pages = [
   { path: '/institutions/patient-participation', canonical: `${base}/institutions/patient-participation`, marker: 'من «لدي موعد» إلى مسار يمكن للمستخدم متابعته بنفسه' },
   { path: '/media/', canonical: `${base}/media/`, marker: 'مركز الوسائط والمواد العملية' },
   { path: '/external-review/', canonical: `${base}/external-review/`, marker: 'برنامج المراجعة الخارجية' },
-  { path: '/external-review/addiction-safety/', canonical: `${base}/external-review/addiction-safety/`, marker: 'حزمة المراجعة الخارجية لسلامة محتوى الإدمان' },
-  { path: '/external-review/reviewer-governance/', canonical: `${base}/external-review/reviewer-governance/`, marker: 'ما الذي يجب أن يعرفه المراجع الخارجي قبل قبول أي حزمة من روافد' },
+  { path: '/external-review/addiction-safety/', canonical: `${base}/external-review/addiction-safety`, marker: 'حزمة المراجعة الخارجية لسلامة محتوى الإدمان' },
+  { path: '/external-review/reviewer-governance/', canonical: `${base}/external-review/reviewer-governance`, marker: 'ما الذي يجب أن يعرفه المراجع الخارجي قبل قبول أي حزمة من روافد' },
   { path: '/accessibility-statement', canonical: `${base}/accessibility-statement`, marker: 'بيان الإتاحة والوصول الرقمي' },
 ];
 
