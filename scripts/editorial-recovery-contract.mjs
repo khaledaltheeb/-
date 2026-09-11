@@ -42,7 +42,7 @@ if(!media.includes("path:'/media/'")||!media.includes('ليس معرض صور'))
 const review=read('app/external-review/page.tsx');
 if(!review.includes("path:'/external-review/'")||!review.includes('اسم جهة مرجعية في هذه الصفحة لا يعني شراكة أو اعتمادًا')) fail('/external-review route lost its transparency boundary');
 const addictionReview=read('app/external-review/addiction-safety/page.tsx');
-if(!addictionReview.includes("path: '/external-review/addiction-safety/'")||!addictionReview.includes('لا تعني أن أي جهة راجعت روافد أو اعتمدتها')) fail('addiction review package lost its scope/claims boundary');
+if(!addictionReview.includes("path: '/external-review/addiction-safety'")||!addictionReview.includes('وجود اسم مراجع أو مؤسسة في مراسلة أو دعوة لا يعني اعتمادًا أو شراكة أو تأييدًا')) fail('addiction review package lost its scope/claims boundary');
 
 const footer=read('components/site-footer.tsx');
 for(const marker of [
