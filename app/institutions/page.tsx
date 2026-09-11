@@ -6,12 +6,12 @@ import { absoluteSiteUrl, buildSeoMetadata } from '@/lib/seo';
 import styles from '@/components/institutional-assurance-page.module.css';
 
 export const metadata: Metadata = buildSeoMetadata({
-  title: 'بوابة المؤسسات | العربية وRTL والوصولية وضمان الترجمة',
-  description: 'بوابة روافد للمؤسسات والمشروعات الدولية: تدقيق العربية وRTL، الوصولية، ضمان الترجمة والمصطلحات، وأدوات مفتوحة المصدر قابلة للدمج في CI.',
+  title: 'بوابة المؤسسات | العربية وRTL والوصولية والتقييم التقني',
+  description: 'بوابة روافد للمؤسسات والمشروعات الدولية: تدقيق العربية وRTL، الوصولية، ضمان الترجمة والمصطلحات، تقييم التقنيات الصحية والمساندة، المشاركة الصحية، وأدوات مفتوحة المصدر قابلة للدمج في CI.',
   path: '/institutions',
   index: true,
   follow: true,
-  keywords: ['تدقيق العربية', 'RTL', 'الوصولية', 'ضمان الترجمة', 'المصطلحات العربية', 'Arabic localization QA'],
+  keywords: ['تدقيق العربية', 'RTL', 'الوصولية', 'ضمان الترجمة', 'المصطلحات العربية', 'تقييم التقنيات المساندة', 'المشاركة الصحية', 'Arabic localization QA'],
   hreflang: { ar: '/institutions', en: '/en/institutions', 'x-default': '/institutions' },
 });
 
@@ -27,6 +27,16 @@ const services = [
     description: 'قواعد قابلة للتدقيق للمصطلحات المطلوبة أو غير المفضلة، مقارنة نص المصدر والهدف، واكتشاف عدم الاتساق دون ادعاء أن الأتمتة بديل عن المراجع البشري.',
   },
   {
+    href: '/institutions/technology-evaluation',
+    title: 'Technology Evaluation',
+    description: 'تقييم غير ترويجي للتقنيات الصحية والتأهيلية والتعليمية المساندة عبر الغرض المقصود والدليل والسلامة وسير العمل والعربية وRTL والوصولية والخصوصية والقياس والتنفيذ قبل أي pilot.',
+  },
+  {
+    href: '/institutions/patient-participation',
+    title: 'Patient Participation',
+    description: 'إطار عربي للاستعداد للموعد والمتابعة واحتياجات التواصل، مبني على وظائف مستقلة في تطبيق روافد مع حدود غير تشخيصية ونموذج قياس وحوكمة للـpilot.',
+  },
+  {
     href: '/institutions/open-source',
     title: 'Open-source engineering toolkit',
     description: 'نواة TypeScript عامة ومفتوحة المصدر للعربية وRTL وi18n والوصولية، منفصلة عن المحتوى العلمي والتحريري لروافد.',
@@ -37,9 +47,9 @@ export default function InstitutionsPage() {
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'WebPage',
-    name: 'Rawafid Institutional Arabic & RTL Assurance',
+    name: 'Rawafid Institutional Arabic, RTL and Technology Evaluation',
     url: absoluteSiteUrl('/institutions'),
-    description: 'Institutional gateway for Arabic, RTL, accessibility, localization and terminology quality assurance.',
+    description: 'Institutional gateway for Arabic, RTL, accessibility, localization, terminology quality assurance, patient participation and independent technology evaluation.',
     inLanguage: ['ar', 'en'],
     isPartOf: { '@id': `${absoluteSiteUrl('/')}#website` },
   };
@@ -51,8 +61,8 @@ export default function InstitutionsPage() {
         <div className={`${styles.shell} ${styles.heroGrid}`}>
           <div>
             <span className={styles.eyebrow}>For institutions · للجهات والمؤسسات</span>
-            <h1 className={styles.title}>العربية ليست طبقة ترجمة أخيرة. إنها جزء من جودة المنتج.</h1>
-            <p className={styles.lead}>تعمل روافد على سد الفجوة بين الترجمة العربية، هندسة RTL، الوصولية، وضبط المصطلحات. نساعد الفرق التي تملك منتجًا أو دليلًا أو بوابة عامة على اكتشاف المشكلات القابلة للإثبات، بناء قواعد QA قابلة للتكرار، وإدخالها في دورة التطوير بدل الاعتماد على الفحص اليدوي المتأخر فقط.</p>
+            <h1 className={styles.title}>العربية ليست طبقة ترجمة أخيرة، والتقنية لا تصبح مناسبة لأنها تعمل في عرض توضيحي.</h1>
+            <p className={styles.lead}>تعمل روافد على سد الفجوة بين الترجمة العربية، هندسة RTL، الوصولية، ضبط المصطلحات، المشاركة الصحية، والتقييم المنهجي للتقنيات الصحية والتأهيلية والمساندة. نساعد الفرق على تحويل المشكلات والادعاءات إلى أدلة واختبارات وحدود قابلة للمراجعة بدل الاعتماد على الانطباع أو الفحص اليدوي المتأخر فقط.</p>
             <div className={styles.actions}>
               <a className={styles.primary} href="mailto:contact@healthrenewal.org?subject=Institutional%20Arabic%20%26%20RTL%20Assurance">تواصل مؤسسي</a>
               <a className={styles.secondary} href="https://github.com/khaledaltheeb/rawafid-arabic-rtl-a11y-toolkit" target="_blank" rel="noreferrer">استعراض المستودع المفتوح</a>
@@ -62,6 +72,8 @@ export default function InstitutionsPage() {
             <h2>ما الذي يمكن مراجعته؟</h2>
             <ul>
               <li>مواقع ومنصات عامة باللغة العربية.</li>
+              <li>تقنيات صحية وتأهيلية وتعليمية مساندة قبل الـpilot.</li>
+              <li>مسارات مشاركة صحية واستعداد للموعد ومتابعة.</li>
               <li>نماذج الإبلاغ والخدمات الإلكترونية.</li>
               <li>ملفات ومفاتيح الترجمة وواجهات i18n.</li>
               <li>مصطلحات مؤسسية متعددة اللغات.</li>
@@ -75,8 +87,8 @@ export default function InstitutionsPage() {
       <section className={`${styles.shell} ${styles.section}`}>
         <div className={styles.sectionHeader}>
           <p className={styles.kicker}>Capabilities</p>
-          <h2>ثلاث طبقات، دون خلط بين المفتوح المصدر والمحتوى المؤسسي</h2>
-          <p>نحافظ على النواة الهندسية العامة مفتوحة المصدر، بينما تبقى القواميس أو قواعد المصطلحات الخاصة بكل مؤسسة منفصلة بحسب الترخيص والخصوصية والحوكمة.</p>
+          <h2>خمس طبقات، دون خلط بين التقييم والمراجعة والتأييد</h2>
+          <p>نحافظ على النواة الهندسية العامة مفتوحة المصدر، بينما تبقى القواميس أو قواعد المصطلحات الخاصة بكل مؤسسة منفصلة بحسب الترخيص والخصوصية والحوكمة. وعند تقييم منتج أو مسار مشاركة، نسجل ما يثبت وما يبقى فرضية قبل أي تجربة أوسع.</p>
         </div>
         <div className={styles.grid}>
           {services.map((service) => <article className={styles.card} key={service.href}>
@@ -92,11 +104,11 @@ export default function InstitutionsPage() {
           <article className={styles.panel}>
             <h2>طريقة العمل</h2>
             <ol>
-              <li>تحديد مشكلة قابلة لإعادة الإنتاج أو فجوة واضحة.</li>
-              <li>توثيق المثال وسياقه ومصدره قبل اقتراح أي تعديل.</li>
-              <li>فصل الخطأ الدلالي عن التفضيل الأسلوبي وعن آثار استخراج PDF أو RTL.</li>
+              <li>تحديد مشكلة قابلة لإعادة الإنتاج أو سؤال قرار واضح.</li>
+              <li>توثيق المثال وسياقه ومصدره قبل اقتراح أي تعديل أو pilot.</li>
+              <li>فصل الخطأ الدلالي عن التفضيل الأسلوبي وعن آثار استخراج PDF أو RTL، وفصل usability عن الفعالية السريرية.</li>
               <li>تحويل القاعدة المتكررة إلى اختبار أو profile قابل للتشغيل حين يكون ذلك مناسبًا.</li>
-              <li>إعادة التحقق بعد الإصلاح وربط النتيجة بدورة CI أو مراجعة إصدار.</li>
+              <li>إعادة التحقق بعد الإصلاح وربط النتيجة بدورة CI أو مراجعة إصدار أو قرار تنفيذ.</li>
             </ol>
           </article>
           <article className={styles.panel}>
@@ -104,12 +116,13 @@ export default function InstitutionsPage() {
             <ul>
               <li>الأدوات الآلية لا تثبت الصحة الدلالية الكاملة للترجمة.</li>
               <li>المجالات الطبية والقانونية وحماية الطفل تحتاج حوكمة ومراجعين مؤهلين.</li>
+              <li>وجود demo أو دراسة أولية لا يثبت الفعالية أو الملاءمة لكل جمهور.</li>
               <li>لا نستخدم شعار أو اسم جهة لإيحاء شراكة أو اعتماد غير مؤكد.</li>
-              <li>لا نضع مفردات محمية أو خاصة داخل المستودع المفتوح دون حق واضح في إعادة توزيعها.</li>
+              <li>لا نضع مفردات أو مواد محمية داخل المستودع المفتوح دون حق واضح في إعادة توزيعها.</li>
             </ul>
           </article>
         </div>
-        <div className={styles.notice}><strong>مبدأ أساسي:</strong> تقديم ملاحظة أو تدقيق أو أداة لجهة لا يعني أن الجهة راجعت روافد أو أيدتها أو دخلت معها في شراكة. أي علاقة مؤسسية تُوصف فقط وفق ما تم تأكيده كتابيًا.</div>
+        <div className={styles.notice}><strong>مبدأ أساسي:</strong> تقديم ملاحظة أو تدقيق أو أداة أو تقييم لجهة لا يعني أن الجهة راجعت روافد أو أيدتها أو دخلت معها في شراكة. أي علاقة مؤسسية تُوصف فقط وفق ما تم تأكيده كتابيًا.</div>
       </section>
 
       <section className={`${styles.shell} ${styles.section}`}>
@@ -127,7 +140,7 @@ export default function InstitutionsPage() {
 
       <section className={`${styles.shell} ${styles.cta}`}>
         <h2>هل لديكم منتج أو مورد عربي يحتاج مراجعة دقيقة؟</h2>
-        <p>أفضل بداية ليست عقدًا كبيرًا. يمكن أن تبدأ بمثال عام واحد قابل للتحقق، أو مجموعة صغيرة من مفاتيح الترجمة، أو صفحة عامة، ثم نحدد إن كانت المشكلة تستحق تحويلها إلى قاعدة QA متكررة.</p>
+        <p>أفضل بداية ليست عقدًا كبيرًا. يمكن أن تبدأ بمثال عام واحد قابل للتحقق، أو مجموعة صغيرة من مفاتيح الترجمة، أو صفحة عامة، أو demo بحدود واضحة، ثم نحدد إن كانت المشكلة تستحق اختبارًا أو pilot أوسع.</p>
         <div className={styles.actions}>
           <a className={styles.primary} href="mailto:contact@healthrenewal.org?subject=Arabic%20Localization%20QA%20Sample">طلب مراجعة عينة</a>
           <Link className={styles.secondary} href="/about">عن روافد</Link>
