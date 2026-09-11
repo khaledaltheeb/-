@@ -23,6 +23,7 @@ const LOCAL_PUBLIC_EXACT = new Set([
   '/institutions/terminology-qa',
   '/institutions/open-source',
   '/institutions/technology-evaluation',
+  '/institutions/patient-participation',
   '/media',
   '/accessibility-statement',
   '/tools/rare-phenotype-navigator',
