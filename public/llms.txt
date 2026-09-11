@@ -20,6 +20,7 @@ Publisher: منصة روافد
 - [Cognitive lab](https://healthrenewal.org/cognitive-lab)
 - [Institutional Arabic/RTL assurance](https://healthrenewal.org/institutions)
 - [Institutional technology evaluation](https://healthrenewal.org/institutions/technology-evaluation)
+- [Patient participation and appointment readiness](https://healthrenewal.org/institutions/patient-participation)
 - [Media and practical materials](https://healthrenewal.org/media/)
 - [External-review transparency](https://healthrenewal.org/external-review/)
 - [Addiction-safety external review pack](https://healthrenewal.org/external-review/addiction-safety/)
