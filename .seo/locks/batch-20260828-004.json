@@ -1,0 +1,20 @@
+{
+  "batch_id": "004",
+  "owner": "scheduled-seo-agent",
+  "status": "audited_pending_ci",
+  "selected_at": "2026-08-28T15:48:00Z",
+  "selection_policy": "oldest published indexable URLs not owned by batches 001-003",
+  "count": 50,
+  "branch": "seo/batch-20260828-004",
+  "rules": {
+    "visible_scientific_copy_changed": false,
+    "published_urls_changed": false,
+    "robots_changed": false,
+    "authors_or_reviewers_invented": false,
+    "new_seo_pages_published": false
+  },
+  "range": {
+    "first": "/content/factor-analysis",
+    "last": "/content/blended-family"
+  }
+}

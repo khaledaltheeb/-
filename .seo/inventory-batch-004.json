@@ -1,0 +1,41 @@
+{
+  "snapshot_at": "2026-08-28T15:48:00Z",
+  "production_domain": "https://healthrenewal.org",
+  "published": 4370,
+  "indexable": 4365,
+  "published_noindex": 5,
+  "indexable_missing_canonical": 0,
+  "indexable_missing_seo_title": 0,
+  "indexable_missing_seo_description": 0,
+  "ownership": {
+    "historical_batches_before_this_run": 150,
+    "batch_004": 50,
+    "total_owned_after_batch_004": 200,
+    "note": "Batches 001-003 are owned in active historical SEO branches/PRs and were explicitly excluded even where their ledger is not yet merged to main."
+  },
+  "batch_004": {
+    "count": 50,
+    "first": "/content/factor-analysis",
+    "last": "/content/blended-family",
+    "all_index_follow": true,
+    "all_have_canonical": true,
+    "all_have_seo_title": true,
+    "all_have_seo_description": true,
+    "all_have_db_schema": true,
+    "all_have_stored_author_display": true,
+    "named_reviewer_count": 37,
+    "stored_review_date_count": 50,
+    "minimum_reference_count": 4,
+    "minimum_body_text_words": 404,
+    "featured_image_count": 0,
+    "exact_primary_query_collision_pages": 12,
+    "selected_seo_title_duplicate_pages": 0,
+    "selected_canonical_duplicate_pages": 0
+  },
+  "release": {
+    "status": "pending_ci",
+    "production_changed": false,
+    "live_selected_route_fetch": "external-reader-unavailable",
+    "do_not_reprocess_before_inventory_completion": true
+  }
+}
