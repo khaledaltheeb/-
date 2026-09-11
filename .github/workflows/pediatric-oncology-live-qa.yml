@@ -68,6 +68,30 @@ jobs:
             fi
           }
 
+          assert_permanent_redirect() {
+            local source="$1"
+            local target="$2"
+            local headers
+            local status
+            local location
+            headers="$(mktemp)"
+            status="$(curl -sS -D "$headers" -o /dev/null --max-redirs 0 \
+              -H 'Cache-Control: no-cache, no-store, max-age=0' \
+              --retry 5 --retry-delay 2 --retry-all-errors --max-time 60 \
+              -w '%{http_code}' "${base}${source}" || true)"
+            if [[ "$status" != '301' && "$status" != '308' ]]; then
+              echo "Expected permanent redirect: ${source} status=${status:-curl-error}" >&2
+              cat "$headers" >&2 || true
+              exit 1
+            fi
+            location="$(awk 'BEGIN{IGNORECASE=1} /^location:/{sub(/^[^:]+:[[:space:]]*/,""); sub(/\r$/,""); print; exit}' "$headers")"
+            rm -f "$headers"
+            if [[ "$location" != "$target" && "$location" != "${base}${target}" ]]; then
+              echo "Wrong redirect target: ${source} -> ${location:-missing}; expected ${target}" >&2
+              exit 1
+            fi
+          }
+
           echo 'LIVE_CHECK pediatric oncology center'
           fetch_html '/sectors/pediatric-oncology' /tmp/pediatric-oncology-center.html
           assert_public_indexable '/sectors/pediatric-oncology' /tmp/pediatric-oncology-center.html
@@ -120,13 +144,58 @@ jobs:
           /care-guides/pediatric-cancer-bereavement-family-siblings-guide/|دعم الأسرة بعد وفاة طفل
           GUIDES
 
-          echo 'LIVE_CHECK robots and discoverability entry points'
+          echo 'LIVE_CHECK pediatric oncology duplicate consolidation redirects'
+          assert_permanent_redirect \
+            '/magazine/pediatric-oncology/theses/surviving-childhood-cancer-western-kenya-lemmen-2025/' \
+            '/magazine/pediatric-oncology/theses/childhood-cancer-survivorship-western-kenya-lemmen-2025/'
+          assert_permanent_redirect \
+            '/magazine/pediatric-oncology/theses/bedside-muscle-ultrasound-sarcopenia-pediatric-oncology-hawes-2026/' \
+            '/magazine/pediatric-oncology/theses/muscle-ultrasound-sarcopenia-pediatric-oncology-hawes-2026/'
+          echo 'LIVE_OK duplicate research routes consolidate permanently'
+
+          echo 'LIVE_CHECK robots, taxonomy sitemap and AI discovery entry points'
           curl -fsS --retry 5 --retry-delay 2 --retry-all-errors "${base}/robots.txt?poQa=${stamp}" >/tmp/robots.txt
           grep -q 'Sitemap: https://healthrenewal.org/sitemap.xml' /tmp/robots.txt
           if grep -qiE '^Disallow:[[:space:]]*/(sectors|sections|care-guides)(/|$)' /tmp/robots.txt; then
             echo 'robots.txt blocks a pediatric oncology public route family.' >&2
             exit 1
           fi
+
+          curl -fsS --retry 5 --retry-delay 2 --retry-all-errors "${base}/sitemaps/taxonomy.xml?poQa=${stamp}" >/tmp/taxonomy.xml
+          grep -q 'https://healthrenewal.org/sectors/pediatric-oncology' /tmp/taxonomy.xml
+          for route in \
+            '/sections/pediatric-cancer-types-diagnosis' \
+            '/sections/pediatric-cancer-treatment-care' \
+            '/sections/pediatric-cancer-research-evidence' \
+            '/sections/pediatric-cancer-theses-dissertations' \
+            '/sections/pediatric-cancer-psychosocial-family' \
+            '/sections/pediatric-cancer-supportive-rehab' \
+            '/sections/pediatric-cancer-daily-life-school' \
+            '/sections/pediatric-cancer-survivorship-late-effects' \
+            '/sections/pediatric-cancer-palliative-bereavement'; do
+            grep -q "https://healthrenewal.org${route}" /tmp/taxonomy.xml
+          done
+
+          stale_lemmen='/magazine/pediatric-oncology/theses/surviving-childhood-cancer-western-kenya-lemmen-2025/'
+          stale_hawes='/magazine/pediatric-oncology/theses/bedside-muscle-ultrasound-sarcopenia-pediatric-oncology-hawes-2026/'
+          for page in 0 1 2 3 4; do
+            out="/tmp/content-sitemap-${page}.xml"
+            curl -fsS --retry 5 --retry-delay 2 --retry-all-errors \
+              "${base}/sitemaps/content.xml?page=${page}&poQa=${stamp}" >"$out"
+            if grep -Fq "https://healthrenewal.org${stale_lemmen}" "$out"; then
+              echo "Redirect-source leak in content sitemap page ${page}: ${stale_lemmen}" >&2
+              exit 1
+            fi
+            if grep -Fq "https://healthrenewal.org${stale_hawes}" "$out"; then
+              echo "Redirect-source leak in content sitemap page ${page}: ${stale_hawes}" >&2
+              exit 1
+            fi
+          done
+
           curl -fsS --retry 5 --retry-delay 2 --retry-all-errors "${base}/llms.txt?poQa=${stamp}" >/tmp/llms.txt
           grep -q 'https://healthrenewal.org/sectors/pediatric-oncology' /tmp/llms.txt
+          grep -q 'https://healthrenewal.org/care-guides/pediatric-cancer-molecular-testing-precision-medicine-guide/' /tmp/llms.txt
+          grep -q 'https://healthrenewal.org/care-guides/pediatric-cancer-targeted-immunotherapy-car-t-guide/' /tmp/llms.txt
+          grep -q 'https://healthrenewal.org/care-guides/pediatric-oncology-surgery-biopsy-resection-guide/' /tmp/llms.txt
+          grep -q 'https://healthrenewal.org/care-guides/pediatric-cancer-bereavement-family-siblings-guide/' /tmp/llms.txt
           echo 'LIVE_OK pediatric oncology discovery guards'
