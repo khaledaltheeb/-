@@ -16,8 +16,8 @@ const routes = [
   ['/institutions/patient-participation', 'app/institutions/patient-participation/page.tsx'],
   ['/media/', 'app/media/page.tsx'],
   ['/external-review/', 'app/external-review/page.tsx'],
-  ['/external-review/addiction-safety/', 'app/external-review/addiction-safety/page.tsx'],
-  ['/external-review/reviewer-governance/', 'app/external-review/reviewer-governance/page.tsx'],
+  ['/external-review/addiction-safety', 'app/external-review/addiction-safety/page.tsx'],
+  ['/external-review/reviewer-governance', 'app/external-review/reviewer-governance/page.tsx'],
   ['/accessibility-statement', 'app/accessibility-statement/page.tsx'],
 ];
 
@@ -67,8 +67,8 @@ for (const url of [
   'https://healthrenewal.org/institutions/patient-participation',
   'https://healthrenewal.org/media/',
   'https://healthrenewal.org/external-review/',
-  'https://healthrenewal.org/external-review/addiction-safety/',
-  'https://healthrenewal.org/external-review/reviewer-governance/',
+  'https://healthrenewal.org/external-review/addiction-safety',
+  'https://healthrenewal.org/external-review/reviewer-governance',
   'https://healthrenewal.org/accessibility-statement',
   'https://healthrenewal.org/sitemaps/discovery.xml',
 ]) {
