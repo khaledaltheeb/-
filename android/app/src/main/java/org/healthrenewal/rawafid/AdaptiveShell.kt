@@ -155,15 +155,16 @@ private fun ShellContent(tab: ShellTab, expanded: Boolean, onNavigate: (ShellTab
 @Composable
 private fun TodayScreen(expanded: Boolean, onNavigate: (ShellTab) -> Unit) {
     val context = LocalContext.current
+    val repository = remember(context) { RawafidRepositories.local(context) }
     var refresh by remember { mutableIntStateOf(0) }
     val all = remember { FeatureCatalog.visible(context) }
     val selected = remember(refresh) { HomePreferenceStore.selected(context) }
-    val water = remember(refresh) { LocalStore.waterCountToday(context) }
+    val water = remember(refresh) { repository.waterCountToday() }
     val safe = remember(refresh) { SafeArrivalStore.load(context) }
     val meds = remember(refresh) { MedicationStore.medications(context) }
     val taken = remember(refresh) { meds.count { MedicationStore.todayStatus(context, it.id) == "أخذته" } }
     val nextAppointment = remember(refresh) {
-        LocalStore.treatments(context)
+        repository.treatments()
             .filter { it.timeMillis > System.currentTimeMillis() }
             .minByOrNull { it.timeMillis }
     }
@@ -224,7 +225,7 @@ private fun TodayScreen(expanded: Boolean, onNavigate: (ShellTab) -> Unit) {
                 appointmentValue = nextAppointment?.let { DateFormat.getDateInstance(DateFormat.SHORT).format(Date(it.timeMillis)) } ?: "لا يوجد",
                 familyValue = familyOpen.toString(),
                 onWater = {
-                    LocalStore.recordWater(context)
+                    repository.recordWater()
                     RawafidWidgetProvider.updateAll(context)
                     refresh++
                 },
