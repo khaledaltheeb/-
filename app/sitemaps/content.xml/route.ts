@@ -47,6 +47,10 @@ type TaxonomySitemapRecord = {
   slug: string;
 };
 
+type RedirectSitemapRecord = {
+  source_path: string;
+};
+
 function applyDedicatedSitemapExclusions<T extends {
   not: (column: string, operator: string, value: string) => T;
   neq: (column: string, value: string) => T;
@@ -72,8 +76,9 @@ const nextConfigRedirectSources = new Set<string>(
   NEXT_CONFIG_REDIRECT_SOURCE_CANONICALS.map((path) => normalizeCanonicalPath(path)),
 );
 
-function isRedirectSource(path: string) {
-  return nextConfigRedirectSources.has(normalizeCanonicalPath(path));
+function isRedirectSource(path: string, databaseRedirectSources: Set<string>) {
+  const normalizedPath = normalizeCanonicalPath(path);
+  return nextConfigRedirectSources.has(normalizedPath) || databaseRedirectSources.has(normalizedPath);
 }
 
 export async function GET(request: Request) {
@@ -88,7 +93,9 @@ export async function GET(request: Request) {
 
   // Taxonomy hub canonicals belong exclusively to taxonomy.xml. Content rows may
   // still power those pages editorially, but must not emit a competing sitemap URL.
-  const [sectorResult, categoryResult] = await Promise.all([
+  // Active database redirect sources are preserved for routing/history but are not
+  // canonical destinations, so they must also be omitted from sitemap advertising.
+  const [sectorResult, categoryResult, redirectResult] = await Promise.all([
     supabase
       .from('sectors')
       .select('slug')
@@ -101,6 +108,11 @@ export async function GET(request: Request) {
       .eq('is_active', true)
       .eq('visibility', 'public')
       .limit(50000),
+    supabase
+      .from('redirects')
+      .select('source_path')
+      .eq('is_active', true)
+      .limit(50000),
   ]);
 
   if (sectorResult.error) {
@@ -109,11 +121,19 @@ export async function GET(request: Request) {
   if (categoryResult.error) {
     throw new Error(`content sitemap taxonomy category query failed: ${categoryResult.error.message}`);
   }
+  if (redirectResult.error) {
+    throw new Error(`content sitemap redirect-source query failed: ${redirectResult.error.message}`);
+  }
 
   const taxonomyOwnedCanonicals = new Set<string>([
     ...((sectorResult.data ?? []) as TaxonomySitemapRecord[]).map((item) => `/sectors/${item.slug}`),
     ...((categoryResult.data ?? []) as TaxonomySitemapRecord[]).map((item) => `/sections/${item.slug}`),
   ]);
+  const databaseRedirectSources = new Set<string>(
+    ((redirectResult.data ?? []) as RedirectSitemapRecord[])
+      .map((item) => normalizeCanonicalPath(item.source_path))
+      .filter(Boolean),
+  );
 
   // Child-sitemap ownership is determined by the published canonical namespace,
   // never by an internal content_type. This prevents non-encyclopedia conditions
@@ -148,7 +168,7 @@ export async function GET(request: Request) {
     .filter((item) => {
       const path = item.canonical_url || `/content/${item.slug}`;
       const normalizedPath = normalizeCanonicalPath(path);
-      return !taxonomyOwnedCanonicals.has(normalizedPath) && !isRedirectSource(normalizedPath);
+      return !taxonomyOwnedCanonicals.has(normalizedPath) && !isRedirectSource(normalizedPath, databaseRedirectSources);
     })
     .map((item) => ({
       path: item.canonical_url || `/content/${item.slug}`,
@@ -180,7 +200,7 @@ export async function GET(request: Request) {
         })),
     ].filter((item) => {
       const normalizedPath = normalizeCanonicalPath(item.path);
-      return !taxonomyOwnedCanonicals.has(normalizedPath) && !isRedirectSource(normalizedPath);
+      return !taxonomyOwnedCanonicals.has(normalizedPath) && !isRedirectSource(normalizedPath, databaseRedirectSources);
     });
   }
 
