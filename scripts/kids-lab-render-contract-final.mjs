@@ -8,6 +8,7 @@ const runtimePath = path.join(scriptsDir, '.kids-lab-render-contract-runtime.mjs
 let source = fs.readFileSync(sourcePath, 'utf8');
 
 const replacements = [
+  ['lib/capabilities/attention-svg.ts','lib/capabilities/attention-svg-final.ts'],
   ['lib/capabilities/memory-svg.ts','lib/capabilities/memory-svg-final.ts'],
   ['lib/capabilities/executive-functions-svg.ts','lib/capabilities/executive-functions-svg-final.ts'],
   ['lib/capabilities/visual-perception-svg.ts','lib/capabilities/visual-perception-svg-final.ts'],

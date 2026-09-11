@@ -6,8 +6,11 @@ function markerSvg(marker: BilateralMarker) {
   return `<path d="M${marker.x} ${marker.y - 14} L${marker.x + 14} ${marker.y + 12} L${marker.x - 14} ${marker.y + 12} Z" fill="#C4B5FD" stroke="#7C3AED" stroke-width="3"/>`;
 }
 function escapeXml(value:string){return value.replace(/[&<>\"]/g,(char)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[char]??char));}
-function wrap(value:string,max=58){const words=value.split(/\s+/),lines:string[]=[];let line='';for(const word of words){const next=line?`${line} ${word}`:word;if(next.length>max&&line){lines.push(line);line=word}else line=next}if(line)lines.push(line);return lines.slice(0,2);}
-function handBadge(cx:number,cy:number,label:string,fill:string,stroke:string){return `<g><circle cx="${cx}" cy="${cy}" r="31" fill="${fill}" stroke="${stroke}" stroke-width="5"/><path d="M ${cx-10} ${cy+10} v-18 q 0-6 5-6 q 5 0 5 6 v8 v-16 q 0-6 5-6 q 5 0 5 6 v16 v-12 q 0-6 5-6 q 5 0 5 6 v15 q 0 19-18 27 q-17-4-22-18 v-8 q0-6 5-6 q5 0 5 6 v4" fill="none" stroke="${stroke}" stroke-width="3" stroke-linecap="round"/></g><text x="${cx}" y="${cy+52}" text-anchor="middle" direction="rtl" font-family="Tahoma,Arial,sans-serif" font-size="15" font-weight="700" fill="${stroke}">${label}</text>`;}
+function wrap(value:string,max=58){const words=value.split(/\s+/).filter(Boolean),lines:string[]=[];let line='';for(const word of words){const next=line?`${line} ${word}`:word;if(next.length>max&&line){lines.push(line);line=word}else line=next}if(line)lines.push(line);return lines;}
+function handBadge(cx:number,cy:number,label:string,fill:string,stroke:string){return `<g><circle cx="${cx}" cy="${cy}" r="31" fill="${fill}" stroke="${stroke}" stroke-width="5"/><path d="M ${cx-10} ${cy+10} v-18 q 0-6 5-6 q 5 0 5 6 v8 v-16 q 0-6 5-6 q 5 0 5 6 v16 v-12 q 0-6 5-6 q 5 0 5 6 v15 q 0 19-18 27 q-17-4-22-18 v-8 q0-6 5-6 q5 0 5 6 v4" fill="none" stroke="${stroke}" stroke-width="3" stroke-linecap="round"/></g><text x="${cx}" y="${cy+52}" text-anchor="middle" direction="rtl" font-family="Tahoma,Arial,sans-serif" font-size="15" font-weight="700" fill="${stroke}">${escapeXml(label)}</text>`;}
+function fieldLabel(x:number,y:number,label:string){return `<text x="${x}" y="${y}" text-anchor="end" direction="rtl" unicode-bidi="plaintext" font-family="Tahoma,Arial,sans-serif" font-size="14" font-weight="700" fill="#334155">${escapeXml(label)}</text>`;}
+function fieldLine(x1:number,y:number,x2:number){return `<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}" stroke="#94A3B8" stroke-width="1.6"/>`;}
+function checkOption(x:number,y:number,label:string){return `<rect x="${x}" y="${y-13}" width="15" height="15" rx="3" fill="#FFF" stroke="#64748B" stroke-width="1.5"/><text x="${x+22}" y="${y}" text-anchor="start" direction="rtl" unicode-bidi="plaintext" font-family="Tahoma,Arial,sans-serif" font-size="13" fill="#475569">${escapeXml(label)}</text>`;}
 
 export function renderBilateralSvg(activity:BilateralActivity){
   const isTest=activity.kind==='test';
@@ -15,8 +18,9 @@ export function renderBilateralSvg(activity:BilateralActivity){
   const markers=(activity.markers??[]).map(markerSvg).join('');
   const helper=isTest?'ابدأ باليدين معًا، وحافظ على التتبع حتى النهاية.':'اليد اليمنى على المسار الأزرق، واليسرى على المسار الأخضر. تحرك بهما معًا.';
   const instructionLines=wrap(activity.instruction,58);
-  const boxH=instructionLines.length>1?70:50;
-  const instructionSvg=instructionLines.map((line,i)=>`<text x="397" y="${222+i*24}" text-anchor="middle" direction="rtl" unicode-bidi="plaintext" font-family="Tahoma,Arial,sans-serif" font-size="${instructionLines.length>1?15:17}" font-weight="700" fill="#0C4A6E">${escapeXml(line)}</text>`).join('');
+  const instructionFont=instructionLines.length<=1?17:instructionLines.length===2?15:13;
+  const boxH=Math.max(50,46+Math.max(0,instructionLines.length-1)*22);
+  const instructionSvg=instructionLines.map((line,i)=>`<text x="397" y="${218+i*21}" text-anchor="middle" direction="rtl" unicode-bidi="plaintext" font-family="Tahoma,Arial,sans-serif" font-size="${instructionFont}" font-weight="700" fill="#0C4A6E">${escapeXml(line)}</text>`).join('');
   return `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="794" height="1123" viewBox="0 0 794 1123" role="img" aria-labelledby="title desc">
 <title id="title">${escapeXml(activity.title)}</title><desc id="desc">${escapeXml(activity.instruction)}</desc>
@@ -31,6 +35,9 @@ export function renderBilateralSvg(activity:BilateralActivity){
 <circle cx="245" cy="930" r="24" fill="#DCFCE7" stroke="#16A34A" stroke-width="5"/><circle cx="549" cy="930" r="24" fill="#DBEAFE" stroke="#2563EB" stroke-width="5"/>
 <text x="245" y="976" text-anchor="middle" direction="rtl" font-family="Tahoma,Arial,sans-serif" font-size="18" font-weight="700" fill="#166534">النهاية</text><text x="549" y="976" text-anchor="middle" direction="rtl" font-family="Tahoma,Arial,sans-serif" font-size="18" font-weight="700" fill="#1D4ED8">النهاية</text>
 <g opacity=".9"><text x="72" y="430" font-size="28">★</text><text x="700" y="530" font-size="26">✦</text><text x="90" y="760" font-size="24">●</text><text x="690" y="820" font-size="24">★</text></g>
-<rect x="52" y="1010" width="690" height="70" rx="18" fill="#F8FAFC" stroke="#CBD5E1"/><text x="716" y="1038" text-anchor="end" direction="rtl" font-family="Tahoma,Arial,sans-serif" font-size="16" font-weight="700" fill="#334155">الاسم: ........................................</text><text x="445" y="1038" text-anchor="end" direction="rtl" font-family="Tahoma,Arial,sans-serif" font-size="16" font-weight="700" fill="#334155">التاريخ: ....................</text><text x="250" y="1038" text-anchor="end" direction="rtl" font-family="Tahoma,Arial,sans-serif" font-size="16" font-weight="700" fill="#334155">الوقت: ............</text><text x="716" y="1066" text-anchor="end" direction="rtl" font-family="Tahoma,Arial,sans-serif" font-size="15" fill="#475569">هل تحركت اليدان معًا؟ نعم / لا</text><text x="430" y="1066" text-anchor="end" direction="rtl" font-family="Tahoma,Arial,sans-serif" font-size="15" fill="#475569">عدد مرات الخروج عن المسار: ........</text><text x="105" y="1066" text-anchor="start" direction="rtl" font-family="Tahoma,Arial,sans-serif" font-size="14" fill="#64748B">روافد - لنرتقي بقدراتهم</text>
+<rect x="52" y="1010" width="690" height="70" rx="18" fill="#F8FAFC" stroke="#CBD5E1"/>
+${fieldLabel(716,1036,'الاسم')}${fieldLine(548,1042,655)}${fieldLabel(500,1036,'التاريخ')}${fieldLine(370,1042,445)}${fieldLabel(315,1036,'الوقت')}${fieldLine(205,1042,265)}
+${fieldLabel(716,1065,'هل تحركت اليدان معًا؟')}${checkOption(515,1065,'نعم')}${checkOption(450,1065,'لا')}${fieldLabel(390,1065,'الخروج عن المسار')}${fieldLine(245,1071,320)}
+<text x="105" y="1066" text-anchor="start" direction="rtl" font-family="Tahoma,Arial,sans-serif" font-size="14" fill="#64748B">روافد - لنرتقي بقدراتهم</text>
 </svg>`;
 }
