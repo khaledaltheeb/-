@@ -82,6 +82,8 @@ jobs:
           fetch_json 'https://healthrenewal.org/api/openapi.json' '/tmp/openapi.json'
           jq -e '.openapi == "3.1.0" and .info.version == "1.2.0" and .paths["/search"] and .paths["/changes"] and .components.schemas.PublicContent and .components.schemas.ChangeStreamResponse' /tmp/openapi.json >/dev/null
           jq -e '.paths["/changes"].get.parameters | any(.name == "cursor")' /tmp/openapi.json >/dev/null
+          jq -e '.paths["/{resource}"].get.responses["200"].content["application/json"].schema.oneOf | length == 2' /tmp/openapi.json >/dev/null
+          jq -e '.components.schemas.TaxonomyListResponse and .components.schemas.ContentBody and .components.responses.NotModified' /tmp/openapi.json >/dev/null
 
           fetch_json 'https://healthrenewal.org/api/v1/content?limit=1' '/tmp/content.json'
           jq -e '.data | type == "array"' /tmp/content.json >/dev/null
@@ -99,10 +101,39 @@ jobs:
           jq -e '.data | type == "array"' /tmp/sources.json >/dev/null
           jq -e '.pagination | has("next_offset")' /tmp/sources.json >/dev/null
 
+          fetch_json 'https://healthrenewal.org/api/v1/sectors?limit=1&offset=0' '/tmp/sectors.json'
+          jq -e '.data | type == "array"' /tmp/sectors.json >/dev/null
+          jq -e '.pagination.offset == 0 and (.pagination | has("next_offset")) and (.pagination | has("has_more"))' /tmp/sectors.json >/dev/null
+
+          fetch_json 'https://healthrenewal.org/api/v1/articles?limit=1' '/tmp/articles.json'
+          jq -e '.data | type == "array"' /tmp/articles.json >/dev/null
+          jq -e '.pagination | has("next_cursor")' /tmp/articles.json >/dev/null
+
           fetch_json 'https://healthrenewal.org/api/v1/stats' '/tmp/stats.json'
           jq -e '.meta.api_version == "1.2.0"' /tmp/stats.json >/dev/null
 
           fetch_json 'https://healthrenewal.org/api/v1/lens' '/tmp/lens.json'
           jq -e '.mode == "explicit_opt_in" and .attribution.label == "Data Sourced from The Lens" and .security.exposed_to_client == false' /tmp/lens.json >/dev/null
 
-          echo 'LIVE_OK developer portal, OpenAPI, public content, ranked search, lossless changes, sources, stats and Lens manifest verified'
+          # Browser CORS preflight must reach the API route without auth/session middleware side effects.
+          options_status="$(curl -sS -o /tmp/options.body -D /tmp/options.headers -X OPTIONS \
+            -H 'Origin: https://example.org' \
+            -H 'Access-Control-Request-Method: GET' \
+            -H 'Access-Control-Request-Headers: Authorization,X-API-Key' \
+            -w '%{http_code}' \
+            'https://healthrenewal.org/api/v1/content')"
+          echo "LIVE_OPTIONS /api/v1/content ${options_status}"
+          test "$options_status" = '204'
+          grep -Eqi '^access-control-allow-origin: \*' /tmp/options.headers
+          grep -Eqi '^access-control-allow-methods:.*GET.*HEAD.*OPTIONS' /tmp/options.headers
+          grep -Eqi '^access-control-allow-headers:.*Authorization.*X-API-Key' /tmp/options.headers
+
+          # ETag must produce a valid 304 conditional response.
+          curl -sS -D /tmp/etag.headers -o /tmp/etag.body 'https://healthrenewal.org/api/v1/content?limit=1'
+          etag="$(awk -F': ' 'tolower($1)=="etag" {gsub("\\r", "", $2); print $2}' /tmp/etag.headers | tail -n 1)"
+          test -n "$etag"
+          conditional_status="$(curl -sS -o /tmp/conditional.body -w '%{http_code}' -H "If-None-Match: ${etag}" 'https://healthrenewal.org/api/v1/content?limit=1')"
+          echo "LIVE_CONDITIONAL /api/v1/content ${conditional_status}"
+          test "$conditional_status" = '304'
+
+          echo 'LIVE_OK developer portal, OpenAPI, public content, ranked search, lossless changes, taxonomy pagination, sources, stats, Lens, CORS and conditional caching verified'
