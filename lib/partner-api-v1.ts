@@ -96,6 +96,7 @@ export function partnerAuthError(request: Request, authorization: PartnerAuthori
   const message = authorization.reason === 'scope_denied' ? 'The supplied API key does not grant this scope.' : authorization.reason === 'authorization_unavailable' ? 'Partner authorization is temporarily unavailable.' : 'A valid Rawafid Partner API key is required.';
   const headers: Record<string, string> = authErrorHeaders(requestId);
   if (status === 401) headers['WWW-Authenticate'] = 'Bearer realm="Rawafid Partner API"';
+  if (status === 503) headers['Retry-After'] = '60';
   return new Response(JSON.stringify({ error: { code, message, request_id: requestId } }), { status, headers });
 }
 
