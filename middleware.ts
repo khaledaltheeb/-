@@ -60,7 +60,8 @@ export async function middleware(request: NextRequest) {
   // surfaces must remain readable without auth-session refresh. Public API routes enforce
   // their own optional Partner API authorization and quota boundary, so bypassing the
   // Supabase session middleware here also prevents Bearer partner credentials from being
-  // interpreted as user-session credentials.
+  // interpreted as user-session credentials. OPTIONS is included so browser CORS preflight
+  // reaches each API route's explicit OPTIONS handler without auth/session side effects.
   const pathname = request.nextUrl.pathname;
   const normalizedPathname = normalizedPublicPath(pathname);
   const isLocalPublicRoute = LOCAL_PUBLIC_EXACT.has(normalizedPathname)
@@ -68,7 +69,7 @@ export async function middleware(request: NextRequest) {
       (prefix) => normalizedPathname === prefix || normalizedPathname.startsWith(`${prefix}/`),
     );
 
-  if (isLocalPublicRoute && ['GET', 'HEAD'].includes(request.method)) {
+  if (isLocalPublicRoute && ['GET', 'HEAD', 'OPTIONS'].includes(request.method)) {
     return NextResponse.next();
   }
 
