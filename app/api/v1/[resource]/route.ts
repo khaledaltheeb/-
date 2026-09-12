@@ -10,6 +10,20 @@ const TAXONOMIES: Record<string, { table: 'sectors' | 'categories' | 'tags'; fie
   tags: { table: 'tags', fields: 'id,slug,name_ar,description,updated_at', order: 'name_ar' },
 };
 
+function latestUpdatedAt(rows: Array<Record<string, unknown>>) {
+  let latest: string | null = null;
+  let latestMs = Number.NEGATIVE_INFINITY;
+  for (const row of rows) {
+    const value = typeof row.updated_at === 'string' ? row.updated_at : '';
+    const timestamp = Date.parse(value);
+    if (!Number.isNaN(timestamp) && timestamp > latestMs) {
+      latestMs = timestamp;
+      latest = value;
+    }
+  }
+  return latest;
+}
+
 export async function GET(request: Request, context: { params: Promise<{ resource: string }> }) {
   const access = await withOptionalPartnerAccess(request, 'content:read');
   if (access.error) return access.error;
@@ -20,22 +34,53 @@ export async function GET(request: Request, context: { params: Promise<{ resourc
   const taxonomy = TAXONOMIES[resource];
   if (!taxonomy) return apiError(request, 404, 'not_found', 'The requested API resource does not exist.');
 
-  const rawLimit = Number(new URL(request.url).searchParams.get('limit') || 100);
-  const limit = Number.isInteger(rawLimit) && rawLimit > 0 ? Math.min(rawLimit, 500) : 100;
+  const url = new URL(request.url);
+  const limitRaw = url.searchParams.get('limit');
+  const offsetRaw = url.searchParams.get('offset');
+  const parsedLimit = limitRaw === null ? 100 : Number(limitRaw);
+  const parsedOffset = offsetRaw === null ? 0 : Number(offsetRaw);
+  if (!Number.isInteger(parsedLimit) || parsedLimit < 1 || parsedLimit > 500) {
+    return apiError(request, 400, 'invalid_parameter', 'limit must be an integer between 1 and 500 for taxonomy resources.', 'limit');
+  }
+  if (!Number.isInteger(parsedOffset) || parsedOffset < 0 || parsedOffset > 100000) {
+    return apiError(request, 400, 'invalid_parameter', 'offset must be an integer between 0 and 100000 for taxonomy resources.', 'offset');
+  }
+  const limit = parsedLimit;
+  const offset = parsedOffset;
+
   const supabase = await createClient();
   const { data, error } = await supabase
     .from(taxonomy.table)
     .select(taxonomy.fields)
     .eq('is_active', true)
     .order(taxonomy.order, { ascending: true })
-    .limit(limit);
+    .range(offset, offset + limit);
   if (error) return apiError(request, 503, 'upstream_unavailable', 'The public taxonomy is temporarily unavailable.');
 
+  const rows = (Array.isArray(data) ? data : []) as Array<Record<string, unknown>>;
+  const hasMore = rows.length > limit;
+  const page = rows.slice(0, limit);
+  const nextOffset = hasMore ? offset + page.length : null;
+
   const response = jsonResponse(request, {
-    data: data || [],
-    pagination: { limit, has_more: Array.isArray(data) && data.length === limit },
-    meta: { api_version: PUBLIC_API_VERSION, generated_at: new Date().toISOString(), resource },
-  }, { cacheControl: 'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400' });
+    data: page,
+    pagination: {
+      limit,
+      offset,
+      returned: page.length,
+      has_more: hasMore,
+      next_offset: nextOffset,
+    },
+    meta: {
+      api_version: PUBLIC_API_VERSION,
+      generated_at: new Date().toISOString(),
+      resource,
+      pagination_mode: 'offset',
+    },
+  }, {
+    cacheControl: 'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400',
+    lastModified: latestUpdatedAt(page),
+  });
   return decoratePartnerResponse(response, access.headers);
 }
 
