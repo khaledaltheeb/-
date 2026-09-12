@@ -1,0 +1,108 @@
+name: Verify Developer API Live
+
+on:
+  workflow_run:
+    workflows: ["Deploy Production Fast"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Verify developer portal and Public API on production
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          verify_page() {
+            local url="$1"
+            local out="$2"
+            local needle="$3"
+            local canonical="$4"
+            local status
+            status="$(curl -sS -L -H 'Cache-Control: no-cache, no-store, max-age=0' -H 'Pragma: no-cache' --retry 8 --retry-delay 2 --retry-all-errors --max-time 60 -o "$out" -w '%{http_code}' "${url}?verify=${GITHUB_SHA}")"
+            echo "LIVE_HTTP ${url} ${status}"
+            if ! [[ "$status" =~ ^2[0-9][0-9]$ ]]; then
+              echo "Page HTTP failure: url=${url} status=${status}" >&2
+              head -c 1800 "$out" 2>/dev/null || true
+              exit 1
+            fi
+            test -s "$out"
+            grep -Fq "$needle" "$out"
+            grep -Fq "$canonical" "$out"
+            if grep -qi 'noindex' "$out"; then
+              echo "Human documentation is unexpectedly noindex: ${url}" >&2
+              exit 1
+            fi
+            if grep -qiE 'internal server error|application error|500 internal' "$out"; then
+              echo "Application error body detected: ${url}" >&2
+              exit 1
+            fi
+          }
+
+          fetch_json() {
+            local url="$1"
+            local out="$2"
+            local status
+            status="$(curl -sS -L -H 'Accept: application/json' -H 'Cache-Control: no-cache, no-store, max-age=0' --retry 8 --retry-delay 2 --retry-all-errors --max-time 60 -o "$out" -w '%{http_code}' "$url")"
+            echo "LIVE_HTTP ${url} ${status}"
+            if ! [[ "$status" =~ ^2[0-9][0-9]$ ]]; then
+              echo "API HTTP failure: url=${url} status=${status}" >&2
+              cat "$out" 2>/dev/null || true
+              exit 1
+            fi
+            jq -e . "$out" >/dev/null
+          }
+
+          verify_page \
+            'https://healthrenewal.org/developers' \
+            '/tmp/developers-ar.html' \
+            'منصة روافد للمطورين' \
+            'https://healthrenewal.org/developers'
+          grep -Fq 'Rawafid Public &amp; Partner API v1.2.0' /tmp/developers-ar.html
+          grep -Fq '/api/openapi.json' /tmp/developers-ar.html
+          grep -Fq 'next_cursor' /tmp/developers-ar.html
+
+          verify_page \
+            'https://healthrenewal.org/en/developers' \
+            '/tmp/developers-en.html' \
+            'Rawafid Developer Platform' \
+            'https://healthrenewal.org/en/developers'
+          grep -Fq '120 requests/minute' /tmp/developers-en.html
+
+          fetch_json 'https://healthrenewal.org/api/v1' '/tmp/api-root.json'
+          jq -e '.version == "1.2.0" and .status == "stable" and .openapi and (.resources | index("search"))' /tmp/api-root.json >/dev/null
+
+          fetch_json 'https://healthrenewal.org/api/openapi.json' '/tmp/openapi.json'
+          jq -e '.openapi == "3.1.0" and .info.version == "1.2.0" and .paths["/search"] and .paths["/changes"] and .components.schemas.PublicContent and .components.schemas.ChangeStreamResponse' /tmp/openapi.json >/dev/null
+          jq -e '.paths["/changes"].get.parameters | any(.name == "cursor")' /tmp/openapi.json >/dev/null
+
+          fetch_json 'https://healthrenewal.org/api/v1/content?limit=1' '/tmp/content.json'
+          jq -e '.data | type == "array"' /tmp/content.json >/dev/null
+          jq -e '.pagination | has("next_cursor")' /tmp/content.json >/dev/null
+
+          fetch_json 'https://healthrenewal.org/api/v1/search?q=autism&limit=2' '/tmp/search.json'
+          jq -e '.data | type == "array"' /tmp/search.json >/dev/null
+          jq -e '.meta.search_mode == "ranked_public_content"' /tmp/search.json >/dev/null
+
+          fetch_json 'https://healthrenewal.org/api/v1/changes?since=2026-09-01T00:00:00Z&limit=2' '/tmp/changes.json'
+          jq -e '.data | type == "array"' /tmp/changes.json >/dev/null
+          jq -e '.pagination.cursor_recommended == true and (.pagination | has("next_cursor"))' /tmp/changes.json >/dev/null
+
+          fetch_json 'https://healthrenewal.org/api/v1/sources?limit=1' '/tmp/sources.json'
+          jq -e '.data | type == "array"' /tmp/sources.json >/dev/null
+          jq -e '.pagination | has("next_offset")' /tmp/sources.json >/dev/null
+
+          fetch_json 'https://healthrenewal.org/api/v1/stats' '/tmp/stats.json'
+          jq -e '.meta.api_version == "1.2.0"' /tmp/stats.json >/dev/null
+
+          fetch_json 'https://healthrenewal.org/api/v1/lens' '/tmp/lens.json'
+          jq -e '.mode == "explicit_opt_in" and .attribution.label == "Data Sourced from The Lens" and .security.exposed_to_client == false' /tmp/lens.json >/dev/null
+
+          echo 'LIVE_OK developer portal, OpenAPI, public content, ranked search, lossless changes, sources, stats and Lens manifest verified'
