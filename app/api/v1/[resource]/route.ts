@@ -57,7 +57,8 @@ export async function GET(request: Request, context: { params: Promise<{ resourc
     .range(offset, offset + limit);
   if (error) return apiError(request, 503, 'upstream_unavailable', 'The public taxonomy is temporarily unavailable.');
 
-  const rows = (Array.isArray(data) ? data : []) as Array<Record<string, unknown>>;
+  const rawRows: unknown[] = Array.isArray(data) ? data : [];
+  const rows = rawRows.filter((row): row is Record<string, unknown> => typeof row === 'object' && row !== null);
   const hasMore = rows.length > limit;
   const page = rows.slice(0, limit);
   const nextOffset = hasMore ? offset + page.length : null;
