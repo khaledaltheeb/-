@@ -7,6 +7,7 @@ const ROOT = process.cwd();
 const OUT = path.join(ROOT, 'public', 'kids-lab-assets');
 const nativeRequire = createRequire(import.meta.url);
 const cache = new Map();
+const ARABIC_TEXT = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]/;
 
 const domains = [
   ['attention','lib/capabilities/attention-lab.ts','lib/capabilities/attention-svg.ts','renderAttentionWorksheet'],
@@ -56,6 +57,25 @@ function activityArray(exportsObject, label) {
   return candidates[0];
 }
 
+function textBody(tag) {
+  return tag
+    .replace(/^<text\b[^>]*>/i, '')
+    .replace(/<\/text>$/i, '')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&(?:amp|lt|gt|quot|apos|#\d+|#x[0-9a-f]+);/gi, ' ');
+}
+
+function legacyArabicRtlEndAnchor(svg) {
+  for (const tag of svg.match(/<text\b[^>]*>[\s\S]*?<\/text>/gi) ?? []) {
+    if (!ARABIC_TEXT.test(textBody(tag))) continue;
+    const openTag = tag.match(/^<text\b[^>]*>/i)?.[0] ?? '';
+    const isRtl = /\bdirection=["']rtl["']/i.test(openTag) || /style=["'][^"']*\bdirection\s*:\s*rtl\b/i.test(openTag);
+    const isEndAnchored = /\btext-anchor=["']end["']/i.test(openTag) || /style=["'][^"']*\btext-anchor\s*:\s*end\b/i.test(openTag);
+    if (isRtl && isEndAnchored) return tag;
+  }
+  return null;
+}
+
 const normalizeKidsLabSvgText = load('lib/capabilities/kids-lab-svg-polish.ts').normalizeKidsLabSvgText;
 if (typeof normalizeKidsLabSvgText !== 'function') throw new Error('Kids Lab SVG text normalizer is unavailable.');
 
@@ -75,8 +95,9 @@ for (const [domain, dataPath, rendererPath, rendererName, fixedSeries] of domain
     if (typeof svg !== 'string' || !svg.includes('<svg') || !svg.includes('</svg>') || /\b(?:NaN|Infinity|undefined)\b/.test(svg)) {
       throw new Error(`Invalid SVG for ${domain}/${series ?? ''}/${item.slug}`);
     }
-    if (/<text\b[^>]*direction=["']rtl["'][^>]*text-anchor=["']end["'][^>]*>[\s\S]*?[\u0600-\u06FF]/i.test(svg) || /<text\b[^>]*text-anchor=["']end["'][^>]*direction=["']rtl["'][^>]*>[\s\S]*?[\u0600-\u06FF]/i.test(svg)) {
-      throw new Error(`Legacy RTL end-anchor survived normalization for ${domain}/${series ?? ''}/${item.slug}`);
+    const legacyTag = legacyArabicRtlEndAnchor(svg);
+    if (legacyTag) {
+      throw new Error(`Legacy RTL end-anchor survived normalization for ${domain}/${series ?? ''}/${item.slug}: ${textBody(legacyTag).trim().slice(0, 80)}`);
     }
     fs.mkdirSync(path.dirname(destination), { recursive: true });
     fs.writeFileSync(destination, svg);
