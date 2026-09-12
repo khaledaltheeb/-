@@ -16,6 +16,7 @@ const required = [
   'app/api/v1/evidence-discovery/route.ts',
   'app/api/openapi.json/route.ts',
   'app/developers/page.tsx',
+  'app/developers/lens/page.tsx',
   'examples/lens-scholarly-demo/lens-demo.mjs',
   'examples/lens-scholarly-demo/README.md',
   'docs/integrations/research-evidence.md',
@@ -43,6 +44,8 @@ const openapiDocument = fs.readFileSync('lib/openapi-v1-document.ts', 'utf8');
 const openapiComponents = fs.readFileSync('lib/openapi-v1-components.ts', 'utf8');
 const openapi = [openapiRoute, openapiDocument, openapiComponents].join('\n');
 const developers = fs.readFileSync('app/developers/page.tsx', 'utf8');
+const developerLens = fs.readFileSync('app/developers/lens/page.tsx', 'utf8');
+const developerDocs = [developers, developerLens].join('\n');
 const demo = fs.readFileSync('examples/lens-scholarly-demo/lens-demo.mjs', 'utf8');
 const demoReadme = fs.readFileSync('examples/lens-scholarly-demo/README.md', 'utf8');
 const lensLabs = fs.readFileSync('docs/integrations/lens-labs.md', 'utf8');
@@ -61,7 +64,7 @@ const lensAuthorContract = lens.includes('collective_name') && lens.includes("te
 const lensOpenApiContract = openapi.includes('EvidenceProviderStatus') && openapi.includes('EvidenceDiscoveryResponse') && openapi.includes("enum: ['ok','not_configured','error']") && openapi.includes('Lens is never included unless explicitly requested.');
 const crossrefContract = crossref.includes('https://api.crossref.org/works') && crossref.includes("'query.bibliographic'") && crossref.includes('mailto') && crossref.includes("'User-Agent'") && crossref.includes("cursor: options.cursor?.trim() || '*'") && crossref.includes('from-update-date') && crossref.includes('from-index-date') && crossref.includes('relations(row');
 const dataCiteContract = datacite.includes('https://api.datacite.org/dois') && datacite.includes("'page[cursor]'" ) && datacite.includes("affiliation: 'true'") && datacite.includes("publisher: 'true'") && datacite.includes("detail: 'true'") && datacite.includes('nameIdentifierScheme') && datacite.includes('relatedIdentifiers') && datacite.includes('affiliationIdentifierScheme');
-const developerEvidenceContract = developers.includes('/api/v1/evidence-discovery') && developers.includes('europe_pmc') && developers.includes('crossref') && developers.includes('LENS_SCHOLARLY_API_TOKEN') && developers.includes('Lens Labs') && developers.includes('opt-in') && developers.includes('20,000') && developers.includes('The Lens attribution policy') && developers.includes('ROR') && developers.includes('ORCID') && developers.includes('related_identifiers') && developers.includes('rights_profiles') && developers.includes('translations') && developers.includes('503') && developers.includes('إعادة نشر');
+const developerEvidenceContract = developerDocs.includes('/api/v1/evidence-discovery') && developerDocs.includes('europe_pmc') && developerDocs.includes('crossref') && developerDocs.includes('LENS_SCHOLARLY_API_TOKEN') && developerDocs.includes('Lens Labs') && developerDocs.includes('opt-in') && developerDocs.includes('20,000') && developerDocs.includes('The Lens attribution policy') && developerDocs.includes('ROR') && developerDocs.includes('ORCID') && developerDocs.includes('related_identifiers') && developerDocs.includes('rights_profiles') && developerDocs.includes('translations') && developerDocs.includes('503') && developerDocs.includes('إعادة نشر');
 const lensLabsDocumentationContract = lensLabs.includes('Lens Labs implementation record') && lensLabs.includes('10 requests per minute') && lensLabs.includes('20,000 requests per month') && lensLabs.includes('provider_id') && lensLabs.includes('identifiers.lens') && lensLabs.includes('LENS_SCHOLARLY_API_TOKEN') && lensLabs.includes('Data Sourced from The Lens') && lensLabs.includes('fail closed') && lensLabs.includes('attempts: 1') && demoReadme.includes('Detailed implementation record');
 const governanceContract = governanceMigration.includes('source_rights_profiles') && governanceMigration.includes('metadata_reuse_status') && governanceMigration.includes('content_reuse_status') && governanceMigration.includes('source_translation_provenance') && governanceMigration.includes('source_translation_human_attribution_check') && governanceMigration.includes('source_translation_machine_tool_check') && governanceMigration.includes("'rights_profiles'") && governanceMigration.includes("'translations'");
 const dataCiteRelationContract = dataCiteRelationMigration.includes("'IsReferencedBy'") && dataCiteRelationMigration.includes("'DataCite'") && dataCiteRelationMigration.includes('refresh_content_related_identifiers') && dataCiteRelationMigration.includes('source_related_identifiers_rawafid_content_idx') && dataCiteRelationMigration.includes("content_reuse_status") && dataCiteRelationMigration.includes("'unknown'");
