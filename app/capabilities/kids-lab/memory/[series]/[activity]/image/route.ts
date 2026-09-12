@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { getMemoryActivity, memoryActivities } from '@/lib/capabilities/memory-lab';
 import { renderMemoryWorksheet } from '@/lib/capabilities/memory-svg-final';
+import { normalizeKidsLabSvgText } from '@/lib/capabilities/kids-lab-svg-polish';
 
 type Params = Promise<{ series: string; activity: string }>;
 
@@ -13,7 +14,7 @@ export async function GET(_: Request, { params }: { params: Params }) {
   const item = getMemoryActivity(series, activity);
   if (!item) notFound();
 
-  return new Response(renderMemoryWorksheet(item), {
+  return new Response(normalizeKidsLabSvgText(renderMemoryWorksheet(item)), {
     headers: {
       'Content-Type': 'image/svg+xml; charset=utf-8',
       'Cache-Control': 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800',
