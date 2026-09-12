@@ -22,15 +22,15 @@ function loadTypeScriptModule(relativePath) {
     },
     fileName: file,
   }).outputText;
-  const module = { exports: {} };
+  const loadedModule = { exports: {} };
   new Function('require', 'module', 'exports', '__filename', '__dirname', js)(
     requireNative,
-    module,
-    module.exports,
+    loadedModule,
+    loadedModule.exports,
     file,
     path.dirname(file)
   );
-  return module.exports;
+  return loadedModule.exports;
 }
 
 function requireText(name, text, pattern, message) {
