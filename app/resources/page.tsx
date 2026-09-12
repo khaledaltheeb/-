@@ -66,13 +66,19 @@ export default async function ResourcesPage() {
       </section>
 
       <section aria-labelledby="featured-knowledge-title">
-        <div className="section-mini-heading"><div><span className="eyebrow">مورد معرفي مميز</span><h2 id="featured-knowledge-title">اكتشاف الكتب المفتوحة والتحقق منها</h2></div><span>Metadata · حقوق · جودة علمية</span></div>
+        <div className="section-mini-heading"><div><span className="eyebrow">موارد معرفية مميزة</span><h2 id="featured-knowledge-title">الكتب المفتوحة والبيانات الوصفية</h2></div><span>Metadata · حقوق · جودة علمية · نشر</span></div>
         <div className="institutional-sector-grid">
           <Link className="institutional-sector-card" href="/resources/open-books-discovery/">
-            <span className="eyebrow">دليل محدث · سبتمبر 2026</span>
+            <span className="eyebrow">دليل عربي محدث · سبتمبر 2026</span>
             <h3>الكتب المفتوحة: من الاكتشاف إلى التحقق من الرخصة والبيانات الوصفية</h3>
             <p>دليل عربي متقدم للاستفادة المسؤولة من Thoth والناشرين، مع مسار تحقق من هوية الكتاب وISBN وDOI وONIX والرخصة وجودة المحتوى قبل الاستخدام.</p>
             <span className="sector-open">فتح دليل الكتب المفتوحة ←</span>
+          </Link>
+          <Link className="institutional-sector-card" href="/en/publishing/thoth/" lang="en" dir="ltr">
+            <span className="eyebrow">English institutional workflow · September 2026</span>
+            <h3>Open Book Publishing & Metadata Infrastructure</h3>
+            <p>Rights-first production workflow for Rawafid / Health Renewal books prepared for Thoth Oasis: authority, licences, ISBN/DOI/ORCID/ROR, ONIX readiness, translation provenance, corrections, and public-record safeguards.</p>
+            <span className="sector-open">Open publishing workflow →</span>
           </Link>
         </div>
       </section>
