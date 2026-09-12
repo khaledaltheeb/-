@@ -9,6 +9,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: developer-api-live-${{ github.event.workflow_run.head_sha || github.sha }}
+  cancel-in-progress: true
+
 jobs:
   verify:
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
@@ -17,6 +21,8 @@ jobs:
     steps:
       - name: Verify developer portal and Public API on production
         shell: bash
+        env:
+          TARGET_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
         run: |
           set -euo pipefail
 
@@ -25,21 +31,38 @@ jobs:
             local out="$2"
             local needle="$3"
             local canonical="$4"
+            local headers="${out}.headers"
             local status
-            status="$(curl -sS -L -H 'Cache-Control: no-cache, no-store, max-age=0' -H 'Pragma: no-cache' --retry 8 --retry-delay 2 --retry-all-errors --max-time 60 -o "$out" -w '%{http_code}' "${url}?verify=${GITHUB_SHA}")"
+
+            status="$(curl -sS -L -D "$headers" \
+              -H 'Cache-Control: no-cache, no-store, max-age=0' \
+              -H 'Pragma: no-cache' \
+              --retry 8 --retry-delay 2 --retry-all-errors --max-time 60 \
+              -o "$out" -w '%{http_code}' "${url}?verify=${TARGET_SHA}")"
             echo "LIVE_HTTP ${url} ${status}"
+
             if ! [[ "$status" =~ ^2[0-9][0-9]$ ]]; then
               echo "Page HTTP failure: url=${url} status=${status}" >&2
               head -c 1800 "$out" 2>/dev/null || true
               exit 1
             fi
+
             test -s "$out"
             grep -Fq "$needle" "$out"
             grep -Fq "$canonical" "$out"
-            if grep -qi 'noindex' "$out"; then
-              echo "Human documentation is unexpectedly noindex: ${url}" >&2
+
+            # Human documentation must be indexable. Check the actual robots
+            # metadata/header only; the page legitimately documents that JSON
+            # API responses themselves use X-Robots-Tag: noindex, nofollow.
+            if grep -Eqi '<meta[^>]+name="robots"[^>]+content="[^"]*noindex|<meta[^>]+content="[^"]*noindex[^>]+name="robots"' "$out"; then
+              echo "Human documentation has a robots noindex directive: ${url}" >&2
               exit 1
             fi
+            if grep -Eqi '^x-robots-tag:.*noindex' "$headers"; then
+              echo "Human documentation has X-Robots-Tag noindex: ${url}" >&2
+              exit 1
+            fi
+
             if grep -qiE 'internal server error|application error|500 internal' "$out"; then
               echo "Application error body detected: ${url}" >&2
               exit 1
@@ -50,7 +73,11 @@ jobs:
             local url="$1"
             local out="$2"
             local status
-            status="$(curl -sS -L -H 'Accept: application/json' -H 'Cache-Control: no-cache, no-store, max-age=0' --retry 8 --retry-delay 2 --retry-all-errors --max-time 60 -o "$out" -w '%{http_code}' "$url")"
+            status="$(curl -sS -L \
+              -H 'Accept: application/json' \
+              -H 'Cache-Control: no-cache, no-store, max-age=0' \
+              --retry 8 --retry-delay 2 --retry-all-errors --max-time 60 \
+              -o "$out" -w '%{http_code}' "$url")"
             echo "LIVE_HTTP ${url} ${status}"
             if ! [[ "$status" =~ ^2[0-9][0-9]$ ]]; then
               echo "API HTTP failure: url=${url} status=${status}" >&2
@@ -59,6 +86,8 @@ jobs:
             fi
             jq -e . "$out" >/dev/null
           }
+
+          echo "VERIFY_DEPLOYED_SHA ${TARGET_SHA}"
 
           verify_page \
             'https://healthrenewal.org/developers' \
