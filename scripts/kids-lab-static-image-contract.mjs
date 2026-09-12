@@ -31,6 +31,9 @@ for (const relative of routes) {
   if (!/export\s+(?:async\s+)?function\s+GET/.test(source)) failures.push(`${relative}: GET handler is missing`);
   if (!/["']Cache-Control["']\s*:/.test(source)) failures.push(`${relative}: explicit worksheet Cache-Control policy is missing`);
   if (/Cache-Control[^\n]*no-store/i.test(source)) failures.push(`${relative}: static worksheet route must not disable caching with no-store`);
+  if (/max-age\s*=\s*31536000[^\n]*immutable/i.test(source)) failures.push(`${relative}: year-long immutable caching can preserve a broken worksheet after an RTL/layout correction`);
+  if (!source.includes("@/lib/capabilities/kids-lab-svg-polish")) failures.push(`${relative}: central Kids Lab SVG text normalizer import is missing`);
+  if (!source.includes('normalizeKidsLabSvgText(')) failures.push(`${relative}: worksheet SVG must pass through normalizeKidsLabSvgText before the response is returned`);
 }
 
 if (routes.length !== 13) failures.push(`Expected 13 Kids Lab image route families, got ${routes.length}`);
@@ -39,4 +42,4 @@ if (failures.length) {
   console.error(failures.join('\n'));
   process.exit(1);
 }
-console.log(`Kids Lab static image contract passed: ${routes.length}/13 worksheet image route families are build-time static and define an explicit cache policy.`);
+console.log(`Kids Lab static image contract passed: ${routes.length}/13 worksheet image route families are build-time static, centrally normalized, and use a bounded cache policy.`);
