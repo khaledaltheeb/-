@@ -9,14 +9,14 @@ const manifestPath = path.resolve('artifacts/kids-lab-routes/manifest.json');
 if (!fs.existsSync(manifestPath)) throw new Error('Kids Lab route manifest is missing. Run scripts/kids-lab-route-contract.mjs first.');
 const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
 if (manifest.summary?.failures) throw new Error(`Route manifest contains ${manifest.summary.failures} failures.`);
-if (!['tests', 'all'].includes(scope)) throw new Error(`Unsupported audit scope: ${scope}`);
+if (!['tests', 'images', 'all'].includes(scope)) throw new Error(`Unsupported audit scope: ${scope}`);
 
 const allHtmlRoutes = manifest.clickedRoutes ?? [];
 const allImageRoutes = manifest.imageRoutes ?? [];
 const testRouteList = manifest.testRoutes ?? [];
 const testImageRouteList = manifest.testImageRoutes ?? [];
-const htmlRoutes = scope === 'all' ? allHtmlRoutes : testRouteList;
-const imageRoutes = scope === 'all' ? allImageRoutes : testImageRouteList;
+const htmlRoutes = scope === 'all' ? allHtmlRoutes : scope === 'tests' ? testRouteList : [];
+const imageRoutes = scope === 'tests' ? testImageRouteList : allImageRoutes;
 const testRoutes = new Set(testRouteList);
 const testImageRoutes = new Set(testImageRouteList);
 const failures = [];
@@ -116,6 +116,10 @@ await runPool(imageRoutes, 'image');
 if (scope === 'tests') {
   if (stats.testPages !== 335) failures.push(`Expected 335 live test pages; verified ${stats.testPages}`);
   if (stats.testImages !== 335) failures.push(`Expected 335 live test worksheet images; verified ${stats.testImages}`);
+} else if (scope === 'images') {
+  if (stats.html !== 0) failures.push(`Expected no live HTML requests in images scope; verified ${stats.html}`);
+  if (stats.images !== 1000) failures.push(`Expected 1000 live SVG routes; verified ${stats.images}`);
+  if (stats.testImages !== 335) failures.push(`Expected all 335 test worksheet images within the 1000-image audit; verified ${stats.testImages}`);
 } else {
   if (stats.testPages !== 335) failures.push(`Expected 335 live test pages; verified ${stats.testPages}`);
   if (stats.testImages !== 335) failures.push(`Expected 335 live test worksheet images; verified ${stats.testImages}`);
