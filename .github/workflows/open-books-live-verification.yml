@@ -4,39 +4,75 @@ on:
   workflow_run:
     workflows: ["Deploy Production Fast"]
     types: [completed]
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
   verify:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 7
     steps:
-      - name: Verify open books discovery resource on production
+      - name: Verify open-book and Thoth publishing pages on production
         shell: bash
         run: |
           set -euo pipefail
-          url="https://healthrenewal.org/resources/open-books-discovery/"
-          out="/tmp/open-books-discovery.html"
-          status="$(curl -sS -L -H 'Cache-Control: no-cache, no-store, max-age=0' -H 'Pragma: no-cache' --retry 8 --retry-delay 2 --retry-all-errors --max-time 60 -o "$out" -w '%{http_code}' "${url}?verify=${{ github.event.workflow_run.head_sha }}")"
-          echo "LIVE_HTTP ${url} ${status}"
-          if ! [[ "$status" =~ ^2[0-9][0-9]$ ]]; then
-            echo "Open books resource HTTP failure: status=${status}" >&2
-            head -c 1600 "$out" 2>/dev/null || true
+
+          verify_page() {
+            local url="$1"
+            local out="$2"
+            local needle="$3"
+            local canonical="$4"
+            local status
+            status="$(curl -sS -L -H 'Cache-Control: no-cache, no-store, max-age=0' -H 'Pragma: no-cache' --retry 8 --retry-delay 2 --retry-all-errors --max-time 60 -o "$out" -w '%{http_code}' "${url}?verify=${GITHUB_SHA}")"
+            echo "LIVE_HTTP ${url} ${status}"
+            if ! [[ "$status" =~ ^2[0-9][0-9]$ ]]; then
+              echo "Live page HTTP failure: url=${url} status=${status}" >&2
+              head -c 1600 "$out" 2>/dev/null || true
+              exit 1
+            fi
+            test -s "$out"
+            grep -Fq "$needle" "$out"
+            grep -Fq "$canonical" "$out"
+            if grep -qi 'noindex' "$out"; then
+              echo "Page is unexpectedly noindex: ${url}" >&2
+              exit 1
+            fi
+            if grep -qiE 'internal server error|application error|500 internal' "$out"; then
+              echo "Application error body detected: ${url}" >&2
+              exit 1
+            fi
+          }
+
+          verify_page \
+            'https://healthrenewal.org/resources/open-books-discovery/' \
+            '/tmp/open-books-discovery.html' \
+            'الكتب المفتوحة' \
+            'https://healthrenewal.org/resources/open-books-discovery/'
+          grep -Fq 'Thoth' /tmp/open-books-discovery.html
+
+          verify_page \
+            'https://healthrenewal.org/en/publishing/thoth/' \
+            '/tmp/thoth-publishing.html' \
+            'Open Book Publishing & Metadata Infrastructure' \
+            'https://healthrenewal.org/en/publishing/thoth/'
+          grep -Fq 'Thoth Oasis' /tmp/thoth-publishing.html
+          grep -Fq 'CC0' /tmp/thoth-publishing.html
+          grep -Fq '/publishing/rawafid-thoth-metadata-readiness-template.csv' /tmp/thoth-publishing.html
+          grep -Fq 'does not imply' /tmp/thoth-publishing.html
+
+          csv_url='https://healthrenewal.org/publishing/rawafid-thoth-metadata-readiness-template.csv'
+          csv_out='/tmp/rawafid-thoth-metadata-readiness-template.csv'
+          csv_status="$(curl -sS -L -H 'Cache-Control: no-cache, no-store, max-age=0' --retry 8 --retry-delay 2 --retry-all-errors --max-time 60 -o "$csv_out" -w '%{http_code}' "${csv_url}?verify=${GITHUB_SHA}")"
+          echo "LIVE_HTTP ${csv_url} ${csv_status}"
+          if ! [[ "$csv_status" =~ ^2[0-9][0-9]$ ]]; then
+            echo "Metadata readiness template HTTP failure: status=${csv_status}" >&2
             exit 1
           fi
-          test -s "$out"
-          grep -q 'الكتب المفتوحة' "$out"
-          grep -q 'Thoth' "$out"
-          grep -q 'https://healthrenewal.org/resources/open-books-discovery/' "$out"
-          if grep -qi 'noindex' "$out"; then
-            echo 'Open books resource is unexpectedly noindex.' >&2
-            exit 1
-          fi
-          if grep -qiE 'internal server error|application error|500 internal' "$out"; then
-            echo 'Open books resource returned an application error body.' >&2
-            exit 1
-          fi
-          echo 'LIVE_OK open-books-discovery 2xx, expected content, canonical, indexable'
+          grep -Fq 'record_status,internal_work_id,work_type,title' "$csv_out"
+          grep -Fq 'translation_permission_basis' "$csv_out"
+          grep -Fq 'rights_evidence_reference' "$csv_out"
+
+          echo 'LIVE_OK open-books guide, English Thoth publishing hub, and metadata readiness template are available, canonical, and indexable'
