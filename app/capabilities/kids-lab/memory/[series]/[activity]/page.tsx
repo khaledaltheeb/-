@@ -37,7 +37,7 @@ export default async function MemoryActivityPage({ params }: Props) {
   const currentIndex = seriesActivities.findIndex((item) => item.slug === activity.slug);
   const previous = currentIndex > 0 ? seriesActivities[currentIndex - 1] : null;
   const next = currentIndex < seriesActivities.length - 1 ? seriesActivities[currentIndex + 1] : null;
-  const imageUrl = `/capabilities/kids-lab/memory/${seriesSlug}/${activity.slug}/image/`;
+  const imageUrl = `/capabilities/kids-lab/memory/${seriesSlug}/${activity.slug}/image/?v=20260912-ar-layout-1`;
 
   return (
     <>
