@@ -13,6 +13,8 @@ const LOCAL_PUBLIC_PREFIXES = [
   '/evidence-guides',
   '/external-review',
   '/sitemaps',
+  '/en/publishing',
+  '/publishing',
 ] as const;
 
 const LOCAL_PUBLIC_EXACT = new Set([
@@ -50,7 +52,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(canonical, 308);
   }
 
-  // First-class public knowledge, institutional, tool and crawler surfaces must
+  // First-class public knowledge, institutional, publishing, tool and crawler surfaces must
   // remain readable even when Supabase auth/redirect lookups are degraded. These
   // routes are either repository-rendered or perform their own read-only public
   // data access, so anonymous GET/HEAD requests do not need session refresh or a
