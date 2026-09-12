@@ -1,0 +1,63 @@
+name: Kids Lab Live Production QA
+
+on:
+  workflow_run:
+    workflows: ["Deploy Production Fast"]
+    types: [completed]
+
+permissions:
+  contents: read
+
+jobs:
+  live-svg-audit:
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout deployed revision
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 2
+
+      - name: Detect Kids Lab relevance
+        id: relevance
+        shell: bash
+        run: |
+          set -euo pipefail
+          sha="${{ github.event.workflow_run.head_sha }}"
+          changed="$(git diff-tree --no-commit-id --name-only -r "$sha" || true)"
+          printf '%s\n' "$changed"
+          if printf '%s\n' "$changed" | grep -Eq '^(app/capabilities/kids-lab/|lib/capabilities/|scripts/kids-lab-|custom-worker\.js$)'; then
+            echo 'relevant=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'relevant=false' >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Setup Node
+        if: steps.relevance.outputs.relevant == 'true'
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install locked dependencies
+        if: steps.relevance.outputs.relevant == 'true'
+        run: npm ci --no-audit --no-fund
+
+      - name: Build Kids Lab route manifest
+        if: steps.relevance.outputs.relevant == 'true'
+        run: node scripts/kids-lab-route-contract.mjs
+
+      - name: Verify all 1000 production worksheet SVGs
+        if: steps.relevance.outputs.relevant == 'true'
+        run: node scripts/kids-lab-live-route-check.mjs https://healthrenewal.org "${{ github.event.workflow_run.head_sha }}" images
+
+      - name: Upload live QA report
+        if: always() && steps.relevance.outputs.relevant == 'true'
+        uses: actions/upload-artifact@v6
+        with:
+          name: kids-lab-live-production-${{ github.event.workflow_run.head_sha }}
+          path: artifacts/kids-lab-live/report.json
+          if-no-files-found: warn
+          retention-days: 14
