@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { sitemapResponse } from '@/lib/sitemap-xml';
+import { contentSitemapPriority } from '@/lib/sitemap-priority';
 import { getCognitivePageIndex } from '@/lib/cognitive-program';
 import { getExpandedEncyclopediaIndex } from '@/lib/expanded-encyclopedia';
 
@@ -170,23 +171,29 @@ export async function GET(request: Request) {
       const normalizedPath = normalizeCanonicalPath(path);
       return !taxonomyOwnedCanonicals.has(normalizedPath) && !isRedirectSource(normalizedPath, databaseRedirectSources);
     })
-    .map((item) => ({
-      path: item.canonical_url || `/content/${item.slug}`,
-      lastModified: item.updated_at,
-      changeFrequency: 'monthly',
-      priority: .7,
-    }));
+    .map((item) => {
+      const path = item.canonical_url || `/content/${item.slug}`;
+      return {
+        path,
+        lastModified: item.updated_at,
+        changeFrequency: 'monthly',
+        priority: contentSitemapPriority(path),
+      };
+    });
 
   let generatedRows: SitemapRow[] = [];
   if (page === 0) {
     const expandedIndex = await getExpandedEncyclopediaIndex();
     generatedRows = [
-      ...getCognitivePageIndex().map((item) => ({
-        path: `/content/${item.slug}`,
-        lastModified: RELEASE,
-        changeFrequency: 'monthly',
-        priority: .72,
-      })),
+      ...getCognitivePageIndex().map((item) => {
+        const path = `/content/${item.slug}`;
+        return {
+          path,
+          lastModified: RELEASE,
+          changeFrequency: 'monthly',
+          priority: contentSitemapPriority(path),
+        };
+      }),
       ...expandedIndex
         // A published/indexable DB row owns this slug. Its canonical belongs to
         // the DB-driven sitemap partition, so the static release must not emit a
@@ -196,7 +203,7 @@ export async function GET(request: Request) {
           path: item.canonical_url,
           lastModified: item.updated_at,
           changeFrequency: 'monthly',
-          priority: .74,
+          priority: contentSitemapPriority(item.canonical_url),
         })),
     ].filter((item) => {
       const normalizedPath = normalizeCanonicalPath(item.path);
