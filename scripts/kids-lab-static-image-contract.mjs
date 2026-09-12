@@ -34,6 +34,15 @@ for (const relative of routes) {
   if (/max-age\s*=\s*31536000[^\n]*immutable/i.test(source)) failures.push(`${relative}: year-long immutable caching can preserve a broken worksheet after an RTL/layout correction`);
   if (!source.includes("@/lib/capabilities/kids-lab-svg-polish")) failures.push(`${relative}: central Kids Lab SVG text normalizer import is missing`);
   if (!source.includes('normalizeKidsLabSvgText(')) failures.push(`${relative}: worksheet SVG must pass through normalizeKidsLabSvgText before the response is returned`);
+
+  const pageRelative = relative.replace('/image/route.ts', '/page.tsx');
+  const pageAbsolute = path.join(ROOT, pageRelative);
+  if (!fs.existsSync(pageAbsolute)) {
+    failures.push(`${pageRelative}: worksheet page is missing`);
+  } else {
+    const pageSource = fs.readFileSync(pageAbsolute, 'utf8');
+    if (!/\/image\/\?v=[A-Za-z0-9._-]+/.test(pageSource)) failures.push(`${pageRelative}: worksheet preview/download URL must carry an explicit revision query so previously immutable browser caches cannot preserve an old SVG`);
+  }
 }
 
 if (routes.length !== 13) failures.push(`Expected 13 Kids Lab image route families, got ${routes.length}`);
@@ -42,4 +51,4 @@ if (failures.length) {
   console.error(failures.join('\n'));
   process.exit(1);
 }
-console.log(`Kids Lab static image contract passed: ${routes.length}/13 worksheet image route families are build-time static, centrally normalized, and use a bounded cache policy.`);
+console.log(`Kids Lab static image contract passed: ${routes.length}/13 worksheet families are build-time static, centrally normalized, bounded-cache, and exposed through versioned preview/download URLs.`);
