@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { attentionActivities, getAttentionActivity } from '@/lib/capabilities/attention-lab';
 import { renderAttentionWorksheet } from '@/lib/capabilities/attention-svg';
+import { normalizeKidsLabSvgText } from '@/lib/capabilities/kids-lab-svg-polish';
 
 type Params = Promise<{ series: string; activity: string }>;
 
@@ -40,11 +41,13 @@ export async function GET(_: Request, { params }: { params: Params }) {
   const item = getAttentionActivity(series, activity);
   if (!item) notFound();
 
-  const svg = normalizeAttentionHeader(renderAttentionWorksheet(item), item.instruction);
+  const svg = normalizeKidsLabSvgText(
+    normalizeAttentionHeader(renderAttentionWorksheet(item), item.instruction)
+  );
   return new Response(svg, {
     headers: {
       'Content-Type': 'image/svg+xml; charset=utf-8',
-      'Cache-Control': 'public, max-age=31536000, immutable',
+      'Cache-Control': 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800',
       'Content-Disposition': `inline; filename="${series}-${activity}.svg"`,
     },
   });
