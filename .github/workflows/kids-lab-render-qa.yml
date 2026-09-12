@@ -50,6 +50,9 @@ jobs:
       - name: Require build-time static worksheet image routes
         run: node scripts/kids-lab-static-image-contract.mjs
 
+      - name: Validate Arabic SVG RTL contract
+        run: node scripts/kids-lab-rtl-contract.mjs
+
       - name: Validate all Kids Lab routes, levels and tests
         run: node scripts/kids-lab-route-contract.mjs
 
