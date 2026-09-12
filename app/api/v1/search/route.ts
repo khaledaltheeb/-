@@ -4,6 +4,10 @@ import { decoratePartnerResponse, withOptionalPartnerAccess } from '@/lib/partne
 
 export const dynamic = 'force-dynamic';
 
+const SEARCH_CONTENT_FIELDS = 'id,content_type,slug,title,excerpt,canonical_url,audience,schema_json,featured_image_url,featured_image_alt,published_at,updated_at,primary_keyword,secondary_keywords,semantic_terms,author_display_name,reviewer_display_name,reviewer_credentials,last_reviewed_at,references_json,sector_id,category_id' as const;
+
+type CandidateRow = { content_id?: string | null; score?: number | null };
+
 export async function GET(request: Request) {
   const access = await withOptionalPartnerAccess(request, 'search:read');
   if (access.error) return access.error;
@@ -15,24 +19,67 @@ export async function GET(request: Request) {
   const requestedType = (url.searchParams.get('type') || '').trim();
 
   const supabase = await createClient();
+
+  // Rank search candidates inside PostgreSQL. Keeping the tsvector/websearch expression
+  // behind an RPC avoids PostgREST parser differences while preserving RLS through
+  // SECURITY INVOKER. Only published, indexable content can be returned by the RPC.
+  const { data: candidateData, error: candidateError } = await supabase.rpc('api_search_public_content_ids', {
+    p_query: q,
+    p_limit: limit,
+    p_type: requestedType || null,
+  });
+  if (candidateError) return apiError(request, 503, 'search_unavailable', 'Public search is temporarily unavailable.');
+
+  const candidates = (Array.isArray(candidateData) ? candidateData : []) as CandidateRow[];
+  const ids = candidates
+    .map((row) => typeof row.content_id === 'string' ? row.content_id : '')
+    .filter(Boolean);
+
+  if (!ids.length) {
+    const response = jsonResponse(request, {
+      data: [],
+      meta: {
+        api_version: PUBLIC_API_VERSION,
+        generated_at: new Date().toISOString(),
+        query: q,
+        type: requestedType || null,
+        count: 0,
+        search_mode: 'ranked_public_content',
+      },
+    }, { cacheControl: 'public, max-age=0, s-maxage=60, stale-while-revalidate=300' });
+    return decoratePartnerResponse(response, access.headers);
+  }
+
   let query = supabase
     .from('content')
-    .select('id,content_type,slug,title,excerpt,canonical_url,audience,schema_json,featured_image_url,featured_image_alt,published_at,updated_at,primary_keyword,secondary_keywords,semantic_terms,author_display_name,reviewer_display_name,reviewer_credentials,last_reviewed_at,references_json,sector_id,category_id')
+    .select(SEARCH_CONTENT_FIELDS)
+    .in('id', ids)
     .eq('status', 'published')
     .eq('robots_index', true)
-    .lte('published_at', new Date().toISOString())
-    .textSearch('search_vector', q, { config: 'simple', type: 'websearch' })
-    .order('updated_at', { ascending: false })
-    .limit(limit);
+    .lte('published_at', new Date().toISOString());
   if (requestedType) query = query.eq('content_type', requestedType);
 
   const { data, error } = await query;
   if (error) return apiError(request, 503, 'search_unavailable', 'Public search is temporarily unavailable.');
-  const rows = Array.isArray(data) ? data : [];
+
+  const rank = new Map(ids.map((id, index) => [id, index]));
+  const rows = (Array.isArray(data) ? data : []).slice().sort((left, right) => {
+    const leftRank = rank.get(String(left.id)) ?? Number.MAX_SAFE_INTEGER;
+    const rightRank = rank.get(String(right.id)) ?? Number.MAX_SAFE_INTEGER;
+    return leftRank - rightRank;
+  });
+
   const response = jsonResponse(request, {
     data: rows.map((row) => serializePublicContent(row as Record<string, unknown>, false)),
-    meta: { api_version: PUBLIC_API_VERSION, generated_at: new Date().toISOString(), query: q, type: requestedType || null, count: rows.length },
-  }, { cacheControl: 'public, max-age=0, s-maxage=60, stale-while-revalidate=300' });
+    meta: {
+      api_version: PUBLIC_API_VERSION,
+      generated_at: new Date().toISOString(),
+      query: q,
+      type: requestedType || null,
+      count: rows.length,
+      search_mode: 'ranked_public_content',
+    },
+  }, { cacheControl: 'public, max-age=0, s-maxage=60, stale-while-revalidate=300', lastModified: rows[0]?.updated_at ? String(rows[0].updated_at) : null });
   return decoratePartnerResponse(response, access.headers);
 }
 
