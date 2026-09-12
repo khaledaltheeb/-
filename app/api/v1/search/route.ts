@@ -8,6 +8,20 @@ const SEARCH_CONTENT_FIELDS = 'id,content_type,slug,title,excerpt,canonical_url,
 
 type CandidateRow = { content_id?: string | null; score?: number | null };
 
+function latestUpdatedAt(rows: Array<Record<string, unknown>>) {
+  let latest: string | null = null;
+  let latestMs = Number.NEGATIVE_INFINITY;
+  for (const row of rows) {
+    const value = typeof row.updated_at === 'string' ? row.updated_at : '';
+    const timestamp = Date.parse(value);
+    if (!Number.isNaN(timestamp) && timestamp > latestMs) {
+      latestMs = timestamp;
+      latest = value;
+    }
+  }
+  return latest;
+}
+
 export async function GET(request: Request) {
   const access = await withOptionalPartnerAccess(request, 'search:read');
   if (access.error) return access.error;
@@ -67,10 +81,10 @@ export async function GET(request: Request) {
     const leftRank = rank.get(String(left.id)) ?? Number.MAX_SAFE_INTEGER;
     const rightRank = rank.get(String(right.id)) ?? Number.MAX_SAFE_INTEGER;
     return leftRank - rightRank;
-  });
+  }) as Array<Record<string, unknown>>;
 
   const response = jsonResponse(request, {
-    data: rows.map((row) => serializePublicContent(row as Record<string, unknown>, false)),
+    data: rows.map((row) => serializePublicContent(row, false)),
     meta: {
       api_version: PUBLIC_API_VERSION,
       generated_at: new Date().toISOString(),
@@ -79,7 +93,10 @@ export async function GET(request: Request) {
       count: rows.length,
       search_mode: 'ranked_public_content',
     },
-  }, { cacheControl: 'public, max-age=0, s-maxage=60, stale-while-revalidate=300', lastModified: rows[0]?.updated_at ? String(rows[0].updated_at) : null });
+  }, {
+    cacheControl: 'public, max-age=0, s-maxage=60, stale-while-revalidate=300',
+    lastModified: latestUpdatedAt(rows),
+  });
   return decoratePartnerResponse(response, access.headers);
 }
 
