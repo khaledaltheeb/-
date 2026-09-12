@@ -11,6 +11,8 @@ const required = [
   'lib/research-integrations/lens-quota.ts',
   'lib/research-integrations/dedupe.ts',
   'lib/research-integrations/evidence-discovery.ts',
+  'lib/openapi-v1-document.ts',
+  'lib/openapi-v1-components.ts',
   'app/api/v1/evidence-discovery/route.ts',
   'app/api/openapi.json/route.ts',
   'app/developers/page.tsx',
@@ -36,7 +38,10 @@ const datacite = fs.readFileSync('lib/research-integrations/datacite.ts', 'utf8'
 const ror = fs.readFileSync('lib/research-integrations/ror.ts', 'utf8');
 const europe = fs.readFileSync('lib/research-integrations/europe-pmc.ts', 'utf8');
 const route = fs.readFileSync('app/api/v1/evidence-discovery/route.ts', 'utf8');
-const openapi = fs.readFileSync('app/api/openapi.json/route.ts', 'utf8');
+const openapiRoute = fs.readFileSync('app/api/openapi.json/route.ts', 'utf8');
+const openapiDocument = fs.readFileSync('lib/openapi-v1-document.ts', 'utf8');
+const openapiComponents = fs.readFileSync('lib/openapi-v1-components.ts', 'utf8');
+const openapi = [openapiRoute, openapiDocument, openapiComponents].join('\n');
 const developers = fs.readFileSync('app/developers/page.tsx', 'utf8');
 const demo = fs.readFileSync('examples/lens-scholarly-demo/lens-demo.mjs', 'utf8');
 const demoReadme = fs.readFileSync('examples/lens-scholarly-demo/README.md', 'utf8');
