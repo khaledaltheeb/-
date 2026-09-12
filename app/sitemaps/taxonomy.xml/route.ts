@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { sitemapResponse } from '@/lib/sitemap-xml';
+import { sectorSitemapPriority, sectionSitemapPriority } from '@/lib/sitemap-priority';
 import { getCognitiveCategories } from '@/lib/cognitive-program';
 import { getExpandedEncyclopediaCategories } from '@/lib/expanded-encyclopedia';
 
@@ -47,25 +48,25 @@ export async function GET() {
       path: `/sectors/${item.slug}`,
       lastModified: item.updated_at,
       changeFrequency: 'weekly',
-      priority: .8,
+      priority: sectorSitemapPriority(item.slug),
     })),
     ...categories.map((item) => ({
       path: `/sections/${item.slug}`,
       lastModified: item.updated_at,
       changeFrequency: 'weekly',
-      priority: .7,
+      priority: sectionSitemapPriority(item.slug),
     })),
     ...getExpandedEncyclopediaCategories().map((item) => ({
       path: `/sections/${item.slug}`,
       lastModified: EXPANDED_RELEASE,
       changeFrequency: 'weekly',
-      priority: .74,
+      priority: sectionSitemapPriority(item.slug),
     })),
     ...getCognitiveCategories().map((item) => ({
       path: `/sections/${item.slug}`,
       lastModified: RELEASE,
       changeFrequency: 'weekly',
-      priority: .72,
+      priority: sectionSitemapPriority(item.slug),
     })),
   ];
 
