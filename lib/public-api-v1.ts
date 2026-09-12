@@ -78,7 +78,14 @@ function responseHeaders(requestId: string, cacheControl = 'public, max-age=0, s
 }
 
 export function optionsResponse() { return new Response(null, { status: 204, headers: responseHeaders(randomUUID(), 'public, max-age=86400') }); }
-export function apiError(request: Request, status: number, code: string, message: string, parameter?: string) { const requestId = request.headers.get('x-request-id')?.slice(0, 120) || randomUUID(); return jsonResponse(request, { error: { code, message, parameter: parameter || null, request_id: requestId }, meta: { api_version: PUBLIC_API_VERSION } }, { status, requestId, cacheControl: 'no-store' }); }
+export function apiError(request: Request, status: number, code: string, message: string, parameter?: string) {
+  const requestId = request.headers.get('x-request-id')?.slice(0, 120) || randomUUID();
+  const response = jsonResponse(request, { error: { code, message, parameter: parameter || null, request_id: requestId }, meta: { api_version: PUBLIC_API_VERSION } }, { status, requestId, cacheControl: 'no-store' });
+  if (status !== 503) return response;
+  const headers = new Headers(response.headers);
+  headers.set('Retry-After', '60');
+  return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+}
 
 export function jsonResponse(request: Request, payload: unknown, options: { status?: number; requestId?: string; cacheControl?: string; lastModified?: string | null } = {}) {
   const requestId = options.requestId || request.headers.get('x-request-id')?.slice(0, 120) || randomUUID();
