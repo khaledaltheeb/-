@@ -13,6 +13,9 @@ const LOCAL_PUBLIC_PREFIXES = [
   '/evidence-guides',
   '/external-review',
   '/sitemaps',
+  '/developers',
+  '/en/developers',
+  '/api/v1',
   '/en/publishing',
   '/publishing',
 ] as const;
@@ -29,6 +32,7 @@ const LOCAL_PUBLIC_EXACT = new Set([
   '/media',
   '/accessibility-statement',
   '/tools/rare-phenotype-navigator',
+  '/api/openapi.json',
   '/sitemap.xml',
   '/robots.txt',
   '/llms.txt',
@@ -52,13 +56,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(canonical, 308);
   }
 
-  // First-class public knowledge, institutional, publishing, tool and crawler surfaces must
-  // remain readable even when Supabase auth/redirect lookups are degraded. These
-  // routes are either repository-rendered or perform their own read-only public
-  // data access, so anonymous GET/HEAD requests do not need session refresh or a
-  // database-backed legacy redirect lookup before the route can render.
-  // Exact matching protects historical redirect behavior for unrelated subpaths;
-  // only namespaces that are entirely first-class public surfaces use prefixes.
+  // First-class public knowledge, institutional, publishing, developer, API and crawler
+  // surfaces must remain readable without auth-session refresh. Public API routes enforce
+  // their own optional Partner API authorization and quota boundary, so bypassing the
+  // Supabase session middleware here also prevents Bearer partner credentials from being
+  // interpreted as user-session credentials.
   const pathname = request.nextUrl.pathname;
   const normalizedPathname = normalizedPublicPath(pathname);
   const isLocalPublicRoute = LOCAL_PUBLIC_EXACT.has(normalizedPathname)
