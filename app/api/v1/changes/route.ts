@@ -4,6 +4,24 @@ import { decoratePartnerResponse, withOptionalPartnerAccess } from '@/lib/partne
 
 export const dynamic = 'force-dynamic';
 
+type ChangeCursor = { occurred_at: string; id: string };
+
+function encodeChangeCursor(value: ChangeCursor) {
+  return Buffer.from(JSON.stringify(value), 'utf8').toString('base64url');
+}
+
+function decodeChangeCursor(value: string | null): ChangeCursor | null {
+  if (!value) return null;
+  try {
+    const parsed = JSON.parse(Buffer.from(value, 'base64url').toString('utf8')) as Partial<ChangeCursor>;
+    if (!parsed.occurred_at || Number.isNaN(Date.parse(parsed.occurred_at))) return null;
+    if (!parsed.id || !/^\d+$/.test(parsed.id)) return null;
+    return { occurred_at: new Date(parsed.occurred_at).toISOString(), id: parsed.id };
+  } catch {
+    return null;
+  }
+}
+
 export async function GET(request: Request) {
   const access = await withOptionalPartnerAccess(request, 'changes:read');
   if (access.error) return access.error;
@@ -11,26 +29,57 @@ export async function GET(request: Request) {
   const sinceRaw = url.searchParams.get('since');
   const since = parseIsoDate(sinceRaw);
   if (!sinceRaw || !since) return apiError(request, 400, 'invalid_parameter', 'since is required and must be an ISO-8601 date.', 'since');
+
+  const cursorRaw = url.searchParams.get('cursor');
+  const cursor = decodeChangeCursor(cursorRaw);
+  if (cursorRaw && !cursor) return apiError(request, 400, 'invalid_cursor', 'The change-stream cursor is invalid or expired.', 'cursor');
+  if (cursor && Date.parse(cursor.occurred_at) < Date.parse(since)) {
+    return apiError(request, 400, 'invalid_cursor', 'The cursor predates the requested since checkpoint.', 'cursor');
+  }
+
   const rawLimit = Number(url.searchParams.get('limit') || 100);
   const limit = Number.isInteger(rawLimit) && rawLimit > 0 ? Math.min(rawLimit, access.authorization?.authorized ? 1000 : 500) : 100;
 
   const supabase = await createClient();
-  const { data, error } = await supabase
+  let query = supabase
     .from('api_change_log')
     .select('id,content_id,event_type,slug,content_type,canonical_url,occurred_at')
-    .gt('occurred_at', since)
     .order('occurred_at', { ascending: true })
     .order('id', { ascending: true })
     .limit(limit + 1);
+
+  if (cursor) {
+    query = query.or(`occurred_at.gt.${cursor.occurred_at},and(occurred_at.eq.${cursor.occurred_at},id.gt.${cursor.id})`);
+  } else {
+    query = query.gt('occurred_at', since);
+  }
+
+  const { data, error } = await query;
   if (error) return apiError(request, 503, 'changes_unavailable', 'The public change stream is temporarily unavailable.');
   const rows = Array.isArray(data) ? data : [];
   const hasMore = rows.length > limit;
   const page = rows.slice(0, limit);
+  const tail = page.at(-1);
+  const nextCursor = hasMore && tail?.occurred_at && tail?.id !== undefined && tail?.id !== null
+    ? encodeChangeCursor({ occurred_at: String(tail.occurred_at), id: String(tail.id) })
+    : null;
   const nextSince = page.length ? String(page[page.length - 1].occurred_at) : since;
+
   const response = jsonResponse(request, {
     data: page,
-    pagination: { limit, has_more: hasMore, next_since: nextSince },
-    meta: { api_version: PUBLIC_API_VERSION, generated_at: new Date().toISOString(), since },
+    pagination: {
+      limit,
+      has_more: hasMore,
+      next_cursor: nextCursor,
+      next_since: nextSince,
+      cursor_recommended: true,
+    },
+    meta: {
+      api_version: PUBLIC_API_VERSION,
+      generated_at: new Date().toISOString(),
+      since,
+      pagination_note: 'Use next_cursor for lossless multi-page synchronization. next_since is retained as a backward-compatible timestamp checkpoint and must not replace the composite cursor while has_more is true.',
+    },
   }, { cacheControl: 'public, max-age=0, s-maxage=30, stale-while-revalidate=120', lastModified: page.length ? String(page[page.length - 1].occurred_at) : null });
   return decoratePartnerResponse(response, access.headers);
 }
