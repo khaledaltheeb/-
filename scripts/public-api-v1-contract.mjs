@@ -3,6 +3,8 @@ import fs from 'node:fs';
 const required = [
   'lib/public-api-v1.ts',
   'lib/partner-api-v1.ts',
+  'lib/openapi-v1-components.ts',
+  'lib/openapi-v1-document.ts',
   'lib/feed-http.ts',
   'app/api/v1/route.ts',
   'app/api/v1/lens/route.ts',
@@ -42,9 +44,10 @@ for (const marker of [
   "pages: ['landing_page', 'directory_page', 'sector_page']",
   'encodeCursor',
   'decodeCursor',
+  'latestTimestamp',
+  "headers.set('Retry-After', '60')",
   "request.headers.get('if-modified-since')",
 ]) if (!core.includes(marker)) fail(`core missing ${marker}`);
-
 for (const forbidden of ['SERVICE_ROLE', 'SUPABASE_SERVICE', 'service_role_key', 'NEXT_PUBLIC_SUPABASE_SERVICE']) if (core.includes(forbidden)) fail(`public API core must not use privileged database secret: ${forbidden}`);
 
 const feedHttp = fs.readFileSync('lib/feed-http.ts', 'utf8');
@@ -56,7 +59,7 @@ for (const file of ['app/feed.xml/route.ts','app/feed.json/route.ts','app/magazi
 }
 
 const partner = fs.readFileSync('lib/partner-api-v1.ts', 'utf8');
-for (const marker of ["createHash('sha256')", "'x-api-key'", "'authorization'", 'api_partner_authorize', "'rate_limited'", 'decoratePartnerResponse']) if (!partner.includes(marker)) fail(`partner API helper missing ${marker}`);
+for (const marker of ["createHash('sha256')", "'x-api-key'", "'authorization'", 'api_partner_authorize', "'rate_limited'", 'decoratePartnerResponse', "headers['Retry-After'] = '60'"]) if (!partner.includes(marker)) fail(`partner API helper missing ${marker}`);
 if (/service.role|SERVICE_ROLE|service_role_key/i.test(partner)) fail('partner API runtime must not embed a service-role secret');
 
 const apiRoot = fs.readFileSync('app/api/v1/route.ts', 'utf8');
@@ -64,7 +67,7 @@ for (const marker of ["'lens'", "href: '/api/v1/lens'", "documentation: '/develo
 if (apiRoot.includes("default_providers: ['europe_pmc','crossref','datacite','lens']")) fail('API discovery must never advertise Lens as a default provider');
 
 const searchRoute = fs.readFileSync('app/api/v1/search/route.ts', 'utf8');
-for (const marker of ['api_search_public_content_ids', "search_mode: 'ranked_public_content'", ".eq('robots_index', true)", 'serializePublicContent']) if (!searchRoute.includes(marker)) fail(`public search route missing ${marker}`);
+for (const marker of ['api_search_public_content_ids', "search_mode: 'ranked_public_content'", ".eq('robots_index', true)", 'serializePublicContent', 'latestUpdatedAt']) if (!searchRoute.includes(marker)) fail(`public search route missing ${marker}`);
 if (searchRoute.includes(".textSearch('search_vector'")) fail('public search route must not depend on PostgREST parsing of the tsvector expression');
 
 const searchMigration = fs.readFileSync('supabase/migrations/20260912130135_public_api_search_content_ids_v1.sql', 'utf8');
@@ -72,6 +75,9 @@ for (const marker of ['api_search_public_content_ids', 'security invoker', "c.st
 
 const changeRoute = fs.readFileSync('app/api/v1/changes/route.ts', 'utf8');
 for (const marker of ['ChangeCursor', 'encodeChangeCursor', 'decodeChangeCursor', 'next_cursor', 'cursor_recommended', 'occurred_at.eq.', 'id.gt.']) if (!changeRoute.includes(marker)) fail(`change stream missing ${marker}`);
+
+const namedResourceRoute = fs.readFileSync('app/api/v1/[resource]/route.ts', 'utf8');
+for (const marker of ['next_offset', 'has_more', "pagination_mode: 'offset'", '.range(offset, offset + limit)', 'latestUpdatedAt']) if (!namedResourceRoute.includes(marker)) fail(`named resource route missing ${marker}`);
 
 const lensManifest = fs.readFileSync('app/api/v1/lens/route.ts', 'utf8');
 for (const marker of [
@@ -93,11 +99,16 @@ for (const marker of [
 ]) if (!lensManifest.includes(marker)) fail(`Lens manifest missing ${marker}`);
 if (/token\s*:\s*process\.env\.LENS_SCHOLARLY_API_TOKEN|LENS_SCHOLARLY_API_TOKEN\?\.trim\(\)\s*[,}]/.test(lensManifest)) fail('Lens manifest must never serialize the Lens credential');
 
-const openapi = fs.readFileSync('app/api/openapi.json/route.ts', 'utf8');
+const openapiRoute = fs.readFileSync('app/api/openapi.json/route.ts', 'utf8');
+if (!openapiRoute.includes('buildOpenApiDocument')) fail('OpenAPI route must use the modular document builder');
+const openapi = [
+  fs.readFileSync('lib/openapi-v1-document.ts', 'utf8'),
+  fs.readFileSync('lib/openapi-v1-components.ts', 'utf8'),
+].join('\n');
 for (const marker of [
-  "openapi: '3.1.0'", "version: '1.2.0'", "'/content/{slug}/sources'", "'/sources/{id}'", "'/evidence-discovery'", "'/changes'", "'/search'", "'/stats'",
-  'PartnerApiKey', 'PartnerBearer', "'pages'", 'related_identifiers', 'crossref_cursor', 'EvidenceProviderStatus', 'EvidenceDiscoveryResponse',
-  'PublicContent:', 'ContentListResponse:', 'SearchResponse:', 'ChangeStreamResponse:', "name: 'cursor'", 'cursor_recommended', 'X-Request-Id', 'X-RateLimit-Minute-Limit',
+  "openapi: '3.1.0'", "version: '1.2.0'", "'/content/{slug}/sources'", "'/sources/{id}'", "'/evidence-discovery'", "'/changes'", "'/search'", "'/stats'", "'/{resource}'",
+  'PartnerApiKey', 'PartnerBearer', 'related_identifiers', 'crossref_cursor', 'EvidenceProviderStatus', 'EvidenceDiscoveryResponse',
+  'PublicContent:', 'ContentBody:', 'ContentListResponse:', 'TaxonomyListResponse:', 'SearchResponse:', 'ChangeStreamResponse:', "name: 'cursor'", 'cursor_recommended', 'X-Request-Id', 'X-RateLimit-Minute-Limit', 'X-RateLimit-Minute-Reset', 'NotModified:', 'oneOf:',
 ]) if (!openapi.includes(marker)) fail(`OpenAPI contract missing ${marker}`);
 if (!openapi.includes("default: 'europe_pmc,crossref,datacite'")) fail('OpenAPI evidence provider default must exclude Lens');
 if (openapi.includes("default: 'europe_pmc,crossref,datacite,lens'")) fail('OpenAPI must never advertise Lens as a default provider');
@@ -125,4 +136,4 @@ const lensDocs = fs.readFileSync('app/developers/lens/page.tsx', 'utf8');
 for (const marker of ['/api/v1/lens','providers=lens','Data Sourced from The Lens','Lens ID','20,000','service_role','not_configured','provider_unavailable','private, no-store']) if (!lensDocs.includes(marker)) fail(`Lens developer docs missing ${marker}`);
 
 if (failed) process.exit(1);
-console.log('PUBLIC API V1.2 + PARTNER API + SEARCH + LOSSLESS SYNC + LENS + FEEDS + GLOBAL DOCS CONTRACT OK');
+console.log('PUBLIC API V1.2 + PARTNER API + SEARCH + LOSSLESS SYNC + TAXONOMY + OPENAPI + LENS + FEEDS + GLOBAL DOCS CONTRACT OK');
