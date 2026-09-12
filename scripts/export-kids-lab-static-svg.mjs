@@ -56,6 +56,9 @@ function activityArray(exportsObject, label) {
   return candidates[0];
 }
 
+const normalizeKidsLabSvgText = load('lib/capabilities/kids-lab-svg-polish.ts').normalizeKidsLabSvgText;
+if (typeof normalizeKidsLabSvgText !== 'function') throw new Error('Kids Lab SVG text normalizer is unavailable.');
+
 fs.rmSync(OUT, { recursive: true, force: true });
 let total = 0;
 let tests = 0;
@@ -68,9 +71,12 @@ for (const [domain, dataPath, rendererPath, rendererName, fixedSeries] of domain
     const destination = fixedSeries === 43
       ? path.join(OUT, domain, `${item.slug}.svg`)
       : path.join(OUT, domain, series, `${item.slug}.svg`);
-    const svg = renderer(item);
+    const svg = normalizeKidsLabSvgText(renderer(item));
     if (typeof svg !== 'string' || !svg.includes('<svg') || !svg.includes('</svg>') || /\b(?:NaN|Infinity|undefined)\b/.test(svg)) {
       throw new Error(`Invalid SVG for ${domain}/${series ?? ''}/${item.slug}`);
+    }
+    if (/<text\b[^>]*direction=["']rtl["'][^>]*text-anchor=["']end["'][^>]*>[\s\S]*?[\u0600-\u06FF]/i.test(svg) || /<text\b[^>]*text-anchor=["']end["'][^>]*direction=["']rtl["'][^>]*>[\s\S]*?[\u0600-\u06FF]/i.test(svg)) {
+      throw new Error(`Legacy RTL end-anchor survived normalization for ${domain}/${series ?? ''}/${item.slug}`);
     }
     fs.mkdirSync(path.dirname(destination), { recursive: true });
     fs.writeFileSync(destination, svg);
@@ -80,4 +86,4 @@ for (const [domain, dataPath, rendererPath, rendererName, fixedSeries] of domain
 }
 if (total !== 1000) throw new Error(`Expected 1000 static Kids Lab SVG assets; exported ${total}`);
 if (tests !== 335) throw new Error(`Expected 335 static Kids Lab test SVG assets; exported ${tests}`);
-console.log(`Kids Lab static SVG export complete: ${total} worksheets, ${tests} tests, ${domains.length} domains.`);
+console.log(`Kids Lab static SVG export complete: ${total} worksheets, ${tests} tests, ${domains.length} domains, Arabic RTL normalization applied to every asset.`);
