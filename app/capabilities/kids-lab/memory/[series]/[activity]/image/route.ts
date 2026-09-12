@@ -16,7 +16,7 @@ export async function GET(_: Request, { params }: { params: Params }) {
   return new Response(renderMemoryWorksheet(item), {
     headers: {
       'Content-Type': 'image/svg+xml; charset=utf-8',
-      'Cache-Control': 'public, max-age=31536000, immutable',
+      'Cache-Control': 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800',
       'Content-Disposition': `inline; filename="memory-${series}-${activity}.svg"`,
     },
   });
