@@ -46,6 +46,19 @@ function canonicalEtagValue(value: unknown): unknown {
 function weakTag(value: string) { return value.trim().replace(/^W\//i, ''); }
 function matchesEtag(header: string | null, etag: string) { if (!header) return false; if (header.trim() === '*') return true; const expected = weakTag(etag); return header.split(',').some((candidate) => weakTag(candidate) === expected); }
 function httpDate(value: string | null | undefined) { if (!value) return null; const parsed = Date.parse(value); return Number.isNaN(parsed) ? null : new Date(parsed); }
+function latestTimestamp(rows: Array<Record<string, unknown>>, field: string) {
+  let latest: string | null = null;
+  let latestMs = Number.NEGATIVE_INFINITY;
+  for (const row of rows) {
+    const value = typeof row[field] === 'string' ? String(row[field]) : '';
+    const timestamp = Date.parse(value);
+    if (!Number.isNaN(timestamp) && timestamp > latestMs) {
+      latestMs = timestamp;
+      latest = value;
+    }
+  }
+  return latest;
+}
 
 export function serializePublicContent(row: Record<string, unknown>, includeBody = false) {
   const canonicalPath = publicContentHref({ slug: asString(row.slug), canonical_url: asString(row.canonical_url) || null, content_type: asString(row.content_type) || null });
@@ -91,7 +104,8 @@ export async function listPublicContent(request: Request, forcedType?: string | 
   if (Array.isArray(requestedType)) query = query.in('content_type', requestedType); else if (requestedType) query = query.eq('content_type', requestedType); if (publishedAfter) query = query.gte('published_at', publishedAfter); if (updatedAfter) query = query.gte('updated_at', updatedAfter); if (cursor) query = query.or(`published_at.lt.${cursor.published_at},and(published_at.eq.${cursor.published_at},id.lt.${cursor.id})`);
   const { data, error } = await query; if (error) return apiError(request, 503, 'upstream_unavailable', 'The public content catalog is temporarily unavailable.');
   const rows = Array.isArray(data) ? data : []; const hasMore = rows.length > limit; const page = rows.slice(0, limit); const tail = page.at(-1); const nextCursor = hasMore && tail?.published_at && tail?.id ? encodeCursor({ published_at: String(tail.published_at), id: String(tail.id) }) : null;
-  return jsonResponse(request, { data: page.map((row) => serializePublicContent(row as unknown as Record<string, unknown>, false)), pagination: { limit, has_more: hasMore, next_cursor: nextCursor }, meta: { api_version: PUBLIC_API_VERSION, generated_at: new Date().toISOString(), filters: { type: requestedType || null, published_after: publishedAfter, updated_after: updatedAfter } } }, { lastModified: page[0]?.updated_at ? String(page[0].updated_at) : null });
+  const pageRecords = page as unknown as Array<Record<string, unknown>>;
+  return jsonResponse(request, { data: pageRecords.map((row) => serializePublicContent(row, false)), pagination: { limit, has_more: hasMore, next_cursor: nextCursor }, meta: { api_version: PUBLIC_API_VERSION, generated_at: new Date().toISOString(), filters: { type: requestedType || null, published_after: publishedAfter, updated_after: updatedAfter } } }, { lastModified: latestTimestamp(pageRecords, 'updated_at') });
 }
 
 export async function getPublicContent(request: Request, slug: string, forcedType?: string) {
