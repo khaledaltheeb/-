@@ -35,7 +35,7 @@ export default async function BilateralActivityPage({ params }: Props) {
   const currentIndex = bilateralActivities.findIndex((item) => item.slug === activity.slug);
   const previous = currentIndex > 0 ? bilateralActivities[currentIndex - 1] : null;
   const next = currentIndex < bilateralActivities.length - 1 ? bilateralActivities[currentIndex + 1] : null;
-  const imageUrl = `/capabilities/kids-lab/bilateral-tracks/${activity.slug}/image/`;
+  const imageUrl = `/capabilities/kids-lab/bilateral-tracks/${activity.slug}/image/?v=20260912-ar-layout-1`;
 
   return (
     <>
