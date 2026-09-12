@@ -10,6 +10,8 @@ const WORKSHEETS_PREFIX = '/resources/worksheets';
 const DYSLEXIA_TOOLKIT_PATH = '/evidence-guides/dyslexia-norway-school-observation-toolkit';
 const PRACTICAL_FLAT_PREFIX = '/practical-static';
 const SECTION_CACHE_CONTROL = 'public, max-age=60, stale-while-revalidate=300, stale-if-error=86400';
+const KIDS_LAB_WORKSHEET_CACHE_CONTROL = 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800';
+const KIDS_LAB_RENDER_REVISION = '20260912-ar-layout-1';
 const PRACTICAL_WORKSHEET_SLUGS = new Set([
   'dyslexia-reading-observation',
   'dyscalculia-math-observation',
@@ -91,7 +93,16 @@ async function flatPracticalResponse(request,env,url,slug,publicPath){
 }
 async function kidsLabStaticResponse(request,env,url){
   if(url.hostname.toLowerCase()!==CANONICAL_HOST||!CACHEABLE_METHODS.has(request.method)||!isPrefix(url.pathname,KIDS_LAB_PREFIX))return null;
-  const worksheet=kidsLabWorksheetAssetPath(url.pathname);if(worksheet)return assetFetch(request,env,worksheet);
+  const worksheet=kidsLabWorksheetAssetPath(url.pathname);
+  if(worksheet){
+    const source=await assetFetch(request,env,worksheet);
+    if(!source)return null;
+    const headers=new Headers(source.headers);
+    headers.set('Cache-Control',KIDS_LAB_WORKSHEET_CACHE_CONTROL);
+    headers.set('X-Content-Type-Options','nosniff');
+    headers.set('X-Rawafid-Kids-Lab-Revision',KIDS_LAB_RENDER_REVISION);
+    return new Response(request.method==='HEAD'?null:source.body,{status:source.status,headers});
+  }
   return staticPageResponse(request,env,url,url.pathname);
 }
 async function practicalResourcesStaticResponse(request,env,url){
