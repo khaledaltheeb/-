@@ -1,6 +1,22 @@
 name: Kids Lab Render QA
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'lib/capabilities/**'
+      - 'app/capabilities/kids-lab/**'
+      - 'scripts/kids-lab-*.mjs'
+      - 'scripts/export-kids-lab-static-svg.mjs'
+      - 'scripts/materialize-kids-lab-static-html.mjs'
+      - 'scripts/cloudflare-production-build.sh'
+      - 'custom-worker.js'
+      - '.github/open-next-production-cache.config.ts'
+      - '.github/workflows/kids-lab-render-qa.yml'
+      - '.github/workflows/deploy-production.yml'
+      - 'eslint.config.mjs'
+      - 'package.json'
   pull_request:
     paths:
       - 'lib/capabilities/**'
